@@ -42,7 +42,6 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     typedef enum { ENCAP_DECAP_TRUE = 1, ENCAP_DECAP_FALSE, ENCAP_DECAP_ETH } EncapDecap;
 
   protected:
-    bool isConnectedToHL;
     EncapDecap encapDecap;
 
   protected:

@@ -40,7 +40,6 @@ void Ieee80211MgmtAPBase::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        isConnectedToHL = gate("upperLayerOut")->getPathEndGate()->isConnected();
         const char *encDec = par("encapDecap").stringValue();
         if (!strcmp(encDec, "true"))
             encapDecap = ENCAP_DECAP_TRUE;
@@ -50,17 +49,11 @@ void Ieee80211MgmtAPBase::initialize(int stage)
             encapDecap = ENCAP_DECAP_ETH;
         else
             throw cRuntimeError("Unknown encapDecap parameter value: '%s'! Must be 'true','false' or 'eth'.", encDec);
-
-        WATCH(isConnectedToHL);
     }
 }
 
 void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
 {
-    if (!isConnectedToHL) {
-        delete packet;
-        return;
-    }
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
