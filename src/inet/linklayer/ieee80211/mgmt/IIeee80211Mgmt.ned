@@ -29,8 +29,6 @@ moduleinterface IIeee80211Mgmt
         @display("i=block/cogwheel");
         string macModule;               // The path to the MAC module
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
         input agentIn;   // optional gates used for the agent in stations

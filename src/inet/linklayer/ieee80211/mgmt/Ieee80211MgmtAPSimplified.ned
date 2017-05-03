@@ -53,8 +53,6 @@ simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
     gates:
-        input upperLayerIn; // from ~IMACRelayUnit; can be left unconnected
-        output upperLayerOut; // to ~IMACRelayUnit; can be left unconnected
         input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface

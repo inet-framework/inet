@@ -35,8 +35,6 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
         @signal[NF_L2_ASSOCIATED](type=inet::InterfaceEntry);
         @signal[NF_L2_BEACON_LOST](type=inet::InterfaceEntry);
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
         input macIn @labels(Ieee80211Frame);
         output macOut @labels(Ieee80211Frame);
         input agentIn;   // used for attaching an agent algorithm
