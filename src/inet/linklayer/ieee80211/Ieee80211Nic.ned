@@ -19,6 +19,7 @@ package inet.linklayer.ieee80211;
 
 import inet.linklayer.common.IIeee8021dQoSClassifier;
 import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.ieee802.Ieee802Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
 import inet.physicallayer.contract.packetlevel.IRadio;
@@ -58,18 +59,22 @@ module Ieee80211Nic like IWirelessNic
         output upperLayerOut; // from upper layers
         input radioIn @labels(IRadioFrame); // to receive radio frames
     submodules:
+        llc: Ieee802Llc {
+            parameters:
+                @display("p=100,100");
+        }
         classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
             parameters:
-	            @display("p=200,100");
+                @display("p=200,100");
         }
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
-                @display("p=200,200");
+                @display("p=300,200");
         }
         mgmt: <mgmtType> like IIeee80211Mgmt {
             parameters:
                 macModule = "^.mac";
-                @display("p=100,100");
+                @display("p=200,200");
         }
         mac: <macType> like IIeee80211Mac {
             parameters:
@@ -84,15 +89,19 @@ module Ieee80211Nic like IWirelessNic
         radio.upperLayerIn <-- mac.lowerLayerOut;
         radio.upperLayerOut --> mac.lowerLayerIn;
 
-        mac.upperLayerOut --> mgmt.macIn;
-        mac.upperLayerIn <-- mgmt.macOut;
+        mac.mgmtOut --> mgmt.macIn;
+        mac.mgmtIn <-- mgmt.macOut;
 
         mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
         mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
 
-        mgmt.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        mgmt.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
-        mgmt.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+        llc.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+
+        llc.lowerLayerOut --> mac.upperLayerIn;
+        llc.lowerLayerIn <-- mac.upperLayerOut;
+
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
 }
 
