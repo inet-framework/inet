@@ -46,7 +46,6 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     InterfaceEntry *myIface = nullptr;
 
     // statistics
-    long numDataFramesReceived;
     long numMgmtFramesReceived;
     long numMgmtFramesDropped;
 
@@ -59,9 +58,6 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
 
     /** Should be redefined to deal with self-messages */
     virtual void handleTimer(cMessage *frame) = 0;
-
-    /** Should be redefined to encapsulate and enqueue msgs from higher layers */
-    virtual void handleUpperMessage(cPacket *msg) = 0;
 
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cObject *ctrl) = 0;
@@ -80,7 +76,6 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
 
     /** @name Processing of different frame types */
     //@{
-    virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) = 0;
     virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) = 0;
     virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) = 0;
     virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) = 0;

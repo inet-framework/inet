@@ -42,15 +42,11 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;
 
-    /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleUpperMessage(cPacket *msg) override;
-
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
     /** @name Processing of different frame types */
     //@{
-    virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) override;
     virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
     virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
     virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;

@@ -55,27 +55,6 @@ void Ieee80211MgmtAPBase::initialize(int stage)
     }
 }
 
-void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Packet *packet)
-{
-    packet->removePoppedChunks();
-    const auto& header = packet->removeHeader<Ieee80211DataFrame>();
-
-    // adjust toDS/fromDS bits, and shuffle addresses
-    header->setToDS(false);
-    header->setFromDS(true);
-
-    // move destination address to address1 (receiver address),
-    // and fill address3 with original source address;
-    // sender address (address2) will be filled in by MAC
-    ASSERT(!header->getAddress3().isUnspecified());
-    header->setReceiverAddress(header->getAddress3());
-    header->setAddress3(header->getTransmitterAddress());
-
-    packet->insertHeader(header);
-
-    sendDown(packet);
-}
-
 void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
 {
     if (!isConnectedToHL) {

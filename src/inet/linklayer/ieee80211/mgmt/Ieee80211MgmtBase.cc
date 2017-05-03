@@ -31,10 +31,8 @@ namespace ieee80211 {
 void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        numDataFramesReceived = 0;
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
-        WATCH(numDataFramesReceived);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
@@ -77,12 +75,8 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 
         handleCommand(msgkind, ctrl);
     }
-    else {
-        // packet from upper layers, to be sent out
-        Packet *pk = check_and_cast<Packet *>(msg);
-        EV << "Packet arrived from upper layers: " << pk << "\n";
-        handleUpperMessage(pk);
-    }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 void Ieee80211MgmtBase::sendDown(Packet *frame)
@@ -108,12 +102,6 @@ void Ieee80211MgmtBase::sendUp(cMessage *msg)
 void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame)
 {
     switch (frame->getType()) {
-        case ST_DATA:
-        case ST_DATA_WITH_QOS:
-            numDataFramesReceived++;
-            handleDataFrame(packet, std::dynamic_pointer_cast<Ieee80211DataFrame>(frame));
-            break;
-
         case ST_AUTHENTICATION:
             numMgmtFramesReceived++;
             handleAuthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame));

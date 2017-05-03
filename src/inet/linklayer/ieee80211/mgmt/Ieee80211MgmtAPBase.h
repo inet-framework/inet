@@ -49,13 +49,6 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
 
-    /**
-     * Utility function for APs: sends back a data frame we received from a
-     * STA to the wireless LAN, after tweaking fromDS/toDS bits and shuffling
-     * addresses as needed.
-     */
-    virtual void distributeReceivedDataFrame(Packet *packet);
-
     /** Utility function for handleUpperMessage() */
     virtual void encapsulate(Packet *msg);
 

@@ -92,24 +92,6 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
-{
-    auto packet = check_and_cast<Packet *>(msg);
-    encapsulate(packet);
-    const auto& frame = packet->peekHeader<Ieee80211DataFrame>();
-    MACAddress macAddr = frame->getReceiverAddress();
-    if (!macAddr.isMulticast()) {
-        auto it = staList.find(macAddr);
-        if (it == staList.end() || it->second.status != ASSOCIATED) {
-            EV << "STA with MAC address " << macAddr << " not associated with this AP, dropping frame\n";
-            delete packet;    // XXX count drops?
-            return;
-        }
-    }
-
-    sendDown(packet);
-}
-
 void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
 {
     throw cRuntimeError("handleCommand(): no commands supported");
@@ -155,50 +137,6 @@ void Ieee80211MgmtAP::sendBeacon()
     body->setChunkLength(byte(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
     frame->setChunkLength(byte(24));
     sendManagementFrame("Beacon", frame, body, MACAddress::BROADCAST_ADDRESS);
-}
-
-void Ieee80211MgmtAP::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
-{
-    // check toDS bit
-    if (!frame->getToDS()) {
-        // looks like this is not for us - discard
-        EV << "Frame is not for us (toDS=false) -- discarding\n";
-        delete packet;
-        return;
-    }
-
-    // handle broadcast/multicast frames
-    if (frame->getAddress3().isMulticast()) {
-        EV << "Handling multicast frame\n";
-
-        if (isConnectedToHL)
-            sendToUpperLayer(packet->dup());
-
-        distributeReceivedDataFrame(packet);
-        return;
-    }
-
-    // look up destination address in our STA list
-    auto it = staList.find(frame->getAddress3());
-    if (it == staList.end()) {
-        // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
-        if (isConnectedToHL) {
-            sendToUpperLayer(packet);
-        }
-        else {
-            EV << "Frame's destination address is not in our STA list -- dropping frame\n";
-            delete packet;
-        }
-    }
-    else {
-        // dest address is our STA, but is it already associated?
-        if (it->second.status == ASSOCIATED)
-            distributeReceivedDataFrame(packet); // send it out to the destination STA
-        else {
-            EV << "Frame's destination STA is not in associated state -- dropping frame\n";
-            delete packet;
-        }
-    }
 }
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)

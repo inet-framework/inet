@@ -40,32 +40,9 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
-{
-    auto packet = check_and_cast<Packet *>(msg);
-    encapsulate(packet);
-    sendDown(packet);
-}
-
 void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
 {
     throw cRuntimeError("handleCommand(): no commands supported");
-}
-
-void Ieee80211MgmtAPSimplified::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
-{
-    // check toDS bit
-    if (!frame->getToDS()) {
-        // looks like this is not for us - discard
-        delete packet;
-        return;
-    }
-
-    if (isConnectedToHL)
-        sendToUpperLayer(packet->dup());
-
-    // send it out to the destination STA
-    distributeReceivedDataFrame(packet);
 }
 
 void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
