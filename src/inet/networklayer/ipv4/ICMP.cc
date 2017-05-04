@@ -84,6 +84,13 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
         return;
     }
 
+    // ICMP messages are only sent about errors in handling fragment zero of fragmented datagrams
+    if (ipv4Header->getFragmentOffset() != 0) {
+        EV_DETAIL << "won't send ICMP error messages about errors in non-first fragments" << endl;
+        delete packet;
+        return;
+    }
+
     // do not reply with error message to error message
     if (ipv4Header->getTransportProtocol() == IP_PROT_ICMP) {
         const auto& recICMPMsg = packet->peekDataAt<ICMPHeader>(byte(ipv4Header->getHeaderLength()));
