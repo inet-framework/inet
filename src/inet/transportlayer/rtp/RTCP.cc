@@ -268,8 +268,9 @@ void RTCP::createPacket()
         delete senderReport;
         reportPacket = senderReportPacket;
     }
-    else
+    else {
         reportPacket = new RTCPReceiverReportPacket("ReceiverReportPacket");
+    }
     reportPacket->setSsrc(_senderInfo->getSsrc());
 
     // insert receiver reports for packets from other sources

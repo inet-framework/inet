@@ -166,7 +166,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     /**
      * The CNAME of this end system.
      */
-    const char *_commonName;
+    std::string _commonName;
 
     /**
      * The available bandwidth for this session.
