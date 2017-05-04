@@ -22,6 +22,7 @@
 
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Receiver.h"
 
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
 #include "inet/transportlayer/rtp/RTPPacket.h"
 
@@ -33,7 +34,11 @@ Define_Module(RTPAVProfilePayload32Receiver);
 
 int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
 {
-    return ((RTPPacket *)packet1)->getSequenceNumber() - ((RTPPacket *)packet2)->getSequenceNumber();
+    auto pk1 = check_and_cast<Packet *>(packet1);
+    auto pk2 = check_and_cast<Packet *>(packet2);
+    const auto& h1 = pk1->peekHeader<RtpHeader>();
+    const auto& h2 = pk2->peekHeader<RtpHeader>();
+    return h1->getSequenceNumber() - h2->getSequenceNumber();
 }
 
 RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver()
@@ -50,25 +55,26 @@ void RTPAVProfilePayload32Receiver::initialize()
     _highestSequenceNumber = 0;
 }
 
-void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
+void RTPAVProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
 {
+    const auto& rtpHeader = rtpPacket->peekHeader<RtpHeader>();
     // the first packet sets the lowest allowed time stamp
     if (_lowestAllowedTimeStamp == 0) {
-        _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
-        _highestSequenceNumber = rtpPacket->getSequenceNumber();
+        _lowestAllowedTimeStamp = rtpHeader->getTimeStamp();
+        _highestSequenceNumber = rtpHeader->getSequenceNumber();
         if (_outputLogLoss.is_open())
-        _outputLogLoss << "sequenceNumberBase" << rtpPacket->getSequenceNumber() << endl;
+        _outputLogLoss << "sequenceNumberBase" << rtpHeader->getSequenceNumber() << endl;
     }
     else if (_outputLogLoss.is_open()) {
-        for (int i = _highestSequenceNumber + 1; i < rtpPacket->getSequenceNumber(); i++) {
+        for (int i = _highestSequenceNumber + 1; i < rtpHeader->getSequenceNumber(); i++) {
             //char line[100];
             //sprintf(line, "%i", i);
             _outputLogLoss << i << endl;
         }
     }
 
-    if ((rtpPacket->getTimeStamp() < _lowestAllowedTimeStamp) ||
-        (rtpPacket->getSequenceNumber() <= _highestSequenceNumber))
+    if ((rtpHeader->getTimeStamp() < _lowestAllowedTimeStamp) ||
+        (rtpHeader->getSequenceNumber() <= _highestSequenceNumber))
     {
         delete rtpPacket;
     }
@@ -76,18 +82,18 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
         // is this packet from the next frame ?
         // this can happen when the marked packet has been
         // lost or arrives late
-        bool nextTimeStamp = rtpPacket->getTimeStamp() > _lowestAllowedTimeStamp;
+        bool nextTimeStamp = rtpHeader->getTimeStamp() > _lowestAllowedTimeStamp;
 
         // is this packet marked, which means that it's
         // the last packet of this frame
-        bool marked = rtpPacket->getMarker();
+        bool marked = rtpHeader->getMarker();
 
         // test if end of frame reached
 
         // check if we received the last (= marked)
         // packet of the frame or
         // we received a packet of the next frame
-        _highestSequenceNumber = rtpPacket->getSequenceNumber();
+        _highestSequenceNumber = rtpHeader->getSequenceNumber();
 
         if (nextTimeStamp || marked) {
             // a marked packet belongs to this frame
@@ -101,20 +107,21 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
             // the queue contains all packets for this frame
             // we have received
             while (!_queue->isEmpty()) {
-                RTPPacket *readPacket = (RTPPacket *)(_queue->pop());
-                RTPMpegPacket *mpegPacket = (RTPMpegPacket *)(readPacket->decapsulate());
+                Packet *qPacket = check_and_cast<Packet *>(_queue->pop());
+                const auto& qRtpHeader = qPacket->popHeader<RtpHeader>();
+                const auto& qMpegPk = qPacket->peekHeader<cPacketChunk>();
+                RTPMpegPacket * mpegPacket = check_and_cast<RTPMpegPacket *>(qMpegPk->getPacket());
                 if (pictureType == 0)
                     pictureType = mpegPacket->getPictureType();
                 frameSize = frameSize + mpegPacket->getPayloadLength();
 
-                delete mpegPacket;
-                delete readPacket;
+                delete qPacket;
             }
 
             // we start the next frame
             // set the allowed time stamp
             if (nextTimeStamp) {
-                _lowestAllowedTimeStamp = rtpPacket->getTimeStamp();
+                _lowestAllowedTimeStamp = rtpHeader->getTimeStamp();
                 _queue->insert(rtpPacket);
             }
 

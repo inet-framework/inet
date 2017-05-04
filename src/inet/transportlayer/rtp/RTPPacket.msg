@@ -19,11 +19,16 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 }}
+
+namespace inet;
+
+class FieldsChunk extends cObject;
 
 namespace inet::rtp;
 
-enum RTPPacketEnums
+enum RtpHeaderEnums
 {
     RTPPACKET_FIX_HEADERLENGTH = 12;
 }
@@ -36,42 +41,40 @@ enum RTPPacketEnums
 // padding, extension, csrcCount. The csrcList can't be used
 // because csrcCount is always 0.
 //
-packet RTPPacket
+class RtpHeader extends FieldsChunk
 {
     @customize(true);  // see the generated C++ header for more info
 
-    byteLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
+    chunkLength = byte(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
 
     // The rtp version of this ~RTPPacket.
-    uint8 version = 2;
+    uint8 version = 2;      // 2 bits
 
     // Set to 1 if padding is used in this ~RTPPacket, 0 otherwise.
     // This implementation doesn't use padding bytes, so it is always 0.
-    bool padding = false;
+    bool padding = false;      // 1 bit
 
     // Set to 1, if this ~RTPPacket contains an rtp header extension, 0 otherwise.
     // This implementation doesn't support rtp header extensions, so it is always 0.
-    bool extension = false;
+    bool extension = false;      // 1 bit
+
+    // uint8_t cc;      // 4 bits, csrc count
 
     // The marker.
-    bool marker = false;
+    bool marker = false;      // 1 bit
 
     // The type of payload carried in this ~RTPPacket.
-    int8 payloadType;
+    int8 payloadType;      // 7 bits
 
     // The sequence number of this ~RTPPacket.
-    uint16 sequenceNumber;
+    uint16 sequenceNumber;      // 16 bits
 
     // The rtp time stamp of this ~RTPPacket.
-    uint32 timeStamp;
+    uint32 timeStamp;      // 32 bits
 
     // The ssrc identifier of the creator of this ~RTPPacket.
-    uint32 ssrc;
+    uint32 ssrc;      // 32 bits
 
     // no mixers, no contributing sources
-    uint32 csrc[];
-
-    abstract int headerLength;
-
-    abstract int payloadLength;
+    uint32 csrc[];      // cc * 32 bits
 };

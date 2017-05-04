@@ -204,9 +204,10 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     EV_TRACE << "dataIn(RTPInnerPacket *rinp) Enter" << endl;
     processIncomingPacket(rinp);
 
-    RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket());
+    Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket());
+    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
 
-    uint32 ssrc = packet->getSsrc();
+    uint32 ssrc = rtpHeader->getSsrc();
 
     SSRCGate *ssrcGate = findSSRCGate(ssrc);
 
@@ -215,7 +216,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
         char payloadReceiverName[100];
         const char *pkgPrefix = "inet.transportlayer.rtp.";    //FIXME hardcoded string
         sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver",
-                pkgPrefix, _profileName, packet->getPayloadType());
+                pkgPrefix, _profileName, rtpHeader->getPayloadType());
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
         if (moduleType == nullptr)

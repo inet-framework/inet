@@ -287,7 +287,7 @@ void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 
 void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 {
-    RTPSenderStatusMessage *ssm = (RTPSenderStatusMessage *)(rinp->decapsulate());
+    RTPSenderStatusMessage *ssm = check_and_cast<RTPSenderStatusMessage *>(rinp->decapsulate());
     RTPCISenderStatus *ci = new RTPCISenderStatus();
     ci->setSsrc(rinp->getSsrc());
     ci->setStatus(ssm->getStatus());
@@ -301,14 +301,10 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
 
 void RTP::dataOut(RTPInnerPacket *rinp)
 {
-    RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket()->dup());
+    Packet *msg = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
+    // RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RTPPacket?
 
-    Packet *pk = new Packet(msg->getName());
-    const auto& chunk = std::make_shared<cPacketChunk>(msg);
-    chunk->markImmutable();
-    pk->append(chunk);
-
-    _udpSocket.sendTo(pk, _destinationAddress, _port);
+    _udpSocket.sendTo(msg, _destinationAddress, _port);
 
     // RTCP module must be informed about sent rtp data packet
     send(rinp, "rtcpOut");
@@ -348,14 +344,13 @@ void RTP::readRet(cMessage *sifp)
 {
     if (!_leaveSession) {
         Packet *pk = check_and_cast<Packet *>(sifp);
-        const auto& pkChunk = pk->peekHeader<cPacketChunk>();
-        RTPPacket *msg = check_and_cast<RTPPacket *>(pkChunk->getPacket());
+        const auto& rtpHeader = pk->peekHeader<RtpHeader>();
 
-        emit(rcvdPkSignal, msg);
+        emit(rcvdPkSignal, pk);
 
-        msg->dump();
+        rtpHeader->dump();
         RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
-        rinp1->setDataInPkt(new RTPPacket(*msg), IPv4Address(_destinationAddress), _port);
+        rinp1->setDataInPkt(pk->dup(), IPv4Address(_destinationAddress), _port);
         RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
         send(rinp2, "rtcpOut");
         send(rinp1, "profileOut");

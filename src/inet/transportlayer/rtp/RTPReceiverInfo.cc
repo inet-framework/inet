@@ -77,8 +77,9 @@ RTPReceiverInfo *RTPReceiverInfo::dup() const
     return new RTPReceiverInfo(*this);
 }
 
-void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
+void RTPReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
+    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     // this endsystem sends, it isn't inactive
     _inactiveIntervals = 0;
 
@@ -86,7 +87,7 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arri
     _itemsReceived++;
 
     if (_packetsReceived == 1) {
-        _sequenceNumberBase = packet->getSequenceNumber();
+        _sequenceNumberBase = rtpHeader->getSequenceNumber();
     }
     else {
         /*if (packet->getSequenceNumber() > _highestSequenceNumber+1)
@@ -105,29 +106,29 @@ void RTPReceiverInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arri
             }
            }*/
 
-        if (packet->getSequenceNumber() > _highestSequenceNumber) {
+        if (rtpHeader->getSequenceNumber() > _highestSequenceNumber) {
             // it is possible that this is a late packet from the
             // previous sequence wrap
-            if (!(packet->getSequenceNumber() > 0xFFEF && _highestSequenceNumber < 0x10))
-                _highestSequenceNumber = packet->getSequenceNumber();
+            if (!(rtpHeader->getSequenceNumber() > 0xFFEF && _highestSequenceNumber < 0x10))
+                _highestSequenceNumber = rtpHeader->getSequenceNumber();
         }
         else {
             // is it a sequence number wrap around 0xFFFF to 0x0000 ?
-            if (packet->getSequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF) {
+            if (rtpHeader->getSequenceNumber() < 0x10 && _highestSequenceNumber > 0xFFEF) {
                 _sequenceNumberCycles += 0x00010000;
-                _highestSequenceNumber = packet->getSequenceNumber();
+                _highestSequenceNumber = rtpHeader->getSequenceNumber();
             }
         }
         // calculate interarrival jitter
         if (_clockRate != 0) {
-            simtime_t d = packet->getTimeStamp() - _lastPacketRTPTimeStamp
+            simtime_t d = rtpHeader->getTimeStamp() - _lastPacketRTPTimeStamp
                 - (arrivalTime - _lastPacketArrivalTime) * (double)_clockRate;
             if (d < 0)
                 d = -d;
             _jitter = _jitter + (d - _jitter) / 16;
         }
 
-        _lastPacketRTPTimeStamp = packet->getTimeStamp();
+        _lastPacketRTPTimeStamp = rtpHeader->getTimeStamp();
         _lastPacketArrivalTime = arrivalTime;
     }
 

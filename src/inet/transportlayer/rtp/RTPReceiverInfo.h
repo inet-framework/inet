@@ -66,7 +66,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
      * Extracts information of the given RTPPacket.
      * Also sets _inactiveIntervals to 0.
      */
-    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime) override;
+    virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime) override;
 
     /**
      * Extracts information of the given SenderReport.

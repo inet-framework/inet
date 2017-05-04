@@ -21,7 +21,9 @@
 #include "inet/transportlayer/rtp/RTPParticipantInfo_m.h"
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 #include "inet/transportlayer/rtp/sdes.h"
 
 namespace inet {
@@ -30,7 +32,6 @@ namespace rtp {
 
 //Forward declarations:
 class ReceptionReport;
-class RTPPacket;
 class SenderReport;
 
 /**
@@ -79,7 +80,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * the sender of this RTP packet is regarded as
      * an active sender.
      */
-    virtual void processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime);
+    virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime);
 
     /**
      * This method extracts information about an RTP endsystem

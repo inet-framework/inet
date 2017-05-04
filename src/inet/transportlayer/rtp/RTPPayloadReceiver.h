@@ -21,13 +21,14 @@
 #include <fstream>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/transportlayer/rtp/RTPPacket.h"
 
 namespace inet {
 
 namespace rtp {
 
 //Forward declarations
-class RTPPacket;
 
 /**
  * The class RTPPayloadReceiver acts as a base class for modules
@@ -59,7 +60,7 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
      * Writes contents of this RTPPacket into the output file. Must be overwritten
      * by subclasses.
      */
-    virtual void processPacket(RTPPacket *packet);
+    virtual void processRtpPacket(Packet *packet);
 
     /**
      * This method is called by initialize and opens the output file stream.

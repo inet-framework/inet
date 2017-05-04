@@ -179,17 +179,17 @@ void RTCP::handleSenderModuleInitialized(RTPInnerPacket *rinp)
     _senderInfo->setSequenceNumberBase(rinp->getSequenceNumberBase());
 }
 
-void RTCP::handleDataOut(RTPInnerPacket *packet)
+void RTCP::handleDataOut(RTPInnerPacket *innerPacket)
 {
-    RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(packet->decapsulate());
-    processOutgoingRTPPacket(rtpPacket);
+    Packet *packet = check_and_cast<Packet *>(innerPacket->decapsulate());
+    processOutgoingRTPPacket(packet);
 }
 
 void RTCP::handleDataIn(RTPInnerPacket *rinp)
 {
-    RTPPacket *rtpPacket = check_and_cast<RTPPacket *>(rinp->decapsulate());
+    Packet *packet = check_and_cast<Packet *>(rinp->decapsulate());
     //rtpPacket->dump();
-    processIncomingRTPPacket(rtpPacket, rinp->getAddress(), rinp->getPort());
+    processIncomingRTPPacket(packet, rinp->getAddress(), rinp->getPort());
 }
 
 void RTCP::handleLeaveSession(RTPInnerPacket *rinp)
@@ -328,15 +328,16 @@ void RTCP::createPacket()
     }
 }
 
-void RTCP::processOutgoingRTPPacket(RTPPacket *packet)
+void RTCP::processOutgoingRTPPacket(Packet *packet)
 {
     _senderInfo->processRTPPacket(packet, getId(), simTime());
 }
 
-void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int port)
+void RTCP::processIncomingRTPPacket(Packet *packet, IPv4Address address, int port)
 {
     bool good = false;
-    uint32 ssrc = packet->getSsrc();
+    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    uint32 ssrc = rtpHeader->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
         participantInfo = new RTPParticipantInfo(ssrc);

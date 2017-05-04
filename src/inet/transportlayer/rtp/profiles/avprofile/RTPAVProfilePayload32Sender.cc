@@ -18,10 +18,11 @@
 #include <fstream>
 #include <string.h>
 
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket.h"
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
 #include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
 
 namespace inet {
 
@@ -117,14 +118,15 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
     if (!_inputFileStream.eof()) {
         while (bytesRemaining > 0) {
-            RTPPacket *rtpPacket = new RTPPacket("RTPPacket");
-            RTPMpegPacket *mpegPacket = new RTPMpegPacket("MpegPacket");
+            Packet *packet = new Packet("RTPPacket");
+            const auto& rtpHeader = std::make_shared<RtpHeader>();
+            RTPMpegPacket *mpegPacket = new RTPMpegPacket("MpegPacket");          //FIXME KLUDGE should convert RTPMpegPacket to a Chunk
 
             // the only mpeg information we know is the picture type
             mpegPacket->setPictureType(pictureType);
 
             // the maximum number of real data bytes
-            int maxDataSize = _mtu - rtpPacket->getByteLength() - mpegPacket->getByteLength();
+            int maxDataSize = _mtu - byte(rtpHeader->getChunkLength()).get() - mpegPacket->getByteLength();
 
             if (bytesRemaining > maxDataSize) {
                 // we do not know where slices in the
@@ -136,30 +138,28 @@ bool RTPAVProfilePayload32Sender::sendPacket()
                 mpegPacket->setPayloadLength(slicedDataSize);
                 mpegPacket->addByteLength(slicedDataSize);
 
-                rtpPacket->encapsulate(mpegPacket);
-
                 bytesRemaining = bytesRemaining - slicedDataSize;
             }
             else {
                 mpegPacket->setPayloadLength(bytesRemaining);
                 mpegPacket->addByteLength(bytesRemaining);
-                rtpPacket->encapsulate(mpegPacket);
                 // set marker because this is
                 // the last packet of the frame
-                rtpPacket->setMarker(1);
+                rtpHeader->setMarker(1);
                 bytesRemaining = 0;
             }
 
-            rtpPacket->setPayloadType(_payloadType);
-            rtpPacket->setSequenceNumber(_sequenceNumber);
+            rtpHeader->setPayloadType(_payloadType);
+            rtpHeader->setSequenceNumber(_sequenceNumber);
             _sequenceNumber++;
 
-            rtpPacket->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
-            rtpPacket->setSsrc(_ssrc);
+            rtpHeader->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
+            rtpHeader->setSsrc(_ssrc);
+            packet->insertTrailer(std::make_shared<cPacketChunk>(mpegPacket));          //FIXME KLUDGE
+            packet->insertHeader(rtpHeader);
 
             RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");
-
-            rinpOut->setDataOutPkt(rtpPacket);
+            rinpOut->setDataOutPkt(packet);
 
             send(rinpOut, "profileOut");
         }

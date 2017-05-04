@@ -53,8 +53,8 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
     if (rinp->getType() == RTP_INP_DATA_IN) {
-        RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->decapsulate());
-        processPacket(packet);
+        auto packet = check_and_cast<Packet *>(rinp->decapsulate());
+        processRtpPacket(packet);
         delete rinp;
     }
     else {
@@ -63,9 +63,10 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg)
     }
 }
 
-void RTPPayloadReceiver::processPacket(RTPPacket *packet)
+void RTPPayloadReceiver::processRtpPacket(Packet *packet)
 {
-    emit(_rcvdPkRtpTimestampSignal, (double)(packet->getTimeStamp()));
+    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    emit(_rcvdPkRtpTimestampSignal, (double)(rtpHeader->getTimeStamp()));
 }
 
 void RTPPayloadReceiver::openOutputFile(const char *fileName)

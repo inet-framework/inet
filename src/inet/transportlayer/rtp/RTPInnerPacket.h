@@ -18,6 +18,7 @@
 #ifndef __INET_RTPINNERPACKET_H
 #define __INET_RTPINNERPACKET_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket_m.h"
 
 namespace inet {
@@ -102,13 +103,13 @@ class INET_API RTPInnerPacket : public RTPInnerPacket_Base
      * Capsulates the outgoing RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void setDataOutPkt(RTPPacket *packet);
+    virtual void setDataOutPkt(Packet *packet);
 
     /**
-     * Capsultes the incoming RTPPacket into this RTPInnerPacket to transport
+     * Capsulates the incoming RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void setDataInPkt(RTPPacket *packet, IPv4Address address, int port);
+    virtual void setDataInPkt(Packet *packet, IPv4Address address, int port);
 
     /**
      * Returns the maximum transmission unit stored in this RTPInnerPacket.

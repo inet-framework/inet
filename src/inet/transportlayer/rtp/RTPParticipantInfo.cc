@@ -68,8 +68,9 @@ RTPParticipantInfo *RTPParticipantInfo::dup() const
     return new RTPParticipantInfo(*this);
 }
 
-void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
+void RTPParticipantInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
+    packet->peekHeader<RtpHeader>();
     _silentIntervals = 0;
     delete packet;
 }

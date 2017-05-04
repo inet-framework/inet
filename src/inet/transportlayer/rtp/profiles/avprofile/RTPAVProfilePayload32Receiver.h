@@ -71,9 +71,9 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
     /**
      * Writes information about received frames into the output file.
      * The only error correction provided is reordering packets
-     * of one frame if needed.
+     * of one frame if needed. The packet should begin with RtpHeader.
      */
-    virtual void processPacket(RTPPacket *packet) override;
+    virtual void processRtpPacket(Packet *packet) override;
 };
 
 } // namespace rtp

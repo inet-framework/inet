@@ -70,10 +70,11 @@ RTPSenderInfo *RTPSenderInfo::dup() const
     return new RTPSenderInfo(*this);
 }
 
-void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
+void RTPSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
+    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     _packetsSent++;
-    _bytesSent = _bytesSent + packet->getPayloadLength();
+    _bytesSent = _bytesSent + packet->getByteLength() - byte(rtpHeader->getChunkLength()).get();
 
     // call corresponding method of superclass
     // for setting _silentIntervals

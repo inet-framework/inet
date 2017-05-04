@@ -139,12 +139,12 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Extracts information of a sent RTPPacket.
      */
-    virtual void processOutgoingRTPPacket(RTPPacket *packet);
+    virtual void processOutgoingRTPPacket(Packet *packet);
 
     /**
      * Extracts information of a received RTPPacket.
      */
-    virtual void processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int port);
+    virtual void processIncomingRTPPacket(Packet *packet, IPv4Address address, int port);
 
     /**
      * Extracts information of a received RTCPCompoundPacket.

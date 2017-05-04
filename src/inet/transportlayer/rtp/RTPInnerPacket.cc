@@ -148,13 +148,13 @@ void RTPInnerPacket::setSessionLeftPkt()
     type = RTP_INP_SESSION_LEFT;
 }
 
-void RTPInnerPacket::setDataOutPkt(RTPPacket *packet)
+void RTPInnerPacket::setDataOutPkt(Packet *packet)
 {
     type = RTP_INP_DATA_OUT;
     encapsulate(packet);
 }
 
-void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPv4Address address_par, int port_par)
+void RTPInnerPacket::setDataInPkt(Packet *packet, IPv4Address address_par, int port_par)
 {
     type = RTP_INP_DATA_IN;
     address = address_par;

@@ -21,35 +21,21 @@ namespace inet {
 
 namespace rtp {
 
-Register_Class(RTPPacket);
+Register_Class(RtpHeader);
 
-std::string RTPPacket::info() const
+std::string RtpHeader::info() const
 {
     std::stringstream out;
-    out << "RTPPacket: payloadType=" << payloadType
-        << " payloadLength=" << getPayloadLength();
+    out << "RtpHeader: payloadType=" << payloadType;
     return out.str();
 }
 
-void RTPPacket::dump() const
+void RtpHeader::dump() const
 {
-    EV_INFO << "RTPPacket:" << endl;
+    EV_INFO << "RtpHeader:" << endl;
     EV_INFO << "  payloadType = " << payloadType << endl;
     EV_INFO << "  sequenceNumber = " << sequenceNumber << endl;
     EV_INFO << "  timeStamp = " << timeStamp << endl;
-    EV_INFO << "  payloadLength = " << getPayloadLength() << endl;
-}
-
-int RTPPacket::getHeaderLength() const
-{
-    // fixed header is 12 bytes long,
-    // add 4 bytes for every csrc identifier
-    return RTPPACKET_FIX_HEADERLENGTH + 4 * getCsrcArraySize();
-}
-
-int RTPPacket::getPayloadLength() const
-{
-    return getByteLength() - getHeaderLength();
 }
 
 } // namespace rtp
