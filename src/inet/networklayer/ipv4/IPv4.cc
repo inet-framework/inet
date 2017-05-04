@@ -749,7 +749,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     int mtu = destIe->getMTU();
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
-    if (mtu == 0 || ipv4Header->getHeaderLength() + packet->getByteLength() <= mtu) {
+    if (mtu == 0 || packet->getByteLength() <= mtu) {
         sendDatagramToOutput(packet, destIe, nextHopAddr);
         return;
     }
