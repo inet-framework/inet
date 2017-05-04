@@ -49,6 +49,7 @@ void RTP::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        _commonName = "";
         _leaveSession = false;
         appInGate = findGate("appIn");
         profileInGate = findGate("profileIn");
@@ -416,7 +417,7 @@ void RTP::initializeRTCP()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
     int rtcpPort = _port + 1;
-    rinp->setInitializeRTCPPkt(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
+    rinp->setInitializeRTCPPkt(_commonName.c_str(), _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
 }
 
