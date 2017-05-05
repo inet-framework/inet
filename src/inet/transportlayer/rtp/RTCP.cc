@@ -87,8 +87,6 @@ void RTCP::handleMessage(cMessage *msg)
     else {
         throw cRuntimeError("Message from unknown gate");
     }
-
-    delete msg;
 }
 
 //
@@ -125,12 +123,14 @@ void RTCP::handleMessageFromRTP(cMessage *msg)
         default:
             throw cRuntimeError("Unknown RTPInnerPacket type");
     }
+
+    delete msg;
 }
 
 void RTCP::handleMessageFromUDP(cMessage *msg)
 {
     // from SocketLayer all message are of type cMessage
-    readRet(PK(msg));
+    readRet(check_and_cast<Packet *>(msg));
 }
 
 void RTCP::handleSelfMessage(cMessage *msg)
@@ -148,6 +148,7 @@ void RTCP::handleSelfMessage(cMessage *msg)
     if (!_leaveSession) {
         scheduleInterval();
     }
+    delete msg;
 }
 
 //
@@ -205,12 +206,13 @@ void RTCP::connectRet()
     scheduleAt(simTime() + intervalLength, reminderMessage);
 }
 
-void RTCP::readRet(cPacket *sifpIn)
+void RTCP::readRet(Packet *sifpIn)
 {
     emit(rcvdPkSignal, sifpIn);
-    const auto& pkChunk = check_and_cast<Packet *>(sifpIn)->peekHeader<cPacketChunk>();
+    const auto& pkChunk = sifpIn->peekHeader<cPacketChunk>();
     RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(pkChunk->getPacket());
     processIncomingRTCPPacket(packet->dup(), IPv4Address(_destinationAddress), _port);
+    delete sifpIn;
 }
 
 void RTCP::createSocket()
@@ -379,27 +381,23 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address add
             // remove the rtcp packet from the rtcp compound packet
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:
-                    processIncomingRTCPSenderReportPacket(
-                        (RTCPSenderReportPacket *)rtcpPacket, address, port);
+                    processIncomingRTCPSenderReportPacket(check_and_cast<RTCPSenderReportPacket *>(rtcpPacket), address, port);
                     break;
 
                 case RTCP_PT_RR:
-                    processIncomingRTCPReceiverReportPacket(
-                        (RTCPReceiverReportPacket *)rtcpPacket, address, port);
+                    processIncomingRTCPReceiverReportPacket(check_and_cast<RTCPReceiverReportPacket *>(rtcpPacket), address, port);
                     break;
 
                 case RTCP_PT_SDES:
-                    processIncomingRTCPSDESPacket(
-                        (RTCPSDESPacket *)rtcpPacket, address, port, arrivalTime);
+                    processIncomingRTCPSDESPacket(check_and_cast<RTCPSDESPacket *>(rtcpPacket), address, port, arrivalTime);
                     break;
 
                 case RTCP_PT_BYE:
-                    processIncomingRTCPByePacket(
-                        (RTCPByePacket *)rtcpPacket, address, port);
+                    processIncomingRTCPByePacket(check_and_cast<RTCPByePacket *>(rtcpPacket), address, port);
                     break;
 
                 default:
-                    // app rtcp packets
+                    throw cRuntimeError("unknown RTCP packet type");
                     break;
             }
             delete rtcpPacket;

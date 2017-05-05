@@ -20,6 +20,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
@@ -113,7 +114,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
      * Called when this rtcp module receives data from the
      * socket layer.
      */
-    virtual void readRet(cPacket *sifpIn);
+    virtual void readRet(Packet *sifpIn);
 
     /**
      * Request a server socket from the socket layer.
