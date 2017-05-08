@@ -89,7 +89,7 @@ void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arriva
 {
     for (int i = 0; i < sdesChunk->size(); i++) {
         if (sdesChunk->exist(i)) {
-            SDESItem *sdesItem = (SDESItem *)(sdesChunk->remove(i));
+            SDESItem *sdesItem = check_and_cast<SDESItem *>(sdesChunk->remove(i));
             addSDESItem(sdesItem);
         }
     }

@@ -171,7 +171,7 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem)
 {
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {
-            SDESItem *compareItem = (SDESItem *)(get(i));
+            SDESItem *compareItem = check_and_cast<SDESItem *>(get(i));
             if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
                 _length = _length - compareItem->getLength();

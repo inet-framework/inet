@@ -65,7 +65,7 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
             initializeSenderModule(rinpIn);
         }
         else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_CONTROL) {
-            RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
+            RTPSenderControlMessage *rscm = check_and_cast<RTPSenderControlMessage *>(rinpIn->decapsulate());
             delete rinpIn;
             switch (rscm->getCommand()) {
                 case RTP_CONTROL_PLAY:

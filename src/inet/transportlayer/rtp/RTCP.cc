@@ -280,9 +280,9 @@ void RTCP::createPacket()
     // insert receiver reports for packets from other sources
     for (int i = 0; i < _participantInfos.size(); i++) {
         if (_participantInfos.exist(i)) {
-            RTPParticipantInfo *participantInfo = (RTPParticipantInfo *)(_participantInfos.get(i));
+            RTPParticipantInfo *participantInfo = check_and_cast<RTPParticipantInfo *>(_participantInfos.get(i));
             if (participantInfo->getSsrc() != _senderInfo->getSsrc()) {
-                ReceptionReport *report = ((RTPReceiverInfo *)participantInfo)->receptionReport(simTime());
+                ReceptionReport *report = check_and_cast<RTPReceiverInfo *>(participantInfo)->receptionReport(simTime());
                 if (report != nullptr) {
                     reportPacket->addReceptionReport(report);
                 }
@@ -376,7 +376,7 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address add
     simtime_t arrivalTime = packet->getArrivalTime();
 
     for (int i = 0; i < rtcpPackets.size(); i++) {
-        RTCPPacket *rtcpPacket = (RTCPPacket *)(rtcpPackets.remove(i));
+        RTCPPacket *rtcpPacket = check_and_cast_nullable<RTCPPacket *>(rtcpPackets.remove(i));
         if (rtcpPacket) {
             // remove the rtcp packet from the rtcp compound packet
             switch (rtcpPacket->getPacketType()) {
@@ -432,7 +432,7 @@ void RTCP::processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSen
     cArray& receptionReports = rtcpSenderReportPacket->getReceptionReports();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
-            ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
+            ReceptionReport *receptionReport = check_and_cast<ReceptionReport *>(receptionReports.remove(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
                 _senderInfo->processReceptionReport(receptionReport, simTime());
             }
@@ -467,7 +467,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtc
     cArray& receptionReports = rtcpReceiverReportPacket->getReceptionReports();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
-            ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
+            ReceptionReport *receptionReport = check_and_cast<ReceptionReport *>(receptionReports.remove(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
                 _senderInfo->processReceptionReport(receptionReport, simTime());
             }
@@ -485,7 +485,7 @@ void RTCP::processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Add
     for (int j = 0; j < sdesChunks.size(); j++) {
         if (sdesChunks.exist(j)) {
             // remove the sdes chunk from the cArray of sdes chunks
-            SDESChunk *sdesChunk = (SDESChunk *)(sdesChunks.remove(j));
+            SDESChunk *sdesChunk = check_and_cast<SDESChunk *>(sdesChunks.remove(j));
             // this is needed to avoid seg faults
             //sdesChunk->setOwner(this);
             uint32 ssrc = sdesChunk->getSsrc();
@@ -522,7 +522,7 @@ void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Addres
 RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 {
     std::string ssrcString = RTPParticipantInfo::ssrcToName(ssrc);
-    return (RTPParticipantInfo *)(_participantInfos.get(ssrcString.c_str()));
+    return check_and_cast_nullable<RTPParticipantInfo *>(_participantInfos.get(ssrcString.c_str()));
 }
 
 void RTCP::calculateAveragePacketSize(int size)

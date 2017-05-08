@@ -161,7 +161,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     if (moduleType == nullptr)
         throw cRuntimeError("RTPProfile: payload sender module '%s' not found", moduleName);
 
-    RTPPayloadSender *rtpPayloadSender = (RTPPayloadSender *)(moduleType->create(moduleName, this));
+    RTPPayloadSender *rtpPayloadSender = check_and_cast<RTPPayloadSender *>(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
 
     gate("payloadSenderOut")->connectTo(rtpPayloadSender->gate("profileIn"));
@@ -223,7 +223,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
             throw cRuntimeError("Receiver module type %s not found", payloadReceiverName);
         else {
             RTPPayloadReceiver *receiverModule =
-                (RTPPayloadReceiver *)(moduleType->create(payloadReceiverName, this));
+                check_and_cast<RTPPayloadReceiver *>(moduleType->create(payloadReceiverName, this));
             if (_autoOutputFileNames) {
                 char outputFileName[100];
                 sprintf(outputFileName, "id%i.sim", receiverModule->getId());
