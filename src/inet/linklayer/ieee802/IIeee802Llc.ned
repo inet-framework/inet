@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee802;
 
-simple Ieee802Llc like IIeee802Llc
+moduleinterface IIeee802Llc
 {
     parameters:
         @display("i=block/layer");
