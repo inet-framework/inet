@@ -50,6 +50,7 @@ simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
     parameters:
         string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         string interfaceTableModule;
+        string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
     gates:

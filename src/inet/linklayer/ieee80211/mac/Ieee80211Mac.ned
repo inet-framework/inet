@@ -89,6 +89,7 @@ module MACProtocolBase extends LayeredProtocolBase
 module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 {
     parameters:
+        string mibModule;
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
@@ -96,6 +97,7 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 
         bool qosStation = default(false);
 
+        *.mibModule = default(absPath(mibModule));
         *.rxModule = "^.rx";
         *.txModule = "^.tx";
 

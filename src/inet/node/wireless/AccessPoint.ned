@@ -51,6 +51,7 @@ module AccessPoint
         string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
+        wlan[*].llcType = default("Ieee80211Portal");
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
         eth[*].encapType = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));

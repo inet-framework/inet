@@ -49,6 +49,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         //dataRate: numeric; XXX TBD
         string interfaceTableModule;
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+        string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
         @signal[NF_L2_AP_ASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");

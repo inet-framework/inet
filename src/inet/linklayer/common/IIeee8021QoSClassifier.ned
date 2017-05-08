@@ -26,6 +26,8 @@ package inet.linklayer.common;
 //
 moduleinterface IIeee8021dQoSClassifier
 {
+    parameters:
+        @display("i=block/fork");
     gates:
         input in;
         output out;

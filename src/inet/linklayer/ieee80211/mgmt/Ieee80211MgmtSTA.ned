@@ -30,6 +30,7 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numChannels = default(1);  // number of channels to scan
+        string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
         @signal[NF_L2_ASSOCIATED](type=inet::InterfaceEntry);
