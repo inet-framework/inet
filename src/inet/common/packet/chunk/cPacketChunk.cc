@@ -60,9 +60,13 @@ Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter co
 }
 
 std::string cPacketChunk::str() const {
-    std::ostringstream os;
-    os << "cPacketChunk, packet = {" << ( packet != nullptr ? packet->str() : std::string("<null>")) << "}";
-    return os.str();
+    if (packet != nullptr) {
+        std::ostringstream os;
+        os << "cPacketChunk, packet = {(" << packet->getClassName() << ")" << packet->str() << ", length = " << getChunkLength() << "}";
+        return os.str();
+    }
+    else
+        return std::string("cPacketChunk, packet = {<null>}");
 }
 
 } // namespace
