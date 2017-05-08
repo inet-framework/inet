@@ -416,6 +416,16 @@ class INET_API Packet : public cPacket
     Ptr<BytesChunk> peekDataBytes(int flags = 0) const {
         return peekDataAt<BytesChunk>(bit(0), getDataLength(), flags);
     }
+
+    /**
+     * Returns the data part (excluding popped headers and trailers) in the
+     * requested representation. The length of the returned chunk is the same as
+     * the value returned by getDataLength().
+     */
+    template <typename T>
+    Ptr<T> peekData(int flags = 0) const {
+        return peekDataAt<T>(bit(0), getDataLength(), flags);
+    }
     //@}
 
     /** @name Querying related functions */
@@ -451,7 +461,6 @@ class INET_API Packet : public cPacket
         return contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
     }
 
-
     /**
      * Returns the whole packet (including popped headers and trailers) in the
      * current representation. The length of the returned chunk is the same as
@@ -477,6 +486,16 @@ class INET_API Packet : public cPacket
      */
     Ptr<BytesChunk> peekAllBytes(int flags = 0) const {
         return peekAt<BytesChunk>(bit(0), getTotalLength(), flags);
+    }
+
+    /**
+     * Returns the whole packet (including popped headers and trailers) in the
+     * requested representation. The length of the returned chunk is the same as
+     * the value returned by getTotalLength().
+     */
+    template <typename T>
+    Ptr<T> peekAll(int flags = 0) const {
+        return peekAt<T>(bit(0), getTotalLength(), flags);
     }
     //@}
 
