@@ -513,6 +513,10 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                         break;
 
 #endif // ifdef WITH_IPv4
+                    case L3Address::MAC:
+                        if (entry->getMacAddress() == add.toMAC())
+                            return mod;
+                        break;
                     default:
                         throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", L3Address::getTypeName(add.getType()));
                         break;
