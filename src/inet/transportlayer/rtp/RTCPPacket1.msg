@@ -15,9 +15,14 @@
 
 cplusplus{{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 }}
 
 class cArray;
+
+namespace inet;
+
+class FieldsChunk extends cObject;
 
 namespace inet::rtp;
 
@@ -41,9 +46,3 @@ packet RTCPPacket
     abstract int rtcpLength;
 }
 
-packet RTCPCompoundPacket
-{
-    byteLength = 0;
-    @customize(true);  // see the generated C++ header for more info
-    cArray rtcpPackets;
-}

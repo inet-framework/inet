@@ -9,17 +9,6 @@ namespace rtp {
 
 Register_Class(RTCPPacket);
 
-Register_Class(RTCPCompoundPacket);
-
-void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket)
-{
-    //rtcpPacket->setOwner(_rtcpPackets);
-    rtcpPackets.add(rtcpPacket);
-    // the size of the rtcp compound packet increases
-    // by the size of the added rtcp packet
-    addByteLength(rtcpPacket->getByteLength());
-};
-
 Register_Class(RTCPReceiverReportPacket);
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name, int kind)

@@ -150,7 +150,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Extracts information of a received RTCPCompoundPacket.
      */
-    virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port);
+    virtual void processIncomingRTCPPacket(Packet *packet, IPv4Address address, int port);
     void processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port);
     void processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port);
     void processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime);

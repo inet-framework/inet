@@ -45,17 +45,6 @@ class INET_API RTCPPacket : public RTCPPacket_Base
     virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
 };
 
-class INET_API RTCPCompoundPacket : public RTCPCompoundPacket_Base
-{
-  public:
-    RTCPCompoundPacket(const char *name = nullptr, int kind = 0) : RTCPCompoundPacket_Base(name, kind) {};
-    RTCPCompoundPacket(const RTCPCompoundPacket& other) : RTCPCompoundPacket_Base(other) {}
-    RTCPCompoundPacket& operator=(const RTCPCompoundPacket& other) { RTCPCompoundPacket_Base::operator=(other); return *this; }
-    virtual RTCPCompoundPacket *dup() const override { return new RTCPCompoundPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base
-    void addRTCPPacket(RTCPPacket *rtcpPacket);
-};
-
 } // namespace rtp
 
 } // namespace inet

@@ -209,10 +209,7 @@ void RTCP::connectRet()
 void RTCP::readRet(Packet *sifpIn)
 {
     emit(rcvdPkSignal, sifpIn);
-    const auto& pkChunk = sifpIn->peekHeader<cPacketChunk>();
-    RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(pkChunk->getPacket());
-    processIncomingRTCPPacket(packet->dup(), IPv4Address(_destinationAddress), _port);
-    delete sifpIn;
+    processIncomingRTCPPacket(sifpIn, IPv4Address(_destinationAddress), _port);
 }
 
 void RTCP::createSocket()
@@ -303,25 +300,21 @@ void RTCP::createPacket()
     SDESChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
 
-    RTCPCompoundPacket *compoundPacket = new RTCPCompoundPacket("RTCPCompoundPacket");
+    Packet *compoundPacket = new Packet("RTCPCompoundPacket");
 
-    compoundPacket->addRTCPPacket(reportPacket);
-    compoundPacket->addRTCPPacket(sdesPacket);
+    compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(reportPacket));
+    compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(sdesPacket));
 
     // create rtcp app/bye packets if needed
     if (_leaveSession) {
         RTCPByePacket *byePacket = new RTCPByePacket("ByePacket");
         byePacket->setSsrc(_senderInfo->getSsrc());
-        compoundPacket->addRTCPPacket(byePacket);
+        compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(byePacket));
     }
 
     calculateAveragePacketSize(compoundPacket->getByteLength());
 
-    Packet *msg = new Packet("RTCPCompoundPacket");
-    const auto& pkchunk = std::make_shared<cPacketChunk>(compoundPacket);
-    pkchunk->markImmutable();
-    msg->append(pkchunk);
-    _udpSocket.sendTo(msg, _destinationAddress, _port);
+    _udpSocket.sendTo(compoundPacket, _destinationAddress, _port);
 
     if (_leaveSession) {
         RTPInnerPacket *rinp = new RTPInnerPacket("sessionLeft()");
@@ -369,16 +362,17 @@ void RTCP::processIncomingRTPPacket(Packet *packet, IPv4Address address, int por
     }
 }
 
-void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port)
+void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
-    cArray& rtcpPackets = packet->getRtcpPackets();
     simtime_t arrivalTime = packet->getArrivalTime();
 
-    for (int i = 0; i < rtcpPackets.size(); i++) {
-        RTCPPacket *rtcpPacket = check_and_cast_nullable<RTCPPacket *>(rtcpPackets.remove(i));
+    for (int i = 0; packet->getByteLength() > 0; i++) {
+        // remove the rtcp packet from the rtcp compound packet
+        const auto& cPk = packet->popHeader<cPacketChunk>();    //FIXME KLUDGE: later: packet->popHeader<RTCPPacket>();
+        RTCPPacket *rtcpPacket = check_and_cast<RTCPPacket *>(cPk->getPacket());
         if (rtcpPacket) {
-            // remove the rtcp packet from the rtcp compound packet
+            rtcpPacket = rtcpPacket->dup();     //FIXME KLUDGE: should make a mutable copy from content of cPacketChunk
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:
                     processIncomingRTCPSenderReportPacket(check_and_cast<RTCPSenderReportPacket *>(rtcpPacket), address, port);
@@ -400,7 +394,6 @@ void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address add
                     throw cRuntimeError("unknown RTCP packet type");
                     break;
             }
-            delete rtcpPacket;
         }
     }
     delete packet;
