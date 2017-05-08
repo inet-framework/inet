@@ -75,25 +75,24 @@ void RTPParticipantInfo::processRTPPacket(Packet *packet, int id, simtime_t arri
     delete packet;
 }
 
-void RTPParticipantInfo::processSenderReport(SenderReport& report, simtime_t arrivalTime)
+void RTPParticipantInfo::processSenderReport(const SenderReport& report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-void RTPParticipantInfo::processReceptionReport(ReceptionReport& report, simtime_t arrivalTime)
+void RTPParticipantInfo::processReceptionReport(const ReceptionReport& report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
+void RTPParticipantInfo::processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
     for (int i = 0; i < sdesChunk->size(); i++) {
         if (sdesChunk->exist(i)) {
-            SDESItem *sdesItem = check_and_cast<SDESItem *>(sdesChunk->remove(i));
-            addSDESItem(sdesItem);
+            const SDESItem *sdesItem = check_and_cast<const SDESItem *>(sdesChunk->get(i));
+            addSDESItem(sdesItem->dup());
         }
     }
-    delete sdesChunk;
 }
 
 SDESChunk *RTPParticipantInfo::getSDESChunk() const

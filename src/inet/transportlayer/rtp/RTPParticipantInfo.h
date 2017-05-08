@@ -86,17 +86,17 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * This method extracts information about an RTP endsystem
      * as provided by the given SenderReport.
      */
-    virtual void processSenderReport(SenderReport& report, simtime_t arrivalTime);
+    virtual void processSenderReport(const SenderReport& report, simtime_t arrivalTime);
 
     /**
      * This method extracts information of the given ReceptionReport.
      */
-    virtual void processReceptionReport(ReceptionReport& report, simtime_t arrivalTime);
+    virtual void processReceptionReport(const ReceptionReport& report, simtime_t arrivalTime);
 
     /**
      * This method extracts sdes information of the given sdes chunk.and stores it.
      */
-    virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime);
+    virtual void processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime);
 
     /**
      * Returns a copy of the sdes chunk used for storing source

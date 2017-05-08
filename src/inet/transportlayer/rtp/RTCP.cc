@@ -372,7 +372,6 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
         const auto& cPk = packet->popHeader<cPacketChunk>();    //FIXME KLUDGE: later: packet->popHeader<RTCPPacket>();
         RTCPPacket *rtcpPacket = check_and_cast<RTCPPacket *>(cPk->getPacket());
         if (rtcpPacket) {
-            rtcpPacket = rtcpPacket->dup();     //FIXME KLUDGE: should make a mutable copy from content of cPacketChunk
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:
                     processIncomingRTCPSenderReportPacket(check_and_cast<RTCPSenderReportPacket *>(rtcpPacket), address, port);
@@ -399,7 +398,7 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
     delete packet;
 }
 
-void RTCP::processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPSenderReportPacket(const RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpSenderReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -422,21 +421,18 @@ void RTCP::processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSen
     }
     participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), simTime());
 
-    cArray& receptionReports = rtcpSenderReportPacket->getReceptionReports();
+    const cArray& receptionReports = rtcpSenderReportPacket->getReceptionReports();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
-            ReceptionReport *receptionReport = check_and_cast<ReceptionReport *>(receptionReports.remove(j));
+            const ReceptionReport *receptionReport = check_and_cast<const ReceptionReport *>(receptionReports.get(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
                 _senderInfo->processReceptionReport(receptionReport, simTime());
             }
-            else
-                //cancelAndDelete(receptionReport);
-                delete receptionReport;
         }
     }
 }
 
-void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPReceiverReportPacket(const RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -457,28 +453,25 @@ void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtc
         }
     }
 
-    cArray& receptionReports = rtcpReceiverReportPacket->getReceptionReports();
+    const cArray& receptionReports = rtcpReceiverReportPacket->getReceptionReports();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
-            ReceptionReport *receptionReport = check_and_cast<ReceptionReport *>(receptionReports.remove(j));
+            const ReceptionReport *receptionReport = check_and_cast<const ReceptionReport *>(receptionReports.get(j));
             if (_senderInfo && (receptionReport->getSsrc() == _senderInfo->getSsrc())) {
                 _senderInfo->processReceptionReport(receptionReport, simTime());
             }
-            else
-                //cancelAndDelete(receptionReport);
-                delete receptionReport;
         }
     }
 }
 
-void RTCP::processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
+void RTCP::processIncomingRTCPSDESPacket(const RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
 {
-    cArray& sdesChunks = rtcpSDESPacket->getSdesChunks();
+    const cArray& sdesChunks = rtcpSDESPacket->getSdesChunks();
 
     for (int j = 0; j < sdesChunks.size(); j++) {
         if (sdesChunks.exist(j)) {
             // remove the sdes chunk from the cArray of sdes chunks
-            SDESChunk *sdesChunk = check_and_cast<SDESChunk *>(sdesChunks.remove(j));
+            const SDESChunk *sdesChunk = check_and_cast<const SDESChunk *>(sdesChunks.get(j));
             // this is needed to avoid seg faults
             //sdesChunk->setOwner(this);
             uint32 ssrc = sdesChunk->getSsrc();
@@ -497,7 +490,7 @@ void RTCP::processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Add
     }
 }
 
-void RTCP::processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPByePacket(const RTCPByePacket *rtcpByePacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpByePacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);

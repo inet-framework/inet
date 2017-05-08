@@ -82,9 +82,8 @@ void RTPSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTi
     RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-void RTPSenderInfo::processReceptionReport(ReceptionReport *report, simtime_t arrivalTime)
+void RTPSenderInfo::processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime)
 {
-    delete report;
 }
 
 SenderReport *RTPSenderInfo::senderReport(simtime_t now)

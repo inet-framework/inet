@@ -66,7 +66,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
     /**
      * Processes an incoming ReceptionReport for this sender.
      */
-    virtual void processReceptionReport(ReceptionReport *report, simtime_t arrivalTime);
+    virtual void processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime);
 
     /**
      * Returns a SenderReport for this rtp endsystem.

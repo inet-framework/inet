@@ -155,7 +155,7 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
     delete report;
 }
 
-void RTPReceiverInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
+void RTPReceiverInfo::processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
     RTPParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
     _itemsReceived++;

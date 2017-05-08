@@ -76,7 +76,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     /**
      * Extracts information of the given SDESChunk.
      */
-    virtual void processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime) override;
+    virtual void processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime) override;
 
     /**
      * Returns a ReceptionReport if this RTP end system is a sender,
