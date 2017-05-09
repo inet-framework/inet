@@ -43,7 +43,7 @@ simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
     throw cRuntimeError("Unimplemented");
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataHeader>& frame)
 {
     return ackPolicy->isBlockAckPolicyEligibleFrame(packet, frame);
 }

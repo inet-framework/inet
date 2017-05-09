@@ -31,7 +31,7 @@ void OriginatorMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     sequenceNumberAssigment->assignSequenceNumber(frame);
 }
@@ -55,7 +55,7 @@ OriginatorMacDataService::Fragments* OriginatorMacDataService::extractFramesToTr
         //    txRateLimitingIfNeeded();
         Packet *packet = pendingQueue->pop();
         if (sequenceNumberAssigment) {
-            auto frame = packet->removeHeader<Ieee80211DataOrMgmtFrame>();
+            auto frame = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(frame);
             packet->insertHeader(frame);
         }

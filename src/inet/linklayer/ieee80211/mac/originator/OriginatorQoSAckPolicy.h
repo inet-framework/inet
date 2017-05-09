@@ -40,19 +40,19 @@ class INET_API OriginatorQoSAckPolicy : public ModeSetListener, public IOriginat
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual bool checkAgreementPolicy(const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const;
-        virtual std::map<MACAddress, std::vector<Ieee80211DataFrame*>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
-        virtual int computeStartingSequenceNumber(const std::vector<Ieee80211DataFrame*>& outstandingFrames) const;
-        virtual bool isCompressedBlockAckReq(const std::vector<Ieee80211DataFrame*>& outstandingFrames, int startingSequenceNumber) const;
+        virtual bool checkAgreementPolicy(const Ptr<Ieee80211DataHeader>& frame, OriginatorBlockAckAgreement *agreement) const;
+        virtual std::map<MACAddress, std::vector<Ieee80211DataHeader*>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
+        virtual int computeStartingSequenceNumber(const std::vector<Ieee80211DataHeader*>& outstandingFrames) const;
+        virtual bool isCompressedBlockAckReq(const std::vector<Ieee80211DataHeader*>& outstandingFrames, int startingSequenceNumber) const;
 
     public:
-        virtual bool isAckNeeded(const Ptr<Ieee80211ManagementHeader>& frame) const override;
-        virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const override;
-        virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) const override;
+        virtual bool isAckNeeded(const Ptr<Ieee80211MgmtHeader>& frame) const override;
+        virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataHeader>& frame, OriginatorBlockAckAgreement *agreement) const override;
+        virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& frame) const override;
         virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const override;
         virtual std::tuple<MACAddress, SequenceNumber, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const override;
 
-        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const override;
+        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const override;
         virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) const override;
 };
 

@@ -42,7 +42,7 @@ void RecipientBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreeme
 // policy is set are received and the Ack Policy subfield in the QoS Control field of that MPDU header is
 // Block Ack or Implicit Block Ack Request.
 //
-void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<Ieee80211DataFrame>& qosFrame, IBlockAckAgreementHandlerCallback *callback)
+void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<Ieee80211DataHeader>& qosFrame, IBlockAckAgreementHandlerCallback *callback)
 {
     if (qosFrame->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO: + Implicit Block Ack
         Tid tid = qosFrame->getTid();

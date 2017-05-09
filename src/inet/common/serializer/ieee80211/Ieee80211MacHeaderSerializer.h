@@ -33,7 +33,7 @@ using namespace ieee80211;
 class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtFrame> frame, short type, uint8_t fc1) const;
+    virtual void parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtHeader> frame, short type, uint8_t fc1) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;

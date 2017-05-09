@@ -30,7 +30,7 @@ namespace ieee80211 {
 class INET_API IDs
 {
   public:
-    virtual void processDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& header) = 0;
+    virtual void processDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& header) = 0;
 };
 
 } // namespace ieee80211

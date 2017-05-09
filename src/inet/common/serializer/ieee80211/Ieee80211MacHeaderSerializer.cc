@@ -24,9 +24,9 @@ namespace inet {
 namespace serializer {
 
 Register_Serializer(Ieee80211Frame, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211DataOrMgmtFrame, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211DataFrame, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211ManagementHeader, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211DataOrMgmtHeader, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211DataHeader, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211MgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211ACKFrame, Ieee80211MacHeaderSerializer);
@@ -66,7 +66,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ctsFrame->getReceiverAddress());
     }
-    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(chunk))
+    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(chunk))
     {
         uint8_t type = dataOrMgmtFrame->getType();
         stream.writeByte(((type & 0x0F) << 4) | ((type & 0x30) >> 2));  //without Qos=0x08, with Qos=0x88
@@ -84,7 +84,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(chunk)) {
+        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(chunk)) {
             if (dataFrame->getFromDS() && dataFrame->getToDS())
                 stream.writeMACAddress(dataFrame->getAddress4());
 
@@ -109,7 +109,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
 
-void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtFrame> frame, short type, uint8_t fc1) const
+void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtHeader> frame, short type, uint8_t fc1) const
 {
     frame->setType(type);
     frame->setToDS(fc1 & 0x1);
@@ -125,9 +125,9 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setFragmentNumber(seq & 0x0F);
 
     if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
-        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setAddress4(stream.readMACAddress());
+        std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMACAddress());
     if (type == ST_DATA_WITH_QOS)
-        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setQos(stream.readUint16Le());
+        std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)->setQos(stream.readUint16Le());
 }
 
 Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -135,7 +135,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
     uint8_t type = stream.readByte();
     uint8_t fc_1 = stream.readByte();  (void)fc_1; // fc_1
     if (!(type & 0x30)) {
-        auto managementHeader = std::make_shared<Ieee80211ManagementHeader>();
+        auto managementHeader = std::make_shared<Ieee80211MgmtHeader>();
         parseDataOrMgmtFrame(stream, managementHeader, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
         return managementHeader;
     }
@@ -181,7 +181,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         case 0x08: // ST_DATA
         case 0x88: // ST_DATA_WITH_QOS
         {
-            auto dataHeader = std::make_shared<Ieee80211DataFrame>();
+            auto dataHeader = std::make_shared<Ieee80211DataHeader>();
             parseDataOrMgmtFrame(stream, dataHeader, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
             return dataHeader;
         }

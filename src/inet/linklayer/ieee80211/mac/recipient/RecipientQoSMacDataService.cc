@@ -48,13 +48,13 @@ Packet *RecipientQoSMacDataService::defragment(std::vector<Packet *> completeFra
 Packet *RecipientQoSMacDataService::defragment(Packet *mgmtFragment)
 {
     auto packet = basicReassembly->addFragment(mgmtFragment);
-    if (packet && packet->hasHeader<Ieee80211DataOrMgmtFrame>())
+    if (packet && packet->hasHeader<Ieee80211DataOrMgmtHeader>())
         return packet;
     else
         return nullptr;
 }
 
-std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
+std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     // TODO: A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataFrame))
@@ -89,7 +89,7 @@ std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *data
     std::vector<Packet *> deaggregatedFrames;
     if (aMsduDeaggregation) {
         for (auto frame : defragmentedFrames) {
-            auto dataFrame = frame->peekHeader<Ieee80211DataFrame>();
+            auto dataFrame = frame->peekHeader<Ieee80211DataHeader>();
             if (dataFrame->getAMsduPresent()) {
                 auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                 for (auto subframe : *subframes)
@@ -104,7 +104,7 @@ std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *data
     return deaggregatedFrames;
 }
 
-std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame)
+std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame)
 {
     // TODO: MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtFrame))

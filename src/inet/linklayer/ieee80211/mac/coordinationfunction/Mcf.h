@@ -34,7 +34,7 @@ class INET_API Mcf : public ICoordinationFunction, public cSimpleModule
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     public:
-        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) override { throw cRuntimeError("Unimplemented!"); }
+        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) override { throw cRuntimeError("Unimplemented!"); }
         virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame) override { throw cRuntimeError("Unimplemented!"); };
         virtual void corruptedFrameReceived() override { throw cRuntimeError("Unimplemented!"); }
 };

@@ -54,7 +54,7 @@ class INET_API BlockAckReordering
         virtual ~BlockAckReordering();
 
         void processReceivedDelba(const Ptr<Ieee80211Delba>& delba);
-        ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame);
+        ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame);
         ReorderBuffer processReceivedBlockAckReq(const Ptr<Ieee80211BlockAckReq>& frame);
 };
 

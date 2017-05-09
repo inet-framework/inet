@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback)
+void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback)
 {
     numReceivedAckableFrame++;
     // After a successful reception of a frame requiring acknowledgment, transmission of the ACK frame
@@ -39,7 +39,7 @@ void RecipientAckProcedure::processTransmittedAck(const Ptr<Ieee80211ACKFrame>& 
     numSentAck++;
 }
 
-Ptr<Ieee80211ACKFrame> RecipientAckProcedure::buildAck(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const
+Ptr<Ieee80211ACKFrame> RecipientAckProcedure::buildAck(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const
 {
     auto ack = std::make_shared<Ieee80211ACKFrame>();
     ack->setReceiverAddress(dataOrMgmtFrame->getTransmitterAddress());

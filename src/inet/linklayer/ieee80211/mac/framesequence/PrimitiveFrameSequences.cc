@@ -51,7 +51,7 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
     switch (step) {
         case 0: {
             auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
-            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekHeader<Ieee80211DataOrMgmtFrame>());
+            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
             rtsPacket->append(rtsFrame);
@@ -158,7 +158,7 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto mgmtFrame = packet->peekHeader<Ieee80211ManagementHeader>();
+            auto mgmtFrame = packet->peekHeader<Ieee80211MgmtHeader>();
             return new ReceiveStep(context->getAckTimeout(packet, mgmtFrame));
         }
         case 2:
@@ -230,7 +230,7 @@ IFrameSequenceStep *AckFs::prepareStep(FrameSequenceContext *context)
         case 0: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
             return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 1:
@@ -266,7 +266,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
@@ -320,7 +320,7 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
             return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 2:
@@ -364,7 +364,7 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
             return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 2:

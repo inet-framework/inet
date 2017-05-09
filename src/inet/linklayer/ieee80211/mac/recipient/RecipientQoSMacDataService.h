@@ -54,9 +54,9 @@ class INET_API RecipientQoSMacDataService : public IRecipientQoSMacDataService, 
         virtual Packet *defragment(Packet *mgmtFragment);
 
     public:
-        virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
+        virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
         virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
-        virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) override;
+        virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) override;
 
 };
 

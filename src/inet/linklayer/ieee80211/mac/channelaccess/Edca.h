@@ -42,7 +42,7 @@ class INET_API Edca : public cSimpleModule
     public:
         virtual ~Edca();
 
-        virtual AccessCategory classifyFrame(const Ptr<Ieee80211DataFrame>& frame);
+        virtual AccessCategory classifyFrame(const Ptr<Ieee80211DataHeader>& frame);
         virtual Edcaf *getChannelOwner();
         virtual std::vector<Edcaf*> getInternallyCollidedEdcafs();
 

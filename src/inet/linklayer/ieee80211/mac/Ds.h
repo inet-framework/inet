@@ -43,10 +43,10 @@ class INET_API Ds : public cSimpleModule, public IDs
      * STA to the wireless LAN, after tweaking fromDS/toDS bits and shuffling
      * addresses as needed.
      */
-    virtual void distributeDataFrame(Packet *frame, const Ptr<Ieee80211DataOrMgmtFrame>& header);
+    virtual void distributeDataFrame(Packet *frame, const Ptr<Ieee80211DataOrMgmtHeader>& header);
 
   public:
-    virtual void processDataFrame(Packet *frame, const Ptr<Ieee80211DataFrame>& header) override;
+    virtual void processDataFrame(Packet *frame, const Ptr<Ieee80211DataHeader>& header) override;
 };
 
 } // namespace ieee80211

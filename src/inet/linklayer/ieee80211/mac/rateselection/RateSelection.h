@@ -64,7 +64,7 @@ class INET_API RateSelection : public IRateSelection, public cSimpleModule, publ
 
         virtual const IIeee80211Mode *getMode(Packet *packet, const Ptr<Ieee80211Frame>& frame);
         virtual const IIeee80211Mode *computeControlFrameMode(const Ptr<Ieee80211Frame>& frame);
-        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame);
+        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame);
 
     public:
         static void setFrameMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, const IIeee80211Mode *mode);
@@ -75,7 +75,7 @@ class INET_API RateSelection : public IRateSelection, public cSimpleModule, publ
         // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
         // is used to initiate a TXOP.
         virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) override;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) override;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) override;
 
         virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
 

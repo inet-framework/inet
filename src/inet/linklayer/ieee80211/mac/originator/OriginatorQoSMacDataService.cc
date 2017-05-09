@@ -48,7 +48,7 @@ Packet *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendin
     return nullptr;
 }
 
-void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     sequenceNumberAssigment->assignSequenceNumber(frame);
 }
@@ -77,7 +77,7 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFram
             packet = pendingQueue->pop();
         // PS Defer Queueing
         if (sequenceNumberAssigment) {
-            auto header = packet->removeHeader<Ieee80211DataOrMgmtFrame>();
+            auto header = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(header);
             packet->insertHeader(header);
         }
@@ -92,7 +92,7 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFram
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)
         //    fragments = mpduCrcFooBarIfNeeded(fragments);
-        // const Ptr<Ieee80211DataOrMgmtFrame>& aMpdu = nullptr;
+        // const Ptr<Ieee80211DataOrMgmtHeader>& aMpdu = nullptr;
         // if (aMpduAggregation)
         //    aMpdu = aMpduAggregateIfNeeded(fragments);
         // if (aMpdu)

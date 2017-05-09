@@ -33,10 +33,10 @@ class INET_API RecipientAckProcedure : public IRecipientAckProcedure
         int numSentAck = 0;
 
     protected:
-        virtual Ptr<Ieee80211ACKFrame> buildAck(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const;
+        virtual Ptr<Ieee80211ACKFrame> buildAck(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const;
 
     public:
-        virtual void processReceivedFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) override;
+        virtual void processReceivedFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) override;
         virtual void processTransmittedAck(const Ptr<Ieee80211ACKFrame>& ack) override;
 };
 

@@ -130,7 +130,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         // IProcedureCallback
        virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame) override;
-       virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) override;
+       virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) override;
 
        virtual bool isSentByUs(const Ptr<Ieee80211Frame>& frame) const;
        virtual bool isForUs(const Ptr<Ieee80211Frame>& frame) const;
@@ -139,7 +139,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual ~Dcf();
 
         // ICoordinationFunction
-        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
+        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
         virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
         virtual void corruptedFrameReceived() override;
 };

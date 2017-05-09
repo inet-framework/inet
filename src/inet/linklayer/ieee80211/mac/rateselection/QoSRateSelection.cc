@@ -76,7 +76,7 @@ bool QoSRateSelection::isControlResponseFrame(const Ptr<Ieee80211Frame>& frame, 
 // non-HT PPDU CTS or ACK control response frame at either the primary rate or the alternate rate, if
 // one exists.
 //
-const IIeee80211Mode* QoSRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+const IIeee80211Mode* QoSRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
     // TODO: BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtFrame);
@@ -124,11 +124,11 @@ const IIeee80211Mode* QoSRateSelection::computeResponseBlockAckFrameMode(Packet 
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
 
-const IIeee80211Mode* QoSRateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+const IIeee80211Mode* QoSRateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
-    if (std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame) && dataFrameMode)
+    if (std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtFrame) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(dataOrMgmtFrame) && mgmtFrameMode)
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(dataOrMgmtFrame) && mgmtFrameMode)
         return mgmtFrameMode;
     // This subclause describes the rate selection rules for group addressed data and management frames, excluding
     // the following:
@@ -235,7 +235,7 @@ const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<Ieee80
 
 const IIeee80211Mode* QoSRateSelection::computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure)
 {
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(frame))
+    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
         return computeDataOrMgmtFrameMode(dataOrMgmtFrame);
     else
         return computeControlFrameMode(frame, txopProcedure);

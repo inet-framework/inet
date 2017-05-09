@@ -130,7 +130,7 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MACAddress originato
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& dataFrame, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
+void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataFrame, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
 {
     auto agreement = getAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataFrame) && agreement == nullptr) {

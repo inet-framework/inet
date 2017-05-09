@@ -35,22 +35,22 @@ void OriginatorQoSAckPolicy::initialize(int stage)
     }
 }
 
-bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211ManagementHeader>& frame) const
+bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211MgmtHeader>& frame) const
 {
     return !frame->getReceiverAddress().isMulticast();
 }
 
-std::map<MACAddress, std::vector<Ieee80211DataFrame*>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
+std::map<MACAddress, std::vector<Ieee80211DataHeader*>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
 {
     auto outstandingFrames = inProgressFrames->getOutstandingFrames();
-    std::map<MACAddress, std::vector<Ieee80211DataFrame*>> outstandingFramesPerReceiver;
+    std::map<MACAddress, std::vector<Ieee80211DataHeader*>> outstandingFramesPerReceiver;
     for (auto frame : outstandingFrames)
         outstandingFramesPerReceiver[frame->getReceiverAddress()].push_back(frame);
     return outstandingFramesPerReceiver;
 }
 
 
-int OriginatorQoSAckPolicy::computeStartingSequenceNumber(const std::vector<Ieee80211DataFrame*>& outstandingFrames) const
+int OriginatorQoSAckPolicy::computeStartingSequenceNumber(const std::vector<Ieee80211DataHeader*>& outstandingFrames) const
 {
     ASSERT(outstandingFrames.size() > 0);
     int startingSequenceNumber = outstandingFrames[0]->getSequenceNumber();
@@ -62,7 +62,7 @@ int OriginatorQoSAckPolicy::computeStartingSequenceNumber(const std::vector<Ieee
     return startingSequenceNumber;
 }
 
-bool OriginatorQoSAckPolicy::isCompressedBlockAckReq(const std::vector<Ieee80211DataFrame*>& outstandingFrames, int startingSequenceNumber) const
+bool OriginatorQoSAckPolicy::isCompressedBlockAckReq(const std::vector<Ieee80211DataHeader*>& outstandingFrames, int startingSequenceNumber) const
 {
     // The Compressed Bitmap subfield of the BA Control field or BAR Control field shall be set to 1 in all
     // BlockAck and BlockAckReq frames sent from one HT STA to another HT STA and shall be set to 0 otherwise.
@@ -104,7 +104,7 @@ std::tuple<MACAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlock
     return std::make_tuple(MACAddress::UNSPECIFIED_ADDRESS, -1, -1);
 }
 
-AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const
+AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataHeader>& frame, OriginatorBlockAckAgreement *agreement) const
 {
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
@@ -118,12 +118,12 @@ AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<Iee
         return AckPolicy::NORMAL_ACK;
 }
 
-bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) const
+bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& frame) const
 {
     return packet->getByteLength() < maxBlockAckPolicyFrameLength;
 }
 
-bool OriginatorQoSAckPolicy::checkAgreementPolicy(const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const
+bool OriginatorQoSAckPolicy::checkAgreementPolicy(const Ptr<Ieee80211DataHeader>& frame, OriginatorBlockAckAgreement *agreement) const
 {
     bool bufferFull = agreement->getBufferSize() == agreement->getNumSentBaPolicyFrames();
     bool aMsduOk = agreement->getIsAMsduSupported() || !frame->getAMsduPresent();
@@ -138,7 +138,7 @@ bool OriginatorQoSAckPolicy::checkAgreementPolicy(const Ptr<Ieee80211DataFrame>&
 // ACKTimeout interval, the STA concludes that the transmission of the MPDU has failed, and this STA shall
 // invoke its backoff procedure upon expiration of the ACKTimeout interval.
 //
-simtime_t OriginatorQoSAckPolicy::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const
+simtime_t OriginatorQoSAckPolicy::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const
 {
     return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtFrame)->getPhyRxStartDelay() : ackTimeout;
 }

@@ -40,14 +40,14 @@ void SingleProtectionMechanism::initialize(int stage)
 // frame, plus one ACK or BlockAck frame if required, plus any NDPs required, plus explicit
 // feedback if required, plus applicable IFS durations.
 //
-simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
+simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
 {
     // TODO: We assume that the RTS frame is not part of a dual clear-to-send
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingFrame, txop);
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getBitLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
     simtime_t durationId = ctsFrameDuration + modeSet->getSifsTime() + pendingFrameDuration + modeSet->getSifsTime();
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(pendingFrame)) {
+    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(pendingFrame)) {
         if (ackPolicy->isAckNeeded(dataOrMgmtFrame)) {
             RateSelection::setFrameMode(pendingPacket, dataOrMgmtFrame, pendingFrameMode); // FIXME: KLUDGE
             simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, dataOrMgmtFrame)->getDuration(LENGTH_ACK);
@@ -117,19 +117,19 @@ simtime_t SingleProtectionMechanism::computeBlockAckDurationField(const Ptr<Ieee
 //  ii) Otherwise, the estimated time required for the transmission of the following frame and its
 //      response frame, if required (including appropriate IFS values)
 //
-simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
+simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
 {
     bool mgmtFrame = false;
     bool mgmtFrameWithNoAck = false;
     bool groupAddressed = dataOrMgmtFrame->getReceiverAddress().isMulticast();
-    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(dataOrMgmtFrame)) {
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(dataOrMgmtFrame)) {
         mgmtFrame = true;
         mgmtFrameWithNoAck = false; // FIXME: ack policy?
     }
     bool nonQoSData = dataOrMgmtFrame->getType() == ST_DATA;
     bool individuallyAddressedDataWithNormalAck = false;
     bool individuallyAddressedDataWithNoAckOrBlockAck = false;
-    if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame)) {
+    if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtFrame)) {
         individuallyAddressedDataWithNormalAck = !groupAddressed && dataFrame->getAckPolicy() == AckPolicy::NORMAL_ACK;
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataFrame->getAckPolicy() == AckPolicy::NO_ACK || dataFrame->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
@@ -176,7 +176,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
     throw cRuntimeError("Unknown frame");
 }
 
-simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
+simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
 {
     if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(frame))
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingFrame, txop, ackPolicy);
@@ -186,7 +186,7 @@ simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const 
         return computeBlockAckReqDurationField(packet, blockAckReq);
     else if (auto blockAck = std::dynamic_pointer_cast<Ieee80211BlockAck>(frame))
         return computeBlockAckDurationField(blockAck);
-    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(frame))
+    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
         return computeDataOrMgmtFrameDurationField(packet, dataOrMgmtFrame, pendingPacket, pendingFrame, txop, ackPolicy);
     else
         throw cRuntimeError("Unknown frame type");

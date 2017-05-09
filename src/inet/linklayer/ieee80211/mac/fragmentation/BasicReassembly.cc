@@ -30,19 +30,19 @@ Register_Class(BasicReassembly);
  */
 Packet *BasicReassembly::addFragment(Packet *packet)
 {
-    const auto& frame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+    const auto& frame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
     // Frame is not fragmented
     if (!frame->getMoreFragments() && frame->getFragmentNumber() == 0)
         return packet;
     // FIXME: temporary fix for mgmt frames
-    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame))
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame))
         return packet;
     // find entry for this frame
     Key key;
     key.macAddress = frame->getTransmitterAddress();
     key.tid = -1;
     if (frame->getType() == ST_DATA_WITH_QOS)
-        if (const Ptr<Ieee80211DataFrame>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame))
+        if (const Ptr<Ieee80211DataHeader>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
             key.tid = qosDataFrame->getTid();
     key.seqNum = frame->getSequenceNumber();
     short fragNum = frame->getFragmentNumber();

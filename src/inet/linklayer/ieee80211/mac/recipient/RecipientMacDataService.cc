@@ -33,13 +33,13 @@ void RecipientMacDataService::initialize()
 Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 {
     Packet *packet = basicReassembly->addFragment(dataOrMgmtFrame);
-    if (packet && packet->peekHeader<Ieee80211DataOrMgmtFrame>())
+    if (packet && packet->peekHeader<Ieee80211DataOrMgmtHeader>())
         return packet;
     else
         return nullptr;
 }
 
-std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     if (duplicateRemoval && duplicateRemoval->isDuplicate(frame))
         return std::vector<Packet*>();
@@ -50,12 +50,12 @@ std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *pa
     return defragmentedFrame != nullptr ? std::vector<Packet*>({defragmentedFrame}) : std::vector<Packet*>();
 }
 
-std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame)
+std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame)
 {
     return dataOrMgmtFrameReceived(dataPacket, dataFrame);
 }
 
-std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame)
+std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame)
 {
     return dataOrMgmtFrameReceived(mgmtPacket, mgmtFrame);
 }

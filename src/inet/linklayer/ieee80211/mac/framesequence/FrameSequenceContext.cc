@@ -36,7 +36,7 @@ simtime_t FrameSequenceContext::getIfs() const
     return getNumSteps() == 0 ? 0 : modeSet->getSifsTime(); // TODO: pifs
 }
 
-simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtframe) const
+simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const
 {
     return qosContext ? qosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe) : nonQoSContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe);
 }
@@ -56,7 +56,7 @@ bool FrameSequenceContext::isSentByUs(const Ptr<Ieee80211Frame>& frame) const
     // FIXME:
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(frame))
+    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
         return dataOrMgmtFrame->getAddress3() == address;
     else
         return false;

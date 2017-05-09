@@ -27,9 +27,9 @@ namespace ieee80211 {
 class INET_API IRecipientMacDataService
 {
     public:
-        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame) = 0;
+        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame) = 0;
         virtual std::vector<Packet*> controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame) = 0;
-        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) = 0;
+        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) = 0;
 };
 
 } /* namespace ieee80211 */

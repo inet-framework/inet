@@ -31,7 +31,7 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
     //
     byte offset = byte(0);
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
-    const auto& frameHeader = frame->popHeader<Ieee80211DataOrMgmtFrame>();
+    const auto& frameHeader = frame->popHeader<Ieee80211DataOrMgmtHeader>();
     frame->popTrailer<Ieee80211MacTrailer>();
     for (int i = 0; i < (int)fragmentSizes.size(); i++) {
         bool lastFragment = i == (int)fragmentSizes.size() - 1;
@@ -40,7 +40,7 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
         byte length = byte(fragmentSizes.at(i));
         fragment->append(frame->peekDataAt(offset, length));
         offset += length;
-        const auto& fragmentHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(frameHeader->dupShared());
+        const auto& fragmentHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);

@@ -28,18 +28,18 @@ EdcaTransmitLifetimeHandler::EdcaTransmitLifetimeHandler(simtime_t bkLifetime, s
     msduLifetime[3] = voLifetime;
 }
 
-void EdcaTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataFrame>& frame)
+void EdcaTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataHeader>& frame)
 {
     if (frame->getFragmentNumber() == 0)
         lifetimes[frame->getSequenceNumber()] = simTime();
 }
 
-void EdcaTransmitLifetimeHandler::frameTransmitted(const Ptr<Ieee80211DataFrame>& frame)
+void EdcaTransmitLifetimeHandler::frameTransmitted(const Ptr<Ieee80211DataHeader>& frame)
 {
     // don't care
 }
 
-bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<Ieee80211DataFrame>& frame)
+bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<Ieee80211DataHeader>& frame)
 {
     ASSERT(frame->getType() == ST_DATA_WITH_QOS);
     AccessCategory ac = mapTidToAc(frame->getTid());

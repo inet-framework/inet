@@ -21,10 +21,10 @@
 namespace inet {
 namespace ieee80211 {
 
-bool QoSDuplicateRemoval::isDuplicate(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+bool QoSDuplicateRemoval::isDuplicate(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     SequenceControlField seqVal(frame);
-    bool isManagementFrame = std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame) != nullptr;
+    bool isManagementFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
@@ -44,7 +44,7 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<Ieee80211DataOrMgmtFrame>& frame
     }
     else
     {
-        const Ptr<Ieee80211DataFrame>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
+        const Ptr<Ieee80211DataHeader>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
         Key key(frame->getTransmitterAddress(), qosDataFrame->getTid());
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end()) {

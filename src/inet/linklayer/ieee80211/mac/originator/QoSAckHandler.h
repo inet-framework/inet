@@ -59,20 +59,20 @@ class INET_API QoSAckHandler : public IAckHandler
     public:
         virtual ~QoSAckHandler() { }
 
-        virtual void processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtFrame>& ackedFrame);
+        virtual void processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame);
         virtual std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck);
 
-        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) override;
-        virtual void processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) override;
+        virtual void processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
         virtual void processTransmittedBlockAckReq(const Ptr<Ieee80211BlockAckReq>& blockAckReq);
-        virtual void processFailedFrame(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame);
+        virtual void processFailedFrame(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame);
 
-        virtual Status getQoSDataAckStatus(const Ptr<Ieee80211DataFrame>& frame);
-        virtual Status getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+        virtual Status getQoSDataAckStatus(const Ptr<Ieee80211DataHeader>& frame);
+        virtual Status getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
         virtual int getNumberOfFramesWithStatus(Status status);
 
-        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
-        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
+        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
+        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
 };
 
 } /* namespace ieee80211 */

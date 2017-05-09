@@ -26,9 +26,9 @@ Register_Class(Defragmentation);
 Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
 {
     auto defragmentedFrame = new Packet();
-    const auto& defragmentedHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(fragmentFrames->at(0)->peekHeader<Ieee80211DataOrMgmtFrame>()->dupShared());
+    const auto& defragmentedHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(fragmentFrames->at(0)->peekHeader<Ieee80211DataOrMgmtHeader>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
-        fragmentFrame->popHeader<Ieee80211DataOrMgmtFrame>();
+        fragmentFrame->popHeader<Ieee80211DataOrMgmtHeader>();
         fragmentFrame->popTrailer<Ieee80211MacTrailer>();
         defragmentedFrame->append(fragmentFrame->peekData());
     }

@@ -341,7 +341,7 @@ void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
     transmissionTimer->setContextPointer(const_cast<RadioFrame *>(radioFrame));
 
 #ifdef NS3_VALIDATION
-    auto *df = dynamic_cast<inet::ieee80211::Ieee80211DataFrame *>(macFrame);
+    auto *df = dynamic_cast<inet::ieee80211::Ieee80211DataHeader *>(macFrame);
     const char *ac = "NA";
     if (df != nullptr && df->getType() == inet::ieee80211::ST_DATA_WITH_QOS) {
         switch (df->getTid()) {

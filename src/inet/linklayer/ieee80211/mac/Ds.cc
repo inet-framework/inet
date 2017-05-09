@@ -33,7 +33,7 @@ void Ds::initialize(int stage)
     }
 }
 
-void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataFrame>& header)
+void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataHeader>& header)
 {
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         mac->sendUp(frame);
@@ -84,10 +84,10 @@ void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataFrame>& header)
         throw cRuntimeError("Unknown mode");
 }
 
-void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<Ieee80211DataOrMgmtFrame>& incomingHeader)
+void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<Ieee80211DataOrMgmtHeader>& incomingHeader)
 {
     incomingFrame->removePoppedChunks();
-    const auto& outgoingHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(incomingHeader->dupShared());
+    const auto& outgoingHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(incomingHeader->dupShared());
 
     // adjust toDS/fromDS bits, and shuffle addresses
     outgoingHeader->setToDS(false);

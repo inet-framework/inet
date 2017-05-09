@@ -53,10 +53,10 @@ class INET_API BasicStatistics : /*public IStatistics, */public cSimpleModule
 //    public:
 //        virtual void setMacUtils(MacUtils *utils) override;
 //        virtual void setRateControl(IRateControl *rateControl) override;
-//        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) override;
-//        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) override;
-//        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) override;
-//        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
+//        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) override;
+//        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) override;
+//        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) override;
+//        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
 //        virtual void frameReceived(const Ptr<Ieee80211Frame>& frame) override;
 //        virtual void erroneousFrameReceived() override;
 };

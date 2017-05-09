@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void NonQoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+void NonQoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = (lastSeqNum + 1) % 4096;

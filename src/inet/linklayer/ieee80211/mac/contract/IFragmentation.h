@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 class INET_API IFragmentation
 {

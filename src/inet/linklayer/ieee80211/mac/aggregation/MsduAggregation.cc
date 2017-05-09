@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 Register_Class(MsduAggregation);
 
-void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataFrame>& frame)
+void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataHeader>& frame)
 {
     // Note: Addr1 (RA), Addr2 (TA)
     // Table 8-19—Address field contents
@@ -57,7 +57,7 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframe>& subfr
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
 {
     auto firstFrame = frames->at(0);
-    auto firstHeader = firstFrame->peekHeader<Ieee80211DataFrame>();
+    auto firstHeader = firstFrame->peekHeader<Ieee80211DataHeader>();
     auto tid = firstHeader->getTid();
     auto toDS = firstHeader->getToDS();
     auto fromDS = firstHeader->getFromDS();
@@ -68,7 +68,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     {
         auto msduSubframeHeader = std::make_shared<Ieee80211MsduSubframe>();
         auto frame = frames->at(i);
-        const auto& header = frame->popHeader<Ieee80211DataFrame>();
+        const auto& header = frame->popHeader<Ieee80211DataHeader>();
         frame->popTrailer<Ieee80211MacTrailer>();
         auto msdu = frame->peekData();
         msduSubframeHeader->setLength(byte(msdu->getChunkLength()).get());
@@ -87,7 +87,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     // The MPDU containing the A-MSDU is carried in any of the following data frame subtypes: QoS Data,
     // QoS Data + CF-Ack, QoS Data + CF-Poll, QoS Data + CF-Ack + CF-Poll. The A-MSDU structure is
     // contained in the frame body of a single MPDU.
-    auto amsduHeader = std::make_shared<Ieee80211DataFrame>();
+    auto amsduHeader = std::make_shared<Ieee80211DataHeader>();
     amsduHeader->setType(ST_DATA_WITH_QOS);
     amsduHeader->setToDS(toDS);
     amsduHeader->setFromDS(fromDS);

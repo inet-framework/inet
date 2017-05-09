@@ -95,12 +95,12 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 int DcfFs::selectMulticastDataOrMgmt(AlternativesFs* frameSequence, FrameSequenceContext* context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frameToTransmit->peekHeader<Ieee80211Frame>()) ? 0 : 1;
+    return std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frameToTransmit->peekHeader<Ieee80211Frame>()) ? 0 : 1;
 }
 
 bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    return context->getInProgressFrames()->hasInProgressFrames() && std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211Frame>());
+    return context->getInProgressFrames()->hasInProgressFrames() && std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211Frame>());
 }
 
 } // namespace ieee80211

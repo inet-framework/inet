@@ -40,7 +40,7 @@ class INET_API BlockAckRecord
         BlockAckRecord(MACAddress originatorAddress, Tid tid);
         virtual ~BlockAckRecord() { }
 
-        void blockAckPolicyFrameReceived(const Ptr<Ieee80211DataFrame>& frame);
+        void blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& frame);
         bool getAckState(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
 
         MACAddress getOriginatorAddress() { return originatorAddress; }

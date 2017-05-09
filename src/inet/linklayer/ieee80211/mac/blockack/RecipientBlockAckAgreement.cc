@@ -30,7 +30,7 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MACAddress originatorAddr
     blockAckRecord = new BlockAckRecord(originatorAddress, tid);
 }
 
-void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<Ieee80211DataFrame>& frame)
+void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& frame)
 {
     ASSERT(frame->getAckPolicy() == BLOCK_ACK);
     blockAckRecord->blockAckPolicyFrameReceived(frame);

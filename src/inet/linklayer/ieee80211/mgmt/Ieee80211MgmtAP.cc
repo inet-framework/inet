@@ -108,13 +108,13 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
 }
 
-Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211ManagementHeader>& frame)
+Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211MgmtHeader>& frame)
 {
     auto it = staList.find(frame->getTransmitterAddress());
     return it == staList.end() ? nullptr : &(it->second);
 }
 
-void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& body, int subtype, const MACAddress& destAddr)
+void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MACAddress& destAddr)
 {
     auto packet = new Packet(name);
     packet->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
@@ -136,7 +136,7 @@ void Ieee80211MgmtAP::sendBeacon()
     sendManagementFrame("Beacon", body, ST_BEACON, MACAddress::BROADCAST_ADDRESS);
 }
 
-void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
@@ -206,7 +206,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     EV << "Processing Deauthentication frame\n";
 
@@ -222,7 +222,7 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee
     }
 }
 
-void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     EV << "Processing AssociationRequest frame\n";
 
@@ -253,12 +253,12 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     EV << "Processing ReassociationRequest frame\n";
 
@@ -287,12 +287,12 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     STAInfo *sta = lookupSenderSTA(frame);
     delete packet;
@@ -304,12 +304,12 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     EV << "Processing ProbeRequest frame\n";
 
@@ -333,7 +333,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 
-void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
+void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
 {
     dropManagementFrame(packet);
 }

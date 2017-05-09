@@ -30,7 +30,7 @@ class INET_API IProcedureCallback
         virtual ~IProcedureCallback() { }
 
         virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame) = 0;
-        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) = 0;
+        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) = 0;
 
 };
 

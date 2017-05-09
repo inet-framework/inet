@@ -47,7 +47,7 @@ bool QoSRtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211Frame>& protec
 {
     if (std::dynamic_pointer_cast<Ieee80211BlockAckReq>(protectedFrame))
         return false;
-    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(protectedFrame))
+    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedFrame))
         return packet->getByteLength() >= rtsThreshold && !protectedFrame->getReceiverAddress().isMulticast();
     else
         return false;

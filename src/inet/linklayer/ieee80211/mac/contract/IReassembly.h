@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 /**
  * Abstract interface for classes that encapsulate the functionality of

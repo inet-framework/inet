@@ -27,7 +27,7 @@ class INET_API IRtsProcedure
 {
     public:
         virtual ~IRtsProcedure() { }
-        virtual Ptr<Ieee80211RTSFrame> buildRtsFrame(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const = 0;
+        virtual Ptr<Ieee80211RTSFrame> buildRtsFrame(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const = 0;
         virtual void processTransmittedRts(const Ptr<Ieee80211RTSFrame>& rtsFrame) = 0;
 };
 

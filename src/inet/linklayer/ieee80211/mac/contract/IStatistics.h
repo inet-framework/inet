@@ -26,7 +26,7 @@ namespace ieee80211 {
 class MacUtils;
 class IRateControl;
 class Ieee80211Frame;
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 /**
  * Abstract interface for statistics collection within the 802.11 MAC.
@@ -46,10 +46,10 @@ class INET_API IStatistics
         virtual void setRateControl(IRateControl *rateControl) = 0;  // is interested in the statistics
 
         // events to compute statistics from; TODO there should be many more, e.g. about the contention, queueing time, etc
-        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtFrame>& frame, int retryCount) = 0;
-        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtFrame>& frame) = 0;
+        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) = 0;
+        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
         virtual void frameReceived(const Ptr<Ieee80211Frame>& frame) = 0;
         virtual void erroneousFrameReceived() = 0;
 };

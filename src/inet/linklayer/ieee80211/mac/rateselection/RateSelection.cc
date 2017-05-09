@@ -68,7 +68,7 @@ const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<Ieee80211
 // frame in the frame exchange sequence (as defined in 9.7), if this rate belongs to the PHY mandatory rates, or
 // else at the highest possible rate belonging to the PHY rates in the BSSBasicRateSet.
 //
-const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
     if (responseAckFrameMode)
         return responseAckFrameMode;
@@ -103,13 +103,13 @@ const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet,
 // Poll+CF-ACK, the rate chosen to transmit the frame must be supported by both the addressed recipient STA
 // and the STA to which the ACK is intended.
 //
-const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
     if (dataOrMgmtFrame->getReceiverAddress().isMulticast() && multicastFrameMode)
         return multicastFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame) && dataFrameMode)
+    if (std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtFrame) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(dataOrMgmtFrame) && mgmtFrameMode)
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(dataOrMgmtFrame) && mgmtFrameMode)
         return mgmtFrameMode;
     if (dataOrMgmtRateControl)
         return dataOrMgmtRateControl->getRate();
@@ -131,7 +131,7 @@ const IIeee80211Mode* RateSelection::computeControlFrameMode(const Ptr<Ieee80211
 
 const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame)
 {
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(frame))
+    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
         return computeDataOrMgmtFrameMode(dataOrMgmtFrame);
     else
         return computeControlFrameMode(frame);

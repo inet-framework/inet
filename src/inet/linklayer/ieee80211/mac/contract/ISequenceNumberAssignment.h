@@ -28,7 +28,7 @@ class INET_API ISequenceNumberAssignment
     public:
         virtual ~ISequenceNumberAssignment() { }
 
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame) = 0;
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
 };
 
 } /* namespace ieee80211 */

@@ -28,8 +28,8 @@ class INET_API IOriginatorAckPolicy
 {
     public:
         virtual ~IOriginatorAckPolicy() { }
-        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtFrame>& frame) const = 0;
-        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) const = 0;
+        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& frame) const = 0;
+        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) const = 0;
 };
 
 } /* namespace ieee80211 */

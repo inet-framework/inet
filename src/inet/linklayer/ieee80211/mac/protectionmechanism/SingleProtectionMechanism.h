@@ -44,17 +44,17 @@ class INET_API SingleProtectionMechanism : public ModeSetListener
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
+        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
         virtual simtime_t computeCtsDurationField(const Ptr<Ieee80211CTSFrame>& ctsFrame);
         virtual simtime_t computeBlockAckReqDurationField(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq);
         virtual simtime_t computeBlockAckDurationField(const Ptr<Ieee80211BlockAck>& blockAck);
-        virtual simtime_t computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
+        virtual simtime_t computeDataOrMgmtFrameDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
 
     public:
         virtual ~SingleProtectionMechanism() { }
 
         // TODO: QoSAckPolicy, IQoSRateSelection may give wrong answers when communicating with a Non-QoS STA.
-        virtual simtime_t computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
+        virtual simtime_t computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy);
 };
 
 } /* namespace ieee80211 */

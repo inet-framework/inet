@@ -29,7 +29,7 @@ class NonQoSSequenceNumberAssignment : public LegacySequenceNumberAssigment
         std::map<MACAddress, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
 
     public:
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
 
 };
 

@@ -178,7 +178,7 @@ class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 //
 // Common base class for 802.11 data and management frames
 //
-class Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
+class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressFrame
 {
     chunkLength = bit(LENGTH_MGMT) - byte(4);
     MACAddress address3;
@@ -189,7 +189,7 @@ class Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 //
 // Format of the 802.11 data frame
 //
-class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
+class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 {
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
@@ -208,7 +208,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 }
 
 //TODO this can be introduced when the SNAP header 
-//class Ieee80211QoSDataFrame extends Ieee80211DataFrame
+//class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;
 //    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - byte(4);
@@ -220,12 +220,12 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
-class Ieee80211ManagementHeader extends Ieee80211DataOrMgmtFrame
+class Ieee80211MgmtHeader extends Ieee80211DataOrMgmtHeader
 {
 }
 
 // 8.3.3.13 Action frame format -- mgmt frame with subtype action
-class Ieee80211ActionFrame extends Ieee80211ManagementHeader
+class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 {
     type = ST_ACTION;
     short category;

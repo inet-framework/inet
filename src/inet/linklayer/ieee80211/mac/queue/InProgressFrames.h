@@ -42,7 +42,7 @@ class INET_API InProgressFrames
                 bool operator() (Packet *packet) {
                     const auto& frame = packet->peekHeader<Ieee80211Frame>();
                     if (frame->getType() == ST_DATA_WITH_QOS) {
-                        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
+                        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
                         return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;
                     }
                     else
@@ -74,7 +74,7 @@ class INET_API InProgressFrames
         virtual void dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
-        virtual std::vector<Ieee80211DataFrame*> getOutstandingFrames();
+        virtual std::vector<Ieee80211DataHeader*> getOutstandingFrames();
 };
 
 } /* namespace ieee80211 */

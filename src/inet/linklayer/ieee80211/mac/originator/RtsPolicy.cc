@@ -45,7 +45,7 @@ void RtsPolicy::initialize(int stage)
 //
 bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211Frame>& protectedFrame) const
 {
-    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(protectedFrame))
+    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedFrame))
         return packet->getByteLength() >= rtsThreshold && !protectedFrame->getReceiverAddress().isMulticast();
     else
         return false;

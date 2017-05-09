@@ -39,7 +39,7 @@ class INET_API IQoSRateSelection
         virtual ~IQoSRateSelection() {}
 
         virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) = 0;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) = 0;
         virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) = 0;
 
         virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure) = 0;

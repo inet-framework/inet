@@ -65,7 +65,7 @@ class INET_API QoSRateSelection : public IQoSRateSelection, public ModeSetListen
 
         virtual const IIeee80211Mode *getMode(Packet *packet, const Ptr<Ieee80211Frame>& frame);
         virtual const IIeee80211Mode *computeControlFrameMode(const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure);
-        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame);
+        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame);
 
         virtual bool isControlResponseFrame(const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure);
 
@@ -76,7 +76,7 @@ class INET_API QoSRateSelection : public IQoSRateSelection, public ModeSetListen
         // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
         // is used to initiate a TXOP.
         virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) override;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) override;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) override;
         virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) override;
 
         virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure) override;

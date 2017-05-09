@@ -32,7 +32,7 @@ namespace ieee80211 {
 class INET_API RecipientMacDataService : public cSimpleModule, public IRecipientMacDataService
 {
     protected:
-        typedef std::vector<Ieee80211DataOrMgmtFrame*> Fragments;
+        typedef std::vector<Ieee80211DataOrMgmtHeader*> Fragments;
 
     protected:
         IReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
@@ -47,13 +47,13 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
     protected:
         virtual void initialize() override;
         virtual Packet *defragment(Packet *dataOrMgmtFrame);
-        virtual std::vector<Packet*> dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+        virtual std::vector<Packet*> dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame);
 
     public:
         virtual ~RecipientMacDataService();
 
-        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame) override;
-        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) override;
+        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame) override;
+        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) override;
         virtual std::vector<Packet*> controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame) override;
 
 };

@@ -40,7 +40,7 @@ QoSAckHandler::Status& QoSAckHandler::getMgmtOrNonQoSAckStatus(const Key& id)
     return it->second;
 }
 
-QoSAckHandler::Status QoSAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+QoSAckHandler::Status QoSAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     auto id = std::make_pair(frame->getReceiverAddress(), SequenceControlField(frame->getSequenceNumber(), frame->getFragmentNumber()));
     auto it = mgmtAckStatuses.find(id);
@@ -52,7 +52,7 @@ QoSAckHandler::Status QoSAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<Ieee8021
 }
 
 
-QoSAckHandler::Status QoSAckHandler::getQoSDataAckStatus(const Ptr<Ieee80211DataFrame>& frame)
+QoSAckHandler::Status QoSAckHandler::getQoSDataAckStatus(const Ptr<Ieee80211DataHeader>& frame)
 {
     auto id = std::make_pair(frame->getReceiverAddress(), std::make_pair(frame->getTid(), SequenceControlField(frame->getSequenceNumber(), frame->getFragmentNumber())));
     auto it = ackStatuses.find(id);
@@ -63,10 +63,10 @@ QoSAckHandler::Status QoSAckHandler::getQoSDataAckStatus(const Ptr<Ieee80211Data
     return it->second;
 }
 
-void QoSAckHandler::processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtFrame>& ackedFrame)
+void QoSAckHandler::processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame)
 {
     if (ackedFrame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(ackedFrame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(ackedFrame);
         auto id = std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())));
         Status &status = getQoSDataAckStatus(id);
         if (status == Status::FRAME_NOT_YET_TRANSMITTED)
@@ -81,10 +81,10 @@ void QoSAckHandler::processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const 
     }
 }
 
-void QoSAckHandler::processFailedFrame(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+void QoSAckHandler::processFailedFrame(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
     if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtFrame);
         ASSERT(getQoSDataAckStatus(dataFrame) == Status::WAITING_FOR_NORMAL_ACK);
         auto id = std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())));
         Status &status = getQoSDataAckStatus(id);
@@ -140,10 +140,10 @@ std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> QoSAckHand
     return ackedFrames;
 }
 
-void QoSAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+void QoSAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     if (frame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
         auto id = std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())));
         switch (dataFrame->getAckPolicy()) {
             case NORMAL_ACK : ackStatuses[id] = Status::WAITING_FOR_NORMAL_ACK; break;
@@ -184,11 +184,11 @@ void QoSAckHandler::processTransmittedBlockAckReq(const Ptr<Ieee80211BlockAckReq
     //printAckStatuses();
 }
 
-bool QoSAckHandler::isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+bool QoSAckHandler::isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     QoSAckHandler::Status status;
     if (frame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
         status = getQoSDataAckStatus(dataFrame);
     }
     else
@@ -196,10 +196,10 @@ bool QoSAckHandler::isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtFrame>& fr
     return status == QoSAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED || status == QoSAckHandler::Status::NORMAL_ACK_NOT_ARRIVED || status == QoSAckHandler::Status::FRAME_NOT_YET_TRANSMITTED;
 }
 
-bool QoSAckHandler::isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
+bool QoSAckHandler::isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
     if (frame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
         auto status = getQoSDataAckStatus(dataFrame);
         return status == QoSAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED;
     }
@@ -207,10 +207,10 @@ bool QoSAckHandler::isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtFrame>& fram
         return false;
 }
 
-void QoSAckHandler::frameGotInProgress(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame)
+void QoSAckHandler::frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame)
 {
     if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS) {
-        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame);
+        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtFrame);
         auto id = std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())));
         Status& status = getQoSDataAckStatus(id);
         ASSERT(status != Status::WAITING_FOR_NORMAL_ACK && status != Status::BLOCK_ACK_NOT_YET_REQUESTED && status != Status::WAITING_FOR_BLOCK_ACK);

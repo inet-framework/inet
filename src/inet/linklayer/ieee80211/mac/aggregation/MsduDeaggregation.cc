@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataFrame>& frame, const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataFrame>& aMsduFrame)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataHeader>& aMsduFrame)
 {
     bool toDS = aMsduFrame->getToDS();
     bool fromDS = aMsduFrame->getFromDS();
@@ -55,7 +55,7 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataFrame>& f
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
     std::vector<Packet *> *frames = new std::vector<Packet *>();
-    const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataFrame>();
+    const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataHeader>();
     aggregatedFrame->popTrailer<Ieee80211MacTrailer>();
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
@@ -69,7 +69,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
         auto frame = new Packet();
         frame->append(msdu);
-        auto header = std::make_shared<Ieee80211DataFrame>();
+        auto header = std::make_shared<Ieee80211DataHeader>();
         // dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
         header->setType(ST_DATA);
         header->setTransmitterAddress(msduSubframeHeader->getSa());
