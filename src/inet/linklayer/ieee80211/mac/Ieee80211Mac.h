@@ -47,6 +47,7 @@ class Ieee80211Frame;
 class INET_API Ieee80211Mac : public MACProtocolBase
 {
   protected:
+    FcsMode fcsMode;
     MACAddress address;
 
     IRx *rx = nullptr;

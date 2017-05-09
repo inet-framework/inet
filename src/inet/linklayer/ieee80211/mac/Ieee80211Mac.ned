@@ -94,6 +94,7 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         string modeSet @enum("a","b","g","n","p") = default("g");
+        string fcsMode @enum("declared","computed") = default("declared");
 
         bool qosStation = default(false);
 

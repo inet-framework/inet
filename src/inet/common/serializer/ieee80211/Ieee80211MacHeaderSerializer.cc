@@ -670,8 +670,8 @@ void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const 
 {
     const auto& macTrailer = std::dynamic_pointer_cast<Ieee80211MacTrailer>(chunk);
     auto fcsMode = macTrailer->getFcsMode();
-//    if (fcsMode != CRC_COMPUTED)
-//        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
+    if (fcsMode != FCS_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
     stream.writeUint32Be(macTrailer->getFcs());
 }
 
@@ -680,7 +680,7 @@ Ptr<Chunk> Ieee80211MacTrailerSerializer::deserialize(MemoryInputStream& stream)
     auto macTrailer = std::make_shared<Ieee80211MacTrailer>();
     auto fcs = stream.readUint32Be();
     macTrailer->setFcs(fcs);
-    macTrailer->setFcsMode(CRC_COMPUTED);
+    macTrailer->setFcsMode(FCS_COMPUTED);
     return macTrailer;
 }
 

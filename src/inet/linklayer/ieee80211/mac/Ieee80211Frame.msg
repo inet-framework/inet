@@ -24,12 +24,9 @@ cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
-#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
-
-enum CrcMode;
 
 class noncobject MACAddress;
 class noncobject BitVector;
@@ -100,11 +97,16 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
+enum FcsMode {
+    FCS_DECLARED = 1;
+    FCS_COMPUTED = 2;
+}
+
 class Ieee80211MacTrailer extends FieldsChunk
 {
     chunkLength = byte(4);
     uint32_t fcs = 0;
-    int fcsMode @enum(CrcMode) = -1;
+    int fcsMode @enum(FcsMode) = -1;
 }
 
 //
