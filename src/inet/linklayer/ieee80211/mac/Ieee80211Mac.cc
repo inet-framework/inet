@@ -275,9 +275,9 @@ void Ieee80211Mac::sendUp(cMessage *msg)
     MACProtocolBase::sendUp(msg);
 }
 
-void Ieee80211Mac::sendFrame(Packet *frame)
+void Ieee80211Mac::sendDownFrame(Packet *frame)
 {
-    Enter_Method("sendFrame(\"%s\")", frame->getName());
+    Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);

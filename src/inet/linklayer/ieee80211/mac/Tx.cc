@@ -93,7 +93,7 @@ void Tx::handleMessage(cMessage *msg)
         EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
         durationField = header->getDuration();
-        mac->sendFrame(frame->dup());
+        mac->sendDownFrame(frame->dup());
         if (hasGUI())
             refreshDisplay();
     }
