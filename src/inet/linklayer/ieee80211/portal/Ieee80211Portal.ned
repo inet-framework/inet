@@ -17,9 +17,9 @@
 
 package inet.linklayer.ieee80211.portal;
 
-import inet.linklayer.ieee802.IIeee802Llc;
+import inet.linklayer.ieee8022.IIeee8022Llc;
 
-simple Ieee80211Portal like IIeee802Llc
+simple Ieee80211Portal like IIeee8022Llc
 {
     parameters:
         @display("i=block/layer");

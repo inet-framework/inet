@@ -23,7 +23,7 @@ namespace inet;
 
 class FieldsChunk extends cObject;
 
-class Ieee802LlcHeader extends FieldsChunk
+class Ieee8022LlcHeader extends FieldsChunk
 {
     chunkLength = byte(3);
     short dsap = -1;
@@ -31,7 +31,7 @@ class Ieee802LlcHeader extends FieldsChunk
     int control = -1;
 }
 
-class Ieee802SnapHeader extends Ieee802LlcHeader
+class Ieee8022SnapHeader extends Ieee8022LlcHeader
 {
     chunkLength = byte(8);
     dsap = 0xAA;

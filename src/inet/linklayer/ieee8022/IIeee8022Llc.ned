@@ -15,26 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE802LLC_H
-#define __INET_IEEE802LLC_H
+package inet.linklayer.ieee8022;
 
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
-
-namespace inet {
-
-class INET_API Ieee802Llc : public cSimpleModule
+moduleinterface IIeee8022Llc
 {
-  protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual void encapsulate(Packet *frame);
-    virtual void decapsulate(Packet *frame);
-};
-
-} // namespace inet
-
-#endif // ifndef __INET_IEEE802LLC_H
-
+    parameters:
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
+}

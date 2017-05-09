@@ -15,15 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee802;
+#ifndef __INET_IEEE8022LLCHEADERSERIALIZER_H
+#define __INET_IEEE8022LLCHEADERSERIALIZER_H
 
-moduleinterface IIeee802Llc
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+
+namespace inet {
+
+namespace serializer {
+
+class INET_API Ieee8022LlcHeaderSerializer : public FieldsChunkSerializer
 {
-    parameters:
-        @display("i=block/layer");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-}
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    Ieee8022LlcHeaderSerializer() : FieldsChunkSerializer() {}
+};
+
+} // namespace serializer
+
+} // namespace inet
+
+#endif // ifndef __INET_IEEE8022LLCHEADERSERIALIZER_H
+

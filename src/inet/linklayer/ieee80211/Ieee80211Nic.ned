@@ -19,11 +19,12 @@ package inet.linklayer.ieee80211;
 
 import inet.linklayer.common.IIeee8021dQoSClassifier;
 import inet.linklayer.contract.IWirelessNic;
-import inet.linklayer.ieee802.IIeee802Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.physicallayer.contract.packetlevel.IRadio;
+
 
 //
 // This NIC implements an 802.11 network interface card.
@@ -42,7 +43,7 @@ module Ieee80211Nic like IWirelessNic
         string interfaceTableModule;
         string energySourceModule = default("");
         string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID
-        string llcType = default("Ieee802Llc");
+        string llcType = default("Ieee8022Llc");
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
         string macType = default("Ieee80211CompatibleMac");   // choose from Ieee80211OldMac, Ieee80211Mac, Ieee80211CompatibleMac
@@ -66,7 +67,7 @@ module Ieee80211Nic like IWirelessNic
             parameters:
                 @display("p=100,100;is=s");
         }
-        llc: <llcType> like IIeee802Llc {
+        llc: <llcType> like IIeee8022Llc {
             parameters:
                 @display("p=250,100");
         }

@@ -17,7 +17,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
 
@@ -65,15 +65,15 @@ void Ieee80211Portal::encapsulate(Packet *packet)
     packet->removePoppedChunks();
     packet->ensureTag<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->ensureTag<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
-    const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
-    ieee802SnapHeader->setOui(0);
+    const auto& ieee8022SnapHeader = std::make_shared<Ieee8022SnapHeader>();
+    ieee8022SnapHeader->setOui(0);
     if (const auto& eth2frame = std::dynamic_pointer_cast<EthernetIIFrame>(ethernetHeader))
-        ieee802SnapHeader->setProtocolId(eth2frame->getEtherType());
+        ieee8022SnapHeader->setProtocolId(eth2frame->getEtherType());
     else if (const auto& snapframe = std::dynamic_pointer_cast<EtherFrameWithSNAP>(ethernetHeader))
-        ieee802SnapHeader->setProtocolId(snapframe->getLocalcode());
+        ieee8022SnapHeader->setProtocolId(snapframe->getLocalcode());
     else
         throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethernetHeader->getClassName());
-    packet->insertHeader(ieee802SnapHeader);
+    packet->insertHeader(ieee8022SnapHeader);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
@@ -83,12 +83,12 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
     packet->removePoppedChunks();
-    const auto& ieee802SnapHeader = packet->removeHeader<Ieee802SnapHeader>();
+    const auto& ieee8022SnapHeader = packet->removeHeader<Ieee8022SnapHeader>();
 
     const auto& ethernetHeader = std::make_shared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
     ethernetHeader->setSrc(packet->getTag<MacAddressInd>()->getSrcAddress());
     ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
-    ethernetHeader->setEtherType(ieee802SnapHeader->getProtocolId());
+    ethernetHeader->setEtherType(ieee8022SnapHeader->getProtocolId());
     ethernetHeader->setChunkLength(byte(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
     packet->insertHeader(ethernetHeader);
 

@@ -16,23 +16,23 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/ieee802/Ieee802LlcHeaderSerializer.h"
-#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
+#include "inet/common/serializer/ieee8022/Ieee8022LlcHeaderSerializer.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
 
 namespace serializer {
 
-Register_Serializer(Ieee802LlcHeader, Ieee802LlcHeaderSerializer);
-Register_Serializer(Ieee802SnapHeader, Ieee802LlcHeaderSerializer);
+Register_Serializer(Ieee8022LlcHeader, Ieee8022LlcHeaderSerializer);
+Register_Serializer(Ieee8022SnapHeader, Ieee8022LlcHeaderSerializer);
 
-void Ieee802LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
-    const auto& llcHeader = CHK(std::dynamic_pointer_cast<const Ieee802LlcHeader>(chunk));
+    const auto& llcHeader = CHK(std::dynamic_pointer_cast<const Ieee8022LlcHeader>(chunk));
     stream.writeByte(llcHeader->getSsap());
     stream.writeByte(llcHeader->getDsap());
     stream.writeByte(llcHeader->getControl());
-    if (auto snapHeader = std::dynamic_pointer_cast<const Ieee802SnapHeader>(chunk)) {
+    if (auto snapHeader = std::dynamic_pointer_cast<const Ieee8022SnapHeader>(chunk)) {
         stream.writeByte(snapHeader->getOui() >> 16);
         stream.writeByte(snapHeader->getOui() >> 8);
         stream.writeByte(snapHeader->getOui());
@@ -40,20 +40,20 @@ void Ieee802LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     }
 }
 
-Ptr<Chunk> Ieee802LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    Ptr<Ieee802LlcHeader> llcHeader = nullptr;
+    Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();
     uint8_t dsap = stream.readByte();
     uint8_t ctrl = stream.readByte();
     if (dsap == 0xAA && ssap == 0xAA) { // snap frame
-        auto snapHeader = std::make_shared<Ieee802SnapHeader>();
+        auto snapHeader = std::make_shared<Ieee8022SnapHeader>();
         snapHeader->setOui(((uint32_t)stream.readByte() << 16) + stream.readUint16Be());
         snapHeader->setProtocolId(stream.readUint16Be());
         llcHeader = snapHeader;
     }
     else
-        llcHeader = std::make_shared<Ieee802LlcHeader>();
+        llcHeader = std::make_shared<Ieee8022LlcHeader>();
     llcHeader->setDsap(dsap);
     llcHeader->setSsap(ssap);
     llcHeader->setControl(ctrl);

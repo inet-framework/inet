@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee802;
+package inet.linklayer.ieee8022;
 
-simple Ieee802Llc like IIeee802Llc
+simple Ieee8022Llc like IIeee8022Llc
 {
     parameters:
         @display("i=block/layer");

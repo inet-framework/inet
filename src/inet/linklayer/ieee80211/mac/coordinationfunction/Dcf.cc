@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -304,8 +304,8 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
         // KLUDGE: removed headers and trailers to allow higher layer protocols to process the packet
         packet->popHeader<Ieee80211DataOrMgmtHeader>();
         const auto& nextHeader = packet->peekHeader();
-        if (std::dynamic_pointer_cast<Ieee802LlcHeader>(nextHeader))
-            packet->popHeader<Ieee802LlcHeader>();
+        if (std::dynamic_pointer_cast<Ieee8022LlcHeader>(nextHeader))
+            packet->popHeader<Ieee8022LlcHeader>();
         packet->popTrailer<Ieee80211MacTrailer>();
         emit(NF_PACKET_DROP, packet);
         emit(NF_LINK_BREAK, packet);
