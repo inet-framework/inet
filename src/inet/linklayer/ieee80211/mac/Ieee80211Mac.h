@@ -104,6 +104,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual const MACAddress& getAddress() const { return address; }
     virtual void sendUp(cMessage *message) override;
+    virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
 };

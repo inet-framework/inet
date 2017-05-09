@@ -593,7 +593,7 @@ void Hcf::sendUp(const std::vector<Packet*>& completeFrames)
         // FIXME: mgmt module does not handle addba req ..
         const auto& header = frame->peekHeader<Ieee80211DataOrMgmtFrame>();
         if (!std::dynamic_pointer_cast<Ieee80211AddbaRequest>(header) && !std::dynamic_pointer_cast<Ieee80211AddbaResponse>(header) && !std::dynamic_pointer_cast<Ieee80211Delba>(header))
-            mac->sendUp(frame);
+            mac->sendUpFrame(frame);
     }
 }
 

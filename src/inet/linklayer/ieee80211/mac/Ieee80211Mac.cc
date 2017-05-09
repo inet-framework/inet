@@ -271,8 +271,18 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 {
     Enter_Method("sendUp(\"%s\")", msg->getName());
     take(msg);
-    decapsulate(check_and_cast<Packet *>(msg));
     MACProtocolBase::sendUp(msg);
+}
+
+void Ieee80211Mac::sendUpFrame(Packet *frame)
+{
+    Enter_Method("sendUpFrame(\"%s\")", frame->getName());
+    const auto& header = frame->peekHeader<Ieee80211DataOrMgmtFrame>();
+    decapsulate(frame);
+    if (!(header->getType() & 0x30))
+        send(frame, "mgmtOut");
+    else
+        ds->processDataFrame(frame, std::dynamic_pointer_cast<Ieee80211DataFrame>(header));
 }
 
 void Ieee80211Mac::sendDownFrame(Packet *frame)
