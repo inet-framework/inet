@@ -26,7 +26,7 @@ Register_Serializer(Ieee80211Frame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataOrMgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MgmtHeader, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211MsduSubframeHeader, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211ACKFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211RTSFrame, Ieee80211MacHeaderSerializer);
@@ -98,7 +98,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // Last One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
     }
-    else if (auto msduSubframe = std::dynamic_pointer_cast<Ieee80211MsduSubframe>(chunk))
+    else if (auto msduSubframe = std::dynamic_pointer_cast<Ieee80211MsduSubframeHeader>(chunk))
     {
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());

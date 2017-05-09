@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 Register_Class(MsduAggregation);
 
-void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataHeader>& frame)
+void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& frame)
 {
     // Note: Addr1 (RA), Addr2 (TA)
     // Table 8-19—Address field contents
@@ -66,7 +66,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     auto aggregatedFrame = new Packet("A-MSDU");
     for (int i = 0; i < (int)frames->size(); i++)
     {
-        auto msduSubframeHeader = std::make_shared<Ieee80211MsduSubframe>();
+        auto msduSubframeHeader = std::make_shared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popHeader<Ieee80211DataHeader>();
         frame->popTrailer<Ieee80211MacTrailer>();

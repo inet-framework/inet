@@ -233,7 +233,7 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
     //short action @enum(WirelessNetworkManagementAction); // action TODO: remove it
 }
 
-class Ieee80211MsduSubframe extends FieldsChunk
+class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
     chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER);
     MACAddress sa; // source addr.

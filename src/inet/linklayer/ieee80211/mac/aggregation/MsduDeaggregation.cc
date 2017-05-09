@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataHeader>& aMsduFrame)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& aMsduFrame)
 {
     bool toDS = aMsduFrame->getToDS();
     bool fromDS = aMsduFrame->getFromDS();
@@ -62,11 +62,11 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     while (aggregatedFrame->getDataLength() > bit(0))
     {
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + byte(paddingLength == 4 ? 0 : paddingLength));
-        const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframe>();
+        const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframeHeader>();
         const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength()));
         paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
-        // TODO: review, restore snap header, see Ieee80211MsduSubframe
+        // TODO: review, restore snap header, see Ieee80211MsduSubframeHeader
         auto frame = new Packet();
         frame->append(msdu);
         auto header = std::make_shared<Ieee80211DataHeader>();
