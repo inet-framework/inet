@@ -509,9 +509,6 @@ IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, Packe
     radioFrame->setName(packet->getName());
     radioFrame->setDuration(transmission->getDuration());
     radioFrame->encapsulate(packet);
-    // KLUDGE: temporary kludge to pass fingerprint tests
-    if (dynamic_cast<const LayeredTransmission *>(transmission) == nullptr)
-        radioFrame->setBitLength(radioFrame->getBitLength() - bit(packet->peekHeader<FieldsChunk>()->getChunkLength()).get());
     return radioFrame;
 }
 
@@ -522,9 +519,6 @@ IRadioFrame *RadioMedium::createReceiverRadioFrame(const ITransmission *transmis
     radioFrame->setName(packet->getName());
     radioFrame->setDuration(transmission->getDuration());
     radioFrame->encapsulate(packet->dup());
-    // KLUDGE: temporary kludge to pass fingerprint tests
-    if (dynamic_cast<const LayeredTransmission *>(transmission) == nullptr)
-        radioFrame->setBitLength(radioFrame->getBitLength() - bit(packet->peekHeader<FieldsChunk>()->getChunkLength()).get());
     return radioFrame;
 }
 
