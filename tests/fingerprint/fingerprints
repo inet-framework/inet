@@ -35,7 +35,7 @@ sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/networks"
 inetLib = inetRoot + "/src/INET"
 opp_run = "opp_run"
-cpuTimeLimit = "300s"
+cpuTimeLimit = "30000s"
 logFile = "test.out"
 extraOppRunArgs = ""
 exitCode = 0
