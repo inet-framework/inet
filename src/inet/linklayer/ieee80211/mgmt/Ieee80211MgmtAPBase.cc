@@ -22,7 +22,6 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
 #ifdef WITH_ETHERNET

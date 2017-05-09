@@ -282,7 +282,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
 
 Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
 {
-    switch(0) // TODO:
+    switch(0) // TODO: receive and dispatch on type_info parameter
     {
         case 0xB0: // ST_AUTHENTICATION
         {

@@ -17,7 +17,6 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ieee80211/Ieee80211MacHeaderSerializer.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
 
 namespace inet {
 
