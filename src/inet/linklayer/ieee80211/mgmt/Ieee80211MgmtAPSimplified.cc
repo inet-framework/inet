@@ -30,11 +30,6 @@ Define_Module(Ieee80211MgmtAPSimplified);
 
 // FIXME add sequence number handling
 
-void Ieee80211MgmtAPSimplified::initialize(int stage)
-{
-    Ieee80211MgmtAPBase::initialize(stage);
-}
-
 void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
 {
     ASSERT(false);

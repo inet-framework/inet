@@ -18,8 +18,6 @@
 #ifndef __INET_IEEE80211MGMTAPSIMPLIFIED_H
 #define __INET_IEEE80211MGMTAPSIMPLIFIED_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
 namespace inet {
@@ -37,7 +35,6 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int) override;
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;
