@@ -53,7 +53,8 @@ void Ieee80211Mac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        qosSta = par("qosStation");
+        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
+        mib->qos = par("qosStation");
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
@@ -139,7 +140,7 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
         processLowerFrame(packet, frame);
     }
     else { // corrupted frame received
-        if (qosSta)
+        if (mib->qos)
             hcf->corruptedFrameReceived();
         else
             dcf->corruptedFrameReceived();
@@ -308,7 +309,7 @@ void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMg
     take(packet);
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << "\n";
     ASSERT(!frame->getReceiverAddress().isUnspecified());
-    if (qosSta)
+    if (mib->qos)
         hcf->processUpperFrame(packet, frame);
     else
         dcf->processUpperFrame(packet, frame);
@@ -318,7 +319,7 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& 
 {
     Enter_Method("processLowerFrame(\"%s\")", frame->getName());
     take(packet);
-    if (qosSta)
+    if (mib->qos)
         hcf->processLowerFrame(packet, frame);
     else
         dcf->processLowerFrame(packet, frame);

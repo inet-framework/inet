@@ -48,7 +48,6 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 {
   protected:
     MACAddress address;
-    bool qosSta = false;
 
     IRx *rx = nullptr;
     ITx *tx = nullptr;
