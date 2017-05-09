@@ -544,7 +544,7 @@ int Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
-    const auto& requestBody = packet->peekDataAt<Ieee80211AuthenticationFrame>(frame->getChunkLength());
+    const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     MACAddress address = frame->getTransmitterAddress();
     int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Received Authentication frame from address=" << address << ", seqNum=" << frameAuthSeq << "\n";
@@ -655,7 +655,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Packet *packet, const Ptr<
     }
 
     // extract frame contents
-    const auto& responseBody = packet->peekDataAt<Ieee80211AssociationResponseFrame>(frame->getChunkLength());
+    const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     MACAddress address = frame->getTransmitterAddress();
     int statusCode = responseBody->getStatusCode();
     //XXX short aid;
@@ -760,7 +760,7 @@ void Ieee80211MgmtSTA::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee802
 void Ieee80211MgmtSTA::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     EV << "Received Probe Response frame\n";
-    const auto& probeResponseBody = packet->peekDataAt<Ieee80211ProbeResponseFrame>(frame->getChunkLength());
+    const auto& probeResponseBody = packet->peekData<Ieee80211ProbeResponseFrame>();
     storeAPInfo(frame->getTransmitterAddress(), probeResponseBody);
     delete packet;
 }

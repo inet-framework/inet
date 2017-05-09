@@ -136,7 +136,7 @@ void Ieee80211MgmtAP::sendBeacon()
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
-    const auto& requestBody = packet->peekDataAt<Ieee80211AuthenticationFrame>(frame->getChunkLength());
+    const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
@@ -311,7 +311,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
 {
     EV << "Processing ProbeRequest frame\n";
 
-    const auto& requestBody = packet->peekDataAt<Ieee80211ProbeRequestFrame>(frame->getChunkLength());
+    const auto& requestBody = packet->peekData<Ieee80211ProbeRequestFrame>();
     if (strcmp(requestBody->getSSID(), "") != 0 && strcmp(requestBody->getSSID(), ssid.c_str()) != 0) {
         EV << "SSID `" << requestBody->getSSID() << "' does not match, ignoring frame\n";
         dropManagementFrame(packet);
