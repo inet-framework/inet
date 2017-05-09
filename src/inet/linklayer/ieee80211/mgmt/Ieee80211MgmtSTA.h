@@ -167,7 +167,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
 
     /** Utility function: sends a management frame */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& address);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& body, int subtype, const MACAddress& address);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;

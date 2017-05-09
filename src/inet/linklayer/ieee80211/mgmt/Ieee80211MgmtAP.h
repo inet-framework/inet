@@ -101,7 +101,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     virtual STAInfo *lookupSenderSTA(const Ptr<Ieee80211ManagementHeader>& frame);
 
     /** Utility function: set fields in the given frame and send it out to the address */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& destAddr);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& body, int subtype, const MACAddress& destAddr);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();

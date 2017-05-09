@@ -233,16 +233,13 @@ void Ieee80211MgmtSTA::beaconLost()
     emit(NF_L2_BEACON_LOST, myIface);
 }
 
-void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& address)
+void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& body, int subtype, const MACAddress& address)
 {
-    // frame goes to the specified AP
-    frame->setReceiverAddress(address);
-    //XXX set sequenceNumber?
-    frame->markImmutable();
     auto packet = new Packet(name);
+    packet->ensureTag<MacAddressReq>()->setDestAddress(address);
+    packet->ensureTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     body->markImmutable();
     packet->append(body);
-    packet->insertHeader(frame);
     sendDown(packet);
 }
 
@@ -258,13 +255,10 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
     EV << "Sending initial Authentication frame with seqNum=1\n";
 
     // create and send first authentication frame
-    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
-    frame->setType(ST_AUTHENTICATION);
     const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
     body->setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
-    frame->setChunkLength(byte(24));
-    sendManagementFrame("Auth", frame, body, ap->address);
+    sendManagementFrame("Auth", body, ST_AUTHENTICATION, ap->address);
 
     ap->authSeqExpected = 2;
 
@@ -286,8 +280,6 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     changeChannel(ap->channel);
 
     // create and send association request
-    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
-    frame->setType(ST_ASSOCIATIONREQUEST);
     const auto& body = std::make_shared<Ieee80211AssociationRequestFrame>();
 
     //XXX set the following too?
@@ -295,8 +287,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     // Ieee80211SupportedRatesElement supportedRates;
 
     body->setChunkLength(byte(2 + 2 + strlen(body->getSSID()) + 2 + body->getSupportedRates().numRates + 2));
-    frame->setChunkLength(byte(24));
-    sendManagementFrame("Assoc", frame, body, ap->address);
+    sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
 
     // schedule timeout
     ASSERT(assocTimeoutMsg == nullptr);
@@ -416,13 +407,10 @@ bool Ieee80211MgmtSTA::scanNextChannel()
 void Ieee80211MgmtSTA::sendProbeRequest()
 {
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
-    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
-    frame->setType(ST_PROBEREQUEST);
     const auto& body = std::make_shared<Ieee80211ProbeRequestFrame>();
     body->setSSID(scanning.ssid.c_str());
     body->setChunkLength(byte((2 + scanning.ssid.length()) + (2 + body->getSupportedRates().numRates)));
-    frame->setChunkLength(byte(24));
-    sendManagementFrame("ProbeReq", frame, body, scanning.bssid);
+    sendManagementFrame("ProbeReq", body, ST_PROBEREQUEST, scanning.bssid);
 }
 
 void Ieee80211MgmtSTA::sendScanConfirm()
@@ -477,12 +465,9 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     }
 
     // create and send deauthentication request
-    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
-    frame->setType(ST_DEAUTHENTICATION);
     const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
     body->setReasonCode(ctrl->getReasonCode());
-    frame->setChunkLength(byte(24));
-    sendManagementFrame("Deauth", frame, body, address);
+    sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, address);
 }
 
 void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
@@ -515,12 +500,9 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     }
 
     // create and send disassociation request
-    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
-    frame->setType(ST_DISASSOCIATION);
     const auto& body = std::make_shared<Ieee80211DisassociationFrame>();
     body->setReasonCode(ctrl->getReasonCode());
-    frame->setChunkLength(byte(24));
-    sendManagementFrame("Disass", frame, body, address);
+    sendManagementFrame("Disass", body, ST_DISASSOCIATION, address);
 }
 
 void Ieee80211MgmtSTA::disassociate()
@@ -590,12 +572,9 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
     if (frameAuthSeq != ap->authSeqExpected) {
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
-        const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
-        resp->setType(ST_AUTHENTICATION);
         const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        resp->setChunkLength(byte(24));
-        sendManagementFrame("Auth-ERROR", resp, body, frame->getTransmitterAddress());
+        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, frame->getTransmitterAddress());
         delete packet;
 
         // cancel timeout, send error to agent
@@ -612,14 +591,11 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
         EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
-        const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
-        resp->setType(ST_AUTHENTICATION);
         const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
         body->setSequenceNumber(frameAuthSeq + 1);
         body->setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
-        resp->setChunkLength(byte(24));
-        sendManagementFrame("Auth", resp, body, address);
+        sendManagementFrame("Auth", body, ST_AUTHENTICATION, address);
         ap->authSeqExpected += 2;
     }
     else {
