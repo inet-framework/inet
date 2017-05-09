@@ -28,6 +28,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
@@ -235,29 +236,28 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 
 void Ieee80211Mac::encapsulate(Packet *packet)
 {
-    // 1. Adhoc Data
+    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
+    auto destAddress = macAddressReq->getDestAddress();
     const auto& header = std::make_shared<Ieee80211DataFrame>();
-    header->setTransmitterAddress(address);
-    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
-
-//    // 2. STA Data or STA simplified Data
-//    header->setToDS(true);
-//    header->setReceiverAddress(apAddress);
-//    header->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
-//
-//    // 3. STA Mgmt
-//    header->setReceiverAddress(destAddress);
-//
-//    // 4. AP Data
-//    header->setFromDS(true);
-//    header->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getSrcAddress());
-//    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
-//
-//    // 5. AP Mgmt
-//    header->setReceiverAddress(destAddress);
-//    header->setAddress3(apAddress);
-
-    // common
+    header->setTransmitterAddress(mib->address);
+    if (mib->mode == Ieee80211Mib::INDEPENDENT)
+        header->setReceiverAddress(destAddress);
+    else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
+        if (mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+            header->setFromDS(true);
+            header->setAddress3(mib->address);
+            header->setReceiverAddress(destAddress);
+        }
+        else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
+            header->setToDS(true);
+            header->setReceiverAddress(mib->bssData.bssid);
+            header->setAddress3(destAddress);
+        }
+        else
+            throw cRuntimeError("Unknown station type");
+    }
+    else
+        throw cRuntimeError("Unknown mode");
     if (auto userPriorityReq = packet->getTag<UserPriorityReq>()) {
         // make it a QoS frame, and set TID
         header->setType(ST_DATA_WITH_QOS);
@@ -266,8 +266,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     }
     packet->insertHeader(header);
     const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
-    // TODO: add module parameter, implement fcs computing
-    // TODO: trailer->setFcsMode(FCS_COMPUTED);
+    trailer->setFcsMode(fcsMode);
     packet->insertTrailer(trailer);
 }
 
@@ -275,9 +274,26 @@ void Ieee80211Mac::decapsulate(Packet *packet)
 {
     const auto& header = packet->popHeader<Ieee80211DataOrMgmtFrame>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
-    macAddressInd->setSrcAddress(header->getTransmitterAddress());
-    macAddressInd->setDestAddress(header->getReceiverAddress());
-    if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataFrame>(header)) {
+    if (mib->mode == Ieee80211Mib::INDEPENDENT) {
+        macAddressInd->setSrcAddress(header->getTransmitterAddress());
+        macAddressInd->setDestAddress(header->getReceiverAddress());
+    }
+    else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
+        if (mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+            macAddressInd->setSrcAddress(header->getTransmitterAddress());
+            macAddressInd->setDestAddress(header->getAddress3());
+        }
+        else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
+            macAddressInd->setSrcAddress(header->getAddress3());
+            macAddressInd->setDestAddress(header->getReceiverAddress());
+        }
+        else
+            throw cRuntimeError("Unknown station type");
+    }
+    else
+        throw cRuntimeError("Unknown mode");
+    if (header->getType() == ST_DATA_WITH_QOS) {
+        auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataFrame>(header);
         int tid = dataHeader->getTid();
         if (tid < 8)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);

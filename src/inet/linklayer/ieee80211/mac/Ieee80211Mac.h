@@ -79,11 +79,16 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual const MACAddress& isInterfaceRegistered();
 
+    virtual void handleMessageWhenUp(cMessage *message) override;
+
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
     virtual void handleUpperCommand(cMessage *msg) override;
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
+
+    /** @brief Handle packets from management */
+    virtual void handleMgmtPacket(Packet *packet);
 
     /** @brief Handle messages from upper layer */
     virtual void handleUpperPacket(cPacket *msg) override;
@@ -98,9 +103,6 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
 
-    virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
-    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
-
   public:
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
@@ -110,6 +112,9 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+
+    virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
 };
 
 } // namespace ieee80211
