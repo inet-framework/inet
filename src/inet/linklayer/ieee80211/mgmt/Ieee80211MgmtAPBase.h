@@ -18,8 +18,6 @@
 #ifndef __INET_IEEE80211MGMTAPBASE_H
 #define __INET_IEEE80211MGMTAPBASE_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
@@ -41,32 +39,6 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
-
-    /** Utility function for handleUpperMessage() */
-    virtual void encapsulate(Packet *msg);
-
-    /**
-     * Utility function: converts EtherFrame to Ieee80211Frame. This is needed
-     * because MACRelayUnit which we use for LAN bridging functionality deals
-     * with EtherFrames.
-     */
-    virtual void convertFromEtherFrame(Packet *packet);
-
-    /**
-     * Utility function: converts Ieee80211Frame to EtherFrame. This is needed
-     * because MACRelayUnit which we use for LAN bridging functionality deals
-     * with EtherFrames.
-     */
-    virtual void convertToEtherFrame(Packet *packet);
-
-    /**
-     * Utility function: send a frame to upperLayerOut.
-     * If convertToEtherFrameFlag is true, converts the given frame to EtherFrame, deleting the
-     * original frame, and send the converted frame.
-     * This function is needed for LAN bridging functionality:
-     * MACRelayUnit deals with EtherFrames.
-     */
-    virtual void sendToUpperLayer(Packet *packet);
 };
 
 } // namespace ieee80211
