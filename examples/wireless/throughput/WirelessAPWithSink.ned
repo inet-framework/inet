@@ -48,6 +48,7 @@ module WirelessAPWithSink
         wlan: Ieee80211Nic {
             parameters:
                 @display("p=169,231;q=queue");
+                llcType = default("Ieee80211Portal");
                 mgmtType = default("Ieee80211MgmtAPSimplified");
         }
         mobility: StationaryMobility {
