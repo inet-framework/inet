@@ -52,7 +52,6 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     Ieee80211Mib *mib = nullptr;
     IDs *ds = nullptr;
-    MACAddress address;
 
     IRx *rx = nullptr;
     ITx *tx = nullptr;
@@ -106,7 +105,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
 
-    virtual const MACAddress& getAddress() const { return address; }
+    virtual const MACAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);

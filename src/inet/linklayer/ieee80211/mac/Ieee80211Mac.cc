@@ -70,7 +70,7 @@ void Ieee80211Mac::initialize(int stage)
             par("address").setStringValue(MACAddress::generateAutoAddress().str().c_str());
             addressString = par("address");
         }
-        address.setAddress(addressString);
+        mib->address.setAddress(addressString);
         modeSet = Ieee80211ModeSet::getModeSet(par("modeSet").stringValue());
         const char *fcsModeString = par("fcsMode");
         if (!strcmp(fcsModeString, "declared"))
@@ -117,8 +117,8 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
     // address
-    e->setMACAddress(address);
-    e->setInterfaceToken(address.formInterfaceIdentifier());
+    e->setMACAddress(mib->address);
+    e->setInterfaceToken(mib->address.formInterfaceIdentifier());
     e->setMtu(par("mtu").longValue());
     // capabilities
     e->setBroadcast(true);
@@ -127,17 +127,60 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     return e;
 }
 
+void Ieee80211Mac::handleMessageWhenUp(cMessage *message)
+{
+    if (message->arrivedOn("mgmtIn")) {
+        if (!message->isPacket())
+            handleUpperCommand(message);
+        else
+            handleMgmtPacket(check_and_cast<Packet *>(message));
+    }
+    else
+        LayeredProtocolBase::handleMessageWhenUp(message);
+}
+
 void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 {
     ASSERT(false);
 }
 
+void Ieee80211Mac::handleMgmtPacket(Packet *packet)
+{
+    const auto& header = std::make_shared<Ieee80211ManagementHeader>();
+    header->setType(packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
+    header->setTransmitterAddress(mib->address);
+    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
+        header->setAddress3(mib->bssData.bssid);
+    packet->insertHeader(header);
+    const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
+    trailer->setFcsMode(fcsMode);
+    packet->insertTrailer(trailer);
+    processUpperFrame(packet, header);
+}
+
 void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::STATION && !mib->bssStationData.isAssociated) {
+        EV << "STA is not associated with an access point, discarding packet " << msg << "\n";
+        delete msg;
+        return;
+    }
     encapsulate(packet);
-    auto frame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
-    processUpperFrame(packet, frame);
+    const auto& header = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+    if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
+        auto receiverAddress = header->getReceiverAddress();
+        if (!receiverAddress.isMulticast()) {
+            auto it = mib->bssAccessPointData.stations.find(receiverAddress);
+            if (it == mib->bssAccessPointData.stations.end() || it->second != Ieee80211Mib::ASSOCIATED) {
+                EV << "STA with MAC address " << receiverAddress << " not associated with this AP, dropping frame\n";
+                delete packet;
+                return;
+            }
+        }
+    }
+    processUpperFrame(packet, header);
 }
 
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
