@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -39,9 +40,9 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
 {
   protected:
     // configuration
-    MACAddress myAddress;
     bool isOperational;    // for lifecycle
 
+    Ieee80211Mib *mib = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
     InterfaceEntry *myIface = nullptr;
 

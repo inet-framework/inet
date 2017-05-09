@@ -39,7 +39,7 @@ Register_Class(Ieee80211MgmtAP::NotificationInfoSta);
 
 static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
 {
-    os << "state:" << sta.status;
+    os << "address:" << sta.address;
     return os;
 }
 
@@ -339,7 +339,7 @@ void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee802
 void Ieee80211MgmtAP::sendAssocNotification(const MACAddress& addr)
 {
     NotificationInfoSta notif;
-    notif.setApAddress(myAddress);
+    notif.setApAddress(mib->address);
     notif.setStaAddress(addr);
     emit(NF_L2_AP_ASSOCIATED, &notif);
 }
@@ -347,7 +347,7 @@ void Ieee80211MgmtAP::sendAssocNotification(const MACAddress& addr)
 void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress& addr)
 {
     NotificationInfoSta notif;
-    notif.setApAddress(myAddress);
+    notif.setApAddress(mib->address);
     notif.setStaAddress(addr);
     emit(NF_L2_AP_DISASSOCIATED, &notif);
 }

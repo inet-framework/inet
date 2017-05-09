@@ -31,6 +31,7 @@ namespace ieee80211 {
 void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
         WATCH(numMgmtFramesReceived);
@@ -43,7 +44,6 @@ void Ieee80211MgmtBase::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         // obtain our address from MAC
         cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
-        myAddress.setAddress(mac->par("address").stringValue());
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
     }
