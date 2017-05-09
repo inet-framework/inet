@@ -18,14 +18,11 @@
 package inet.linklayer.ieee80211.mac;
 
 import inet.linklayer.ieee80211.IIeee80211Mac;
-import inet.linklayer.ieee80211.mac.contract.IRateControl;
-import inet.linklayer.ieee80211.mac.contract.IRateSelection;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 import inet.linklayer.ieee80211.mac.contract.IStatistics;
 import inet.linklayer.ieee80211.mac.contract.ITx;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
-
 
 // near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
 module LayeredProtocolBase
@@ -120,19 +117,23 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         }
         hcf: Hcf {
             parameters:
-                @display("p=200,100");
+                @display("p=250,100");
+        }
+        ds: Ds {
+            parameters:
+                @display("p=400,100");
         }
         rx: <default("Rx")> like IRx {
             parameters:
-                @display("p=100,200");
+                @display("p=100,250");
         }
         tx: <default("Tx")> like ITx {
             parameters:
-                @display("p=200,200");
+                @display("p=250,250");
         }
         statistics: <default("BasicStatistics")> like IStatistics {
             parameters:
-                @display("p=300,100");
+                @display("p=400,250");
         }
 }
 

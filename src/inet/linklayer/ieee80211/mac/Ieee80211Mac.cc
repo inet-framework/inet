@@ -61,6 +61,7 @@ void Ieee80211Mac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
+        ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         const char *addressString = par("address");
