@@ -33,6 +33,9 @@ Define_Module(Ieee80211MgmtAdhoc);
 void Ieee80211MgmtAdhoc::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        mib->mode = Ieee80211Mib::INDEPENDENT;
+    }
 }
 
 void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)

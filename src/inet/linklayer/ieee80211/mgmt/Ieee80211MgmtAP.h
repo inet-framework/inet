@@ -37,14 +37,10 @@ namespace ieee80211 {
 class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
 {
   public:
-    /** State of a STA */
-    enum STAStatus { NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED };
-
     /** Describes a STA */
     struct STAInfo
     {
         MACAddress address;
-        STAStatus status;
         int authSeqExpected;    // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX association should expire after a while if STA is silent?

@@ -18,8 +18,6 @@
 #ifndef __INET_IEEE80211MGMTSTASIMPLIFIED_H
 #define __INET_IEEE80211MGMTSTASIMPLIFIED_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
 namespace inet {
@@ -35,11 +33,6 @@ namespace ieee80211 {
  */
 class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
 {
-  protected:
-    // associate AP information
-    MACAddress accessPointAddress;
-    int receiveSequence;
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;

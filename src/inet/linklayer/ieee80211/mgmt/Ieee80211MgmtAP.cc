@@ -146,7 +146,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
         MACAddress staAddress = frame->getTransmitterAddress();
         sta = &staList[staAddress];    // this implicitly creates a new entry
         sta->address = staAddress;
-        sta->status = NOT_AUTHENTICATED;
+        mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
 
@@ -158,9 +158,9 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     // receives authentication frame number 1 from STA, which will cause the AP to return an Auth-Error
     // making the MN STA to start the handover process all over again.
     if (frameAuthSeq == 1) {
-        if (sta->status == ASSOCIATED)
+        if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED)
             sendDisAssocNotification(sta->address);
-        sta->status = NOT_AUTHENTICATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
 
@@ -193,9 +193,9 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
 
     // update status
     if (isLast) {
-        if (sta->status == ASSOCIATED)
+        if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED)
             sendDisAssocNotification(sta->address);
-        sta->status = AUTHENTICATED;    // XXX only when ACK of this frame arrives
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;    // XXX only when ACK of this frame arrives
         EV << "STA authenticated\n";
     }
     else {
@@ -213,9 +213,9 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee
 
     if (sta) {
         // mark STA as not authenticated; alternatively, it could also be removed from staList
-        if (sta->status == ASSOCIATED)
+        if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED)
             sendDisAssocNotification(sta->address);
-        sta->status = NOT_AUTHENTICATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
 }
@@ -226,7 +226,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
 
     // "11.3.2 AP association procedures"
     STAInfo *sta = lookupSenderSTA(frame);
-    if (!sta || sta->status == NOT_AUTHENTICATED) {
+    if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
@@ -238,9 +238,9 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     delete packet;
 
     // mark STA as associated
-    if (sta->status != ASSOCIATED)
+    if (mib->bssAccessPointData.stations[sta->address] != Ieee80211Mib::ASSOCIATED)
         sendAssocNotification(sta->address);
-    sta->status = ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
+    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
     const auto& body = std::make_shared<Ieee80211AssociationResponseFrame>();
@@ -262,7 +262,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
 
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
     STAInfo *sta = lookupSenderSTA(frame);
-    if (!sta || sta->status == NOT_AUTHENTICATED) {
+    if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
@@ -274,7 +274,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     delete packet;
 
     // mark STA as associated
-    sta->status = ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
+    mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
     const auto& body = std::make_shared<Ieee80211ReassociationResponseFrame>();
@@ -296,9 +296,9 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80
     delete packet;
 
     if (sta) {
-        if (sta->status == ASSOCIATED)
+        if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED)
             sendDisAssocNotification(sta->address);
-        sta->status = AUTHENTICATED;
+        mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;
     }
 }
 

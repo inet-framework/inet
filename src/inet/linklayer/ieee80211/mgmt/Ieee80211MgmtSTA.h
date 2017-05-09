@@ -107,12 +107,11 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     AccessPointList apList;
 
     // associated Access Point
-    bool isAssociated;
     cMessage *assocTimeoutMsg;    // if non-nullptr: association is in progress
     AssociatedAPInfo assocAP;
 
   public:
-    Ieee80211MgmtSTA() : host(nullptr), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSTA() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
