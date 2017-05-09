@@ -54,14 +54,6 @@ void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataFrame>& header)
                 return;
             }
             // look up destination address in our STA list
-            // KLUDGE: remove
-            bool kludge = dynamic_cast<Ieee80211MgmtAPSimplified *>(getParentModule()->getParentModule()->getSubmodule("mgmt"));
-            if (kludge) {
-                EV << "Frame's destination address is not in our STA list -- passing up\n";
-                mac->sendUp(frame);
-                distributeDataFrame(frame, header); // send it out to the destination STA
-                return;
-            }
             auto it = mib->bssAccessPointData.stations.find(header->getAddress3());
             if (it == mib->bssAccessPointData.stations.end()) {
                 EV << "Frame's destination address is not in our STA list -- passing up\n";
