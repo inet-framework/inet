@@ -40,15 +40,6 @@ void Ieee80211MgmtAPBase::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *encDec = par("encapDecap").stringValue();
-        if (!strcmp(encDec, "true"))
-            encapDecap = ENCAP_DECAP_TRUE;
-        else if (!strcmp(encDec, "false"))
-            encapDecap = ENCAP_DECAP_FALSE;
-        else if (!strcmp(encDec, "eth"))
-            encapDecap = ENCAP_DECAP_ETH;
-        else
-            throw cRuntimeError("Unknown encapDecap parameter value: '%s'! Must be 'true','false' or 'eth'.", encDec);
     }
 }
 

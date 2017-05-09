@@ -49,7 +49,6 @@ module WirelessAPWithSink
             parameters:
                 @display("p=89,225;q=queue");
                 mgmtType = default("Ieee80211MgmtAPSimplified");
-                mgmt.encapDecap = "false";
         }
         mobility: StationaryMobility {
             parameters:

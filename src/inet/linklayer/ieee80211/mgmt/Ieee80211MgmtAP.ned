@@ -45,7 +45,6 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         string ssid = default("SSID");
         double beaconInterval @unit("s") = default(100ms);
         int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
-        string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
         string interfaceTableModule;
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value

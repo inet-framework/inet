@@ -38,12 +38,6 @@ namespace ieee80211 {
  */
 class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
 {
-  public:
-    typedef enum { ENCAP_DECAP_TRUE = 1, ENCAP_DECAP_FALSE, ENCAP_DECAP_ETH } EncapDecap;
-
-  protected:
-    EncapDecap encapDecap;
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
