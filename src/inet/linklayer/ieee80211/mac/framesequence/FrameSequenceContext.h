@@ -95,8 +95,8 @@ class INET_API FrameSequenceContext
         virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) const;
         virtual simtime_t getIfs() const;
 
-        virtual bool isForUs(const Ptr<Ieee80211MacHeader>& frame) const;
-        virtual bool isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const;
+        virtual bool isForUs(const Ptr<Ieee80211MacHeader>& header) const;
+        virtual bool isSentByUs(const Ptr<Ieee80211MacHeader>& header) const;
 };
 
 } // namespace ieee80211

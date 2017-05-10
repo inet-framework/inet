@@ -37,14 +37,14 @@ class INET_API ITx
         {
             public:
                 virtual ~ICallback() {}
-                virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) = 0;
+                virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& header) = 0;
         };
 
     public:
         virtual ~ITx() {}
 
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, ITx::ICallback *txCallback) = 0;
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 

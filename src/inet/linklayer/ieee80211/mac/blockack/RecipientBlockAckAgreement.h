@@ -38,7 +38,7 @@ class INET_API RecipientBlockAckAgreement
         RecipientBlockAckAgreement(MACAddress originatorAddress, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
         virtual ~RecipientBlockAckAgreement() { delete blockAckRecord; }
 
-        virtual void blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& frame);
+        virtual void blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& header);
 
         virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
         virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }

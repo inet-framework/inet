@@ -113,8 +113,8 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
 
-    virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame);
-    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
+    virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header);
+    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header);
 };
 
 } // namespace ieee80211

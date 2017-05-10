@@ -31,10 +31,10 @@ class INET_API IRecipientQoSAckPolicy
     public:
         virtual ~IRecipientQoSAckPolicy() { }
 
-        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& frame) const = 0;
+        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& header) const = 0;
         virtual bool isBlockAckNeeded(const Ptr<Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const = 0;
 
-        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) const = 0;
+        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header) const = 0;
         virtual simtime_t computeBasicBlockAckDurationField(Packet *packet, const Ptr<Ieee80211BasicBlockAckReq>& basicBlockAckReq) const = 0;
 };
 

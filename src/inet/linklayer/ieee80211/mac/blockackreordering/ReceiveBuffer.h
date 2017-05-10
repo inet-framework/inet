@@ -44,7 +44,7 @@ class INET_API ReceiveBuffer
         ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber);
         virtual ~ReceiveBuffer();
 
-        bool insertFrame(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame);
+        bool insertFrame(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader);
         void remove(int sequenceNumber);
 
         const ReorderBuffer& getBuffer() { return buffer; }

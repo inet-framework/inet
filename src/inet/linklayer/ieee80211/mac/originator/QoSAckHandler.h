@@ -59,20 +59,20 @@ class INET_API QoSAckHandler : public IAckHandler
     public:
         virtual ~QoSAckHandler() { }
 
-        virtual void processReceivedAck(const Ptr<Ieee80211AckFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame);
+        virtual void processReceivedAck(const Ptr<Ieee80211AckFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedHeader);
         virtual std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck);
 
-        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) override;
-        virtual void processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
+        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
+        virtual void processTransmittedDataOrMgmtFrame(const Ptr<Ieee80211DataOrMgmtHeader>& header);
         virtual void processTransmittedBlockAckReq(const Ptr<Ieee80211BlockAckReq>& blockAckReq);
-        virtual void processFailedFrame(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame);
+        virtual void processFailedFrame(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
-        virtual Status getQoSDataAckStatus(const Ptr<Ieee80211DataHeader>& frame);
-        virtual Status getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
+        virtual Status getQoSDataAckStatus(const Ptr<Ieee80211DataHeader>& header);
+        virtual Status getMgmtOrNonQoSAckStatus(const Ptr<Ieee80211DataOrMgmtHeader>& header);
         virtual int getNumberOfFramesWithStatus(Status status);
 
-        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
-        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
+        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
+        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } /* namespace ieee80211 */

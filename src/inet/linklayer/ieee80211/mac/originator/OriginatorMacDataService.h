@@ -46,7 +46,7 @@ class INET_API OriginatorMacDataService : public IOriginatorMacDataService, publ
     protected:
         virtual void initialize() override;
 
-        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
         virtual Fragments *fragmentIfNeeded(Packet *frame);
 
     public:

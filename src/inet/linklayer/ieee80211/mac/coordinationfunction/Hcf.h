@@ -138,22 +138,22 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual bool isReceptionInProgress();
 
         // Recipient
-        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
-        virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
-        virtual void recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& frame);
-        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211MacHeader>& frame);
+        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header);
+        virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header);
+        virtual void recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& header);
+        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211MacHeader>& header);
 
         // Originator
-        virtual void originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211MgmtHeader>& mgmtFrame, AccessCategory ac);
-        virtual void originatorProcessTransmittedControlFrame(const Ptr<Ieee80211MacHeader>& controlFrame, AccessCategory ac);
-        virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& frame, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, Packet *lastTransmittedPacket, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedDataFrame(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac);
+        virtual void originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
+        virtual void originatorProcessTransmittedControlFrame(const Ptr<Ieee80211MacHeader>& controlHeader, AccessCategory ac);
+        virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& header, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, Packet *lastTransmittedPacket, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedDataFrame(const Ptr<Ieee80211DataHeader>& header, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
 
-        virtual void setFrameMode(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, const IIeee80211Mode *mode) const;
-        virtual bool isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const;
-        virtual bool isForUs(const Ptr<Ieee80211MacHeader>& frame) const;
+        virtual void setFrameMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header, const IIeee80211Mode *mode) const;
+        virtual bool isSentByUs(const Ptr<Ieee80211MacHeader>& header) const;
+        virtual bool isForUs(const Ptr<Ieee80211MacHeader>& header) const;
 
     protected:
         // IFrameSequenceHandler::ICallback
@@ -169,11 +169,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual void channelGranted(IChannelAccess *channelAccess) override;
 
         // ITx::ICallback
-        virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) override;
+        virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& header) override;
 
         // IProcedureCallback
-        virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211MacHeader>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211MacHeader>& receivedFrame) override;
-        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) override;
+        virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<Ieee80211MacHeader>& receivedHeader) override;
+        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtHeader) override;
 
         // IProcedureCallback
         virtual void scheduleInactivityTimer(simtime_t timeout) override;
@@ -182,8 +182,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual ~Hcf();
 
         // ICoordinationFunction
-        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
-        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) override;
+        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
+        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header) override;
         virtual void corruptedFrameReceived() override;
 
 };

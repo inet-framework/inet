@@ -34,12 +34,12 @@ class INET_API RecipientAckPolicy : public ModeSetListener, public IRecipientAck
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        simtime_t computeAckDuration(Packet *dataOrMgmtPacket, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const;
+        simtime_t computeAckDuration(Packet *dataOrMgmtPacket, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const;
 
     public:
-        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& frame) const override;
+        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& header) const override;
 
-        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) const override;
+        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header) const override;
 };
 
 } /* namespace ieee80211 */

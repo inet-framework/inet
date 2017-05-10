@@ -37,7 +37,7 @@ class INET_API QoSDuplicateRemoval : public IDuplicateRemoval
         Mac2SeqValMap lastSeenTimePriorityManagementSeqNumCache;
 
     public:
-        virtual bool isDuplicate(const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
+        virtual bool isDuplicate(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } // namespace ieee80211

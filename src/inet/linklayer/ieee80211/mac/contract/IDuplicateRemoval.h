@@ -28,7 +28,7 @@ class INET_API IDuplicateRemoval
     public:
         virtual ~IDuplicateRemoval() { }
 
-        virtual bool isDuplicate(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
+        virtual bool isDuplicate(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
 
 };
 

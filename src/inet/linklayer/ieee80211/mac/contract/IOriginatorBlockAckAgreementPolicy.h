@@ -31,7 +31,7 @@ class INET_API IOriginatorBlockAckAgreementPolicy
     public:
         virtual ~IOriginatorBlockAckAgreementPolicy() { }
 
-        virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataHeader>& frame) = 0;
+        virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataHeader>& header) = 0;
         virtual bool isAddbaReqAccepted(const Ptr<Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement) = 0;
         virtual bool isDelbaAccepted(const Ptr<Ieee80211Delba>& delba) = 0;
 

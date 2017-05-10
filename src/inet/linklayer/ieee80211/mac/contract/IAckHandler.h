@@ -28,9 +28,9 @@ class INET_API IAckHandler
     public:
         virtual ~IAckHandler() { };
 
-        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
-        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
-        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) = 0;
+        virtual bool isEligibleToTransmit(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual bool isOutstandingFrame(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
 };
 
 } /* namespace ieee80211 */

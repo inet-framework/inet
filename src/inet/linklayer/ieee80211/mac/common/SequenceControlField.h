@@ -36,7 +36,7 @@ class INET_API SequenceControlField
 
     public:
         SequenceControlField(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
-        SequenceControlField(const Ptr<Ieee80211DataOrMgmtHeader>& frame);
+        SequenceControlField(const Ptr<Ieee80211DataOrMgmtHeader>& header);
 
         SequenceNumber getSequenceNumber() const { return sequenceNumber; }
         FragmentNumber getFragmentNumber() const { return fragmentNumber; }

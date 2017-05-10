@@ -26,7 +26,7 @@ namespace ieee80211 {
 class INET_API MsduAggregation : public IMsduAggregation, public cObject
 {
     protected:
-        virtual void setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& frame);
+        virtual void setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& header);
 
     public:
         virtual Packet *aggregateFrames(std::vector<Packet*> *frames) override;
