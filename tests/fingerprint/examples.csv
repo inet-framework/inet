@@ -348,10 +348,10 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            38cb-01ac/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            397e-d777/tplx
 
-# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
-# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0000-0000    # unstable fingerprint
-# /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0000-0000    # unstable fingerprint
-# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                5000s,           f4ea-7a24/tplx
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                5000s,           c359-01c5/tplx
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                5000s,           b828-861b/tplx
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                5000s,           81cc-c27b/tplx
 
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx
