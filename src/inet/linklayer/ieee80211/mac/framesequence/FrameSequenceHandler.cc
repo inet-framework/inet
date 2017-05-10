@@ -187,5 +187,11 @@ void FrameSequenceHandler::abortFrameSequence()
     finishFrameSequence(false);
 }
 
+FrameSequenceHandler::~FrameSequenceHandler()
+{
+    delete frameSequence;
+    delete context;
+}
+
 } // namespace ieee80211
 } // namespace inet

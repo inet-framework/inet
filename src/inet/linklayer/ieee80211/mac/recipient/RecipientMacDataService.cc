@@ -41,8 +41,10 @@ Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 
 std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
 {
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(frame))
-        return std::vector<Packet*>();
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(frame)) {
+        delete packet;
+        return std::vector<Packet *>();
+    }
     Packet *defragmentedFrame = nullptr;
     if (basicReassembly) { // FIXME: defragmentation
         defragmentedFrame = defragment(packet);

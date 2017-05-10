@@ -28,6 +28,7 @@ class INET_API TxOpFs : public AlternativesFs {
 
     public:
         TxOpFs();
+        virtual ~TxOpFs() { }
 
         virtual int selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
         virtual bool isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);

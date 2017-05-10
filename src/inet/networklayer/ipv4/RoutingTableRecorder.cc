@@ -15,7 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "inet/common/INETDefs.h"
+
+#include <cinttypes>
 
 #if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
@@ -30,8 +33,6 @@
 #include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 
 Define_Module(RoutingTableRecorder);
-
-#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
 
 class RoutingTableNotificationBoardListener : public cListener
 {
@@ -204,8 +205,6 @@ namespace inet {
 
 Define_Module(RoutingTableRecorder);
 
-#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
-
 Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
 
 RoutingTableRecorder::RoutingTableRecorder()
@@ -293,7 +292,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
 
     // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s  %" LL "d  %s  %d  %s %s\n",
+    fprintf(routingLogFile, "%s  %" PRId64 "  %s  %d  %s %s\n",
             tag,
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
@@ -320,7 +319,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 
     // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s %" LL "d  %s  %d  %s  %s  %d  %s\n",
+    fprintf(routingLogFile, "%s %" PRId64 "  %s  %d  %s  %s  %d  %s\n",
             tag,
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),

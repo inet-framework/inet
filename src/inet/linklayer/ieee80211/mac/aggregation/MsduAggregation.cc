@@ -82,7 +82,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
             padding->markImmutable();
             aggregatedFrame->append(padding);
         }
-        // FIXME: delete dataFrame; ownership problem
+	delete frame;
     }
     // The MPDU containing the A-MSDU is carried in any of the following data frame subtypes: QoS Data,
     // QoS Data + CF-Ack, QoS Data + CF-Poll, QoS Data + CF-Ack + CF-Poll. The A-MSDU structure is

@@ -57,8 +57,10 @@ Packet *RecipientQoSMacDataService::defragment(Packet *mgmtFragment)
 std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     // TODO: A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(dataFrame))
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(dataFrame)) {
+        delete dataPacket;
         return std::vector<Packet *>();
+    }
     BlockAckReordering::ReorderBuffer frames;
     frames[dataFrame->getSequenceNumber()].push_back(dataPacket);
     if (blockAckReordering && blockAckAgreementHandler) {
