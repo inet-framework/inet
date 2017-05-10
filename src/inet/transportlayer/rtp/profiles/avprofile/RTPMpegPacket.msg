@@ -34,6 +34,7 @@ namespace inet::rtp;
 
 packet RTPMpegPacket
 {
+    byteLength = 4;
     int headerLength = 4;
     int payloadLength; // size of the mpeg data
     int pictureType;   // picture type of the frame the data in this packet belongs to.
