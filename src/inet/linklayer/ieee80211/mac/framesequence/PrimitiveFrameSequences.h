@@ -169,7 +169,7 @@ class INET_API BlockAckReqBlockAckFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() const override { return std::string("BLOCKACKREQ") + (step == 2 ? " ACK" : ""); } // TODO: completeStep = true?
+        virtual std::string getHistory() const override { return std::string("BLOCKACKREQ") + (step == 2 ? " BLOCKACK" : ""); } // TODO: completeStep = true?
 };
 
 } // namespace ieee80211
