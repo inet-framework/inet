@@ -100,14 +100,17 @@ void Hcf::updateDisplayString()
 {
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();
+        getDisplayString().setTagArg("tt", 0, ("Fs: " + history).c_str());
         if (history.length() > 32) {
             history.erase(history.begin(), history.end() - 32);
             history = "..." + history;
         }
-        getDisplayString().setTagArg("t", 0, history.c_str());
+        getDisplayString().setTagArg("t", 0, ("Fs: " + history).c_str());
     }
-    else
+    else {
         getDisplayString().removeTag("t");
+        getDisplayString().removeTag("tt");
+    }
 }
 
 void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)

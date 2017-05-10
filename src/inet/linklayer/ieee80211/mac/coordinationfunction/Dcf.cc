@@ -74,7 +74,7 @@ void Dcf::updateDisplayString()
 {
     if (frameSequenceHandler->isSequenceRunning()) {
         auto history = frameSequenceHandler->getFrameSequence()->getHistory();
-        getDisplayString().setTagArg("t", 0, history.c_str());
+        getDisplayString().setTagArg("t", 0, ("Fs: " + history).c_str());
     }
     else
         getDisplayString().removeTag("t");
