@@ -21,5 +21,5 @@ moduleinterface IWirelessNic extends INic
         @nic;
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(ISignal); // to receive radio frames
+        input radioIn @labels(ISignal); // to receive signals
 }

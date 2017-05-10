@@ -61,7 +61,7 @@ module Ieee80211Nic like IWirelessNic
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
-        input radioIn @labels(ISignal); // to receive radio frames
+        input radioIn @labels(ISignal); // to receive signals
     submodules:
         mib: Ieee80211Mib {
             parameters:

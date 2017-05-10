@@ -35,7 +35,7 @@ class IRadio;
 /**
  * This interface represents the transmission of a radio signal. There's one
  * instance per transmission of this interface that is sent to all potential
- * receiver radios in a separate radio frame instance.
+ * receiver radios in a separate signal instance.
  *
  * This interface is strictly immutable to safely support parallel computation.
  */

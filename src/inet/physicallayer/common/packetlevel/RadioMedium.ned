@@ -49,11 +49,11 @@ module RadioMedium like IRadioMedium
         string neighborCacheType = default("");   // NED type of the neighbor cache model
         string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
 
-        // filter parameters that control when radio frames are sent to receiver radios
-        string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
-        bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode
-        bool listeningFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
-        bool macAddressFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it the destination mac address differs
+        // filter parameters that control when signals are sent to receiver radios
+        string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
+        bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send signals to a radio if it's neither in receiver nor in transceiver mode
+        bool listeningFilter = default(false);  // when enabled the radio medium doesn't send signals to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        bool macAddressFilter = default(false); // when enabled the radio medium doesn't send signals to a radio if it the destination mac address differs
 
         // logging parameters
         bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception

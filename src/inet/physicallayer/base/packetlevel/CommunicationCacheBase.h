@@ -59,7 +59,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     {
       public:
         /**
-         * The radio frame that was sent to the receiver or nullptr if not yet sent.
+         * The signal that was sent to the receiver or nullptr if not yet sent.
          */
         const ISignal *frame;
         const IArrival *arrival;
@@ -95,7 +95,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          */
         simtime_t interferenceEndTime;
         /**
-         * The radio frame that was created by the transmitter is never nullptr.
+         * The signal that was created by the transmitter is never nullptr.
          */
         const ISignal *frame;
         /**

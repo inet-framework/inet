@@ -29,13 +29,13 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * This purely virtual interface provides an abstraction for different radio frames.
+ * This purely virtual interface provides an abstraction for different signals.
  */
 class INET_API ISignal : public IPhysicalLayerFrame, public IPrintableObject
 {
   public:
     /**
-     * Returns the radio signal transmission that this radio frame represents.
+     * Returns the radio signal transmission that this signal represents.
      * This function never returns nullptr.
      */
     virtual const ITransmission *getTransmission() const = 0;

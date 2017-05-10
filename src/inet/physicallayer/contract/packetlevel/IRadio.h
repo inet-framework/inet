@@ -38,7 +38,7 @@ class IRadioMedium;
  *
  * @author Levente Meszaros
  */
-// TODO: add burst support, sending of radio frames back to back (using a resource limited queue)
+// TODO: add burst support, sending of signals back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
 class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
@@ -201,7 +201,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
   public:
     /**
-     * Returns the gate of the radio that receives incoming radio frames.
+     * Returns the gate of the radio that receives incoming signals.
      */
     virtual const cGate *getRadioGate() const = 0;
 

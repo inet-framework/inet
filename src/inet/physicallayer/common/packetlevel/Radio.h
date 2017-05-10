@@ -41,7 +41,7 @@ namespace physicallayer {
  * its transmitter state back to idle, and emits a transmitter state changed
  * signal.
  *
- * The reception process starts when the radio module receives a radio frame.
+ * The reception process starts when the radio module receives a signal.
  * The radio must be in receiver or transceiver mode before the message arrives,
  * otherwise it just ignores the message. The radio changes its receiver state
  * to the appropriate value, and emits a receiver state changed signal. Finally,

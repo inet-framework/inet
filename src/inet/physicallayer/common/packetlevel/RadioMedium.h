@@ -81,23 +81,23 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     const IMaterial *material;
     /**
-     * The radio medium doesn't send radio frames to a radio if it's outside
+     * The radio medium doesn't send signals to a radio if it's outside
      * the range provided by the selected range filter.
      */
     RangeFilterKind rangeFilter;
     /**
-     * True means the radio medium doesn't send radio frames to a radio if
+     * True means the radio medium doesn't send signals to a radio if
      * it's neither in receiver nor in transceiver mode.
      */
     bool radioModeFilter;
     /**
-     * True means the radio medium doesn't send radio frames to a radio if
+     * True means the radio medium doesn't send signals to a radio if
      * it listens on the medium in incompatible mode (e.g. different carrier
      * frequency and/or bandwidth, different modulation, etc.)
      */
     bool listeningFilter;
     /**
-     * True means the radio medium doesn't send radio frames to a radio if
+     * True means the radio medium doesn't send signals to a radio if
      * the mac address of the destination is different.
      */
     bool macAddressFilter;
@@ -165,7 +165,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mutable long transmissionCount;
     /**
-     * Total number of radio frame sends.
+     * Total number of signal sends.
      */
     mutable long signalSendCount;
     /**
@@ -255,23 +255,23 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void addTransmission(const IRadio *transmitter, const ITransmission *transmission);
 
     /**
-     * Creates a new radio frame for the transmitter.
+     * Creates a new signal for the transmitter.
      */
     virtual ISignal *createTransmitterSignal(const IRadio *radio, Packet *packet);
 
     /**
-     * Creates a new radio frame for a receiver.
+     * Creates a new signal for a receiver.
      */
     virtual ISignal *createReceiverSignal(const ITransmission *transmission);
 
     /**
-     * Sends a copy of the provided radio frame to all affected receivers on
+     * Sends a copy of the provided signal to all affected receivers on
      * the radio medium.
      */
     virtual void sendToAffectedRadios(IRadio *transmitter, const ISignal *frame);
 
     /**
-     * Sends a copy of the provided radio frame to all receivers on the radio medium.
+     * Sends a copy of the provided signal to all receivers on the radio medium.
      */
     virtual void sendToAllRadios(IRadio *transmitter, const ISignal *frame);
     //@}
@@ -283,7 +283,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * Returns true if the radio can potentially receive the transmission
      * successfully. If this function returns false then the radio medium
-     * doesn't send a radio frame to this receiver.
+     * doesn't send a signal to this receiver.
      */
     virtual bool isPotentialReceiver(const IRadio *receiver, const ITransmission *transmission) const;
 

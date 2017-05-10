@@ -125,14 +125,14 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual void removeRadio(const IRadio *radio) = 0;
 
     /**
-     * Returns a new radio frame containing the radio signal transmission that
-     * represents the provided packet. A copy of this radio frame is sent to
+     * Returns a new signal containing the radio signal transmission that
+     * represents the provided packet. A copy of this signal is sent to
      * all affected radios.
      */
     virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) = 0;
 
     /**
-     * Returns the packet that was transmitted in the provided radio frame.
+     * Returns the packet that was transmitted in the provided signal.
      */
     virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) = 0;
 
