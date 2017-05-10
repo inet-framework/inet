@@ -58,10 +58,16 @@ bool SequentialFs::completeStep(FrameSequenceContext *context)
 std::string SequentialFs::getHistory() const
 {
     ASSERT(step != -1);
-    std::string history = "(";
-    for (int i = 0; i < std::min(elementIndex + 1, (int)elements.size()); i++)
-        history += (i == 0 ? "" : " ") + elements.at(i)->getHistory();
-    history += ")";
+    std::string history;
+    for (int i = 0; i < std::min(elementIndex + 1, (int)elements.size()); i++) {
+        auto elementHistory = elements.at(i)->getHistory();
+        if (!elementHistory.empty()) {
+            if (!history.empty())
+                history += " ";
+            history += elementHistory;
+        }
+    }
+    history = "(" + history + ")";
     return history;
 }
 
@@ -161,13 +167,16 @@ bool RepeatingFs::completeStep(FrameSequenceContext *context)
 std::string RepeatingFs::getHistory() const
 {
     ASSERT(step != -1);
-    std::string repeatHistory = "{";
+    std::string history;
     for (int i = 0; i < (int) histories.size(); i++) {
-        if (i != 0)
-            repeatHistory += " ";
-        repeatHistory += histories.at(i);
+        auto elementHistory = histories.at(i);
+        if (!elementHistory.empty()) {
+            if (!history.empty())
+                history += " ";
+            history += elementHistory;
+        }
     }
-    return repeatHistory + "}";
+    return "{" + history + "}";
 }
 
 AlternativesFs::AlternativesFs(std::vector<IFrameSequence*> elements, std::function<int(AlternativesFs*, FrameSequenceContext*)> selector) :
