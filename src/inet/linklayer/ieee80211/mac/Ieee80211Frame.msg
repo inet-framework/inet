@@ -201,10 +201,9 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     chunkLength = bit(DATAFRAME_HEADER_MINLENGTH) - byte(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
-    uint16 qos;             // TODO nobody uses this currently, only its parts like tid below... 
-    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
-    uint8 tid; //FIXME in real life this is part of the optional qos field above...
-    bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield FIXME in real life this is part of the optional qos field above...
+    int ackPolicy @enum(AckPolicy);
+    uint8 tid;
+    bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
 //TODO this can be introduced when the SNAP header 

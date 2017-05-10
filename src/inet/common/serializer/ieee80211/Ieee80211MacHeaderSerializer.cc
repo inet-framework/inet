@@ -87,8 +87,13 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             if (dataFrame->getFromDS() && dataFrame->getToDS())
                 stream.writeMACAddress(dataFrame->getAddress4());
 
-            if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS)
-                stream.writeUint16Le(dataFrame->getQos() | dataFrame->getTid() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
+            if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS) {
+                uint16_t qos =
+                        (dataFrame->getTid() & 0x0F) |
+                        (dataFrame->getAckPolicy() & 0x03 << 5) |
+                        (dataFrame->getAMsduPresent() ? 0x80 : 0x00);
+                stream.writeUint16Le(qos);
+            }
         }
 
         if (std::dynamic_pointer_cast<Ieee80211ActionFrame>(chunk))
@@ -125,8 +130,13 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
 
     if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
         std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMACAddress());
-    if (type == ST_DATA_WITH_QOS)
-        std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)->setQos(stream.readUint16Le());
+    if (type == ST_DATA_WITH_QOS) {
+        auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
+        uint16_t qos = stream.readUint16Le();
+        dataHeader->setTid(qos & 0xF);
+        dataHeader->setAckPolicy((qos >> 5) & 0x03);
+        dataHeader->setAMsduPresent(qos & 0x80);
+    }
 }
 
 Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
