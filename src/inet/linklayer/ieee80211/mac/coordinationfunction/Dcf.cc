@@ -170,7 +170,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     RateSelection::setFrameMode(packet, frame, rateSelection->computeMode(packet, frame));
     auto pendingPacket = inProgressFrames->getPendingFrameFor(packet);
     auto duration = originatorProtectionMechanism->computeDurationField(packet, frame, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
-    auto header = packet->removeHeader<Ieee80211MacHeader>();
+    const auto& header = packet->removeHeader<Ieee80211MacHeader>();
     header->setDuration(duration);
     packet->insertHeader(header);
     tx->transmitFrame(packet, packet->peekHeader<Ieee80211MacHeader>(), ifs, this);
