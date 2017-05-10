@@ -33,15 +33,12 @@ class IStatistics;
 class INET_API Tx : public cSimpleModule, public ITx
 {
     protected:
-        MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
         ITx::ICallback *txCallback = nullptr;
         Ieee80211Mac *mac = nullptr;
         IRx *rx = nullptr;
         IStatistics *statistics = nullptr;
         Packet *frame = nullptr;
-        Ptr<Ieee80211MacHeader> header = nullptr;
         cMessage *endIfsTimer = nullptr;
-        simtime_t durationField = -1;
         bool transmitting = false;
 
     protected:

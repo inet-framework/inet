@@ -44,8 +44,7 @@ void Tx::initialize(int stage)
         // statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
         WATCH(transmitting);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
-        address = mac->getAddress();
+    else if (stage == INITSTAGE_LINK_LAYER) {
         refreshDisplay();
     }
 }
@@ -66,7 +65,6 @@ void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, sim
         twoAddressHeader->setTransmitterAddress(mac->getAddress());
     packet->insertHeader(h);
     this->frame = packet->dup();
-    header = frame;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     if (hasGUI())
@@ -80,12 +78,14 @@ void Tx::radioTransmissionFinished()
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;
         ASSERT(txCallback != nullptr);
-        ITx::ICallback *tmpTxCallback = txCallback;
-        txCallback = nullptr;
-        tmpTxCallback->transmissionComplete(frame, header);
+        const auto& header = frame->peekHeader<Ieee80211MacHeader>();
+        auto duration = header->getDuration();
+        auto tmpFrame = frame;
+        auto tmpTxCallback = txCallback;
         frame = nullptr;
-        header = nullptr;
-        rx->frameTransmitted(durationField);
+        txCallback = nullptr;
+        tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekHeader<Ieee80211MacHeader>());
+        rx->frameTransmitted(duration);
         if (hasGUI())
             refreshDisplay();
     }
@@ -96,7 +96,6 @@ void Tx::handleMessage(cMessage *msg)
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
-        durationField = header->getDuration();
         mac->sendDownFrame(frame->dup());
         if (hasGUI())
             refreshDisplay();
