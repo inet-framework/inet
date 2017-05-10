@@ -21,7 +21,7 @@
 #include "inet/common/figures/HeatMapFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"

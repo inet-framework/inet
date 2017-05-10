@@ -257,23 +257,23 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * Creates a new radio frame for the transmitter.
      */
-    virtual IRadioFrame *createTransmitterRadioFrame(const IRadio *radio, Packet *packet);
+    virtual ISignal *createTransmitterSignal(const IRadio *radio, Packet *packet);
 
     /**
      * Creates a new radio frame for a receiver.
      */
-    virtual IRadioFrame *createReceiverRadioFrame(const ITransmission *transmission);
+    virtual ISignal *createReceiverSignal(const ITransmission *transmission);
 
     /**
      * Sends a copy of the provided radio frame to all affected receivers on
      * the radio medium.
      */
-    virtual void sendToAffectedRadios(IRadio *transmitter, const IRadioFrame *frame);
+    virtual void sendToAffectedRadios(IRadio *transmitter, const ISignal *frame);
 
     /**
      * Sends a copy of the provided radio frame to all receivers on the radio medium.
      */
-    virtual void sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame);
+    virtual void sendToAllRadios(IRadio *transmitter, const ISignal *frame);
     //@}
 
     /** @name Reception */
@@ -332,10 +332,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
 
-    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
+    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const ISignal *frame);
 
-    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, Packet *packet) override;
-    virtual Packet *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) override;
+    virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
+    virtual Packet *receivePacket(const IRadio *receiver, ISignal *radioFrame) override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 

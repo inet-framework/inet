@@ -36,7 +36,7 @@ module WirelessNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IRadioFrame);
+        input radioIn @labels(ISignal);
     submodules:
         classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
                 @display("p=80,70");

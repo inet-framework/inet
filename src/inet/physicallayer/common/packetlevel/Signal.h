@@ -18,13 +18,13 @@
 #ifndef __INET_RADIOFRAME_H
 #define __INET_RADIOFRAME_H
 
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API RadioFrame : public cPacket, public IRadioFrame
+class INET_API Signal : public cPacket, public ISignal
 {
   protected:
     const ITransmission *transmission = nullptr;
@@ -33,10 +33,10 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
     mutable const IReception *reception = nullptr;
 
   public:
-    RadioFrame(const ITransmission *transmission);
-    RadioFrame(const RadioFrame& other);
+    Signal(const ITransmission *transmission);
+    Signal(const Signal& other);
 
-    virtual RadioFrame *dup() const override { return new RadioFrame(*this); }
+    virtual Signal *dup() const override { return new Signal(*this); }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

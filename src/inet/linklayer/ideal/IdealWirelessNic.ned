@@ -53,7 +53,7 @@ module IdealWirelessNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IdealRadioFrame);
+        input radioIn @labels(IdealSignal);
     submodules:
         queue: <queueType> like IOutputQueue {
             parameters:

@@ -32,7 +32,7 @@ module Ieee802154NarrowbandNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IRadioFrame);
+        input radioIn @labels(ISignal);
     submodules:
         mac: Ieee802154NarrowbandMac {
             parameters:

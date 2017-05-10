@@ -34,7 +34,7 @@ module Ieee802154UWBIRNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IRadioFrame);
+        input radioIn @labels(ISignal);
     submodules:
         queue: <queueType> like IOutputQueue {
             parameters:

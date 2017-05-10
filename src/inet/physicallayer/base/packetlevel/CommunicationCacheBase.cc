@@ -181,12 +181,12 @@ void CommunicationCacheBase::removeCachedInterferenceEndTime(const ITransmission
     getTransmissionCacheEntry(transmission)->interferenceEndTime = -1;
 }
 
-const IRadioFrame *CommunicationCacheBase::getCachedFrame(const ITransmission *transmission)
+const ISignal *CommunicationCacheBase::getCachedFrame(const ITransmission *transmission)
 {
     return getTransmissionCacheEntry(transmission)->frame;
 }
 
-void CommunicationCacheBase::setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame)
+void CommunicationCacheBase::setCachedFrame(const ITransmission *transmission, const ISignal *frame)
 {
     getTransmissionCacheEntry(transmission)->frame = frame;
 }
@@ -404,13 +404,13 @@ void CommunicationCacheBase::removeCachedReceptionResult(const IRadio *receiver,
         cacheEntry->receptionResult = nullptr;
 }
 
-const IRadioFrame *CommunicationCacheBase::getCachedFrame(const IRadio *receiver, const ITransmission *transmission)
+const ISignal *CommunicationCacheBase::getCachedFrame(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->frame : nullptr;
 }
 
-void CommunicationCacheBase::setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const IRadioFrame *frame)
+void CommunicationCacheBase::setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const ISignal *frame)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)

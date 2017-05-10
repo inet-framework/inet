@@ -49,7 +49,7 @@
 #endif // ifdef WITH_RIP
 
 #ifdef WITH_RADIO
-#include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #endif // ifdef WITH_RADIO
 
@@ -75,7 +75,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
     std::string formatRIPPacket(const RIPPacket *packet) const;
 #endif // ifdef WITH_RIP
 #ifdef WITH_RADIO
-    std::string formatRadioFrame(const RadioFrame *packet) const;
+    std::string formatSignal(const Signal *packet) const;
 #endif // ifdef WITH_RADIO
 #ifdef WITH_TCP_COMMON
     std::string formatTCPPacket(const tcp::TcpHeader *tcpSeg) const;
@@ -196,8 +196,8 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_RIP
 #ifdef WITH_RADIO
-        else if (const auto radioFrame = dynamic_cast<const RadioFrame *>(chunk)) {
-            out << formatRadioFrame(radioFrame);
+        else if (const auto radioFrame = dynamic_cast<const Signal *>(chunk)) {
+            out << formatSignal(radioFrame);
         }
 #endif // ifdef WITH_RADIO
         else
@@ -519,7 +519,7 @@ std::string InetPacketPrinter2::formatRIPPacket(const RIPPacket *packet) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatRadioFrame(const RadioFrame *packet) const
+std::string InetPacketPrinter2::formatSignal(const Signal *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_RADIO

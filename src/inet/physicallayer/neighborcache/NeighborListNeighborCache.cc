@@ -58,7 +58,7 @@ std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int
     return stream;
 }
 
-void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
+void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *frame, double range) const
 {
     if (this->range < range)
         throw cRuntimeError("The transmitter's (id: %d) range is bigger then the cache range", transmitter->getId());

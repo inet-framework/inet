@@ -32,7 +32,7 @@
 #include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 
@@ -129,12 +129,12 @@ class INET_API IRadioMedium : public IPrintableObject
      * represents the provided packet. A copy of this radio frame is sent to
      * all affected radios.
      */
-    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, Packet *packet) = 0;
+    virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) = 0;
 
     /**
      * Returns the packet that was transmitted in the provided radio frame.
      */
-    virtual Packet *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) = 0;
+    virtual Packet *receivePacket(const IRadio *receiver, ISignal *radioFrame) = 0;
 
     /**
      * Returns the listening decision that describes what the receiver detects

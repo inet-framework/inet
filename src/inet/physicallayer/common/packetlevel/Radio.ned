@@ -99,7 +99,7 @@ module Radio like IRadio
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);
         output upperLayerOut @labels(ILinkLayerFrame/up);
-        input radioIn @labels(IRadioFrame);
+        input radioIn @labels(ISignal);
 
     submodules:
         antenna: <antennaType> like IAntenna {

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
@@ -23,28 +23,28 @@ namespace inet {
 
 namespace physicallayer {
 
-RadioFrame::RadioFrame(const ITransmission *transmission) :
+Signal::Signal(const ITransmission *transmission) :
     transmission(transmission)
 {
 }
 
-RadioFrame::RadioFrame(const RadioFrame& other) :
+Signal::Signal(const Signal& other) :
     cPacket(other),
     transmission(other.transmission)
 {
 }
 
-std::ostream& RadioFrame::printToStream(std::ostream& stream, int level) const
+std::ostream& Signal::printToStream(std::ostream& stream, int level) const
 {
     return stream << (cPacket *)this;
 }
 
-const ITransmission *RadioFrame::getTransmission() const
+const ITransmission *Signal::getTransmission() const
 {
     return transmission;
 }
 
-const IArrival *RadioFrame::getArrival() const
+const IArrival *Signal::getArrival() const
 {
     if (arrival == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
@@ -53,7 +53,7 @@ const IArrival *RadioFrame::getArrival() const
     return arrival;
 }
 
-const IListening *RadioFrame::getListening() const
+const IListening *Signal::getListening() const
 {
     if (listening == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
@@ -62,7 +62,7 @@ const IListening *RadioFrame::getListening() const
     return listening;
 }
 
-const IReception *RadioFrame::getReception() const
+const IReception *Signal::getReception() const
 {
     if (reception == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
