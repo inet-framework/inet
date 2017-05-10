@@ -12,7 +12,7 @@ index 70db509..5a356d1 100644
      /**
       * Constructor. It has an empty body. (The class does not have data members
 diff --git a/src/nedxml/msgcppgenerator.cc b/src/nedxml/msgcppgenerator.cc
-index 6b452ac..5fd0bab 100644
+index 6b452ac..63c4dd2 100644
 --- a/src/nedxml/msgcppgenerator.cc
 +++ b/src/nedxml/msgcppgenerator.cc
 @@ -133,6 +133,7 @@ P check_and_cast(T *p)
@@ -23,15 +23,27 @@ index 6b452ac..5fd0bab 100644
          {"bool",            "bool",            "string2bool($)",     "bool2string($)",      "false"},
          {"float",           "float",           "string2double($)",   "double2string($)",    "0"},
          {"double",          "double",          "string2double($)",   "double2string($)",    "0"},
-@@ -732,6 +733,7 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
+@@ -723,8 +724,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
+     }
+ 
+     if (info.generate_class) {
+-        if (it->classtype == COWNEDOBJECT && info.classtype != COWNEDOBJECT) {
+-            errors->addError(it->nedElement, "cannot use cOwnedObject field '%s %s' in struct or non-cOwnedObject class '%s'\n", it->ftype.c_str(), it->fname.c_str(), info.msgname.c_str());
++        if (it->classtype == COWNEDOBJECT && !(info.classtype == COBJECT || info.classtype == CNAMEDOBJECT || info.classtype == COWNEDOBJECT)) {
++            errors->addError(it->nedElement, "cannot use cOwnedObject field '%s %s' in struct or non-cObject class '%s'\n", it->ftype.c_str(), it->fname.c_str(), info.msgname.c_str());
+         }
+     }
+ 
+@@ -732,6 +733,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
      it->feditable = getPropertyAsBool(it->fprops, "editable", false);
      it->editNotDisabled = getPropertyAsBool(it->fprops, "editable", true);
      it->fopaque = getPropertyAsBool(it->fprops, "opaque", false);
-+    it->overrideGetter = getPropertyAsBool(it->fprops, "overridegetter", false);
++    it->overrideGetter = getPropertyAsBool(it->fprops, "overridegetter", false) || getPropertyAsBool(it->fprops, "override", false);
++    it->overrideSetter = getPropertyAsBool(it->fprops, "overridesetter", false) || getPropertyAsBool(it->fprops, "override", false);
      it->tostring = getProperty(it->fprops, "tostring", "");
      it->fromstring = getProperty(it->fprops, "fromstring", "");
  
-@@ -950,6 +952,8 @@ void MsgCppGenerator::prepareForCodeGeneration(ClassInfo& info)
+@@ -950,6 +953,8 @@ void MsgCppGenerator::prepareForCodeGeneration(ClassInfo& info)
          info.fieldnamesuffix = "_var";
      }
  
@@ -40,7 +52,7 @@ index 6b452ac..5fd0bab 100644
      std::string s = getProperty(info.props, "implements");
      if (!s.empty()) {
          info.implements = StringTokenizer(s.c_str(), ",").asVector();
-@@ -1112,6 +1116,9 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1112,6 +1117,9 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
      else {
          H << "    virtual " << info.msgclass << " *dup() const override {return new " << info.msgclass << "(*this);}\n";
      }
@@ -50,11 +62,12 @@ index 6b452ac..5fd0bab 100644
      H << "    virtual void parsimPack(omnetpp::cCommBuffer *b) const override;\n";
      H << "    virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;\n";
      H << "\n";
-@@ -1120,28 +1127,29 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1120,29 +1128,31 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
          std::string pure;
          if (it->fisabstract)
              pure = " = 0";
 +        std::string overrideGetter(it->overrideGetter ? " override" : "");
++        std::string overrideSetter(it->overrideSetter ? " override" : "");
  
          bool isstruct = !it->fisprimitivetype;
          std::string constifprimitivetype = (!isstruct ? " const" : "");
@@ -64,8 +77,9 @@ index 6b452ac..5fd0bab 100644
 +            H << "    virtual " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k)" << constifprimitivetype << "" << pure << overrideGetter << ";\n";
              if (isstruct)
 -                H << "    virtual const " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k) const {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "(k);}\n";
+-            H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << ";\n";
 +                H << "    virtual const " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k) const " << overrideGetter << " {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "(k);}\n";
-             H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << ";\n";
++            H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << overrideSetter << ";\n";
          }
          else if (it->fisarray && it->farraysize.empty()) {
              H << "    virtual void " << it->alloc << "(" << it->fsizetype << " size)" << pure << ";\n";
@@ -74,19 +88,22 @@ index 6b452ac..5fd0bab 100644
 +            H << "    virtual " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k)" << constifprimitivetype << "" << pure << overrideGetter << ";\n";
              if (isstruct)
 -                H << "    virtual const " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k) const {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "(k);}\n";
+-            H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << ";\n";
 +                H << "    virtual const " << it->rettype << " " << it->getter << "(" << it->fsizetype << " k) const" << overrideGetter << " {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "(k);}\n";
-             H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << ";\n";
++            H << "    virtual void " << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")" << pure << overrideSetter << ";\n";
          }
          else {
 -            H << "    virtual " << it->rettype << " " << it->getter << "()" << constifprimitivetype << "" << pure << ";\n";
 +            H << "    virtual " << it->rettype << " " << it->getter << "()" << constifprimitivetype << "" << pure << overrideGetter << ";\n";
              if (isstruct)
 -                H << "    virtual const " << it->rettype << " " << it->getter << "() const {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "();}\n";
+-            H << "    virtual void " << it->setter << "(" << it->argtype << " " << it->argname << ")" << pure << ";\n";
 +                H << "    virtual const " << it->rettype << " " << it->getter << "() const" << overrideGetter << " {return const_cast<" << info.msgclass << "*>(this)->" << it->getter << "();}\n";
-             H << "    virtual void " << it->setter << "(" << it->argtype << " " << it->argname << ")" << pure << ";\n";
++            H << "    virtual void " << it->setter << "(" << it->argtype << " " << it->argname << ")" << pure << overrideSetter << ";\n";
          }
      }
-@@ -1410,6 +1418,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+     H << "};\n\n";
+@@ -1410,6 +1420,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -94,7 +111,7 @@ index 6b452ac..5fd0bab 100644
                  CC << "    if (k>=" << it->farraysize << ") throw omnetpp::cRuntimeError(\"Array of size " << it->farraysize << " indexed by %lu\", (unsigned long)k);\n";
                  CC << "    this->" << it->var << "[k] = " << it->argname << ";\n";
                  CC << "}\n\n";
-@@ -1417,6 +1426,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1417,6 +1428,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
              else if (it->fisarray && it->farraysize.empty()) {
                  CC << "void " << info.msgclass << "::" << it->alloc << "(" << it->fsizetype << " size)\n";
                  CC << "{\n";
@@ -102,7 +119,7 @@ index 6b452ac..5fd0bab 100644
                  CC << "    " << it->datatype << " *" << it->var << "2 = (size==0) ? nullptr : new " << it->datatype << "[size];\n";
                  CC << "    " << it->fsizetype << " sz = " << it->varsize << " < size ? " << it->varsize << " : size;\n";
                  CC << "    for (" << it->fsizetype << " i=0; i<sz; i++)\n";
-@@ -1444,6 +1454,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1444,6 +1456,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -110,7 +127,7 @@ index 6b452ac..5fd0bab 100644
                  CC << "    if (k>=" << it->varsize << ") throw omnetpp::cRuntimeError(\"Array of size %d indexed by %d\", " << it->varsize << ", k);\n";
                  CC << "    this->" << it->var << "[k] = " << it->argname << ";\n";
                  CC << "}\n\n";
-@@ -1455,6 +1466,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1455,6 +1468,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -119,18 +136,19 @@ index 6b452ac..5fd0bab 100644
                  CC << "}\n\n";
              }
 diff --git a/src/nedxml/msgcppgenerator.h b/src/nedxml/msgcppgenerator.h
-index 76c74d4..315d758 100644
+index 76c74d4..7c2896b 100644
 --- a/src/nedxml/msgcppgenerator.h
 +++ b/src/nedxml/msgcppgenerator.h
-@@ -151,6 +151,7 @@ class NEDXML_API MsgCppGenerator
+@@ -151,6 +151,8 @@ class NEDXML_API MsgCppGenerator
              bool feditable;         // @editable(true)
              bool editNotDisabled;   // true when field doesn't have property "@editable(false)"
              bool fopaque;         // @opaque(true)        // TODO: @opaque should rather be the attribute of the field's type, not the field itself
-+            bool overrideGetter;   // @overridegetter, uses when field getter function overrides a function in base class
++            bool overrideGetter;   // @overridegetter|@override, uses when field getter function overrides a function in base class
++            bool overrideSetter;   // @overridesetter|@override, uses when field setter function overrides a function in base class
  
            public:
              FieldInfo() : nedElement(nullptr), fisabstract(false), fispointer(false), fisarray(false), classtype(UNKNOWN), fnopack(false), feditable(false),fopaque(false) {}
-@@ -165,6 +166,7 @@ class NEDXML_API MsgCppGenerator
+@@ -165,6 +167,7 @@ class NEDXML_API MsgCppGenerator
  
          bool gap;                   // true if @customize
          bool omitgetverb;
