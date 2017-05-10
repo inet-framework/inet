@@ -52,7 +52,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=550,600;b=580,5,,,,1");
+                @display("p=590,600;b=660,5,,,,1");
         }
 
     connections allowunconnected:
