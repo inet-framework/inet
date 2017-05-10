@@ -55,6 +55,7 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
             rtsPacket->append(rtsFrame);
+            rtsPacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(dataOrMgmtPacket, rtsPacket, context->getIfs());
         }
         case 1:
@@ -409,6 +410,7 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
             blockAckReq->markImmutable();
             auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
+            blockAckPacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
             return new TransmitStep(blockAckPacket, context->getIfs());
         }
         case 1: {
