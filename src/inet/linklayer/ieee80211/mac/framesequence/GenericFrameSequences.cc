@@ -161,9 +161,12 @@ bool RepeatingFs::completeStep(FrameSequenceContext *context)
 std::string RepeatingFs::getHistory() const
 {
     ASSERT(step != -1);
-    std::string repeatHistory = "{" + histories.at(0);
-    for (int i = 1; i < (int) histories.size(); i++)
-        repeatHistory += " " + histories.at(i);
+    std::string repeatHistory = "{";
+    for (int i = 0; i < (int) histories.size(); i++) {
+        if (i != 0)
+            repeatHistory += " ";
+        repeatHistory += histories.at(i);
+    }
     return repeatHistory + "}";
 }
 
@@ -195,6 +198,7 @@ bool AlternativesFs::completeStep(FrameSequenceContext *context)
 std::string AlternativesFs::getHistory() const
 {
     ASSERT(step != -1);
+    ASSERT(0 <= elementIndex && elementIndex < elements.size());
     return elements[elementIndex]->getHistory();
 }
 
