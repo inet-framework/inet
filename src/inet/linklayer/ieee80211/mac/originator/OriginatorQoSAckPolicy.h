@@ -41,9 +41,9 @@ class INET_API OriginatorQoSAckPolicy : public ModeSetListener, public IOriginat
         virtual void initialize(int stage) override;
 
         virtual bool checkAgreementPolicy(const Ptr<Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
-        virtual std::map<MACAddress, std::vector<Ieee80211DataHeader*>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
-        virtual int computeStartingSequenceNumber(const std::vector<Ieee80211DataHeader*>& outstandingFrames) const;
-        virtual bool isCompressedBlockAckReq(const std::vector<Ieee80211DataHeader*>& outstandingFrames, int startingSequenceNumber) const;
+        virtual std::map<MACAddress, std::vector<Packet *>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
+        virtual int computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const;
+        virtual bool isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const;
 
     public:
         virtual bool isAckNeeded(const Ptr<Ieee80211MgmtHeader>& header) const override;

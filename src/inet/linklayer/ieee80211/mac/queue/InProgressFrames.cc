@@ -96,12 +96,12 @@ void InProgressFrames::dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, 
     inProgressFrames.remove_if(predicate);
 }
 
-std::vector<Ieee80211DataHeader*> InProgressFrames::getOutstandingFrames()
+std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 {
-    std::vector<Ieee80211DataHeader*> outstandingFrames;
+    std::vector<Packet *> outstandingFrames;
     for (auto frame : inProgressFrames) {
         if (ackHandler->isOutstandingFrame(frame->peekHeader<Ieee80211DataOrMgmtHeader>()))
-            outstandingFrames.push_back(check_and_cast<Ieee80211DataHeader*>(frame));
+            outstandingFrames.push_back(frame);
     }
     return outstandingFrames;
 }

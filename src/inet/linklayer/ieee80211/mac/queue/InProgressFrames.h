@@ -74,7 +74,7 @@ class INET_API InProgressFrames
         virtual void dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
-        virtual std::vector<Ieee80211DataHeader*> getOutstandingFrames();
+        virtual std::vector<Packet *> getOutstandingFrames();
 };
 
 } /* namespace ieee80211 */

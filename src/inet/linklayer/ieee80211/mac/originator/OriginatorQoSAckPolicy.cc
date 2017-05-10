@@ -40,29 +40,29 @@ bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211MgmtHeader>& frame) 
     return !frame->getReceiverAddress().isMulticast();
 }
 
-std::map<MACAddress, std::vector<Ieee80211DataHeader*>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
+std::map<MACAddress, std::vector<Packet *>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
 {
     auto outstandingFrames = inProgressFrames->getOutstandingFrames();
-    std::map<MACAddress, std::vector<Ieee80211DataHeader*>> outstandingFramesPerReceiver;
+    std::map<MACAddress, std::vector<Packet*>> outstandingFramesPerReceiver;
     for (auto frame : outstandingFrames)
-        outstandingFramesPerReceiver[frame->getReceiverAddress()].push_back(frame);
+        outstandingFramesPerReceiver[frame->peekHeader<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
     return outstandingFramesPerReceiver;
 }
 
 
-int OriginatorQoSAckPolicy::computeStartingSequenceNumber(const std::vector<Ieee80211DataHeader*>& outstandingFrames) const
+int OriginatorQoSAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
 {
     ASSERT(outstandingFrames.size() > 0);
-    int startingSequenceNumber = outstandingFrames[0]->getSequenceNumber();
+    int startingSequenceNumber = outstandingFrames[0]->peekHeader<Ieee80211DataHeader>()->getSequenceNumber();
     for (int i = 1; i < (int)outstandingFrames.size(); i++) {
-        int seqNum = outstandingFrames[i]->getSequenceNumber();
+        int seqNum = outstandingFrames[i]->peekHeader<Ieee80211DataHeader>()->getSequenceNumber();
         if (seqNum < startingSequenceNumber)
             startingSequenceNumber = seqNum;
     }
     return startingSequenceNumber;
 }
 
-bool OriginatorQoSAckPolicy::isCompressedBlockAckReq(const std::vector<Ieee80211DataHeader*>& outstandingFrames, int startingSequenceNumber) const
+bool OriginatorQoSAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const
 {
     // The Compressed Bitmap subfield of the BA Control field or BAR Control field shall be set to 1 in all
     // BlockAck and BlockAckReq frames sent from one HT STA to another HT STA and shall be set to 0 otherwise.
@@ -97,7 +97,7 @@ std::tuple<MACAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlock
             }
             MACAddress receiverAddress = largestOutstandingFrames->first;
             SequenceNumber startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
-            Tid tid = largestOutstandingFrames->second.at(0)->getTid();
+            Tid tid = largestOutstandingFrames->second.at(0)->peekHeader<Ieee80211DataHeader>()->getTid();
             return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
         }
     }
