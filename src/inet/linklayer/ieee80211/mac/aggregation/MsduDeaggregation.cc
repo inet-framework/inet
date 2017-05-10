@@ -72,7 +72,6 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         auto header = std::make_shared<Ieee80211DataHeader>();
         // dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
         header->setType(ST_DATA);
-        header->setTransmitterAddress(msduSubframeHeader->getSa());
         header->setToDS(amsduHeader->getToDS());
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);

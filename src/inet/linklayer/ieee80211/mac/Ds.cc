@@ -96,7 +96,6 @@ void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<Ieee80211DataOrMgm
     // move destination address to address1 (receiver address),
     // and fill address3 with original source address;
     ASSERT(!outgoingHeader->getAddress3().isUnspecified());
-    outgoingHeader->setTransmitterAddress(mib->address);
     outgoingHeader->setReceiverAddress(incomingHeader->getAddress3());
     outgoingHeader->setAddress3(incomingHeader->getTransmitterAddress());
 

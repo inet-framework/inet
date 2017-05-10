@@ -149,7 +149,6 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
 {
     const auto& header = std::make_shared<Ieee80211MgmtHeader>();
     header->setType(packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
-    header->setTransmitterAddress(mib->address);
     header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
@@ -239,7 +238,6 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     auto destAddress = macAddressReq->getDestAddress();
     const auto& header = std::make_shared<Ieee80211DataHeader>();
-    header->setTransmitterAddress(mib->address);
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         header->setReceiverAddress(destAddress);
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {

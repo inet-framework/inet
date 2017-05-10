@@ -61,6 +61,10 @@ void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, sim
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", frame->getName());
     take(packet);
+    const auto& h = packet->removeHeader<Ieee80211MacHeader>();
+    if (auto twoAddressHeader = std::dynamic_pointer_cast<Ieee80211TwoAddressHeader>(h))
+        twoAddressHeader->setTransmitterAddress(mac->getAddress());
+    packet->insertHeader(h);
     this->frame = packet->dup();
     header = frame;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle

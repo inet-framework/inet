@@ -62,7 +62,6 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     auto toDS = firstHeader->getToDS();
     auto fromDS = firstHeader->getFromDS();
     auto ra = firstHeader->getReceiverAddress();
-    auto ta = firstHeader->getTransmitterAddress();
     auto aggregatedFrame = new Packet("A-MSDU");
     for (int i = 0; i < (int)frames->size(); i++)
     {
@@ -92,7 +91,6 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     amsduHeader->setToDS(toDS);
     amsduHeader->setFromDS(fromDS);
     amsduHeader->setAMsduPresent(true);
-    amsduHeader->setTransmitterAddress(ta);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
     amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
