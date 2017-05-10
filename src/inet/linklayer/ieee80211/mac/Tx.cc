@@ -59,7 +59,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, sim
 {
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
-    Enter_Method("transmitFrame(\"%s\")", frame->getName());
+    Enter_Method("transmitFrame(\"%s\")", packet->getName());
     take(packet);
     const auto& h = packet->removeHeader<Ieee80211MacHeader>();
     if (auto twoAddressHeader = std::dynamic_pointer_cast<Ieee80211TwoAddressHeader>(h))

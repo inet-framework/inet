@@ -64,7 +64,7 @@ void Rx::handleMessage(cMessage *msg)
 
 bool Rx::lowerFrameReceived(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
-    Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
+    Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
     bool isFrameOk = isFcsOk(packet, frame);
