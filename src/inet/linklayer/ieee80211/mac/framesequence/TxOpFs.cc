@@ -55,12 +55,13 @@ int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceCont
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    const auto& macHeader = frameToTransmit->peekHeader<Ieee80211MacHeader>();
     if (context->getQoSContext()->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), context->getQoSContext()->txopProcedure))
         return 2;
-    if (dynamic_cast<Ieee80211MgmtHeader*>(frameToTransmit))
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(macHeader))
         return 3;
     else {
-        auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(frameToTransmit->peekHeader<Ieee80211MacHeader>());
+        auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(macHeader);
         OriginatorBlockAckAgreement* agreement = nullptr;
         if (context->getQoSContext()->blockAckAgreementHandler)
             agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataFrameToTransmit->getReceiverAddress(), dataFrameToTransmit->getTid());
