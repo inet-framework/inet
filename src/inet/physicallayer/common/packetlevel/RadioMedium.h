@@ -167,7 +167,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * Total number of radio frame sends.
      */
-    mutable long radioFrameSendCount;
+    mutable long signalSendCount;
     /**
      * Total number of reception computations.
      */
@@ -335,7 +335,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const ISignal *frame);
 
     virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
-    virtual Packet *receivePacket(const IRadio *receiver, ISignal *radioFrame) override;
+    virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 

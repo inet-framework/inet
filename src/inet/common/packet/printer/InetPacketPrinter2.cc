@@ -196,8 +196,8 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_RIP
 #ifdef WITH_RADIO
-        else if (const auto radioFrame = dynamic_cast<const Signal *>(chunk)) {
-            out << formatSignal(radioFrame);
+        else if (const auto signal = dynamic_cast<const Signal *>(chunk)) {
+            out << formatSignal(signal);
         }
 #endif // ifdef WITH_RADIO
         else

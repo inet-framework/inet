@@ -61,7 +61,7 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) = 0;
 
     virtual const ISignal *getCachedFrame(const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const ITransmission *transmission, const ISignal *radioFrame) = 0;
+    virtual void setCachedFrame(const ITransmission *transmission, const ISignal *signal) = 0;
     virtual void removeCachedFrame(const ITransmission *transmission) = 0;
     //@}
 
@@ -104,7 +104,7 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) = 0;
 
     virtual const ISignal *getCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const ISignal *radioFrame) = 0;
+    virtual void setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal) = 0;
     virtual void removeCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
     //@}
 };

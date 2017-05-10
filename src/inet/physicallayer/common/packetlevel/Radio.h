@@ -208,7 +208,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void captureReception(cMessage *timer);
 
     virtual void sendUp(Packet *macFrame);
-    virtual cMessage *createReceptionTimer(Signal *radioFrame) const;
+    virtual cMessage *createReceptionTimer(Signal *signal) const;
     virtual bool isReceptionTimer(const cMessage *message) const;
 
     virtual bool isReceiverMode(IRadio::RadioMode radioMode) const;

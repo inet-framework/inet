@@ -35,8 +35,8 @@ class INET_API CommunicationLog
   public:
     virtual void open();
     virtual void close();
-    virtual void writeTransmission(const IRadio *transmitter, const ISignal *radioFrame);
-    virtual void writeReception(const IRadio *receiver, const ISignal *radioFrame);
+    virtual void writeTransmission(const IRadio *transmitter, const ISignal *signal);
+    virtual void writeReception(const IRadio *receiver, const ISignal *signal);
 };
 
 } // namespace physicallayer

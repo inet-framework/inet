@@ -134,7 +134,7 @@ class INET_API IRadioMedium : public IPrintableObject
     /**
      * Returns the packet that was transmitted in the provided radio frame.
      */
-    virtual Packet *receivePacket(const IRadio *receiver, ISignal *radioFrame) = 0;
+    virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) = 0;
 
     /**
      * Returns the listening decision that describes what the receiver detects

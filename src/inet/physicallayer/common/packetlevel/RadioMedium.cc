@@ -50,7 +50,7 @@ RadioMedium::RadioMedium() :
     neighborCache(nullptr),
     communicationCache(nullptr),
     transmissionCount(0),
-    radioFrameSendCount(0),
+    signalSendCount(0),
     receptionComputationCount(0),
     interferenceComputationCount(0),
     receptionDecisionComputationCount(0),
@@ -127,7 +127,7 @@ void RadioMedium::finish()
     double decisionCacheHitPercentage = 100 * (double)cacheDecisionHitCount / (double)cacheDecisionGetCount;
     double resultCacheHitPercentage = 100 * (double)cacheResultHitCount / (double)cacheResultGetCount;
     EV_INFO << "Transmission count = " << transmissionCount << endl;
-    EV_INFO << "Radio frame send count = " << radioFrameSendCount << endl;
+    EV_INFO << "Radio frame send count = " << signalSendCount << endl;
     EV_INFO << "Reception computation count = " << receptionComputationCount << endl;
     EV_INFO << "Interference computation count = " << interferenceComputationCount << endl;
     EV_INFO << "Reception decision computation count = " << receptionDecisionComputationCount << endl;
@@ -139,7 +139,7 @@ void RadioMedium::finish()
     EV_INFO << "Reception decision cache hit = " << decisionCacheHitPercentage << " %" << endl;
     EV_INFO << "Reception result cache hit = " << resultCacheHitPercentage << " %" << endl;
     recordScalar("transmission count", transmissionCount);
-    recordScalar("radio frame send count", radioFrameSendCount);
+    recordScalar("radio frame send count", signalSendCount);
     recordScalar("reception computation count", receptionComputationCount);
     recordScalar("interference computation count", interferenceComputationCount);
     recordScalar("reception decision computation count", receptionDecisionComputationCount);
@@ -237,11 +237,11 @@ void RadioMedium::removeNonInterferingTransmissions()
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
     for (auto it = transmissions.cbegin(); it != transmissions.cbegin() + transmissionIndex; it++) {
         const ITransmission *transmission = *it;
-        const ISignal *radioFrame = communicationCache->getCachedFrame(transmission);
+        const ISignal *signal = communicationCache->getCachedFrame(transmission);
         communicationCache->removeCachedFrame(transmission);
         communicationCache->removeTransmission(transmission);
         emit(transmissionRemovedSignal, check_and_cast<const cObject *>(transmission));
-        delete radioFrame;
+        delete signal;
         delete transmission;
     }
     transmissions.erase(transmissions.begin(), transmissions.begin() + transmissionIndex);
@@ -505,27 +505,27 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     Enter_Method_Silent();
     take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
-    auto radioFrame = new Signal(transmission);
-    radioFrame->setName(packet->getName());
-    radioFrame->setDuration(transmission->getDuration());
-    radioFrame->encapsulate(packet);
-    return radioFrame;
+    auto signal = new Signal(transmission);
+    signal->setName(packet->getName());
+    signal->setDuration(transmission->getDuration());
+    signal->encapsulate(packet);
+    return signal;
 }
 
 ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 {
-    auto radioFrame = new Signal(transmission);
+    auto signal = new Signal(transmission);
     auto packet = transmission->getPacket();
-    radioFrame->setName(packet->getName());
-    radioFrame->setDuration(transmission->getDuration());
-    radioFrame->encapsulate(packet->dup());
-    return radioFrame;
+    signal->setName(packet->getName());
+    signal->setDuration(transmission->getDuration());
+    signal->encapsulate(packet->dup());
+    return signal;
 }
 
 void RadioMedium::sendToAffectedRadios(IRadio *radio, const ISignal *frame)
 {
-    const Signal *radioFrame = check_and_cast<const Signal *>(frame);
-    EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
+    const Signal *signal = check_and_cast<const Signal *>(frame);
+    EV_DEBUG << "Sending " << frame << " with " << signal->getBitLength() << " bits in " << signal->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << (IRadioMedium *)this << "." << endl;
     if (neighborCache && rangeFilter != RANGE_FILTER_ANYWHERE)
     {
@@ -561,34 +561,34 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
                  << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
                  << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
                  << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
-        auto radioFrame = static_cast<Signal *>(createReceiverSignal(transmission));
+        auto signal = static_cast<Signal *>(createReceiverSignal(transmission));
         cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-        radioFrame->clearTags();
-        const_cast<Radio *>(transmitterRadio)->sendDirect(radioFrame, propagationTime, transmission->getDuration(), gate);
-        communicationCache->setCachedFrame(receiverRadio, transmission, radioFrame);
-        radioFrameSendCount++;
+        signal->clearTags();
+        const_cast<Radio *>(transmitterRadio)->sendDirect(signal, propagationTime, transmission->getDuration(), gate);
+        communicationCache->setCachedFrame(receiverRadio, transmission, signal);
+        signalSendCount++;
     }
 }
 
 ISignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet)
 {
-    auto radioFrame = createTransmitterSignal(radio, packet);
-    auto transmission = radioFrame->getTransmission();
+    auto signal = createTransmitterSignal(radio, packet);
+    auto transmission = signal->getTransmission();
     addTransmission(radio, transmission);
     if (recordCommunicationLog)
-        communicationLog.writeTransmission(radio, radioFrame);
-    sendToAffectedRadios(const_cast<IRadio *>(radio), radioFrame);
-    communicationCache->setCachedFrame(transmission, radioFrame);
-    return radioFrame;
+        communicationLog.writeTransmission(radio, signal);
+    sendToAffectedRadios(const_cast<IRadio *>(radio), signal);
+    communicationCache->setCachedFrame(transmission, signal);
+    return signal;
 }
 
-Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *radioFrame)
+Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *signal)
 {
-    const ITransmission *transmission = radioFrame->getTransmission();
+    const ITransmission *transmission = signal->getTransmission();
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
     if (recordCommunicationLog)
-        communicationLog.writeReception(radio, radioFrame);
+        communicationLog.writeReception(radio, signal);
     const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
     communicationCache->removeCachedReceptionResult(radio, transmission);
     Packet *packet = result->getPacket()->dup();
@@ -689,15 +689,15 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                              << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
                              << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
                              << " in " << arrival->getStartPropagationTime() * 1E+6 << " us propagation time." << endl;
-                    auto radioFrame = static_cast<Signal *>(createReceiverSignal(transmission));
+                    auto signal = static_cast<Signal *>(createReceiverSignal(transmission));
                     simtime_t delay = arrival->getStartTime() - simTime();
-                    simtime_t duration = delay > 0 ? radioFrame->getDuration() : radioFrame->getDuration() + delay;
+                    simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-                    radioFrame->clearTags();
-                    const_cast<Radio *>(transmitterRadio)->sendDirect(radioFrame, delay > 0 ? delay : 0, duration, gate);
-                    communicationCache->setCachedFrame(receiverRadio, transmission, radioFrame);
-                    radioFrameSendCount++;
+                    signal->clearTags();
+                    const_cast<Radio *>(transmitterRadio)->sendDirect(signal, delay > 0 ? delay : 0, duration, gate);
+                    communicationCache->setCachedFrame(receiverRadio, transmission, signal);
+                    signalSendCount++;
                 }
             }
         }

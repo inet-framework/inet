@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IRADIOFRAME_H
-#define __INET_IRADIOFRAME_H
+#ifndef __INET_ISIGNAL_H
+#define __INET_ISIGNAL_H
 
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IListening.h"
@@ -60,5 +60,5 @@ class INET_API ISignal : public IPhysicalLayerFrame, public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IRADIOFRAME_H
+#endif // ifndef __INET_ISIGNAL_H
 

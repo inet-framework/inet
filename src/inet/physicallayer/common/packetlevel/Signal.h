@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RADIOFRAME_H
-#define __INET_RADIOFRAME_H
+#ifndef __INET_SIGNAL_H
+#define __INET_SIGNAL_H
 
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
 
@@ -50,5 +50,5 @@ class INET_API Signal : public cPacket, public ISignal
 
 } // namespace inet
 
-#endif // ifndef __INET_RADIOFRAME_H
+#endif // ifndef __INET_SIGNAL_H
 
