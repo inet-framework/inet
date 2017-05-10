@@ -114,7 +114,7 @@ class INET_API RtsFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() const override { return "TODO"; } // TODO: completeStep = true?
+        virtual std::string getHistory() const override { return "RTS"; } // TODO: completeStep = true?
 };
 
 
@@ -128,7 +128,7 @@ class INET_API CtsFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() const override { return "TODO"; } // TODO: completeStep = true?
+        virtual std::string getHistory() const override { return "CTS"; } // TODO: completeStep = true?
 };
 
 
