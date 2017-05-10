@@ -223,9 +223,9 @@ int NonQoSRecoveryProcedure::getRc(Packet *packet, const Ptr<Ieee80211DataOrMgmt
         throw cRuntimeError("The retry counter entry doesn't exist for message id: %d", packet->getId());
 }
 
-bool NonQoSRecoveryProcedure::isMulticastFrame(const Ptr<Ieee80211Frame>& frame)
+bool NonQoSRecoveryProcedure::isMulticastFrame(const Ptr<Ieee80211MacHeader>& frame)
 {
-    if (auto oneAddressFrame = std::dynamic_pointer_cast<Ieee80211OneAddressFrame>(frame))
+    if (auto oneAddressFrame = std::dynamic_pointer_cast<Ieee80211OneAddressHeader>(frame))
         return oneAddressFrame->getReceiverAddress().isMulticast();
     return false;
 }

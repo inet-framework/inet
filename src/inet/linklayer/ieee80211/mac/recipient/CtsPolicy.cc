@@ -32,7 +32,7 @@ void CtsPolicy::initialize(int stage)
     }
 }
 
-simtime_t CtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame) const
+simtime_t CtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
 {
     return rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
 }
@@ -42,7 +42,7 @@ simtime_t CtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee80211RT
 // subtraction of aSIFSTime and the number of microseconds required to transmit the CTS frame at a data rate
 // determined by the rules in 9.7.
 //
-simtime_t CtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame) const
+simtime_t CtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
 {
     simtime_t duration = rtsFrame->getDuration() - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
     return duration < 0 ? 0 : duration;
@@ -53,7 +53,7 @@ simtime_t CtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<Ieee80
 // a SIFS period if the NAV at the STA receiving the RTS frame indicates that
 // the medium is idle.
 //
-bool CtsPolicy::isCtsNeeded(const Ptr<Ieee80211RTSFrame>& rtsFrame) const
+bool CtsPolicy::isCtsNeeded(const Ptr<Ieee80211RtsFrame>& rtsFrame) const
 {
    return rx->isMediumFree();
 }

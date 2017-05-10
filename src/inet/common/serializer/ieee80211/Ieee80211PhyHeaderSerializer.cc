@@ -53,7 +53,7 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
 //        hdr->reserved = 0;
 //        hdr->service = 0;
 //        hdr->tail = 0;
-//        Ieee80211Frame *encapsulatedPacket = check_and_cast<Ieee80211Frame*>(ofdmPhyFrame->getEncapsulatedPacket());
+//        Ieee80211MacHeader *encapsulatedPacket = check_and_cast<Ieee80211MacHeader*>(ofdmPhyFrame->getEncapsulatedPacket());
 //        Ieee80211Serializer ieee80211Serializer;
 //        // Here we just write the header which is exactly 5 bytes in length.
 //        Buffer subBuffer(b, b.getRemainingSize());

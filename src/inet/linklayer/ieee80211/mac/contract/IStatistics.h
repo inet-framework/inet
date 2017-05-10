@@ -25,7 +25,7 @@ namespace ieee80211 {
 
 class MacUtils;
 class IRateControl;
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 class Ieee80211DataOrMgmtHeader;
 
 /**
@@ -50,7 +50,7 @@ class INET_API IStatistics
         virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) = 0;
         virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame, int retryCount) = 0;
         virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtHeader>& frame) = 0;
-        virtual void frameReceived(const Ptr<Ieee80211Frame>& frame) = 0;
+        virtual void frameReceived(const Ptr<Ieee80211MacHeader>& frame) = 0;
         virtual void erroneousFrameReceived() = 0;
 };
 

@@ -87,7 +87,7 @@ IFrameSequenceStep* CtsFs::prepareStep(FrameSequenceContext* context)
         case 0: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
             auto rtsPacket = txStep->getFrameToTransmit();
-            return new ReceiveStep(context->getCtsTimeout(rtsPacket, rtsPacket->peekHeader<Ieee80211RTSFrame>()));
+            return new ReceiveStep(context->getCtsTimeout(rtsPacket, rtsPacket->peekHeader<Ieee80211RtsFrame>()));
         }
         case 1:
             return nullptr;
@@ -103,7 +103,7 @@ bool CtsFs::completeStep(FrameSequenceContext* context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
         }
         default:
@@ -179,7 +179,7 @@ bool ManagementAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -247,7 +247,7 @@ bool AckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -276,7 +276,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto rtsFrame = packet->peekHeader<Ieee80211RTSFrame>();
+            auto rtsFrame = packet->peekHeader<Ieee80211RtsFrame>();
             return new ReceiveStep(context->getCtsTimeout(packet, rtsFrame));
         }
         case 2:
@@ -296,7 +296,7 @@ bool RtsCtsFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
         }
         default:
@@ -340,7 +340,7 @@ bool FragFrameAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -384,7 +384,7 @@ bool LastFrameAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -434,7 +434,7 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_BLOCKACK;
         }
         default:

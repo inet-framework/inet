@@ -35,7 +35,7 @@ void Ieee80211TesterMac::handleLowerPacket(cPacket *msg)
     if (msgCounter >= len)
         throw cRuntimeError("No action is defined for this msg %s", msg->getName());
     if (actions[msgCounter] == 'A')
-        rx->lowerFrameReceived(check_and_cast<Ieee80211Frame *>(msg));
+        rx->lowerFrameReceived(check_and_cast<Ieee80211MacHeader *>(msg));
     else if (actions[msgCounter] == 'B')
         delete msg; // block
     else

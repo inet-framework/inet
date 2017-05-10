@@ -40,7 +40,7 @@ void SingleProtectionMechanism::initialize(int stage)
 // frame, plus one ACK or BlockAck frame if required, plus any NDPs required, plus explicit
 // feedback if required, plus applicable IFS durations.
 //
-simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
+simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
 {
     // TODO: We assume that the RTS frame is not part of a dual clear-to-send
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingFrame, txop);
@@ -67,7 +67,7 @@ simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, 
 //  ii) If there is no response frame, the time required to transmit the pending frame, plus one
 //      SIFS interval
 //
-simtime_t SingleProtectionMechanism::computeCtsDurationField(const Ptr<Ieee80211CTSFrame>& ctsFrame)
+simtime_t SingleProtectionMechanism::computeCtsDurationField(const Ptr<Ieee80211CtsFrame>& ctsFrame)
 {
     throw cRuntimeError("Self CTS is not supported");
 }
@@ -176,11 +176,11 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
     throw cRuntimeError("Unknown frame");
 }
 
-simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
+simtime_t SingleProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame, TxopProcedure *txop, IRecipientQoSAckPolicy *ackPolicy)
 {
-    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(frame))
+    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame))
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingFrame, txop, ackPolicy);
-    else if (auto ctsFrame = std::dynamic_pointer_cast<Ieee80211CTSFrame>(frame))
+    else if (auto ctsFrame = std::dynamic_pointer_cast<Ieee80211CtsFrame>(frame))
         return computeCtsDurationField(ctsFrame);
     else if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BlockAckReq>(frame))
         return computeBlockAckReqDurationField(packet, blockAckReq);

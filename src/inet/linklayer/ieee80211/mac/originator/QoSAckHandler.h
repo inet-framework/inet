@@ -59,7 +59,7 @@ class INET_API QoSAckHandler : public IAckHandler
     public:
         virtual ~QoSAckHandler() { }
 
-        virtual void processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame);
+        virtual void processReceivedAck(const Ptr<Ieee80211AckFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame);
         virtual std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck);
 
         virtual void frameGotInProgress(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) override;

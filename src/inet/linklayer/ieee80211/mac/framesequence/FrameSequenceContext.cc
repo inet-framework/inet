@@ -41,17 +41,17 @@ simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<Ieee8021
     return qosContext ? qosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe) : nonQoSContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe);
 }
 
-simtime_t FrameSequenceContext::getCtsTimeout(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) const
+simtime_t FrameSequenceContext::getCtsTimeout(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
 {
     return rtsPolicy->getCtsTimeout(packet, rtsFrame);
 }
 
-bool FrameSequenceContext::isForUs(const Ptr<Ieee80211Frame>& frame) const
+bool FrameSequenceContext::isForUs(const Ptr<Ieee80211MacHeader>& frame) const
 {
     return frame->getReceiverAddress() == address || (frame->getReceiverAddress().isMulticast() && !isSentByUs(frame));
 }
 
-bool FrameSequenceContext::isSentByUs(const Ptr<Ieee80211Frame>& frame) const
+bool FrameSequenceContext::isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const
 {
     // FIXME:
     // Check the roles of the Addr3 field when aggregation is applied

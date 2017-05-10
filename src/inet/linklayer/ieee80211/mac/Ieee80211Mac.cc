@@ -187,7 +187,7 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto frame = packet->peekHeader<Ieee80211Frame>();
+    auto frame = packet->peekHeader<Ieee80211MacHeader>();
     if (rx->lowerFrameReceived(packet, frame)) {
         processLowerFrame(packet, frame);
     }
@@ -382,7 +382,7 @@ void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMg
         dcf->processUpperFrame(packet, frame);
 }
 
-void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame)
+void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
     Enter_Method("processLowerFrame(\"%s\")", frame->getName());
     take(packet);

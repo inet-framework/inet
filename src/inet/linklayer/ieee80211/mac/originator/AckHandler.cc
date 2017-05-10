@@ -41,7 +41,7 @@ AckHandler::Status AckHandler::getAckStatus(const Ptr<Ieee80211DataOrMgmtHeader>
     return it->second;
 }
 
-void AckHandler::processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame)
+void AckHandler::processReceivedAck(const Ptr<Ieee80211AckFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame)
 {
     auto id = SequenceControlField(ackedFrame->getSequenceNumber(), ackedFrame->getFragmentNumber());
     Status &status = getAckStatus(id);

@@ -137,7 +137,7 @@ Define_Module(BasicStatistics);
 //{
 //}
 //
-//void BasicStatistics::frameReceived(const Ptr<Ieee80211Frame>& frame)
+//void BasicStatistics::frameReceived(const Ptr<Ieee80211MacHeader>& frame)
 //{
 //    if (dynamic_cast<const Ptr<Ieee80211DataOrMgmtHeader>& >(frame)) {
 //        if (!utils->isForUs(frame))

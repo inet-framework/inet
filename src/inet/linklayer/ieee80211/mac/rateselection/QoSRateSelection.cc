@@ -47,7 +47,7 @@ void QoSRateSelection::initialize(int stage)
     }
 }
 
-const IIeee80211Mode* QoSRateSelection::getMode(Packet *packet, const Ptr<Ieee80211Frame>& frame)
+const IIeee80211Mode* QoSRateSelection::getMode(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
     auto modeReqTag = packet->getTag<Ieee80211ModeReq>();
     if (modeReqTag)
@@ -58,11 +58,11 @@ const IIeee80211Mode* QoSRateSelection::getMode(Packet *packet, const Ptr<Ieee80
     throw cRuntimeError("Missing mode");
 }
 
-bool QoSRateSelection::isControlResponseFrame(const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure)
+bool QoSRateSelection::isControlResponseFrame(const Ptr<Ieee80211MacHeader>& frame, TxopProcedure *txopProcedure)
 {
-    bool nonSelfCts = std::dynamic_pointer_cast<Ieee80211CTSFrame>(frame) && !txopProcedure->isTxopInitiator(frame);
+    bool nonSelfCts = std::dynamic_pointer_cast<Ieee80211CtsFrame>(frame) && !txopProcedure->isTxopInitiator(frame);
     bool blockAck = std::dynamic_pointer_cast<Ieee80211BlockAck>(frame) != nullptr;
-    bool ack = std::dynamic_pointer_cast<Ieee80211ACKFrame>(frame) != nullptr;
+    bool ack = std::dynamic_pointer_cast<Ieee80211AckFrame>(frame) != nullptr;
     return ack || blockAck || nonSelfCts;
 }
 
@@ -93,7 +93,7 @@ const IIeee80211Mode* QoSRateSelection::computeResponseAckFrameMode(Packet *pack
         return responseAckFrameMode;
 }
 
-const IIeee80211Mode* QoSRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame)
+const IIeee80211Mode* QoSRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame)
 {
     // TODO: BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
@@ -172,7 +172,7 @@ const IIeee80211Mode* QoSRateSelection::computeDataOrMgmtFrameMode(const Ptr<Iee
     }
 }
 
-const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure)
+const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<Ieee80211MacHeader>& frame, TxopProcedure *txopProcedure)
 {
     ASSERT(!isControlResponseFrame(frame, txopProcedure));
     if (controlFrameMode)
@@ -233,7 +233,7 @@ const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<Ieee80
         throw cRuntimeError("Control frames cannot terminate TXOPs");
 }
 
-const IIeee80211Mode* QoSRateSelection::computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure)
+const IIeee80211Mode* QoSRateSelection::computeMode(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, TxopProcedure *txopProcedure)
 {
     if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
         return computeDataOrMgmtFrameMode(dataOrMgmtFrame);
@@ -250,7 +250,7 @@ void QoSRateSelection::receiveSignal(cComponent* source, simsignal_t signalID, c
     }
 }
 
-void QoSRateSelection::frameTransmitted(Packet *packet, const Ptr<Ieee80211Frame>& frame)
+void QoSRateSelection::frameTransmitted(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
     auto receiverAddr = frame->getReceiverAddress();
     lastTransmittedFrameMode[receiverAddr] = getMode(packet, frame);

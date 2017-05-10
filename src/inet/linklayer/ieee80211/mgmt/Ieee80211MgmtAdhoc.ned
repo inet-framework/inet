@@ -39,8 +39,8 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
         string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/cogwheel");
     gates:
-        input macIn @labels(Ieee80211Frame);
-        output macOut @labels(Ieee80211Frame);
+        input macIn @labels(Ieee80211MacHeader);
+        output macOut @labels(Ieee80211MacHeader);
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
         output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }

@@ -60,7 +60,7 @@ std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mg
     return dataOrMgmtFrameReceived(mgmtPacket, mgmtFrame);
 }
 
-std::vector<Packet*> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame)
+std::vector<Packet*> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211MacHeader>& controlFrame)
 {
     return std::vector<Packet*>(); // has nothing to do
 }

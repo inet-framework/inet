@@ -34,14 +34,14 @@ class INET_API OriginatorProtectionMechanism : public ModeSetListener
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
+        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
         virtual simtime_t computeDataFrameDurationField(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
         virtual simtime_t computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
 
     public:
         virtual ~OriginatorProtectionMechanism() { }
 
-        virtual simtime_t computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
+        virtual simtime_t computeDurationField(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame);
 };
 
 } /* namespace ieee80211 */

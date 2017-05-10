@@ -58,7 +58,7 @@ module MACProtocolBase extends LayeredProtocolBase
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
 // typically in the 802.11 management module, see in ~Ieee80211Nic).
-// The base class for 802.11 frame messages is ~Ieee80211Frame, but this
+// The base class for 802.11 frame messages is ~Ieee80211MacHeader, but this
 // module expects ~Ieee80211DataOrMgmtHeader (a subclass) from upper layers
 // (the management module). This module will assign the transmitter address
 // (address 2) and the frame sequence number/fragment number fields in the

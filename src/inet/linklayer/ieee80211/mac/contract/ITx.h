@@ -24,7 +24,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 
 /**
  * Abstract interface for unconditionally transmitting a frame immediately
@@ -37,14 +37,14 @@ class INET_API ITx
         {
             public:
                 virtual ~ICallback() {}
-                virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211Frame>& frame) = 0;
+                virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) = 0;
         };
 
     public:
         virtual ~ITx() {}
 
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, ITx::ICallback *txCallback) = 0;
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 

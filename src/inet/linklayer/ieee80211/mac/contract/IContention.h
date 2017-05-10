@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 
 /**
  * Abstract interface for processes that implement contention-based channel access.

@@ -50,12 +50,12 @@ void Tx::initialize(int stage)
     }
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, ITx::ICallback *txCallback)
 {
     transmitFrame(packet, frame, SIMTIME_ZERO, txCallback);
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime_t ifs, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, simtime_t ifs, ITx::ICallback *txCallback)
 {
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;

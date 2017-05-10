@@ -32,7 +32,7 @@ class DataFs : public IFrameSequence
                 case FrameSequenceContext::Role::ORIGINATOR: {
                     switch (step) {
                         case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("DATA");
+                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("DATA");
                             frame->setType(ST_DATA);
                             return new TransmitStep(frame, 0);
                         }
@@ -111,7 +111,7 @@ class INET_API AckFs : public IFrameSequence {
                 case FrameSequenceContext::Role::RECIPIENT: {
                     switch (step) {
                         case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("ACK");
+                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("ACK");
                             frame->setType(ST_ACK);
                             return new TransmitStep(frame, 0);
                         }
@@ -172,7 +172,7 @@ class RtsCtsFs : public IFrameSequence {
                 case FrameSequenceContext::Role::ORIGINATOR: {
                     switch (step) {
                         case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("RTS");
+                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("RTS");
                             frame->setType(ST_RTS);
                             return new TransmitStep(frame, 0);
                         }
@@ -189,7 +189,7 @@ class RtsCtsFs : public IFrameSequence {
                         case 0:
                             return new ReceiveStep();
                         case 1: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("CTS");
+                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("CTS");
                             frame->setType(ST_CTS);
                             return new TransmitStep(frame, 0);
                         }
@@ -245,14 +245,14 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
     // prepare originator
     bool isOriginatorRunning = true;
     IFrameSequenceStep *originatorStep = nullptr;
-    Ieee80211Frame *originatorFrame = nullptr;
+    Ieee80211MacHeader *originatorFrame = nullptr;
     FrameSequenceContext *originatorContext = new FrameSequenceContext(FrameSequenceContext::Role::ORIGINATOR, nullptr, nullptr, nullptr, nullptr);
     originatorFrameSequence->startSequence(originatorContext, 0);
 
     // prepare recipient
     bool isRecipientRunning = true;
     IFrameSequenceStep *recipientStep = nullptr;
-    Ieee80211Frame *recipientFrame = nullptr;
+    Ieee80211MacHeader *recipientFrame = nullptr;
     FrameSequenceContext *recipientContext = new FrameSequenceContext(FrameSequenceContext::Role::RECIPIENT, nullptr, nullptr, nullptr, nullptr);
     recipientFrameSequence->startSequence(recipientContext, 0);
     

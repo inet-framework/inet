@@ -34,14 +34,14 @@ void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<Ieee8
     }
 }
 
-void RecipientAckProcedure::processTransmittedAck(const Ptr<Ieee80211ACKFrame>& ack)
+void RecipientAckProcedure::processTransmittedAck(const Ptr<Ieee80211AckFrame>& ack)
 {
     numSentAck++;
 }
 
-Ptr<Ieee80211ACKFrame> RecipientAckProcedure::buildAck(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const
+Ptr<Ieee80211AckFrame> RecipientAckProcedure::buildAck(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const
 {
-    auto ack = std::make_shared<Ieee80211ACKFrame>();
+    auto ack = std::make_shared<Ieee80211AckFrame>();
     ack->setReceiverAddress(dataOrMgmtFrame->getTransmitterAddress());
     return ack;
 }

@@ -27,7 +27,7 @@ class MACAddress;
 
 namespace ieee80211 {
 
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 class IContention;
 
 using namespace inet::physicallayer;  //TODO Khmm
@@ -60,7 +60,7 @@ class INET_API IRx
         virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;
         virtual void transmissionStateChanged(IRadio::TransmissionState state) = 0;
         virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) = 0;
-        virtual bool lowerFrameReceived(Packet *packet, const Ptr<Ieee80211Frame>& frame) = 0;
+        virtual bool lowerFrameReceived(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) = 0;
 };
 
 } // namespace ieee80211

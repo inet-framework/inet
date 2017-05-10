@@ -38,7 +38,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 // intervals. If the calculated duration includes a fractional microsecond, that value is rounded up to the next
 // higher integer. For RTS frames sent by QoS STAs, see 8.2.5.
 //
-simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame)
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingFrame);
     RateSelection::setFrameMode(pendingPacket, pendingFrame, pendingFrameMode); // FIXME: Kludge
@@ -99,9 +99,9 @@ simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *m
     }
 }
 
-simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingFrame)
 {
-    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(frame))
+    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame))
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingFrame);
     else if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
         return computeDataFrameDurationField(packet, dataFrame, pendingPacket, pendingFrame);

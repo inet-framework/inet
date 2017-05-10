@@ -35,7 +35,7 @@ class INET_API Mcf : public ICoordinationFunction, public cSimpleModule
 
     public:
         virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) override { throw cRuntimeError("Unimplemented!"); }
-        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame) override { throw cRuntimeError("Unimplemented!"); };
+        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) override { throw cRuntimeError("Unimplemented!"); };
         virtual void corruptedFrameReceived() override { throw cRuntimeError("Unimplemented!"); }
 };
 

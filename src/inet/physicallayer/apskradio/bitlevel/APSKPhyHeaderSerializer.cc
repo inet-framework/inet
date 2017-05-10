@@ -36,7 +36,7 @@ Ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const
 
 //BitVector *APSKPhyHeaderSerializer::serialize(const APSKPhyHeader *phyHeader) const
 //{
-//    const Ieee80211Frame *macFrame = check_and_cast<const Ieee80211Frame*>(phyHeader->getEncapsulatedPacket());
+//    const Ieee80211MacHeader *macFrame = check_and_cast<const Ieee80211MacHeader*>(phyHeader->getEncapsulatedPacket());
 //    uint16_t macFrameLength = macFrame->getByteLength();
 //    // KLUDGE: the serializer sometimes produces more or less bytes than the precomputed macFrameLength
 //    unsigned char *buffer = new unsigned char[macFrameLength + 1000];

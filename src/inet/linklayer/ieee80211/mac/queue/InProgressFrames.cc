@@ -61,7 +61,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 {
     auto frameToTransmit = getFrameToTransmit();
-    if (std::dynamic_pointer_cast<Ieee80211RTSFrame>(frame->peekHeader<Ieee80211Frame>()))
+    if (std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame->peekHeader<Ieee80211MacHeader>()))
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {

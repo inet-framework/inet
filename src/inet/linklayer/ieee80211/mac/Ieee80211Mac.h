@@ -38,7 +38,7 @@ using namespace physicallayer;
 
 class IContention;
 class IRx;
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 
 /**
  * Implements the IEEE 802.11 MAC. The features, standards compliance and
@@ -114,7 +114,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void sendDownPendingRadioConfigMsg();
 
     virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame);
-    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
+    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
 };
 
 } // namespace ieee80211

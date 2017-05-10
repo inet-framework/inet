@@ -118,7 +118,7 @@ std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet
     return std::vector<Packet *>({mgmtPacket});
 }
 
-std::vector<Packet *> RecipientQoSMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
+std::vector<Packet *> RecipientQoSMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211MacHeader>& controlFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(controlFrame)) {
         BlockAckReordering::ReorderBuffer frames;

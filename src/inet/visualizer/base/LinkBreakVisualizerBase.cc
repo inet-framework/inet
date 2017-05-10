@@ -124,7 +124,7 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
 //            transmitterAddress = frame->getTransmitterAddress();
 //            receiverAddress = frame->getReceiverAddress();
 //        }
-        if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressFrame *>(object)) {
+        if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressHeader *>(object)) {
             transmitterAddress = frame->getTransmitterAddress();
             receiverAddress = frame->getReceiverAddress();
         }

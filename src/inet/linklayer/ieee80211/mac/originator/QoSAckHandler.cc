@@ -63,7 +63,7 @@ QoSAckHandler::Status QoSAckHandler::getQoSDataAckStatus(const Ptr<Ieee80211Data
     return it->second;
 }
 
-void QoSAckHandler::processReceivedAck(const Ptr<Ieee80211ACKFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame)
+void QoSAckHandler::processReceivedAck(const Ptr<Ieee80211AckFrame>& ack, const Ptr<Ieee80211DataOrMgmtHeader>& ackedFrame)
 {
     if (ackedFrame->getType() == ST_DATA_WITH_QOS) {
         auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(ackedFrame);

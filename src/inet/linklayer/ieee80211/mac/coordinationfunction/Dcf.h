@@ -108,9 +108,9 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual bool isReceptionInProgress();
         virtual FrameSequenceContext *buildContext();
 
-        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
-        virtual void recipientProcessControlFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
-        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211Frame>& frame);
+        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
+        virtual void recipientProcessControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
+        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211MacHeader>& frame);
 
     protected:
         // IChannelAccess::ICallback
@@ -126,21 +126,21 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
         // ITx::ICallback
-        virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
+        virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) override;
 
         // IProcedureCallback
-       virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame) override;
+       virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211MacHeader>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211MacHeader>& receivedFrame) override;
        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame) override;
 
-       virtual bool isSentByUs(const Ptr<Ieee80211Frame>& frame) const;
-       virtual bool isForUs(const Ptr<Ieee80211Frame>& frame) const;
+       virtual bool isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const;
+       virtual bool isForUs(const Ptr<Ieee80211MacHeader>& frame) const;
 
     public:
         virtual ~Dcf();
 
         // ICoordinationFunction
         virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) override;
-        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
+        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) override;
         virtual void corruptedFrameReceived() override;
 };
 

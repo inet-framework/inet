@@ -53,7 +53,7 @@ class INET_API NonQoSRecoveryProcedure : public cSimpleModule, public IRecoveryP
         virtual void incrementCounter(const Ptr<Ieee80211DataOrMgmtHeader>& frame, std::map<SequenceControlField, int>& retryCounter);
         virtual void resetContentionWindow();
         virtual int getRc(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame, std::map<SequenceControlField, int>& retryCounter);
-        virtual bool isMulticastFrame(const Ptr<Ieee80211Frame>& frame);
+        virtual bool isMulticastFrame(const Ptr<Ieee80211MacHeader>& frame);
         virtual void incrementStationSrc(StationRetryCounters *stationCounters);
         virtual void incrementStationLrc(StationRetryCounters *stationCounters);
 

@@ -43,7 +43,7 @@ void RtsPolicy::initialize(int stage)
 // be set on a per-STA basis. This mechanism allows STAs to be configured to initiate RTS/CTS either always,
 // never, or only on frames longer than a specified length.
 //
-bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211Frame>& protectedFrame) const
+bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& protectedFrame) const
 {
     if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedFrame))
         return packet->getByteLength() >= rtsThreshold && !protectedFrame->getReceiverAddress().isMulticast();
@@ -58,7 +58,7 @@ bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211Frame>& protected
 // the transmission of the RTS has failed, and this STA shall invoke its backoff procedure upon expiration of the
 // CTSTimeout interval.
 //
-simtime_t RtsPolicy::getCtsTimeout(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) const
+simtime_t RtsPolicy::getCtsTimeout(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
 {
     return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(packet, rtsFrame)->getPhyRxStartDelay() : ctsTimeout;
 }

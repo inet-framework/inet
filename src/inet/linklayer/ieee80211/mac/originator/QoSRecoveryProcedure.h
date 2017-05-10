@@ -63,7 +63,7 @@ class INET_API QoSRecoveryProcedure : public cSimpleModule, public IRecoveryProc
         void resetContentionWindow();
         int doubleCw(int cw);
         int getRc(Packet *packet, const Ptr<Ieee80211DataHeader>& frame, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter);
-        bool isMulticastFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
+        bool isMulticastFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame);
 
     public:
         virtual void multicastFrameTransmitted();

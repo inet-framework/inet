@@ -117,7 +117,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 // Frame control format fields not supported by this model are omitted:
 // MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
-class Ieee80211Frame extends FieldsChunk
+class Ieee80211MacHeader extends FieldsChunk
 {
     chunkLength = bit(LENGTH_ACK) - byte(4);
     short type @enum(Ieee80211FrameType); // type and subtype
@@ -135,14 +135,14 @@ class Ieee80211Frame extends FieldsChunk
 //
 // Format of a 802.11 frame with address1 present, like ACK and CTS
 //
-class Ieee80211OneAddressFrame extends Ieee80211Frame
+class Ieee80211OneAddressHeader extends Ieee80211MacHeader
 {
 }
 
 //
 // Format of the 802.11 ACK frame
 //
-class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
+class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 {
     chunkLength = bit(LENGTH_ACK) - byte(4);
     type = ST_ACK;
@@ -151,7 +151,7 @@ class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 //
 // Format of a 802.11 frame with address1 and address2 present
 //
-class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
+class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
     chunkLength = bit(LENGTH_RTS) - byte(4);
     MACAddress transmitterAddress; // aka address2
@@ -160,7 +160,7 @@ class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 //
 // Format of the 802.11 RTS frame
 //
-class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
+class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 {
     chunkLength = bit(LENGTH_RTS) - byte(4);
     type = ST_RTS;
@@ -169,7 +169,7 @@ class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 //
 // Format of the 802.11 CTS frame
 //
-class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
+class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 {
     chunkLength = bit(LENGTH_CTS) - byte(4);
     type = ST_CTS;
@@ -178,7 +178,7 @@ class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 //
 // Common base class for 802.11 data and management frames
 //
-class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressFrame
+class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
     chunkLength = bit(LENGTH_MGMT) - byte(4);
     MACAddress address3;
@@ -315,12 +315,10 @@ class Ieee80211Delba extends Ieee80211ActionFrame
     int reasonCode;
 }
 
-
-
 //
 // 8.3.1.8 BlockAckReq frame format
 //
-class Ieee80211BlockAckReq extends Ieee80211TwoAddressFrame
+class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 {
     // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
@@ -348,7 +346,6 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
     multiTid = 0;
     compressedBitmap = 0;
 }
-
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
@@ -390,11 +387,10 @@ class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
     // TODO: unimplemented
 }
 
-
 //
 // 8.3.1.9 BlockAck frame format -- 410p.
 //
-class Ieee80211BlockAck extends Ieee80211TwoAddressFrame
+class Ieee80211BlockAck extends Ieee80211TwoAddressHeader
 {
     // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.

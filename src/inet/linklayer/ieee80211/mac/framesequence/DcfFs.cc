@@ -61,7 +61,7 @@ int DcfFs::selectSelfCtsOrRtsCts(AlternativesFs *frameSequence, FrameSequenceCon
 
 bool DcfFs::hasMoreFragments(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return context->getInProgressFrames()->hasInProgressFrames() && context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211Frame>()->getMoreFragments();
+    return context->getInProgressFrames()->hasInProgressFrames() && context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211MacHeader>()->getMoreFragments();
 }
 
 bool DcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
@@ -72,7 +72,7 @@ bool DcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 bool DcfFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
     auto protectedFrame = context->getInProgressFrames()->getFrameToTransmit();
-    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekHeader<Ieee80211Frame>());
+    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekHeader<Ieee80211MacHeader>());
 }
 
 bool DcfFs::isCtsOrRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
@@ -86,7 +86,7 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 {
     if (context->getInProgressFrames()->hasInProgressFrames()) {
         auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-        return frameToTransmit->peekHeader<Ieee80211Frame>()->getReceiverAddress().isMulticast();
+        return frameToTransmit->peekHeader<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
     }
     else
         return false;
@@ -95,12 +95,12 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 int DcfFs::selectMulticastDataOrMgmt(AlternativesFs* frameSequence, FrameSequenceContext* context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frameToTransmit->peekHeader<Ieee80211Frame>()) ? 0 : 1;
+    return std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frameToTransmit->peekHeader<Ieee80211MacHeader>()) ? 0 : 1;
 }
 
 bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    return context->getInProgressFrames()->hasInProgressFrames() && std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211Frame>());
+    return context->getInProgressFrames()->hasInProgressFrames() && std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211MacHeader>());
 }
 
 } // namespace ieee80211

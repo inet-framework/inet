@@ -60,7 +60,7 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
     if (dynamic_cast<Ieee80211MgmtHeader*>(frameToTransmit))
         return 3;
     else {
-        auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(frameToTransmit->peekHeader<Ieee80211Frame>());
+        auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(frameToTransmit->peekHeader<Ieee80211MacHeader>());
         OriginatorBlockAckAgreement* agreement = nullptr;
         if (context->getQoSContext()->blockAckAgreementHandler)
             agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataFrameToTransmit->getReceiverAddress(), dataFrameToTransmit->getTid());
@@ -77,7 +77,7 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
 bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
     auto protectedFrame = context->getInProgressFrames()->getFrameToTransmit();
-    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekHeader<Ieee80211Frame>());
+    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekHeader<Ieee80211MacHeader>());
 }
 
 bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)

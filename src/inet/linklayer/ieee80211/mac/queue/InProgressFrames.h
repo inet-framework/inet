@@ -40,7 +40,7 @@ class INET_API InProgressFrames
                     seqAndFragNums(seqAndFragNums) {}
 
                 bool operator() (Packet *packet) {
-                    const auto& frame = packet->peekHeader<Ieee80211Frame>();
+                    const auto& frame = packet->peekHeader<Ieee80211MacHeader>();
                     if (frame->getType() == ST_DATA_WITH_QOS) {
                         auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
                         return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;

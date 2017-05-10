@@ -69,7 +69,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
     std::string formatICMPPacket(const ICMPHeader *packet) const;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IEEE80211
-    std::string formatIeee80211Frame(const ieee80211::Ieee80211Frame *packet) const;
+    std::string formatIeee80211Frame(const ieee80211::Ieee80211MacHeader *packet) const;
 #endif // ifdef WITH_IEEE80211
 #ifdef WITH_RIP
     std::string formatRIPPacket(const RIPPacket *packet) const;
@@ -186,7 +186,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IEEE80211
-        else if (const auto ieee80211Hdr = dynamic_cast<const ieee80211::Ieee80211Frame *>(chunk)) {
+        else if (const auto ieee80211Hdr = dynamic_cast<const ieee80211::Ieee80211MacHeader *>(chunk)) {
             out << formatIeee80211Frame(ieee80211Hdr);
         }
 #endif // ifdef WITH_IEEE80211
@@ -249,7 +249,7 @@ std::string InetPacketPrinter2::formatARPPacket(const ARPPacket *packet) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatIeee80211Frame(const ieee80211::Ieee80211Frame *packet) const
+std::string InetPacketPrinter2::formatIeee80211Frame(const ieee80211::Ieee80211MacHeader *packet) const
 {
     using namespace ieee80211;
 
@@ -314,7 +314,7 @@ std::string InetPacketPrinter2::formatIeee80211Frame(const ieee80211::Ieee80211F
             break;
 
         case ST_RTS: {
-            const Ieee80211RTSFrame *pk = check_and_cast<const Ieee80211RTSFrame *>(packet);
+            const Ieee80211RtsFrame *pk = check_and_cast<const Ieee80211RtsFrame *>(packet);
             os << " rts " << pk->getTransmitterAddress() << " to " << packet->getReceiverAddress();
             break;
         }

@@ -30,8 +30,8 @@ class INET_API ICtsProcedure
 {
     public:
         virtual ~ICtsProcedure() { }
-        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
-        virtual void processTransmittedCts(const Ptr<Ieee80211CTSFrame>& ctsFrame) = 0;
+        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
+        virtual void processTransmittedCts(const Ptr<Ieee80211CtsFrame>& ctsFrame) = 0;
 };
 
 } /* namespace ieee80211 */

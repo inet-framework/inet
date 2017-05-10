@@ -54,8 +54,8 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         @signal[NF_L2_AP_ASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
         @signal[NF_L2_AP_DISASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
     gates:
-        input macIn @labels(Ieee80211Frame); // from ~Ieee80211Mac
-        output macOut @labels(Ieee80211Frame); // to ~Ieee80211Mac
+        input macIn @labels(Ieee80211MacHeader); // from ~Ieee80211Mac
+        output macOut @labels(Ieee80211MacHeader); // to ~Ieee80211Mac
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
         output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }
