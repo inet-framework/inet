@@ -30,11 +30,20 @@
 // @see ~RTPAVProfilePayload32Receiver
 //
 
+cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
+}}
+
+namespace inet;
+
+class FieldsChunk extends cObject;
+
 namespace inet::rtp;
 
-packet RTPMpegPacket
+class RTPMpegHeader extends FieldsChunk
 {
-    byteLength = 4;
+    chunkLength = byte(4);
     int headerLength = 4;
     int payloadLength; // size of the mpeg data
     int pictureType;   // picture type of the frame the data in this packet belongs to.

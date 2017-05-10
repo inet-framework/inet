@@ -22,7 +22,7 @@
 
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Receiver.h"
 
-#include "inet/common/packet/chunk/cPacketChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
 #include "inet/transportlayer/rtp/RTPPacket.h"
 
@@ -109,8 +109,7 @@ void RTPAVProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
             while (!_queue->isEmpty()) {
                 Packet *qPacket = check_and_cast<Packet *>(_queue->pop());
                 const auto& qRtpHeader = qPacket->popHeader<RtpHeader>();
-                const auto& qMpegPk = qPacket->peekHeader<cPacketChunk>();
-                RTPMpegPacket * mpegPacket = check_and_cast<RTPMpegPacket *>(qMpegPk->getPacket());
+                const auto& mpegPacket = qPacket->peekHeader<RTPMpegHeader>();
                 if (pictureType == 0)
                     pictureType = mpegPacket->getPictureType();
                 frameSize = frameSize + mpegPacket->getPayloadLength();
