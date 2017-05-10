@@ -110,7 +110,7 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee802
     responsePacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(receivedFrame))
-        responseMode = rateSelection->computeResponseCtsFrameMode(responsePacket, rtsFrame);
+        responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
     else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(receivedFrame))
         responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtFrame);
     else
