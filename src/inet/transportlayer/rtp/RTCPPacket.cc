@@ -11,13 +11,13 @@ Register_Class(RTCPPacket);
 
 Register_Class(RTCPReceiverReportPacket);
 
-RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name, int kind)
-    : RTCPReceiverReportPacket_Base(name, kind)
+RTCPReceiverReportPacket::RTCPReceiverReportPacket()
+    : RTCPReceiverReportPacket_Base()
 {
     receptionReports.setName("ReceptionReports");
     // an empty rtcp receiver report packet is 4 bytes
     // longer, the ssrc identifier is stored in it
-    addByteLength(4);
+    setChunkLength(getChunkLength() + byte(4));
 };
 
 void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report)
@@ -25,22 +25,22 @@ void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report)
     receptionReports.add(report);
     count++;
     // an rtcp receiver report is 24 bytes long
-    addByteLength(24);
+    setChunkLength(getChunkLength() + byte(24));
 };
 
 Register_Class(RTCPSenderReportPacket);
 
-RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name, int kind)
-    : RTCPSenderReportPacket_Base(name, kind)
+RTCPSenderReportPacket::RTCPSenderReportPacket()
+    : RTCPSenderReportPacket_Base()
 {
     // a sender report is 20 bytes long
-    addByteLength(20);
+    setChunkLength(getChunkLength() + byte(20));
 };
 
 Register_Class(RTCPSDESPacket);
 
-RTCPSDESPacket::RTCPSDESPacket(const char *name, int kind)
-    : RTCPSDESPacket_Base(name, kind)
+RTCPSDESPacket::RTCPSDESPacket()
+    : RTCPSDESPacket_Base()
 {
     sdesChunks.setName("SDESChunks");
     // no addByteLength() needed, sdes chunks
@@ -54,16 +54,16 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk)
     count++;
     // the size of the rtcp packet increases by the
     // size of the sdes chunk (including ssrc)
-    addByteLength(sdesChunk->getLength());
+    setChunkLength(getChunkLength() + byte(sdesChunk->getLength()));
 };
 
 Register_Class(RTCPByePacket);
 
-RTCPByePacket::RTCPByePacket(const char *name, int kind)
-    : RTCPByePacket_Base(name, kind)
+RTCPByePacket::RTCPByePacket()
+    : RTCPByePacket_Base()
 {
     // space for the ssrc identifier
-    addByteLength(4);
+    setChunkLength(getChunkLength() + byte(4));
 };
 
 } // namespace rtp

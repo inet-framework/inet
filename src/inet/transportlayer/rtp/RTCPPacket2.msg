@@ -23,9 +23,9 @@ class cArray;
 
 namespace inet::rtp;
 
-packet RTCPPacket;
+class RTCPPacket extends cObject;
 
-packet RTCPReceiverReportPacket extends RTCPPacket
+class RTCPReceiverReportPacket extends RTCPPacket
 {
     packetType = RTCP_PT_RR;
     @customize(true);  // see the generated C++ header for more info
@@ -33,14 +33,14 @@ packet RTCPReceiverReportPacket extends RTCPPacket
     cArray receptionReports;
 }
 
-packet RTCPSDESPacket extends RTCPPacket
+class RTCPSDESPacket extends RTCPPacket
 {
     packetType = RTCP_PT_SDES;
     @customize(true);  // see the generated C++ header for more info
     cArray sdesChunks;
 }
 
-packet RTCPByePacket extends RTCPPacket
+class RTCPByePacket extends RTCPPacket
 {
     packetType = RTCP_PT_BYE;
     count = 1;

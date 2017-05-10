@@ -21,7 +21,6 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/RTCPPacket.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPParticipantInfo.h"
@@ -258,19 +257,19 @@ void RTCP::createPacket()
 {
     // first packet in an rtcp compound packet must
     // be a sender or receiver report
-    RTCPReceiverReportPacket *reportPacket;
+    std::shared_ptr<RTCPReceiverReportPacket> reportPacket = nullptr;
 
     // if this rtcp end system is a sender (see SenderInformation::isSender() for
     // details) insert a sender report
     if (_senderInfo->isSender()) {
-        RTCPSenderReportPacket *senderReportPacket = new RTCPSenderReportPacket("SenderReportPacket");
+        const auto& senderReportPacket = std::make_shared<RTCPSenderReportPacket>();
         SenderReport *senderReport = _senderInfo->senderReport(simTime());
         senderReportPacket->setSenderReport(*senderReport);
         delete senderReport;
         reportPacket = senderReportPacket;
     }
     else {
-        reportPacket = new RTCPReceiverReportPacket("ReceiverReportPacket");
+        reportPacket = std::make_shared<RTCPReceiverReportPacket>();
     }
     reportPacket->setSsrc(_senderInfo->getSsrc());
 
@@ -295,21 +294,21 @@ void RTCP::createPacket()
     }
 
     // insert source description items (at least common name)
-    RTCPSDESPacket *sdesPacket = new RTCPSDESPacket("SDESPacket");
+    const auto& sdesPacket = std::make_shared<RTCPSDESPacket>();
 
     SDESChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
 
     Packet *compoundPacket = new Packet("RTCPCompoundPacket");
 
-    compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(reportPacket));
-    compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(sdesPacket));
+    compoundPacket->insertTrailer(reportPacket);
+    compoundPacket->insertTrailer(sdesPacket);
 
     // create rtcp app/bye packets if needed
     if (_leaveSession) {
-        RTCPByePacket *byePacket = new RTCPByePacket("ByePacket");
+        const auto& byePacket = std::make_shared<RTCPByePacket>();
         byePacket->setSsrc(_senderInfo->getSsrc());
-        compoundPacket->insertTrailer(std::make_shared<cPacketChunk>(byePacket));
+        compoundPacket->insertTrailer(byePacket);
     }
 
     calculateAveragePacketSize(compoundPacket->getByteLength());
@@ -369,8 +368,8 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
 
     for (int i = 0; packet->getByteLength() > 0; i++) {
         // remove the rtcp packet from the rtcp compound packet
-        const auto& cPk = packet->popHeader<cPacketChunk>();    //FIXME KLUDGE: later: packet->popHeader<RTCPPacket>();
-        RTCPPacket *rtcpPacket = check_and_cast<RTCPPacket *>(cPk->getPacket());
+        const auto& _rtcpPacket = packet->popHeader<RTCPPacket>();
+        RTCPPacket *rtcpPacket = _rtcpPacket.get();
         if (rtcpPacket) {
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:

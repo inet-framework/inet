@@ -31,7 +31,7 @@ namespace rtp {
 class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 {
   public:
-    RTCPReceiverReportPacket(const char *name = nullptr, int kind = 0);
+    RTCPReceiverReportPacket();
     RTCPReceiverReportPacket(const RTCPReceiverReportPacket& other) : RTCPReceiverReportPacket_Base(other) {}
     RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& other) { RTCPReceiverReportPacket_Base::operator=(other); return *this; }
     virtual RTCPReceiverReportPacket *dup() const override { return new RTCPReceiverReportPacket(*this); }
@@ -45,7 +45,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 class INET_API RTCPSDESPacket : public RTCPSDESPacket_Base
 {
   public:
-    RTCPSDESPacket(const char *name = nullptr, int kind = 0);
+    RTCPSDESPacket();
     RTCPSDESPacket(const RTCPSDESPacket& other) : RTCPSDESPacket_Base(other) {}
     RTCPSDESPacket& operator=(const RTCPSDESPacket& other) { RTCPSDESPacket_Base::operator=(other); return *this; }
     virtual RTCPSDESPacket *dup() const override { return new RTCPSDESPacket(*this); }
@@ -56,7 +56,7 @@ class INET_API RTCPSDESPacket : public RTCPSDESPacket_Base
 class INET_API RTCPByePacket : public RTCPByePacket_Base
 {
   public:
-    RTCPByePacket(const char *name = nullptr, int kind = 0);
+    RTCPByePacket();
     RTCPByePacket(const RTCPByePacket& other) : RTCPByePacket_Base(other) {}
     RTCPByePacket& operator=(const RTCPByePacket& other) { RTCPByePacket_Base::operator=(other); return *this; }
     virtual RTCPByePacket *dup() const override { return new RTCPByePacket(*this); }

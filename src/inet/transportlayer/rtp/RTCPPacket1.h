@@ -31,7 +31,7 @@ namespace rtp {
 class INET_API RTCPPacket : public RTCPPacket_Base
 {
   public:
-    RTCPPacket(const char *name = nullptr, int kind = 0) : RTCPPacket_Base(name, kind) {};
+    RTCPPacket() : RTCPPacket_Base() {};
     RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other) {}
     RTCPPacket& operator=(const RTCPPacket& other) { RTCPPacket_Base::operator=(other); return *this; }
     virtual RTCPPacket *dup() const override { return new RTCPPacket(*this); }
@@ -41,7 +41,7 @@ class INET_API RTCPPacket : public RTCPPacket_Base
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
-    virtual int getRtcpLength() const override { return (int)(getByteLength() / 4) - 1; }
+    virtual int getRtcpLength() const override { return (int)(byte(getChunkLength()).get() / 4) - 1; }
     virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
 };
 

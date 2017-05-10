@@ -31,7 +31,7 @@ namespace rtp {
 class INET_API RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
   public:
-    RTCPSenderReportPacket(const char *name = nullptr, int kind = 0);
+    RTCPSenderReportPacket();
     RTCPSenderReportPacket(const RTCPSenderReportPacket& other) : RTCPSenderReportPacket_Base(other) {}
     RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) { RTCPSenderReportPacket_Base::operator=(other); return *this; }
     virtual RTCPSenderReportPacket *dup() const override { return new RTCPSenderReportPacket(*this); }

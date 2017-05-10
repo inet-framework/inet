@@ -22,7 +22,6 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RTPProfile.h"

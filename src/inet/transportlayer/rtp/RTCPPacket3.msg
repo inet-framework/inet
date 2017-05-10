@@ -22,9 +22,9 @@ cplusplus {{
 namespace inet::rtp;
 
 class noncobject SenderReport;
-packet RTCPReceiverReportPacket;
+class RTCPReceiverReportPacket extends cObject;
 
-packet RTCPSenderReportPacket extends RTCPReceiverReportPacket
+class RTCPSenderReportPacket extends RTCPReceiverReportPacket
 {
     packetType = RTCP_PT_SR;
     @customize(true);  // see the generated C++ header for more info
