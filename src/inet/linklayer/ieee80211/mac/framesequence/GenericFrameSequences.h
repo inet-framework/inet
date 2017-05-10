@@ -46,7 +46,7 @@ class INET_API SequentialFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() override;
+        virtual std::string getHistory() const override;
 };
 
 class INET_API OptionalFs : public IFrameSequence {
@@ -68,7 +68,7 @@ class INET_API OptionalFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() override;
+        virtual std::string getHistory() const override;
 };
 
 class INET_API RepeatingFs : public IFrameSequence {
@@ -93,7 +93,7 @@ class INET_API RepeatingFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() override;
+        virtual std::string getHistory() const override;
 };
 
 class INET_API AlternativesFs : public IFrameSequence {
@@ -115,7 +115,7 @@ class INET_API AlternativesFs : public IFrameSequence {
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
         virtual bool completeStep(FrameSequenceContext *context) override;
 
-        virtual std::string getHistory() override;
+        virtual std::string getHistory() const override;
 };
 
 } // namespace ieee80211

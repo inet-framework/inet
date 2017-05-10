@@ -55,7 +55,7 @@ bool SequentialFs::completeStep(FrameSequenceContext *context)
     return elements[elementIndex]->completeStep(context);
 }
 
-std::string SequentialFs::getHistory()
+std::string SequentialFs::getHistory() const
 {
     ASSERT(step != -1);
     std::string history = "(";
@@ -100,7 +100,7 @@ bool OptionalFs::completeStep(FrameSequenceContext *context)
     return element->completeStep(context);
 }
 
-std::string OptionalFs::getHistory()
+std::string OptionalFs::getHistory() const
 {
     ASSERT(step != -1);
     return apply ? "["+ element->getHistory() + "]" : "";
@@ -158,7 +158,7 @@ bool RepeatingFs::completeStep(FrameSequenceContext *context)
     return complete;
 }
 
-std::string RepeatingFs::getHistory()
+std::string RepeatingFs::getHistory() const
 {
     ASSERT(step != -1);
     std::string repeatHistory = "{" + histories.at(0);
@@ -192,7 +192,7 @@ bool AlternativesFs::completeStep(FrameSequenceContext *context)
     return elements[elementIndex]->completeStep(context);
 }
 
-std::string AlternativesFs::getHistory()
+std::string AlternativesFs::getHistory() const
 {
     ASSERT(step != -1);
     return elements[elementIndex]->getHistory();

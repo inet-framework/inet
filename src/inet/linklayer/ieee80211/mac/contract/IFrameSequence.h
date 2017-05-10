@@ -75,7 +75,7 @@ class INET_API IFrameSequence
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) = 0;
         virtual bool completeStep(FrameSequenceContext *context) = 0;
 
-        virtual std::string getHistory() = 0;
+        virtual std::string getHistory() const = 0;
 };
 
 } // namespace ieee80211

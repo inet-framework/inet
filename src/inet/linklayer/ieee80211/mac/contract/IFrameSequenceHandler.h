@@ -45,6 +45,7 @@ class INET_API IFrameSequenceHandler
     public:
         virtual ~IFrameSequenceHandler() { }
 
+        virtual const IFrameSequence *getFrameSequence() const = 0;
         virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
         virtual void processResponse(Packet *frame) = 0;
         virtual void transmissionComplete() = 0;
