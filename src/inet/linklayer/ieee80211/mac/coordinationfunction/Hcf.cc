@@ -79,8 +79,10 @@ void Hcf::initialize(int stage)
 void Hcf::handleMessage(cMessage* msg)
 {
     if (msg == startRxTimer) {
-        if (!isReceptionInProgress())
+        if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
+            updateDisplayString();
+        }
     }
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
@@ -92,6 +94,20 @@ void Hcf::handleMessage(cMessage* msg)
     }
     else
         throw cRuntimeError("Unknown msg type");
+}
+
+void Hcf::updateDisplayString()
+{
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto history = frameSequenceHandler->getFrameSequence()->getHistory();
+        if (history.length() > 32) {
+            history.erase(history.begin(), history.end() - 32);
+            history = "..." + history;
+        }
+        getDisplayString().setTagArg("t", 0, history.c_str());
+    }
+    else
+        getDisplayString().removeTag("t");
 }
 
 void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
@@ -148,8 +164,10 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponse?
-        if ((!isForUs(frame) && !startRxTimer->isScheduled()) || isForUs(frame))
+        if ((!isForUs(frame) && !startRxTimer->isScheduled()) || isForUs(frame)) {
             frameSequenceHandler->processResponse(packet);
+            updateDisplayString();
+        }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
             delete packet;
@@ -193,6 +211,7 @@ FrameSequenceContext* Hcf::buildContext(AccessCategory ac)
 void Hcf::startFrameSequence(AccessCategory ac)
 {
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
+    updateDisplayString();
 }
 
 void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
@@ -315,8 +334,10 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>
 void Hcf::transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
     auto edcaf = edca->getChannelOwner();
-    if (edcaf)
+    if (edcaf) {
         frameSequenceHandler->transmissionComplete();
+        updateDisplayString();
+    }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
     else
@@ -701,8 +722,10 @@ bool Hcf::isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const
 void Hcf::corruptedFrameReceived()
 {
     if (frameSequenceHandler->isSequenceRunning()) {
-        if (!startRxTimer->isScheduled())
+        if (!startRxTimer->isScheduled()) {
             frameSequenceHandler->handleStartRxTimeout();
+            updateDisplayString();
+        }
     }
 }
 

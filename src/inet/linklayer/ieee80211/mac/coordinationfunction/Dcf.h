@@ -102,6 +102,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
+        virtual void updateDisplayString();
 
         virtual void sendUp(const std::vector<Packet*>& completeFrames);
         virtual bool hasFrameToTransmit();

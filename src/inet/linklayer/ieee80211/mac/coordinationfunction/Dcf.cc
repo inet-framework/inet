@@ -61,18 +61,32 @@ void Dcf::initialize(int stage)
 void Dcf::handleMessage(cMessage* msg)
 {
     if (msg == startRxTimer) {
-        if (!isReceptionInProgress())
+        if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
+            updateDisplayString();
+        }
     }
     else
         throw cRuntimeError("Unknown msg type");
 }
 
+void Dcf::updateDisplayString()
+{
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto history = frameSequenceHandler->getFrameSequence()->getHistory();
+        getDisplayString().setTagArg("t", 0, history.c_str());
+    }
+    else
+        getDisplayString().removeTag("t");
+}
+
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
     ASSERT(dcfChannelAccess == channelAccess);
-    if (!frameSequenceHandler->isSequenceRunning())
+    if (!frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
+        updateDisplayString();
+    }
 }
 
 void Dcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
@@ -134,6 +148,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame
         // TODO: always call processResponses
         if ((!isForUs(frame) && !startRxTimer->isScheduled()) || isForUs(frame)) {
             frameSequenceHandler->processResponse(packet);
+            updateDisplayString();
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -216,8 +231,10 @@ FrameSequenceContext* Dcf::buildContext()
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
 {
-    if (frameSequenceHandler->isSequenceRunning())
+    if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
+        updateDisplayString();
+    }
     else
         recipientProcessTransmittedControlResponseFrame(frame);
     delete packet;
@@ -337,8 +354,10 @@ bool Dcf::isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const
 void Dcf::corruptedFrameReceived()
 {
     if (frameSequenceHandler->isSequenceRunning()) {
-        if (!startRxTimer->isScheduled())
+        if (!startRxTimer->isScheduled()) {
             frameSequenceHandler->handleStartRxTimeout();
+            updateDisplayString();
+        }
     }
 }
 
