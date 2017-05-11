@@ -27,83 +27,45 @@ namespace serializer {
 using namespace physicallayer;
 
 Register_Serializer(Ieee80211PhyHeader, Ieee80211PhyHeaderSerializer);
+Register_Serializer(Ieee80211OfdmPhyHeader, Ieee80211PhyHeaderSerializer);
 
 void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& phyHeader = std::static_pointer_cast<const Ieee80211PhyHeader>(chunk);
-    // TODO:
-    stream.writeByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
-
-//    if (plcpHeader->getType() == OFDM)
-//    {
-//        const Ieee80211OFDMPLCPFrame *ofdmPhyFrame = check_and_cast<const Ieee80211OFDMPLCPFrame *>(plcpHeader);
-//        unsigned int byteLength = ofdmPhyFrame->getByteLength(); // Byte length of the complete frame
-//        unsigned char *buf = new unsigned char[byteLength];
-//        for (unsigned int i = 0; i < byteLength; i++)
-//            buf[i] = 0;
-//        Buffer b(buf, byteLength);
-//        Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) b.accessNBytes(OFDM_PLCP_HEADER_LENGTH);
-//        ASSERT(hdr);
-//        hdr->length = ofdmPhyFrame->getLength(); // Byte length of the payload
-//        hdr->rate = ofdmPhyFrame->getRate();
-//        hdr->parity = 0; // TODO What is the correct value for this? Check the reference.
-//        hdr->reserved = 0;
-//        hdr->service = 0;
-//        hdr->tail = 0;
-//        Ieee80211MacHeader *encapsulatedPacket = check_and_cast<Ieee80211MacHeader*>(ofdmPhyFrame->getEncapsulatedPacket());
-//        Ieee80211Serializer ieee80211Serializer;
-//        // Here we just write the header which is exactly 5 bytes in length.
-//        Buffer subBuffer(b, b.getRemainingSize());
-//        Context c;
-//        ieee80211Serializer.serializePacket(encapsulatedPacket, subBuffer, c);
-//        b.accessNBytes(subBuffer.getPos());
-//        unsigned int numOfWrittenBytes = b.getPos();
-//        // TODO: This assertion must hold!
-////        ASSERT(numOfWrittenBytes == byteLength);
-//        writeToBitVector(buf, numOfWrittenBytes, serializedPacket);
-//        // KLUDGE: if numOfWrittenBytes != byteLength it causes runtime error at the physical layer
-//        int pad = byteLength - numOfWrittenBytes;
-//        if (pad > 0)
-//            serializedPacket->appendBit(false, pad * 8);
-//        serializedPacket->appendBit(0, 6); // tail bits
-//        delete[] buf;
-//        return true;
-//    }
-//    return false;
+    if (auto ofdmPhyHeader = std::dynamic_pointer_cast<Ieee80211OfdmPhyHeader>(chunk)) {
+        Ieee80211OFDMPLCPHeader phyhdr;
+        phyhdr.length = ofdmPhyHeader->getLengthField(); // Byte length of the payload
+        phyhdr.rate = ofdmPhyHeader->getRate();
+        phyhdr.parity = 0; // TODO What is the correct value for this? Check the reference.
+        phyhdr.reserved = 0;
+        phyhdr.service = 0;
+        phyhdr.tail = 0;
+        stream.writeBytes((uint8_t *)&phyhdr, byte(OFDM_PLCP_HEADER_LENGTH));
+    }
+    else {
+        // TODO:
+        stream.writeByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
+    }
 }
 
 Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
-    // TODO:
-    phyHeader->setChunkLength(bit(192));
-    stream.readByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
-
-//    // TODO: Revise this code snippet and optimize
-//    // FIXME: We only have OFDM deserializer
-//    unsigned char *hdrBuf = new unsigned char[OFDM_PLCP_HEADER_LENGTH];
-//    const std::vector<uint8>& bitFields = serializedPacket->getBytes();
-//    for (int i = 0; i < OFDM_PLCP_HEADER_LENGTH; i++)
-//        hdrBuf[i] = bitFields[i];
-//    Ieee80211OFDMPLCPHeader *hdr = (Ieee80211OFDMPLCPHeader *) hdrBuf;
-//    Ieee80211OFDMPLCPFrame *plcpFrame = new Ieee80211OFDMPLCPFrame();
-//    plcpFrame->setRate(hdr->rate);
-//    plcpFrame->setLength(hdr->length);
-//    plcpFrame->setType(OFDM);
-//    unsigned char *buf = new unsigned char[hdr->length + OFDM_PLCP_HEADER_LENGTH];
-//    for (int i = 0; i < hdr->length + OFDM_PLCP_HEADER_LENGTH; i++)
-//        buf[i] = bitFields[i];
-//    Ieee80211Serializer serializer;
-//    Buffer subBuffer(buf + OFDM_PLCP_HEADER_LENGTH, hdr->length);
-//    Context c;
-//    cPacket *payload = serializer.deserializePacket(subBuffer, c);
-//    plcpFrame->setBitLength(OFDM_PLCP_HEADER_LENGTH);
-//    plcpFrame->encapsulate(payload);
-////    ASSERT(plcpFrame->getBitLength() == OFDM_PLCP_HEADER_LENGTH + 8 * hdr->length);
-//    delete[] buf;
-//    delete[] hdrBuf;
-//    return plcpFrame;
-    return phyHeader;
+    if (true) {
+        uint8_t buffer[OFDM_PLCP_HEADER_LENGTH];
+        stream.readBytes(buffer, byte(OFDM_PLCP_HEADER_LENGTH));
+        auto ofdmPhyHeader = std::make_shared<Ieee80211OfdmPhyHeader>();
+        const struct Ieee80211OFDMPLCPHeader& phyhdr = *static_cast<const struct Ieee80211OFDMPLCPHeader *>((void *)&buffer);
+        ofdmPhyHeader->setLengthField(phyhdr.length);
+        ofdmPhyHeader->setRate(phyhdr.rate);
+        return ofdmPhyHeader;
+    }
+    else {
+        auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
+        // TODO:
+        phyHeader->setChunkLength(bit(192));
+        stream.readByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
+        return phyHeader;
+    }
 }
 
 } // namespace serializer

@@ -79,12 +79,13 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
     const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const;
     const ITransmissionAnalogModel *createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
 
-    void appendPadding(BitVector *serializedPacket, unsigned int length) const;
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
 
   public:
     virtual ~Ieee80211LayeredOFDMTransmitter();
 
+    virtual bit getPaddingLength(const Packet *packet) const;
+    virtual const Ieee80211OFDMMode *getMode(const Packet* packet) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
     virtual const IModulator *getModulator() const { return dataModulator; }

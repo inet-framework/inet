@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMRadio.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
@@ -31,20 +33,21 @@ Ieee80211OFDMRadio::Ieee80211OFDMRadio() :
 
 void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
 {
-    // The PLCP header is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1),
-    // Tail (6) and SERVICE (16) fields.
-    int plcpHeaderLength = 4 + 1 + 12 + 1 + 6 + 16;
-    auto phyHeader = std::make_shared<Ieee80211OFDMPLCPFrame>();
-    phyHeader->setChunkLength(bit(plcpHeaderLength));
-// TODO: phyHeader->setRate(mode->getSignalMode()->getRate());
-    phyHeader->setLength(byte(packet->getTotalLength()).get());
-    phyHeader->markImmutable();
-    packet->pushHeader(phyHeader);
+    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
+    auto paddingLength = ofdmTransmitter->getPaddingLength(packet);
+    const auto& phyHeader = std::make_shared<Ieee80211OfdmPhyHeader>();
+    phyHeader->setRate(ofdmTransmitter->getMode(packet)->getSignalMode()->getRate());
+    phyHeader->setLengthField(byte(packet->getTotalLength()).get());
+    packet->insertHeader(phyHeader);
+    if (paddingLength != bit(0)) {
+        const auto& phyTrailer = std::make_shared<BitCountChunk>(paddingLength);
+        packet->insertTrailer(phyTrailer);
+    }
 }
 
 void Ieee80211OFDMRadio::decapsulate(Packet *packet) const
 {
-    packet->popHeader<Ieee80211OFDMPLCPFrame>();
+    packet->popHeader<Ieee80211OfdmPhyHeader>();
 }
 
 } // namespace physicallayer

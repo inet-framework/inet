@@ -146,7 +146,8 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
     const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAllBytes()->getBytes());
     for (unsigned int i = 0; i < NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i++)
         signalField->appendBit(serializedPacket->getBit(i));
-    return new TransmissionPacketModel(nullptr, bps(NaN));
+    const auto& signalChunk = std::make_shared<BytesChunk>(signalField->getBytes());
+    return new TransmissionPacketModel(new Packet(nullptr, signalChunk), bps(NaN));
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
@@ -155,7 +156,8 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataField
     const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAllBytes()->getBytes());
     for (unsigned int i = NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i < serializedPacket->getSize(); i++)
         dataField->appendBit(serializedPacket->getBit(i));
-    return new TransmissionPacketModel(nullptr, bps(NaN));
+    const auto& dataChunk = std::make_shared<BytesChunk>(dataField->getBytes());
+    return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN));
 }
 
 void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *& fieldBitModel, const ITransmissionSymbolModel *& fieldSymbolModel, const IEncoder *encoder, const IModulator *modulator, bool isSignalField) const
@@ -235,10 +237,11 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
     return new TransmissionBitModel(bit(-1), mode->getSignalMode()->getGrossBitrate(), bit(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
-void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int length) const
+bit Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) const
 {
     // 18.3.5.4 Pad bits (PAD), 1597p.
     // TODO: in non-compliant mode: header padding.
+    const Ieee80211OFDMMode *mode = getMode(packet);
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OFDMCode *code = mode->getDataMode()->getCode();
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
@@ -246,11 +249,11 @@ void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket,
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int dataBitsLength = 6 + length * 8 + 16;
+    unsigned int dataBitsLength = 6 + bit(packet->getTotalLength()).get() + 16;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
-    serializedPacket->appendBit(0, numberOfPadBits);
+    return bit(numberOfPadBits);
 }
 
 const ITransmissionSampleModel *Ieee80211LayeredOFDMTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
@@ -297,13 +300,20 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
     return new Ieee80211OFDMMode("", new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
+const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::getMode(const Packet* packet) const
+{
+    auto modeReq = const_cast<Packet*>(packet)->getTag<Ieee80211ModeReq>();
+    if (isCompliant)
+        return modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode*>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
+    else if (mode)
+        return mode;
+    else
+        return computeMode(bandwidth);
+}
+
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto modeReq = const_cast<Packet *>(packet)->getTag<Ieee80211ModeReq>();
-    if (isCompliant)
-        mode = modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
-    else if (!mode)
-        mode = computeMode(bandwidth);
+    mode = getMode(packet);
     const ITransmissionBitModel *bitModel = nullptr;
     const ITransmissionBitModel *signalFieldBitModel = nullptr;
     const ITransmissionBitModel *dataFieldBitModel = nullptr;

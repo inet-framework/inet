@@ -342,15 +342,10 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAllBytes()->getBytes());
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
-    throw cRuntimeError("Obsoleted"); // KLUDGE:
-    Packet *phyFrame = nullptr; // TODO: check_and_cast<Packet *>(deserializer.deserialize(mergedBits)); // TODO: type was cPacket
-    bool isReceptionSuccessful = true;
-    cPacket *packet = phyFrame;
-    while (packet != nullptr) {
-        isReceptionSuccessful &= !packet->hasBitError();
-        packet = packet->getEncapsulatedPacket();
-    }
-    return new ReceptionPacketModel(phyFrame, bps(NaN), 0, isReceptionSuccessful);
+    const auto& data = std::make_shared<BytesChunk>(mergedBits->getBytes());
+    Packet *packet = new Packet(nullptr, data);
+    bool isReceptionSuccessful = true; // TODO:
+    return new ReceptionPacketModel(packet, bps(NaN), 0, isReceptionSuccessful);
 }
 
 const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
