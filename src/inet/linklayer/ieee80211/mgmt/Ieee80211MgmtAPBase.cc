@@ -41,6 +41,9 @@ void Ieee80211MgmtAPBase::initialize(int stage)
         mib->mode = Ieee80211Mib::INFRASTRUCTURE;
         mib->bssStationData.stationType = Ieee80211Mib::ACCESS_POINT;
     }
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
+        mib->bssData.bssid = mib->address;
+    }
 }
 
 } // namespace ieee80211
