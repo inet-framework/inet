@@ -36,6 +36,25 @@ void Ieee80211Mib::initialize(int stage)
     }
 }
 
+void Ieee80211Mib::refreshDisplay() const
+{
+    std::string modeString;
+    std::string bssidString;
+    switch (mode) {
+        case INFRASTRUCTURE: modeString = "Infrastructure"; bssidString = "\nBSSID: " + bssData.bssid.str(); break;
+        case INDEPENDENT: modeString = "Ad-hoc"; break;
+        case MESH: modeString = "Mesh"; break;
+    }
+    std::string bssStationTypeString;
+    std::string associatedString;
+    switch (bssStationData.stationType) {
+        case ACCESS_POINT: bssStationTypeString = ", AP"; break;
+        case STATION: bssStationTypeString = ", STA"; associatedString = bssStationData.isAssociated ? "\nAssociated" : "\nNot associated"; break;
+    }
+    auto text = std::string("Address: ") + address.str() + bssidString + "\n" + modeString + bssStationTypeString + (qos ? ", QoS" : ", Non-QoS") + associatedString;
+    getDisplayString().setTagArg("t", 0, text.c_str());
+}
+
 } // namespace ieee80211
 
 } // namespace inet

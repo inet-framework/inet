@@ -71,6 +71,7 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace ieee80211
