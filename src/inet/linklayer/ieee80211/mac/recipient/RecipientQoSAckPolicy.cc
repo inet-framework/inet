@@ -36,9 +36,9 @@ simtime_t RecipientQoSAckPolicy::computeBasicBlockAckDuration(Packet *packet, co
     return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
 }
 
-simtime_t RecipientQoSAckPolicy::computeAckDuration(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtFrame) const
+simtime_t RecipientQoSAckPolicy::computeAckDuration(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    return rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtFrame)->getDuration(LENGTH_ACK);
+    return rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
 }
 
 //
@@ -46,13 +46,13 @@ simtime_t RecipientQoSAckPolicy::computeAckDuration(Packet *packet, const Ptr<Ie
 // Annex G. On receipt of a management frame of subtype Action NoAck, a STA shall not send an ACK frame
 // in response.
 //
-bool RecipientQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& frame) const
+bool RecipientQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& header) const
 {
     // TODO: add mgmt frame NoAck check
-    if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
-        if (dataFrame->getAckPolicy() != NORMAL_ACK)
+    if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header))
+        if (dataHeader->getAckPolicy() != NORMAL_ACK)
             return false;
-    return !frame->getReceiverAddress().isMulticast();
+    return !header->getReceiverAddress().isMulticast();
 }
 
 //
@@ -85,9 +85,9 @@ bool RecipientQoSAckPolicy::isBlockAckNeeded(const Ptr<Ieee80211BlockAckReq>& bl
 // that elicited the response minus the time, in microseconds between the end of the PPDU carrying the frame
 // that elicited the response and the end of the PPDU carrying the ACK frame.
 //
-simtime_t RecipientQoSAckPolicy::computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame) const
+simtime_t RecipientQoSAckPolicy::computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header) const
 {
-    simtime_t duration = frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(packet, frame);
+    simtime_t duration = header->getDuration() - modeSet->getSifsTime() - computeAckDuration(packet, header);
     return duration < 0 ? 0 : duration;
 }
 

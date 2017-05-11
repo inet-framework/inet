@@ -46,18 +46,18 @@ simtime_t FrameSequenceContext::getCtsTimeout(Packet *packet, const Ptr<Ieee8021
     return rtsPolicy->getCtsTimeout(packet, rtsFrame);
 }
 
-bool FrameSequenceContext::isForUs(const Ptr<Ieee80211MacHeader>& frame) const
+bool FrameSequenceContext::isForUs(const Ptr<Ieee80211MacHeader>& header) const
 {
-    return frame->getReceiverAddress() == address || (frame->getReceiverAddress().isMulticast() && !isSentByUs(frame));
+    return header->getReceiverAddress() == address || (header->getReceiverAddress().isMulticast() && !isSentByUs(header));
 }
 
-bool FrameSequenceContext::isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const
+bool FrameSequenceContext::isSentByUs(const Ptr<Ieee80211MacHeader>& header) const
 {
     // FIXME:
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
-        return dataOrMgmtFrame->getAddress3() == address;
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+        return dataOrMgmtHeader->getAddress3() == address;
     else
         return false;
 }

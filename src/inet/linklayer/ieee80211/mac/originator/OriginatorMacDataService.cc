@@ -31,9 +31,9 @@ void OriginatorMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    sequenceNumberAssigment->assignSequenceNumber(frame);
+    sequenceNumberAssigment->assignSequenceNumber(header);
 }
 
 OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)

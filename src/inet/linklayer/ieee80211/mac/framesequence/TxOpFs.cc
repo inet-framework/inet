@@ -61,11 +61,11 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
     if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(macHeader))
         return 3;
     else {
-        auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(macHeader);
+        auto dataHeaderToTransmit = std::dynamic_pointer_cast<Ieee80211DataHeader>(macHeader);
         OriginatorBlockAckAgreement* agreement = nullptr;
         if (context->getQoSContext()->blockAckAgreementHandler)
-            agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataFrameToTransmit->getReceiverAddress(), dataFrameToTransmit->getTid());
-        auto ackPolicy = context->getQoSContext()->ackPolicy->computeAckPolicy(frameToTransmit, dataFrameToTransmit, agreement);
+            agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataHeaderToTransmit->getReceiverAddress(), dataHeaderToTransmit->getTid());
+        auto ackPolicy = context->getQoSContext()->ackPolicy->computeAckPolicy(frameToTransmit, dataHeaderToTransmit, agreement);
         if (ackPolicy == AckPolicy::BLOCK_ACK)
             return 0;
         else if (ackPolicy == AckPolicy::NORMAL_ACK)

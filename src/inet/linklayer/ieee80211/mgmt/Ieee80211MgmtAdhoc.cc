@@ -47,52 +47,52 @@ void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }

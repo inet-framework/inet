@@ -43,10 +43,10 @@ void RtsPolicy::initialize(int stage)
 // be set on a per-STA basis. This mechanism allows STAs to be configured to initiate RTS/CTS either always,
 // never, or only on frames longer than a specified length.
 //
-bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& protectedFrame) const
+bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& protectedHeader) const
 {
-    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedFrame))
-        return packet->getByteLength() >= rtsThreshold && !protectedFrame->getReceiverAddress().isMulticast();
+    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedHeader))
+        return packet->getByteLength() >= rtsThreshold && !protectedHeader->getReceiverAddress().isMulticast();
     else
         return false;
 }

@@ -30,10 +30,10 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MACAddress originatorAddr
     blockAckRecord = new BlockAckRecord(originatorAddress, tid);
 }
 
-void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& frame)
+void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& header)
 {
-    ASSERT(frame->getAckPolicy() == BLOCK_ACK);
-    blockAckRecord->blockAckPolicyFrameReceived(frame);
+    ASSERT(header->getAckPolicy() == BLOCK_ACK);
+    blockAckRecord->blockAckPolicyFrameReceived(header);
 }
 
 std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement)

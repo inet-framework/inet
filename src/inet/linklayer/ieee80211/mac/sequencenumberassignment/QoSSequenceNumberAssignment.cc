@@ -20,23 +20,23 @@
 namespace inet {
 namespace ieee80211 {
 
-QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<Ieee80211DataOrMgmtHeader>& frame, bool incoming)
+QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<Ieee80211DataOrMgmtHeader>& header, bool incoming)
 {
     bool isTimePriorityFrame = false; // TODO
-    const MACAddress& address = incoming ? frame->getTransmitterAddress() : frame->getReceiverAddress();
+    const MACAddress& address = incoming ? header->getTransmitterAddress() : header->getReceiverAddress();
     if (isTimePriorityFrame)
         return TIME_PRIORITY;
-    else if (frame->getType() != ST_DATA_WITH_QOS || address.isMulticast())
+    else if (header->getType() != ST_DATA_WITH_QOS || address.isMulticast())
         return SHARED;
     else
         return DATA;
 }
 
-void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    CacheType type = getCacheType(frame, false);
+    CacheType type = getCacheType(header, false);
     int seqNum;
-    MACAddress address = frame->getReceiverAddress();
+    MACAddress address = header->getReceiverAddress();
     if (type == TIME_PRIORITY)
     {
         // Error in spec?
@@ -61,8 +61,8 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
     }
     else if (type == DATA)
     {
-        const Ptr<Ieee80211DataHeader>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
-        Key key(frame->getReceiverAddress(), qosDataFrame->getTid());
+        const Ptr<Ieee80211DataHeader>& qosDataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header);
+        Key key(header->getReceiverAddress(), qosDataHeader->getTid());
         auto it = lastSentSeqNums.find(key);
         if (it == lastSentSeqNums.end())
             lastSentSeqNums[key] = seqNum = 0;
@@ -72,7 +72,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
     else
         ASSERT(false);
 
-    frame->setSequenceNumber(seqNum);
+    header->setSequenceNumber(seqNum);
 }
 
 } /* namespace ieee80211 */

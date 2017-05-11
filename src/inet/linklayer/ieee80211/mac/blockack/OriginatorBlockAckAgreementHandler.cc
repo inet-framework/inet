@@ -130,11 +130,11 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MACAddress originato
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataFrame, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
+void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
 {
-    auto agreement = getAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
-    if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataFrame) && agreement == nullptr) {
-        auto addbaReq = buildAddbaRequest(dataFrame->getReceiverAddress(), dataFrame->getTid(), dataFrame->getSequenceNumber() + 1, blockAckAgreementPolicy);
+    auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
+    if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
+        auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
         createAgreement(addbaReq);
         addbaReq->markImmutable();
         auto addbaPacket = new Packet("AddbaReq", addbaReq);

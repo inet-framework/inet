@@ -24,16 +24,16 @@ namespace ieee80211 {
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     // The reception of QoS data frames using Normal Ack policy shall not be used by the
     // recipient to reset the timer to detect Block Ack timeout (see 10.5.4).
     // This allows the recipient to delete the Block Ack if the originator does not switch
     // back to using Block Ack.
-    if (receiveBuffer->insertFrame(dataPacket, dataFrame)) {
-        if (dataFrame->getAckPolicy() == BLOCK_ACK)
-            agreement->blockAckPolicyFrameReceived(dataFrame);
+    if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
+        if (dataHeader->getAckPolicy() == BLOCK_ACK)
+            agreement->blockAckPolicyFrameReceived(dataHeader);
         auto earliestCompleteMsduOrAMsdu = getEarliestCompleteMsduOrAMsduIfExists(receiveBuffer);
         if (earliestCompleteMsduOrAMsdu.size() > 0) {
             int earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekHeader<Ieee80211DataHeader>()->getSequenceNumber();

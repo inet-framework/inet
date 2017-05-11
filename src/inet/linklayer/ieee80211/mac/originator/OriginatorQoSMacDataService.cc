@@ -48,9 +48,9 @@ Packet *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendin
     return nullptr;
 }
 
-void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    sequenceNumberAssigment->assignSequenceNumber(frame);
+    sequenceNumberAssigment->assignSequenceNumber(header);
 }
 
 OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::fragmentIfNeeded(Packet *frame)

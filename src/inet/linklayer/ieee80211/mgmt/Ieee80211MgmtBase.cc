@@ -63,8 +63,8 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         // process incoming frame
         EV << "Frame arrived from MAC: " << msg << "\n";
         auto packet = check_and_cast<Packet *>(msg);
-        const Ptr<Ieee80211DataOrMgmtHeader>& frame = packet->peekAt<Ieee80211DataOrMgmtHeader>(packet->getHeaderPopOffset() - byte(24));
-        processFrame(packet, frame);
+        const Ptr<Ieee80211DataOrMgmtHeader>& header = packet->peekAt<Ieee80211DataOrMgmtHeader>(packet->getHeaderPopOffset() - byte(24));
+        processFrame(packet, header);
     }
     else if (msg->arrivedOn("agentIn")) {
         // process command from agent
@@ -99,61 +99,61 @@ void Ieee80211MgmtBase::sendUp(cMessage *msg)
     send(msg, "upperLayerOut");
 }
 
-void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    switch (frame->getType()) {
+    switch (header->getType()) {
         case ST_AUTHENTICATION:
             numMgmtFramesReceived++;
-            handleAuthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleAuthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_DEAUTHENTICATION:
             numMgmtFramesReceived++;
-            handleDeauthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleDeauthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_ASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleAssociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleAssociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_ASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleAssociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleAssociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_REASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleReassociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleReassociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_REASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleReassociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleReassociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_DISASSOCIATION:
             numMgmtFramesReceived++;
-            handleDisassociationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleDisassociationFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_BEACON:
             numMgmtFramesReceived++;
-            handleBeaconFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleBeaconFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_PROBEREQUEST:
             numMgmtFramesReceived++;
-            handleProbeRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleProbeRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         case ST_PROBERESPONSE:
             numMgmtFramesReceived++;
-            handleProbeResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame));
+            handleProbeResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header));
             break;
 
         default:
-            throw cRuntimeError("Unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
+            throw cRuntimeError("Unexpected frame type (%s)%s", packet->getClassName(), packet->getName());
     }
 }
 

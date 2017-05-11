@@ -23,35 +23,35 @@ namespace ieee80211 {
 
 Register_Class(MsduAggregation);
 
-void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& frame)
+void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<Ieee80211DataHeader>& header)
 {
     // Note: Addr1 (RA), Addr2 (TA)
     // Table 8-19—Address field contents
     MACAddress da, sa;
-    bool toDS = frame->getToDS();
-    bool fromDS = frame->getFromDS();
+    bool toDS = header->getToDS();
+    bool fromDS = header->getFromDS();
     if (toDS == 0 && fromDS == 0) // STA to STA
     {
-        da = frame->getReceiverAddress();
-        sa = frame->getTransmitterAddress();
+        da = header->getReceiverAddress();
+        sa = header->getTransmitterAddress();
     }
     else if (toDS == 0 && fromDS == 1) // AP to STA
     {
-        da = frame->getReceiverAddress();
-        sa = frame->getAddress3();
+        da = header->getReceiverAddress();
+        sa = header->getAddress3();
     }
     else if (toDS == 1 && fromDS == 0) // STA to AP
     {
-        da = frame->getAddress3();
-        sa = frame->getTransmitterAddress();
+        da = header->getAddress3();
+        sa = header->getTransmitterAddress();
     }
     else if (toDS == 1 && fromDS == 1) // AP to AP
     {
-        da = frame->getAddress3();
-        sa = frame->getAddress4();
+        da = header->getAddress3();
+        sa = header->getAddress4();
     }
-    subframe->setDa(da);
-    subframe->setSa(sa);
+    subframeHeader->setDa(da);
+    subframeHeader->setSa(sa);
 }
 
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)

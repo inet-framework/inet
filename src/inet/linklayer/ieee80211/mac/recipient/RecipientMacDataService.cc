@@ -39,9 +39,9 @@ Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
         return nullptr;
 }
 
-std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(frame)) {
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(header)) {
         delete packet;
         return std::vector<Packet *>();
     }
@@ -52,17 +52,17 @@ std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *pa
     return defragmentedFrame != nullptr ? std::vector<Packet*>({defragmentedFrame}) : std::vector<Packet*>();
 }
 
-std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame)
+std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader)
 {
-    return dataOrMgmtFrameReceived(dataPacket, dataFrame);
+    return dataOrMgmtFrameReceived(dataPacket, dataHeader);
 }
 
-std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame)
+std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtHeader)
 {
-    return dataOrMgmtFrameReceived(mgmtPacket, mgmtFrame);
+    return dataOrMgmtFrameReceived(mgmtPacket, mgmtHeader);
 }
 
-std::vector<Packet*> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211MacHeader>& controlFrame)
+std::vector<Packet*> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211MacHeader>& controlHeader)
 {
     return std::vector<Packet*>(); // has nothing to do
 }

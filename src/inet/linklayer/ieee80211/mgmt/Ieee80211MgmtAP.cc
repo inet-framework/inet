@@ -108,9 +108,9 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
 }
 
-Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211MgmtHeader>& frame)
+Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211MgmtHeader>& header)
 {
-    auto it = staList.find(frame->getTransmitterAddress());
+    auto it = staList.find(header->getTransmitterAddress());
     return it == staList.end() ? nullptr : &(it->second);
 }
 
@@ -136,16 +136,16 @@ void Ieee80211MgmtAP::sendBeacon()
     sendManagementFrame("Beacon", body, ST_BEACON, MACAddress::BROADCAST_ADDRESS);
 }
 
-void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
     // create STA entry if needed
-    STAInfo *sta = lookupSenderSTA(frame);
+    STAInfo *sta = lookupSenderSTA(header);
     if (!sta) {
-        MACAddress staAddress = frame->getTransmitterAddress();
+        MACAddress staAddress = header->getTransmitterAddress();
         sta = &staList[staAddress];    // this implicitly creates a new entry
         sta->address = staAddress;
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
@@ -172,7 +172,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
         const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, frame->getTransmitterAddress());
+        sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
         delete packet;
         sta->authSeqExpected = 1;    // go back to start square
         return;
@@ -189,7 +189,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     body->setStatusCode(SC_SUCCESSFUL);
     body->setIsLast(isLast);
     // XXX frame length could be increased to account for challenge text length etc.
-    sendManagementFrame(isLast ? "Auth-OK" : "Auth", body, ST_AUTHENTICATION, frame->getTransmitterAddress());
+    sendManagementFrame(isLast ? "Auth-OK" : "Auth", body, ST_AUTHENTICATION, header->getTransmitterAddress());
 
     delete packet;
 
@@ -206,11 +206,11 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     EV << "Processing Deauthentication frame\n";
 
-    STAInfo *sta = lookupSenderSTA(frame);
+    STAInfo *sta = lookupSenderSTA(header);
     delete packet;
 
     if (sta) {
@@ -222,17 +222,17 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee
     }
 }
 
-void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     EV << "Processing AssociationRequest frame\n";
 
     // "11.3.2 AP association procedures"
-    STAInfo *sta = lookupSenderSTA(frame);
+    STAInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
-        sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, frame->getTransmitterAddress());
+        sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, header->getTransmitterAddress());
         delete packet;
         return;
     }
@@ -253,22 +253,22 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     EV << "Processing ReassociationRequest frame\n";
 
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
-    STAInfo *sta = lookupSenderSTA(frame);
+    STAInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
-        sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, frame->getTransmitterAddress());
+        sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, header->getTransmitterAddress());
         delete packet;
         return;
     }
@@ -287,14 +287,14 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
-    STAInfo *sta = lookupSenderSTA(frame);
+    STAInfo *sta = lookupSenderSTA(header);
     delete packet;
 
     if (sta) {
@@ -304,12 +304,12 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     EV << "Processing ProbeRequest frame\n";
 
@@ -320,7 +320,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
         return;
     }
 
-    MACAddress staAddress = frame->getTransmitterAddress();
+    MACAddress staAddress = header->getTransmitterAddress();
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
@@ -333,7 +333,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 
-void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& frame)
+void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }

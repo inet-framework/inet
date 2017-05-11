@@ -22,33 +22,33 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<Ieee80211DataHeader>& aMsduFrame)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& header, const Ptr<Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<Ieee80211DataHeader>& aMsduHeader)
 {
-    bool toDS = aMsduFrame->getToDS();
-    bool fromDS = aMsduFrame->getFromDS();
+    bool toDS = aMsduHeader->getToDS();
+    bool fromDS = aMsduHeader->getFromDS();
     if (fromDS == 0 && toDS == 0) // STA to STA
     {
-        frame->setTransmitterAddress(aMsduFrame->getTransmitterAddress());
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
     }
     else if (fromDS == 1 && toDS == 0) // AP to STA
     {
-        frame->setTransmitterAddress(frame->getTransmitterAddress());
-        frame->setReceiverAddress(subframe->getDa());
-        frame->setAddress3(subframe->getSa());
+        header->setTransmitterAddress(header->getTransmitterAddress());
+        header->setReceiverAddress(subframeHeader->getDa());
+        header->setAddress3(subframeHeader->getSa());
     }
     else if (fromDS == 0 && toDS == 1) // STA to AP
     {
-        frame->setTransmitterAddress(subframe->getSa());
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
-        frame->setAddress3(subframe->getDa());
+        header->setTransmitterAddress(subframeHeader->getSa());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
+        header->setAddress3(subframeHeader->getDa());
     }
     else if (fromDS == 1 && toDS == 1) // AP to AP
     {
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
-        frame->setTransmitterAddress(aMsduFrame->getTransmitterAddress());
-        frame->setAddress3(subframe->getDa());
-        frame->setAddress4(subframe->getSa());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
+        header->setAddress3(subframeHeader->getDa());
+        header->setAddress4(subframeHeader->getSa());
     }
 }
 

@@ -113,10 +113,10 @@ void Hcf::updateDisplayString()
     }
 }
 
-void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    Enter_Method("processUpperFrame(%s)", frame->getName());
-    EV_INFO << "Processing upper frame: " << frame->getName() << endl;
+    Enter_Method("processUpperFrame(%s)", packet->getName());
+    EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     // TODO:
     // A QoS STA should send individually addressed Management frames that are addressed to a non-QoS STA
     // using the access category AC_BE and shall send all other management frames using the access category
@@ -125,15 +125,15 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>
     // Management frames are exempted from any and all restrictions on transmissions arising from admission
     // control procedures.
     AccessCategory ac = AccessCategory(-1);
-    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame)) // TODO: + non-QoS frames
+    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header)) // TODO: + non-QoS frames
         ac = AccessCategory::AC_VO;
-    else if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
-        ac = edca->classifyFrame(dataFrame);
+    else if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header))
+        ac = edca->classifyFrame(dataHeader);
     else
         throw cRuntimeError("Unknown message type");
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     if (edcaPendingQueues[ac]->insert(packet)) {
-        EV_INFO << "Frame " << frame->getName() << " has been inserted into the PendingQueue." << endl;
+        EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
         auto edcaf = edca->getChannelOwner();
         if (edcaf == nullptr || edcaf->getAccessCategory() != ac) {
             EV_DETAIL << "Requesting channel for access category " << printAccessCategory(ac) << endl;
@@ -141,7 +141,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>
         }
     }
     else {
-        EV_INFO << "Frame " << frame->getName() << " has been dropped because the PendingQueue is full." << endl;
+        EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
         emit(NF_PACKET_DROP, packet);
         delete packet;
     }
@@ -161,13 +161,13 @@ void Hcf::scheduleInactivityTimer(simtime_t timeout)
     scheduleAt(simTime() + timeout, inactivityTimer);
 }
 
-void Hcf::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
+void Hcf::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
 {
     Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponse?
-        if ((!isForUs(frame) && !startRxTimer->isScheduled()) || isForUs(frame)) {
+        if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
             updateDisplayString();
         }
@@ -179,8 +179,8 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame
     }
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
-    else if (isForUs(frame))
-        recipientProcessReceivedFrame(packet, frame);
+    else if (isForUs(header))
+        recipientProcessReceivedFrame(packet, header);
     else {
         EV_INFO << "This frame is not for us" << std::endl;
         delete packet;
@@ -225,23 +225,23 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
         auto internallyCollidedHeader = internallyCollidedFrame->peekHeader<Ieee80211DataOrMgmtHeader>();
         EV_INFO << printAccessCategory(ac) << " (" << internallyCollidedFrame->getName() << ")" << endl;
         bool retryLimitReached = false;
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(internallyCollidedHeader)) { // TODO: QoSDataFrame
-            edcaDataRecoveryProcedures[ac]->dataFrameTransmissionFailed(internallyCollidedFrame, dataFrame);
-            retryLimitReached = edcaDataRecoveryProcedures[ac]->isRetryLimitReached(internallyCollidedFrame, dataFrame);
+        if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(internallyCollidedHeader)) { // TODO: QoSDataFrame
+            edcaDataRecoveryProcedures[ac]->dataFrameTransmissionFailed(internallyCollidedFrame, dataHeader);
+            retryLimitReached = edcaDataRecoveryProcedures[ac]->isRetryLimitReached(internallyCollidedFrame, dataHeader);
         }
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(internallyCollidedHeader)) {
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(internallyCollidedHeader)) {
             ASSERT(ac == AccessCategory::AC_BE);
-            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(internallyCollidedFrame, mgmtFrame, stationRetryCounters[AccessCategory::AC_BE]);
-            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(internallyCollidedFrame, mgmtFrame);
+            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(internallyCollidedFrame, mgmtHeader, stationRetryCounters[AccessCategory::AC_BE]);
+            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(internallyCollidedFrame, mgmtHeader);
         }
         else // TODO: + NonQoSDataFrame
             throw cRuntimeError("Unknown frame");
         if (retryLimitReached) {
             EV_DETAIL << "The frame has reached its retry limit. Dropping it" << std::endl;
-            if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(internallyCollidedHeader))
-                edcaDataRecoveryProcedures[ac]->retryLimitReached(internallyCollidedFrame, dataFrame);
-            else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(internallyCollidedHeader))
-                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(internallyCollidedFrame, mgmtFrame);
+            if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(internallyCollidedHeader))
+                edcaDataRecoveryProcedures[ac]->retryLimitReached(internallyCollidedFrame, dataHeader);
+            else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(internallyCollidedHeader))
+                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(internallyCollidedFrame, mgmtHeader);
             else ; // TODO: + NonQoSDataFrame
             emit(NF_PACKET_DROP, internallyCollidedFrame);
             emit(NF_LINK_BREAK, internallyCollidedFrame);
@@ -281,47 +281,47 @@ void Hcf::frameSequenceFinished()
         throw cRuntimeError("Frame sequence finished but channel owner not found!");
 }
 
-void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
+void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
 {
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
-        recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtFrame, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
-    if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)) {
-        if (dataFrame->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
-            recipientBlockAckAgreementHandler->qosFrameReceived(dataFrame, this);
-        sendUp(recipientDataService->dataFrameReceived(packet, dataFrame, recipientBlockAckAgreementHandler));
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+        recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
+    if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header)) {
+        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
+            recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
+        sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
-    else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame)) {
-        sendUp(recipientDataService->managementFrameReceived(packet, mgmtFrame));
-        recipientProcessReceivedManagementFrame(mgmtFrame);
+    else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header)) {
+        sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
+        recipientProcessReceivedManagementFrame(mgmtHeader);
     }
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
-        sendUp(recipientDataService->controlFrameReceived(packet, frame, recipientBlockAckAgreementHandler));
-        recipientProcessReceivedControlFrame(packet, frame);
+        sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
+        recipientProcessReceivedControlFrame(packet, header);
     }
 }
 
-void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
+void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
 {
-    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame))
+    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
-    else if (auto blockAckRequest = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(frame)) {
+    else if (auto blockAckRequest = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(header)) {
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
-    else if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(frame))
+    else if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(header))
         ; // drop it, it is an ACK frame that is received after the ACKTimeout
     else
         throw cRuntimeError("Unknown control frame");
 }
 
-void Hcf::recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& frame)
+void Hcf::recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& header)
 {
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
-        if (auto addbaRequest = std::dynamic_pointer_cast<Ieee80211AddbaRequest>(frame))
+        if (auto addbaRequest = std::dynamic_pointer_cast<Ieee80211AddbaRequest>(header))
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
-        else if (auto addbaResp = std::dynamic_pointer_cast<Ieee80211AddbaResponse>(frame))
+        else if (auto addbaResp = std::dynamic_pointer_cast<Ieee80211AddbaResponse>(header))
             originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
-        else if (auto delba = std::dynamic_pointer_cast<Ieee80211Delba>(frame)) {
+        else if (auto delba = std::dynamic_pointer_cast<Ieee80211Delba>(header)) {
             if (delba->getInitiator())
                 recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
             else
@@ -334,7 +334,7 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>
         ; // Optional modules
 }
 
-void Hcf::transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
+void Hcf::transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
 {
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -344,7 +344,7 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<Ieee80211MacHeader>& fr
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
     else
-        recipientProcessTransmittedControlResponseFrame(frame);
+        recipientProcessTransmittedControlResponseFrame(header);
     delete packet;
 }
 
@@ -356,21 +356,21 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
         EV_INFO << "RTS frame transmission failed\n";
         AccessCategory ac = edcaf->getAccessCategory();
         bool retryLimitReached = false;
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(protectedFrame)) {
-            edcaDataRecoveryProcedures[ac]->rtsFrameTransmissionFailed(dataFrame);
-            retryLimitReached = edcaDataRecoveryProcedures[ac]->isRtsFrameRetryLimitReached(packet, dataFrame);
+        if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(protectedFrame)) {
+            edcaDataRecoveryProcedures[ac]->rtsFrameTransmissionFailed(dataHeader);
+            retryLimitReached = edcaDataRecoveryProcedures[ac]->isRtsFrameRetryLimitReached(packet, dataHeader);
         }
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(protectedFrame)) {
-            edcaMgmtAndNonQoSRecoveryProcedure->rtsFrameTransmissionFailed(mgmtFrame, stationRetryCounters[ac]);
-            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRtsFrameRetryLimitReached(packet, dataFrame);
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(protectedFrame)) {
+            edcaMgmtAndNonQoSRecoveryProcedure->rtsFrameTransmissionFailed(mgmtHeader, stationRetryCounters[ac]);
+            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRtsFrameRetryLimitReached(packet, dataHeader);
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO: QoSDataFrame, NonQoSDataFrame
         if (retryLimitReached) {
-            if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(protectedFrame))
-                edcaDataRecoveryProcedures[ac]->retryLimitReached(packet, dataFrame);
-            else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(protectedFrame))
-                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtFrame);
+            if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(protectedFrame))
+                edcaDataRecoveryProcedures[ac]->retryLimitReached(packet, dataHeader);
+            else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(protectedFrame))
+                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             else ; // TODO: nonqos data
             edcaInProgressFrames[ac]->dropFrame(packet);
             emit(NF_PACKET_DROP, packet);
@@ -390,13 +390,13 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedFrame->getReceiverAddress().isMulticast()) {
             edcaDataRecoveryProcedures[ac]->multicastFrameTransmitted();
-            if (auto transmittedDataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(transmittedFrame))
+            if (auto transmittedDataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(transmittedFrame))
                 edcaInProgressFrames[ac]->dropFrame(packet);
         }
-        else if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(transmittedFrame))
-            originatorProcessTransmittedDataFrame(packet, dataFrame, ac);
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(transmittedFrame))
-            originatorProcessTransmittedManagementFrame(mgmtFrame, ac);
+        else if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(transmittedFrame))
+            originatorProcessTransmittedDataFrame(packet, dataHeader, ac);
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(transmittedFrame))
+            originatorProcessTransmittedManagementFrame(mgmtHeader, ac);
         else // TODO: Ieee80211ControlFrame
             originatorProcessTransmittedControlFrame(transmittedFrame, ac);
     }
@@ -406,26 +406,26 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
         throw cRuntimeError("Frame transmitted but channel owner not found");
 }
 
-void Hcf::originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataFrame, AccessCategory ac)
+void Hcf::originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataHeader, AccessCategory ac)
 {
-    edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(dataFrame);
+    edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(dataHeader);
     if (originatorBlockAckAgreementHandler)
-        originatorBlockAckAgreementHandler->processTransmittedDataFrame(packet, dataFrame, originatorBlockAckAgreementPolicy, this);
-    if (dataFrame->getAckPolicy() == NO_ACK)
+        originatorBlockAckAgreementHandler->processTransmittedDataFrame(packet, dataHeader, originatorBlockAckAgreementPolicy, this);
+    if (dataHeader->getAckPolicy() == NO_ACK)
         edcaInProgressFrames[ac]->dropFrame(packet);
 }
 
-void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211MgmtHeader>& mgmtFrame, AccessCategory ac)
+void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac)
 {
-    if (originatorAckPolicy->isAckNeeded(mgmtFrame))
-        edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(mgmtFrame);
-    if (auto addbaReq = std::dynamic_pointer_cast<Ieee80211AddbaRequest>(mgmtFrame)) {
+    if (originatorAckPolicy->isAckNeeded(mgmtHeader))
+        edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(mgmtHeader);
+    if (auto addbaReq = std::dynamic_pointer_cast<Ieee80211AddbaRequest>(mgmtHeader)) {
         if (originatorBlockAckAgreementHandler)
             originatorBlockAckAgreementHandler->processTransmittedAddbaReq(addbaReq);
     }
-    else if (auto addbaResp = std::dynamic_pointer_cast<Ieee80211AddbaResponse>(mgmtFrame))
+    else if (auto addbaResp = std::dynamic_pointer_cast<Ieee80211AddbaResponse>(mgmtHeader))
         recipientBlockAckAgreementHandler->processTransmittedAddbaResp(addbaResp, this);
-    else if (auto delba = std::dynamic_pointer_cast<Ieee80211Delba>(mgmtFrame)) {
+    else if (auto delba = std::dynamic_pointer_cast<Ieee80211Delba>(mgmtHeader)) {
         if (delba->getInitiator())
             originatorBlockAckAgreementHandler->processTransmittedDelba(delba);
         else
@@ -434,11 +434,11 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211MgmtHea
     else ; // TODO: other mgmt frames if needed
 }
 
-void Hcf::originatorProcessTransmittedControlFrame(const Ptr<Ieee80211MacHeader>& controlFrame, AccessCategory ac)
+void Hcf::originatorProcessTransmittedControlFrame(const Ptr<Ieee80211MacHeader>& controlHeader, AccessCategory ac)
 {
-    if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BlockAckReq>(controlFrame))
+    if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BlockAckReq>(controlHeader))
         edcaAckHandlers[ac]->processTransmittedBlockAckReq(blockAckReq);
-    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(controlFrame))
+    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(controlHeader))
         rtsProcedure->processTransmittedRts(rtsFrame);
     else
         throw cRuntimeError("Unknown control frame");
@@ -451,17 +451,17 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         bool retryLimitReached = false;
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(failedFrame)) {
+        if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(failedFrame)) {
             EV_INFO << "Data frame transmission failed\n";
-            if (dataFrame->getAckPolicy() == NORMAL_ACK) {
-                edcaDataRecoveryProcedures[ac]->dataFrameTransmissionFailed(packet, dataFrame);
-                retryLimitReached = edcaDataRecoveryProcedures[ac]->isRetryLimitReached(packet, dataFrame);
+            if (dataHeader->getAckPolicy() == NORMAL_ACK) {
+                edcaDataRecoveryProcedures[ac]->dataFrameTransmissionFailed(packet, dataHeader);
+                retryLimitReached = edcaDataRecoveryProcedures[ac]->isRetryLimitReached(packet, dataHeader);
                 if (dataAndMgmtRateControl) {
-                    int retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(packet, dataFrame);
+                    int retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(packet, dataHeader);
                     dataAndMgmtRateControl->frameTransmitted(packet, retryCount, false, retryLimitReached);
                 }
             }
-            else if (dataFrame->getAckPolicy() == BLOCK_ACK) {
+            else if (dataHeader->getAckPolicy() == BLOCK_ACK) {
                 // TODO:
                 // bool lifetimeExpired = lifetimeHandler->isLifetimeExpired(failedFrame);
                 // if (lifetimeExpired) {
@@ -472,12 +472,12 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             else
                 throw cRuntimeError("Unimplemented!");
         }
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(failedFrame)) { // TODO: + NonQoS frames
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(failedFrame)) { // TODO: + NonQoS frames
             EV_INFO << "Management frame transmission failed\n";
-            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(packet, mgmtFrame, stationRetryCounters[ac]);
-            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(packet, mgmtFrame);
+            edcaMgmtAndNonQoSRecoveryProcedure->dataOrMgmtFrameTransmissionFailed(packet, mgmtHeader, stationRetryCounters[ac]);
+            retryLimitReached = edcaMgmtAndNonQoSRecoveryProcedure->isRetryLimitReached(packet, mgmtHeader);
             if (dataAndMgmtRateControl) {
-                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(packet, mgmtFrame);
+                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(packet, mgmtHeader);
                 dataAndMgmtRateControl->frameTransmitted(packet, retryCount, false, retryLimitReached);
             }
         }
@@ -485,10 +485,10 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             throw cRuntimeError("Unknown frame"); // TODO: qos, nonqos
         edcaAckHandlers[ac]->processFailedFrame(failedFrame);
         if (retryLimitReached) {
-            if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(failedFrame))
-                edcaDataRecoveryProcedures[ac]->retryLimitReached(packet, dataFrame);
-            else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(failedFrame))
-                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtFrame);
+            if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(failedFrame))
+                edcaDataRecoveryProcedures[ac]->retryLimitReached(packet, dataHeader);
+            else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(failedFrame))
+                edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             edcaInProgressFrames[ac]->dropFrame(packet);
             // KLUDGE: removed headers and trailers to allow higher layer protocols to process the packet
             packet->popHeader<Ieee80211DataOrMgmtHeader>();
@@ -517,10 +517,10 @@ void Hcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
-            originatorProcessReceivedDataFrame(dataFrame, lastTransmittedFrame, ac);
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame))
-            originatorProcessReceivedManagementFrame(mgmtFrame, lastTransmittedFrame, ac);
+        if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame))
+            originatorProcessReceivedDataFrame(dataHeader, lastTransmittedFrame, ac);
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(frame))
+            originatorProcessReceivedManagementFrame(mgmtHeader, lastTransmittedFrame, ac);
         else
             originatorProcessReceivedControlFrame(packet, frame, lastTransmittedPacket, lastTransmittedFrame, ac);
     }
@@ -529,38 +529,38 @@ void Hcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     delete packet;
 }
 
-void Hcf::originatorProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& frame, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac)
+void Hcf::originatorProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& header, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac)
 {
     throw cRuntimeError("Unknown management frame");
 }
 
-void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, Packet *lastTransmittedPacket, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac)
+void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, Packet *lastTransmittedPacket, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac)
 {
-    if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(frame)) {
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(lastTransmittedFrame)) {
+    if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(header)) {
+        if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
                 int retryCount;
-                if (dataFrame->getRetry())
-                    retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(packet, dataFrame);
+                if (dataHeader->getRetry())
+                    retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(packet, dataHeader);
                 else
                     retryCount = 0;
-                edcaDataRecoveryProcedures[ac]->ackFrameReceived(packet, dataFrame);
+                edcaDataRecoveryProcedures[ac]->ackFrameReceived(packet, dataHeader);
                 dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
             }
         }
-        else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(lastTransmittedFrame)) {
+        else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
-                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(packet, dataFrame);
+                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(packet, dataHeader);
                 dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
             }
-            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(packet, mgmtFrame, stationRetryCounters[ac]);
+            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(packet, mgmtHeader, stationRetryCounters[ac]);
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO: qos, nonqos frame
-        edcaAckHandlers[ac]->processReceivedAck(ackFrame, std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(lastTransmittedFrame));
+        edcaAckHandlers[ac]->processReceivedAck(ackFrame, std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(lastTransmittedHeader));
         edcaInProgressFrames[ac]->dropFrame(lastTransmittedPacket);
     }
-    else if (auto blockAck = std::dynamic_pointer_cast<Ieee80211BasicBlockAck>(frame)) {
+    else if (auto blockAck = std::dynamic_pointer_cast<Ieee80211BasicBlockAck>(header)) {
         EV_INFO << "BasicBlockAck has arrived" << std::endl;
         edcaDataRecoveryProcedures[ac]->blockAckFrameReceived();
         auto ackedSeqAndFragNums = edcaAckHandlers[ac]->processReceivedBlockAck(blockAck);
@@ -572,19 +572,19 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80
 //            EV_INFO << "Fragment number = " << seqCtrlField.getSequenceNumber() << " Sequence number = " << (int)seqCtrlField.getFragmentNumber() << std::endl;
         edcaInProgressFrames[ac]->dropFrames(ackedSeqAndFragNums);
     }
-    else if (std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame))
+    else if (std::dynamic_pointer_cast<Ieee80211RtsFrame>(header))
         ; // void
-    else if (std::dynamic_pointer_cast<Ieee80211CtsFrame>(frame))
+    else if (std::dynamic_pointer_cast<Ieee80211CtsFrame>(header))
         edcaDataRecoveryProcedures[ac]->ctsFrameReceived();
-    else if (frame->getType() == ST_DATA_WITH_QOS)
+    else if (header->getType() == ST_DATA_WITH_QOS)
         ; // void
-    else if (std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(frame))
+    else if (std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(header))
         ; // void
     else
         throw cRuntimeError("Unknown control frame");
 }
 
-void Hcf::originatorProcessReceivedDataFrame(const Ptr<Ieee80211DataHeader>& frame, const Ptr<Ieee80211MacHeader>& lastTransmittedFrame, AccessCategory ac)
+void Hcf::originatorProcessReceivedDataFrame(const Ptr<Ieee80211DataHeader>& header, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac)
 {
     throw cRuntimeError("Unknown data frame");
 }
@@ -656,45 +656,45 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         throw cRuntimeError("Hcca is unimplemented");
 }
 
-void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211MacHeader>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211MacHeader>& receivedFrame)
+void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<Ieee80211MacHeader>& receivedHeader)
 {
     responsePacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
-    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(receivedFrame))
+    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(receivedHeader))
         responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
-    else if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(receivedFrame))
+    else if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(receivedHeader))
         responseMode = rateSelection->computeResponseBlockAckFrameMode(receivedPacket, blockAckReq);
-    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(receivedFrame))
-        responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtFrame);
+    else if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(receivedHeader))
+        responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtHeader);
     else
         throw cRuntimeError("Unknown received frame type");
-    setFrameMode(responsePacket, responseFrame, responseMode);
-    tx->transmitFrame(responsePacket, responseFrame, modeSet->getSifsTime(), this);
+    setFrameMode(responsePacket, responseHeader, responseMode);
+    tx->transmitFrame(responsePacket, responseHeader, modeSet->getSifsTime(), this);
     delete responsePacket;
 }
 
-void Hcf::recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211MacHeader>& frame)
+void Hcf::recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211MacHeader>& header)
 {
-    if (auto ctsFrame = std::dynamic_pointer_cast<Ieee80211CtsFrame>(frame))
+    if (auto ctsFrame = std::dynamic_pointer_cast<Ieee80211CtsFrame>(header))
         ctsProcedure->processTransmittedCts(ctsFrame);
-    else if (auto blockAck = std::dynamic_pointer_cast<Ieee80211BlockAck>(frame)) {
+    else if (auto blockAck = std::dynamic_pointer_cast<Ieee80211BlockAck>(header)) {
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processTransmittedBlockAck(blockAck);
     }
-    else if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(frame))
+    else if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(header))
         recipientAckProcedure->processTransmittedAck(ackFrame);
     else
         throw cRuntimeError("Unknown control response frame");
 }
 
 
-void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtFrame)
+void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtHeader)
 {
     mgmtPacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
-    processUpperFrame(mgmtPacket, mgmtFrame);
+    processUpperFrame(mgmtPacket, mgmtHeader);
 }
 
-void Hcf::setFrameMode(Packet *packet, const Ptr<Ieee80211MacHeader>& frame, const IIeee80211Mode *mode) const
+void Hcf::setFrameMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header, const IIeee80211Mode *mode) const
  {
     ASSERT(mode != nullptr);
     packet->ensureTag<Ieee80211ModeReq>()->setMode(mode);
@@ -706,18 +706,18 @@ bool Hcf::isReceptionInProgress()
     return rx->isReceptionInProgress();
 }
 
-bool Hcf::isForUs(const Ptr<Ieee80211MacHeader>& frame) const
+bool Hcf::isForUs(const Ptr<Ieee80211MacHeader>& header) const
 {
-    return frame->getReceiverAddress() == mac->getAddress() || (frame->getReceiverAddress().isMulticast() && !isSentByUs(frame));
+    return header->getReceiverAddress() == mac->getAddress() || (header->getReceiverAddress().isMulticast() && !isSentByUs(header));
 }
 
-bool Hcf::isSentByUs(const Ptr<Ieee80211MacHeader>& frame) const
+bool Hcf::isSentByUs(const Ptr<Ieee80211MacHeader>& header) const
 {
     // FIXME:
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
-    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(frame))
-        return dataOrMgmtFrame->getAddress3() == mac->getAddress();
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+        return dataOrMgmtHeader->getAddress3() == mac->getAddress();
     else
         return false;
 }

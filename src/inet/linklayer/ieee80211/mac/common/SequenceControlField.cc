@@ -28,9 +28,9 @@ SequenceControlField::SequenceControlField(SequenceNumber sequenceNumber, Fragme
     ASSERT(fragmentNumber < 16);
 }
 
-SequenceControlField::SequenceControlField(const Ptr<Ieee80211DataOrMgmtHeader>& frame) :
-    sequenceNumber(frame->getSequenceNumber()),
-    fragmentNumber(frame->getFragmentNumber())
+SequenceControlField::SequenceControlField(const Ptr<Ieee80211DataOrMgmtHeader>& header) :
+    sequenceNumber(header->getSequenceNumber()),
+    fragmentNumber(header->getFragmentNumber())
 {
 }
 

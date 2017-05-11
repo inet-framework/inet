@@ -32,9 +32,9 @@ ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
 // data frame, unless the sequence number of the frame is older than the NextExpectedSequenceNumber for that
 // Block Ack agreement, in which case the frame is discarded because it is either old or a duplicate.
 //
-bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataFrame)
+bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader)
 {
-    int sequenceNumber = dataFrame->getSequenceNumber();
+    int sequenceNumber = dataHeader->getSequenceNumber();
     // The total number of MPDUs in these MSDUs may not
     // exceed the reorder buffer size in the receiver.
     if (length < bufferSize && !isSequenceNumberTooOld(sequenceNumber, nextExpectedSequenceNumber, bufferSize)) {

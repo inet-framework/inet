@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void DcfTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataHeader>& frame)
+void DcfTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataHeader>& header)
 {
     // don't care
 }
@@ -30,21 +30,21 @@ void DcfTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataHeader
 // dot11MaxTransmitMSDULifetime specifies the maximum amount of time allowed to transmit an MSDU. The
 // timer starts on the initial attempt to transmit the first fragment of the MSDU.
 //
-void DcfTransmitLifetimeHandler::frameTransmitted(const Ptr<Ieee80211DataHeader>& frame)
+void DcfTransmitLifetimeHandler::frameTransmitted(const Ptr<Ieee80211DataHeader>& header)
 {
-    if (frame->getFragmentNumber() == 0)
-        lifetimes[frame->getSequenceNumber()] = simTime();
+    if (header->getFragmentNumber() == 0)
+        lifetimes[header->getSequenceNumber()] = simTime();
 }
 
 //
 // If the timer exceeds dot11MaxTransmitMSDULifetime, then all remaining fragments are discarded
 // by the source STA and no attempt is made to complete transmission of the MSDU.
 //
-bool DcfTransmitLifetimeHandler::isLifetimeExpired(const Ptr<Ieee80211DataHeader>& frame)
+bool DcfTransmitLifetimeHandler::isLifetimeExpired(const Ptr<Ieee80211DataHeader>& header)
 {
-    auto it = lifetimes.find(frame->getSequenceNumber());
+    auto it = lifetimes.find(header->getSequenceNumber());
     if (it == lifetimes.end())
-        throw cRuntimeError("There is no lifetime entry for frame = %s", frame->getName());
+        throw cRuntimeError("There is no lifetime entry for frame = %s", header->getName());
     return (simTime() - it->second) >= maxTransmitLifetime;
 }
 

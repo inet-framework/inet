@@ -62,16 +62,16 @@ void Rx::handleMessage(cMessage *msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-bool Rx::lowerFrameReceived(Packet *packet, const Ptr<Ieee80211MacHeader>& frame)
+bool Rx::lowerFrameReceived(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet, frame);
+    bool isFrameOk = isFcsOk(packet, header);
     if (isFrameOk) {
-        EV_INFO << "Received frame from PHY: " << frame << endl;
-        if (frame->getReceiverAddress() != address)
-            setOrExtendNav(frame->getDuration());
+        EV_INFO << "Received frame from PHY: " << packet << endl;
+        if (header->getReceiverAddress() != address)
+            setOrExtendNav(header->getDuration());
 //        statistics->frameReceived(frame);
         return true;
     }
@@ -99,11 +99,11 @@ bool Rx::isReceptionInProgress() const
            (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
-bool Rx::isFcsOk(Packet *packet, const Ptr<Ieee80211MacHeader>& frame) const
+bool Rx::isFcsOk(Packet *packet, const Ptr<Ieee80211MacHeader>& header) const
 {
     // TODO: real FCS check based on fcs mode, see UDP for example
     // TODO: e.g. packet->peekData()->isCorrect();
-    return !packet->hasBitError() && frame->isCorrect();
+    return !packet->hasBitError() && header->isCorrect();
 }
 
 void Rx::recomputeMediumFree()
