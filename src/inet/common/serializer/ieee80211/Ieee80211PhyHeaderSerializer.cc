@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/BitVector.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ieee80211/Ieee80211PhyHeaderSerializer.h"
 #include "inet/common/serializer/ieee80211/Ieee80211PLCPHeaders.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211PLCPFrame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
@@ -108,19 +105,6 @@ Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) 
 //    return plcpFrame;
     return phyHeader;
 }
-
-//void Ieee80211PhySerializer::writeToBitVector(unsigned char* buf, unsigned int bufSize, BitVector* bitVector) const
-//{
-//    for (unsigned int i = 0; i < bufSize; i++)
-//    {
-//        unsigned int currentByte = buf[i];
-//        for (unsigned int j = 0; j < 8; j++)
-//        {
-//            bool currentBit = currentByte & (1 << j);
-//            bitVector->appendBit(currentBit);
-//        }
-//    }
-//}
 
 } // namespace serializer
 

@@ -28,12 +28,12 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -93,17 +93,6 @@ std::ostream& Ieee80211LayeredOFDMTransmitter::printToStream(std::ostream& strea
                << ", carrierFrequency = " << carrierFrequency
                << ", power = " << power;
     return stream;
-}
-
-BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) const
-{
-    BitVector *serializedPacket = new BitVector();
-    const Ieee80211OFDMPLCPFrame *phyFrame = check_and_cast<const Ieee80211OFDMPLCPFrame *>(packet);
-    throw cRuntimeError("Obsoleted"); // KLUDGE:
-    // TODO: phySerializer.serialize(phyFrame, serializedPacket);
-    unsigned int byteLength = phyFrame->getLength();
-    appendPadding(serializedPacket, byteLength);
-    return serializedPacket;
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createPacketModel(const Packet *packet) const

@@ -79,7 +79,6 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
     const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const;
     const ITransmissionAnalogModel *createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
 
-    BitVector *serialize(const cPacket *packet) const;
     void appendPadding(BitVector *serializedPacket, unsigned int length) const;
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
 
