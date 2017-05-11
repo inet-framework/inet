@@ -297,7 +297,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
     }
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->popTrailer<Ieee80211MacTrailer>();
+    packet->popTrailer<Ieee80211MacTrailer>(byte(4));
 }
 
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
