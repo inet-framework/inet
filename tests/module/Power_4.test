@@ -85,8 +85,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 	Test.hostSource.pingApp[0]
 --------------------------------------------------------
 sent: 81   received: 30   loss rate (%): 62.963
-round-trip min/avg/max (ms): 0.4564/0.784147/2.0288
-stddev (ms): 0.29398   variance:8.64243e-08
+round-trip min/avg/max (ms): 0.2344/0.553547/1.5488
+stddev (ms): 0.25787   variance:6.64969e-08
 --------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
