@@ -354,7 +354,6 @@
 /examples/visualization/advanced/,   -f omnetpp.ini -c DisableVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c MultipleVisualizations -r 0
 /examples/visualization/datalink/,   -f omnetpp.ini -c DynamicDataLinkVisualization -r 0
-/examples/visualization/earth/,      -f omnetpp.ini -c General -r 0
 /examples/visualization/environment/, -f omnetpp.ini -c General -r 0
 /examples/visualization/ieee80211/,  -f omnetpp.ini -c General -r 0
 /examples/visualization/info/,       -f omnetpp.ini -c General -r 0
