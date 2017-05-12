@@ -1,13 +1,13 @@
 %description:
-Testing manetrouting with AODVUU routing protocol, UDP forwarding
-    manetrouting AODVUU UDP
+Testing manetrouting with AODV routing protocol, UDP forwarding
+    manetrouting AODV UDP
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.FlatNetworkConfigurator;
-import inet.node.inet.AdhocHost;
+import inet.node.aodv.AODVRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -22,21 +22,21 @@ network Net80211_aodv_test
         int numHosts;
         int distance @unit(m) = default(350m);
     submodules:
-        senderhost: AdhocHost {
+        senderhost: AODVRouter {
             parameters:
                 mobility.initialX = 1m;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        rcvrhost: AdhocHost {
+        rcvrhost: AODVRouter {
             parameters:
                 mobility.initialX = 1m + (numHosts+1) * distance;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        host[numHosts]: AdhocHost {
+        host[numHosts]: AODVRouter {
             parameters:
                 mobility.initialX = 1m + (index+1) * distance;
                 mobility.initialY = 200m;
@@ -102,10 +102,7 @@ description = "Aodv Simple test"
 **.udpApp[0].burstDuration = 0
 **.udpApp[0].chooseDestAddrMode = "perBurst"
 **.udpApp[0].sleepDuration = 1s
-# **.udpApp[0].burstDuration = uniform(1s,4s,1)
-# **.udpApp[0].stopTime = uniform(20s,40s,1)
 **.udpApp[0].stopTime = -1s
-##**.udpApp[0].startTime = uniform(0s,4s,1)
 **.udpApp[0].startTime = 10s
 **.udpApp[0].delayLimit = 20s
 **.udpApp[0].destAddrRNG = 0
@@ -124,17 +121,8 @@ description = "Aodv Simple test"
 **.pingApp.stopTime = -1s
 **.pingApp.printPing = true
 
-# tcp settings
-**.tcp.mss = 1024
-**.tcp.advertisedWindow = 14336  # 14*mss
-#**.tcp.sendQueueClass = "TCPMsgBasedSendQueue"
-#**.tcp.receiveQueueClass = "TCPMsgBasedRcvQueue"
-**.tcp.tcpAlgorithmClass = "TCPReno"
-**.tcp.recordStats = true
-
 # ip settings
 **.ip.procDelay = 10us
-# **.forwarding=false
 
 
 ######################################################################
