@@ -133,7 +133,7 @@ options(width=160)
 library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
-scafile <- 'results/General-0.sca'
+scafile <- 'results/General-#0.sca'
 linecount <- 2 * 2
 cliBytes <- 10000000
 srvBytes <- 2 * cliBytes

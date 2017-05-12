@@ -127,7 +127,7 @@ options(width=160)
 library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
-scafile <- 'results/General-0.sca'
+scafile <- 'results/General-#0.sca'
 linecount <- 6
 idlelimit <- 2.0
 usedlimit <- 98.0
