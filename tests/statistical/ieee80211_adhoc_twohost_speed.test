@@ -28,7 +28,7 @@ module ThroughputClient
         int idx;
         int maxCli;
         int maxSrv;
-        @node();
+        @networkNode();
         @display("i=device/wifilaptop");
         **.interfaceTableModule = "";
     gates:
@@ -60,7 +60,7 @@ module ThroughputServer
     parameters:
         int idx;
         int maxSrv;
-        @node();
+        @networkNode();
         @display("i=device/wifilaptop");
         **.interfaceTableModule = "";
     gates:
