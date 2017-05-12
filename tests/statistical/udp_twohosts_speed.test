@@ -69,6 +69,7 @@ sim-time-limit = 20s
 **.host*snap.udpApp[0].sendInterval = 1.719ms   #etherframe with snap and gap: 1074 bytes, 2 packets (sent, echoed): 1074*8/10000000*2 = 17.184ms
 **.host*snap.udpApp[0].stopTime = 17.19s
 **.udpApp[0].sendInterval = 1.706ms   #etherframe and gap: 1066 bytes, 2 packets (sent, echoed): 1066*8/10000000*2 = 17.056ms
+**.udpApp[0].startTime = 0s
 **.udpApp[0].stopTime = 17.06s
 **.host1.udpApp[0].destAddresses = "host2"
 **.host2.udpApp[0].destAddresses = "host1"
@@ -80,6 +81,9 @@ sim-time-limit = 20s
 
 **.host*snap.eth[*].useSNAP = true
 **.host*.eth[*].queue.frameCapacity = 1
+
+# ARP
+**.arpType = "GlobalARP"
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: Rscript check.r
@@ -104,7 +108,7 @@ dataset <- loadDataset(scafile)
 cat("\nOMNETPP TEST RESULT:\n")
 
 udpApp <- dataset$scalars[grep("\\.host\\d\\w*\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
-udpSent <- udpApp[udpApp$name == "sentPk:sum(packetBytes)",]
+udpSent <- udpApp[udpApp$name == "sentPk:count",]
 udpRcvd <- udpApp[udpApp$name == "echoedPk:count",]
 
 cat("  UDP SPEED TEST RESULT:\n")
