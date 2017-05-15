@@ -139,10 +139,11 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
     parameters:
         string rateControlType = default("");
         string opMode @enum("a","b","g","n","p") = default("g");
-        double bitrate @unit("bps") = default(-1bps);
-        double dataBitrate @unit("bps") = default(-1bps);
-        double multicastBitrate @unit("bps") = default(-1bps);
-        double basicBitrate @unit("bps") = default(-1bps);
+        double bitrate @unit("bps") = default(-1bps); // for backward compatibility
+        double basicBitrate @unit("bps") = default(-1bps); // for backward compatibility
+        double dataBitrate @unit("bps") = default(bitrate);
+        double mgmtBitrate @unit("bps") = default(basicBitrate);
+        double multicastBitrate @unit("bps") = default(basicBitrate);
         double controlBitrate @unit("bps") = default(-1bps);
         double initialRateControlRate @unit("bps") = default(-1bps);
         int rtsThresholdBytes @unit("B") = default(2346B);
@@ -171,7 +172,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         *.rateControlType = rateControlType;
         *.rateSelection.multicastFrameBitrate = multicastBitrate; // BasicRateSelection
         *.rateSelection.dataFrameBitrate = dataBitrate; // BasicRateSelection
-        *.rateSelection.mgmtFrameBitrate = basicBitrate;
+        *.rateSelection.mgmtFrameBitrate = mgmtBitrate;
         *.rateSelection.controlFrameBitrate = controlBitrate;
         *.rateSelection.responseAckFrameBitrate = controlBitrate;
         *.rateControl.initialRate = initialRateControlRate;
