@@ -1,9 +1,60 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.6.0 - stable
+INET-3.6.0 (May, 2017) - stable
 -------------------------------
 
+This release contains some important new features, several bug fixes, and a few
+minor enhancements. It requires OMNeT++ 5.1 or later.
+
+Highlights in this release:
+
+ - The IEEE 802.11 MAC model has been extended with several new components. The
+   implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
+   Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications.
+
+   The new architecture is designed to be modular to facilitate experimenting
+   with new policies, features and algorithms within the MAC layer. Users can
+   easily replace individual components with their own implementations. Policies,
+   which most likely to be experimented with, are extracted into their own modules.
+   
+   The new model has the following replaceable built-in policies:
+    - ACK policy
+    - RTS/CTS policy
+    - Originator and recipient block ACK agreement policies
+    - MSDU aggregation policy
+    - Fragmentation policy
+    
+   The new model also separates the following components:
+    - Coordination functions
+    - Channel access methods
+    - MAC data services
+    - Aggregation and deaggregation
+    - Fragmentation and defragmentation
+    - Block ACK agreements and reordering
+    - Frame exchange sequences
+    - Duplicate removal
+    - Rate selection
+    - Rate control
+    - Protection mechanisms
+    - Recovery procedure
+    - Contention
+    - Frame queues
+    - TX/RX
+
+   There are several enhancements and new features to the previous version, the
+   most notable are frame exchange sequences, block acknowledgement, and MSDU
+   aggregation.
+
+ - The power model has been extended with support for charge/current based models
+   as opposed to the existing energy/power based ones. A new energy management
+   component has also been added to separate monitoring and controlling of energy
+   consumers and generators from the rest of the model. 
+
+ - New visualizers has been added to display packet drops and link breaks, data
+   contained in interface tables, routes stored in routing tables, and transport
+   connections between network nodes. The new visualizers are also added to the
+   already existing integrated ones.
 
 
 INET-3.5.0 (Feb, 2017) - stable
