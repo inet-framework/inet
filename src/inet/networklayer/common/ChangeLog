@@ -1,5 +1,22 @@
 ====== inet-3.x ======
 
+2017-02-13  Levente Mészáros
+
+	Disabled displaying interface name, IP address and netmask length on the
+	gate by default. This feature is replaced by the InterfaceTableVisualizer.
+
+2017-02-13  Levente Mészáros
+
+	Added IPv4Address field to InterfaceEntry msg file.
+
+2017-02-09  Levente Mészáros
+
+	Added InterfaceEntry class descriptor.
+
+2017-01-13  Levente Mészáros
+
+	Added guards to avoid crash when there's no IPv4 data.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2017-02-17  Rudolf Hornig

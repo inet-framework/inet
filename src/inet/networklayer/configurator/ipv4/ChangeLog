@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-01-13  Levente Mészáros
+
+	Split configureNode into configureInterface and configureRoutingTable.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2017-01-15  xiabin

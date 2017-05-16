@@ -9,8 +9,18 @@ import string
 import subprocess
 
 # configuration
-since = '2016-06-18'
+since = '2017-02-20'
 entriesToIgnore = [
+"""2017-02-20  Rudolf Hornig
+
+	doc: tagged changelogs
+
+""",
+"""2017-02-20  Rudolf Hornig
+
+	doc: updated changelogs
+
+""",
 """2016-12-23  Rudolf Hornig
 
 	build: ChangeLogs tagged

@@ -1,5 +1,44 @@
 ====== inet-3.x ======
 
+2017-02-20  Levente Mészáros
+
+	Implemented missing interfaceFilter in LinkVisualizer.
+
+2017-02-20  Levente Mészáros
+
+	Implemented missing nodeFilter in PathVisualizer.
+
+2017-02-09  Levente Mészáros
+
+	Increased statistic text precision to avoid scientific notation below 9999.
+
+2017-02-09  Levente Mészáros
+
+	Changed PathVisualizer to use ColorSet.
+
+2017-02-09  Levente Mészáros
+
+	Cleaned up MobilityVisualizer lineStyle and lineWidth parameters.
+
+2017-02-09  Levente Mészáros
+
+	Changed MediumVisualizer signalColor to use ColorSet.
+
+2017-02-08  Levente Mészáros
+
+	Changed StatisticVisualizer to use the new StringFormat.
+
+2017-02-07  Levente Mészáros
+
+	Added signalPropagationAdditionalTime parameter to MediumVisualizerBase.
+
+2017-01-02  Levente Mészáros
+
+	Added base classes for new visualizers:
+	Added interfaces for new visualizers: IIeee80211Visualizer,
+	IInterfaceTableVisualizer, IRoutingTableVisualizer, IInfoVisualizer
+	ITransportConnectionVisualizer, ILinkBreakVisualizer, IPacketDropVisualizer.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-10-20  Rudolf Hornig

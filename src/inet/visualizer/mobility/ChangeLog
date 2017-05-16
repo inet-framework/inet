@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2017-02-13  Levente Mészáros
+
+	Changed radius of orientation visualization to use submodule size.
+
+2017-02-09  Levente Mészáros
+
+	Cleaned up MobilityVisualizer lineStyle and lineWidth parameters.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-10-20  Rudolf Hornig

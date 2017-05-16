@@ -1,5 +1,21 @@
 ====== inet-3.x ======
 
+2017-03-27  Benjamin Martin Seregi
+
+	Added NF_PACKET_DROP signal to NotifierConsts.
+
+2017-01-13  Levente Mészáros
+
+	Added createLineStateSet to OSGUtils.
+
+2017-01-02  Levente Mészáros
+
+	Added MatchableObject for matching cObjects using cMatchExpressions.
+
+2016-09-20  Levente Mészáros
+
+	Added a couple of Ampere * second related units.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2017-02-17  Rudolf Hornig
