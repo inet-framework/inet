@@ -120,7 +120,7 @@ AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Ieee80211DataFrame* frame, Or
 
 bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Ieee80211DataFrame* frame) const
 {
-    return frame->getByteLength() < maxBlockAckPolicyFrameLength;
+    return frame->getType() == ST_DATA_WITH_QOS && frame->getByteLength() < maxBlockAckPolicyFrameLength;
 }
 
 bool OriginatorQoSAckPolicy::checkAgreementPolicy(Ieee80211DataFrame* frame, OriginatorBlockAckAgreement *agreement) const
