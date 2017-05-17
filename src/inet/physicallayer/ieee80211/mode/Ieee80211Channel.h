@@ -37,7 +37,7 @@ class INET_API Ieee80211Channel : public IPrintableObject
 
     virtual const IIeee80211Band *getBand() const { return band; }
     virtual int getChannelNumber() const { return channelNumber; }
-    virtual Hz getCenterFrequency() const { return band->getCenterFreqency(channelNumber); }
+    virtual Hz getCenterFrequency() const { return band->getCenterFrequency(channelNumber); }
 };
 
 } // namespace physicallayer

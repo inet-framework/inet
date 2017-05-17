@@ -32,7 +32,7 @@ Ieee80211EnumeratedBand::Ieee80211EnumeratedBand(const char *name, const std::ve
 {
 }
 
-Hz Ieee80211EnumeratedBand::getCenterFreqency(int channelNumber) const
+Hz Ieee80211EnumeratedBand::getCenterFrequency(int channelNumber) const
 {
     if (channelNumber < 0 || channelNumber >= (int)centers.size())
         throw cRuntimeError("Invalid channel number: %d", channelNumber);
@@ -47,7 +47,7 @@ Ieee80211ArithmeticalBand::Ieee80211ArithmeticalBand(const char *name, Hz start,
 {
 }
 
-Hz Ieee80211ArithmeticalBand::getCenterFreqency(int channelNumber) const
+Hz Ieee80211ArithmeticalBand::getCenterFrequency(int channelNumber) const
 {
     if (channelNumber < 0 || channelNumber >= numChannels)
         throw cRuntimeError("Invalid channel number: %d", channelNumber);
