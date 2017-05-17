@@ -40,8 +40,12 @@ class INET_API InProgressFrames
                     seqAndFragNums(seqAndFragNums) {}
 
                 bool operator() (const Ieee80211DataOrMgmtFrame *frame) {
-                    auto dataFrame = check_and_cast<const Ieee80211DataFrame*>(frame);
-                    return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;
+                    if (frame->getType() == ST_DATA_WITH_QOS) {
+                        auto dataFrame = dynamic_cast<const Ieee80211DataFrame*>(frame);
+                        return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;
+                    }
+                    else
+                        return 0;
                 }
         };
 
