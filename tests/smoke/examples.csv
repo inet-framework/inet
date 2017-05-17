@@ -76,7 +76,6 @@
 /examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0
-/examples/ethernet/switch/,          -f ethernet-switch.ini -c General -r 0
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0
 # /examples/hiddennode_new80211/,      -f omnetpp.ini -c hiddennode1 -r 0   # hiddennode1 extended
 # /examples/hiddennode_new80211/,      -f omnetpp.ini -c hiddennode2 -r 0   # hiddennode2 extended
@@ -349,7 +348,6 @@
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
-/examples/tests/eth/,                -f ethernet-twohosts.ini -c General -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c SimpleVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c DisableVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c MultipleVisualizations -r 0
