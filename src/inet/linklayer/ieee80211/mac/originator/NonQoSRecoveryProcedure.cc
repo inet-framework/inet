@@ -48,21 +48,17 @@ void NonQoSRecoveryProcedure::initialize(int stage)
 void NonQoSRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationCounters)
 {
     stationCounters->incrementStationShortRetryCount();
-    if (stationCounters->getStationShortRetryCount() == shortRetryLimit) { // 9.3.3 Random backoff time
+    if (stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
-        stationCounters->resetStationShortRetryCount();
-    }
     else
         cwCalculator->incrementCw();
 }
 
 void NonQoSRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationCounters)
 {
-    stationCounters->incrementStationShortRetryCount();
-    if (stationCounters->getStationLongRetryCount() == longRetryLimit) { // 9.3.3 Random backoff time
+    stationCounters->incrementStationLongRetryCount();
+    if (stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
-        stationCounters->resetStationLongRetryCount();
-    }
     else
         cwCalculator->incrementCw();
 }
