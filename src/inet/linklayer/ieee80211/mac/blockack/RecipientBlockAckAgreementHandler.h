@@ -47,6 +47,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
         virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback* callback);
 
     public:
+        virtual ~RecipientBlockAckAgreementHandler();
         virtual void processTransmittedAddbaResp(Ieee80211AddbaResponse *addbaResp, IBlockAckAgreementHandlerCallback *callback) override;
         virtual void processReceivedAddbaRequest(Ieee80211AddbaRequest *addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
         virtual void processReceivedDelba(Ieee80211Delba *delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;

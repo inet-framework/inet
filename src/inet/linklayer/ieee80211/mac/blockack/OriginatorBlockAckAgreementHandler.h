@@ -42,6 +42,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
         virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
     public:
+        virtual ~OriginatorBlockAckAgreementHandler();
         virtual void processTransmittedAddbaReq(Ieee80211AddbaRequest *addbaReq) override;
         virtual void processTransmittedDataFrame(Ieee80211DataFrame *dataFrame, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
         virtual void processReceivedBlockAck(Ieee80211BlockAck *blockAck, IBlockAckAgreementHandlerCallback *callback) override;
