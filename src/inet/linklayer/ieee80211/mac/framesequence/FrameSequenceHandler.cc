@@ -152,11 +152,20 @@ void FrameSequenceHandler::finishFrameSequence(bool ok)
         numSteps = context->getNumSteps() - (dynamic_cast<IReceiveStep*>(context->getLastStep()) ? 2 : 1);
     for (int i = 0; i < numSteps; i++) {
         auto step = context->getStep(i);
-        if (auto transmitStep = dynamic_cast<TransmitStep*>(step))
-            delete transmitStep->getFrameToTransmit();
+        if (auto transmitStep = dynamic_cast<TransmitStep*>(step)) {
+            auto frame = transmitStep->getFrameToTransmit();
+            if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
+                if (!context->getInProgressFrames()->isFrameInProgress(dataOrMgmtFrame))
+                    delete frame;
+            }
+            else
+                delete frame;
+        }
         else if (auto rtsTransmitStep = dynamic_cast<RtsTransmitStep*>(step)) {
             delete rtsTransmitStep->getFrameToTransmit();
-            delete rtsTransmitStep->getProtectedFrame();
+            auto protectedFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(rtsTransmitStep->getProtectedFrame());
+            if (!context->getInProgressFrames()->isFrameInProgress(protectedFrame))
+                delete protectedFrame;
         }
     }
     delete context;

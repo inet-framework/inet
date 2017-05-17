@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include <algorithm>
 #include "InProgressFrames.h"
 
 namespace inet {
@@ -83,6 +84,11 @@ Ieee80211DataOrMgmtFrame* InProgressFrames::getPendingFrameFor(Ieee80211Frame *f
         else
             return nullptr;
     }
+}
+
+bool InProgressFrames::isFrameInProgress(Ieee80211DataOrMgmtFrame *frame)
+{
+    return std::find(inProgressFrames.begin(), inProgressFrames.end(), frame) != inProgressFrames.end();
 }
 
 void InProgressFrames::dropFrame(Ieee80211DataOrMgmtFrame* frame)

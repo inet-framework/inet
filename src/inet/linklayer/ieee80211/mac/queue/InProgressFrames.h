@@ -63,6 +63,8 @@ class INET_API InProgressFrames
             ackHandler(ackHandler)
         { }
 
+        virtual bool isFrameInProgress(Ieee80211DataOrMgmtFrame *frame);
+
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit();
         virtual Ieee80211DataOrMgmtFrame *getPendingFrameFor(Ieee80211Frame *frame);
         virtual void dropFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
