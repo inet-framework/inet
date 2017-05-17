@@ -363,7 +363,7 @@
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        fb8a-21b5/tplx
 
-/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                100s,         dfee-1999/tplx
+/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,           641e-108c/tplx
 
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           b196-8c85/tplx
 
