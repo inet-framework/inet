@@ -27,6 +27,7 @@ namespace ieee80211 {
 
 Define_Module(RecipientQoSMacDataService);
 
+// TODO: refactor to avoid code duplication
 void RecipientQoSMacDataService::initialize()
 {
     duplicateRemoval = new QoSDuplicateRemoval();
@@ -148,8 +149,22 @@ std::vector<Ieee80211Frame*> RecipientQoSMacDataService::controlFrameReceived(Ie
                 }
             }
         }
-        // TODO: Defrag, MSDU Integrity, Replay Detection, A-MSDU Degagg., RX MSDU Rate Limiting
-        return defragmentedFrames;
+        std::vector<Ieee80211Frame *> deaggregatedFrames;
+        if (aMsduDeaggregation) {
+            for (auto frame : defragmentedFrames) {
+                auto dataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
+                if (dataFrame->getAMsduPresent()) {
+                    auto subframes = aMsduDeaggregation->deaggregateFrame(dataFrame);
+                    for (auto subframe : *subframes)
+                        deaggregatedFrames.push_back(subframe);
+                    delete subframes;
+                }
+                else
+                    deaggregatedFrames.push_back(dataFrame);
+            }
+        }
+        // TODO: MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
+        return deaggregatedFrames;
     }
     return std::vector<Ieee80211Frame*>();
 }
