@@ -1,0 +1,42 @@
+--- Ieee80211ControlInfoDescr_m.cc	2017-05-17 10:55:00.908896724 +0200
++++ Ieee80211ControlInfoDescr.cc	2017-05-17 10:54:21.189187209 +0200
+@@ -26,7 +26,7 @@
+ 
+ #include <iostream>
+ #include <sstream>
+-#include "Ieee80211ControlInfoDescr_m.h"
++#include <Ieee80211ControlInfoDescr.h>
+ 
+ namespace omnetpp {
+ 
+@@ -442,9 +442,9 @@
+     }
+     Ieee80211ConfigureRadioCommand *pp = (Ieee80211ConfigureRadioCommand *)object; (void)pp;
+     switch (field) {
+-        case 1: return (void *)static_cast<omnetpp::cObject *>(pp->getModeSet()); break;
+-        case 2: return (void *)static_cast<omnetpp::cObject *>(pp->getMode()); break;
+-        case 3: return (void *)static_cast<omnetpp::cObject *>(pp->getBand()); break;
++        case 1: return (void *)static_cast<const omnetpp::cObject *>(pp->getModeSet()); break;
++        case 2: return (void *)static_cast<const omnetpp::cObject *>(pp->getMode()); break;
++        case 3: return (void *)static_cast<const omnetpp::cObject *>(pp->getBand()); break;
+         default: return nullptr;
+     }
+ }
+@@ -694,7 +694,7 @@
+     }
+     Ieee80211TransmissionRequest *pp = (Ieee80211TransmissionRequest *)object; (void)pp;
+     switch (field) {
+-        case 0: return (void *)static_cast<omnetpp::cObject *>(pp->getMode()); break;
++        case 0: return (void *)static_cast<const omnetpp::cObject *>(pp->getMode()); break;
+         default: return nullptr;
+     }
+ }
+@@ -980,7 +980,7 @@
+     }
+     Ieee80211ReceptionIndication *pp = (Ieee80211ReceptionIndication *)object; (void)pp;
+     switch (field) {
+-        case 0: return (void *)static_cast<omnetpp::cObject *>(pp->getMode()); break;
++        case 0: return (void *)static_cast<const omnetpp::cObject *>(pp->getMode()); break;
+         default: return nullptr;
+     }
+ }

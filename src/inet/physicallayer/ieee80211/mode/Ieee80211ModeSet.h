@@ -79,6 +79,11 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     simtime_t getPhyRxStartDelay() const { return entries[0].mode->getPhyRxStartDelay(); }
     int getCwMin() const { return entries[0].mode->getLegacyCwMin(); }
     int getCwMax() const { return entries[0].mode->getLegacyCwMax(); }
+
+    IIeee80211Mode *_getSlowestMode() const { return const_cast<IIeee80211Mode*>(getSlowestMode()); }
+    IIeee80211Mode *_getFastestMode() const { return const_cast<IIeee80211Mode*>(getFastestMode()); }
+    IIeee80211Mode *_getSlowestMandatoryMode() const { return const_cast<IIeee80211Mode*>(getSlowestMandatoryMode()); }
+    IIeee80211Mode *_getFastestMandatoryMode() const { return const_cast<IIeee80211Mode*>(getFastestMandatoryMode()); }
 };
 
 } // namespace physicallayer
