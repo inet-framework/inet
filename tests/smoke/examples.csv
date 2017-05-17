@@ -443,6 +443,8 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0   # MacQos extended
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0   # AbstractIdealMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0
