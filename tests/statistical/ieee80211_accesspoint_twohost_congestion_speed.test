@@ -159,7 +159,10 @@ sim-time-limit = 50s
 **.mgmt.frameCapacity = 100
 
 # nic settings
-**.wlan*.bitrate = 11Mbps
+**.wlan*.*.dataBitrate = 11Mbps
+**.wlan*.*.mgmtBitrate = 11Mbps
+**.wlan*.*.multicastBitrate = 11Mbps
+**.wlan*.*.controlBitrate = 11Mbps
 **.mac.address = "auto"
 **.mac.maxQueueSize = 14
 **.mac.rtsThresholdBytes = 3000B

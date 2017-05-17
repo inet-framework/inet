@@ -132,7 +132,12 @@ description = "Aodv Simple test"
 #######################################################
 
 # nic settings
-**.wlan*.bitrate = 54Mbps
+#for validation
+**.wlan*.*.dataBitrate = 54Mbps
+**.wlan*.*.basicBitrate = 1Mbps
+**.wlan*.*.multicastBitrate = 54Mbps
+**.wlan*.*.controlBitrate = 1Mbps
+#for validation
 **.wlan*.mac.EDCA = false
 **.wlan*.mgmt.frameCapacity = 10
 **.wlan*.mac.maxQueueSize = 14
