@@ -668,6 +668,7 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
             routeSG->startRegisterStopTimer(uniform(0.5 * registerSuppressionTime, 1.5 * registerSuppressionTime) - registerProbeTime);
         }
     }
+    delete pkt;
 }
 
 void PIMSM::processAssertPacket(PIMAssert *pkt)
@@ -1568,6 +1569,7 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     ctrl->setProtocol(datagram->getTransportProtocol());
     data->setControlInfo(ctrl);
     send(data, "ipOut");
+    delete datagram;
 }
 
 //============================================================================
