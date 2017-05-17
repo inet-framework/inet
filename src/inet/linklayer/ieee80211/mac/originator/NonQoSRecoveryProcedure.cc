@@ -200,6 +200,17 @@ int NonQoSRecoveryProcedure::getRetryCount(Ieee80211DataOrMgmtFrame* frame)
         return getRc(frame, shortRetryCounter);
 }
 
+
+int NonQoSRecoveryProcedure::getShortRetryCount(Ieee80211DataOrMgmtFrame* frame)
+{
+    return getRc(frame, shortRetryCounter);
+}
+
+int NonQoSRecoveryProcedure::getLongRetryCount(Ieee80211DataOrMgmtFrame* frame)
+{
+    return getRc(frame, longRetryCounter);
+}
+
 void NonQoSRecoveryProcedure::resetContentionWindow()
 {
     cwCalculator->resetCw();
@@ -216,7 +227,7 @@ int NonQoSRecoveryProcedure::getRc(Ieee80211DataOrMgmtFrame* frame, std::map<Seq
     if (count != retryCounter.end())
         return count->second;
     else
-        throw cRuntimeError("The retry counter entry doesn't exist for message id: %d", frame->getId());
+        return 0;
 }
 
 bool NonQoSRecoveryProcedure::isMulticastFrame(Ieee80211Frame* frame)
@@ -230,4 +241,3 @@ bool NonQoSRecoveryProcedure::isMulticastFrame(Ieee80211Frame* frame)
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

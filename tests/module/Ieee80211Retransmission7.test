@@ -73,10 +73,11 @@ ned-path = .;../../../../src;../../lib
 **.receiver.numUdpApps = 1
 **.receiver.udpApp[0].typename = "UDPSink"
 **.receiver.udpApp[0].localPort = 21
-**.wlan[*].mac.rtsThresholdBytes = 1500B
-**.wlan[*].mac.cwMinData = 15
-**.wlan[*].mac.cwMaxData = 1023
-**.sender.wlan[*].macType = "Ieee80211CompatibleMac"
+**.sender.wlan[*].macType = "Ieee80211Mac"
+**.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B
+**.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
+**.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
+**.sender.wlan[*].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2000B
 **.receiver.wlan[*].macType = "Ieee80211TesterMac"
 **.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
 
@@ -84,7 +85,6 @@ ned-path = .;../../../../src;../../lib
 **.receiver.wlan[*].mac.actions = "ABABABABABAA"
 
 %contains-regex: stdout
-.*
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
 .*
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
@@ -101,21 +101,13 @@ For the current frame exchange, we have CW = 127 SRC = 0 LRC = 3 SSRC = 0 and SL
 .*
 For the current frame exchange, we have CW = 127 SRC = 0 LRC = 3 SSRC = 0 and SLRC = 3
 .*
-For the current frame exchange, we have CW = 15 SRC = 0 LRC = 4 SSRC = 0 and SLRC = 4
-.*
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 4
 .*
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 4
-.*
-For the current frame exchange, we have CW = 31 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 5
-.*
-For the current frame exchange, we have CW = 31 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 5
-.*
-For the current frame exchange, we have CW = 15 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 0
 .*
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%#%not-contains: stdout
+%#undisposed object:
+%#%not-contains: stdout
+%#-- check module destructor
 %#--------------------------------------------------------------------------------------------------------------
