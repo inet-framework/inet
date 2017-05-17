@@ -268,10 +268,13 @@ void Hcf::recipientProcessReceivedFrame(Ieee80211Frame* frame)
     else if (auto mgmtFrame = dynamic_cast<Ieee80211ManagementFrame*>(frame)) {
         sendUp(recipientDataService->managementFrameReceived(mgmtFrame));
         recipientProcessReceivedManagementFrame(mgmtFrame);
+        if (dynamic_cast<Ieee80211ActionFrame *>(mgmtFrame))
+            delete mgmtFrame;
     }
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(frame, recipientBlockAckAgreementHandler));
         recipientProcessReceivedControlFrame(frame);
+        delete frame;
     }
 }
 
@@ -574,7 +577,7 @@ void Hcf::sendUp(const std::vector<Ieee80211Frame*>& completeFrames)
 {
     for (auto frame : completeFrames) {
         // FIXME: mgmt module does not handle addba req ..
-        if (!dynamic_cast<Ieee80211AddbaRequest*>(frame) && !dynamic_cast<Ieee80211AddbaResponse*>(frame) && !dynamic_cast<Ieee80211Delba*>(frame))
+        if (!dynamic_cast<Ieee80211ActionFrame *>(frame))
             mac->sendUp(frame);
     }
 }

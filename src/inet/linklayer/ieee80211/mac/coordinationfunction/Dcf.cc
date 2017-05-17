@@ -184,6 +184,7 @@ void Dcf::recipientProcessReceivedFrame(Ieee80211Frame* frame)
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(frame));
         recipientProcessControlFrame(frame);
+        delete frame;
     }
 }
 
