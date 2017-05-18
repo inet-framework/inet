@@ -182,6 +182,8 @@ class INET_API PostureTransition
      */
     PostureTransition(int);
 
+    ~PostureTransition();
+
     /** @brief Receives a transition matrix and add to the list. */
     int addMatrix(std::string, double **, bool);
 
