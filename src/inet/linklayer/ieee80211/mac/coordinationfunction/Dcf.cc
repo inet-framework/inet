@@ -232,7 +232,6 @@ void Dcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protect
         recoveryProcedure->retryLimitReached(protectedFrame);
         inProgressFrames->dropFrame(protectedFrame);
         emit(NF_PACKET_DROP, protectedFrame);
-        delete protectedFrame;
     }
 }
 

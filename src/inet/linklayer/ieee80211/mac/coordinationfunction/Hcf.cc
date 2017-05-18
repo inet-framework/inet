@@ -350,7 +350,6 @@ void Hcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protect
             edcaInProgressFrames[ac]->dropFrame(protectedFrame);
             emit(NF_LINK_BREAK, protectedFrame);
             emit(NF_PACKET_DROP, protectedFrame);
-            delete protectedFrame;
         }
     }
     else
