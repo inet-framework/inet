@@ -49,6 +49,19 @@ RSVP::RSVP()
 RSVP::~RSVP()
 {
     // TODO cancelAndDelete timers in all data structures
+    for (auto& psb: PSBList) {
+        cancelAndDelete(psb.timerMsg);
+        cancelAndDelete(psb.timeoutMsg);
+    }
+    for (auto& rsb: RSBList) {
+        cancelAndDelete(rsb.refreshTimerMsg);
+        cancelAndDelete(rsb.commitTimerMsg);
+        cancelAndDelete(rsb.timeoutMsg);
+    }
+    for (auto& hello: HelloList) {
+        cancelAndDelete(hello.timer);
+        cancelAndDelete(hello.timeout);
+    }
 }
 
 void RSVP::initialize(int stage)
@@ -1036,11 +1049,8 @@ void RSVP::removePSB(PathStateBlock_t *psb)
 
     // proceed with actual removal *********************************************
 
-    cancelEvent(psb->timerMsg);
-    cancelEvent(psb->timeoutMsg);
-
-    delete psb->timerMsg;
-    delete psb->timeoutMsg;
+    cancelAndDelete(psb->timerMsg);
+    cancelAndDelete(psb->timeoutMsg);
 
     for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->id == psb->id) {
