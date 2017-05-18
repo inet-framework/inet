@@ -41,7 +41,7 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
     // an sdes item requires one byte for the type field,
     // one byte for the length field and bytes for
     // the content string
-    _length = 2 + strlen(_content);
+    _length = 2 + _content.length();
 }
 
 SDESItem::SDESItem(const SDESItem& sdesItem) : cObject(sdesItem)
@@ -68,7 +68,7 @@ void SDESItem::copy(const SDESItem& sdesItem)
 {
     _type = sdesItem._type;
     _length = sdesItem._length;
-    _content = opp_strdup(sdesItem._content);
+    _content = sdesItem._content;
 }
 
 SDESItem *SDESItem::dup() const
@@ -97,7 +97,7 @@ SDESItem::SDES_ITEM_TYPE SDESItem::getType() const
 
 const char *SDESItem::getContent() const
 {
-    return opp_strdup(_content);
+    return _content.c_str();
 }
 
 int SDESItem::getLength() const
