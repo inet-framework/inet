@@ -439,7 +439,6 @@ void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
                 // bool lifetimeExpired = lifetimeHandler->isLifetimeExpired(failedFrame);
                 // if (lifetimeExpired) {
                 //    inProgressFrames->dropFrame(failedFrame);
-                //    delete dataFrame;
                 // }
             }
             else
@@ -465,7 +464,6 @@ void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
             edcaInProgressFrames[ac]->dropFrame(failedFrame);
             emit(NF_LINK_BREAK, failedFrame);
             emit(NF_PACKET_DROP, failedFrame);
-            delete failedFrame;
         }
         else
             failedFrame->setRetry(true);
@@ -488,7 +486,6 @@ void Hcf::originatorProcessReceivedFrame(Ieee80211Frame* frame, Ieee80211Frame* 
     }
     else
         throw cRuntimeError("Hcca is unimplemented!");
-    delete frame;
 }
 
 void Hcf::originatorProcessReceivedManagementFrame(Ieee80211ManagementFrame* frame, Ieee80211Frame* lastTransmittedFrame, AccessCategory ac)

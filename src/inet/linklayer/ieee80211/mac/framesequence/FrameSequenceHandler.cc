@@ -17,8 +17,8 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
-#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -87,7 +87,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
     auto nextStep = frameSequence->prepareStep(context);
     // EV_INFO << "Frame sequence history:" << frameSequence->getHistory() << endl;
     if (nextStep == nullptr)
-        finishFrameSequence(true);
+        finishFrameSequence();
     else {
         context->addStep(nextStep);
         switch (nextStep->getType()) {
@@ -142,32 +142,9 @@ void FrameSequenceHandler::finishFrameSequenceStep()
     }
 }
 
-void FrameSequenceHandler::finishFrameSequence(bool ok)
+void FrameSequenceHandler::finishFrameSequence()
 {
-    EV_INFO << (ok ? "Frame sequence finished\n" : "Frame sequence aborted\n");
-    int numSteps = 0;
-    if (ok)
-        numSteps = context->getNumSteps();
-    else
-        numSteps = context->getNumSteps() - (dynamic_cast<IReceiveStep*>(context->getLastStep()) ? 2 : 1);
-    for (int i = 0; i < numSteps; i++) {
-        auto step = context->getStep(i);
-        if (auto transmitStep = dynamic_cast<TransmitStep*>(step)) {
-            auto frame = transmitStep->getFrameToTransmit();
-            if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
-                if (!context->getInProgressFrames()->isFrameInProgress(dataOrMgmtFrame))
-                    delete frame;
-            }
-            else
-                delete frame;
-        }
-        else if (auto rtsTransmitStep = dynamic_cast<RtsTransmitStep*>(step)) {
-            delete rtsTransmitStep->getFrameToTransmit();
-            auto protectedFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(rtsTransmitStep->getProtectedFrame());
-            if (!context->getInProgressFrames()->isFrameInProgress(protectedFrame))
-                delete protectedFrame;
-        }
-    }
+    EV_INFO << "Frame sequence finished\n";
     delete context;
     delete frameSequence;
     context = nullptr;
@@ -184,15 +161,14 @@ void FrameSequenceHandler::abortFrameSequence()
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
     if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frameToTransmit))
         callback->originatorProcessFailedFrame(dataOrMgmtFrame);
-    else if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frameToTransmit)) {
-        auto rtsTxStep = dynamic_cast<RtsTransmitStep*>(failedTxStep);
+    else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep*>(failedTxStep))
         callback->originatorProcessRtsProtectionFailed(rtsTxStep->getProtectedFrame());
-        delete rtsFrame;
-    }
-    else if (auto blockAckReq = dynamic_cast<Ieee80211BlockAckReq *>(frameToTransmit))
-        delete blockAckReq;
-    else ; // TODO: etc ?
-    finishFrameSequence(false);
+    delete context;
+    delete frameSequence;
+    context = nullptr;
+    frameSequence = nullptr;
+    callback->frameSequenceFinished();
+    callback = nullptr;
 }
 
 FrameSequenceHandler::~FrameSequenceHandler()

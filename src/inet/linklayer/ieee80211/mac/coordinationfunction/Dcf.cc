@@ -273,7 +273,6 @@ void Dcf::originatorProcessReceivedFrame(Ieee80211Frame* frame, Ieee80211Frame* 
         recoveryProcedure->ctsFrameReceived(stationRetryCounters);
     else
         throw cRuntimeError("Unknown frame type");
-    delete frame;
 }
 
 void Dcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
@@ -293,7 +292,6 @@ void Dcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
         recoveryProcedure->retryLimitReached(failedFrame);
         inProgressFrames->dropFrame(failedFrame);
         emit(NF_PACKET_DROP, failedFrame);
-        delete failedFrame;
     }
     else
         failedFrame->setRetry(true);

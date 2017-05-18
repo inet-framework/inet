@@ -52,7 +52,7 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
         case 0: {
             auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            return new RtsTransmitStep(dataOrMgmtFrame->dup(), rtsFrame, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -118,7 +118,7 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = check_and_cast<Ieee80211DataFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame->dup(), context->getIfs());
         }
         case 1:
             return nullptr;
@@ -149,7 +149,7 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            return new TransmitStep(mgmtFrame->dup(), context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
@@ -192,7 +192,7 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            return new TransmitStep(mgmtFrame->dup(), context->getIfs());
         }
         case 1:
             return nullptr;
@@ -259,7 +259,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
         case 0: {
             auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            return new RtsTransmitStep(dataOrMgmtFrame->dup(), rtsFrame, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
@@ -301,7 +301,7 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame->dup(), context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
@@ -343,7 +343,7 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame->dup(), context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());

@@ -35,6 +35,7 @@ class INET_API TransmitStep : public ITransmitStep
             frameToTransmit(frame),
             ifs(ifs)
         { }
+        virtual ~TransmitStep() { delete frameToTransmit; }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }
@@ -52,6 +53,7 @@ class INET_API RtsTransmitStep : public TransmitStep
             TransmitStep(frame, ifs),
             protectedFrame(protectedFrame)
         { }
+        virtual ~RtsTransmitStep() { delete protectedFrame; }
 
         virtual Ieee80211DataOrMgmtFrame *getProtectedFrame() { return protectedFrame; }
 };
@@ -67,6 +69,7 @@ class INET_API ReceiveStep : public IReceiveStep
         ReceiveStep(simtime_t timeout = -1) :
             timeout(timeout)
         { }
+        virtual ~ReceiveStep() { delete receivedFrame; }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }

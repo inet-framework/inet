@@ -29,26 +29,6 @@ namespace ieee80211 {
 
 class INET_API InProgressFrames
 {
-    public:
-        class SequenceControlPredicate
-        {
-            private:
-                const std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>>& seqAndFragNums;
-
-            public:
-                SequenceControlPredicate(const std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>>& seqAndFragNums) :
-                    seqAndFragNums(seqAndFragNums) {}
-
-                bool operator() (const Ieee80211DataOrMgmtFrame *frame) {
-                    if (frame->getType() == ST_DATA_WITH_QOS) {
-                        auto dataFrame = dynamic_cast<const Ieee80211DataFrame*>(frame);
-                        return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;
-                    }
-                    else
-                        return 0;
-                }
-        };
-
     protected:
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
@@ -67,11 +47,10 @@ class INET_API InProgressFrames
             ackHandler(ackHandler)
         { }
 
-        virtual bool isFrameInProgress(Ieee80211DataOrMgmtFrame *frame);
-
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit();
         virtual Ieee80211DataOrMgmtFrame *getPendingFrameFor(Ieee80211Frame *frame);
         virtual void dropFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
+        virtual void dropFrame(SequenceControlField sequenceControlField);
         virtual void dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
