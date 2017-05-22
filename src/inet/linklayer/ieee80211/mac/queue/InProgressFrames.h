@@ -34,27 +34,29 @@ class INET_API InProgressFrames
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
         std::list<Ieee80211DataOrMgmtFrame *> inProgressFrames;
+        std::vector<Ieee80211DataOrMgmtFrame *> droppedFrames;
 
     protected:
         void ensureHasFrameToTransmit();
         bool hasEligibleFrameToTransmit();
 
     public:
-        virtual ~InProgressFrames();
         InProgressFrames(PendingQueue *pendingQueue, IOriginatorMacDataService *dataService, IAckHandler *ackHandler) :
             pendingQueue(pendingQueue),
             dataService(dataService),
             ackHandler(ackHandler)
         { }
+        virtual ~InProgressFrames();
 
         virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit();
         virtual Ieee80211DataOrMgmtFrame *getPendingFrameFor(Ieee80211Frame *frame);
         virtual void dropFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
-        virtual void dropFrame(SequenceControlField sequenceControlField);
         virtual void dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
         virtual std::vector<Ieee80211DataFrame*> getOutstandingFrames();
+
+        virtual void clearDroppedFrames();
 };
 
 } /* namespace ieee80211 */

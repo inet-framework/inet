@@ -323,14 +323,14 @@ void Dcf::corruptedFrameReceived()
 Dcf::~Dcf()
 {
     cancelAndDelete(startRxTimer);
-    delete pendingQueue;
-    delete inProgressFrames;
     delete rtsProcedure;
     delete recipientAckProcedure;
     delete ackHandler;
     delete stationRetryCounters;
-    delete frameSequenceHandler;
     delete ctsProcedure;
+    delete frameSequenceHandler;
+    delete inProgressFrames;
+    delete pendingQueue;
 }
 
 } // namespace ieee80211
