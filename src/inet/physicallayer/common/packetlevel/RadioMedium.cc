@@ -469,6 +469,11 @@ void RadioMedium::removeRadio(const IRadio *radio)
     emit(radioRemovedSignal, radioModule);
 }
 
+bool RadioMedium::hasRadio(const IRadio *radio) const
+{
+    return std::find(radios.begin(), radios.end(), radio) != radios.end();
+}
+
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
     transmissionCount++;
