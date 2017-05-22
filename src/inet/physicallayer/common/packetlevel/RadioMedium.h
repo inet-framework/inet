@@ -29,6 +29,7 @@
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include <algorithm>
+#include <set>
 
 namespace inet {
 
@@ -120,12 +121,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name State */
     //@{
     /**
-     * The list of radios that can transmit and receive radio signals on the
-     * radio medium. The radios follow each other in the order of their unique
-     * id. Radios are only removed from the beginning. This list may contain
-     * nullptr values.
+     * The set of radios that can transmit and receive radio signals on the
+     * radio medium.
      */
-    std::vector<const IRadio *> radios;
+    std::set<const IRadio *> radios;
+
     /**
      * The list of ongoing transmissions on the radio medium. The transmissions
      * follow each other in the order of their unique id. Transmissions are only
