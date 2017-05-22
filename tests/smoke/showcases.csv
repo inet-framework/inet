@@ -1,0 +1,79 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+/showcases/visualizer/advanced/,     -f omnetpp.ini -c advanced -r 0
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWired -r 0
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c EnablingVisualizationWireless -r 0
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Filtering -r 0
+/showcases/visualizer/datalinkactivity/, -f omnetpp.ini -c Dynamic -r 0
+/showcases/visualizer/earth/,        -f omnetpp.ini -c DefaultSettings -r 0   # DefaultSettings extended
+/showcases/visualizer/earth/,        -f omnetpp.ini -c TempConfig -r 0
+/showcases/visualizer/earth/,        -f omnetpp.ini -c PhysicalObjects -r 0   # PhysicalObjects extended
+/showcases/visualizer/earth/,        -f omnetpp.ini -c NetworkNodes -r 0
+/showcases/visualizer/environment/,  -f omnetpp.ini -c DefaultView -r 0   # DefaultView extended
+/showcases/visualizer/environment/,  -f omnetpp.ini -c IsometricView -r 0
+/showcases/visualizer/filtering/,    -f omnetpp.ini -c unfiltered -r 0
+/showcases/visualizer/filtering/,    -f omnetpp.ini -c nodeandpacket -r 0
+/showcases/visualizer/filtering/,    -f omnetpp.ini -c filtering -r 0
+/showcases/visualizer/filtering/,    -f omnetpp.ini -c filtering2 -r 0
+/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c OneNetwork -r 0
+/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c MultipleNetworks -r 0
+/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c VisualizingHandover -r 0
+/showcases/visualizer/indicator/,    -f omnetpp.ini -c General -r 0
+/showcases/visualizer/info/,         -f omnetpp.ini -c VisualizingSubmoduleInformation -r 0   # VisualizingSubmoduleInformation extended
+/showcases/visualizer/info/,         -f omnetpp.ini -c MultipleModules -r 0
+/showcases/visualizer/interfacetablevisualizer/, -f omnetpp.ini -c EnablingVisualization -r 0
+/showcases/visualizer/interfacetablevisualizer/, -f omnetpp.ini -c AdvancedFeatures -r 0
+/showcases/visualizer/linkbreak/,    -f omnetpp.ini -c LinkBreak1 -r 0
+/showcases/visualizer/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c VisualizingNodes -r 0
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0
+/showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c ChangingPaths -r 0
+/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0
+/showcases/visualizer/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c MACRetryLimitReached -r 0
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c InterfaceNotConnected -r 0
+/showcases/visualizer/packetdrop/,   -f omnetpp.ini -c NoRouteToDestination -r 0
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c EnablingVisualization -r 0
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Filtering -r 0
+/showcases/visualizer/physicallinkactivity/, -f omnetpp.ini -c Mobile -r 0
+/showcases/visualizer/propagation/,  -f omnetpp.ini -c DisplayingPropagationTransmissionsReceptions -r 0
+/showcases/visualizer/propagation/,  -f omnetpp.ini -c MultipleNodes -r 0
+/showcases/visualizer/propagation/,  -f omnetpp.ini -c InterferingSignals -r 0
+/showcases/visualizer/propagation/,  -f omnetpp.ini -c Propagation4 -r 0
+/showcases/visualizer/propagation/,  -f omnetpp.ini -c Propagation5 -r 0
+/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c DisplayingAll -r 0
+/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Unfiltered -r 0
+/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Filtered -r 0
+/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Dynamic -r 0
+/showcases/visualizer/statistic/,    -f omnetpp.ini -c PingRtt -r 0
+/showcases/visualizer/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0
+/showcases/visualizer/styling/,      -f omnetpp.ini -c LineStyling -r 0
+/showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0
+/showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWired -r 0
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c ExtendedPathVisualization -r 0
+/showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c DifferentApplicationConnections -r 0
+/showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r 0
+/showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRTSoff -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRTSon -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRTSoff -r 0
+/showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r 0
+/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 0
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0   # PingBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c UDPBase -r 0   # UDPBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioMediumBase -r 0   # IdealRadioMediumBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c ScalarRadioMediumBase -r 0   # ScalarRadioMediumBase extended
+# /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Base -r 0   # Ieee80211Base extended
+/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0
+/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Udp -r 0
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0
+/showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0

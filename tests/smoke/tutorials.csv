@@ -1,0 +1,110 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c one -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c two -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c three -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c four -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c five -r 0   # five extended
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c six -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seven -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eight -r 0   # eight extended
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nine -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c ten -r 0   # ten extended
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eleven -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twelve -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c thirteen -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c fourteen -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c fifteen -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c sixteen -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeen -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeenB -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeenC -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenA -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenB -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenC -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenD -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenA -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenB -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenC -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twenty -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyone -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentytwo -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentythree -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyfour -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyfive -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentysix -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyseven -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyeight -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentynine -r 0
+/tutorials/configurator/configuratortest/, -f omnetpp.ini -c thirty -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0   # Step4 extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0   # Step8A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0   # Step10A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0   # Step10B extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial01 -r 0
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial02 -r 0
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial03 -r 0   # VisualizationTutorial03 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial04 -r 0   # VisualizationTutorial04 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial05 -r 0   # VisualizationTutorial05 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial06 -r 0   # VisualizationTutorial06 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial07 -r 0   # VisualizationTutorial07 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial08 -r 0   # VisualizationTutorial08 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial09 -r 0   # VisualizationTutorial09 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial10 -r 0   # VisualizationTutorial10 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial11 -r 0   # VisualizationTutorial11 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial12 -r 0   # VisualizationTutorial12 extended
+/tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial13 -r 0
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization01 -r 0   # Visualization01 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization02 -r 0   # Visualization02 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization03 -r 0   # Visualization03 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization04 -r 0   # Visualization04 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization05 -r 0   # Visualization05 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization06 -r 0   # Visualization06 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization07 -r 0   # Visualization07 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization08 -r 0   # Visualization08 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization09 -r 0   # Visualization09 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization10 -r 0   # Visualization10 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization11 -r 0   # Visualization11 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization12 -r 0   # Visualization12 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization13 -r 0   # Visualization13 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization14 -r 0   # Visualization14 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization15 -r 0   # Visualization15 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization16 -r 0   # Visualization16 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization17 -r 0   # Visualization17 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization18 -r 0   # Visualization18 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization19 -r 0   # Visualization19 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization20 -r 0   # Visualization20 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization21 -r 0   # Visualization21 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization22 -r 0   # Visualization22 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization23 -r 0   # Visualization23 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization24 -r 0   # Visualization24 extended
+/tutorials/visualization/,           -f omnetpp.ini -c Visualization25 -r 0
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless01 -r 0   # Wireless01 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless02 -r 0   # Wireless02 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless03 -r 0   # Wireless03 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless04 -r 0   # Wireless04 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless05 -r 0   # Wireless05 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless06 -r 0   # Wireless06 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless07 -r 0   # Wireless07 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless08 -r 0   # Wireless08 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless09 -r 0   # Wireless09 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless10 -r 0   # Wireless10 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless11 -r 0   # Wireless11 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0   # Wireless12 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0   # Wireless13 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0
