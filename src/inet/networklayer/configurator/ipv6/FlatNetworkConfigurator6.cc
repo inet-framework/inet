@@ -117,6 +117,9 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
             p.advPreferredLifetime = 604800;
             // Default: TRUE
             p.advAutonomousFlag = true;
+#ifdef WITH_xMIPv6
+            p.advRtrAddr = false;
+#endif
             ie->ipv6Data()->addAdvPrefix(p);
 
             // add a link-local address (tentative) if it doesn't have one

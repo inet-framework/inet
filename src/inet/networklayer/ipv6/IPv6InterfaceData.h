@@ -147,18 +147,14 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
         bool advOnLinkFlag;    //L-flag
         bool advAutonomousFlag;    //A-flag
 
-#ifndef WITH_xMIPv6
-        // USE_MOBILITY: bool advRtrAddr;
-#else /* WITH_xMIPv6 */
+#ifdef WITH_xMIPv6
         bool advRtrAddr;    //R-flag (Zarrar Yousaf 09.07.07)
 #endif /* WITH_xMIPv6 */
 
         simtime_t advValidLifetime;    // see comment above
         simtime_t advPreferredLifetime;    // see comment above
-#ifndef WITH_xMIPv6
         IPv6Address prefix;
-#else /* WITH_xMIPv6 */
-        IPv6Address prefix;    //default in RA's
+#ifdef WITH_xMIPv6
         IPv6Address rtrAddress;    //global scope, present when advRtrAddr is true (Zarrar Yousaf 09.07.07)
 #endif /* WITH_xMIPv6 */
     };
