@@ -64,7 +64,7 @@ std::vector<Ieee80211DataFrame*> *MsduDeaggregation::deaggregateFrame(Ieee80211D
         cPacket *msdu = msduSubframe.decapsulate();
         Ieee80211DataFrame *dataFrame = nullptr;
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
-        dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP() : new Ieee80211DataFrame();
+        dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP(msduSubframe.getName()) : new Ieee80211DataFrame(msduSubframe.getName());
         // dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
         dataFrame->setType(ST_DATA);
         dataFrame->setTransmitterAddress(msduSubframe.getSa());
