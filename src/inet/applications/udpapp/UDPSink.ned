@@ -39,7 +39,7 @@ simple UDPSink like IUDPApp
         @display("i=block/sink");
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=last);
+        @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=vector);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[rcvdPkSeqNo](title="received packet sequence number"; source="appPkSeqNo(rcvdPk)"; record=vector; interpolationmode=none);
 
