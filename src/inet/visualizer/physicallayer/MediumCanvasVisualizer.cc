@@ -442,16 +442,18 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
             setAnimationSpeed();
         if (displayReceptions) {
             auto receiver = reception->getReceiver();
-            auto figure = getRadioFigure(receiver);
-            figure->getFigure(1)->setVisible(true);
-            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(1))->getLabelFigure();
-            if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
-                char tmp[32];
-                sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
-                labelFigure->setText(tmp);
+            if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
+                auto figure = getRadioFigure(receiver);
+                figure->getFigure(1)->setVisible(true);
+                auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(1))->getLabelFigure();
+                if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
+                    char tmp[32];
+                    sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
+                    labelFigure->setText(tmp);
+                }
+                else
+                    labelFigure->setText("");
             }
-            else
-                labelFigure->setText("");
         }
         if (displayCommunicationHeat) {
             const ITransmission *transmission = reception->getTransmission();
@@ -476,8 +478,10 @@ void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
             setAnimationSpeed();
         if (displayReceptions) {
             auto receiver = reception->getReceiver();
-            auto figure = getRadioFigure(receiver);
-            figure->getFigure(1)->setVisible(false);
+            if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
+                auto figure = getRadioFigure(receiver);
+                figure->getFigure(1)->setVisible(false);
+            }
         }
     }
 }
