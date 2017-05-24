@@ -251,6 +251,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
         else if (!rt->isForwardingEnabled()) {
             EV_WARN << "forwarding off, dropping packet\n";
             numDropped++;
+            emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
             delete datagram;
         }
         else
@@ -303,6 +304,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
     if (ift->getNumInterfaces() == 0) {
         EV_ERROR << "No interfaces exist, dropping packet\n";
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, packet);
         delete packet;
         return;
     }
@@ -363,6 +365,7 @@ void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE
         else {
             EV_ERROR << "No multicast interface, packet dropped\n";
             numUnroutable++;
+            emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
             delete datagram;
         }
     }
@@ -449,8 +452,9 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
     }
 
     if (!destIE) {    // no route found
-        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
         numUnroutable++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
@@ -490,6 +494,7 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, const InterfaceEntr
     }
     else {
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         delete datagram;
     }
 }
@@ -522,6 +527,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
         if (!route) {
             EV_ERROR << "No route, packet dropped.\n";
             numUnroutable++;
+            emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
             delete datagram;
             return;
         }
@@ -531,12 +537,14 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
         EV_ERROR << "Did not arrive on input interface, packet dropped.\n";
         emit(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         delete datagram;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
     else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(datagram)) {
         EV_ERROR << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         delete datagram;
     }
     else {
@@ -677,6 +685,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         return;
     }
 
@@ -694,6 +703,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
         icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         return;
     }
 
@@ -852,6 +862,10 @@ void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
+        for (int i = 0; i < packetQueue.getLength(); i++) {
+            auto packet = packetQueue.get(i);
+            emit(LayeredProtocolBase::packetFromUpperDroppedSignal, packet);
+        }
         packetQueue.clear();
         pendingPackets.erase(it);
     }
