@@ -275,8 +275,14 @@ const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)
 const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 {
     const Ieee80211ModeSet *modeSet = findModeSet(mode);
-    if (modeSet == nullptr)
-        throw cRuntimeError("Unknown 802.11 operational mode: '%s'", mode);
+    if (modeSet == nullptr) {
+        std::string validModeSets;
+        for (int index = 0; index < (int)(&modeSets)->size(); index++) {
+            const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
+            validModeSets += std::string("'") + modeSet->getName() + "' ";
+        }
+        throw cRuntimeError("Unknown 802.11 operational mode: '%s', valid modes are: %s", mode, validModeSets.c_str());
+    }
     else
         return modeSet;
 }
