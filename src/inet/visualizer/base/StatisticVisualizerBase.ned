@@ -49,8 +49,6 @@ simple StatisticVisualizerBase extends VisualizerBase
 
 		string format = default("%n: %v %u"); // determines what is displayed, info by default
         string unit = default(""); // display the value in this unit, statistic unit by default
-        double minValue = default(-1/0); // minimum value of the statistic, negative infinity by default
-        double maxValue = default(1/0); // maximum value of the statistic, positive infinity by default
 
         string font = default("<default>"); // statistic value font, automatic by default
         string textColor = default("black"); // statistic value font color, black by default

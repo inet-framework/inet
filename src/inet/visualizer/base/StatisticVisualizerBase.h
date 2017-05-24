@@ -76,8 +76,6 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     const char *statisticName = nullptr;
     StringFormat format;
     std::vector<std::string> units;
-    double minValue = NaN;
-    double maxValue = NaN;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;

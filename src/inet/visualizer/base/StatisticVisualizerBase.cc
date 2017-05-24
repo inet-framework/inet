@@ -76,8 +76,6 @@ void StatisticVisualizerBase::initialize(int stage)
         cStringTokenizer tokenizer(par("unit"));
         while (tokenizer.hasMoreTokens())
             units.push_back(tokenizer.nextToken());
-        minValue = par("minValue");
-        maxValue = par("maxValue");
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
