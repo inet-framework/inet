@@ -113,6 +113,26 @@ class INET_API ThroughputFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+/**
+ * Filter that outputs the elapsed time since the creation of this filter object.
+ */
+class INET_API ElapsedTimeFilter : public cResultFilter
+{
+  protected:
+    long startTime;
+  public:
+    ElapsedTimeFilter();
+  protected:
+    double getElapsedTime();
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+};
+
 } // namespace filters
 
 } // namespace utils

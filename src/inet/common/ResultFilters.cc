@@ -120,6 +120,20 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
     }
 }
 
+Register_ResultFilter("elapsedTime", ElapsedTimeFilter);
+
+ElapsedTimeFilter::ElapsedTimeFilter()
+{
+    startTime = time(nullptr);
+}
+
+double ElapsedTimeFilter::getElapsedTime()
+{
+    long t = time(nullptr);
+    return t - startTime;
+}
+
+
 } // namespace filters
 
 } // namespace utils
