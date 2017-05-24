@@ -351,7 +351,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numCollision++;
                 resetStateVariables();
             );
-            FSMA_Event_Transition(Receive-Unknown-Ack,
+            FSMA_Event_Transition(Receive-Unexpected-Ack,
                                   isLowerMessage(msg) && isAck(frame),
                                   IDLE,
                 delete frame;
