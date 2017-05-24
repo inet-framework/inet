@@ -34,7 +34,7 @@ namespace inet {
  */
 class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 {
-  protected:
+  public:
     std::list<IPassiveQueueListener *> listeners;
 
     // state
@@ -44,6 +44,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int numQueueReceived;
     int numQueueDropped;
 
+  public:
     /** Signal with packet when received it */
     static simsignal_t rcvdPkSignal;
     /** Signal with packet when enqueued it */
