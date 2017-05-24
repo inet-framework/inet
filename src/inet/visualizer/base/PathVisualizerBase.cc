@@ -231,7 +231,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
+                auto treeId = packet->getEncapsulationTreeId();
                 auto module = check_and_cast<cModule *>(source);
                 addToIncompletePath(treeId, getContainingNode(module));
             }
@@ -241,7 +241,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulatedPacket()->getTreeId();
+                auto treeId = packet->getEncapsulationTreeId();
                 auto module = check_and_cast<cModule *>(source);
                 addToIncompletePath(treeId, getContainingNode(module));
             }
@@ -249,12 +249,9 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         else if (isPathElement(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetFilter.matches(packet)) {
-                auto encapsulatedPacket = packet->getEncapsulatedPacket()->getEncapsulatedPacket();
-                if (encapsulatedPacket != nullptr) {
-                    auto treeId = encapsulatedPacket->getTreeId();
-                    auto module = check_and_cast<cModule *>(source);
-                    addToIncompletePath(treeId, getContainingNode(module));
-                }
+                auto treeId = packet->getEncapsulationTreeId();
+                auto module = check_and_cast<cModule *>(source);
+                addToIncompletePath(treeId, getContainingNode(module));
             }
         }
     }
@@ -264,7 +261,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
+                auto treeId = packet->getEncapsulationTreeId();
                 auto path = getIncompletePath(treeId);
                 updatePathVisualization(*path, packet);
                 removeIncompletePath(treeId);
