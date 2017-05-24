@@ -92,7 +92,7 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string modeSet @enum("a","b","g","n","p") = default("g");
+        string modeSet @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
 
         bool qosStation = default(false);
 
@@ -138,7 +138,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
 {
     parameters:
         string rateControlType = default("");
-        string opMode @enum("a","b","g","n","p") = default("g");
+        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
         double bitrate @unit("bps") = default(-1bps); // for backward compatibility
         double basicBitrate @unit("bps") = default(-1bps); // for backward compatibility
         double dataBitrate @unit("bps") = default(bitrate);

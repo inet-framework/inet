@@ -36,7 +36,7 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
-        string opMode @enum("a", "b", "g", "n", "p") = default("g");    // operation mode
+        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");    // operation mode
         string bandName @enum("2.4 GHz", "5 GHz") = default("2.4 GHz"); // band name
         int channelNumber = default(0);                                 // initial channel number within the band (TODO: this is offset by 1)
         carrierFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
