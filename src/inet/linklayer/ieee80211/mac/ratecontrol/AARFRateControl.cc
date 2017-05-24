@@ -62,6 +62,7 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, int retryCou
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
+        emitDatarateSignal();
         updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         multiplyIncreaseThreshold(factor);
@@ -71,6 +72,7 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, int retryCou
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
+        emitDatarateSignal();
         updateDisplayString();
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         resetIncreaseThreshdold();
@@ -83,6 +85,7 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, int retryCou
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
+        emitDatarateSignal();
         updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
@@ -114,6 +117,7 @@ void AARFRateControl::increaseRateIfTimerIsExpired()
     if (simTime() - timer >= interval)
     {
         currentMode = increaseRateIfPossible(currentMode);
+        emitDatarateSignal();
         updateDisplayString();
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();

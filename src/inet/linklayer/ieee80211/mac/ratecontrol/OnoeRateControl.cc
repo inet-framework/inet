@@ -87,6 +87,7 @@ void OnoeRateControl::computeMode()
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1)
         {
             currentMode = decreaseRateIfPossible(currentMode);
+            emitDatarateSignal();
             updateDisplayString();
             EV_DETAIL << "Decreased rate to " << *currentMode << endl;
             credit = 0;
@@ -99,6 +100,7 @@ void OnoeRateControl::computeMode()
         if (credit >= 10)
         {
             currentMode = increaseRateIfPossible(currentMode);
+            emitDatarateSignal();
             updateDisplayString();
             EV_DETAIL << "Increased rate to " << *currentMode << endl;
             credit = 0;
