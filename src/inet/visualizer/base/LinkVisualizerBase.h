@@ -25,6 +25,7 @@
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PacketFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -42,6 +43,17 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
         virtual ~LinkVisualization() {}
     };
 
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const cPacket *packet = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const cPacket *packet) : packet(packet) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   protected:
     /** @name Parameters */
     //@{
@@ -56,6 +68,9 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     const char *lineShiftMode = nullptr;
     double lineContactSpacing = NaN;
     const char *lineContactMode = nullptr;
+    StringFormat labelFormat;
+    cFigure::Font labelFont;
+    cFigure::Color labelColor;
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
@@ -81,7 +96,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 
     virtual bool isLinkEnd(cModule *module) const = 0;
 
-    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination) const = 0;
+    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const = 0;
     virtual const LinkVisualization *getLinkVisualization(std::pair<int, int> linkVisualization);
     virtual void addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization);
     virtual void removeLinkVisualization(const LinkVisualization *linkVisualization);
@@ -92,7 +107,9 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     virtual void setLastModule(int treeId, cModule *lastModule);
     virtual void removeLastModule(int treeId);
 
-    virtual void updateLinkVisualization(cModule *source, cModule *destination);
+    virtual std::string getLinkVisualizationText(cPacket *packet) const;
+    virtual void refreshLinkVisualization(const LinkVisualization *linkVisualization, cPacket *packet);
+    virtual void updateLinkVisualization(cModule *source, cModule *destination, cPacket *packet);
 
   public:
     virtual ~LinkVisualizerBase();

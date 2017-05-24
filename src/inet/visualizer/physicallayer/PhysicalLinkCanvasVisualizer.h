@@ -28,7 +28,7 @@ class INET_API PhysicalLinkCanvasVisualizer : public LinkCanvasVisualizerBase
 {
   protected:
     virtual bool isLinkEnd(cModule *module) const override;
-    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination) const override;
+    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const override;
 };
 
 } // namespace visualizer
