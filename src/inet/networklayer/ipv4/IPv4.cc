@@ -699,11 +699,11 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
 
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->getDontFragment()) {
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
-        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         return;
     }
 
