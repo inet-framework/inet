@@ -682,10 +682,10 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     // hop counter check
     if (datagram->getTimeToLive() <= 0) {
         // drop datagram, destruction responsibility in ICMP
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
-        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         return;
     }
 
