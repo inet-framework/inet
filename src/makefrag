@@ -1,9 +1,12 @@
 #
-# on windows we have to link with the winsock2 library as it is no longer added
+# on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
 # to the omnetpp system libraries by default (as of OMNeT++ 5.1)
 #
 ifeq ($(PLATFORM),win32.x86_64)
-  LIBS += -lwsock32
+  LIBS += -lws2_32
+  DEFINES += -DINET_EXPORT
+  ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
+  LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
 endif
 
 #

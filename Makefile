@@ -14,7 +14,7 @@ cleanall: checkmakefiles
 	@rm -f src/Makefile $(FEATURES_H)
 	@cd tutorials && $(MAKE) clean && rm -rf doc/tutorials
 
-MAKEMAKE_OPTIONS := -f --deep -o INET -O out -I.
+MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET -I.
 
 makefiles: makefiles-so
 

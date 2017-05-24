@@ -9,6 +9,10 @@ minor enhancements. It requires OMNeT++ 5.1 or later.
 
 Highlights in this release:
 
+ - On Windows, INET is no longer using the auto-import feature of the linker, because
+   it generated more than 65536 symbols. Dependent projects crashed because of this.
+   All INET APIs now should be prefixed with INET_API macro. (fixes #257)
+
  - The IEEE 802.11 MAC model has been extended with several new components. The
    implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
    Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications.
@@ -17,14 +21,14 @@ Highlights in this release:
    with new policies, features and algorithms within the MAC layer. Users can
    easily replace individual components with their own implementations. Policies,
    which most likely to be experimented with, are extracted into their own modules.
-   
+
    The new model has the following replaceable built-in policies:
     - ACK policy
     - RTS/CTS policy
     - Originator and recipient block ACK agreement policies
     - MSDU aggregation policy
     - Fragmentation policy
-    
+
    The new model also separates the following components:
     - Coordination functions
     - Channel access methods
@@ -49,7 +53,7 @@ Highlights in this release:
  - The power model has been extended with support for charge/current based models
    as opposed to the existing energy/power based ones. A new energy management
    component has also been added to separate monitoring and controlling of energy
-   consumers and generators from the rest of the model. 
+   consumers and generators from the rest of the model.
 
  - New visualizers has been added to display packet drops and link breaks, data
    contained in interface tables, routes stored in routing tables, and transport
