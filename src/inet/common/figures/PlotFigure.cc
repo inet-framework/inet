@@ -34,6 +34,7 @@ static const double LABEL_Y_DISTANCE_FACTOR = 1.5;
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_LABEL = "label";
+static const char *PKEY_LABEL_OFFSET = "labelOffset";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
 static const char *PKEY_VALUE_TICK_SIZE = "valueTickSize";
@@ -166,6 +167,19 @@ void PlotFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
+const int PlotFigure::getLabelOffset() const
+{
+    return labelOffset;
+}
+
+void PlotFigure::setLabelOffset(int offset)
+{
+    if(labelOffset != offset)   {
+        labelOffset = offset;
+        layout();
+    }
+}
+
 const cFigure::Font& PlotFigure::getLabelFont() const
 {
     return labelFigure->getFont();
@@ -207,6 +221,8 @@ void PlotFigure::parse(cProperty *property)
         setMaxValue(atof(s));
     if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
+    if ((s = property->getValue(PKEY_LABEL_OFFSET)) != nullptr)
+                setLabelOffset(atoi(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
         setLabelColor(parseColor(s));
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)

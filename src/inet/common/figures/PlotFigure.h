@@ -46,6 +46,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     simtime_t timeWindow = 10;
     double valueTickSize = 2.5;
     simtime_t timeTickSize = 3;
+    int labelOffset = 0;
     double min = 0;
     double max = 10;
     std::list<std::pair<simtime_t, double>> values;
