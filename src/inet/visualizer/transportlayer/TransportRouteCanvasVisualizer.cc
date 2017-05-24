@@ -25,6 +25,10 @@
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
+#ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/IPv4.h"
+#endif
+
 #ifdef WITH_TCP_INET
 #include "inet/transportlayer/tcp/TCP.h"
 #endif
@@ -63,6 +67,11 @@ bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
 
 #ifdef WITH_IEEE8021D
     if (dynamic_cast<Ieee8021dRelay *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
         return true;
 #endif
 
