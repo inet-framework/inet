@@ -32,7 +32,7 @@ from StringIO import StringIO
 
 inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
-nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/networks"
+nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials" + sep + inetRoot + "/tests/networks"
 inetLib = inetRoot + "/src/INET"
 opp_run = "opp_run"
 cpuTimeLimit = "300s"
