@@ -537,7 +537,7 @@ void CsmaCaMac::cancelBackoffTimer()
  */
 void CsmaCaMac::sendDataFrame(CsmaCaMacDataFrame *frameToSend)
 {
-    EV << "sending Data frame\n";
+    EV << "sending Data frame " << frameToSend->getName() << endl;
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frameToSend->dup());
 }
