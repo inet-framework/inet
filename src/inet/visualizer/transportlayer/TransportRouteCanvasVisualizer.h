@@ -29,7 +29,7 @@ class INET_API TransportRouteCanvasVisualizer : public PathCanvasVisualizerBase
   protected:
     virtual bool isPathEnd(cModule *module) const override;
     virtual bool isPathElement(cModule *module) const override;
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const override;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const override;
 };
 
 } // namespace visualizer

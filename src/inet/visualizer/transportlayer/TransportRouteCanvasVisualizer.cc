@@ -78,9 +78,9 @@ bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
     return false;
 }
 
-const PathCanvasVisualizerBase::PathVisualization *TransportRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path) const
+const PathCanvasVisualizerBase::PathVisualization *TransportRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
 {
-    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path));
+    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path, packet));
     pathVisualization->figure->setTags("transport_route");
     pathVisualization->figure->setTooltip("This polyline arrow represents a recently active transport route between two network nodes");
     pathVisualization->shiftPriority = 4;

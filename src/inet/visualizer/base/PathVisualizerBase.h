@@ -25,10 +25,15 @@
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PacketFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
 namespace visualizer {
+
+// TODO: move to some utility file
+inline bool isEmpty(const char *s) { return !s || !s[0]; }
+inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 {
@@ -40,6 +45,17 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
       public:
         PathVisualization(const std::vector<int>& path);
         virtual ~PathVisualization() {}
+    };
+
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const cPacket *packet = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const cPacket *packet) : packet(packet) { }
+
+        virtual const char *resolveDirective(char directive) override;
     };
 
   protected:
@@ -55,6 +71,10 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     const char *lineShiftMode = nullptr;
     double lineContactSpacing = NaN;
     const char *lineContactMode = nullptr;
+    StringFormat labelFormat;
+    cFigure::Font labelFont;
+    const char *labelColorAsString = nullptr;
+    cFigure::Color labelColor;
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
@@ -85,7 +105,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const = 0;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const = 0;
     virtual const PathVisualization *getPathVisualization(const std::vector<int>& path);
     virtual void addPathVisualization(const PathVisualization *pathVisualization);
     virtual void removePathVisualization(const PathVisualization *pathVisualization);
@@ -96,7 +116,9 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void addToIncompletePath(int treeId, cModule *module);
     virtual void removeIncompletePath(int treeId);
 
-    virtual void updatePath(const std::vector<int>& path);
+    virtual std::string getPathVisualizationText(cPacket *packet) const;
+    virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);
+    virtual void updatePathVisualization(const std::vector<int>& path, cPacket *packet);
 
   public:
     virtual ~PathVisualizerBase();

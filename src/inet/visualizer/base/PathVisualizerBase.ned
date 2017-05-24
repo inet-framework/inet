@@ -37,6 +37,10 @@ package inet.visualizer.base;
 // a certain amount of time the route becomes inactive unless it is reinforced
 // by another packet. 
 //
+// The format string can contain the following directives:
+//  - %n packet name
+//  - %c packet class
+//
 // @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, ~INetworkRouteVisualizer
 // @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~ITransportRouteVisualizer
 //
@@ -59,6 +63,10 @@ simple PathVisualizerBase extends VisualizerBase
 
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
+
+        string labelFormat = default("%n"); // determines what path data is displayed
+        string labelFont = default("<default>"); // label font, automatic by default
+        string labelColor = default(""); // label color, same as line by default
 
         string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive routes fade out
         double fadeOutTime @unit(s) = default(1s); // how quickly inactive routes fade away, 1 second by default

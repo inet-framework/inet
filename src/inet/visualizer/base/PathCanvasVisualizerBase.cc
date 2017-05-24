@@ -102,7 +102,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
             if (index == segments.size() - 1)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
         }
-        pathCanvasVisualization->figure->getPolylineFigure()->setPoints(points);
+        pathCanvasVisualization->figure->setPoints(points);
     }
     visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
@@ -114,11 +114,12 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
     polylineFigure->setLineWidth(lineWidth);
     polylineFigure->setLineStyle(lineStyle);
     polylineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
-    polylineFigure->setLineColor(lineColorSet.getColor(pathVisualizations.size()));
+    auto lineColor = lineColorSet.getColor(pathVisualizations.size());
+    polylineFigure->setLineColor(lineColor);
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
-    labelFigure->setColor(labelColor);
-    auto text = getPathVisualizationText(path, packet);
+    labelFigure->setColor(isEmpty(labelColorAsString) ? lineColor : labelColor);
+    auto text = getPathVisualizationText(packet);
     labelFigure->setText(text.c_str());
     return new PathCanvasVisualization(path, figure);
 }
@@ -143,6 +144,14 @@ void PathCanvasVisualizerBase::setAlpha(const PathVisualization *path, double al
 {
     auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(path);
     pathCanvasVisualization->figure->getPolylineFigure()->setLineOpacity(alpha);
+}
+
+void PathCanvasVisualizerBase::refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet)
+{
+    PathVisualizerBase::refreshPathVisualization(pathVisualization, packet);
+    auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
+    auto text = getPathVisualizationText(packet);
+    pathCanvasVisualization->figure->getLabelFigure()->setText(text.c_str());
 }
 
 } // namespace visualizer

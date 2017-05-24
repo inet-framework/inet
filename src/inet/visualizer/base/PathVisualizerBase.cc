@@ -29,6 +29,21 @@ PathVisualizerBase::PathVisualization::PathVisualization(const std::vector<int>&
 {
 }
 
+const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'n':
+            result = packet->getName();
+            break;
+        case 'c':
+            result = packet->getClassName();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 PathVisualizerBase::~PathVisualizerBase()
 {
     if (displayRoutes)
@@ -50,6 +65,11 @@ void PathVisualizerBase::initialize(int stage)
         lineShiftMode = par("lineShiftMode");
         lineContactSpacing = par("lineContactSpacing");
         lineContactMode = par("lineContactMode");
+        labelFormat.parseFormat(par("labelFormat"));
+        labelFont = cFigure::parseFont(par("labelFont"));
+        labelColorAsString = par("labelColor");
+        if (!isEmpty(labelColorAsString))
+            labelColor = cFigure::Color(labelColorAsString);
         fadeOutMode = par("fadeOutMode");
         fadeOutTime = par("fadeOutTime");
         fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
@@ -115,7 +135,13 @@ void PathVisualizerBase::unsubscribe()
     }
 }
 
-const PathVisualizerBase::PathVisualization *PathVisualizerBase::createPathVisualization(const std::vector<int>& path) const
+std::string PathVisualizerBase::getPathVisualizationText(cPacket *packet) const
+{
+    DirectiveResolver directiveResolver(packet);
+    return labelFormat.formatString(&directiveResolver);
+}
+
+const PathVisualizerBase::PathVisualization *PathVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
 {
     return new PathVisualization(path);
 }
@@ -180,15 +206,20 @@ void PathVisualizerBase::removeIncompletePath(int treeId)
     incompletePaths.erase(incompletePaths.find(treeId));
 }
 
-void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
+void PathVisualizerBase::updatePathVisualization(const std::vector<int>& moduleIds, cPacket *packet)
 {
     const PathVisualization *pathVisualization = getPathVisualization(moduleIds);
     if (pathVisualization == nullptr) {
-        pathVisualization = createPathVisualization(moduleIds);
+        pathVisualization = createPathVisualization(moduleIds, packet);
         addPathVisualization(pathVisualization);
     }
     else
-        pathVisualization->lastUsageAnimationPosition = AnimationPosition();
+        refreshPathVisualization(pathVisualization, packet);
+}
+
+void PathVisualizerBase::refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet)
+{
+    pathVisualization->lastUsageAnimationPosition = AnimationPosition();
 }
 
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
@@ -235,7 +266,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
                 auto path = getIncompletePath(treeId);
-                updatePath(*path);
+                updatePathVisualization(*path, packet);
                 removeIncompletePath(treeId);
             }
         }
