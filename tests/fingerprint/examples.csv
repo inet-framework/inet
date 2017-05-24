@@ -8,7 +8,7 @@
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             c927-33ba/tplx
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          8f17-9b2f/tplx
-/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          f8ac-4b51/tplx
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          d216-699b/tplx
 /examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          0c51-a284/tplx
 /examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,          5a0c-2f8e/tplx
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,          d057-5dd6/tplx
