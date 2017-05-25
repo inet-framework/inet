@@ -182,8 +182,10 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
 void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == IMobility::mobilityStateChangedSignal)
-        ensureMobilityVisualization(dynamic_cast<IMobility *>(object));
+    if (signal == IMobility::mobilityStateChangedSignal) {
+        if (moduleFilter.matches(check_and_cast<cModule *>(source)))
+            ensureMobilityVisualization(dynamic_cast<IMobility *>(source));
+    }
     else
         throw cRuntimeError("Unknown signal");
 }
