@@ -60,11 +60,11 @@ void MobilityCanvasVisualizer::refreshDisplay() const
         auto position = canvasProjection->computeCanvasPoint(mobility->getCurrentPosition());
         auto orientation = mobility->getCurrentAngularPosition();
         auto velocity = canvasProjection->computeCanvasPoint(mobility->getCurrentSpeed());
-        mobilityVisualization->networkNodeVisualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+        mobilityVisualization->networkNodeVisualization->setPosition(cFigure::Point(position.x, position.y));
         if (mobilityVisualization->visualRepresentation != nullptr)
             setPosition(mobilityVisualization->visualRepresentation, position);
         if (displayOrientations) {
-            // TODO: this doesn't correctly take canvas projetion into account
+            // TODO: this doesn't correctly take canvas projection into account
             double angle = orientation.alpha;
             mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationArcSize);
             mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationArcSize);

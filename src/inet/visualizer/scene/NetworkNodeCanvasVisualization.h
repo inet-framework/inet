@@ -24,7 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
+class INET_API NetworkNodeCanvasVisualization : public cPanelFigure
 {
   protected:
     class INET_API Annotation {
