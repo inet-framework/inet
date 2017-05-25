@@ -46,7 +46,7 @@ void LabeledPolylineFigure::updateLabelPosition()
     auto position = (points[index] + points[index + 1]) / 2;
     auto direction = points[index + 1] - points[index];
     double alpha = atan2(-direction.y, direction.x);
-    if (alpha >= M_PI / 2 || alpha <= -M_PI / 2)
+    if (alpha > M_PI / 2 || alpha < -M_PI / 2)
         alpha += M_PI;
     cFigure::Transform transform;
     transform.rotate(-alpha);

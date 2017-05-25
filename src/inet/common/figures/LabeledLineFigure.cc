@@ -50,7 +50,7 @@ void LabeledLineFigure::updateLabelPosition()
     auto position = (lineFigure->getStart() + lineFigure->getEnd()) / 2;
     auto direction = lineFigure->getEnd() - lineFigure->getStart();
     double alpha = atan2(-direction.y, direction.x);
-    if (alpha >= M_PI / 2 || alpha <= -M_PI / 2)
+    if (alpha > M_PI / 2 || alpha < -M_PI / 2)
         alpha += M_PI;
     cFigure::Transform transform;
     transform.rotate(-alpha);
