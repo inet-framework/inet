@@ -21,8 +21,8 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.visualizer.contract.ILinkBreakVisualizer;
 import inet.visualizer.contract.IInterfaceTableVisualizer;
+import inet.visualizer.contract.ILinkBreakVisualizer;
 import inet.visualizer.contract.IMediumVisualizer;
 import inet.visualizer.contract.IMobilityVisualizer;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
@@ -31,6 +31,7 @@ import inet.visualizer.contract.INetworkRouteVisualizer;
 import inet.visualizer.contract.IPacketDropVisualizer;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
+import inet.visualizer.contract.IQueueVisualizer;
 import inet.visualizer.contract.IRoutingTableVisualizer;
 import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.contract.IStatisticVisualizer;
@@ -58,6 +59,7 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
         string mediumVisualizerType = default("MediumOsgVisualizer");
         string obstacleLossVisualizerType = default("TracingObstacleLossOsgVisualizer");
         string packetDropVisualizerType = default("PacketDropOsgVisualizer");
+        string queueVisualizerType = default("QueueOsgVisualizer");
         string physicalLinkVisualizerType = default("PhysicalLinkOsgVisualizer");
         string interfaceTableVisualizerType = default("InterfaceTableOsgVisualizer");
         string dataLinkVisualizerType = default("DataLinkOsgVisualizer");
@@ -108,40 +110,44 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,950");
         }
-        physicalLinkVisualizer: <physicalLinkVisualizerType> like IPhysicalLinkVisualizer if physicalLinkVisualizerType != "" {
+        queueVisualizer: <queueVisualizerType> like IQueueVisualizer if queueVisualizerType != "" {
             parameters:
                 @display("p=450,50");
         }
-        interfaceTableVisualizer: <interfaceTableVisualizerType> like IInterfaceTableVisualizer if interfaceTableVisualizerType != "" {
+        physicalLinkVisualizer: <physicalLinkVisualizerType> like IPhysicalLinkVisualizer if physicalLinkVisualizerType != "" {
             parameters:
                 @display("p=450,150");
         }
-        dataLinkVisualizer: <dataLinkVisualizerType> like IDataLinkVisualizer if dataLinkVisualizerType != "" {
+        interfaceTableVisualizer: <interfaceTableVisualizerType> like IInterfaceTableVisualizer if interfaceTableVisualizerType != "" {
             parameters:
                 @display("p=450,250");
         }
-        linkBreakVisualizer: <linkBreakVisualizerType> like ILinkBreakVisualizer if linkBreakVisualizerType != "" {
+        dataLinkVisualizer: <dataLinkVisualizerType> like IDataLinkVisualizer if dataLinkVisualizerType != "" {
             parameters:
                 @display("p=450,350");
         }
-        ieee80211Visualizer: <ieee80211VisualizerType> like IIeee80211Visualizer if ieee80211VisualizerType != "" {
+        linkBreakVisualizer: <linkBreakVisualizerType> like ILinkBreakVisualizer if linkBreakVisualizerType != "" {
             parameters:
                 @display("p=450,450");
         }
-        networkRouteVisualizer: <networkRouteVisualizerType> like INetworkRouteVisualizer if networkRouteVisualizerType != "" {
+        ieee80211Visualizer: <ieee80211VisualizerType> like IIeee80211Visualizer if ieee80211VisualizerType != "" {
             parameters:
                 @display("p=450,550");
         }
-        routingTableVisualizer: <routingTableVisualizerType> like IRoutingTableVisualizer if routingTableVisualizerType != "" {
+        networkRouteVisualizer: <networkRouteVisualizerType> like INetworkRouteVisualizer if networkRouteVisualizerType != "" {
             parameters:
                 @display("p=450,650");
         }
-        transportRouteVisualizer: <transportRouteVisualizerType> like ITransportRouteVisualizer if transportRouteVisualizerType != "" {
+        routingTableVisualizer: <routingTableVisualizerType> like IRoutingTableVisualizer if routingTableVisualizerType != "" {
             parameters:
                 @display("p=450,750");
         }
-        transportConnectionVisualizer: <transportConnectionVisualizerType> like ITransportConnectionVisualizer if transportConnectionVisualizerType != "" {
+        transportRouteVisualizer: <transportRouteVisualizerType> like ITransportRouteVisualizer if transportRouteVisualizerType != "" {
             parameters:
                 @display("p=450,850");
+        }
+        transportConnectionVisualizer: <transportConnectionVisualizerType> like ITransportConnectionVisualizer if transportConnectionVisualizerType != "" {
+            parameters:
+                @display("p=450,950");
         }
 }
