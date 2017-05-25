@@ -26,7 +26,8 @@ class INET_API LabeledPolylineFigure : public cGroupFigure
 {
   protected:
     cPolylineFigure *polylineFigure;
-    cLabelFigure *labelFigure;
+    cPanelFigure *panelFigure;
+    cTextFigure *labelFigure;
 
   protected:
     void updateLabelPosition();
@@ -35,7 +36,7 @@ class INET_API LabeledPolylineFigure : public cGroupFigure
     LabeledPolylineFigure(const char *name = nullptr);
 
     cPolylineFigure *getPolylineFigure() const { return polylineFigure; }
-    cLabelFigure *getLabelFigure() const { return labelFigure; }
+    cTextFigure *getLabelFigure() const { return labelFigure; }
 
     void setPoints(const std::vector<cFigure::Point>& points);
 };

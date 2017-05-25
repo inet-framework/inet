@@ -23,11 +23,14 @@ LabeledPolylineFigure::LabeledPolylineFigure(const char *name) :
     cGroupFigure(name)
 {
     polylineFigure = new cPolylineFigure("line");
-    labelFigure = new cLabelFigure("label");
-    labelFigure->setAnchor(cFigure::ANCHOR_CENTER);
-    labelFigure->setHalo(true);
+    panelFigure = new cPanelFigure("panel");
     addFigure(polylineFigure);
-    addFigure(labelFigure);
+    addFigure(panelFigure);
+    labelFigure = new cTextFigure("label");
+    labelFigure->setAnchor(cFigure::ANCHOR_S);
+    labelFigure->setHalo(true);
+    labelFigure->setPosition(cFigure::Point(0, 0));
+    panelFigure->addFigure(labelFigure);
 }
 
 void LabeledPolylineFigure::setPoints(const std::vector<cFigure::Point>& points)
@@ -38,11 +41,17 @@ void LabeledPolylineFigure::setPoints(const std::vector<cFigure::Point>& points)
 
 void LabeledPolylineFigure::updateLabelPosition()
 {
-    // TODO: correctly compute position along the polyline
-    // TODO: cLabelFigure doesn't support text rotation right now
     auto points = polylineFigure->getPoints();
     int index = points.size() / 2;
-    labelFigure->setPosition((points[index] + points[index + 1]) / 2);
+    auto position = (points[index] + points[index + 1]) / 2;
+    auto direction = points[index + 1] - points[index];
+    double alpha = atan2(-direction.y, direction.x);
+    if (alpha >= M_PI / 2 || alpha <= -M_PI / 2)
+        alpha += M_PI;
+    cFigure::Transform transform;
+    transform.rotate(-alpha);
+    panelFigure->setPosition(position);
+    panelFigure->setTransform(transform);
 }
 
 } // namespace inet
