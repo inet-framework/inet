@@ -26,10 +26,9 @@ namespace inet {
 
 namespace visualizer {
 
-RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(int nodeModuleId, int nextHopModuleId) :
+RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
     ModuleLine(nodeModuleId, nextHopModuleId),
-    nodeModuleId(nodeModuleId),
-    nextHopModuleId(nextHopModuleId)
+    route(route)
 {
 }
 
@@ -139,7 +138,7 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         throw cRuntimeError("Unknown signal");
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(std::pair<int, int> route)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route)
 {
     auto it = routeVisualizations.find(route);
     return it == routeVisualizations.end() ? nullptr : it->second;
@@ -147,14 +146,12 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase
 
 void RoutingTableVisualizerBase::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    auto key = std::pair<int, int>(routeVisualization->nodeModuleId, routeVisualization->nextHopModuleId);
-    routeVisualizations[key] = routeVisualization;
+    routeVisualizations[routeVisualization->route] = routeVisualization;
 }
 
 void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    auto key = std::pair<int, int>(routeVisualization->nodeModuleId, routeVisualization->nextHopModuleId);
-    routeVisualizations.erase(routeVisualizations.find(key));
+    routeVisualizations.erase(routeVisualizations.find(routeVisualization->route));
 }
 
 std::vector<IPv4Address> RoutingTableVisualizerBase::getDestinations()
@@ -189,8 +186,8 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
                 auto gateway = route->getGateway();
                 auto nextHop = addressResolver.findHostWithAddress(gateway.isUnspecified() ? destination : gateway);
                 if (nextHop != nullptr) {
-                    auto key = std::pair<int, int>(node->getId(), nextHop->getId());
-                    if (routeVisualizations.find(key) == routeVisualizations.end())
+                    auto routeVisualization = getRouteVisualization(route);
+                    if (routeVisualization == nullptr)
                         addRouteVisualization(createRouteVisualization(route, node, nextHop));
                 }
             }
@@ -200,10 +197,9 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
 
 void RoutingTableVisualizerBase::removeRouteVisualizations(IIPv4RoutingTable *routingTable)
 {
-    auto node = getContainingNode(check_and_cast<cModule *>(routingTable));
     std::vector<const RouteVisualization *> removedRouteVisualizations;
     for (auto it : routeVisualizations)
-        if (it.first.first == node->getId() && it.second)
+        if (it.first->getRoutingTable() == routingTable && it.second)
             removedRouteVisualizations.push_back(it.second);
     for (auto it : removedRouteVisualizations) {
         removeRouteVisualization(it);

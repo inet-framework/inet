@@ -32,8 +32,8 @@ Define_Module(RoutingTableOsgVisualizer);
 
 #ifdef WITH_OSG
 
-RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, int nodeModuleId, int nextHopModuleId) :
-    RouteVisualization(nodeModuleId, nextHopModuleId),
+RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+    RouteVisualization(route, nodeModuleId, nextHopModuleId),
     node(node)
 {
 }
@@ -54,7 +54,7 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer:
     lineWidth->setWidth(this->lineWidth);
     stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
     osgNode->setStateSet(stateSet);
-    return new RouteOsgVisualization(osgNode, node->getId(), nextHop->getId());
+    return new RouteOsgVisualization(osgNode, route, node->getId(), nextHop->getId());
 }
 
 void RoutingTableOsgVisualizer::addRouteVisualization(const RouteVisualization *routeVisualization)

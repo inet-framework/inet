@@ -34,7 +34,7 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
         LabeledLineFigure *figure = nullptr;
 
       public:
-        RouteCanvasVisualization(LabeledLineFigure *figure, int nodeModuleId, int nextHopModuleId);
+        RouteCanvasVisualization(LabeledLineFigure *figure, const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteCanvasVisualization();
     };
 

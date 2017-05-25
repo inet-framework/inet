@@ -23,8 +23,8 @@ namespace visualizer {
 
 Define_Module(RoutingTableCanvasVisualizer);
 
-RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, int nodeModuleId, int nextHopModuleId) :
-    RouteVisualization(nodeModuleId, nextHopModuleId),
+RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+    RouteVisualization(route, nodeModuleId, nextHopModuleId),
     figure(figure)
 {
 }
@@ -81,7 +81,7 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualiz
     labelFigure->setColor(labelColor);
     auto text = getRouteVisualizationText(route);
     labelFigure->setText(text.c_str());
-    auto routeVisualization = new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
+    auto routeVisualization = new RouteCanvasVisualization(figure, route, node->getId(), nextHop->getId());
     routeVisualization->shiftPriority = 0.5;
     return routeVisualization;
 }

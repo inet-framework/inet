@@ -34,11 +34,10 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
   protected:
     class INET_API RouteVisualization : public LineManager::ModuleLine {
       public:
-        const int nodeModuleId = -1;
-        const int nextHopModuleId = -1;
+        const IPv4Route *route = nullptr;
 
       public:
-        RouteVisualization(int nodeModuleId, int nextHopModuleId);
+        RouteVisualization(const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteVisualization() {}
     };
 
@@ -73,7 +72,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     LineManager *lineManager = nullptr;
 
-    std::map<std::pair<int, int>, const RouteVisualization *> routeVisualizations;
+    std::map<const IPv4Route *, const RouteVisualization *> routeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
@@ -83,7 +82,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void unsubscribe();
 
     virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const = 0;
-    virtual const RouteVisualization *getRouteVisualization(std::pair<int, int> route);
+    virtual const RouteVisualization *getRouteVisualization(IPv4Route *route);
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization);
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization);
 

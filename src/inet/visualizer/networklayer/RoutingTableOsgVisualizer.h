@@ -34,7 +34,7 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
         osg::Node *node = nullptr;
 
       public:
-        RouteOsgVisualization(osg::Node *node, int nodeModuleId, int nextHopModuleId);
+        RouteOsgVisualization(osg::Node *node, const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteOsgVisualization();
     };
 
