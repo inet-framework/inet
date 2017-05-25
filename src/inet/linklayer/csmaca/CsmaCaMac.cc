@@ -96,6 +96,7 @@ void CsmaCaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
+        transmissionQueue.setMaxPacketLength(maxQueueSize);
         transmissionQueue.setName("transmissionQueue");
         if (par("prioritizeByUP"))
             transmissionQueue.setup(&compareFramesByPriority);
