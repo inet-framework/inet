@@ -19,7 +19,11 @@
 #define __INET_INETDEFS_H
 
 // precompiled headers must be included first
-#include "inet/common/precompiled.h"
+#ifdef NDEBUG
+#include "inet/common/precompiled_release.h"
+#else
+#include "inet/common/precompiled_debug.h"
+#endif
 
 // important WITH_* macros defined by OMNET
 #include "inet/opp_defines.h"
