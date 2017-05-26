@@ -38,7 +38,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
                 auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
                 auto visualization = createNetworkNodeVisualization(networkNode);
                 visualization->setZIndex(zIndex);
-                visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+                visualization->setPosition(cFigure::Point(position.x, position.y));
                 setNetworkNodeVisualization(networkNode, visualization);
                 visualizerTargetModule->getCanvas()->addFigure(visualization);
             }
@@ -52,7 +52,7 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
         auto networkNode = it.first;
         auto visualization = it.second;
         auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
-        visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+        visualization->setPosition(cFigure::Point(position.x, position.y));
     }
 }
 
