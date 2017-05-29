@@ -34,7 +34,6 @@ class INET_API LabeledIconFigure : public cGroupFigure
     cIconFigure *getIconFigure() const { return iconFigure; }
     cLabelFigure *getLabelFigure() const { return labelFigure; }
 
-    void setTags(const char *tags);
     void setTooltip(const char *tooltip);
     void setAssociatedObject(cObject * object);
 

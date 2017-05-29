@@ -28,6 +28,7 @@ LabeledLineFigure::LabeledLineFigure(const char *name) :
     addFigure(panelFigure);
     labelFigure = new cTextFigure("label");
     labelFigure->setAnchor(cFigure::ANCHOR_S);
+    labelFigure->setTags("label");
     labelFigure->setHalo(true);
     labelFigure->setPosition(cFigure::Point(0, 0));
     panelFigure->addFigure(labelFigure);
