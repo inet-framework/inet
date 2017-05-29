@@ -43,7 +43,7 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
-        string displacement = defatul("top");
+        string displacement = default("top");
 
         @class(Ieee80211VisualizerBase);
 }
