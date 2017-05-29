@@ -68,9 +68,13 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      */
     std::vector<const ITransmission *> transmissions;
     /**
-     * The list of radio figures.
+     * The list of transmission figures.
      */
-    std::map<const IRadio *, cFigure *> radioFigures;
+    std::map<const IRadio *, cFigure *> transmissionFigures;
+    /**
+     * The list of reception figures.
+     */
+    std::map<const IRadio *, cFigure *> receptionFigures;
     /**
      * The propagating signal figures.
      */
@@ -94,9 +98,13 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void refreshDisplay() const override;
     virtual void setAnimationSpeed();
 
-    virtual cFigure *getRadioFigure(const IRadio *radio) const;
-    virtual void setRadioFigure(const IRadio *radio, cFigure *figure);
-    virtual cFigure *removeRadioFigure(const IRadio *radio);
+    virtual cFigure *getTransmissionFigure(const IRadio *radio) const;
+    virtual void setTransmissionFigure(const IRadio *radio, cFigure *figure);
+    virtual cFigure *removeTransmissionFigure(const IRadio *radio);
+
+    virtual cFigure *getReceptionFigure(const IRadio *radio) const;
+    virtual void setReceptionFigure(const IRadio *radio, cFigure *figure);
+    virtual cFigure *removeReceptionFigure(const IRadio *radio);
 
     virtual cFigure *getSignalFigure(const ITransmission *transmission) const;
     virtual void setSignalFigure(const ITransmission *transmission, cFigure *figure);

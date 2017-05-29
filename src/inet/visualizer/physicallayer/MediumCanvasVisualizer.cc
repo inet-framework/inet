@@ -160,27 +160,52 @@ void MediumCanvasVisualizer::setAnimationSpeed()
     visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
-cFigure *MediumCanvasVisualizer::getRadioFigure(const IRadio *radio) const
+cFigure *MediumCanvasVisualizer::getTransmissionFigure(const IRadio *radio) const
 {
-    auto it = radioFigures.find(radio);
-    if (it == radioFigures.end())
+    auto it = transmissionFigures.find(radio);
+    if (it == transmissionFigures.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MediumCanvasVisualizer::setRadioFigure(const IRadio *radio, cFigure *figure)
+void MediumCanvasVisualizer::setTransmissionFigure(const IRadio *radio, cFigure *figure)
 {
-    radioFigures[radio] = figure;
+    transmissionFigures[radio] = figure;
 }
 
-cFigure *MediumCanvasVisualizer::removeRadioFigure(const IRadio *radio)
+cFigure *MediumCanvasVisualizer::removeTransmissionFigure(const IRadio *radio)
 {
-    auto it = radioFigures.find(radio);
-    if (it == radioFigures.end())
+    auto it = transmissionFigures.find(radio);
+    if (it == transmissionFigures.end())
         return nullptr;
     else {
-        radioFigures.erase(it);
+        transmissionFigures.erase(it);
+        return it->second;
+    }
+}
+
+cFigure *MediumCanvasVisualizer::getReceptionFigure(const IRadio *radio) const
+{
+    auto it = receptionFigures.find(radio);
+    if (it == receptionFigures.end())
+        return nullptr;
+    else
+        return it->second;
+}
+
+void MediumCanvasVisualizer::setReceptionFigure(const IRadio *radio, cFigure *figure)
+{
+    receptionFigures[radio] = figure;
+}
+
+cFigure *MediumCanvasVisualizer::removeReceptionFigure(const IRadio *radio)
+{
+    auto it = receptionFigures.find(radio);
+    if (it == receptionFigures.end())
+        return nullptr;
+    else {
+        receptionFigures.erase(it);
         return it->second;
     }
 }
@@ -326,8 +351,6 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         }
         if (displayTransmissions || displayReceptions) {
             auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
-            auto group = new cGroupFigure("activity");
-            cFigure::Rectangle bounds;
             if (displayTransmissions) {
                 std::string imageName = par("transmissionImage");
                 auto transmissionFigure = new LabeledIconFigure("transmission");
@@ -339,8 +362,8 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = transmissionFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                group->addFigure(transmissionFigure);
-                bounds = transmissionFigure->getBounds();
+                networkNodeVisualization->addAnnotation(transmissionFigure, transmissionFigure->getBounds().getSize(), transmissionDisplacement, 1);
+                setTransmissionFigure(radio, transmissionFigure);
             }
             if (displayReceptions) {
                 std::string imageName = par("receptionImage");
@@ -353,11 +376,9 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = receptionFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                group->addFigure(receptionFigure);
-                bounds = receptionFigure->getBounds();
+                networkNodeVisualization->addAnnotation(receptionFigure, receptionFigure->getBounds().getSize(), receptionDisplacement, -1);
+                setReceptionFigure(radio, receptionFigure);
             }
-            networkNodeVisualization->addAnnotation(group, bounds.getSize());
-            setRadioFigure(radio, group);
         }
     }
 }
@@ -365,7 +386,13 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
 void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
-    auto figure = removeRadioFigure(radio);
+    auto transmissionFigure = removeTransmissionFigure(radio);
+    if (transmissionFigure != nullptr) {
+        auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
+        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        networkNodeVisualization->removeAnnotation(transmissionFigure);
+    }
+    auto figure = removeReceptionFigure(radio);
     if (figure != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
@@ -406,9 +433,11 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
             setAnimationSpeed();
         if (displayTransmissions) {
             auto transmitter = transmission->getTransmitter();
-            auto figure = getRadioFigure(transmitter);
-            figure->getFigure(0)->setVisible(true);
-            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(0))->getLabelFigure();
+            auto figure = getTransmissionFigure(transmitter);
+            auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
+            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            networkNodeVisualization->setAnnotationVisible(figure, true);
+            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
             if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
                 char tmp[32];
                 sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarTransmission->getPower()).get()));
@@ -428,8 +457,10 @@ void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission
             setAnimationSpeed();
         if (displayTransmissions) {
             auto transmitter = transmission->getTransmitter();
-            auto figure = getRadioFigure(transmitter);
-            figure->getFigure(0)->setVisible(false);
+            auto figure = getTransmissionFigure(transmitter);
+            auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
+            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            networkNodeVisualization->setAnnotationVisible(figure, false);
         }
     }
 }
@@ -443,9 +474,11 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
         if (displayReceptions) {
             auto receiver = reception->getReceiver();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
-                auto figure = getRadioFigure(receiver);
-                figure->getFigure(1)->setVisible(true);
-                auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(1))->getLabelFigure();
+                auto figure = getReceptionFigure(receiver);
+                auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
+                auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+                networkNodeVisualization->setAnnotationVisible(figure, true);
+                auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
                 if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
                     char tmp[32];
                     sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
@@ -479,8 +512,10 @@ void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
         if (displayReceptions) {
             auto receiver = reception->getReceiver();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
-                auto figure = getRadioFigure(receiver);
-                figure->getFigure(1)->setVisible(false);
+                auto figure = getReceptionFigure(receiver);
+                auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
+                auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+                networkNodeVisualization->setAnnotationVisible(figure, false);
             }
         }
     }

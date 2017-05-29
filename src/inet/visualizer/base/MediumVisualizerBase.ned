@@ -49,11 +49,11 @@ simple MediumVisualizerBase extends VisualizerBase
 
         bool displayTransmissions = default(false); // display an image where a transmission is currently in progress, disabled by default
         string transmissionImage = default("misc/transmission.png"); // transmission image for ongoing transmissions
-        string transmissionDisplacement = default("top");
+        string transmissionDisplacement = default("topCenter");
 
         bool displayReceptions = default(false); // display an image where a reception is currently in progress, disabled by default
         string receptionImage = default("misc/reception.png"); // reception image for ongoing receptions
-        string receptionDisplacement = default("top");
+        string receptionDisplacement = default("topCenter");
 
         bool displayCommunicationRanges = default(false); // display communication ranges as circles around radios, enabled by default
         string communicationRangeLineColor = default("blue"); // communication range circle line color, blue by default
