@@ -4,6 +4,8 @@
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
  - add indexed image visualizations for radioMode, transmissionState and receptionState
+ - review what is added as annotation (e.g. communication range should not be added)
+ - review packet drop signals, all current signals are necessary? check against showcase
 
 Change:
  - review how LinkBreakVisualizer visualizes link breaks
