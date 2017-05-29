@@ -244,7 +244,10 @@ PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position
 
 osg::Image* createImage(const char *fileName)
 {
-    return osgDB::readImageFile(fileName);
+    auto image = osgDB::readImageFile(fileName);
+    if (image == nullptr)
+        throw cRuntimeError("Image '%s' not found", fileName);
+    return image;
 }
 
 Texture2D *createTexture(const char *name, bool repeat)

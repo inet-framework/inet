@@ -91,8 +91,6 @@ void SceneOsgVisualizerBase::initializePlayground()
         if (*imageString != '\0') {
             std::string imagePath = resolveResourcePath(imageString);
             image = inet::osg::createImage(imagePath.c_str());
-            if (image == nullptr)
-                throw cRuntimeError("Cannot read playground image: '%s'", imageString);
         }
         double imageSize = par("playgroundImageSize");
         auto color = cFigure::Color(par("playgroundColor"));

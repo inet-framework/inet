@@ -65,8 +65,6 @@ void MediumOsgVisualizer::initialize(int stage)
             const char *transmissionImageString = par("transmissionImage");
             auto path = resolveResourcePath(transmissionImageString);
             transmissionImage = inet::osg::createImage(path.c_str());
-            if (transmissionImage == nullptr)
-                throw cRuntimeError("Transmission image '%s' not found", transmissionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(transmissionImage);
             if (imageStream != nullptr)
                 imageStream->play();
@@ -75,8 +73,6 @@ void MediumOsgVisualizer::initialize(int stage)
             const char *receptionImageString = par("receptionImage");
             auto path = resolveResourcePath(receptionImageString);
             receptionImage = inet::osg::createImage(path.c_str());
-            if (receptionImage == nullptr)
-                throw cRuntimeError("Reception reception '%s' not found", receptionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(receptionImage);
             if (imageStream != nullptr)
                 imageStream->play();
