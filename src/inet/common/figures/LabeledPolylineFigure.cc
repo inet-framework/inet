@@ -43,7 +43,7 @@ void LabeledPolylineFigure::setPoints(const std::vector<cFigure::Point>& points)
 void LabeledPolylineFigure::updateLabelPosition()
 {
     auto points = polylineFigure->getPoints();
-    int index = points.size() / 2;
+    int index = (points.size() - 1) / 2;
     auto position = (points[index] + points[index + 1]) / 2;
     auto direction = points[index + 1] - points[index];
     double alpha = atan2(-direction.y, direction.x);
