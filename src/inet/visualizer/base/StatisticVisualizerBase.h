@@ -19,6 +19,7 @@
 #define __INET_STATISTICVISUALIZERBASE_H
 
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/Displacement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
 #include "inet/visualizer/util/StringFormat.h"
 
@@ -80,6 +81,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
     double opacity = NaN;
+    Displacement displacement;
     //@}
 
     std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;

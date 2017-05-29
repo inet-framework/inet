@@ -53,6 +53,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
 
         string format = default("%N %\\%n"); // determines what interface data is displayed
+        string displacement = default("top");
 
         string font = default("<default>"); // interface text font, automatic by default
         string textColor = default("#005030"); // interface text font color

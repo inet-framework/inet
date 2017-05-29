@@ -44,9 +44,9 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
 
         string icon = default("misc/marker_s"); // transport connection visualization icon
         string iconColor @enum("light", "dark") = default("dark"); // transport connection icon color is a list of colors, a set of dark colors by default
-
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
+        string displacement = defatul("top");
 
         @class(TransportConnectionVisualizerBase);
 }

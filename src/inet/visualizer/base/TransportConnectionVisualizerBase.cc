@@ -53,6 +53,7 @@ void TransportConnectionVisualizerBase::initialize(int stage)
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
+        displacement = parseDisplacement(par("displacement"));
         if (displayTransportConnections)
             subscribe();
     }

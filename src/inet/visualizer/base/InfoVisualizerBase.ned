@@ -47,6 +47,7 @@ simple InfoVisualizerBase extends VisualizerBase
         string textColor = default("black"); // info text font color, black by default
         string backgroundColor = default("white"); // info text background color, white by default
         double opacity = default(1.0); // opacity of the visualization
+        string displacement = default("top");
 
         @class(InfoVisualizerBase);
 }
