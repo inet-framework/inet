@@ -29,10 +29,11 @@ package inet.visualizer.base;
 //
 // The format string can contain the following directives:
 //  - %N interface name
+//  - %m MAC address
 //  - %4 IPv4 address
 //  - %6 IPv6 address
+//  - %a IPv4 or IPv6 address
 //  - %g generic address
-//  - %m MAC address
 //  - %n network address
 //  - %i InterfaceEntry::info()
 //  - %s InterfaceEntry::str()
@@ -53,7 +54,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
-        string format = default("%N %\\%n"); // determines what interface data is displayed
+        string format = default("%N %\\%a"); // determines what interface data is displayed
         string displacement = default("top");
 
         string font = default("<default>"); // interface text font, automatic by default
