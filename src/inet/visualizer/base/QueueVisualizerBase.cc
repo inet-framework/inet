@@ -41,6 +41,12 @@ void QueueVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         displayQueues = par("displayQueues");
         queueFilter.setPattern(par("queueFilter"));
+        color = cFigure::parseColor(par("color"));
+        spacing = par("spacing");
+        elementWidth = par("elementWidth");
+        elementHeight = par("elementHeight");
+        elementCount = par("elementCount");
+        displacement = parseDisplacement(par("displacement"));
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayQueues)

@@ -53,7 +53,11 @@ QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisua
     figure->setTags("queue");
     figure->setTooltip("This figure represents a queue");
     figure->setAssociatedObject(queue);
-    figure->setMaxValue(queue->getMaxPacketLength());
+    figure->setColor(color);
+    figure->setSpacing(spacing);
+    figure->setElementWidth(elementWidth);
+    figure->setElementHeight(elementHeight);
+    figure->setElementCount(elementCount == -1 ? queue->getMaxPacketLength() : elementCount);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
     return new QueueCanvasVisualization(networkNodeVisualization, figure, queue);
@@ -64,7 +68,7 @@ void QueueCanvasVisualizer::addQueueVisualization(const QueueVisualization *queu
     QueueVisualizerBase::addQueueVisualization(queueVisualization);
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto figure = queueCanvasVisualization->figure;
-    queueCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize());
+    queueCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), displacement);
 }
 
 void QueueCanvasVisualizer::removeQueueVisualization(const QueueVisualization *queueVisualization)
@@ -80,7 +84,7 @@ void QueueCanvasVisualizer::refreshQueueVisualization(const QueueVisualization *
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto queue = queueVisualization->queue;
     auto figure = queueCanvasVisualization->figure;
-    figure->setValue(queue->getLength());
+    figure->setValue(elementCount == -1 ? queue->getLength() : elementCount * ((double)queue->getLength() / (double)queue->getMaxPacketLength()));
 }
 
 } // namespace visualizer

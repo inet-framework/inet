@@ -27,9 +27,16 @@ simple QueueVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
 
-        bool displayQueues = default(true);
-        
-        string queueFilter = default("**"); // which queues are considered, matches all queues by default
+        bool displayQueues = default(false);
+
+        string queueFilter = default("**"); // which queues are considered, matches no queues by default
+
+        string color = default("blue");
+        double spacing = default(2);
+        double elementWidth = default(8);
+        double elementHeight = default(4);
+        int elementCount = default(-1); // specifies the number of elements, queue length by default
+        string displacement = default("right");
 
         @class(QueueVisualizerBase);
 }
