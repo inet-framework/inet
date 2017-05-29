@@ -28,6 +28,7 @@ void NetworkNodeVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         nodeFilter.setPattern(par("nodeFilter"));
+        annotationSpacing = par("annotationSpacing");
     }
 }
 

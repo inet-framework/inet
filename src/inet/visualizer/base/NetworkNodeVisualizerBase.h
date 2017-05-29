@@ -29,6 +29,7 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
 {
   protected:
     NetworkNodeFilter nodeFilter;
+    double annotationSpacing;
 
   protected:
     virtual void initialize(int stage) override;
