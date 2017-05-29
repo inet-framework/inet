@@ -3,9 +3,7 @@
  - osg visualizer image with "" crashes
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
- - RoutingTableVisualizer might have to display several routing table entries on the same arrow, so the label will be incorrect!
- - should we enabled/disable individual visualization features with booleans (e.g. displayBackground) or with some special values (e.g. backgroundColor = "")
- - copy cPanelFigure to INET until the next OMNET is released
+ - add indexed image visualizations for radioMode, transmissionState and receptionState
 
 Change:
  - review how LinkBreakVisualizer visualizes link breaks
@@ -15,10 +13,9 @@ Change:
  - remove updateInterval from MovingMobilityBase
 
 2D:
- - route visualizer labels don't rotate with the arrows
- - zoom in/out breaks layout of network node annotations
 
 3D:
+ - review and compare to 2D implementation
  - iconTintColor parameters don't work
  - lineStyle parameters don't work
  - network node annotations overlap
@@ -29,5 +26,4 @@ Change:
  - PhysicalLinkVisualizer nyilai nem látszanak rendesen, indulhatnának a source node szélétől, mehetnének a destination node széléig, nem a közepéig
 
 Feature:
- - add separate queue visualizers that display queue icons next to network nodes
  - IEEE 802.11 association visualizer should display signal strength
