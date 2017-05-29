@@ -19,6 +19,7 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
@@ -47,6 +48,9 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             break;
         case '6':
             result = interfaceEntry->ipv6Data() == nullptr ? "" : interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
+            break;
+        case 'g':
+            result = interfaceEntry->getGenericNetworkProtocolData() == nullptr ? "" : interfaceEntry->getGenericNetworkProtocolData()->getAddress().str();
             break;
         case 'm':
             result = interfaceEntry->getMacAddress().str();

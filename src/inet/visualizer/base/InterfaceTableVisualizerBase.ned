@@ -31,6 +31,7 @@ package inet.visualizer.base;
 //  - %N interface name
 //  - %4 IPv4 address
 //  - %6 IPv6 address
+//  - %g generic address
 //  - %m MAC address
 //  - %n network address
 //  - %i InterfaceEntry::info()
