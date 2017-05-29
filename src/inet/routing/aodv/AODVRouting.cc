@@ -1274,11 +1274,14 @@ void AODVRouting::clearState()
 
     if (useHelloMessages)
         cancelEvent(helloMsgTimer);
-
-    cancelEvent(expungeTimer);
-    cancelEvent(counterTimer);
-    cancelEvent(blacklistTimer);
-    cancelEvent(rrepAckTimer);
+    if (expungeTimer)
+        cancelEvent(expungeTimer);
+    if (counterTimer)
+        cancelEvent(counterTimer);
+    if (blacklistTimer)
+        cancelEvent(blacklistTimer);
+    if (rrepAckTimer)
+        cancelEvent(rrepAckTimer);
 }
 
 void AODVRouting::handleWaitForRREP(WaitForRREP *rrepTimer)
