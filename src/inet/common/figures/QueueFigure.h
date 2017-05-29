@@ -25,6 +25,7 @@ namespace inet {
 class INET_API QueueFigure : public cRectangleFigure
 {
   protected:
+    cFigure::Color color;
     double spacing = 2;
     double elementWidth = 16;
     double elementHeight = 4;
@@ -33,8 +34,20 @@ class INET_API QueueFigure : public cRectangleFigure
   public:
     QueueFigure(const char *name = nullptr);
 
+    cFigure::Color getColor() const { return color; }
+    void setColor(cFigure::Color color) { this->color = color; }
+
+    double getSpacing() const { return spacing; }
+    void setSpacing(double spacing) { this->spacing = spacing; }
+
+    double getElementWidth() const { return elementWidth; }
+    void setElementWidth(double elementWidth) { this->elementWidth = elementWidth; }
+
+    double getElementHeight() const { return elementHeight; }
+    void setElementHeight(double elementHeight) { this->elementHeight = elementHeight; }
+
     void setValue(int value);
-    void setMaxValue(int maxValue);
+    void setElementCount(int elementCount);
 };
 
 } // namespace inet

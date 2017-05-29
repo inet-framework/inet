@@ -24,23 +24,23 @@ QueueFigure::QueueFigure(const char *name) :
 {
 }
 
-void QueueFigure::setMaxValue(int maxValue)
+void QueueFigure::setElementCount(int elementCount)
 {
     for (auto box : boxes) {
         removeFigure(box);
         delete box;
     }
     boxes.clear();
-    for (int i = 0; i < maxValue; i++) {
+    for (int i = 0; i < elementCount; i++) {
         auto box = new cRectangleFigure("box");
         box->setOutlined(false);
         box->setFilled(true);
-        box->setFillColor(cFigure::BLUE);
+        box->setFillColor(color);
         box->setBounds(cFigure::Rectangle(spacing, spacing + i * (elementHeight + spacing), elementWidth, elementHeight));
         boxes.push_back(box);
         addFigure(box);
     }
-    setBounds(cFigure::Rectangle(0, 0, 2 * spacing + elementWidth, spacing + maxValue * (elementHeight + spacing)));
+    setBounds(cFigure::Rectangle(0, 0, 2 * spacing + elementWidth, spacing + elementCount * (elementHeight + spacing)));
 }
 
 void QueueFigure::setValue(int value)
