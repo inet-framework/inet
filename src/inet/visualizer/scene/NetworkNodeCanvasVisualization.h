@@ -18,7 +18,7 @@
 #ifndef __INET_NETWORKNODECANVASVISUALIZATION_H
 #define __INET_NETWORKNODECANVASVISUALIZATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/visualizer/util/Displacement.h"
 
 namespace inet {
 
@@ -30,26 +30,36 @@ class INET_API NetworkNodeCanvasVisualization : public cPanelFigure
     class INET_API Annotation {
       public:
         cFigure *figure;
-        cFigure::Point size;
+        cFigure::Rectangle bounds;
+        Displacement displacement;
+        double priority;
 
       public:
-        Annotation(cFigure *figure, cFigure::Point size);
+        Annotation(cFigure *figure, const cFigure::Point& size, Displacement displacement, double priority);
+
+        static bool comparePriority(const Annotation& a1, const Annotation& a2);
     };
 
   protected:
-    cModule *networkNode = nullptr;
-    cFigure::Point size;
+    cModule *networkNode;
+    double annotationSpacing;
+
+    bool isLayoutInvalid = false;
+    cFigure::Rectangle submoduleBounds;
     std::vector<Annotation> annotations;
 
   protected:
-    virtual void updateAnnotationPositions();
+    virtual void layout();
 
   public:
-    NetworkNodeCanvasVisualization(cModule *networkNode);
+    NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing);
 
-    virtual void addAnnotation(cFigure *figure, cFigure::Point size);
+    virtual void refreshDisplay() override;
+
+    virtual void addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacement = DISPLACEMENT_ANY, double priority = 0);
     virtual void removeAnnotation(cFigure *figure);
     virtual void setAnnotationSize(cFigure *figure, cFigure::Point size);
+    virtual void setAnnotationVisible(cFigure *figure, bool visible);
 };
 
 } // namespace visualizer

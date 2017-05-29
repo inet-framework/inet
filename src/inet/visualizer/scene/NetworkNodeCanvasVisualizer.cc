@@ -53,12 +53,13 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
         auto visualization = it.second;
         auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
         visualization->setPosition(cFigure::Point(position.x, position.y));
+        visualization->refreshDisplay();
     }
 }
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::createNetworkNodeVisualization(cModule *networkNode) const
 {
-    return new NetworkNodeCanvasVisualization(networkNode);
+    return new NetworkNodeCanvasVisualization(networkNode, annotationSpacing);
 }
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNeworkNodeVisualization(const cModule *networkNode) const
