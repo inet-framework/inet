@@ -50,7 +50,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         bool displayBackground = default(false); // specifies whether the text should have a background or not
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string interfaceFilter = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
         string format = default("%N %\\%n"); // determines what interface data is displayed
         string displacement = default("top");
