@@ -29,8 +29,12 @@ static inline double determinant(double a1, double a2, double b1, double b2)
     return a1 * b2 - a2 * b1;
 }
 
-static Coord intersectLines(const Coord& begin1, const Coord& end1, const Coord& begin2, const Coord& end2)
+static Coord intersectLines(const LineSegment& segment1, const LineSegment& segment2)
 {
+    const Coord& begin1 = segment1.getPoint1();
+    const Coord& end1 = segment1.getPoint2();
+    const Coord& begin2 = segment2.getPoint1();
+    const Coord& end2 = segment2.getPoint2();
     double x1 = begin1.x;
     double y1 = begin1.y;
     double x2 = end1.x;
@@ -45,6 +49,14 @@ static Coord intersectLines(const Coord& begin1, const Coord& end1, const Coord&
     double x = determinant(a, x1 - x2, b, x3 - x4) / c;
     double y = determinant(a, y1 - y2, b, y3 - y4) / c;
     return Coord(x, y, 0);
+}
+
+bool isPointOnSegment(const LineSegment& segment, const Coord& point)
+{
+    auto& p1 = segment.getPoint1();
+    auto& p2 = segment.getPoint2();
+    return (p2.x <= std::max(p1.x, point.x) && p2.x >= std::min(p1.x, point.x) &&
+            p2.y <= std::max(p1.y, point.y) && p2.y >= std::min(p1.y, point.y));
 }
 
 PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure) :
@@ -96,8 +108,29 @@ void PathCanvasVisualizerBase::refreshDisplay() const
             if (index == 0)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint1()));
             if (index > 0) {
-                Coord intersection = intersectLines(segments[index].getPoint1(), segments[index].getPoint2(), segments[index - 1].getPoint1(), segments[index - 1].getPoint2());
-                points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                auto& segment1 = segments[index - 1];
+                auto& segment2 = segments[index];
+                Coord intersection = intersectLines(segment1, segment2);
+                if (std::isfinite(intersection.x) && std::isfinite(intersection.y)) {
+                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection)) {
+                        points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                    }
+                    else {
+                        double distance = segment1.getPoint2().distance(segment2.getPoint1());
+                        double distance1 = intersection.distance(segment1.getPoint2());
+                        double distance2 = intersection.distance(segment2.getPoint1());
+                        if (distance1 + distance2 < 2 * distance)
+                            points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                        else {
+                            points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));
+                            points.push_back(canvasProjection->computeCanvasPoint(segment2.getPoint1()));
+                        }
+                    }
+                }
+                else {
+                    points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));
+                    points.push_back(canvasProjection->computeCanvasPoint(segment2.getPoint1()));
+                }
             }
             if (index == segments.size() - 1)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
