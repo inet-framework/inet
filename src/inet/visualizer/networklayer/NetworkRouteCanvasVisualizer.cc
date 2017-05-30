@@ -57,6 +57,11 @@ bool NetworkRouteCanvasVisualizer::isPathElement(cModule *module) const
         return true;
 #endif
 
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
+        return true;
+#endif
+
     return false;
 }
 

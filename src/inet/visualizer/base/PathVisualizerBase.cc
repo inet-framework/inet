@@ -198,7 +198,10 @@ const std::vector<int> *PathVisualizerBase::getIncompletePath(int treeId)
 
 void PathVisualizerBase::addToIncompletePath(int treeId, cModule *module)
 {
-    incompletePaths[treeId].push_back(module->getId());
+    auto& moduleIds = incompletePaths[treeId];
+    auto moduleId = module->getId();
+    if (moduleIds.size() == 0 || moduleIds[moduleIds.size() - 1] != moduleId)
+        moduleIds.push_back(moduleId);
 }
 
 void PathVisualizerBase::removeIncompletePath(int treeId)
@@ -238,15 +241,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         }
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
-        if (isPathEnd(static_cast<cModule *>(source))) {
-            auto packet = check_and_cast<cPacket *>(object);
-            if (packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulationTreeId();
-                auto module = check_and_cast<cModule *>(source);
-                addToIncompletePath(treeId, getContainingNode(module));
-            }
-        }
-        else if (isPathElement(static_cast<cModule *>(source))) {
+        if (isPathElement(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetFilter.matches(packet)) {
                 auto treeId = packet->getEncapsulationTreeId();
