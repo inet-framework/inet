@@ -398,7 +398,11 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 }
 
 IPv4Address InterfaceEntry::getIPv4Address() const {
+#ifdef WITH_IPv4
     return ipv4data == nullptr ? IPv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
+#else
+    return IPv4Address::UNSPECIFIED_ADDRESS;
+#endif // ifdef WITH_IPv4
 }
 
 } // namespace inet
