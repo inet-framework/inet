@@ -61,6 +61,7 @@ void PathVisualizerBase::initialize(int stage)
         lineColorSet.parseColors(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
+        lineSmooth = par("lineSmooth");
         lineShift = par("lineShift");
         lineShiftMode = par("lineShiftMode");
         lineContactSpacing = par("lineContactSpacing");

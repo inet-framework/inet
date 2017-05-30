@@ -67,6 +67,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     ColorSet lineColorSet;
     cFigure::LineStyle lineStyle;
     double lineWidth = NaN;
+    bool lineSmooth = false;
     double lineShift = NaN;
     const char *lineShiftMode = nullptr;
     double lineContactSpacing = NaN;

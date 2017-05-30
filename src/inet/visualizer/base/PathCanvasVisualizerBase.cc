@@ -144,6 +144,7 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
 {
     auto figure = new LabeledPolylineFigure("path");
     auto polylineFigure = figure->getPolylineFigure();
+    polylineFigure->setSmooth(lineSmooth);
     polylineFigure->setLineWidth(lineWidth);
     polylineFigure->setLineStyle(lineStyle);
     polylineFigure->setEndArrowhead(cFigure::ARROW_BARBED);

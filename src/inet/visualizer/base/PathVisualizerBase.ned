@@ -57,6 +57,7 @@ simple PathVisualizerBase extends VisualizerBase
         string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)
         double lineWidth = default(3); // route line width
+        bool lineSmooth = default(false); // when true polylines are displayed as curves
 
         double lineShift = default(10); // route line shift to avoid overlapping routes
         string lineShiftMode = default("normal"); // determines how overlapping lines are shifted, possible values are: normal, x, y, z; optional prefix + or -
