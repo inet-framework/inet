@@ -60,7 +60,7 @@ void MobilityCanvasVisualizer::refreshDisplay() const
         auto position = canvasProjection->computeCanvasPoint(mobility->getCurrentPosition());
         auto orientation = mobility->getCurrentAngularPosition();
         auto velocity = canvasProjection->computeCanvasPoint(mobility->getCurrentSpeed());
-        mobilityVisualization->networkNodeVisualization->setPosition(cFigure::Point(position.x, position.y));
+        mobilityVisualization->networkNodeVisualization->setTransform(cFigure::Transform().translate(position.x, position.y));
         if (mobilityVisualization->visualRepresentation != nullptr)
             setPosition(mobilityVisualization->visualRepresentation, position);
         if (displayOrientations) {

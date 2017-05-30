@@ -25,7 +25,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API NetworkNodeCanvasVisualization : public cPanelFigure
+class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
 {
   protected:
     class INET_API Annotation {
@@ -48,6 +48,7 @@ class INET_API NetworkNodeCanvasVisualization : public cPanelFigure
     bool isLayoutInvalid = false;
     cFigure::Rectangle submoduleBounds;
     std::vector<Annotation> annotations;
+    cPanelFigure *annotationFigure = nullptr;
 
   protected:
     virtual void layout();

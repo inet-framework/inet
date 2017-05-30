@@ -39,10 +39,12 @@ static BoxedLabelFigure *createRectangle(const char *label) {
 }
 
 NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing) :
-    cPanelFigure(networkNode->getFullName()),
+    cGroupFigure(networkNode->getFullName()),
     networkNode(networkNode),
     annotationSpacing(annotationSpacing)
 {
+    annotationFigure = new cPanelFigure("annotation");
+    addFigure(annotationFigure);
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
@@ -57,7 +59,7 @@ void NetworkNodeCanvasVisualization::refreshDisplay()
 void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacement, double priority)
 {
     annotations.push_back(Annotation(figure, size, displacement, priority));
-    addFigure(figure);
+    annotationFigure->addFigure(figure);
     isLayoutInvalid = true;
 }
 
@@ -70,7 +72,7 @@ void NetworkNodeCanvasVisualization::removeAnnotation(cFigure *figure)
             break;
         }
     }
-    removeFigure(figure);
+    annotationFigure->removeFigure(figure);
     isLayoutInvalid = true;
 }
 
