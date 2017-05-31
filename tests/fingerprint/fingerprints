@@ -215,7 +215,7 @@ class SimulationResult:
 
 
 class SimulationTestCase(unittest.TestCase):
-    def runSimulation(self, title, command, workingdir):
+    def runSimulation(self, title, command, workingdir, resultdir):
         global logFile
         ensure_dir(workingdir + "/results")
 
@@ -226,6 +226,16 @@ class SimulationTestCase(unittest.TestCase):
 
         elapsedTime = time.time() - t0
         FILE = open(logFile, "a")
+        FILE.write("------------------------------------------------------\n"
+                 + "Running: " + title + "\n\n"
+                 + "$ cd " + workingdir + "\n"
+                 + "$ " + command + "\n\n"
+                 + out.strip() + "\n\n"
+                 + "Exit code: " + str(exitcode) + "\n"
+                 + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
+        FILE.close()
+
+        FILE = open(resultdir + "/test.out", "w")
         FILE.write("------------------------------------------------------\n"
                  + "Running: " + title + "\n\n"
                  + "$ cd " + workingdir + "\n"
@@ -290,7 +300,7 @@ class FingerprintTestCase(SimulationTestCase):
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
-        wdname = '' + self.wd
+        wdname = '' + self.wd + ' ' + self.args
         wdname = re.sub('/', '_', wdname);
         wdname = re.sub('[\W]+', '_', wdname);
         resultdir = os.path.abspath(".") + "/results/" + self.csvFile + "/" + wdname;
@@ -309,7 +319,7 @@ class FingerprintTestCase(SimulationTestCase):
         anyFingerprintBad = False;
         computedFingerprints = set()
         for rep in range(self.repeat):
-            result = self.runSimulation(self.title, command, workingdir)
+            result = self.runSimulation(self.title, command, workingdir, resultdir)
 
             # process the result
             # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
