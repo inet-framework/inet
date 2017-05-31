@@ -465,12 +465,12 @@ void UDP::processICMPError(cPacket *pk)
         throw cRuntimeError("Unrecognized packet (%s)%s: not an ICMP error message", pk->getClassName(), pk->getName());
     }
 
-    EV_WARN << "ICMP error received: type=" << type << " code=" << code
-            << " about packet " << localAddr << ":" << localPort << " > "
-            << remoteAddr << ":" << remotePort << "\n";
-
     // identify socket and report error to it
     if (udpHeaderAvailable) {
+        EV_WARN << "ICMP error received: type=" << type << " code=" << code
+                << " about packet " << localAddr << ":" << localPort << " > "
+                << remoteAddr << ":" << remotePort << "\n";
+
         SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
         if (sd) {
             // send UDP_I_ERROR to socket
