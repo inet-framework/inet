@@ -52,6 +52,7 @@ static bool isFiniteNumber(double value)
 
 MobilityBase::MobilityBase() :
     visualRepresentation(nullptr),
+    canvasProjection(nullptr),
     constraintAreaMin(Coord::ZERO),
     constraintAreaMax(Coord::ZERO),
     lastPosition(Coord::ZERO),
