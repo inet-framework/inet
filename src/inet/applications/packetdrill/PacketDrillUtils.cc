@@ -136,7 +136,7 @@ PacketDrillExpression::~PacketDrillExpression()
  */
 int PacketDrillExpression::unescapeCstringExpression(const char *input_string, char **error)
 {
-    int bytes = strlen(input_string);
+    int bytes = strlen(input_string) + 1;
     type = EXPR_STRING;
     value.string = (char *)malloc(bytes);
     const char *c_in = input_string;
