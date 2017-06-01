@@ -59,14 +59,14 @@ simple PathVisualizerBase extends VisualizerBase
         double lineWidth = default(3); // route line width
         bool lineSmooth = default(false); // when true polylines are displayed as curves
 
-        double lineShift = default(10); // route line shift to avoid overlapping routes
+        double lineShift = default(16); // route line shift to avoid overlapping routes
         string lineShiftMode = default("normal"); // determines how overlapping lines are shifted, possible values are: normal, x, y, z; optional prefix + or -
 
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
 
         string labelFormat = default("%n"); // determines what path data is displayed
-        string labelFont = default("<default>"); // label font, automatic by default
+        string labelFont = default("<default>, 8px"); // label font, automatic by default
         string labelColor = default(""); // label color, same as line by default
 
         string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive routes fade out
