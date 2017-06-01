@@ -26,7 +26,7 @@ class INET_API SignalSource : public cSimpleModule
 {
   protected:
     simtime_t startTime, endTime;
-    simsignal_t signal;
+    simsignal_t signal = -1;
 
   public:
     SignalSource() {}
