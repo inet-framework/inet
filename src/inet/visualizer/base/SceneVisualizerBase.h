@@ -28,6 +28,7 @@ namespace visualizer {
 class INET_API SceneVisualizerBase : public VisualizerBase
 {
   protected:
+    virtual void initialize(int stage) override;
     virtual Box getPlaygroundBounds();
 };
 

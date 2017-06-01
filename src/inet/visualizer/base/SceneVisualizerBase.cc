@@ -26,6 +26,14 @@ namespace visualizer {
 
 using namespace inet::physicalenvironment;
 
+void SceneVisualizerBase::initialize(int stage)
+{
+    VisualizerBase::initialize(stage);
+    if (!hasGUI()) return;
+    if (stage == INITSTAGE_LOCAL)
+        visualizerTargetModule->getCanvas()->setAnimationSpeed(par("animationSpeed"), this);
+}
+
 Box SceneVisualizerBase::getPlaygroundBounds()
 {
     auto physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, false);
