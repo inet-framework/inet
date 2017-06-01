@@ -320,8 +320,8 @@ void PacketDrillScript::readScript()
             length = 0;
         }
 
-    if (close(fd))
-        EV_INFO << "File destriptor was closed\n";
+        if (close(fd))
+            EV_INFO << "File destriptor was closed\n";
     }
     EV_INFO << "Script " << scriptPath << " was read with " << length << " length\n";
 }

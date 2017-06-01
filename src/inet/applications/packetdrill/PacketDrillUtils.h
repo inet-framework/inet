@@ -616,7 +616,7 @@ class INET_API PacketDrillScript
         int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
 
         char *getBuffer() { return buffer; };
-        int getLength() { return length; };
+        int getLength() const { return length; };
         const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
         cQueue *getOptionList() { return optionList; };
