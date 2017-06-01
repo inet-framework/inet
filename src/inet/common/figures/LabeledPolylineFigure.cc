@@ -30,7 +30,6 @@ LabeledPolylineFigure::LabeledPolylineFigure(const char *name) :
     labelFigure->setAnchor(cFigure::ANCHOR_S);
     labelFigure->setTags("label");
     labelFigure->setHalo(true);
-    labelFigure->setPosition(cFigure::Point(0, 0));
     panelFigure->addFigure(labelFigure);
 }
 
@@ -49,10 +48,9 @@ void LabeledPolylineFigure::updateLabelPosition()
     double alpha = atan2(-direction.y, direction.x);
     if (alpha > M_PI / 2 || alpha < -M_PI / 2)
         alpha += M_PI;
-    cFigure::Transform transform;
-    transform.rotate(-alpha);
+    panelFigure->setTransform(cFigure::Transform().rotate(-alpha));
     panelFigure->setPosition(position);
-    panelFigure->setTransform(transform);
+    labelFigure->setPosition(cFigure::Point(0, -polylineFigure->getLineWidth() / 2));
 }
 
 } // namespace inet
