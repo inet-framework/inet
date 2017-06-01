@@ -41,15 +41,45 @@ using namespace tcp;
 
 PacketDrillApp::PacketDrillApp()
 {
+    script = nullptr;
+    config = nullptr;
     localPort = 1000;
     remotePort = 2000;
     protocol = 0;
-    idInbound = 0;
-    idOutbound = 0;
+    tcpConnId = -1;
+    sctpAssocId = -1;
+    pd = nullptr;
+    msgArrived = false;
+    recvFromSet = false;
+    listenSet = false;
+    acceptSet = false;
+    establishedPending = false;
+    abortSent = false;
+    socketOptionsArrived = false;
+    receivedPackets = nullptr;
+    outboundPackets = nullptr;
+    expectedMessageSize = 0;
     relSequenceIn = 0;
     relSequenceOut = 0;
     peerTS = 0;
     peerWindow = 0;
+    peerInStreams = 0;
+    peerOutStreams = 0;
+    peerCookie = nullptr;
+    peerCookieLength = 0;
+    initPeerTsn = 0;
+    initLocalTsn = 0;
+    localDiffTsn = 0;
+    peerCumTsn = 0;
+    localCumTsn = 0;
+    eventCounter = 0;
+    numEvents = 0;
+    idInbound = 0;
+    idOutbound = 0;
+    localVTag = 0;
+    peerVTag = 0;
+    eventTimer = nullptr;
+
     localAddress = L3Address("127.0.0.1");
     remoteAddress = L3Address("127.0.0.1");
 }

@@ -90,6 +90,8 @@ struct int_symbol *platform_symbols(void)
 PacketDrillConfig::PacketDrillConfig()
 {
     ip_version = IP_VERSION_4;
+    socketDomain = AF_INET;
+    wireProtocol = AF_INET;
     tolerance_usecs = 75000;
     mtu = TUN_DRIVER_DEFAULT_MTU;
     scriptPath = nullptr;
@@ -106,6 +108,7 @@ void PacketDrillConfig::parseScriptOptions(cQueue *options)
 PacketDrillPacket::PacketDrillPacket()
 {
    inetPacket = nullptr;
+   direction = DIRECTION_INVALID;
 }
 
 PacketDrillPacket::~PacketDrillPacket()
@@ -117,6 +120,7 @@ PacketDrillPacket::~PacketDrillPacket()
 PacketDrillExpression::PacketDrillExpression(enum expression_t type_)
 {
     type = type_;
+    format = nullptr;
     if (type == EXPR_SCTP_SNDRCVINFO)
         value.sctp_sndrcvinfo = (struct sctp_sndrcvinfo_expr *)malloc(sizeof(struct sctp_sndrcvinfo_expr));
 }
@@ -250,6 +254,9 @@ int PacketDrillExpression::symbolToInt(const char *input_symbol, int64 *output_i
 
 PacketDrillEvent::PacketDrillEvent(enum event_t type_)
 {
+    lineNumber = -1;
+    eventNumber = -1;
+    timeType = ANY_TIME;
     type = type_;
     eventTimeEnd = NO_TIME_RANGE;
     eventOffset = NO_TIME_RANGE;
@@ -266,9 +273,10 @@ PacketDrillScript::PacketDrillScript(const char *scriptFile)
 {
     eventList = new cQueue("scriptEventList");
     optionList = new cQueue("scriptOptionList");
-    buffer = NULL;
-    assert(scriptFile != NULL);
+    buffer = nullptr;
+    assert(scriptFile != nullptr);
     scriptPath = scriptFile;
+    length = 0;
 }
 
 PacketDrillScript::~PacketDrillScript()
@@ -347,6 +355,11 @@ int PacketDrillScript::parseScriptAndSetConfig(PacketDrillConfig *config, const 
 
 PacketDrillStruct::PacketDrillStruct()
 {
+    value1 = 0;
+    value2 = 0;
+    value3 = 0;
+    value4 = 0;
+    streamNumbers = nullptr;
 }
 
 PacketDrillStruct::PacketDrillStruct(int64 v1, int64 v2)
@@ -379,6 +392,11 @@ PacketDrillTcpOption::PacketDrillTcpOption(uint16 kind_, uint16 length_)
 {
     kind = kind_;
     length = length_;
+    mss = 0;
+    timeStamp.val = 0;
+    timeStamp.ecr = 0;
+    blockList = nullptr;
+    windowScale = 0;
     blockCount = 0;
 }
 
@@ -415,11 +433,14 @@ PacketDrillSctpParameter::~PacketDrillSctpParameter()
 
 PacketDrillSctpParameter::PacketDrillSctpParameter(uint16 type_, int16 len, void* content_)
 {
+    parameterValue = 0;
     uint32 flgs = 0;
     type = type_;
     if (len == -1)
         flgs |= FLAG_CHUNK_LENGTH_NOCHECK;
     parameterLength = len;
+    parameterList = nullptr;
+    content = nullptr;
 
     if (!content_) {
         flgs |= FLAG_CHUNK_VALUE_NOCHECK;
@@ -435,11 +456,10 @@ PacketDrillSctpParameter::PacketDrillSctpParameter(uint16 type_, int16 len, void
                 parameterList = (cQueue *)(content_);
                 break;
             }
-        default:
-           content = content_;
+            default:
+                content = content_;
         }
     }
-
 
     flags = flgs;
 }
