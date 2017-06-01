@@ -29,6 +29,7 @@ void NetworkNodeVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         nodeFilter.setPattern(par("nodeFilter"));
         annotationSpacing = par("annotationSpacing");
+        displacementPenalty = par("displacementPenalty");
     }
 }
 

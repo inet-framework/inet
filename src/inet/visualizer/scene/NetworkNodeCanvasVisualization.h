@@ -42,8 +42,9 @@ class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
     };
 
   protected:
-    cModule *networkNode;
-    double annotationSpacing;
+    cModule *networkNode = nullptr;
+    double annotationSpacing = NaN;
+    double displacementPenalty = NaN;
 
     bool isLayoutInvalid = false;
     cFigure::Rectangle submoduleBounds;
@@ -54,7 +55,7 @@ class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
     virtual void layout();
 
   public:
-    NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing);
+    NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double displacementPenalty);
 
     virtual void refreshDisplay() override;
 
