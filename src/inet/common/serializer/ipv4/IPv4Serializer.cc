@@ -284,7 +284,6 @@ TLVOptionBase *IPv4OptionDefaultSerializer::deserializeOption(Buffer &b, Context
         case IPOPTION_ROUTER_ALERT:
         case IPOPTION_SECURITY:
         default:
-            length = b.readByte();
             break;
     }    // switch
 
