@@ -62,7 +62,7 @@ void StatisticCanvasVisualizer::addStatisticVisualization(const StatisticVisuali
 {
     StatisticVisualizerBase::addStatisticVisualization(statisticVisualization);
     auto statisticCanvasVisualization = static_cast<const StatisticCanvasVisualization *>(statisticVisualization);
-    statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, statisticCanvasVisualization->figure->getBounds().getSize(), displacement);
+    statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, statisticCanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void StatisticCanvasVisualizer::removeStatisticVisualization(const StatisticVisualization *statisticVisualization)

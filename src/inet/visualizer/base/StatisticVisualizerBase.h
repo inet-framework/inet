@@ -81,7 +81,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
     double opacity = NaN;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;

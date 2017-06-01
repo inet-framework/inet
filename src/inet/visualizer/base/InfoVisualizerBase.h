@@ -61,7 +61,8 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
     double opacity = NaN;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::vector<const InfoVisualization *> infoVisualizations;

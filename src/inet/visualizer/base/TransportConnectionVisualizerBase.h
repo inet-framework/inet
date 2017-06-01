@@ -55,7 +55,8 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::vector<const TransportConnectionVisualization *> connectionVisualizations;

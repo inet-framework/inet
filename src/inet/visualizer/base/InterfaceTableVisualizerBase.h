@@ -63,7 +63,8 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     StringFormat format;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;

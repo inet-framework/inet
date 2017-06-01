@@ -46,7 +46,8 @@ void QueueVisualizerBase::initialize(int stage)
         elementWidth = par("elementWidth");
         elementHeight = par("elementHeight");
         elementCount = par("elementCount");
-        displacement = parseDisplacement(par("displacement"));
+        displacementHint = parseDisplacement(par("displacementHint"));
+        displacementPriority = par("displacementPriority");
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayQueues)

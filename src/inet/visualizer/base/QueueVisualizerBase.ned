@@ -36,7 +36,8 @@ simple QueueVisualizerBase extends VisualizerBase
         double elementWidth = default(8);
         double elementHeight = default(4);
         int elementCount = default(-1); // specifies the number of elements, queue length by default
-        string displacement = default("right");
+        string displacementHint = default("right"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double displacementPriority = default(0); // determines the order of annotation positioning
 
         @class(QueueVisualizerBase);
 }

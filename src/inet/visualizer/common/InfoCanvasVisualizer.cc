@@ -68,7 +68,7 @@ void InfoCanvasVisualizer::addInfoVisualization(const InfoVisualization *infoVis
     InfoVisualizerBase::addInfoVisualization(infoVisualization);
     auto infoCanvasVisualization = static_cast<const InfoCanvasVisualization *>(infoVisualization);
     auto figure = infoCanvasVisualization->figure;
-    infoCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), displacement);
+    infoCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void InfoCanvasVisualizer::removeInfoVisualization(const InfoVisualization *infoVisualization)

@@ -52,7 +52,8 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::map<std::pair<int, int>, const Ieee80211Visualization *> ieee80211Visualizations;

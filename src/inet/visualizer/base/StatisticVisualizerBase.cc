@@ -80,7 +80,8 @@ void StatisticVisualizerBase::initialize(int stage)
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
         opacity = par("opacity");
-        displacement = parseDisplacement(par("displacement"));
+        displacementHint = parseDisplacement(par("displacementHint"));
+        displacementPriority = par("displacementPriority");
         if (displayStatistics)
             subscribe();
     }

@@ -54,7 +54,8 @@ simple StatisticVisualizerBase extends VisualizerBase
         string textColor = default("black"); // statistic value font color, black by default
         string backgroundColor = default("white"); // statistic value background color, white by default
         double opacity = default(1.0); // opacity of the visualization
-        string displacement = default("top");
+        string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double displacementPriority = default(0); // determines the order of annotation positioning
 
         @class(StatisticVisualizerBase);
 }

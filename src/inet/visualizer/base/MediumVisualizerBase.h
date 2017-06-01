@@ -59,8 +59,10 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double signalAnimationSpeedChangeTime = NaN;
     bool displayTransmissions = false;
     bool displayReceptions = false;
-    Displacement transmissionDisplacement;
-    Displacement receptionDisplacement;
+    Displacement transmissionDisplacementHint;
+    Displacement receptionDisplacementHint;
+    double transmissionDisplacementPriority;
+    double receptionDisplacementPriority;
     bool displayInterferenceRanges = false;
     cFigure::Color interferenceRangeLineColor;
     cFigure::LineStyle interferenceRangeLineStyle;

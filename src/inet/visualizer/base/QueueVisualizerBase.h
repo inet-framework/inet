@@ -60,7 +60,8 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     double elementWidth;
     double elementHeight;
     int elementCount;
-    Displacement displacement;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::vector<const QueueVisualization *> queueVisualizations;

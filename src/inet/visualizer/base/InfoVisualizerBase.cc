@@ -63,7 +63,8 @@ void InfoVisualizerBase::initialize(int stage)
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
         opacity = par("opacity");
-        displacement = parseDisplacement(par("displacement"));
+        displacementHint = parseDisplacement(par("displacementHint"));
+        displacementPriority = par("displacementPriority");
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayInfos)

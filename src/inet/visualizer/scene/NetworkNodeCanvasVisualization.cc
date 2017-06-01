@@ -24,11 +24,11 @@ namespace inet {
 
 namespace visualizer {
 
-NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& size, Displacement displacement, double priority) :
+NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& size, Displacement displacementHint, double displacementPriority) :
     figure(figure),
     bounds(cFigure::Rectangle(NaN, NaN, size.x, size.y)),
-    displacement(displacement),
-    priority(priority)
+    displacementHint(displacementHint),
+    displacementPriority(displacementPriority)
 {
 }
 
@@ -59,9 +59,9 @@ void NetworkNodeCanvasVisualization::refreshDisplay()
     }
 }
 
-void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacement, double priority)
+void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacementHint, double displacementPriority)
 {
-    annotations.push_back(Annotation(figure, size, displacement, priority));
+    annotations.push_back(Annotation(figure, size, displacementHint, displacementPriority));
     annotationFigure->addFigure(figure);
     isLayoutInvalid = true;
 }
@@ -201,8 +201,8 @@ static double getClosestDisplacementDistance(const cFigure::Rectangle& rc, Displ
     return distance;
 }
 
-bool NetworkNodeCanvasVisualization::Annotation::comparePriority(const Annotation& a1, const Annotation& a2) {
-    return a1.priority < a2.priority;
+bool NetworkNodeCanvasVisualization::Annotation::compareDisplacementPriority(const Annotation& a1, const Annotation& a2) {
+    return a1.displacementPriority < a2.displacementPriority;
 }
 
 void NetworkNodeCanvasVisualization::layout()
@@ -224,7 +224,7 @@ void NetworkNodeCanvasVisualization::layout()
     pts.push_back(getBottomCenter(extendendSubmoduleBounds));
     pts.push_back(getBottomRight(extendendSubmoduleBounds));
 
-    std::sort(annotations.begin(), annotations.end(), Annotation::comparePriority);
+    std::sort(annotations.begin(), annotations.end(), Annotation::compareDisplacementPriority);
 
     // delete all annotation positions
     for (auto it = annotations.begin(); it != annotations.end(); it++) {
@@ -286,10 +286,10 @@ void NetworkNodeCanvasVisualization::layout()
                 }
 
                 double distance = 0;
-                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacement, getTopLeft(candidateRc)) * displacementPenalty;
-                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacement, getTopRight(candidateRc)) * displacementPenalty;
-                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacement, getBottomLeft(candidateRc)) * displacementPenalty;
-                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacement, getBottomRight(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getTopLeft(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getTopRight(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getBottomLeft(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getBottomRight(candidateRc)) * displacementPenalty;
 
                 // find an already positioned annotation which would intersect the candidate rectangle
                 bool intersects = false;
