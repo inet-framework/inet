@@ -92,6 +92,7 @@ PacketDrillConfig::PacketDrillConfig()
     ip_version = IP_VERSION_4;
     tolerance_usecs = 75000;
     mtu = TUN_DRIVER_DEFAULT_MTU;
+    scriptPath = nullptr;
 }
 
 PacketDrillConfig::~PacketDrillConfig()
