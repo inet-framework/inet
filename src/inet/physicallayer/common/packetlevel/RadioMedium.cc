@@ -52,6 +52,7 @@ RadioMedium::RadioMedium() :
     receptionComputationCount(0),
     interferenceComputationCount(0),
     receptionDecisionComputationCount(0),
+    receptionResultComputationCount(0),
     listeningDecisionComputationCount(0),
     cacheReceptionGetCount(0),
     cacheReceptionHitCount(0),
