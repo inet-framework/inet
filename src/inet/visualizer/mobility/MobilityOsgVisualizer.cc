@@ -121,7 +121,7 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
 {
     Enter_Method_Silent();
     if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
+        auto mobility = check_and_cast<IMobility *>(object);
         auto position = mobility->getCurrentPosition();
         auto orientation = mobility->getCurrentAngularPosition();
         auto mobilityVisualization = ensureMobilityVisualization(mobility);
