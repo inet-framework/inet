@@ -87,7 +87,7 @@ class INET_API IPv6NeighbourCache
         //But we should merge those information in the neighbour cache for a
         //cleaner solution. if reachability state is INCOMPLETE, it means that
         //addr resolution is being performed for this NCE.
-        unsigned int numOfARNSSent;
+        unsigned int numOfARNSSent = 0;
         cMessage *arTimer = nullptr;    //Address Resolution self-message timer
         MsgPtrVector pendingPackets;    //ptrs to queued packets associated with this NCE
         IPv6Address nsSrcAddr;    //the src addr that was used to send the previous NS
