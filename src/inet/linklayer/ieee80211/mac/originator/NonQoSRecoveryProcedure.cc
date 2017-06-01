@@ -232,8 +232,7 @@ int NonQoSRecoveryProcedure::getRc(Ieee80211DataOrMgmtFrame* frame, std::map<Seq
 
 bool NonQoSRecoveryProcedure::isMulticastFrame(Ieee80211Frame* frame)
 {
-    if (dynamic_cast<Ieee80211OneAddressFrame*>(frame)) {
-        Ieee80211OneAddressFrame *oneAddressFrame = dynamic_cast<Ieee80211OneAddressFrame*>(frame);
+    if (Ieee80211OneAddressFrame *oneAddressFrame = dynamic_cast<Ieee80211OneAddressFrame*>(frame)) {
         return oneAddressFrame->getReceiverAddress().isMulticast();
     }
     return false;
