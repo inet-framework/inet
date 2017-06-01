@@ -153,14 +153,18 @@ bool MediumVisualizerBase::isSignalTransmissionInProgress(const ITransmission *t
 
 bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission) const
 {
-    L3AddressResolver addressResolver;
-    auto transmitter = transmission->getTransmitter();
-    auto radio = check_and_cast<const cModule *>(transmitter);
+    auto radio = check_and_cast<const cModule *>(transmission->getTransmitter());
     auto networkNode = getContainingNode(radio);
-    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-    auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
+    if (!networkNodeFilter.matches(networkNode))
+        return false;
+    L3AddressResolver addressResolver;
+    if (auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode)) {
+        auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
+        if (!interfaceFilter.matches(interfaceEntry))
+            return false;
+    }
     auto packet = transmission->getPhyFrame() != nullptr ? transmission->getPhyFrame() : transmission->getMacFrame();
-    return networkNodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet);
+    return packetFilter.matches(packet);
 }
 
 } // namespace visualizer
