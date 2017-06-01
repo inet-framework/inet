@@ -76,7 +76,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             : Interface(owner, ie), nextHop(neighbor),
             graftPruneState(FORWARDING), graftRetryTimer(nullptr), overrideTimer(nullptr), lastPruneSentTime(0.0),
             originatorState(NOT_ORIGINATOR), sourceActiveTimer(nullptr), stateRefreshTimer(nullptr), maxTtlSeen(0)
-        { ASSERT(owner); ASSERT(ie); setFlag(SOURCE_DIRECTLY_CONNECTED, isSourceDirectlyConnected); }
+        { setFlag(SOURCE_DIRECTLY_CONNECTED, isSourceDirectlyConnected); }
         virtual ~UpstreamInterface();
         Route *route() const { return check_and_cast<Route *>(owner); }
         PIMDM *pimdm() const { return check_and_cast<PIMDM *>(owner->owner); }
