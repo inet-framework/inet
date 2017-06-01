@@ -1,6 +1,4 @@
  - separate opp features: WITH_VISUALIZER and WITH_OSGGEO
- - hosttohost crashes in MediumCanvasVisualizer InterfaceTable nullptr, MediumVisualizerBase::matchesTransmission crash?
- - osg visualizer image with "" crashes
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
  - add indexed image visualizations for radioMode, transmissionState and receptionState
@@ -19,6 +17,7 @@
  - queue figure should be continuous unless accurately represents the number of packets
  - queue figure should be horizontal, parameter? battery figure?
  - hiddennode example protection mechanism is unfair (wall, no rts)?
+ - use optional submodule vectors in the integrated visualizers
 
 Change:
  - review how LinkBreakVisualizer visualizes link breaks
