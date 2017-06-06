@@ -2,7 +2,6 @@
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
  - add indexed image visualizations for radioMode, transmissionState and receptionState
- !- review what is added as annotation (e.g. communication range should not be added)
  !- review packet drop signals, all current signals are necessary? check against showcase
  - path visualization is completely broken with fragmentation
  !- path visualization filters should work as all or nothing (as opposed to filtering segments?!)
@@ -10,7 +9,6 @@
  - string tag = default(""); in each visualizer, also automatically add network node name tags
  !- queue figure should be continuous unless accurately represents the number of packets
  - queue figure should be horizontal, parameter? battery figure?
- !- hiddennode example protection mechanism is unfair (wall, no rts)?
  - use optional submodule vectors in the integrated visualizers
 
 Change:
