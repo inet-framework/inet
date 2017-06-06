@@ -8,6 +8,7 @@
  !- getPosition should not be called from initialize before INITSTAGE_ENVIRONMENT_2 (MOBAN mobility)
  - queue figure should be horizontal, parameter? battery figure?
  - use optional submodule vectors in the integrated visualizers
+ !- path intersection is still too far away
 
 Change:
  - review how LinkBreakVisualizer visualizes link breaks
