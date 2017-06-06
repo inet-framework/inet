@@ -28,6 +28,6 @@ module Ieee80211IdealRadio extends Ieee80211Radio
 {
     parameters:
         transmitterType = default("Ieee80211IdealTransmitter");
-        receiverType = default("IdealReceiver");
+        receiverType = default("Ieee80211IdealReceiver");
         @class(Radio);
 }

@@ -18,13 +18,10 @@
 package inet.physicallayer.ieee80211.packetlevel;
 
 //
-// See also ~Ieee80211IdealReceiver, ~Ieee80211IdealRadio, and ~IdealRadioMedium.
+// See also ~Ieee80211IdealTransmitter, ~Ieee80211IdealRadio, and ~IdealRadioMedium.
 //
-module Ieee80211IdealTransmitter extends Ieee80211TransmitterBase
+module Ieee80211IdealReceiver extends Ieee80211ReceiverBase
 {
     parameters:
-        double communicationRange @unit(m);                              // the range where the reception of transmissions produced by this transmitter is possible
-        double interferenceRange @unit(m) = default(communicationRange); // the range where transmissions produced by this transmitter interferes with other transmissions
-        double detectionRange @unit(m) = default(interferenceRange);     // the range where transmissions produced by this transmitter can be detected at all
-        @class(Ieee80211IdealTransmitter);
+        @class(Ieee80211IdealReceiver);
 }

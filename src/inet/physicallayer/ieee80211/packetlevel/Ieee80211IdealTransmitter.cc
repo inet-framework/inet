@@ -19,6 +19,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealTransmitter.h"
 
 namespace inet {
@@ -68,7 +69,7 @@ const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio 
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
+    return new Ieee80211IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange, transmissionMode, channel);
 }
 
 } // namespace physicallayer
