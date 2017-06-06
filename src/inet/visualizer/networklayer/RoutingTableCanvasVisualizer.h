@@ -50,7 +50,7 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
     virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override;
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route) override;
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;
 };
 
 } // namespace visualizer

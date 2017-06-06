@@ -18,6 +18,7 @@
 #ifndef __INET_ROUTINGTABLEVISUALIZERBASE_H
 #define __INET_ROUTINGTABLEVISUALIZERBASE_H
 
+#include <tuple>
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/visualizer/base/VisualizerBase.h"
@@ -34,6 +35,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
   protected:
     class INET_API RouteVisualization : public LineManager::ModuleLine {
       public:
+        mutable int numRoutes = 1;
         const IPv4Route *route = nullptr;
 
       public:
@@ -56,6 +58,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     /** @name Parameters */
     //@{
     bool displayRoutingTables = false;
+    bool displayRoutesIndividually = false;
+    bool displayLabels = false;
     NetworkNodeFilter destinationFilter;
     NetworkNodeFilter nodeFilter;
     cFigure::Color lineColor;
@@ -72,7 +76,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     LineManager *lineManager = nullptr;
 
-    std::map<std::pair<const IPv4Route *, int>, const RouteVisualization *> routeVisualizations;
+    std::map<std::tuple<const IPv4Route *, int, int>, const RouteVisualization *> routeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
@@ -82,7 +86,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void unsubscribe();
 
     virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const = 0;
-    virtual const RouteVisualization *getRouteVisualization(IPv4Route *route, int nextHopModuleId);
+    virtual const RouteVisualization *getRouteVisualization(IPv4Route *route, int nodeModuleId, int nextHopModuleId);
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization);
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization);
 
@@ -95,7 +99,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void updateAllRouteVisualizations();
 
     virtual std::string getRouteVisualizationText(const IPv4Route *route) const;
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route) = 0;
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const = 0;
 
   public:
     virtual ~RoutingTableVisualizerBase();

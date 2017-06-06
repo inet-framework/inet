@@ -43,8 +43,10 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for routing table signals, root module by default
         
         bool displayRoutingTables = default(false); // display routing table data, disabled by default
+        bool displayRoutesIndividually = default(true); // display routes between the same network nodes individually, enabled by default
+        bool displayLabels = default(true); // display labels on arrows, enabled by default
 
-        string destinationFilter = default("*"); // which destinations are considered, matches no destinations by default
+        string destinationFilter = default("*"); // which destinations are considered, matches all destinations by default
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
 
         string lineColor = default("black"); // route line color, black by default

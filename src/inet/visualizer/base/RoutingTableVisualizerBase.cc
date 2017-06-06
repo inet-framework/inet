@@ -71,6 +71,8 @@ void RoutingTableVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayRoutingTables = par("displayRoutingTables");
+        displayRoutesIndividually = par("displayRoutesIndividually");
+        displayLabels = par("displayLabels");
         destinationFilter.setPattern(par("destinationFilter"));
         nodeFilter.setPattern(par("nodeFilter"));
         lineColor = cFigure::Color(par("lineColor"));
@@ -138,20 +140,23 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         throw cRuntimeError("Unknown signal");
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route, int nextHopModuleId)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route, int nodeModuleId, int nextHopModuleId)
 {
-    auto it = routeVisualizations.find(std::make_pair(route, nextHopModuleId));
+    auto key = std::make_tuple(route, nodeModuleId, nextHopModuleId);
+    auto it = routeVisualizations.find(key);
     return it == routeVisualizations.end() ? nullptr : it->second;
 }
 
 void RoutingTableVisualizerBase::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    routeVisualizations[std::make_pair(routeVisualization->route, routeVisualization->destinationModuleId)] = routeVisualization;
+    auto key = std::make_tuple(routeVisualization->route, routeVisualization->sourceModuleId, routeVisualization->destinationModuleId);
+    routeVisualizations[key] = routeVisualization;
 }
 
 void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    routeVisualizations.erase(routeVisualizations.find(std::make_pair(routeVisualization->route, routeVisualization->destinationModuleId)));
+    auto key = std::make_tuple(routeVisualization->route, routeVisualization->sourceModuleId, routeVisualization->destinationModuleId);
+    routeVisualizations.erase(routeVisualizations.find(key));
 }
 
 std::vector<IPv4Address> RoutingTableVisualizerBase::getDestinations()
@@ -186,9 +191,13 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
                 auto gateway = route->getGateway();
                 auto nextHop = addressResolver.findHostWithAddress(gateway.isUnspecified() ? destination : gateway);
                 if (nextHop != nullptr) {
-                    auto routeVisualization = getRouteVisualization(route, nextHop->getId());
+                    auto routeVisualization = getRouteVisualization(displayRoutesIndividually ? route : nullptr, node->getId(), nextHop->getId());
                     if (routeVisualization == nullptr)
-                        addRouteVisualization(createRouteVisualization(route, node, nextHop));
+                        addRouteVisualization(createRouteVisualization(displayRoutesIndividually ? route : nullptr, node, nextHop));
+                    else {
+                        routeVisualization->numRoutes++;
+                        refreshRouteVisualization(routeVisualization);
+                    }
                 }
             }
         }
@@ -197,9 +206,10 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
 
 void RoutingTableVisualizerBase::removeRouteVisualizations(IIPv4RoutingTable *routingTable)
 {
+    auto networkNode = getContainingNode(check_and_cast<cModule *>(routingTable));
     std::vector<const RouteVisualization *> removedRouteVisualizations;
     for (auto it : routeVisualizations)
-        if (it.first.first->getRoutingTable() == routingTable && it.second)
+        if (std::get<1>(it.first) == networkNode->getId() && it.second)
             removedRouteVisualizations.push_back(it.second);
     for (auto it : removedRouteVisualizations) {
         removeRouteVisualization(it);
