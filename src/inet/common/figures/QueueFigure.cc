@@ -24,29 +24,55 @@ QueueFigure::QueueFigure(const char *name) :
 {
 }
 
-void QueueFigure::setElementCount(int elementCount)
+void QueueFigure::setMaxElementCount(int maxElementCount)
 {
-    for (auto box : boxes) {
-        removeFigure(box);
-        delete box;
+    if (this->maxElementCount != maxElementCount) {
+        this->maxElementCount = maxElementCount;
+        for (auto box : boxes) {
+            removeFigure(box);
+            delete box;
+        }
+        boxes.clear();
+        const auto& bounds = getBounds();
+        elementWidth = bounds.width - 2 * spacing;
+        elementHeight = (bounds.height - (maxElementCount + 1) * spacing) / maxElementCount;
+        continuous = elementHeight < spacing * 2;
+        if (continuous) {
+            auto box = new cRectangleFigure("box");
+            box->setOutlined(false);
+            box->setFilled(true);
+            box->setFillColor(color);
+            boxes.push_back(box);
+            addFigure(box);
+        }
+        else  {
+            for (int i = 0; i < maxElementCount; i++) {
+                auto box = new cRectangleFigure("box");
+                box->setOutlined(false);
+                box->setFilled(true);
+                box->setFillColor(color);
+                box->setBounds(cFigure::Rectangle(spacing, spacing + i * (elementHeight + spacing), elementWidth, elementHeight));
+                boxes.push_back(box);
+                addFigure(box);
+            }
+        }
     }
-    boxes.clear();
-    for (int i = 0; i < elementCount; i++) {
-        auto box = new cRectangleFigure("box");
-        box->setOutlined(false);
-        box->setFilled(true);
-        box->setFillColor(color);
-        box->setBounds(cFigure::Rectangle(spacing, spacing + i * (elementHeight + spacing), elementWidth, elementHeight));
-        boxes.push_back(box);
-        addFigure(box);
-    }
-    setBounds(cFigure::Rectangle(0, 0, 2 * spacing + elementWidth, spacing + elementCount * (elementHeight + spacing)));
 }
 
-void QueueFigure::setValue(int value)
+void QueueFigure::setElementCount(int elementCount)
 {
-    for (int i = 0; i < boxes.size(); i++)
-        boxes[i]->setVisible((boxes.size() - i) <= value);
+    if (this->elementCount != elementCount) {
+        this->elementCount = elementCount;
+        if (continuous) {
+            const auto& bounds = getBounds();
+            double width = bounds.width - 2 * spacing;
+            double height = (bounds.height - 2 * spacing) * elementCount / maxElementCount;
+            boxes[0]->setBounds(cFigure::Rectangle(spacing, bounds.height - spacing - height, width, height));
+        }
+        else
+            for (int i = 0; i < boxes.size(); i++)
+                boxes[i]->setVisible((boxes.size() - i) <= elementCount);
+    }
 }
 
 } // namespace inet

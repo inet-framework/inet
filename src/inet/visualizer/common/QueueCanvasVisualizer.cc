@@ -55,9 +55,8 @@ QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisua
     figure->setAssociatedObject(queue);
     figure->setColor(color);
     figure->setSpacing(spacing);
-    figure->setElementWidth(elementWidth);
-    figure->setElementHeight(elementHeight);
-    figure->setElementCount(elementCount == -1 ? queue->getMaxPacketLength() : elementCount);
+    figure->setBounds(cFigure::Rectangle(0, 0, width, height));
+    figure->setMaxElementCount(queue->getMaxPacketLength());
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
     return new QueueCanvasVisualization(networkNodeVisualization, figure, queue);
@@ -84,7 +83,7 @@ void QueueCanvasVisualizer::refreshQueueVisualization(const QueueVisualization *
     auto queueCanvasVisualization = static_cast<const QueueCanvasVisualization *>(queueVisualization);
     auto queue = queueVisualization->queue;
     auto figure = queueCanvasVisualization->figure;
-    figure->setValue(elementCount == -1 ? queue->getLength() : elementCount * ((double)queue->getLength() / (double)queue->getMaxPacketLength()));
+    figure->setElementCount(queue->getLength());
 }
 
 } // namespace visualizer

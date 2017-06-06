@@ -56,10 +56,9 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     bool displayQueues = false;
     QueueFilter queueFilter;
     cFigure::Color color;
+    double width;
+    double height;
     double spacing;
-    double elementWidth;
-    double elementHeight;
-    int elementCount;
     Displacement displacementHint;
     double displacementPriority;
     //@}

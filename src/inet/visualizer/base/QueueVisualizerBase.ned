@@ -32,10 +32,9 @@ simple QueueVisualizerBase extends VisualizerBase
         string queueFilter = default("**"); // which queues are considered, matches no queues by default
 
         string color = default("blue");
+        double width = default(8);
+        double height = default(24);
         double spacing = default(2);
-        double elementWidth = default(8);
-        double elementHeight = default(4);
-        int elementCount = default(-1); // specifies the number of elements, queue length by default
         string displacementHint = default("right"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double displacementPriority = default(0); // determines the order of annotation positioning
 

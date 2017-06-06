@@ -26,9 +26,12 @@ class INET_API QueueFigure : public cRectangleFigure
 {
   protected:
     cFigure::Color color;
+    bool continuous = false;
     double spacing = 2;
     double elementWidth = 16;
     double elementHeight = 4;
+    int elementCount = -1;
+    int maxElementCount = -1;
     std::vector<cRectangleFigure *> boxes;
 
   public:
@@ -40,14 +43,8 @@ class INET_API QueueFigure : public cRectangleFigure
     double getSpacing() const { return spacing; }
     void setSpacing(double spacing) { this->spacing = spacing; }
 
-    double getElementWidth() const { return elementWidth; }
-    void setElementWidth(double elementWidth) { this->elementWidth = elementWidth; }
-
-    double getElementHeight() const { return elementHeight; }
-    void setElementHeight(double elementHeight) { this->elementHeight = elementHeight; }
-
-    void setValue(int value);
     void setElementCount(int elementCount);
+    void setMaxElementCount(int maxElementCount);
 };
 
 } // namespace inet
