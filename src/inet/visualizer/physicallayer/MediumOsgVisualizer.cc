@@ -351,7 +351,7 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
     if (displayTransmissions || displayReceptions || displayInterferenceRanges || displayCommunicationRanges) {
         auto group = new osg::Group();
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->addAnnotation(group, osg::Vec3d(0.0, 0.0, 0.0), 100.0);
         if (displayTransmissions) {
             auto texture = new osg::Texture2D();
@@ -409,7 +409,7 @@ void MediumOsgVisualizer::radioRemoved(const IRadio *radio)
     auto node = removeRadioOsgNode(radio);
     if (node != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->removeAnnotation(node);
     }
 }

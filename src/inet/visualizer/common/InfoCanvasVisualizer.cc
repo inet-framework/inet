@@ -59,7 +59,7 @@ InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualiza
     figure->setBackgroundColor(backgroundColor);
     figure->setOpacity(opacity);
     auto networkNode = getContainingNode(module);
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InfoCanvasVisualization(networkNodeVisualization, figure, module->getId());
 }
 

@@ -326,7 +326,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
         if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
             m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
             interferenceRangeFigure->setTags("interference_range");
@@ -338,7 +338,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             networkNodeVisualization->addFigure(interferenceRangeFigure);
         }
         if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto communicationRangeFigure = new cOvalFigure("communicationRange");
             m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
             communicationRangeFigure->setTags("communication_range");
@@ -350,7 +350,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             networkNodeVisualization->addFigure(communicationRangeFigure);
         }
         if (displayTransmissions || displayReceptions) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             if (displayTransmissions) {
                 std::string imageName = par("transmissionImage");
                 auto transmissionFigure = new LabeledIconFigure("transmission");
@@ -389,13 +389,13 @@ void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
     auto transmissionFigure = removeTransmissionFigure(radio);
     if (transmissionFigure != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->removeAnnotation(transmissionFigure);
     }
     auto figure = removeReceptionFigure(radio);
     if (figure != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->removeAnnotation(figure);
     }
 }
@@ -435,7 +435,7 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
             auto transmitter = transmission->getTransmitter();
             auto figure = getTransmissionFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
-            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, true);
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
             if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
@@ -459,7 +459,7 @@ void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission
             auto transmitter = transmission->getTransmitter();
             auto figure = getTransmissionFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
-            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, false);
         }
     }
@@ -476,7 +476,7 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
                 auto figure = getReceptionFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
-                auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+                auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
                 if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
@@ -514,7 +514,7 @@ void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
                 auto figure = getReceptionFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
-                auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+                auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, false);
             }
         }

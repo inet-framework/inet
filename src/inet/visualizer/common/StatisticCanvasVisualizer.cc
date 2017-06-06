@@ -54,7 +54,7 @@ StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::crea
     figure->setBackgroundColor(backgroundColor);
     figure->setOpacity(opacity);
     auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new StatisticCanvasVisualization(networkNodeVisualization, figure, source->getId(), signal, getUnit(source));
 }
 

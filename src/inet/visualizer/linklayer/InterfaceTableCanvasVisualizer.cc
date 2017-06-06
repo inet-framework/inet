@@ -67,7 +67,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisual
             figure->getRectangleFigure()->setVisible(false);
         }
     }
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InterfaceCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 

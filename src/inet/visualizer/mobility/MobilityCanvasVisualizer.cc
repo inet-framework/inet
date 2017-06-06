@@ -112,7 +112,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         auto canvas = visualizerTargetModule->getCanvas();
         auto module = const_cast<cModule *>(dynamic_cast<const cModule *>(mobility));
         auto visualRepresentation = findVisualRepresentation(module);
-        auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto visualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         cArcFigure *orientationFigure = nullptr;
         if (displayOrientations) {
             auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);

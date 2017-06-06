@@ -58,7 +58,7 @@ QueueVisualizerBase::QueueVisualization *QueueCanvasVisualizer::createQueueVisua
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
     figure->setMaxElementCount(queue->getMaxPacketLength());
     auto networkNode = getContainingNode(module);
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new QueueCanvasVisualization(networkNodeVisualization, figure, queue);
 }
 
