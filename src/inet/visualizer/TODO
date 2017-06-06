@@ -7,7 +7,6 @@
  !- path visualization filters should work as all or nothing (as opposed to filtering segments?!)
  !- getPosition should not be called from initialize before INITSTAGE_ENVIRONMENT_2 (MOBAN mobility)
  - string tag = default(""); in each visualizer, also automatically add network node name tags
- !- queue figure should be continuous unless accurately represents the number of packets
  - queue figure should be horizontal, parameter? battery figure?
  - use optional submodule vectors in the integrated visualizers
 
