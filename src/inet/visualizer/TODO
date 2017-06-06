@@ -2,21 +2,15 @@
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
  - add indexed image visualizations for radioMode, transmissionState and receptionState
- - review what is added as annotation (e.g. communication range should not be added)
- - review packet drop signals, all current signals are necessary? check against showcase
+ !- review what is added as annotation (e.g. communication range should not be added)
+ !- review packet drop signals, all current signals are necessary? check against showcase
  - path visualization is completely broken with fragmentation
- - path visualization filters should work as all or nothing (as opposed to filtering segments?!)
- - getPosition should not be called from initialize before INITSTAGE_ENVIRONMENT_2 (MOBAN mobility)
- - routing table visualizer key must be (route, node, nextHop) tuple, reasoning:
-     same route might lead towards different nextHop for different destinations (*)
-     different routes might go between same node/nextHop for different destinations
- - routing table visualizer must support merging different routes when labels are not displayed!
-        bool displayLabel = default(true);
-        bool mergeLines = default(false);
+ !- path visualization filters should work as all or nothing (as opposed to filtering segments?!)
+ !- getPosition should not be called from initialize before INITSTAGE_ENVIRONMENT_2 (MOBAN mobility)
  - string tag = default(""); in each visualizer, also automatically add network node name tags
- - queue figure should be continuous unless accurately represents the number of packets
+ !- queue figure should be continuous unless accurately represents the number of packets
  - queue figure should be horizontal, parameter? battery figure?
- - hiddennode example protection mechanism is unfair (wall, no rts)?
+ !- hiddennode example protection mechanism is unfair (wall, no rts)?
  - use optional submodule vectors in the integrated visualizers
 
 Change:
