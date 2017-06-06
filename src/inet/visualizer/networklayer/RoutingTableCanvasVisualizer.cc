@@ -68,7 +68,7 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
 const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto figure = new LabeledLineFigure("routing entry");
-    figure->setTags("route");
+    figure->setTags((std::string("route ") + tags).c_str());
     figure->setTooltip("This arrow represents a route in a routing table");
     figure->setAssociatedObject(route);
     auto lineFigure = figure->getLineFigure();

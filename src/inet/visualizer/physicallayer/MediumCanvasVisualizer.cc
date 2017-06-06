@@ -60,7 +60,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         if (displayCommunicationHeat) {
             communicationHeat = new HeatMapFigure(communicationHeatMapSize, "communication heat");
             communicationHeat->setZIndex(zIndex);
-            communicationHeat->setTags("successful_reception heat");
+            communicationHeat->setTags((std::string("successful_reception heat ") + tags).c_str());
             canvas->addFigure(communicationHeat, 0);
         }
         animationSpeedInterpolator.setCurrentAnimationSpeed(0);
@@ -241,7 +241,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     cGroupFigure* groupFigure = new cGroupFigure("signal");
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
     SignalFigure* signalFigure = new SignalFigure("bubble");
-    signalFigure->setTags("propagating_signal");
+    signalFigure->setTags((std::string("propagating_signal ") + tags).c_str());
     signalFigure->setTooltip("These rings represents a signal propagating through the medium");
     signalFigure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(transmission)));
     signalFigure->setRingCount(signalRingCount);
@@ -258,7 +258,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     groupFigure->addFigure(signalFigure);
     cLabelFigure* nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
-    nameFigure->setTags("propagating_signal packet_name label");
+    nameFigure->setTags((std::string("propagating_signal packet_name label ") + tags).c_str());
     nameFigure->setText(transmission->getMacFrame()->getName());
     nameFigure->setColor(color);
     groupFigure->addFigure(nameFigure);
@@ -329,7 +329,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
             m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-            interferenceRangeFigure->setTags("interference_range");
+            interferenceRangeFigure->setTags((std::string("interference_range ") + tags).c_str());
             interferenceRangeFigure->setTooltip("This circle represents the interference range of a wireless interface");
             interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
             interferenceRangeFigure->setLineColor(interferenceRangeLineColor);
@@ -341,7 +341,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto communicationRangeFigure = new cOvalFigure("communicationRange");
             m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
-            communicationRangeFigure->setTags("communication_range");
+            communicationRangeFigure->setTags((std::string("communication_range ") + tags).c_str());
             communicationRangeFigure->setTooltip("This circle represents the communication range of a wireless interface");
             communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
             communicationRangeFigure->setLineColor(communicationRangeLineColor);
@@ -354,7 +354,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             if (displayTransmissions) {
                 std::string imageName = par("transmissionImage");
                 auto transmissionFigure = new LabeledIconFigure("transmission");
-                transmissionFigure->setTags("transmission");
+                transmissionFigure->setTags((std::string("transmission ") + tags).c_str());
                 transmissionFigure->setTooltip("This icon represents an ongoing transmission in a wireless interface");
                 transmissionFigure->setVisible(false);
                 auto iconFigure = transmissionFigure->getIconFigure();
@@ -368,7 +368,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             if (displayReceptions) {
                 std::string imageName = par("receptionImage");
                 auto receptionFigure = new LabeledIconFigure("reception");
-                receptionFigure->setTags("reception");
+                receptionFigure->setTags((std::string("reception ") + tags).c_str());
                 receptionFigure->setTooltip("This icon represents an ongoing reception in a wireless interface");
                 receptionFigure->setVisible(false);
                 auto iconFigure = receptionFigure->getIconFigure();

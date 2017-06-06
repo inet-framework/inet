@@ -55,7 +55,7 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisuali
     std::string icon(this->icon);
     auto position = getPosition(getContainingNode(module));
     auto labeledIconFigure = new LabeledIconFigure("packetDrop");
-    labeledIconFigure->setTags("packet_drop");
+    labeledIconFigure->setTags((std::string("packet_drop ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(packet);
     labeledIconFigure->setZIndex(zIndex);
     labeledIconFigure->setPosition(canvasProjection->computeCanvasPoint(position));

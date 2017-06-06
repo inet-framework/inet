@@ -75,7 +75,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     LabeledLineFigure *intersectionLine = nullptr;
     if (displayIntersections) {
         intersectionLine = new LabeledLineFigure("intersection");
-        intersectionLine->setTags("obstacle_loss");
+        intersectionLine->setTags((std::string("obstacle_loss ") + tags).c_str());
         intersectionLine->setTooltip("This line represents the intersection of a propagating signal and an obstructing physical object.");
         intersectionLine->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
         intersectionLine->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
@@ -95,7 +95,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
         Coord normalVisualization1 = normal1 / normal1.length() * intersectionDistance / 10;
         Coord normalVisualization2 = normal2 / normal2.length() * intersectionDistance / 10;
         faceNormal1Line = new cLineFigure("normal1");
-        faceNormal1Line->setTags("obstacle_loss face_normal_vector");
+        faceNormal1Line->setTags((std::string("obstacle_loss face_normal_vector ") + tags).c_str());
         faceNormal1Line->setTooltip("This line represents the face normal vector at the intersection of a propagating signal and an obstructing physical object.");
         faceNormal1Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
         faceNormal1Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVectorClockwise(normalVisualization1)));
@@ -104,7 +104,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
         faceNormal1Line->setLineWidth(faceNormalLineWidth);
         faceNormal1Line->setZoomLineWidth(false);
         faceNormal2Line = new cLineFigure("normal2");
-        faceNormal2Line->setTags("obstacle_loss face_normal_vector");
+        faceNormal2Line->setTags((std::string("obstacle_loss face_normal_vector ") + tags).c_str());
         faceNormal2Line->setTooltip("This line represents the face normal vector at the intersection of a propagating signal and an obstructing physical object.");
         faceNormal2Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
         faceNormal2Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVectorClockwise(normalVisualization2)));

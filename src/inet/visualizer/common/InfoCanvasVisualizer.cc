@@ -49,7 +49,7 @@ void InfoCanvasVisualizer::initialize(int stage)
 InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualization(cModule *module) const
 {
     auto figure = new BoxedLabelFigure("info");
-    figure->setTags("info");
+    figure->setTags((std::string("info ") + tags).c_str());
     figure->setTooltip("This label represents some module information");
     figure->setAssociatedObject(module);
     figure->setZIndex(zIndex);

@@ -118,7 +118,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
             auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
             int radius = rectangle.getSize().getLength() * 1.25 / 2;
             orientationFigure = new cArcFigure("orientation");
-            orientationFigure->setTags("orientation");
+            orientationFigure->setTags((std::string("orientation ") + tags).c_str());
             orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
             orientationFigure->setZIndex(zIndex);
             orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
@@ -130,7 +130,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         cLineFigure *velocityFigure = nullptr;
         if (displayVelocities) {
             velocityFigure = new cLineFigure("velocity");
-            velocityFigure->setTags("velocity");
+            velocityFigure->setTags((std::string("velocity ") + tags).c_str());
             velocityFigure->setTooltip("This arrow represents the current velocity of the mobility model");
             velocityFigure->setZIndex(zIndex);
             velocityFigure->setVisible(false);
@@ -143,7 +143,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         TrailFigure *trailFigure = nullptr;
         if (displayMovementTrails) {
             trailFigure = new TrailFigure(trailLength, true, "movement trail");
-            trailFigure->setTags("movement_trail recent_history");
+            trailFigure->setTags((std::string("movement_trail recent_history ") + tags).c_str());
             trailFigure->setZIndex(zIndex);
             canvas->addFigure(trailFigure);
         }
@@ -166,7 +166,7 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
     // TODO: 1?
     if (trailFigure->getNumFigures() == 0 || dx * dx + dy * dy > 1) {
         cLineFigure *movementLine = new cLineFigure("movementTrail");
-        movementLine->setTags("movement_trail recent_history");
+        movementLine->setTags((std::string("movement_trail recent_history ") + tags).c_str());
         movementLine->setTooltip("This line represents the recent movement trail of the mobility model");
         movementLine->setStart(startPosition);
         movementLine->setEnd(endPosition);

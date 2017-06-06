@@ -29,6 +29,7 @@ class INET_API VisualizerBase : public cSimpleModule
 {
   protected:
     cModule *visualizerTargetModule = nullptr;
+    const char *tags = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -47,7 +47,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
 {
     std::string icon(this->icon);
     auto labeledIconFigure = new LabeledIconFigure("transportConnection");
-    labeledIconFigure->setTags("transport_connection");
+    labeledIconFigure->setTags((std::string("transport_connection ") + tags).c_str());
     labeledIconFigure->setTooltip("This icon represents a transport connection between two network nodes");
     labeledIconFigure->setAssociatedObject(tcpConnection);
     labeledIconFigure->setZIndex(zIndex);

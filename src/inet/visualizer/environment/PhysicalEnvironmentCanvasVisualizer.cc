@@ -82,10 +82,10 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
                 figure->setLineOpacity(object->getOpacity());
                 figure->setFillOpacity(object->getOpacity());
                 figure->setZoomLineWidth(false);
-                std::string tags("physical_object ");
+                std::string objectTags("physical_object ");
                 if (object->getTags())
-                    tags += object->getTags();
-                figure->setTags(tags.c_str());
+                    objectTags += object->getTags();
+                figure->setTags((objectTags + " " + tags).c_str());
                 objectsLayer->addFigure(figure);
             }
             // prism
@@ -107,7 +107,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             if (name) {
                 cLabelFigure *nameFigure = new cLabelFigure("objectName");
                 nameFigure->setPosition(canvasProjection->computeCanvasPoint(position));
-                nameFigure->setTags("physical_object object_name label");
+                nameFigure->setTags((std::string("physical_object object_name label ") + tags).c_str());
                 nameFigure->setText(name);
                 objectsLayer->addFigure(nameFigure);
             }
@@ -138,10 +138,10 @@ void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObjec
         figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
         figure->setZoomLineWidth(false);
-        std::string tags("physical_object ");
+        std::string objectTags("physical_object ");
         if (object->getTags())
-            tags += object->getTags();
-        figure->setTags(tags.c_str());
+            objectTags += object->getTags();
+        figure->setTags((objectTags + " " + tags).c_str());
         objectsLayer->addFigure(figure);
     }
 }

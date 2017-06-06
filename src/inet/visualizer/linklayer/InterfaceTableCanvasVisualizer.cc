@@ -53,7 +53,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisual
     auto gate = displayWiredInterfacesAtConnections ? getOutputGate(networkNode, interfaceEntry) : nullptr;
     if (gate == nullptr) {
         figure = new BoxedLabelFigure("networkInterface");
-        figure->setTags("network_interface");
+        figure->setTags((std::string("network_interface ") + tags).c_str());
         figure->setTooltip("This label represents a network interface in a network node");
         figure->setAssociatedObject(interfaceEntry);
         figure->setZIndex(zIndex);

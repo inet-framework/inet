@@ -32,7 +32,7 @@ bool PhysicalLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 const LinkVisualizerBase::LinkVisualization *PhysicalLinkCanvasVisualizer::createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const
 {
     auto linkVisualization = static_cast<const LinkCanvasVisualization *>(LinkCanvasVisualizerBase::createLinkVisualization(source, destination, packet));
-    linkVisualization->figure->setTags("physical_link");
+    linkVisualization->figure->setTags((std::string("physical_link ") + tags).c_str());
     linkVisualization->figure->setTooltip("This arrow represents a physical link between two network nodes");
     linkVisualization->shiftPriority = 1;
     return linkVisualization;

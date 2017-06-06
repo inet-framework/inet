@@ -46,7 +46,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     std::hash<std::string> hasher;
     std::string icon(this->icon);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
-    labeledIconFigure->setTags("ieee80211_association");
+    labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(interfaceEntry);
     labeledIconFigure->setZIndex(zIndex);
     auto iconFigure = labeledIconFigure->getIconFigure();

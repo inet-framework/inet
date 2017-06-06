@@ -52,9 +52,10 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     cLineFigure *xAxis = new cLineFigure("xAxis");
     cLineFigure *yAxis = new cLineFigure("yAxis");
     cLineFigure *zAxis = new cLineFigure("zAxis");
-    xAxis->setTags("axis");
-    yAxis->setTags("axis");
-    zAxis->setTags("axis");
+    auto axisTags = std::string("axis ") + tags;
+    xAxis->setTags(axisTags.c_str());
+    yAxis->setTags(axisTags.c_str());
+    zAxis->setTags(axisTags.c_str());
     xAxis->setTooltip("This arrow represents the X axis of the playground");
     yAxis->setTooltip("This arrow represents the Y axis of the playground");
     zAxis->setTooltip("This arrow represents the Z axis of the playground");
@@ -79,9 +80,10 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     cLabelFigure *xLabel = new cLabelFigure("xAxisLabel");
     cLabelFigure *yLabel = new cLabelFigure("yAxisLabel");
     cLabelFigure *zLabel = new cLabelFigure("zAxisLabel");
-    xLabel->setTags("axis label");
-    yLabel->setTags("axis label");
-    zLabel->setTags("axis label");
+    auto axisLabelTags = std::string("axis label ") + tags;
+    xLabel->setTags(axisLabelTags.c_str());
+    yLabel->setTags(axisLabelTags.c_str());
+    zLabel->setTags(axisLabelTags.c_str());
     xLabel->setText("X");
     yLabel->setText("Y");
     zLabel->setText("Z");

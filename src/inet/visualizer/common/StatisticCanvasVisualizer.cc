@@ -44,7 +44,7 @@ void StatisticCanvasVisualizer::initialize(int stage)
 StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::createStatisticVisualization(cComponent *source, simsignal_t signal)
 {
     auto figure = new BoxedLabelFigure("statistic");
-    figure->setTags("statistic");
+    figure->setTags((std::string("statistic ") + tags).c_str());
     figure->setTooltip("This label represents the current value of a statistic");
     figure->setAssociatedObject(source);
     figure->setZIndex(zIndex);
