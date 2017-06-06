@@ -138,20 +138,20 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         throw cRuntimeError("Unknown signal");
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route, int nextHopModuleId)
 {
-    auto it = routeVisualizations.find(route);
+    auto it = routeVisualizations.find(std::make_pair(route, nextHopModuleId));
     return it == routeVisualizations.end() ? nullptr : it->second;
 }
 
 void RoutingTableVisualizerBase::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    routeVisualizations[routeVisualization->route] = routeVisualization;
+    routeVisualizations[std::make_pair(routeVisualization->route, routeVisualization->destinationModuleId)] = routeVisualization;
 }
 
 void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    routeVisualizations.erase(routeVisualizations.find(routeVisualization->route));
+    routeVisualizations.erase(routeVisualizations.find(std::make_pair(routeVisualization->route, routeVisualization->destinationModuleId)));
 }
 
 std::vector<IPv4Address> RoutingTableVisualizerBase::getDestinations()
@@ -186,7 +186,7 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
                 auto gateway = route->getGateway();
                 auto nextHop = addressResolver.findHostWithAddress(gateway.isUnspecified() ? destination : gateway);
                 if (nextHop != nullptr) {
-                    auto routeVisualization = getRouteVisualization(route);
+                    auto routeVisualization = getRouteVisualization(route, nextHop->getId());
                     if (routeVisualization == nullptr)
                         addRouteVisualization(createRouteVisualization(route, node, nextHop));
                 }
@@ -199,7 +199,7 @@ void RoutingTableVisualizerBase::removeRouteVisualizations(IIPv4RoutingTable *ro
 {
     std::vector<const RouteVisualization *> removedRouteVisualizations;
     for (auto it : routeVisualizations)
-        if (it.first->getRoutingTable() == routingTable && it.second)
+        if (it.first.first->getRoutingTable() == routingTable && it.second)
             removedRouteVisualizations.push_back(it.second);
     for (auto it : removedRouteVisualizations) {
         removeRouteVisualization(it);
