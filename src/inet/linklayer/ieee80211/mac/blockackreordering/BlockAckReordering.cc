@@ -53,7 +53,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
         }
     }
     else
-        delete dataFrame;
+        delete dataPacket;
     return ReorderBuffer({});
 }
 

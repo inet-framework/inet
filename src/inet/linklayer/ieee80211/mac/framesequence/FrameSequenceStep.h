@@ -35,7 +35,7 @@ class INET_API TransmitStep : public ITransmitStep
             frameToTransmit(frame),
             ifs(ifs)
         { }
-        virtual ~TransmitStep() { if (!dynamic_cast<Ieee80211DataOrMgmtFrame *>(frameToTransmit)) delete frameToTransmit; }
+        virtual ~TransmitStep() { if (!dynamic_cast<Ieee80211DataOrMgmtHeader *>(frameToTransmit)) delete frameToTransmit; }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }

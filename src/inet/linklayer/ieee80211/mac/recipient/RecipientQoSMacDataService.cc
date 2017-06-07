@@ -152,18 +152,17 @@ std::vector<Packet *> RecipientQoSMacDataService::controlFrameReceived(Packet *c
                 }
             }
         }
-        std::vector<Ieee80211Frame *> deaggregatedFrames;
+        std::vector<Packet *> deaggregatedFrames;
         if (aMsduDeaggregation) {
             for (auto frame : defragmentedFrames) {
-                auto dataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
-                if (dataFrame->getAMsduPresent()) {
-                    auto subframes = aMsduDeaggregation->deaggregateFrame(dataFrame);
+                if (frame->peekHeader<Ieee80211DataHeader>()->getAMsduPresent()) {
+                    auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                     for (auto subframe : *subframes)
                         deaggregatedFrames.push_back(subframe);
                     delete subframes;
                 }
                 else
-                    deaggregatedFrames.push_back(dataFrame);
+                    deaggregatedFrames.push_back(frame);
             }
         }
         // TODO: MSDU Integrity, Replay Detection, RX MSDU Rate Limiting

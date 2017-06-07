@@ -1596,7 +1596,6 @@ void PIMSM::forwardMulticastData(Packet *data, int outInterfaceId)
     data->ensureTag<HopLimitReq>()->setHopLimit(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
     data->removePoppedChunks();
     send(data, "ipOut");
-    delete datagram;
 }
 
 //============================================================================

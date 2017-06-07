@@ -33,8 +33,8 @@ cplusplus {{
 typedef const IIeee80211Mode ConstIIeee80211Mode;
 typedef const Ieee80211ModeSet * Ieee80211ModeSetPtr;
 typedef const IIeee80211Mode * IIeee80211ModePtr;
-typedef IIeee80211Band * IIeee80211BandPtr;
-typedef Ieee80211Channel * Ieee80211ChannelPtr;
+typedef IIeee80211Band * IIeee80211BandPtr_;
+typedef Ieee80211Channel * Ieee80211ChannelPtr_;
 
 typedef const IIeee80211PreambleMode* IIeee80211PreambleModePtr;
 typedef const IIeee80211HeaderMode* IIeee80211HeaderModePtr;
@@ -120,8 +120,8 @@ class Ieee80211ModeSet extends cObject
 class noncobject IIeee80211ModePtr;
 class noncobject Ieee80211ModeSetPtr;
 class noncobject IIeee80211ModePtr;
-class noncobject IIeee80211BandPtr;
-class noncobject Ieee80211ChannelPtr;
+class noncobject IIeee80211BandPtr_;
+class noncobject Ieee80211ChannelPtr_;
 class noncobject ConfigureRadioCommand;
 //
 // Control info attached to a configure command that is sent to the ~Radio.
@@ -132,7 +132,7 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     string opMode;                         // new default operation mode or "" if not set.
     Ieee80211ModeSetPtr modeSet = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default mode set or nullptr if not set.
     IIeee80211ModePtr mode = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default transmission mode or nullptr if not set.
-    IIeee80211BandPtr band = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default band or nullptr if not set.
-    Ieee80211ChannelPtr channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
+    IIeee80211BandPtr_ band = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default band or nullptr if not set.
+    Ieee80211ChannelPtr_ channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }

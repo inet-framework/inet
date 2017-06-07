@@ -293,7 +293,7 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHe
     else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header)) {
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
         recipientProcessReceivedManagementFrame(mgmtHeader);
-        if (dynamic_cast<Ieee80211ActionFrame *>(mgmtHeader))
+        if (std::dynamic_pointer_cast<Ieee80211ActionFrame>(mgmtHeader))
             delete packet;
     }
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))

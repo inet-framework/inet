@@ -48,21 +48,22 @@ std::ostream& Ieee80211IdealReceiver::printToStream(std::ostream& stream, int le
     return IdealReceiver::printToStream(stream, level);
 }
 
-const ReceptionIndication *Ieee80211IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
-{
-    auto indication = new Ieee80211ReceptionIndication();
-    auto reception = check_and_cast<const IdealReception *>(snir->getReception());
-    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
-    double errorRate = reception->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
-    indication->setSymbolErrorRate(errorRate);
-    indication->setBitErrorRate(errorRate);
-    indication->setPacketErrorRate(errorRate);
-    // TODO: should match and get the mode and channel from the receiver
-    const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
-    indication->setMode(transmission->getMode());
-    indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
-    return indication;
-}
+// TODO:
+//const ReceptionIndication *Ieee80211IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
+//{
+//    auto indication = new Ieee80211ReceptionIndication();
+//    auto reception = check_and_cast<const IdealReception *>(snir->getReception());
+//    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
+//    double errorRate = reception->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
+//    indication->setSymbolErrorRate(errorRate);
+//    indication->setBitErrorRate(errorRate);
+//    indication->setPacketErrorRate(errorRate);
+//    // TODO: should match and get the mode and channel from the receiver
+//    const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
+//    indication->setMode(transmission->getMode());
+//    indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
+//    return indication;
+//}
 
 } // namespace physicallayer
 

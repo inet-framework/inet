@@ -235,7 +235,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
                 mapChunkIds(packet->peekAt(bit(0)), [&] (int id) {
                     auto lastModule = getLastModule(id);
                     if (lastModule != nullptr)
-                        updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module));
+                        updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module), packet);
                 });
             }
         }

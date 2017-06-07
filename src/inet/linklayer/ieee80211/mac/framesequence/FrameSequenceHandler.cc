@@ -159,10 +159,11 @@ void FrameSequenceHandler::abortFrameSequence()
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
-    if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frameToTransmit))
-        callback->originatorProcessFailedFrame(dataOrMgmtFrame);
+    auto header = frameToTransmit->peekHeader<Ieee80211MacHeader>();
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+        callback->originatorProcessFailedFrame(frameToTransmit);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))
-        callback->originatorProcessRtsProtectionFailed(rtsTxStep->getProtectedFrame());
+        callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));
     delete context;
     delete frameSequence;
     context = nullptr;

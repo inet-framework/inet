@@ -206,7 +206,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHe
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header));
         recipientProcessControlFrame(packet, header);
-        delete frame;
+        delete packet;
     }
 }
 
@@ -251,7 +251,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     EV_INFO << "RTS frame transmission failed\n";
     auto protectedHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
-    EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
+    EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         inProgressFrames->dropFrame(packet);
@@ -264,7 +264,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
     auto transmittedHeader = packet->peekHeader<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
-        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(dataOrMgmtFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(dataOrMgmtFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
+        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(packet, dataOrMgmtHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(packet, dataOrMgmtHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         if (originatorAckPolicy->isAckNeeded(dataOrMgmtHeader)) {
             ackHandler->processTransmittedDataOrMgmtFrame(dataOrMgmtHeader);
         }
@@ -275,7 +275,8 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
     }
     else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(transmittedHeader)) {
         auto protectedFrame = inProgressFrames->getFrameToTransmit(); // TODO: kludge
-        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
+        auto protectedHeader = protectedFrame->peekHeader<Ieee80211DataOrMgmtHeader>();
+        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
     }
 }
@@ -287,7 +288,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     if (frame->getType() == ST_ACK) {
         auto lastTransmittedDataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(lastTransmittedFrame);
         if (dataAndMgmtRateControl) {
-            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtFrame) : 0;
+            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtHeader) : 0;
             dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
         }
         recoveryProcedure->ackFrameReceived(packet, lastTransmittedDataOrMgmtHeader, stationRetryCounters);

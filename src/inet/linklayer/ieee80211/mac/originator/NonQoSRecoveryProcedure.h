@@ -66,8 +66,8 @@ class INET_API NonQoSRecoveryProcedure : public cSimpleModule, public IRecoveryP
         virtual void rtsFrameTransmissionFailed(const Ptr<Ieee80211DataOrMgmtHeader>& protectedHeader, StationRetryCounters *stationCounters);
         virtual void dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& failedHeader, StationRetryCounters *stationCounters);
         virtual int getRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header);
-        virtual int getShortRetryCount(Ieee80211DataOrMgmtFrame* frame);
-        virtual int getLongRetryCount(Ieee80211DataOrMgmtFrame* frame);
+        virtual int getShortRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame);
+        virtual int getLongRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame);
 
         virtual bool isRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& failedHeader);
         virtual bool isRtsFrameRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& protectedHeader);

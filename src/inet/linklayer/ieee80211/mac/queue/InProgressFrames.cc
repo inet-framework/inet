@@ -96,9 +96,9 @@ void InProgressFrames::dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, 
 {
     for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
         auto frame = *it;
-        if (frame->getType() == ST_DATA_WITH_QOS) {
-            auto dataFrame = check_and_cast<const Ieee80211DataFrame*>(frame);
-            if (seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0) {
+        auto header = frame->peekHeader<Ieee80211DataHeader>();
+        if (header->getType() == ST_DATA_WITH_QOS) {
+            if (seqAndFragNums.count(std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber())))) != 0) {
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
             }
