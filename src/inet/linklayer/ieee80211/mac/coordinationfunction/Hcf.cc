@@ -286,8 +286,8 @@ void Hcf::recipientProcessReceivedControlFrame(Ieee80211Frame* frame)
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processReceivedBlockAckReq(blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
-    else if (auto ackFrame = dynamic_cast<Ieee80211ACKFrame*>(frame))
-        ; // drop it, it is an ACK frame that is received after the ACKTimeout
+    else if (dynamic_cast<Ieee80211ACKFrame*>(frame))
+        EV_WARN << "ACK frame received after timeout, ignoring it.\n"; // drop it, it is an ACK frame that is received after the ACKTimeout
     else
         throw cRuntimeError("Unknown control frame");
 }
