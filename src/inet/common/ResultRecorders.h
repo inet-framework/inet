@@ -60,7 +60,7 @@ class INET_API ElapsedTimeRecorder : public cResultRecorder
 
     public:
         ElapsedTimeRecorder();
-        virtual void finish(cResultFilter* prev);
+        virtual void finish(cResultFilter* prev) override;
 };
 
 } // namespace inet
