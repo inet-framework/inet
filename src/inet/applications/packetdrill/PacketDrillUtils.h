@@ -453,11 +453,11 @@ class INET_API PacketDrillConfig
         char *scriptPath;    /* pathname of script file */
 
     public:
-        const char* getScriptPath() { return scriptPath; };
+        const char* getScriptPath() const { return scriptPath; };
         void setScriptPath(const char* sPath) { scriptPath = (char*)sPath; };
-        int getWireProtocol() { return wireProtocol; };
-        int getSocketDomain() { return socketDomain; };
-        int getToleranceUsecs() { return tolerance_usecs; };
+        int getWireProtocol() const { return wireProtocol; };
+        int getSocketDomain() const { return socketDomain; };
+        int getToleranceUsecs() const { return tolerance_usecs; };
         void parseScriptOptions(cQueue *options);
 };
 
@@ -473,7 +473,7 @@ class INET_API PacketDrillPacket
         enum direction_t direction; /* direction packet is traveling */
 
     public:
-        enum direction_t getDirection() { return direction; };
+        enum direction_t getDirection() const { return direction; };
         void setDirection(enum direction_t dir) { direction = dir; };
         cPacket* getInetPacket() { return inetPacket; };
         void setInetPacket(cPacket *pkt) { inetPacket = pkt->dup(); delete pkt;};
@@ -501,22 +501,22 @@ class INET_API PacketDrillEvent : public cObject
 
     public:
         void setLineNumber(int number) { lineNumber = number; };
-        int getLineNumber() { return lineNumber; };
+        int getLineNumber() const { return lineNumber; };
         void setEventNumber(int number) { eventNumber = number; };
-        int getEventNumber() { return eventNumber; };
+        int getEventNumber() const { return eventNumber; };
         void setEventTime(int64 usecs) { eventTime = SimTime(usecs, SIMTIME_US); };
         void setEventTime(simtime_t time) { eventTime = time; };
-        simtime_t getEventTime() { return eventTime; };
+        simtime_t getEventTime() const { return eventTime; };
         void setEventTimeEnd(int64 usecs) { eventTimeEnd = SimTime(usecs, SIMTIME_US); };
         void setEventTimeEnd(simtime_t time) { eventTimeEnd = time; };
-        simtime_t getEventTimeEnd() { return eventTimeEnd; };
+        simtime_t getEventTimeEnd() const { return eventTimeEnd; };
         void setEventOffset(int64 usecs) { eventOffset = SimTime(usecs, SIMTIME_US); };
         void setEventOffset(simtime_t time) { eventOffset = time; };
-        simtime_t getEventOffset() { return eventOffset; };
+        simtime_t getEventOffset() const { return eventOffset; };
         void setTimeType(enum eventTime_t ttype) { timeType = ttype; };
-        enum eventTime_t getTimeType() { return timeType; };
+        enum eventTime_t getTimeType() const { return timeType; };
         void setType(enum event_t tt) { type = tt; };
-        enum event_t getType() { return type; };
+        enum event_t getType() const { return type; };
         PacketDrillPacket* getPacket() { return eventKind.packet; };
         void setPacket(PacketDrillPacket* packet) { eventKind.packet = packet; };
         void setSyscall(struct syscall_spec *syscall) { eventKind.syscall = syscall; };
@@ -555,13 +555,13 @@ class INET_API PacketDrillExpression : public cObject
 
     public:
         void setType(enum expression_t t) { type = t; };
-        enum expression_t getType() { return type; };
+        enum expression_t getType() const { return type; };
         void setNum(int64 n) { value.num = n; };
-        int64 getNum() { return value.num; };
+        int64 getNum() const { return value.num; };
         void setString(char* str) { value.string = str; };
-        char* getString() { return value.string; };
+        const char* getString() const { return value.string; };
         void setFormat(const char* format_) { format = format_; };
-        const char* getFormat() { return format; };
+        const char* getFormat() const { return format; };
         cQueue* getList() { return value.list; };
         void setList(cQueue* queue) { value.list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
@@ -616,7 +616,7 @@ class INET_API PacketDrillScript
         int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
 
         char *getBuffer() { return buffer; };
-        int getLength() { return length; };
+        int getLength() const { return length; };
         const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
         cQueue *getOptionList() { return optionList; };
@@ -631,12 +631,12 @@ class INET_API PacketDrillStruct: public cObject
         PacketDrillStruct(int64 v1, int64 v2);
         PacketDrillStruct(int64 v1, int64 v2, int32 v3, int32 v4, cQueue *streams);
 
-        int64 getValue1() { return value1; };
+        int64 getValue1() const { return value1; };
         void setValue1(uint64 value) { value1 = value; };
-        int64 getValue2() { return value2; };
+        int64 getValue2() const { return value2; };
         void setValue2(uint64 value) { value2 = value; };
-        int32 getValue3() { return value3; }
-        int32 getValue4() { return value4; }
+        int32 getValue3() const { return value3; }
+        int32 getValue4() const { return value4; }
         cQueue *getStreams() { return streamNumbers; };
         virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); };
 
@@ -645,7 +645,7 @@ class INET_API PacketDrillStruct: public cObject
         int64 value2;
         int32 value3;
         int32 value4;
-        cQueue *streamNumbers;
+        cQueue *streamNumbers = nullptr;
 };
 
 class INET_API PacketDrillOption: public cObject
@@ -653,10 +653,10 @@ class INET_API PacketDrillOption: public cObject
     public:
         PacketDrillOption(char *name, char *value);
 
-        char *getName() { return name; };
-        void setName(char *name_) { strcpy(name, name_); };
-        char *getValue() { return value; };
-        void setValue(char *value_) { strcpy(value, value_); };
+        const char *getName() const { return name; };
+        void setName(char *name_) { free(name); name = strdup(name_); };
+        const char *getValue() const { return value; };
+        void setValue(char *value_) { free(value); value = strdup(value_); };
 
     private:
         char *name;
@@ -670,7 +670,7 @@ class INET_API PacketDrillBytes: public cObject
         PacketDrillBytes(uint8 byte);
 
         void appendByte(uint8 byte);
-        uint32 getListLength() { return listLength; };
+        uint32 getListLength() const { return listLength; };
         ByteArray* getByteList() { return &byteList; };
 
     private:
@@ -744,12 +744,12 @@ class INET_API PacketDrillSctpParameter : public cObject
         void *content;
 
     public:
-        int32 getValue() { return parameterValue; };
+        int32 getValue() const { return parameterValue; };
         cQueue* getList() { return parameterList; };
-        uint32 getFlags() { return flags; };
+        uint32 getFlags() const { return flags; };
         void setFlags(uint32 flgs_) { flags = flgs_; };
-        int16 getLength() { return parameterLength; };
-        uint16 getType() { return type; };
+        int16 getLength() const { return parameterLength; };
+        uint16 getType() const { return type; };
         ByteArray* getByteList() { return bytearray; };
         void setByteArrayPointer(ByteArray *ptr) { bytearray = ptr; };
         void *getContent() { return content; };

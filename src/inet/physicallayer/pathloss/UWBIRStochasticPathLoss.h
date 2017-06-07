@@ -18,7 +18,7 @@
 #ifndef __INET_UWBIRSTOCHASTICPATHLOSS_H
 #define __INET_UWBIRSTOCHASTICPATHLOSS_H
 
-#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
+#include "inet/physicallayer/base/packetlevel/PathLossBase.h"
 
 namespace inet {
 
@@ -48,7 +48,7 @@ namespace physicallayer {
  * @ingroup ieee802154a
  * @ingroup analogueModels
  */
-class INET_API UWBIRStochasticPathLoss : public cModule, public IPathLoss
+class INET_API UWBIRStochasticPathLoss : public PathLossBase
 {
   protected:
     static const Hz fc; // mandatory band 3, center frequency

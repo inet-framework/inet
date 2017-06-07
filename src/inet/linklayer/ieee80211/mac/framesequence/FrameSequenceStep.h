@@ -35,6 +35,7 @@ class INET_API TransmitStep : public ITransmitStep
             frameToTransmit(frame),
             ifs(ifs)
         { }
+        virtual ~TransmitStep() { if (!dynamic_cast<Ieee80211DataOrMgmtFrame *>(frameToTransmit)) delete frameToTransmit; }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }
@@ -67,6 +68,7 @@ class INET_API ReceiveStep : public IReceiveStep
         ReceiveStep(simtime_t timeout = -1) :
             timeout(timeout)
         { }
+        virtual ~ReceiveStep() { delete receivedFrame; }
 
         virtual Completion getCompletion() override { return completion; }
         virtual void setCompletion(Completion completion) override { this->completion = completion; }

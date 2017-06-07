@@ -62,7 +62,7 @@ InfoVisualizerBase::InfoVisualization *InfoOsgVisualizer::createInfoVisualizatio
     auto geode = new osg::Geode();
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     geode->addDrawable(text);
-    auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+    auto visualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
     return new InfoOsgVisualization(visualization, geode, module->getId());
 }
 

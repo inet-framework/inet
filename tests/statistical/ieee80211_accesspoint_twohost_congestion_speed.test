@@ -34,7 +34,7 @@ module ThroughputClient
         int idx;
         int maxCli;
         int maxSrv;
-        @node();
+        @networkNode();
         @display("i=device/wifilaptop");
         **.interfaceTableModule = "";
     gates:
@@ -66,7 +66,7 @@ module ThroughputServer
     parameters:
         int idx;
         int maxSrv;
-        @node();
+        @networkNode();
         @display("i=device/wifilaptop");
         **.interfaceTableModule = "";
     gates:
@@ -159,7 +159,10 @@ sim-time-limit = 50s
 **.mgmt.frameCapacity = 100
 
 # nic settings
-**.wlan*.bitrate = 11Mbps
+**.wlan*.*.dataBitrate = 11Mbps
+**.wlan*.*.mgmtBitrate = 11Mbps
+**.wlan*.*.multicastBitrate = 11Mbps
+**.wlan*.*.controlBitrate = 11Mbps
 **.mac.address = "auto"
 **.mac.maxQueueSize = 14
 **.mac.rtsThresholdBytes = 3000B
@@ -189,7 +192,7 @@ options(width=160)
 library("omnetpp", warn.conflicts=FALSE)
 
 #TEST parameters
-scafile <- 'results/General-0.sca'
+scafile <- 'results/General-#0.sca'
 linecount <- 1 # count of client-server pairs
 rcvdBytes <-  11000000/8 # bytes
 expectedRate <- 29.0 # %

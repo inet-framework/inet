@@ -23,11 +23,14 @@ LabeledLineFigure::LabeledLineFigure(const char *name) :
     cGroupFigure(name)
 {
     lineFigure = new cLineFigure("line");
-    labelFigure = new cLabelFigure("label");
-    labelFigure->setAnchor(cFigure::ANCHOR_CENTER);
-    labelFigure->setHalo(true);
+    panelFigure = new cPanelFigure("panel");
     addFigure(lineFigure);
-    addFigure(labelFigure);
+    addFigure(panelFigure);
+    labelFigure = new cTextFigure("label");
+    labelFigure->setAnchor(cFigure::ANCHOR_S);
+    labelFigure->setTags("label");
+    labelFigure->setHalo(true);
+    panelFigure->addFigure(labelFigure);
 }
 
 void LabeledLineFigure::setStart(cFigure::Point point)
@@ -44,15 +47,14 @@ void LabeledLineFigure::setEnd(cFigure::Point point)
 
 void LabeledLineFigure::updateLabelPosition()
 {
-    labelFigure->setPosition((lineFigure->getStart() + lineFigure->getEnd()) / 2);
-    // TODO: cLabelFigure doesn't support text rotation right now
-//    auto direction = lineFigure->getEnd() - lineFigure->getStart();
-//    double alpha = atan2(-direction.y, direction.x);
-//    cFigure::Transform transform;
-//    transform.translate(-labelFigure->getPosition().x, -labelFigure->getPosition().y);
-//    transform.rotate(alpha * 180 / M_PI);
-//    transform.translate(labelFigure->getPosition().x, labelFigure->getPosition().y);
-//    labelFigure->setTransform(transform);
+    auto position = (lineFigure->getStart() + lineFigure->getEnd()) / 2;
+    auto direction = lineFigure->getEnd() - lineFigure->getStart();
+    double alpha = atan2(-direction.y, direction.x);
+    if (alpha > M_PI / 2 || alpha < -M_PI / 2)
+        alpha += M_PI;
+    panelFigure->setTransform(cFigure::Transform().rotate(-alpha));
+    panelFigure->setPosition(position);
+    labelFigure->setPosition(cFigure::Point(0, -lineFigure->getLineWidth() / 2));
 }
 
 } // namespace inet

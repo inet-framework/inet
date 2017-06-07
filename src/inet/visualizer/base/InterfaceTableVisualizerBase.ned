@@ -29,9 +29,11 @@ package inet.visualizer.base;
 //
 // The format string can contain the following directives:
 //  - %N interface name
+//  - %m MAC address
 //  - %4 IPv4 address
 //  - %6 IPv6 address
-//  - %m MAC address
+//  - %a IPv4 or IPv6 address
+//  - %g generic address
 //  - %n network address
 //  - %i InterfaceEntry::info()
 //  - %s InterfaceEntry::str()
@@ -50,9 +52,11 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         bool displayBackground = default(false); // specifies whether the text should have a background or not
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string interfaceFilter = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
-        string format = default("%N %\\%n"); // determines what interface data is displayed
+        string format = default("%N %\\%a"); // determines what interface data is displayed
+        string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double displacementPriority = default(0); // determines the order of annotation positioning
 
         string font = default("<default>"); // interface text font, automatic by default
         string textColor = default("#005030"); // interface text font color

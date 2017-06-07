@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-01-13  Levente Mészáros
+
+	Added packet dropped signals.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-10-20  Rudolf Hornig

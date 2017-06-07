@@ -166,7 +166,6 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
                     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
                     simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
-                    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }
             }

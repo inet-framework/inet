@@ -42,7 +42,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.constraintAreaMaxZ = 0m
 
 # mac
-**.ctn[*].initialChannelBusy = false
+**.contention.initialChannelBusy = false
 
 # radio
 **.radio.receiver.energyDetection = -100dBm

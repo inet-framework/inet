@@ -41,9 +41,6 @@ network InstrumentsExample
         signalSource: SignalSource {
             @display("p=50,350;is=s");
         }
-        figureHelper: DelegateSignalConfigurator {
-            @display("p=180,350");
-        }
 }
 
 network InstrumentsExample2 extends InstrumentsExample

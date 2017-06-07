@@ -65,8 +65,6 @@ void MediumOsgVisualizer::initialize(int stage)
             const char *transmissionImageString = par("transmissionImage");
             auto path = resolveResourcePath(transmissionImageString);
             transmissionImage = inet::osg::createImage(path.c_str());
-            if (transmissionImage == nullptr)
-                throw cRuntimeError("Transmission image '%s' not found", transmissionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(transmissionImage);
             if (imageStream != nullptr)
                 imageStream->play();
@@ -75,8 +73,6 @@ void MediumOsgVisualizer::initialize(int stage)
             const char *receptionImageString = par("receptionImage");
             auto path = resolveResourcePath(receptionImageString);
             receptionImage = inet::osg::createImage(path.c_str());
-            if (receptionImage == nullptr)
-                throw cRuntimeError("Reception reception '%s' not found", receptionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(receptionImage);
             if (imageStream != nullptr)
                 imageStream->play();
@@ -355,7 +351,7 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
     if (displayTransmissions || displayReceptions || displayInterferenceRanges || displayCommunicationRanges) {
         auto group = new osg::Group();
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->addAnnotation(group, osg::Vec3d(0.0, 0.0, 0.0), 100.0);
         if (displayTransmissions) {
             auto texture = new osg::Texture2D();
@@ -413,7 +409,7 @@ void MediumOsgVisualizer::radioRemoved(const IRadio *radio)
     auto node = removeRadioOsgNode(radio);
     if (node != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->removeAnnotation(node);
     }
 }

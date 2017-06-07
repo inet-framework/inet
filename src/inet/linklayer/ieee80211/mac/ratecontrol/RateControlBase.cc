@@ -21,6 +21,8 @@
 namespace inet {
 namespace ieee80211 {
 
+simsignal_t RateControlBase::datarateSignal = cComponent::registerSignal("datarate");
+
 void RateControlBase::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
@@ -38,6 +40,12 @@ const IIeee80211Mode* RateControlBase::decreaseRateIfPossible(const IIeee80211Mo
     return newMode == nullptr ? currentMode : newMode;
 }
 
+void RateControlBase::emitDatarateSignal()
+{
+    bps rate = currentMode->getDataMode()->getNetBitrate();
+    emit(datarateSignal, rate.get());
+}
+
 void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
@@ -45,6 +53,7 @@ void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cO
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         double initRate = par("initialRate");
         currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));
+        emitDatarateSignal();
     }
 }
 

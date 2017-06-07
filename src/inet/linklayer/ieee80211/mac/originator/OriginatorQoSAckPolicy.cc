@@ -120,7 +120,7 @@ AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<Iee
 
 bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& header) const
 {
-    return packet->getByteLength() < maxBlockAckPolicyFrameLength;
+    return header->getType() == ST_DATA_WITH_QOS && packet->getByteLength() < maxBlockAckPolicyFrameLength;
 }
 
 bool OriginatorQoSAckPolicy::checkAgreementPolicy(const Ptr<Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const

@@ -127,8 +127,8 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     state->regions.clearTo(state->snd_una);
+    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
 
     if (found != nullptr) {
         simtime_t currentTime = simTime();

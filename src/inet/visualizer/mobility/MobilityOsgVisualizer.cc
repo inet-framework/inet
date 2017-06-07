@@ -83,7 +83,7 @@ MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMo
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         auto trail = new osg::Geode();
         trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
-        auto networkNode = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        auto networkNode = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(trail);
         mobilityVisualization = new MobilityOsgVisualization(networkNode, trail);
@@ -121,7 +121,7 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
 {
     Enter_Method_Silent();
     if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
+        auto mobility = check_and_cast<IMobility *>(object);
         auto position = mobility->getCurrentPosition();
         auto orientation = mobility->getCurrentAngularPosition();
         auto mobilityVisualization = ensureMobilityVisualization(mobility);

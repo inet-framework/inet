@@ -29,8 +29,12 @@ static inline double determinant(double a1, double a2, double b1, double b2)
     return a1 * b2 - a2 * b1;
 }
 
-static Coord intersectLines(const Coord& begin1, const Coord& end1, const Coord& begin2, const Coord& end2)
+static Coord intersectLines(const LineSegment& segment1, const LineSegment& segment2)
 {
+    const Coord& begin1 = segment1.getPoint1();
+    const Coord& end1 = segment1.getPoint2();
+    const Coord& begin2 = segment2.getPoint1();
+    const Coord& end2 = segment2.getPoint2();
     double x1 = begin1.x;
     double y1 = begin1.y;
     double x2 = end1.x;
@@ -47,7 +51,15 @@ static Coord intersectLines(const Coord& begin1, const Coord& end1, const Coord&
     return Coord(x, y, 0);
 }
 
-PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, cPolylineFigure *figure) :
+bool isPointOnSegment(const LineSegment& segment, const Coord& point)
+{
+    auto& p1 = segment.getPoint1();
+    auto& p2 = segment.getPoint2();
+    return (p2.x <= std::max(p1.x, point.x) && p2.x >= std::min(p1.x, point.x) &&
+            p2.y <= std::max(p1.y, point.y) && p2.y >= std::min(p1.y, point.y));
+}
+
+PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure) :
     PathVisualization(path),
     figure(figure)
 {
@@ -96,8 +108,29 @@ void PathCanvasVisualizerBase::refreshDisplay() const
             if (index == 0)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint1()));
             if (index > 0) {
-                Coord intersection = intersectLines(segments[index].getPoint1(), segments[index].getPoint2(), segments[index - 1].getPoint1(), segments[index - 1].getPoint2());
-                points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                auto& segment1 = segments[index - 1];
+                auto& segment2 = segments[index];
+                Coord intersection = intersectLines(segment1, segment2);
+                if (std::isfinite(intersection.x) && std::isfinite(intersection.y)) {
+                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection)) {
+                        points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                    }
+                    else {
+                        double distance = segment1.getPoint2().distance(segment2.getPoint1());
+                        double distance1 = intersection.distance(segment1.getPoint2());
+                        double distance2 = intersection.distance(segment2.getPoint1());
+                        if (distance1 + distance2 < 2 * distance)
+                            points.push_back(canvasProjection->computeCanvasPoint(intersection));
+                        else {
+                            points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));
+                            points.push_back(canvasProjection->computeCanvasPoint(segment2.getPoint1()));
+                        }
+                    }
+                }
+                else {
+                    points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));
+                    points.push_back(canvasProjection->computeCanvasPoint(segment2.getPoint1()));
+                }
             }
             if (index == segments.size() - 1)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
@@ -107,13 +140,21 @@ void PathCanvasVisualizerBase::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path) const
+const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
 {
-    auto figure = new cPolylineFigure("path");
-    figure->setLineWidth(lineWidth);
-    figure->setLineStyle(lineStyle);
-    figure->setEndArrowhead(cFigure::ARROW_BARBED);
-    figure->setLineColor(lineColorSet.getColor(pathVisualizations.size()));
+    auto figure = new LabeledPolylineFigure("path");
+    auto polylineFigure = figure->getPolylineFigure();
+    polylineFigure->setSmooth(lineSmooth);
+    polylineFigure->setLineWidth(lineWidth);
+    polylineFigure->setLineStyle(lineStyle);
+    polylineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
+    auto lineColor = lineColorSet.getColor(pathVisualizations.size());
+    polylineFigure->setLineColor(lineColor);
+    auto labelFigure = figure->getLabelFigure();
+    labelFigure->setFont(labelFont);
+    labelFigure->setColor(isEmpty(labelColorAsString) ? lineColor : labelColor);
+    auto text = getPathVisualizationText(packet);
+    labelFigure->setText(text.c_str());
     return new PathCanvasVisualization(path, figure);
 }
 
@@ -136,7 +177,15 @@ void PathCanvasVisualizerBase::removePathVisualization(const PathVisualization *
 void PathCanvasVisualizerBase::setAlpha(const PathVisualization *path, double alpha) const
 {
     auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(path);
-    pathCanvasVisualization->figure->setLineOpacity(alpha);
+    pathCanvasVisualization->figure->getPolylineFigure()->setLineOpacity(alpha);
+}
+
+void PathCanvasVisualizerBase::refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet)
+{
+    PathVisualizerBase::refreshPathVisualization(pathVisualization, packet);
+    auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
+    auto text = getPathVisualizationText(packet);
+    pathCanvasVisualization->figure->getLabelFigure()->setText(text.c_str());
 }
 
 } // namespace visualizer

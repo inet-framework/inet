@@ -29,6 +29,7 @@ SCTPSocket::SCTPSocket(bool type)
 {
     sockstate = NOT_BOUND;
     localPrt = remotePrt = 0;
+    fsmStatus = -1;
     cb = nullptr;
     yourPtr = nullptr;
     gateToSctp = nullptr;

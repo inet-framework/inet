@@ -18,6 +18,7 @@
 #ifndef __INET_PATHCANVASVISUALIZERBASE_H
 #define __INET_PATHCANVASVISUALIZERBASE_H
 
+#include "inet/common/figures/LabeledPolylineFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
@@ -30,10 +31,10 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
   protected:
     class INET_API PathCanvasVisualization : public PathVisualization {
       public:
-        cPolylineFigure *figure = nullptr;
+        LabeledPolylineFigure *figure = nullptr;
 
       public:
-        PathCanvasVisualization(const std::vector<int>& path, cPolylineFigure *figure);
+        PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure);
         virtual ~PathCanvasVisualization();
     };
 
@@ -46,10 +47,11 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const override;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path, cPacket *packet) const override;
     virtual void addPathVisualization(const PathVisualization *pathVisualization) override;
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
+    virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet) override;
 };
 
 } // namespace visualizer

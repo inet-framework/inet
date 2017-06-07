@@ -91,8 +91,6 @@ void SceneOsgVisualizerBase::initializePlayground()
         if (*imageString != '\0') {
             std::string imagePath = resolveResourcePath(imageString);
             image = inet::osg::createImage(imagePath.c_str());
-            if (image == nullptr)
-                throw cRuntimeError("Cannot read playground image: '%s'", imageString);
         }
         double imageSize = par("playgroundImageSize");
         auto color = cFigure::Color(par("playgroundColor"));
@@ -190,7 +188,7 @@ osg::BoundingSphere SceneOsgVisualizerBase::getNetworkBoundingSphere()
         if (isNetworkNode(networkNode)) {
             nodeCount++;
             // NOTE: ignore network node annotations
-            auto visualRepresentation = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto visualRepresentation = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto mainNode = visualRepresentation->getMainPart();
             auto radius = std::max(0.0f, mainNode->computeBound().radius());
             auto drawable = new osg::ShapeDrawable(new osg::Sphere(visualRepresentation->getPosition(), radius));

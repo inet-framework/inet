@@ -50,6 +50,8 @@ void Ieee80211VisualizerBase::initialize(int stage)
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
+        displacementHint = parseDisplacement(par("displacementHint"));
+        displacementPriority = par("displacementPriority");
         if (displayAssociations)
             subscribe();
     }

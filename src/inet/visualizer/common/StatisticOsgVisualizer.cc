@@ -57,7 +57,7 @@ StatisticVisualizerBase::StatisticVisualization *StatisticOsgVisualizer::createS
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     geode->addDrawable(label);
     auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new StatisticOsgVisualization(networkNodeVisualization, geode, source->getId(), signal, getUnit(source));
 }
 

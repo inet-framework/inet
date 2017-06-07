@@ -25,6 +25,10 @@
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
+#ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/IPv4.h"
+#endif
+
 #ifdef WITH_TCP_INET
 #include "inet/transportlayer/tcp/TCP.h"
 #endif
@@ -66,13 +70,18 @@ bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
         return true;
 #endif
 
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
+        return true;
+#endif
+
     return false;
 }
 
-const PathCanvasVisualizerBase::PathVisualization *TransportRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path) const
+const PathCanvasVisualizerBase::PathVisualization *TransportRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
 {
-    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path));
-    pathVisualization->figure->setTags("transport_route");
+    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path, packet));
+    pathVisualization->figure->setTags((std::string("transport_route ") + tags).c_str());
     pathVisualization->figure->setTooltip("This polyline arrow represents a recently active transport route between two network nodes");
     pathVisualization->shiftPriority = 4;
     return pathVisualization;

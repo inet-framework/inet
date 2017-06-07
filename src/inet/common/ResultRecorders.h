@@ -45,6 +45,24 @@ class INET_API GroupCountRecorder : public cResultRecorder
         virtual void finish(cResultFilter *prev) override;
 };
 
+class INET_API ElapsedTimeRecorder : public cResultRecorder
+{
+    protected:
+        clock_t startTime;
+    protected:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {}
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {}
+
+    public:
+        ElapsedTimeRecorder();
+        virtual void finish(cResultFilter* prev) override;
+};
+
 } // namespace inet
 
 #endif

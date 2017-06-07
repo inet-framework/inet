@@ -44,6 +44,7 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     int numTicks = 0;
     double shifting = 0;
     int curvesOnCanvas = 0;
+    int labelOffset = 10;
 
   protected:
     virtual void parse(cProperty *property) override;
@@ -79,6 +80,9 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     const char *getLabel() const;
     void setLabel(const char *text);
+
+    const int getLabelOffset() const;
+    void setLabelOffset(int offset);
 
     const Font& getLabelFont() const;
     void setLabelFont(const Font& font);

@@ -1,5 +1,14 @@
 ====== inet-3.x ======
 
+2016-10-05  Levente Mészáros
+
+	Refactored existing base classes for new power infrastructure.
+
+2016-10-05  Levente Mészáros
+
+	Added new base classes for new power infrastructure. Added separate base
+	classes for charge/current and energy/power based models.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-06-15  ------ inet-3.4.0 released ------

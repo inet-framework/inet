@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IIeee80211Band : public IPrintableObject
+class INET_API IIeee80211Band : public cObject, public IPrintableObject
 {
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211Band, name = " << getName(); }
-    virtual const char *getName() const = 0;
+    virtual const char *getName() const override = 0;
     virtual int getNumChannels() const = 0;
-    virtual Hz getCenterFreqency(int channelNumber) const = 0;
+    virtual Hz getCenterFrequency(int channelNumber) const = 0;
 };
 
 class INET_API Ieee80211BandBase : public IIeee80211Band
@@ -53,7 +53,7 @@ class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
     Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers);
 
     virtual int getNumChannels() const override { return centers.size(); }
-    virtual Hz getCenterFreqency(int channelNumber) const override;
+    virtual Hz getCenterFrequency(int channelNumber) const override;
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
@@ -67,7 +67,7 @@ class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
     Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels);
 
     virtual int getNumChannels() const override { return numChannels; }
-    virtual Hz getCenterFreqency(int channelNumber) const override;
+    virtual Hz getCenterFrequency(int channelNumber) const override;
 };
 
 class INET_API Ieee80211CompliantBands

@@ -1234,11 +1234,14 @@ void AODVRouting::clearState()
 
     if (useHelloMessages)
         cancelEvent(helloMsgTimer);
-
-    cancelEvent(expungeTimer);
-    cancelEvent(counterTimer);
-    cancelEvent(blacklistTimer);
-    cancelEvent(rrepAckTimer);
+    if (expungeTimer)
+        cancelEvent(expungeTimer);
+    if (counterTimer)
+        cancelEvent(counterTimer);
+    if (blacklistTimer)
+        cancelEvent(blacklistTimer);
+    if (rrepAckTimer)
+        cancelEvent(rrepAckTimer);
 }
 
 void AODVRouting::handleWaitForRREP(WaitForRREP *rrepTimer)
@@ -1248,6 +1251,7 @@ void AODVRouting::handleWaitForRREP(WaitForRREP *rrepTimer)
 
     ASSERT(addressToRreqRetries.find(destAddr) != addressToRreqRetries.end());
     if (addressToRreqRetries[destAddr] == rreqRetries) {
+        cancelRouteDiscovery(destAddr);
         EV_WARN << "Re-discovery attempts for node " << destAddr << " reached RREQ_RETRIES= " << rreqRetries << " limit. Stop sending RREQ." << endl;
         return;
     }
@@ -1583,6 +1587,11 @@ void AODVRouting::cancelRouteDiscovery(const L3Address& destAddr)
         networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(it->second));
 
     targetAddressToDelayedPackets.erase(lt, ut);
+
+    auto waitRREPIter = waitForRREPTimers.find(destAddr);
+    ASSERT(waitRREPIter != waitForRREPTimers.end());
+    cancelAndDelete(waitRREPIter->second);
+    waitForRREPTimers.erase(waitRREPIter);
 }
 
 bool AODVRouting::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime)

@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IIeee80211PreambleMode : public IPrintableObject
+class INET_API IIeee80211PreambleMode : public cObject, public IPrintableObject
 {
   public:
     virtual const simtime_t getDuration() const = 0;
 };
 
-class INET_API IIeee80211HeaderMode : public IPrintableObject
+class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
 {
   public:
     virtual bps getNetBitrate() const = 0;
@@ -40,7 +40,7 @@ class INET_API IIeee80211HeaderMode : public IPrintableObject
     virtual const IModulation *getModulation() const = 0;
 };
 
-class INET_API IIeee80211DataMode : public IPrintableObject
+class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
 {
   public:
     virtual bps getNetBitrate() const = 0;
@@ -51,7 +51,7 @@ class INET_API IIeee80211DataMode : public IPrintableObject
     virtual int getNumberOfSpatialStreams() const = 0;
 };
 
-class INET_API IIeee80211Mode : public IPrintableObject
+class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 {
   public:
     virtual int getLegacyCwMin() const = 0;
@@ -60,6 +60,9 @@ class INET_API IIeee80211Mode : public IPrintableObject
     virtual const IIeee80211PreambleMode *getPreambleMode() const = 0;
     virtual const IIeee80211HeaderMode *getHeaderMode() const = 0;
     virtual const IIeee80211DataMode *getDataMode() const = 0;
+    IIeee80211PreambleMode *_getPreambleMode() const { return const_cast<IIeee80211PreambleMode*>(getPreambleMode()); }
+    IIeee80211HeaderMode *_getHeaderMode() const { return const_cast<IIeee80211HeaderMode*>(getHeaderMode()); }
+    IIeee80211DataMode *_getDataMode() const { return const_cast<IIeee80211DataMode*>(getDataMode()); }
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;

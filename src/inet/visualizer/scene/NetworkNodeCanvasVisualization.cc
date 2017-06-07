@@ -15,67 +15,331 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+#include "inet/common/INETMath.h"
+#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
 
 namespace inet {
 
 namespace visualizer {
 
-NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, cFigure::Point size) :
+NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cFigure::Point& size, Displacement displacementHint, double displacementPriority) :
     figure(figure),
-    size(size)
+    bounds(cFigure::Rectangle(NaN, NaN, size.x, size.y)),
+    displacementHint(displacementHint),
+    displacementPriority(displacementPriority)
 {
 }
 
-NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode) :
+static BoxedLabelFigure *createRectangle(const char *label) {
+    auto figure = new BoxedLabelFigure();
+    figure->setText(label);
+    return figure;
+}
+
+NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double displacementPenalty) :
     cGroupFigure(networkNode->getFullName()),
-    networkNode(networkNode)
+    networkNode(networkNode),
+    annotationSpacing(annotationSpacing),
+    displacementPenalty(displacementPenalty)
 {
-    // TODO: determine size from icon
-    // const char *icon = networkNode->getDisplayString().getTagArg("i", 0);
-    size.x = 40;
-    size.y = 40;
+    annotationFigure = new cPanelFigure("annotation");
+    addFigure(annotationFigure);
+    submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
+    submoduleBounds.x = -submoduleBounds.width / 2;
+    submoduleBounds.y = -submoduleBounds.height / 2;
 }
 
-void NetworkNodeCanvasVisualization::updateAnnotationPositions()
+void NetworkNodeCanvasVisualization::refreshDisplay()
 {
-    double spacing = 4;
-    double totalHeight = 0;
-    for (auto annotation : annotations) {
-        double dx = -annotation.size.x / 2;
-        double dy = -size.y / 2 - spacing - totalHeight - annotation.size.y;
-        annotation.figure->setTransform(cFigure::Transform().translate(dx, dy));
-        totalHeight += annotation.size.y + spacing;
+    if (isLayoutInvalid) {
+        layout();
+        isLayoutInvalid = false;
     }
 }
 
-void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size)
+void NetworkNodeCanvasVisualization::addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacementHint, double displacementPriority)
 {
-    annotations.push_back(Annotation(figure, size));
-    addFigure(figure);
-    updateAnnotationPositions();
+    annotations.push_back(Annotation(figure, size, displacementHint, displacementPriority));
+    annotationFigure->addFigure(figure);
+    isLayoutInvalid = true;
 }
 
 void NetworkNodeCanvasVisualization::removeAnnotation(cFigure *figure)
 {
     for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        if ((*it).figure == figure) {
+        auto& annotation = *it;
+        if (annotation.figure == figure) {
             annotations.erase(it);
             break;
         }
     }
-    removeFigure(figure);
-    updateAnnotationPositions();
+    annotationFigure->removeFigure(figure);
+    isLayoutInvalid = true;
 }
 
 void NetworkNodeCanvasVisualization::setAnnotationSize(cFigure *figure, cFigure::Point size)
 {
     for (auto it = annotations.begin(); it != annotations.end(); it++) {
-        if ((*it).figure == figure) {
-            it->size = size;
+        auto& annotation = *it;
+        if (annotation.figure == figure) {
+            annotation.bounds.width = size.x;
+            annotation.bounds.height = size.y;
+            break;
         }
     }
-    updateAnnotationPositions();
+    isLayoutInvalid = true;
+}
+
+void NetworkNodeCanvasVisualization::setAnnotationVisible(cFigure *figure, bool visible)
+{
+    figure->setVisible(visible);
+    isLayoutInvalid = true;
+}
+
+static cFigure::Point getTopLeft(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x, rc.y);
+}
+
+static cFigure::Point getTopCenter(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width / 2, rc.y);
+}
+
+static cFigure::Point getTopRight(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width, rc.y);
+}
+
+static cFigure::Point getCenterLeft(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x, rc.y + rc.height / 2);
+}
+
+static cFigure::Point getCenterCenter(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width / 2, rc.y + rc.height / 2);
+}
+
+static cFigure::Point getCenterRight(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width, rc.y + rc.height / 2);
+}
+
+static cFigure::Point getBottomLeft(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x, rc.y + rc.height);
+}
+
+static cFigure::Point getBottomCenter(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width / 2, rc.y + rc.height);
+}
+
+static cFigure::Point getBottomRight(const cFigure::Rectangle& rc) {
+    return cFigure::Point(rc.x + rc.width, rc.y + rc.height);
+}
+
+static bool containsPoint(const cFigure::Rectangle& rc, const cFigure::Point& p) {
+    return rc.x < p.x && p.x < rc.x + rc.width && rc.y < p.y && p.y < rc.y + rc.height;
+}
+
+static bool intersectsRectangle(const cFigure::Rectangle& rc1, const cFigure::Rectangle& rc2) {
+    return rc1.x < rc2.x + rc2.width && rc1.x + rc1.width > rc2.x &&
+           rc1.y < rc2.y + rc2.height && rc1.y + rc1.height > rc2.y;
+}
+
+static cFigure::Rectangle createRectangle(const cFigure::Point& pt, const cFigure::Point& rs)
+{
+    return cFigure::Rectangle(pt.x, pt.y, rs.x, rs.y);
+}
+
+static void pushUnlessContains(std::vector<cFigure::Point>& pts, const std::vector<cFigure::Rectangle>& rcs, const cFigure::Point& pt)
+{
+    for (int j = 0; j < (int)rcs.size(); j++) {
+        cFigure::Rectangle rc = rcs[j];
+        if (containsPoint(rc, pt))
+            return;
+    }
+    pts.push_back(pt);
+}
+
+static double getDistance(const cFigure::Rectangle& rc, const cFigure::Point& pt) {
+    if (pt.x <= rc.x && pt.y <= rc.y)
+        return pt.distanceTo(getTopLeft(rc));
+    else if (rc.x <= pt.x && pt.x <= rc.x + rc.width && pt.y <= rc.y)
+        return fabs(pt.y - rc.y);
+    else if (pt.x >= rc.x + rc.width && pt.y <= rc.y)
+        return pt.distanceTo(getTopRight(rc));
+    else if (pt.x <= rc.x && rc.y <= pt.y && pt.y <= rc.y + rc.height)
+        return fabs(pt.x - rc.x);
+    else if (pt.x >= rc.x + rc.width && rc.y <= pt.y && pt.y <= rc.y + rc.height)
+        return fabs(pt.x - (rc.x + rc.width));
+    else if (pt.x <= rc.x && pt.y >= rc.y + rc.height)
+        return pt.distanceTo(getBottomLeft(rc));
+    else if (rc.x <= pt.x && pt.x <= rc.x + rc.width && pt.y >= rc.y + rc.height)
+        return fabs(pt.y - (rc.y + rc.height));
+    else if (pt.x >= rc.x + rc.width && pt.y >= rc.y + rc.height)
+        return pt.distanceTo(getBottomRight(rc));
+    else
+        return 0;
+}
+
+static double getClosestDisplacementDistance(const cFigure::Rectangle& rc, Displacement displacement, const cFigure::Point& pt) {
+    double size = 1000;
+    double distance = std::numeric_limits<double>::infinity();
+    if (displacement & DISPLACEMENT_TOP_LEFT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x - size, rc.y - size, size, size), pt));
+    if (displacement & DISPLACEMENT_TOP_CENTER)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x, rc.y - size, rc.width, size), pt));
+    if (displacement & DISPLACEMENT_TOP_RIGHT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x + rc.width, rc.y - size, size, size), pt));
+    if (displacement & DISPLACEMENT_CENTER_LEFT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x - size, rc.y, size, rc.height), pt));
+    if (displacement & DISPLACEMENT_CENTER_RIGHT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x + rc.width, rc.y, size, rc.height), pt));
+    if (displacement & DISPLACEMENT_BOTTOM_LEFT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x - size, rc.y + rc.height, size, size), pt));
+    if (displacement & DISPLACEMENT_BOTTOM_CENTER)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x, rc.y + rc.height, rc.width, size), pt));
+    if (displacement & DISPLACEMENT_BOTTOM_RIGHT)
+        distance = std::min(distance, getDistance(cFigure::Rectangle(rc.x + rc.width, rc.y + rc.height, size, size), pt));
+    return distance;
+}
+
+bool NetworkNodeCanvasVisualization::Annotation::compareDisplacementPriority(const Annotation& a1, const Annotation& a2) {
+    return a1.displacementPriority < a2.displacementPriority;
+}
+
+void NetworkNodeCanvasVisualization::layout()
+{
+    std::vector<cFigure::Rectangle> rcs;  // rectangles of annotations already positioned
+    std::vector<cFigure::Point> pts;  // candidate points where annotations may be positioned
+    cFigure::Rectangle extendendSubmoduleBounds = submoduleBounds;
+    extendendSubmoduleBounds.x -= annotationSpacing / 2;
+    extendendSubmoduleBounds.y -= annotationSpacing / 2;
+    extendendSubmoduleBounds.width += annotationSpacing;
+    extendendSubmoduleBounds.height += annotationSpacing;
+    rcs.push_back(extendendSubmoduleBounds);
+    pts.push_back(getTopLeft(extendendSubmoduleBounds));
+    pts.push_back(getTopCenter(extendendSubmoduleBounds));
+    pts.push_back(getTopRight(extendendSubmoduleBounds));
+    pts.push_back(getCenterLeft(extendendSubmoduleBounds));
+    pts.push_back(getCenterRight(extendendSubmoduleBounds));
+    pts.push_back(getBottomLeft(extendendSubmoduleBounds));
+    pts.push_back(getBottomCenter(extendendSubmoduleBounds));
+    pts.push_back(getBottomRight(extendendSubmoduleBounds));
+
+    std::sort(annotations.begin(), annotations.end(), Annotation::compareDisplacementPriority);
+
+    // delete all annotation positions
+    for (auto it = annotations.begin(); it != annotations.end(); it++) {
+        auto& annotation = *it;
+        annotation.bounds.x = NaN;
+        annotation.bounds.y = NaN;
+    }
+
+    for (auto it = annotations.begin(); it != annotations.end(); it++) {
+        auto& annotation = *it;
+        if (!annotation.figure->isVisible())
+            continue;
+        cFigure::Point rs = cFigure::Point(annotation.bounds.width + annotationSpacing, annotation.bounds.height + annotationSpacing);
+
+        // find the best minimizing the distance cost function
+        double bestDistance = std::numeric_limits<double>::infinity();
+        cFigure::Rectangle bestRc;
+
+        // for all candidate points
+        for (int j = 0; j < (int)pts.size(); j++) {
+            cFigure::Point pt = pts[j];
+
+            // align annotation to candidate points with its various points
+            for (int k = 0; k < 8; k++) {
+                cFigure::Rectangle candidateRc;
+                switch (k) {
+                    case 0:
+                        // candidate point is top left
+                        candidateRc = createRectangle(pt - cFigure::Point(0, 0), rs);
+                        break;
+                    case 1:
+                        // candidate point is top center
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x / 2, 0), rs);
+                        break;
+                    case 2:
+                        // candidate point is top right
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x, 0), rs);
+                        break;
+                    case 3:
+                        // candidate point is center left
+                        candidateRc = createRectangle(pt - cFigure::Point(0, rs.y / 2), rs);
+                        break;
+                    case 4:
+                        // candidate point is center right
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x, rs.y / 2), rs);
+                        break;
+                    case 5:
+                        // candidate point is bottom left
+                        candidateRc = createRectangle(pt - cFigure::Point(0, rs.y), rs);
+                        break;
+                    case 6:
+                        // candidate point is bottom center
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x / 2, rs.y), rs);
+                        break;
+                    case 7:
+                        // candidate point is bottom right
+                        candidateRc = createRectangle(pt - cFigure::Point(rs.x, rs.y), rs);
+                        break;
+                }
+
+                double distance = 0;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getTopLeft(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getTopRight(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getBottomLeft(candidateRc)) * displacementPenalty;
+                distance += getClosestDisplacementDistance(submoduleBounds, annotation.displacementHint, getBottomRight(candidateRc)) * displacementPenalty;
+
+                // find an already positioned annotation which would intersect the candidate rectangle
+                bool intersects = false;
+                for (int l = 0; l < (int)rcs.size(); l++) {
+                    cFigure::Rectangle rc = rcs[l];
+                    if (intersectsRectangle(candidateRc, rc)) {
+                        intersects = true;
+                        break;
+                    }
+                }
+                if (intersects)
+                    continue;
+
+                // if better than the current best
+                distance += getCenterCenter(submoduleBounds).distanceTo(getCenterCenter(candidateRc));
+                if (distance < bestDistance) {
+                    bestRc = candidateRc;
+                    bestDistance = distance;
+                    if (distance == 0)
+                        goto found;
+                }
+            }
+        }
+
+    found:
+        // store position and rectangle
+        annotation.bounds.x = bestRc.x + annotationSpacing / 2;
+        annotation.bounds.y = bestRc.y + annotationSpacing / 2;
+        annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
+
+        // delete candidate points covered by best rc
+        for (int j = 0; j < (int)pts.size(); j++) {
+            cFigure::Point pt = pts[j];
+
+            if (containsPoint(bestRc, pt))
+                pts.erase(pts.begin() + j--);
+        }
+
+        // push new candidates
+        pushUnlessContains(pts, rcs, getTopLeft(bestRc));
+        pushUnlessContains(pts, rcs, getTopCenter(bestRc));
+        pushUnlessContains(pts, rcs, getTopRight(bestRc));
+        pushUnlessContains(pts, rcs, getCenterLeft(bestRc));
+        pushUnlessContains(pts, rcs, getCenterRight(bestRc));
+        pushUnlessContains(pts, rcs, getBottomLeft(bestRc));
+        pushUnlessContains(pts, rcs, getBottomCenter(bestRc));
+        pushUnlessContains(pts, rcs, getBottomRight(bestRc));
+
+        rcs.push_back(bestRc);
+    }
 }
 
 } // namespace visualizer

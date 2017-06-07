@@ -2380,6 +2380,7 @@ void Area::calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRouting
                 /* Look for an equal cost entry in the sameOrWorseCost list, and
                  * also clear the more expensive entries from the newRoutingTable.
                  */
+                //FIXME The code does not work according to the comment
                 for (auto checkedEntry : sameOrWorseCost) {
                     if (checkedEntry->getCost() > currentCost) {
                         for (auto entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {

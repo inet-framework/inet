@@ -23,6 +23,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/NotifierConsts.h"
@@ -174,6 +175,7 @@ RIPRouting::~RIPRouting()
 {
     for (auto & elem : ripRoutes)
         delete elem;
+    ripRoutes.clear();
     cancelAndDelete(updateTimer);
     cancelAndDelete(triggeredUpdateTimer);
     cancelAndDelete(startupTimer);
@@ -508,6 +510,8 @@ void RIPRouting::stopRIPRouting()
     cancelEvent(triggeredUpdateTimer);
 
     // clear data
+    for (auto& elem : ripRoutes)
+        delete elem;
     ripRoutes.clear();
     ripInterfaces.clear();
 }
@@ -1043,9 +1047,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
         deleteRoute(route);
     }
 
-    auto end = std::remove(ripRoutes.begin(), ripRoutes.end(), ripRoute);
-    if (end != ripRoutes.end())
-        ripRoutes.erase(end, ripRoutes.end());
+    remove(ripRoutes, ripRoute);
     delete ripRoute;
 
     emit(numRoutesSignal, (unsigned long)ripRoutes.size());
@@ -1136,6 +1138,7 @@ void RIPRouting::deleteInterface(const InterfaceEntry *ie)
     bool emitNumRoutesSignal = false;
     for (auto it = ripRoutes.begin(); it != ripRoutes.end(); ) {
         if ((*it)->getInterface() == ie) {
+            delete *it;
             it = ripRoutes.erase(it);
             emitNumRoutesSignal = true;
         }

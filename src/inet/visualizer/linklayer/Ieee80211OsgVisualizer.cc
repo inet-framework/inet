@@ -69,7 +69,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createI
     auto geode = new osg::Geode();
     geode->addDrawable(geometry);
     // TODO: apply tinting
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new Ieee80211OsgVisualization(networkNodeVisualization, geode, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 

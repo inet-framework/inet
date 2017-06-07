@@ -15,7 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "InProgressFrames.h"
+#include <algorithm>
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -88,12 +89,25 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 void InProgressFrames::dropFrame(Packet *packet)
 {
     inProgressFrames.remove(packet);
+    droppedFrames.push_back(packet);
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
-    SequenceControlPredicate predicate(seqAndFragNums);
-    inProgressFrames.remove_if(predicate);
+    for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
+        auto frame = *it;
+        if (frame->getType() == ST_DATA_WITH_QOS) {
+            auto dataFrame = check_and_cast<const Ieee80211DataFrame*>(frame);
+            if (seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0) {
+                it = inProgressFrames.erase(it);
+                droppedFrames.push_back(frame);
+            }
+            else
+                it++;
+        }
+        else
+            it++;
+    }
 }
 
 std::vector<Packet *> InProgressFrames::getOutstandingFrames()
@@ -106,9 +120,18 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
     return outstandingFrames;
 }
 
+void InProgressFrames::clearDroppedFrames()
+{
+    for (auto frame : droppedFrames)
+        delete frame;
+    droppedFrames.clear();
+}
+
 InProgressFrames::~InProgressFrames()
 {
     for (auto frame : inProgressFrames)
+        delete frame;
+    for (auto frame : droppedFrames)
         delete frame;
 }
 

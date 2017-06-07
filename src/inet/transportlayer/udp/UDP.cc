@@ -26,6 +26,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -320,6 +321,7 @@ void UDP::processCommandFromApp(cMessage *msg)
 
 void UDP::processPacketFromApp(Packet *packet)
 {
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
@@ -397,6 +399,7 @@ void UDP::processPacketFromApp(Packet *packet)
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(sentPkSignal, packet);
+    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
     send(packet, "ipOut");
     numSent++;
 }
@@ -404,6 +407,7 @@ void UDP::processPacketFromApp(Packet *packet)
 void UDP::processUDPPacket(Packet *udpPacket)
 {
     ASSERT(udpPacket->getControlInfo() == nullptr);
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, udpPacket);
     emit(rcvdPkSignal, udpPacket);
 
     bit udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
@@ -535,12 +539,12 @@ void UDP::processICMPv6Error(Packet *packet)
         udpHeaderAvailable = true;
     }
 
-    EV_WARN << "ICMPv6 error received: type=" << type << " code=" << code
-            << " about packet " << localAddr << ":" << localPort << " > "
-            << remoteAddr << ":" << remotePort << "\n";
-
     // identify socket and report error to it
     if (udpHeaderAvailable) {
+        EV_WARN << "ICMP error received: type=" << type << " code=" << code
+                << " about packet " << localAddr << ":" << localPort << " > "
+                << remoteAddr << ":" << remotePort << "\n";
+
         SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
         if (sd) {
             // send UDP_I_ERROR to socket
@@ -815,6 +819,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
     payload->ensureTag<L4PortInd>()->setDestPort(destPort);
 
     emit(passedUpPkSignal, payload);
+    emit(LayeredProtocolBase::packetSentToUpperSignal, payload);
     send(payload, "appOut");
     numPassedUp++;
 }

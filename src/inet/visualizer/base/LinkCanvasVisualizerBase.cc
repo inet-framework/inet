@@ -25,7 +25,7 @@ namespace inet {
 
 namespace visualizer {
 
-LinkCanvasVisualizerBase::LinkCanvasVisualization::LinkCanvasVisualization(cLineFigure *figure, int sourceModuleId, int destinationModuleId) :
+LinkCanvasVisualizerBase::LinkCanvasVisualization::LinkCanvasVisualization(LabeledLineFigure *figure, int sourceModuleId, int destinationModuleId) :
     LinkVisualization(sourceModuleId, destinationModuleId),
     figure(figure)
 {
@@ -69,13 +69,19 @@ void LinkCanvasVisualizerBase::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(linkVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const LinkVisualizerBase::LinkVisualization *LinkCanvasVisualizerBase::createLinkVisualization(cModule *source, cModule *destination) const
+const LinkVisualizerBase::LinkVisualization *LinkCanvasVisualizerBase::createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const
 {
-    auto figure = new cLineFigure("link");
-    figure->setEndArrowhead(cFigure::ARROW_BARBED);
-    figure->setLineWidth(lineWidth);
-    figure->setLineColor(lineColor);
-    figure->setLineStyle(lineStyle);
+    auto figure = new LabeledLineFigure("link");
+    auto lineFigure = figure->getLineFigure();
+    lineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
+    lineFigure->setLineWidth(lineWidth);
+    lineFigure->setLineColor(lineColor);
+    lineFigure->setLineStyle(lineStyle);
+    auto labelFigure = figure->getLabelFigure();
+    labelFigure->setFont(labelFont);
+    labelFigure->setColor(labelColor);
+    auto text = getLinkVisualizationText(packet);
+    labelFigure->setText(text.c_str());
     return new LinkCanvasVisualization(figure, source->getId(), destination->getId());
 }
 
@@ -100,7 +106,15 @@ void LinkCanvasVisualizerBase::setAlpha(const LinkVisualization *linkVisualizati
 {
     auto linkCanvasVisualization = static_cast<const LinkCanvasVisualization *>(linkVisualization);
     auto figure = linkCanvasVisualization->figure;
-    figure->setLineOpacity(alpha);
+    figure->getLineFigure()->setLineOpacity(alpha);
+}
+
+void LinkCanvasVisualizerBase::refreshLinkVisualization(const LinkVisualization *linkVisualization, cPacket *packet)
+{
+    LinkVisualizerBase::refreshLinkVisualization(linkVisualization, packet);
+    auto linkCanvasVisualization = static_cast<const LinkCanvasVisualization *>(linkVisualization);
+    auto text = getLinkVisualizationText(packet);
+    linkCanvasVisualization->figure->getLabelFigure()->setText(text.c_str());
 }
 
 } // namespace visualizer

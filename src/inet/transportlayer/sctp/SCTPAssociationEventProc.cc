@@ -326,9 +326,9 @@ void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
             sendAddInAndOutStreamsRequest(rinfo);
         } else if (!state->fragInProgress && state->outstandingBytes == 0) {
             sendStreamResetRequest(rinfo);
-            if (rinfo->getRequestType() == RESET_OUTGOING || RESET_BOTH ||
-                rinfo->getRequestType() == SSN_TSN || rinfo->getRequestType() == ADD_INCOMING ||
-                rinfo->getRequestType() == ADD_OUTGOING) {
+            if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_BOTH ||
+                    rinfo->getRequestType() == SSN_TSN || rinfo->getRequestType() == ADD_INCOMING ||
+                    rinfo->getRequestType() == ADD_OUTGOING) {
                 state->resetPending = true;
             }
         } else if (state->outstandingBytes > 0) {
@@ -336,9 +336,9 @@ void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
                 if (rinfo->getStreamsArraySize() > 0) {
                     for (uint16 i = 0; i < rinfo->getStreamsArraySize(); i++) {
                         if ((getBytesInFlightOfStream(rinfo->getStreams(i)) > 0) ||
-                            getFragInProgressOfStream(rinfo->getStreams(i)) ||
-                            !orderedQueueEmptyOfStream(rinfo->getStreams(i)) ||
-                            !unorderedQueueEmptyOfStream(rinfo->getStreams(i))) {
+                                getFragInProgressOfStream(rinfo->getStreams(i)) ||
+                                !orderedQueueEmptyOfStream(rinfo->getStreams(i)) ||
+                                !unorderedQueueEmptyOfStream(rinfo->getStreams(i))) {
                             state->streamsPending.push_back(rinfo->getStreams(i));
                         } else {
                             state->streamsToReset.push_back(rinfo->getStreams(i));
@@ -361,8 +361,8 @@ void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
                 }
             }
             if ((rinfo->getRequestType() == SSN_TSN) ||
-                (rinfo->getRequestType() == ADD_INCOMING) ||
-                (rinfo->getRequestType() == ADD_OUTGOING)) {
+                    (rinfo->getRequestType() == ADD_INCOMING) ||
+                    (rinfo->getRequestType() == ADD_OUTGOING)) {
                 state->resetInfo = rinfo;
                 state->resetInfo->setName("state-resetLater");
                 state->localRequestType = state->resetInfo->getRequestType();

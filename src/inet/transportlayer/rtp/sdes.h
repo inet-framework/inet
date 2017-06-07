@@ -122,7 +122,7 @@ class INET_API SDESItem : public cObject
     /**
      * The sdes string.
      */
-    const char *_content;
+    std::string _content;
 };
 
 /**

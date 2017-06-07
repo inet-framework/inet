@@ -49,7 +49,7 @@ void InfoCanvasVisualizer::initialize(int stage)
 InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualization(cModule *module) const
 {
     auto figure = new BoxedLabelFigure("info");
-    figure->setTags("info");
+    figure->setTags((std::string("info ") + tags).c_str());
     figure->setTooltip("This label represents some module information");
     figure->setAssociatedObject(module);
     figure->setZIndex(zIndex);
@@ -59,7 +59,7 @@ InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualiza
     figure->setBackgroundColor(backgroundColor);
     figure->setOpacity(opacity);
     auto networkNode = getContainingNode(module);
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InfoCanvasVisualization(networkNodeVisualization, figure, module->getId());
 }
 
@@ -68,7 +68,7 @@ void InfoCanvasVisualizer::addInfoVisualization(const InfoVisualization *infoVis
     InfoVisualizerBase::addInfoVisualization(infoVisualization);
     auto infoCanvasVisualization = static_cast<const InfoCanvasVisualization *>(infoVisualization);
     auto figure = infoCanvasVisualization->figure;
-    infoCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize());
+    infoCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void InfoCanvasVisualizer::removeInfoVisualization(const InfoVisualization *infoVisualization)

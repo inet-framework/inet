@@ -37,7 +37,7 @@ void Dcf::initialize(int stage)
         dataAndMgmtRateControl = dynamic_cast<IRateControl *>(getSubmodule(("rateControl")));
         tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        dcfChannelAccess = check_and_cast<IChannelAccess *>(getSubmodule("channelAccess"));
+        dcfChannelAccess = check_and_cast<Dcaf *>(getSubmodule("channelAccess"));
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
         recipientDataService = check_and_cast<IRecipientMacDataService*>(getSubmodule("recipientMacDataService"));
         recoveryProcedure = check_and_cast<NonQoSRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
@@ -206,6 +206,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHe
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header));
         recipientProcessControlFrame(packet, header);
+        delete frame;
     }
 }
 
@@ -250,12 +251,12 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     EV_INFO << "RTS frame transmission failed\n";
     auto protectedHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
     recoveryProcedure->rtsFrameTransmissionFailed(protectedHeader, stationRetryCounters);
+    EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         inProgressFrames->dropFrame(packet);
         emit(NF_PACKET_DROP, packet);
         emit(NF_LINK_BREAK, packet);
-        delete packet;
     }
 }
 
@@ -263,6 +264,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
     auto transmittedHeader = packet->peekHeader<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(transmittedHeader)) {
+        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(dataOrMgmtFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(dataOrMgmtFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         if (originatorAckPolicy->isAckNeeded(dataOrMgmtHeader)) {
             ackHandler->processTransmittedDataOrMgmtFrame(dataOrMgmtHeader);
         }
@@ -271,8 +273,11 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
             inProgressFrames->dropFrame(packet);
         }
     }
-    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(transmittedHeader))
+    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(transmittedHeader)) {
+        auto protectedFrame = inProgressFrames->getFrameToTransmit(); // TODO: kludge
+        EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
+    }
 }
 
 void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket)
@@ -282,11 +287,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     if (frame->getType() == ST_ACK) {
         auto lastTransmittedDataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(lastTransmittedFrame);
         if (dataAndMgmtRateControl) {
-            int retryCount;
-            if (lastTransmittedFrame->getRetry())
-                retryCount = recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtHeader);
-            else
-                retryCount = 0;
+            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtFrame) : 0;
             dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
         }
         recoveryProcedure->ackFrameReceived(packet, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
@@ -299,7 +300,6 @@ void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
         recoveryProcedure->ctsFrameReceived(stationRetryCounters);
     else
         throw cRuntimeError("Unknown frame type");
-    delete packet;
 }
 
 void Dcf::originatorProcessFailedFrame(Packet *packet)
@@ -326,7 +326,6 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
         packet->popTrailer<Ieee80211MacTrailer>();
         emit(NF_PACKET_DROP, packet);
         emit(NF_LINK_BREAK, packet);
-        delete packet;
     }
     else {
         auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
@@ -364,14 +363,14 @@ void Dcf::corruptedFrameReceived()
 Dcf::~Dcf()
 {
     cancelAndDelete(startRxTimer);
-    delete pendingQueue;
-    delete inProgressFrames;
     delete rtsProcedure;
     delete recipientAckProcedure;
     delete ackHandler;
     delete stationRetryCounters;
-    delete frameSequenceHandler;
     delete ctsProcedure;
+    delete frameSequenceHandler;
+    delete inProgressFrames;
+    delete pendingQueue;
 }
 
 } // namespace ieee80211

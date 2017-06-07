@@ -1,5 +1,28 @@
 ====== inet-3.x ======
 
+2017-03-07  Levente Mészáros
+
+	Removed @nic from Ieee80211Mac, the MAC module is not the NIC module.
+
+2017-03-02  Benjamin Martin Seregi
+
+	Extended the IEEE 802.11 MAC implementation with the following components
+	(i.e. segregates them in their own classes):
+
+	- coordination functions
+	- channel access methods
+	- MAC data services
+	- frame exchange sequences
+	- queues
+	- TX/RX components
+
+	It includes several enhancements and new features to the previous version
+	such as block acknowledgement and MSDU aggregation.
+
+2017-01-13  Levente Mészáros
+
+	Added packet dropped signals.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-10-20  Rudolf Hornig

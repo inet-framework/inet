@@ -40,6 +40,7 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
     cTextFigure *labelFigure;
 
     double value = NaN;
+    int labelOffset = 10;
     Anchor anchor = ANCHOR_NW;
 
   protected:
@@ -79,6 +80,9 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
     const char *getLabel() const;
     void setLabel(const char *text);
 
+    const int getLabelOffset() const;
+    void setLabelOffset(int offset);
+
     const Font& getLabelFont() const;
     void setLabelFont(const Font& font);
 
@@ -96,6 +100,7 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);
+
 };
 
 // } // namespace inet

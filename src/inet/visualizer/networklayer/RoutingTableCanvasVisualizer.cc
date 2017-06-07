@@ -23,8 +23,8 @@ namespace visualizer {
 
 Define_Module(RoutingTableCanvasVisualizer);
 
-RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, int nodeModuleId, int nextHopModuleId) :
-    RouteVisualization(nodeModuleId, nextHopModuleId),
+RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+    RouteVisualization(route, nodeModuleId, nextHopModuleId),
     figure(figure)
 {
 }
@@ -68,7 +68,7 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
 const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto figure = new LabeledLineFigure("routing entry");
-    figure->setTags("route");
+    figure->setTags((std::string("route ") + tags).c_str());
     figure->setTooltip("This arrow represents a route in a routing table");
     figure->setAssociatedObject(route);
     auto lineFigure = figure->getLineFigure();
@@ -79,10 +79,10 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualiz
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
-    auto text = getRouteVisualizationText(route);
-    labelFigure->setText(text.c_str());
-    auto routeVisualization = new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
+    labelFigure->setVisible(displayLabels);
+    auto routeVisualization = new RouteCanvasVisualization(figure, route, node->getId(), nextHop->getId());
     routeVisualization->shiftPriority = 0.5;
+    refreshRouteVisualization(routeVisualization);
     return routeVisualization;
 }
 
@@ -102,11 +102,11 @@ void RoutingTableCanvasVisualizer::removeRouteVisualization(const RouteVisualiza
     routeGroup->removeFigure(routeCanvasVisualization->figure);
 }
 
-void RoutingTableCanvasVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route)
+void RoutingTableCanvasVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization) const
 {
     auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
     auto labelFigure = routeCanvasVisualization->figure->getLabelFigure();
-    auto text = getRouteVisualizationText(route);
+    auto text = displayRoutesIndividually ? getRouteVisualizationText(routeCanvasVisualization->route) : std::to_string(routeVisualization->numRoutes) + (routeVisualization->numRoutes > 1 ? " routes" : " route");
     labelFigure->setText(text.c_str());
 }
 

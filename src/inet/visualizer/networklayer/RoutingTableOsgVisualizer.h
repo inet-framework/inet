@@ -34,7 +34,7 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
         osg::Node *node = nullptr;
 
       public:
-        RouteOsgVisualization(osg::Node *node, int nodeModuleId, int nextHopModuleId);
+        RouteOsgVisualization(osg::Node *node, const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteOsgVisualization();
     };
 
@@ -42,7 +42,7 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override;
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route) override;
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;
 
 #else // ifdef WITH_OSG
 
@@ -50,7 +50,7 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override { return nullptr; }
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route) override { }
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override { }
 
 #endif // ifdef WITH_OSG
 };

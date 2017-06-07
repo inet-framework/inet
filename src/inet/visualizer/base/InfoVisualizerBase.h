@@ -19,6 +19,7 @@
 #define __INET_INFOVISUALIZERBASE_H
 
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/Displacement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
 #include "inet/visualizer/util/StringFormat.h"
 
@@ -60,6 +61,8 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
     double opacity = NaN;
+    Displacement displacementHint;
+    double displacementPriority;
     //@}
 
     std::vector<const InfoVisualization *> infoVisualizations;

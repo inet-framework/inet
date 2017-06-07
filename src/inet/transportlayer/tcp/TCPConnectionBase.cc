@@ -75,6 +75,8 @@ TCPStateVariables::TCPStateVariables()
 
     ws_support = false;    // will be set from configureStateVariables()
     ws_enabled = false;
+    ws_manual_scale = -1;
+
     snd_ws = false;
     rcv_ws = false;
     rcv_wnd_scale = 0;    // will be set from configureStateVariables()

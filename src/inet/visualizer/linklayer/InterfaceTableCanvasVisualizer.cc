@@ -53,7 +53,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisual
     auto gate = displayWiredInterfacesAtConnections ? getOutputGate(networkNode, interfaceEntry) : nullptr;
     if (gate == nullptr) {
         figure = new BoxedLabelFigure("networkInterface");
-        figure->setTags("network_interface");
+        figure->setTags((std::string("network_interface ") + tags).c_str());
         figure->setTooltip("This label represents a network interface in a network node");
         figure->setAssociatedObject(interfaceEntry);
         figure->setZIndex(zIndex);
@@ -67,7 +67,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisual
             figure->getRectangleFigure()->setVisible(false);
         }
     }
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InterfaceCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 
@@ -121,7 +121,7 @@ void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVi
         displayString.setTagArg("t", 1, "l");
     }
     else
-        interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize());
+        interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)

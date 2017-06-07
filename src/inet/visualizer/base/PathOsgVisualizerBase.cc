@@ -50,7 +50,7 @@ void PathOsgVisualizerBase::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const std::vector<int>& path) const
+const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
 {
     std::vector<Coord> points;
     for (auto id : path) {

@@ -41,7 +41,7 @@ class INET_API NetworkNodeCanvasVisualizer : public NetworkNodeVisualizerBase
     virtual void setNetworkNodeVisualization(const cModule *networkNode, NetworkNodeCanvasVisualization *networkNodeVisualization);
 
   public:
-    virtual NetworkNodeCanvasVisualization *getNeworkNodeVisualization(const cModule *networkNode) const;
+    virtual NetworkNodeCanvasVisualization *getNetworkNodeVisualization(const cModule *networkNode) const;
 };
 
 } // namespace visualizer

@@ -30,6 +30,10 @@ package inet.visualizer.base;
 // filters. The filters use the format of cMatchExpression with the packet name
 // as the default attribute.
 //
+// The format string can contain the following directives:
+//  - %n packet name
+//  - %c packet class
+//
 // @see ~PhysicalLinkVisualizerBase, ~DataLinkVisualizerBase, ~VisualizerBase
 //
 simple LinkVisualizerBase extends VisualizerBase
@@ -47,11 +51,15 @@ simple LinkVisualizerBase extends VisualizerBase
         string lineStyle = default("solid"); // link arrow style (solid, dashed, dotted)
         double lineWidth = default(3); // link arrow width
 
-        double lineShift = default(10); // line shift to avoid overlapping arrows
+        double lineShift = default(16); // line shift to avoid overlapping arrows
         string lineShiftMode = default("normal"); // determines how overlapping arrows are shifted, possible values are: none, normal, x, y, z; optional prefix + or -
 
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
+
+        string labelFormat = default("%n"); // determines what link data is displayed
+        string labelFont = default("<default>, 8px"); // label font, automatic by default
+        string labelColor = default("black"); // label color, black by default
 
         string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive links fade out
         double fadeOutTime @unit(s) = default(1s); // how quickly inactive links fade away, 1 second by default

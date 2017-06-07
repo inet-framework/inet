@@ -47,14 +47,16 @@ void Ieee80211BerTableErrorModel::initialize(int stage)
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))
             opMode = 'b';
-        else if (!strcmp("g", opModeString))
+        else if (!strcmp("g(erp)", opModeString))
+            opMode = 'g';
+        else if (!strcmp("g(mixed)", opModeString))
             opMode = 'g';
         else if (!strcmp("a", opModeString))
             opMode = 'a';
         else if (!strcmp("p", opModeString))
             opMode = 'p';
         else
-            opMode = 'g';
+            throw cRuntimeError("Unknown opMode");
         berTableFile = new BerParseFile(opMode);
         berTableFile->parseFile(fname);
     }

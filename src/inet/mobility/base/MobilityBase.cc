@@ -52,6 +52,7 @@ static bool isFiniteNumber(double value)
 
 MobilityBase::MobilityBase() :
     visualRepresentation(nullptr),
+    canvasProjection(nullptr),
     constraintAreaMin(Coord::ZERO),
     constraintAreaMax(Coord::ZERO),
     lastPosition(Coord::ZERO),
@@ -207,7 +208,7 @@ static int reflect(double min, double max, double& coordinate, double& speed)
 void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& speed, double& angle)
 {
     int sign;
-    double dummy;
+    double dummy = NaN;
     if (lastPosition.x < constraintAreaMin.x || constraintAreaMax.x < lastPosition.x) {
         sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, speed.x);
         reflect(constraintAreaMin.x, constraintAreaMax.x, targetPosition.x, dummy);

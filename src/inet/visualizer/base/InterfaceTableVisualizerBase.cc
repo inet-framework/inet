@@ -19,6 +19,7 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
@@ -39,8 +40,8 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'N':
             result = interfaceEntry->getName();
             break;
-        case 'n':
-            result = interfaceEntry->getNetworkAddress().str();
+        case 'm':
+            result = interfaceEntry->getMacAddress().str();
             break;
         case '4':
             result = interfaceEntry->ipv4Data() == nullptr ? "" : interfaceEntry->ipv4Data()->getIPAddress().str();
@@ -48,8 +49,19 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case '6':
             result = interfaceEntry->ipv6Data() == nullptr ? "" : interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
             break;
-        case 'm':
-            result = interfaceEntry->getMacAddress().str();
+        case 'a':
+            if (interfaceEntry->ipv4Data() != nullptr)
+                result = interfaceEntry->ipv4Data()->getIPAddress().str();
+            else if (interfaceEntry->ipv6Data() != nullptr)
+                result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
+            else
+                result = "";
+            break;
+        case 'g':
+            result = interfaceEntry->getGenericNetworkProtocolData() == nullptr ? "" : interfaceEntry->getGenericNetworkProtocolData()->getAddress().str();
+            break;
+        case 'n':
+            result = interfaceEntry->getNetworkAddress().str();
             break;
         case 'i':
             result = interfaceEntry->info();
@@ -83,6 +95,8 @@ void InterfaceTableVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         format.parseFormat(par("format"));
+        displacementHint = parseDisplacement(par("displacementHint"));
+        displacementPriority = par("displacementPriority");
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::parseColor(par("textColor"));
         backgroundColor = cFigure::parseColor(par("backgroundColor"));

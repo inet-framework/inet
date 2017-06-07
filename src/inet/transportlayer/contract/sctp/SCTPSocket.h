@@ -200,7 +200,7 @@ class INET_API SCTPSocket
     void setRtoInfo(double initial, double max, double min);
     void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; };
 
-    void setUserOptions(void* msg) { sOptions = (SocketOptions*) msg; };
+    void setUserOptions(void* msg) { delete sOptions; sOptions = (SocketOptions*) msg; };
 
     int getOutboundStreams() { return appOptions->outboundStreams; };
     int getInboundStreams() { return appOptions->inboundStreams; };

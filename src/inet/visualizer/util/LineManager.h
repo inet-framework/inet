@@ -35,7 +35,7 @@ class INET_API LineManager
         mutable int shiftOffset;
 
       public:
-        ModuleLine(int sourceModuleId, int destinationModuleId, double shiftPriority = 0) : sourceModuleId(sourceModuleId), destinationModuleId(destinationModuleId), shiftPriority(shiftPriority) { }
+        ModuleLine(int sourceModuleId, int destinationModuleId, double shiftPriority = 0) : sourceModuleId(sourceModuleId), destinationModuleId(destinationModuleId), shiftPriority(shiftPriority), shiftOffset(0) { }
     };
 
     class INET_API ModulePath {

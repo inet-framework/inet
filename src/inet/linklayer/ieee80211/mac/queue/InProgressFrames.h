@@ -29,44 +29,24 @@ namespace ieee80211 {
 
 class INET_API InProgressFrames
 {
-    public:
-        class SequenceControlPredicate
-        {
-            private:
-                const std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>>& seqAndFragNums;
-
-            public:
-                SequenceControlPredicate(const std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>>& seqAndFragNums) :
-                    seqAndFragNums(seqAndFragNums) {}
-
-                bool operator() (Packet *packet) {
-                    const auto& frame = packet->peekHeader<Ieee80211MacHeader>();
-                    if (frame->getType() == ST_DATA_WITH_QOS) {
-                        auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
-                        return seqAndFragNums.count(std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(), SequenceControlField(dataHeader->getSequenceNumber(), dataHeader->getFragmentNumber())))) != 0;
-                    }
-                    else
-                        throw cRuntimeError("This method is not applicable for NonQoS frames");
-                }
-        };
-
     protected:
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
-        std::list<Packet*> inProgressFrames;
+        std::list<Packet *> inProgressFrames;
+        std::vector<Packet *> droppedFrames;
 
     protected:
         void ensureHasFrameToTransmit();
         bool hasEligibleFrameToTransmit();
 
     public:
-        virtual ~InProgressFrames();
         InProgressFrames(PendingQueue *pendingQueue, IOriginatorMacDataService *dataService, IAckHandler *ackHandler) :
             pendingQueue(pendingQueue),
             dataService(dataService),
             ackHandler(ackHandler)
         { }
+        virtual ~InProgressFrames();
 
         virtual Packet *getFrameToTransmit();
         virtual Packet *getPendingFrameFor(Packet *frame);
@@ -75,6 +55,8 @@ class INET_API InProgressFrames
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
         virtual std::vector<Packet *> getOutstandingFrames();
+
+        virtual void clearDroppedFrames();
 };
 
 } /* namespace ieee80211 */

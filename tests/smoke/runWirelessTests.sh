@@ -1,2 +1,2 @@
 #!/bin/sh
-./smoketest -c -m wireless -m adhoc -m manet -m mobileipv6 -m WirelessDHCP
+./smoketest -c -m wireless -m Wireless -m adhoc -m mobileipv6 -m dymo -m examples/aodv -m neighborcache -m objectcache $*

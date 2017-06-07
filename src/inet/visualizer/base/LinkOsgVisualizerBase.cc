@@ -52,7 +52,7 @@ void LinkOsgVisualizerBase::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(linkVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const LinkVisualizerBase::LinkVisualization *LinkOsgVisualizerBase::createLinkVisualization(cModule *source, cModule *destination) const
+const LinkVisualizerBase::LinkVisualization *LinkOsgVisualizerBase::createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const
 {
     auto sourcePosition = getPosition(source);
     auto destinationPosition = getPosition(destination);

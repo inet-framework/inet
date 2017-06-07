@@ -73,10 +73,10 @@ ned-path = .;../../../../src;../../lib
 **.receiver.numUdpApps = 1
 **.receiver.udpApp[0].typename = "UDPSink"
 **.receiver.udpApp[0].localPort = 21
-**.wlan[*].mac.rtsThresholdBytes = 1500B
-**.wlan[*].mac.cwMinData = 15
-**.wlan[*].mac.cwMaxData = 1023
-**.sender.wlan[*].macType = "Ieee80211CompatibleMac"
+**.sender.wlan[*].macType = "Ieee80211Mac"
+**.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B
+**.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
+**.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
 **.receiver.wlan[*].macType = "Ieee80211TesterMac"
 **.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
 
@@ -99,8 +99,6 @@ For the current frame exchange, we have CW = 511 SRC = 5 LRC = 0 SSRC = 5 and SL
 .*
 For the current frame exchange, we have CW = 1023 SRC = 6 LRC = 0 SSRC = 6 and SLRC = 0
 .*
-For the current frame exchange, we have CW = 15 SRC = 7 LRC = 0 SSRC = 7 and SLRC = 0
-.*
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 7 and SLRC = 0
 .*
 For the current frame exchange, we have CW = 31 SRC = 1 LRC = 0 SSRC = 8 and SLRC = 0
@@ -115,13 +113,7 @@ For the current frame exchange, we have CW = 511 SRC = 5 LRC = 0 SSRC = 12 and S
 .*
 For the current frame exchange, we have CW = 1023 SRC = 6 LRC = 0 SSRC = 13 and SLRC = 0
 .*
-For the current frame exchange, we have CW = 1023 SRC = 7 LRC = 0 SSRC = 14 and SLRC = 0
-.*
 For the current frame exchange, we have CW = 1023 SRC = 0 LRC = 0 SSRC = 14 and SLRC = 0
-.*
-For the current frame exchange, we have CW = 1023 SRC = 1 LRC = 0 SSRC = 15 and SLRC = 0
-.*
-For the current frame exchange, we have CW = 15 SRC = 1 LRC = 0 SSRC = 0 and SLRC = 0
 .*
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

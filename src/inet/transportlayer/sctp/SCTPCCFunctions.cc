@@ -125,13 +125,13 @@ void SCTPAssociation::updateHighSpeedCCThresholdIdx(SCTPPathVariables *path)
     ASSERT(path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES);
 
     if (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) {
-        while ((path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-                (path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES)) {
+        while ((path->highSpeedCCThresholdIdx < HIGHSPEED_ENTRIES)
+                && (path->cwnd > HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu)) {
             path->highSpeedCCThresholdIdx++;
         }
     } else {
-        while ((path->cwnd <= HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu) &&
-                (path->highSpeedCCThresholdIdx > 0)) {
+        while ((path->highSpeedCCThresholdIdx > 0)      //FIXME check the condition: '>' or '>='
+                && (path->cwnd <= HighSpeedCwndAdjustmentTable[path->highSpeedCCThresholdIdx].cwndThreshold * path->pmtu)) {
             path->highSpeedCCThresholdIdx--;
         }
     }

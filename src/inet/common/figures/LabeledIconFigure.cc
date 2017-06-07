@@ -26,15 +26,10 @@ LabeledIconFigure::LabeledIconFigure(const char *name) :
     iconFigure->setAnchor(cFigure::ANCHOR_NW);
     labelFigure = new cLabelFigure("label");
     labelFigure->setAnchor(cFigure::ANCHOR_CENTER);
+    labelFigure->setTags("label");
     labelFigure->setHalo(true);
     addFigure(iconFigure);
     addFigure(labelFigure);
-}
-
-void LabeledIconFigure::setTags(const char *tags)
-{
-    iconFigure->setTags(tags);
-    labelFigure->setTags(tags);
 }
 
 void LabeledIconFigure::setTooltip(const char *tooltip)

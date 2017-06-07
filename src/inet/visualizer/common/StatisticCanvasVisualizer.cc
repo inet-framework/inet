@@ -44,7 +44,7 @@ void StatisticCanvasVisualizer::initialize(int stage)
 StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::createStatisticVisualization(cComponent *source, simsignal_t signal)
 {
     auto figure = new BoxedLabelFigure("statistic");
-    figure->setTags("statistic");
+    figure->setTags((std::string("statistic ") + tags).c_str());
     figure->setTooltip("This label represents the current value of a statistic");
     figure->setAssociatedObject(source);
     figure->setZIndex(zIndex);
@@ -54,7 +54,7 @@ StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::crea
     figure->setBackgroundColor(backgroundColor);
     figure->setOpacity(opacity);
     auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new StatisticCanvasVisualization(networkNodeVisualization, figure, source->getId(), signal, getUnit(source));
 }
 
@@ -62,7 +62,7 @@ void StatisticCanvasVisualizer::addStatisticVisualization(const StatisticVisuali
 {
     StatisticVisualizerBase::addStatisticVisualization(statisticVisualization);
     auto statisticCanvasVisualization = static_cast<const StatisticCanvasVisualization *>(statisticVisualization);
-    statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, statisticCanvasVisualization->figure->getBounds().getSize());
+    statisticCanvasVisualization->networkNodeVisualization->addAnnotation(statisticCanvasVisualization->figure, statisticCanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void StatisticCanvasVisualizer::removeStatisticVisualization(const StatisticVisualization *statisticVisualization)

@@ -178,8 +178,7 @@ class INET_API EtherMACBase : public MACBase
     static simsignal_t rxPkFromHLSignal;
     static simsignal_t dropPkNotForUsSignal;
     static simsignal_t dropPkBitErrorSignal;
-    static simsignal_t dropPkIfaceDownSignal;
-    static simsignal_t dropPkFromHLIfaceDownSignal;
+
 
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;
@@ -191,6 +190,8 @@ class INET_API EtherMACBase : public MACBase
 
   public:
     static const double SPEED_OF_LIGHT_IN_CABLE;
+    static simsignal_t dropPkIfaceDownSignal;
+    static simsignal_t dropPkFromHLIfaceDownSignal;
 
   public:
     EtherMACBase();

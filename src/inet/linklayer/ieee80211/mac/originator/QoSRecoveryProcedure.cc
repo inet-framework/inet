@@ -49,7 +49,7 @@ void QoSRecoveryProcedure::incrementStationSrc()
 {
     stationShortRetryCounter++;
     if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
-        resetContentionWindow(); // TODO: + stationShortRetryCounter = 0??
+        resetContentionWindow();
     else
         cwCalculator->incrementCw();
 }
@@ -58,7 +58,7 @@ void QoSRecoveryProcedure::incrementStationLrc()
 {
     stationLongRetryCounter++;
     if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
-        resetContentionWindow(); // TODO: + stationLongRetryCounter = 0??
+        resetContentionWindow();
     else
         cwCalculator->incrementCw();
 }

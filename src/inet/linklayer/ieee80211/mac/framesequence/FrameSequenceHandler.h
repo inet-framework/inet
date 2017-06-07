@@ -25,7 +25,6 @@
 namespace inet {
 namespace ieee80211 {
 
-// TODO: FrameSequence: Process, Runtime, Engine, Executor?
 class INET_API FrameSequenceHandler : public IFrameSequenceHandler
 {
     protected:
@@ -36,7 +35,7 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     protected:
         virtual void startFrameSequenceStep();
         virtual void finishFrameSequenceStep();
-        virtual void finishFrameSequence(bool ok);
+        virtual void finishFrameSequence();
         virtual void abortFrameSequence();
 
     public:

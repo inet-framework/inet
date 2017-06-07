@@ -35,7 +35,7 @@ from StringIO import StringIO
 
 inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
-nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/smoke"
+nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials"
 inetLib = inetRoot + "/src/INET"
 opp_run = "opp_run"
 cpuTimeLimit = "6s"
@@ -46,35 +46,52 @@ memcheckFailedErrorCode = 66
 
 class SmokeTestCaseGenerator():
     fileToSimulationsMap = {}
-    def generateFromCSV(self, csvFileList, filterRegexList):
+    def generateFromCSV(self, csvFileList, filterRegexList, excludeFilterRegexList, repeat):
         testcases = []
         for csvFile in csvFileList:
-            f = open(csvFile, 'r')
-            contents = f.read()
-            f.close()
-            simulations = self.parseSimulationsTable(contents)
+            simulations = self.parseSimulationsTable(csvFile)
             self.fileToSimulationsMap[csvFile] = simulations
-            testcases.extend(self.generateFromDictList(simulations, filterRegexList))
+            testcases.extend(self.generateFromDictList(simulations, filterRegexList, excludeFilterRegexList, repeat))
         return testcases
 
-    def generateFromDictList(self, simulations, filterRegexList):
+    def generateFromDictList(self, simulations, filterRegexList, excludeFilterRegexList, repeat):
+        class StoreFingerprintCallback:
+            def __init__(self, simulation):
+                self.simulation = simulation
+            def __call__(self, fingerprint):
+                self.simulation['computedFingerprint'] = fingerprint
+
+        class StoreExitcodeCallback:
+            def __init__(self, simulation):
+                self.simulation = simulation
+            def __call__(self, exitcode):
+                self.simulation['exitcode'] = exitcode
+
         testcases = []
         for simulation in simulations:
             title = simulation['wd'] + " " + simulation['args']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
-                testcases.append(SmokeTestCase(title, simulation['wd'], simulation['args']))
+                if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
+                    testcases.append(SmokeTestCase(title, simulation['file'], simulation['wd'], simulation['args']))
         return testcases
 
+    def commentRemover(self, csvData):
+        p = re.compile(' *#.*$')
+        for line in csvData:
+            yield p.sub('',line)
+
     # parse the CSV into a list of dicts
-    def parseSimulationsTable(self, text):
+    def parseSimulationsTable(self, csvFile):
         simulations = []
-        for line in text.splitlines():
-            line = line.strip()
-            if line != "" and not line.startswith("#"):
-                fields = re.split(", +", line)
-                if len(fields) < 2:
-                    raise Exception("Line must contain at least 2 items: " + line)
-                simulations.append({'wd': fields[0], 'args': fields[1]})
+        f = open(csvFile, 'rb')
+        csvReader = csv.reader(self.commentRemover(f), delimiter=',', quotechar='"', skipinitialspace=True)
+        for fields in csvReader:
+            if len(fields) == 0:
+                continue        # empty line
+            if len(fields) != 2:
+                raise Exception("Line " + str(csvReader.line_num) + " must contain 2 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
+            simulations.append({'file': csvFile, 'line' : csvReader.line_num, 'wd': fields[0], 'args': fields[1]})
+        f.close()
         return simulations
 
 
@@ -99,9 +116,10 @@ class SimulationTestCase(unittest.TestCase):
 
         # run the program and log the output
         t0 = time.time()
-        (exitcode, out) = self.runProgram(command, workingdir)
-        elapsedTime = time.time() - t0
 
+        (exitcode, out) = self.runProgram(command, workingdir)
+
+        elapsedTime = time.time() - t0
         FILE = open(logFile, "a")
         FILE.write("------------------------------------------------------\n"
                  + "Running: " + title + "\n\n"
@@ -149,9 +167,10 @@ class SimulationTestCase(unittest.TestCase):
 
 
 class SmokeTestCase(SimulationTestCase):
-    def __init__(self, title, wd, args):
+    def __init__(self, title, csvFile, wd, args):
         SimulationTestCase.__init__(self)
         self.title = title
+        self.csvFile = csvFile
         self.wd = wd
         self.args = args
 
@@ -160,13 +179,18 @@ class SmokeTestCase(SimulationTestCase):
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
+        resultdir = os.path.abspath(".") + "/results/";
+        if not os.path.exists(resultdir):
+            os.makedirs(resultdir)
         memcheckPrefix = ""
         if memcheck:
             memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + inetRoot + "/tests/smoke/valgrind.supp "
         command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
-            " --vector-recording=false --scalar-recording=false"
+            " --vector-recording=false --scalar-recording=false" \
+            " --result-dir=" + resultdir
 
+        # print "COMMAND: " + command + '\n'
         result = self.runSimulation(self.title, command, workingdir)
 
         # process the result
@@ -355,7 +379,8 @@ class SimulationTextTestResult(ThreadedTestResult):
     def addSkip(self, test, reason):
         super(SimulationTextTestResult, self).addSkip(test, reason)
         if self.showAll:
-            self.stream.write(": skipped {0!r}\n".format(reason))
+            self.stream.write(": skipped {0!r}".format(reason))
+            self.stream.write("\n")
         elif self.dots:
             self.stream.write("s")
             self.stream.flush()
@@ -401,11 +426,15 @@ class SimulationTextTestResult(ThreadedTestResult):
 def _iif(cond,t,f):
     return t if cond else f
 
+def ensure_dir(f):
+    if not os.path.exists(f):
+        os.makedirs(f)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
+    parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-c', '--memcheck', default=False, dest='memcheck', action='store_true', help='run using valgrind memcheck (default: false)')
     parser.add_argument('-s', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
@@ -423,7 +452,7 @@ if __name__ == "__main__":
         args.testspecfiles = glob.glob('*.csv')
 
     generator = SmokeTestCaseGenerator()
-    testcases = generator.generateFromCSV(args.testspecfiles, args.match)
+    testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, 1)
 
     testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)

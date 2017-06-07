@@ -60,6 +60,30 @@ PostureTransition::PostureTransition(int numPosture)
     defaultMatrixID = 0;    // if no default matrix found, the first one will be supposed as the default matrix.
 }
 
+PostureTransition::~PostureTransition()
+{
+    for (auto comb: combinationList) {
+        delete comb;
+    }
+    for (auto mat: matrixList) {
+        for (int i = 0; i < numPos; ++i)
+            delete [] mat->matrix[i];
+        delete [] mat->matrix;
+        delete mat;
+    }
+    for (auto areaType: areaTypeList) {
+        for (auto bound: areaType->boundries)
+            delete bound;
+        delete areaType;
+    }
+    for (auto timeDomain: timeDomainList) {
+        for (auto bound: timeDomain->boundries)
+            delete bound;
+        delete timeDomain;
+    }
+}
+
+
 /**
  * This function initiates a new instance of markov matrix with the given matrix. Note that it copies the matrix into the created matrix.
  * The function first verifies if the given matrix can be a Markov transition matrix.
@@ -468,7 +492,6 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
             else
                 identity[i][j] = 0;
 
-
     double *sum = new double[numPos];
     int *changeSum = new int[numPos];
 
@@ -532,11 +555,11 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
     }
 
     for (int i = 0; i < numPos; ++i) {
-        delete temp1[i];
-        delete temp2[i];
-        delete temp3[i];
-        delete identity[i];
-        delete change[i];
+        delete [] temp1[i];
+        delete [] temp2[i];
+        delete [] temp3[i];
+        delete [] identity[i];
+        delete [] change[i];
     }
     delete [] temp1;
     delete [] temp2;

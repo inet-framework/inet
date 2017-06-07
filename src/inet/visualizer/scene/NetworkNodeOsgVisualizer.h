@@ -40,7 +40,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
     virtual void setNetworkNodeVisualization(const cModule *networkNode, NetworkNodeOsgVisualization *networkNodeVisualization);
 
   public:
-    virtual NetworkNodeOsgVisualization *getNeworkNodeVisualization(const cModule *networkNode) const;
+    virtual NetworkNodeOsgVisualization *getNetworkNodeVisualization(const cModule *networkNode) const;
 
 #endif // ifdef WITH_OSG
 };

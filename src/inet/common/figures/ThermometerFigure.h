@@ -40,6 +40,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     double value = NaN;
     int numTicks = 0;
     double shifting = 0;
+    int labelOffset = 10;
 
   protected:
     virtual void parse(cProperty *property) override;
@@ -70,6 +71,9 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     const char *getLabel() const;
     void setLabel(const char *text);
 
+    const int getLabelOffset() const;
+    void setLabelOffset(int offset);
+
     const Font& getLabelFont() const;
     void setLabelFont(const Font& font);
 
@@ -84,6 +88,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
 
     double getTickSize() const;
     void setTickSize(double value);
+
 };
 
 // } // namespace inet

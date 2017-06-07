@@ -18,7 +18,7 @@
 #ifndef __INET_LABELEDLINEFIGURE_H
 #define __INET_LABELEDLINEFIGURE_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/figures/cPanelFigure.h"
 
 namespace inet {
 
@@ -26,7 +26,8 @@ class INET_API LabeledLineFigure : public cGroupFigure
 {
   protected:
     cLineFigure *lineFigure;
-    cLabelFigure *labelFigure;
+    cPanelFigure *panelFigure;
+    cTextFigure *labelFigure;
 
   protected:
     void updateLabelPosition();
@@ -35,7 +36,7 @@ class INET_API LabeledLineFigure : public cGroupFigure
     LabeledLineFigure(const char *name = nullptr);
 
     cLineFigure *getLineFigure() const { return lineFigure; }
-    cLabelFigure *getLabelFigure() const { return labelFigure; }
+    cTextFigure *getLabelFigure() const { return labelFigure; }
 
     void setStart(cFigure::Point point);
     void setEnd(cFigure::Point point);

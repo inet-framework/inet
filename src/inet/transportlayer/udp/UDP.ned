@@ -73,6 +73,10 @@ simple UDP like IUDP
         string icmpv6Module = default("^.ipv6.icmpv6");
         string crcMode @enum("disabled", "declared", "computed") = default("declared");
         @display("i=block/transport");
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
         @signal[passedUpPk](type=cPacket);

@@ -48,7 +48,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
     }),
     // TODO: slotTime, cwMin, cwMax must be identical in all modes
-    Ieee80211ModeSet("g", {
+    Ieee80211ModeSet("g(mixed)", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
@@ -62,6 +62,16 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO: ERP-CCK, ERP-PBCC, DSSS-OFDM
     }),
+    Ieee80211ModeSet("g(erp)", {
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode9Mbps },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode12Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode18Mbps },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode24Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode36Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode48Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps },
+    }),
     Ieee80211ModeSet("p", {
         { true, &Ieee80211OFDMCompliantModes::ofdmMode3MbpsCS10MHz },
         { false, &Ieee80211OFDMCompliantModes::ofdmMode4_5MbpsCS10MHz },
@@ -72,7 +82,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS10MHz },
         { false, &Ieee80211OFDMCompliantModes::ofdmMode27Mbps },
         }),
-    Ieee80211ModeSet("n", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
+    Ieee80211ModeSet("n(mixed-2.4Ghz)", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
         { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs0BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs1BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs2BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -275,8 +285,14 @@ const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)
 const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 {
     const Ieee80211ModeSet *modeSet = findModeSet(mode);
-    if (modeSet == nullptr)
-        throw cRuntimeError("Unknown 802.11 operational mode: '%s'", mode);
+    if (modeSet == nullptr) {
+        std::string validModeSets;
+        for (int index = 0; index < (int)(&modeSets)->size(); index++) {
+            const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
+            validModeSets += std::string("'") + modeSet->getName() + "' ";
+        }
+        throw cRuntimeError("Unknown 802.11 operational mode: '%s', valid modes are: %s", mode, validModeSets.c_str());
+    }
     else
         return modeSet;
 }

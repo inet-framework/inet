@@ -395,7 +395,7 @@ IPv4Address InterfaceEntry::getIPv4Address() const {
     return ipv4data == nullptr ? IPv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else
     return IPv4Address::UNSPECIFIED_ADDRESS;
-#endif
+#endif // ifdef WITH_IPv4
 }
 
 } // namespace inet

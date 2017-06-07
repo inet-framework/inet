@@ -46,7 +46,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     std::hash<std::string> hasher;
     std::string icon(this->icon);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
-    labeledIconFigure->setTags("ieee80211_association");
+    labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(interfaceEntry);
     labeledIconFigure->setZIndex(zIndex);
     auto iconFigure = labeledIconFigure->getIconFigure();
@@ -60,7 +60,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     labelFigure->setColor(labelColor);
     labelFigure->setText(ssid.c_str());
     labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new Ieee80211CanvasVisualization(networkNodeVisualization, labeledIconFigure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 
@@ -68,7 +68,7 @@ void Ieee80211CanvasVisualizer::addIeee80211Visualization(const Ieee80211Visuali
 {
     Ieee80211VisualizerBase::addIeee80211Visualization(ieee80211Visualization);
     auto ieee80211CanvasVisualization = static_cast<const Ieee80211CanvasVisualization *>(ieee80211Visualization);
-    ieee80211CanvasVisualization->networkNodeVisualization->addAnnotation(ieee80211CanvasVisualization->figure, ieee80211CanvasVisualization->figure->getBounds().getSize());
+    ieee80211CanvasVisualization->networkNodeVisualization->addAnnotation(ieee80211CanvasVisualization->figure, ieee80211CanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
 }
 
 void Ieee80211CanvasVisualizer::removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization)

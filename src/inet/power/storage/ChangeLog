@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2016-10-05  Levente Mészáros
+
+	Added a new simple charge and current based battery model.
+
+2016-10-05  Levente Mészáros
+
+	Adapted existing storage models to new power infrastructure.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-07-12  Levente Meszaros

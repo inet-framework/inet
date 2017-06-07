@@ -293,10 +293,13 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211MacHe
     else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header)) {
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
         recipientProcessReceivedManagementFrame(mgmtHeader);
+        if (dynamic_cast<Ieee80211ActionFrame *>(mgmtHeader))
+            delete packet;
     }
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
         recipientProcessReceivedControlFrame(packet, header);
+        delete packet;
     }
 }
 
@@ -308,8 +311,8 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee802
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
-    else if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(header))
-        ; // drop it, it is an ACK frame that is received after the ACKTimeout
+    else if (std::dynamic_pointer_cast<Ieee80211AckFrame>(header))
+        EV_WARN << "ACK frame received after timeout, ignoring it.\n"; // drop it, it is an ACK frame that is received after the ACKTimeout
     else
         throw cRuntimeError("Unknown control frame");
 }
@@ -375,7 +378,6 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             edcaInProgressFrames[ac]->dropFrame(packet);
             emit(NF_PACKET_DROP, packet);
             emit(NF_LINK_BREAK, packet);
-            delete packet;
         }
     }
     else
@@ -466,7 +468,6 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
                 // bool lifetimeExpired = lifetimeHandler->isLifetimeExpired(failedFrame);
                 // if (lifetimeExpired) {
                 //    inProgressFrames->dropFrame(failedFrame);
-                //    delete dataFrame;
                 // }
             }
             else
@@ -498,7 +499,6 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             packet->popTrailer<Ieee80211MacTrailer>();
             emit(NF_PACKET_DROP, packet);
             emit(NF_LINK_BREAK, packet);
-            delete packet;
         }
         else {
             auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
@@ -526,7 +526,6 @@ void Hcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     }
     else
         throw cRuntimeError("Hcca is unimplemented!");
-    delete packet;
 }
 
 void Hcf::originatorProcessReceivedManagementFrame(const Ptr<Ieee80211MgmtHeader>& header, const Ptr<Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac)
@@ -616,7 +615,7 @@ void Hcf::sendUp(const std::vector<Packet*>& completeFrames)
     for (auto frame : completeFrames) {
         // FIXME: mgmt module does not handle addba req ..
         const auto& header = frame->peekHeader<Ieee80211DataOrMgmtHeader>();
-        if (!std::dynamic_pointer_cast<Ieee80211AddbaRequest>(header) && !std::dynamic_pointer_cast<Ieee80211AddbaResponse>(header) && !std::dynamic_pointer_cast<Ieee80211Delba>(header))
+        if (!std::dynamic_pointer_cast<Ieee80211ActionFrame>(header))
             mac->sendUpFrame(frame);
     }
 }

@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-02-20  Rudolf Hornig
+
+	Fixed build error on Windows.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-11-24  Irene Ruengeler

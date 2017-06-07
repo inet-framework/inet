@@ -182,5 +182,11 @@ void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<Ieee8021
         terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
 }
 
+OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()
+{
+    for (auto it : blockAckAgreements)
+        delete it.second;
+}
+
 } // namespace ieee80211
 } // namespace inet

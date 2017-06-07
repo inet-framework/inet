@@ -56,7 +56,7 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableOsgVisualize
     auto geode = new osg::Geode();
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     geode->addDrawable(label);
-    auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new InterfaceOsgVisualization(networkNodeVisualization, geode, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 

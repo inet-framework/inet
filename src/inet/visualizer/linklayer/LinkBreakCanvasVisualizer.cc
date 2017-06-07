@@ -65,7 +65,7 @@ const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakCanvasVisualizer
     auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
     auto receiverPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(receiver)));
     auto figure = new cIconFigure("linkBreak");
-    figure->setTags("link_break");
+    figure->setTags((std::string("link_break ") + tags).c_str());
     figure->setTooltip("This icon represents a link break between two network nodes");
     figure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
     figure->setTintAmount(iconTintAmount);
