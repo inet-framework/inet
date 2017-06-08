@@ -94,6 +94,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
+    virtual bool isLinkStart(cModule *module) const = 0;
     virtual bool isLinkEnd(cModule *module) const = 0;
 
     virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const = 0;

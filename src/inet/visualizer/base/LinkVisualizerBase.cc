@@ -186,9 +186,7 @@ void LinkVisualizerBase::setLastModule(int treeId, cModule *module)
 
 void LinkVisualizerBase::removeLastModule(int treeId)
 {
-    auto it = lastModules.find(treeId);
-    if (it != lastModules.end())
-        lastModules.erase(it);
+    lastModules.erase(lastModules.find(treeId));
 }
 
 void LinkVisualizerBase::refreshLinkVisualization(const LinkVisualization *linkVisualization, cPacket *packet)
@@ -212,28 +210,32 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
 {
     Enter_Method_Silent();
     if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
-        if (isLinkEnd(static_cast<cModule *>(source))) {
+        if (isLinkStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
-            auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
             auto treeId = packet->getTreeId();
+            auto lastModule = getLastModule(treeId);
+            if (lastModule != nullptr)
+                removeLastModule(treeId);
+            auto networkNode = getContainingNode(module);
+            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet))
                 setLastModule(treeId, module);
-            else
-                removeLastModule(treeId);
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
-            auto networkNode = getContainingNode(module);
-            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
             auto treeId = packet->getTreeId();
             auto lastModule = getLastModule(treeId);
-            if (lastModule != nullptr && nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet))
-                updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module), packet);
+            if (lastModule != nullptr) {
+                auto networkNode = getContainingNode(module);
+                auto interfaceEntry = getInterfaceEntry(networkNode, module);
+                if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet))
+                    updateLinkVisualization(getContainingNode(lastModule), networkNode, packet);
+                // NOTE: don't call removeLastModule(treeId) because other network nodes may still receive this packet
+            }
         }
     }
     else

@@ -25,6 +25,11 @@ namespace visualizer {
 
 Define_Module(DataLinkOsgVisualizer);
 
+bool DataLinkOsgVisualizer::isLinkStart(cModule *module) const
+{
+    return dynamic_cast<MACProtocolBase *>(module) != nullptr || dynamic_cast<MACBase *>(module) != nullptr;
+}
+
 bool DataLinkOsgVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<MACProtocolBase *>(module) != nullptr || dynamic_cast<MACBase *>(module) != nullptr;

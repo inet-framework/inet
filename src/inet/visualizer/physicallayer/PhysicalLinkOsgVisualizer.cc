@@ -24,6 +24,11 @@ namespace visualizer {
 
 Define_Module(PhysicalLinkOsgVisualizer);
 
+bool PhysicalLinkOsgVisualizer::isLinkStart(cModule *module) const
+{
+    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
+}
+
 bool PhysicalLinkOsgVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
