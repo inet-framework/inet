@@ -35,10 +35,8 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
         for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
-                auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
                 auto visualization = createNetworkNodeVisualization(networkNode);
                 visualization->setZIndex(zIndex);
-                visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
                 setNetworkNodeVisualization(networkNode, visualization);
                 visualizerTargetModule->getCanvas()->addFigure(visualization);
             }
