@@ -139,7 +139,10 @@ void PacketDropVisualizerBase::unsubscribe()
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal || PassiveQueueBase::dropPkByQueueSignal || EtherMACBase::dropPkIfaceDownSignal || EtherMACBase::dropPkFromHLIfaceDownSignal) {
+    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal
+            || signal == PassiveQueueBase::dropPkByQueueSignal
+            || signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
+            ) {
         auto packet = check_and_cast<cPacket *>(object);
         if (packetFilter.matches(packet))
             addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), packet->dup()));
