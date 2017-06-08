@@ -19,40 +19,29 @@
 
 namespace inet {
 
-BarFigure::BarFigure(double value, double minValue, double maxValue, const char *name) :
-    cGroupFigure(name),
-    value(value),
-    minValue(minValue),
-    maxValue(maxValue)
+BarFigure::BarFigure(const char *name) :
+    cRectangleFigure(name)
 {
-    auto lineFigure = new cLineFigure();
-    lineFigure->setStart(position + cFigure::Point(0, height));
-    lineFigure->setEnd(position + cFigure::Point(0, height));
-    lineFigure->setLineWidth(width);
-    lineFigure->setZoomLineWidth(false);
-    addFigure(lineFigure);
-    refreshDisplay();
-}
-
-void BarFigure::setPosition(const cFigure::Point& position)
-{
-    this->position = position;
-    refreshDisplay();
+    valueFigure = new cRectangleFigure();
+    valueFigure->setFilled(true);
+    addFigure(valueFigure);
 }
 
 void BarFigure::setValue(double value)
 {
-    this->value = value;
-    refreshDisplay();
+    if (this->value != value) {
+        this->value = value;
+        refreshDisplay();
+    }
 }
 
 void BarFigure::refreshDisplay()
 {
-    auto lineFigure = static_cast<cLineFigure *>(getFigure(0));
     auto alpha = (value - minValue) / (maxValue - minValue);
     alpha = std::min(std::max(alpha, 0.0), 1.0);
-    lineFigure->setStart(position + cFigure::Point(0, height));
-    lineFigure->setEnd(position + cFigure::Point(0, height * (1 - alpha)));
+    auto& bounds = getBounds();
+    auto height = (bounds.height - 2 * spacing) * alpha;
+    valueFigure->setBounds(cFigure::Rectangle(spacing, bounds.height - spacing - height, bounds.width - 2 * spacing, height));
 }
 
 } // namespace inet
