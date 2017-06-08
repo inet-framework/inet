@@ -45,6 +45,7 @@ void TransportConnectionCanvasVisualizer::initialize(int stage)
 
 LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigure(tcp::TCPConnection *tcpConnection) const
 {
+#ifdef WITH_TCP_COMMON
     std::string icon(this->icon);
     auto labeledIconFigure = new LabeledIconFigure("transportConnection");
     labeledIconFigure->setTags((std::string("transport_connection ") + tags).c_str());
@@ -66,6 +67,9 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     label[1] = '\0';
     labelFigure->setText(label);
     return labeledIconFigure;
+#else
+    return nullptr;
+#endif // WITH_TCP_COMMON
 }
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionCanvasVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const

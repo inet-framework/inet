@@ -19,7 +19,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/linklayer/contract/IMACFrame.h"
+#ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#endif // WITH_IEEE80211
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
@@ -124,10 +126,12 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             transmitterAddress = frame->getTransmitterAddress();
             receiverAddress = frame->getReceiverAddress();
         }
+#ifdef WITH_IEEE80211
         if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressFrame *>(object)) {
             transmitterAddress = frame->getTransmitterAddress();
             receiverAddress = frame->getReceiverAddress();
         }
+#endif // WITH_IEEE80211
         auto transmitter = findNode(transmitterAddress);
         auto receiver = findNode(receiverAddress);
         if (nodeFilter.matches(transmitter) && nodeFilter.matches(receiver)) {
