@@ -81,7 +81,7 @@ void TransportConnectionVisualizerBase::subscribe()
 #ifdef WITH_TCP_COMMON
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     subscriptionModule->subscribe(inet::tcp::TCP::tcpConnectionAddedSignal, this);
-#endif WITH_TCP_COMMON
+#endif // WITH_TCP_COMMON
 }
 
 void TransportConnectionVisualizerBase::unsubscribe()
