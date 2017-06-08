@@ -112,14 +112,13 @@ void PathCanvasVisualizerBase::refreshDisplay() const
                 auto& segment2 = segments[index];
                 Coord intersection = intersectLines(segment1, segment2);
                 if (std::isfinite(intersection.x) && std::isfinite(intersection.y)) {
-                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection)) {
+                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection))
                         points.push_back(canvasProjection->computeCanvasPoint(intersection));
-                    }
                     else {
                         double distance = segment1.getPoint2().distance(segment2.getPoint1());
                         double distance1 = intersection.distance(segment1.getPoint2());
                         double distance2 = intersection.distance(segment2.getPoint1());
-                        if (distance1 + distance2 < 2 * distance)
+                        if (distance1 + distance2 < 4 * distance)
                             points.push_back(canvasProjection->computeCanvasPoint(intersection));
                         else {
                             points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));
