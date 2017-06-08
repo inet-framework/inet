@@ -589,7 +589,7 @@ void PacketDrillApp::closeAllSockets()
     datagram->setVersion(4);
     datagram->setHeaderLength(20);
     datagram->setTransportProtocol(IPPROTO_SCTP);
-    datagram->setTimeToLive(31);
+    datagram->setTimeToLive(32);
     datagram->setMoreFragments(0);
     datagram->setDontFragment(0);
     datagram->setFragmentOffset(0);

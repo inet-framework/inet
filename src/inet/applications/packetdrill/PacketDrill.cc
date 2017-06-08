@@ -65,7 +65,7 @@ IPv4Datagram* PacketDrill::makeIPPacket(int protocol, enum direction_t direction
     } else
         throw cRuntimeError("Unknown direction type %d", direction);
     datagram->setTransportProtocol(protocol);
-    datagram->setTimeToLive(31);
+    datagram->setTimeToLive(32);
     datagram->setMoreFragments(0);
     datagram->setDontFragment(0);
     datagram->setFragmentOffset(0);
