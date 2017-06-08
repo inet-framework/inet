@@ -41,59 +41,51 @@ class DataFs : public IFrameSequence
         }
 
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("DATA");
-                            frame->setType(ST_DATA);
-                            return new TransmitStep(frame, 0);
-                        }
-                        case 1:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0: {
+                        Ieee80211Frame *frame = new Ieee80211Frame("DATA");
+                        frame->setType(ST_DATA);
+                        return new TransmitStep(frame, 0);
                     }
+                    case 1:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0:
-                            return new ReceiveStep();
-                        case 1:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
-                    }
+            }
+			else {
+                switch (step) {
+                    case 0:
+                        return new ReceiveStep();
+                    case 1:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
 
         virtual bool completeStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0:
-                            step++;
-                            return true;
-                        default:
-                            throw cRuntimeError("Unknown step");
-                    }
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0:
+                        step++;
+                        return true;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0: {
-                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
-                            step++;
-                            return receiveStep->getReceivedFrame()->getType() == ST_DATA;
-                        }
-                        default:
-                            throw cRuntimeError("Unknown step");
+            }
+            else {
+                switch (step) {
+                    case 0: {
+                        IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                        step++;
+                        return receiveStep->getReceivedFrame()->getType() == ST_DATA;
                     }
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
 
@@ -112,59 +104,51 @@ class INET_API AckFs : public IFrameSequence {
         }
 
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0:
-                            return new ReceiveStep();
-                        case 1:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
-                    }
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0:
+                        return new ReceiveStep();
+                    case 1:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("ACK");
-                            frame->setType(ST_ACK);
-                            return new TransmitStep(frame, 0);
-                        }
-                        case 1:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
+            }
+            else {
+                switch (step) {
+                    case 0: {
+                        Ieee80211Frame *frame = new Ieee80211Frame("ACK");
+                        frame->setType(ST_ACK);
+                        return new TransmitStep(frame, 0);
                     }
+                    case 1:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
 
         virtual bool completeStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0: {
-                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
-                            step++;
-                            return receiveStep->getReceivedFrame()->getType() == ST_ACK;
-                        }
-                        default:
-                            throw cRuntimeError("Unknown step");
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0: {
+                        IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                        step++;
+                        return receiveStep->getReceivedFrame()->getType() == ST_ACK;
                     }
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0:
-                            step++;
-                            return true;
-                        default:
-                            throw cRuntimeError("Unknown step");
-                    }
+            }
+            else {
+                switch (step) {
+                    case 0:
+                        step++;
+                        return true;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
 
@@ -185,74 +169,66 @@ class RtsCtsFs : public IFrameSequence {
         }
 
         IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("RTS");
-                            frame->setType(ST_RTS);
-                            return new TransmitStep(frame, 0);
-                        }
-                        case 1:
-                            return new ReceiveStep();
-                        case 2:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0: {
+                        Ieee80211Frame *frame = new Ieee80211Frame("RTS");
+                        frame->setType(ST_RTS);
+                        return new TransmitStep(frame, 0);
                     }
+                    case 1:
+                        return new ReceiveStep();
+                    case 2:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0:
-                            return new ReceiveStep();
-                        case 1: {
-                            Ieee80211Frame *frame = new Ieee80211Frame("CTS");
-                            frame->setType(ST_CTS);
-                            return new TransmitStep(frame, 0);
-                        }
-                        case 2:
-                            return nullptr;
-                        default:
-                            throw cRuntimeError("Unknown step");
+            }
+            else {
+                switch (step) {
+                    case 0:
+                        return new ReceiveStep();
+                    case 1: {
+                        Ieee80211Frame *frame = new Ieee80211Frame("CTS");
+                        frame->setType(ST_CTS);
+                        return new TransmitStep(frame, 0);
                     }
+                    case 2:
+                        return nullptr;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
         
         bool completeStep(FrameSequenceContext *context) override {
-            switch (context == recipientContext) {
-                case ORIGINATOR: {
-                    switch (step) {
-                        case 0:
-                            step++;
-                            return true;
-                        case 1: {
-                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
-                            step++;
-                            return receiveStep->getReceivedFrame()->getType() == ST_CTS;
-                        }
-                        default:
-                            throw cRuntimeError("Unknown step");
+            if (context == originatorContext) {
+                switch (step) {
+                    case 0:
+                        step++;
+                        return true;
+                    case 1: {
+                        IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                        step++;
+                        return receiveStep->getReceivedFrame()->getType() == ST_CTS;
                     }
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                case RECIPIENT: {
-                    switch (step) {
-                        case 0: {
-                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
-                            step++;
-                            return receiveStep->getReceivedFrame()->getType() == ST_RTS;
-                        }
-                        case 1:
-                            step++;
-                            return true;
-                        default:
-                            throw cRuntimeError("Unknown step");
+            }
+            else {
+                switch (step) {
+                    case 0: {
+                        IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                        step++;
+                        return receiveStep->getReceivedFrame()->getType() == ST_RTS;
                     }
+                    case 1:
+                        step++;
+                        return true;
+                    default:
+                        throw cRuntimeError("Unknown step");
                 }
-                default:
-                    throw cRuntimeError("Unknown frame sequence role");
             }
         }
 
@@ -360,8 +336,6 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
         originatorFrame = nullptr;
         recipientFrame = nullptr;
     }
-    delete originatorContext;
-    delete recipientContext;
     delete originatorFrameSequence;
     delete recipientFrameSequence;
 }
