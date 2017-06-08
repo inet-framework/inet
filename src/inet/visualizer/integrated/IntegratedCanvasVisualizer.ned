@@ -18,6 +18,7 @@
 package inet.visualizer.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
+import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -57,6 +58,7 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         string mobilityVisualizerType = default("MobilityCanvasVisualizer");
         string statisticVisualizerType = default("StatisticCanvasVisualizer");
         string infoVisualizerType = default("InfoCanvasVisualizer");
+        string energyStorageVisualizerType = default("EnergyStorageCanvasVisualizer");
         string mediumVisualizerType = default("MediumCanvasVisualizer");
         string obstacleLossVisualizerType = default("TracingObstacleLossCanvasVisualizer");
         string packetDropVisualizerType = default("PacketDropCanvasVisualizer");
@@ -99,17 +101,21 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,650");
         }
-        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
+        energyStorageVisualizer: <energyStorageVisualizerType> like IEnergyStorageVisualizer if energyStorageVisualizerType != "" {
             parameters:
                 @display("p=150,750");
         }
-        obstacleLossVisualizer: <obstacleLossVisualizerType> like ITracingObstacleLossVisualizer if obstacleLossVisualizerType != "" {
+        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
             parameters:
                 @display("p=150,850");
         }
-        packetDropVisualizer: <packetDropVisualizerType> like IPacketDropVisualizer if packetDropVisualizerType != "" {
+        obstacleLossVisualizer: <obstacleLossVisualizerType> like ITracingObstacleLossVisualizer if obstacleLossVisualizerType != "" {
             parameters:
                 @display("p=150,950");
+        }
+        packetDropVisualizer: <packetDropVisualizerType> like IPacketDropVisualizer if packetDropVisualizerType != "" {
+            parameters:
+                @display("p=150,1050");
         }
         queueVisualizer: <queueVisualizerType> like IQueueVisualizer if queueVisualizerType != "" {
             parameters:
