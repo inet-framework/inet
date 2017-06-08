@@ -35,6 +35,16 @@ namespace visualizer {
 
 Define_Module(NetworkRouteCanvasVisualizer);
 
+bool NetworkRouteCanvasVisualizer::isPathStart(cModule *module) const
+{
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
+}
+
 bool NetworkRouteCanvasVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_IPv4

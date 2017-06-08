@@ -43,6 +43,21 @@ namespace visualizer {
 
 Define_Module(TransportRouteCanvasVisualizer);
 
+bool TransportRouteCanvasVisualizer::isPathStart(cModule *module) const
+{
+#ifdef WITH_UDP
+    if (dynamic_cast<UDP *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef WITH_TCP_INET
+    if (dynamic_cast<tcp::TCP *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
+}
+
 bool TransportRouteCanvasVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_UDP

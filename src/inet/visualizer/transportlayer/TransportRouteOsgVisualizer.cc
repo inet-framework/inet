@@ -39,6 +39,21 @@ namespace visualizer {
 
 Define_Module(TransportRouteOsgVisualizer);
 
+bool TransportRouteOsgVisualizer::isPathStart(cModule *module) const
+{
+#ifdef WITH_UDP
+    if (dynamic_cast<UDP *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef WITH_TCP_INET
+    if (dynamic_cast<tcp::TCP *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
+}
+
 bool TransportRouteOsgVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_UDP

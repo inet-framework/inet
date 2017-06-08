@@ -103,6 +103,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
+    virtual bool isPathStart(cModule *module) const = 0;
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 

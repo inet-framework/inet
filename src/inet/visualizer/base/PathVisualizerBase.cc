@@ -230,36 +230,38 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
 {
     Enter_Method_Silent();
     if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
-        if (isPathEnd(static_cast<cModule *>(source))) {
+        if (isPathStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
-            auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulationTreeId();
-                auto module = check_and_cast<cModule *>(source);
-                addToIncompletePath(treeId, getContainingNode(module));
-            }
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr)
+                removeIncompletePath(treeId);
+            auto networkNode = getContainingNode(module);
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                addToIncompletePath(treeId, networkNode);
         }
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
         if (isPathElement(static_cast<cModule *>(source))) {
+            auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<cPacket *>(object);
-            if (packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulationTreeId();
-                auto module = check_and_cast<cModule *>(source);
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr)
                 addToIncompletePath(treeId, getContainingNode(module));
-            }
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
-            auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulationTreeId();
-                auto path = getIncompletePath(treeId);
-                updatePathVisualization(*path, packet);
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr) {
+                auto networkNode = getContainingNode(module);
+                if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                    updatePathVisualization(*path, packet);
                 removeIncompletePath(treeId);
             }
         }

@@ -35,6 +35,16 @@ namespace visualizer {
 
 Define_Module(NetworkRouteOsgVisualizer);
 
+bool NetworkRouteOsgVisualizer::isPathStart(cModule *module) const
+{
+#ifdef WITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
+}
+
 bool NetworkRouteOsgVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_IPv4

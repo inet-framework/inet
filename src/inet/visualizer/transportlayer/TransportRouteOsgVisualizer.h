@@ -27,6 +27,7 @@ namespace visualizer {
 class INET_API TransportRouteOsgVisualizer : public PathOsgVisualizerBase
 {
   protected:
+    virtual bool isPathStart(cModule *module) const override;
     virtual bool isPathEnd(cModule *module) const override;
     virtual bool isPathElement(cModule *module) const override;
 };
