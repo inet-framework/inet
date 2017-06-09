@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-05-30  Levente Mészáros
+
+	Fixed compilation with disabled IPv4 feature, reported by Michael Kirsche.
+
 2017-02-13  Levente Mészáros
 
 	Disabled displaying interface name, IP address and netmask length on the

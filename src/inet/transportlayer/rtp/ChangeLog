@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-05-18  Zoltan Bojthe
+
+	Fixed memory leak.
+
 2017-05-04  Zoltan Bojthe
 
 	Bugfix: _commonName pointed to deallocated memory.
