@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
@@ -166,7 +166,6 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Ieee802
                 if (ackPolicy->isAckNeeded(pendingFrame)) {
                     RateSelection::setFrameMode(pendingFrame, pendingFrameMode); // FIXME: Kludge
                     simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingFrame)->getDuration(LENGTH_ACK);
-                    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(dataOrMgmtFrame)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }
             }
