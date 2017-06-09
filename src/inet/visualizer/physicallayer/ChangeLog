@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
 2017-06-08  Levente Mészáros
 
 	Added radio mode, reception state and transmission state visualization.

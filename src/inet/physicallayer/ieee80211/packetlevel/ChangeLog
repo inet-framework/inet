@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
 2017-06-06  Levente Mészáros
 
 	Added ideal transmission and ideal receiver to 802.11 model.
