@@ -53,17 +53,24 @@ Highlights in this release:
    most notable are frame exchange sequences, block acknowledgement, and MSDU
    aggregation.
 
+   The new version was thoroughly tested against the old one using fingerprint
+   tests. The tests ensure that the new version doesn't introduce any regression.
+   In fact, the tests brought up a few problems in the old implementation that
+   were fixed in the new one.
+
  - The power model has been extended with support for charge/current based models
    as opposed to the existing energy/power based ones. A new energy management
    component has also been added to separate monitoring and controlling of energy
    consumers and generators from the rest of the model.
 
  - New visualizers has been added to display packet drops and link breaks, data
-   contained in interface tables, routes stored in routing tables, and transport
-   connections between network nodes. The new visualizers are also added to the
-   already existing integrated ones.
+   contained in interface tables, routes stored in routing tables, queues filled
+   with packets, residual capacity of energy storages, and transport connections
+   between network nodes. The new visualizers are also added to the already existing
+   integrated ones. Note: many features that work with the 2D visualizers currently
+   don't work with the 3D OSG visualizers.
 
-  - Added new features for various tutorials and showcases.
+ - Added new features for various tutorials and showcases.
 
 
 INET-3.5.0 (Feb, 2017) - stable
