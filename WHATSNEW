@@ -1,8 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.6.0 (May, 2017) - stable
--------------------------------
+INET-3.6.0 (June, 2017) - stable
+--------------------------------
 
 This release contains some important new features, several bug fixes, and a few
 minor enhancements. It requires OMNeT++ 5.1 or later.
@@ -12,6 +12,9 @@ Highlights in this release:
  - On Windows, INET is no longer using the auto-import feature of the linker, because
    it generated more than 65536 symbols. Dependent projects crashed because of this.
    All INET APIs now should be prefixed with INET_API macro. (fixes #257)
+
+ - The makefile now generates separate precompiled header for debug and release mode.
+   This is required to be able to quicly switch between release and debug mode in the IDE.
 
  - The IEEE 802.11 MAC model has been extended with several new components. The
    implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
@@ -59,6 +62,8 @@ Highlights in this release:
    contained in interface tables, routes stored in routing tables, and transport
    connections between network nodes. The new visualizers are also added to the
    already existing integrated ones.
+
+  - Added new features for various tutorials and showcases.
 
 
 INET-3.5.0 (Feb, 2017) - stable
