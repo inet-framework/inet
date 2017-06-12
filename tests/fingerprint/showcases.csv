@@ -14,14 +14,14 @@
 /showcases/visualizer/filtering/,    -f omnetpp.ini -c nodeandpacket -r 0,                                      5s,            396d-0659/tplx
 /showcases/visualizer/filtering/,    -f omnetpp.ini -c filtering -r 0,                                          5s,            396d-0659/tplx
 /showcases/visualizer/filtering/,    -f omnetpp.ini -c filtering2 -r 0,                                         5s,            396d-0659/tplx
-/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c OneNetwork -r 0,                                  5s,            238b-6bba/tplx
-/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c MultipleNetworks -r 0,                            5s,            f934-82d3/tplx
-/showcases/visualizer/ieee80211visualizer/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            bc09-f32a/tplx
-/showcases/visualizer/indicator/,    -f omnetpp.ini -c General -r 0,                                            3s,              ba45-a12b/tplx
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c OneNetwork -r 0,                                  5s,            238b-6bba/tplx
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c MultipleNetworks -r 0,                            5s,            f934-82d3/tplx
+/showcases/visualizer/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            bc09-f32a/tplx
+/showcases/visualizer/instrument/,    -f omnetpp.ini -c General -r 0,                                            3s,              dde9-dcc4/tplx
 /showcases/visualizer/info/,         -f omnetpp.ini -c VisualizingSubmoduleInformation -r 0,                    5s,            cba8-69b6/tplx   # VisualizingSubmoduleInformation extended
 /showcases/visualizer/info/,         -f omnetpp.ini -c MultipleModules -r 0,                                    5s,            cba8-69b6/tplx
-/showcases/visualizer/interfacetablevisualizer/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            64b1-5417/tplx
-/showcases/visualizer/interfacetablevisualizer/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            ee93-dbab/tplx
+/showcases/visualizer/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            64b1-5417/tplx
+/showcases/visualizer/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            ee93-dbab/tplx
 # /showcases/visualizer/linkbreak/,    -f omnetpp.ini -c LinkBreak1 -r 0,                                         500s,            0000-0000/tplx # postponed
 /showcases/visualizer/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            3571-8652/tplx
 /showcases/visualizer/networknode/,  -f omnetpp.ini -c VisualizingNodes -r 0,                                   500s,            dc86-e1ee/tplx
@@ -44,10 +44,10 @@
 /showcases/visualizer/propagation/,  -f omnetpp.ini -c InterferingSignals -r 0,                                 500s,            1dc2-eb9c/tplx
 # /showcases/visualizer/propagation/,  -f omnetpp.ini -c Propagation4 -r 0,                                       500s,            0000-0000/tplx # temporary config
 # /showcases/visualizer/propagation/,  -f omnetpp.ini -c Propagation5 -r 0,                                       500s,            0000-0000/tplx # temporary config
-/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            fd35-dd9d/tplx
-/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            6b26-dc97/tplx
-/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            6b26-dc97/tplx
-/showcases/visualizer/routingtablevisualizer/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            3f84-a1dc/tplx
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c DisplayingAll -r 0,                            500s,            fd35-dd9d/tplx
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Unfiltered -r 0,                               500s,            6b26-dc97/tplx
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            6b26-dc97/tplx
+/showcases/visualizer/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            3f84-a1dc/tplx
 /showcases/visualizer/statistic/,    -f omnetpp.ini -c PingRtt -r 0,                                            500s,            e06c-962e/tplx
 /showcases/visualizer/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            56dc-73c4/tplx
 /showcases/visualizer/styling/,      -f omnetpp.ini -c LineStyling -r 0,                                        25s,            aacb-121f/tplx
