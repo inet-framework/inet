@@ -227,7 +227,7 @@ void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfa
 {
 #ifdef WITH_GENERIC
     if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete ipv4data;
+        delete genericNetworkProtocolData;
     genericNetworkProtocolData = p;
     p->ownerp = this;
     configChanged(F_GENERIC_DATA);
