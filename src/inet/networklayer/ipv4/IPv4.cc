@@ -729,7 +729,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
 
         // FIXME is it ok that full encapsulated packet travels in every datagram fragment?
         // should better travel in the last fragment only. Cf. with reassembly code!
-        IPv4Datagram *fragment = (IPv4Datagram *)datagram->dup();
+        IPv4Datagram *fragment = datagram->dup();
         fragment->setName(fragMsgName.c_str());
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true

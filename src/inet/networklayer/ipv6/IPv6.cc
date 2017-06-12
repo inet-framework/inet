@@ -471,7 +471,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (fromIE != ie && !ie->isLoopback())
-            fragmentAndSend((IPv6Datagram *)datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS, fromHL);
+            fragmentAndSend(datagram->dup(), ie, MACAddress::BROADCAST_ADDRESS, fromHL);
     }
     delete datagram;
 
@@ -500,7 +500,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
     IPv6Address destAddress = datagram->getDestAddress();
     if (rt->isLocalMulticastAddress(destAddress))
     {
-        IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
+        IPv6Datagram *datagramCopy = datagram->dup();
 
         // FIXME code from the MPLS model: set packet dest address to routerId (???)
         datagramCopy->setDestAddress(rt->getRouterId());
@@ -531,7 +531,7 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *de
             // don't forward to input port
             if (outputGateIndex>=0 && outputGateIndex!=inputGateIndex)
             {
-                IPv6Datagram *datagramCopy = (IPv6Datagram *) datagram->dup();
+                IPv6Datagram *datagramCopy = datagram->dup();
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())

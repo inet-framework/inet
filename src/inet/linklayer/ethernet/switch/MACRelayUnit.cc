@@ -104,7 +104,7 @@ void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputport)
     for (int i = 0; i < numPorts; ++i) {
         if (i != inputport) {
             emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
-            send((EtherFrame *)frame->dup(), "ifOut", i);
+            send(frame->dup(), "ifOut", i);
         }
     }
 
