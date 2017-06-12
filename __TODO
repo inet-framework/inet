@@ -53,22 +53,16 @@ TODO: port NAM trace writer to use signals mechanism
 
 TODO: Add ThruputMetering channel (NED definition)
 
-TODO: remove MobileHost, MFMobileHost and most of the obsolete modules in nosed/wireless
-
 TODO: provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
 
 TODO: integrate models:
-   HTTPTools, VoIPTools, HIPSim++, MobileWiMAX, ...
-
-TODO: for omnetpp-4.1: eliminate NotificationBoard, use signals instead
+   HIPSim++, MobileWiMAX, ...
 
 TODO: PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
 
-TODO: IPv6 works only eth, not work on ppp. See examples/ipv6/nclients.
-
 TODO: implement node failure/recovery by using signals mechanism
 
-TODO: pcacp file recording using signals mechanism
+TODO: pcap file recording using signals mechanism
 
 TODO: VideoStrmReq problem on IPv6: 
       "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
@@ -95,18 +89,6 @@ TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP pa
 TODO: eliminate ARP overhead for PPP interfaces; 
 
 TODO: UDPSocket::Callback::socketDatagramArrived() - change arg cMessage* to cPacket*
-
-TODO: eliminate ARP overhead for PPP interfaces;
-
-  [Ingmar Baumgart email, 2008 dec 10, "INET Framework: ARP performance issue"]
-    The only issue which results in about 10% slowdown in our simulations is
-    the unnecessary use of the ARP module for PPP interfaces. A quick fix
-    would be to modify IP::sendDatagramToOutput() to use a sendDirect to
-    skip the ARP module, if the outgoing interface is not a broadcast
-    interface (mainly move the logic from ARP::processOutboundPacket() to
-    IP::sendDatagramToOutput).
-    Of course we could also remove the outgoing connection from the ARP
-    module and use there sendDirect as well.
 
 TODO: examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
 
