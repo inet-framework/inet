@@ -36,7 +36,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 {
     const auto& applicationHeader = std::static_pointer_cast<const ApplicationHeader>(chunk);
     auto position = stream.getLength();
-    stream.writeUint16(applicationHeader->getSomeData());
+    stream.writeUint16Be(applicationHeader->getSomeData());
     stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
@@ -44,7 +44,7 @@ Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) c
 {
     auto applicationHeader = std::make_shared<ApplicationHeader>();
     auto position = stream.getPosition();
-    applicationHeader->setSomeData(stream.readUint16());
+    applicationHeader->setSomeData(stream.readUint16Be());
     stream.readByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
     return applicationHeader;
 }
@@ -55,10 +55,10 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>
     auto position = stream.getLength();
     if (tcpHeader->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize TCP header");
-    stream.writeUint16(tcpHeader->getLengthField());
-    stream.writeUint16(tcpHeader->getSrcPort());
-    stream.writeUint16(tcpHeader->getDestPort());
-    stream.writeUint16(tcpHeader->getCrc());
+    stream.writeUint16Be(tcpHeader->getLengthField());
+    stream.writeUint16Be(tcpHeader->getSrcPort());
+    stream.writeUint16Be(tcpHeader->getDestPort());
+    stream.writeUint16Be(tcpHeader->getCrc());
     stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
@@ -67,16 +67,16 @@ Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
     auto tcpHeader = std::make_shared<TcpHeader>();
     auto position = stream.getPosition();
     auto remainingLength = stream.getRemainingLength();
-    auto lengthField = byte(stream.readUint16());
+    auto lengthField = byte(stream.readUint16Be());
     if (lengthField > remainingLength)
         tcpHeader->markIncomplete();
     auto length = lengthField < remainingLength ? lengthField : byte(remainingLength);
     tcpHeader->setChunkLength(byte(length));
     tcpHeader->setLengthField(byte(lengthField).get());
-    tcpHeader->setSrcPort(stream.readUint16());
-    tcpHeader->setDestPort(stream.readUint16());
+    tcpHeader->setSrcPort(stream.readUint16Be());
+    tcpHeader->setDestPort(stream.readUint16Be());
     tcpHeader->setCrcMode(CRC_COMPUTED);
-    tcpHeader->setCrc(stream.readUint16());
+    tcpHeader->setCrc(stream.readUint16Be());
     stream.readByteRepeatedly(0, byte(length - stream.getPosition() + position).get());
     return tcpHeader;
 }
@@ -85,7 +85,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>&
 {
     const auto& ipHeader = std::static_pointer_cast<const IpHeader>(chunk);
     auto position = stream.getLength();
-    stream.writeUint16((int16_t)ipHeader->getProtocol());
+    stream.writeUint16Be((int16_t)ipHeader->getProtocol());
     stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
@@ -93,7 +93,7 @@ Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ipHeader = std::make_shared<IpHeader>();
     auto position = stream.getPosition();
-    Protocol protocol = (Protocol)stream.readUint16();
+    Protocol protocol = (Protocol)stream.readUint16Be();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
         ipHeader->markImproperlyRepresented();
     ipHeader->setProtocol(protocol);
@@ -105,7 +105,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<C
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EthernetHeader>(chunk);
     auto position = stream.getLength();
-    stream.writeUint16((int16_t)ethernetHeader->getProtocol());
+    stream.writeUint16Be((int16_t)ethernetHeader->getProtocol());
     stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
@@ -113,7 +113,7 @@ Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) cons
 {
     auto ethernetHeader = std::make_shared<EthernetHeader>();
     auto position = stream.getPosition();
-    ethernetHeader->setProtocol((Protocol)stream.readUint16());
+    ethernetHeader->setProtocol((Protocol)stream.readUint16Be());
     stream.readByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
     return ethernetHeader;
 }
@@ -122,7 +122,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<
 {
     const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
     auto position = stream.getLength();
-    stream.writeUint16(ethernetTrailer->getCrc());
+    stream.writeUint16Be(ethernetTrailer->getCrc());
     stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
 }
 
@@ -130,7 +130,7 @@ Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) con
 {
     auto ethernetTrailer = std::make_shared<EthernetTrailer>();
     auto position = stream.getPosition();
-    ethernetTrailer->setCrc(stream.readUint16());
+    ethernetTrailer->setCrc(stream.readUint16Be());
     stream.readByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
     return ethernetTrailer;
 }

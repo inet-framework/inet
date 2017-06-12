@@ -144,7 +144,7 @@ void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
     const auto& tlvHeader = std::static_pointer_cast<const TlvHeaderInt>(chunk);
     stream.writeUint8(tlvHeader->getType());
     stream.writeUint8(byte(tlvHeader->getChunkLength()).get());
-    stream.writeUint16(tlvHeader->getInt16Value());
+    stream.writeUint16Be(tlvHeader->getInt16Value());
 }
 
 Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
@@ -152,7 +152,7 @@ Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
     auto tlvHeader = std::make_shared<TlvHeaderInt>();
     assert(tlvHeader->getType() == stream.readUint8());
     assert(byte(tlvHeader->getChunkLength()) == byte(stream.readUint8()));
-    tlvHeader->setInt16Value(stream.readUint16());
+    tlvHeader->setInt16Value(stream.readUint16Be());
     return tlvHeader;
 }
 
@@ -634,27 +634,27 @@ static void testStreaming()
     // 4. uint16_t
     uint64_t uint16 = 0x4242;
     MemoryOutputStream outputStream2;
-    outputStream2.writeUint16(uint16);
+    outputStream2.writeUint16Be(uint16);
     MemoryInputStream inputStream2(outputStream2.getData());
-    assert(inputStream2.readUint16() == uint16);
+    assert(inputStream2.readUint16Be() == uint16);
     assert(!inputStream2.isReadBeyondEnd());
     assert(inputStream2.getRemainingLength() == bit(0));
 
     // 5. uint32_t
     uint64_t uint32 = 0x42424242;
     MemoryOutputStream outputStream3;
-    outputStream3.writeUint32(uint32);
+    outputStream3.writeUint32Be(uint32);
     MemoryInputStream inputStream3(outputStream3.getData());
-    assert(inputStream3.readUint32() == uint32);
+    assert(inputStream3.readUint32Be() == uint32);
     assert(!inputStream3.isReadBeyondEnd());
     assert(inputStream3.getRemainingLength() == bit(0));
 
     // 6. uint64_t
     uint64_t uint64 = 0x4242424242424242L;
     MemoryOutputStream outputStream4;
-    outputStream4.writeUint64(uint64);
+    outputStream4.writeUint64Be(uint64);
     MemoryInputStream inputStream4(outputStream4.getData());
-    assert(inputStream4.readUint64() == uint64);
+    assert(inputStream4.readUint64Be() == uint64);
     assert(!inputStream4.isReadBeyondEnd());
     assert(inputStream4.getRemainingLength() == bit(0));
 
