@@ -60,7 +60,7 @@ class SIM_API cPanelFigure : public cFigure
         //@{
         virtual cPanelFigure *dup() const override  {return new cPanelFigure(*this);}
         virtual std::string str() const override;
-        virtual const char *getRendererClassName() const override {return "";} // non-visual figure
+        virtual const char *getRendererClassName() const override {return "GroupFigureRenderer";} // just so it will have a QGraphicsLayer (avoids a crash)
         virtual void updateParentTransform(Transform& transform) override;
         virtual void move(double dx, double dy) override { moveLocal(dx, dy); }
         virtual void moveLocal(double dx, double dy) override {position.x += dx; position.y += dy; fireTransformChange();}
