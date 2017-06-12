@@ -1187,7 +1187,7 @@ void SCTPAssociation::retransmitShutdownAck()
 void SCTPAssociation::sendPacketDrop(const bool flag)
 {
     EV_INFO << "sendPacketDrop:\t";
-    SCTPMessage *drop = (SCTPMessage *)state->sctpmsg->dup();
+    SCTPMessage *drop = (SCTPMessage *)state->sctpmsg->dup();        //FIXME is the c-style conversion need here?
     if (drop->getChunksArraySize() == 1) {
         SCTPChunk *header = (SCTPChunk *)(drop->getChunks(0));
         if (header->getChunkType() == PKTDROP) {
