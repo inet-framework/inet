@@ -9,7 +9,7 @@ src/Makefile.vc
 .nedexclusions
 src/inet/features.h
 src/inet/opp_defines.h
-precompiled.h.*
+precompiled_*.h.*
 /3rdparty
 
 # output and result files
