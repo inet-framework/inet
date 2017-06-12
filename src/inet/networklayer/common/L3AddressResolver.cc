@@ -526,6 +526,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 
 #endif // ifdef WITH_IPv4
                     default:
+                        (void)entry;    // eliminate warning: unused variable 'entry'
                         throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", L3Address::getTypeName(add.getType()));
                         break;
                 }
