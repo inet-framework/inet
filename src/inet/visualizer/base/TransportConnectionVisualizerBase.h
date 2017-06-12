@@ -24,11 +24,11 @@
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PortFilter.h"
 
-#ifdef WITH_TCP_COMMON
+#ifdef WITH_TCP_INET
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #else
 namespace inet { namespace tcp { class TCPConnection; } }
-#endif // WITH_TCP_COMMON
+#endif // WITH_TCP_INET
 
 namespace inet {
 
