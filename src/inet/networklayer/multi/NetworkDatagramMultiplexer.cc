@@ -69,7 +69,7 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage *message)
         return 2;
 #endif // ifdef WITH_GENERIC
     else
-        throw cRuntimeError("Unknown control info");
+        throw cRuntimeError("Unknown control info/packet: '%s' in '%s'", (controlInfo?controlInfo->getClassName():"<nullptr>"), packet->getClassName());
 }
 
 } // namespace inet
