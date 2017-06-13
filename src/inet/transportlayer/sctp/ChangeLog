@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-01  Zoltan Bojthe
+
+	CID 77786 Out-of-bounds read
+
+2017-06-01  Zoltan Bojthe
+
+	CID 179285 Logical vs. bitwise operator, code indentation
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-11-24  Irene Ruengeler

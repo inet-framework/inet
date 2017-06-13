@@ -1,5 +1,23 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-09  Rudolf Hornig
+
+	The makefile now generates separate precompiled header for debug and release mode.
+	This is required to be able to quickly switch between release and debug mode in the IDE.
+
+2017-05-24  Levente Mészáros
+
+	Changed ThroughputFilter to measure throughput periodically as opposed to the whole simulation.
+	Added result filter called ElapsedTimeFilter.
+	Added new result recorder called ElapsedTimeRecorder.
+	Added bubbles when node starts, shuts down or crashes.
+
+2017-05-18  Zoltan Bojthe
+
+	Added more utility functions for stlutils.h copied from omnetpp
+
 2017-03-27  Benjamin Martin Seregi
 
 	Added NF_PACKET_DROP signal to NotifierConsts.

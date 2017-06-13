@@ -22,27 +22,27 @@
 
 namespace inet {
 
-class INET_API BarFigure : public cGroupFigure
+class INET_API BarFigure : public cRectangleFigure
 {
   protected:
     double value = NaN;
     double minValue = NaN;
     double maxValue = NaN;
-    double width = 3;
-    double height = 16;
-    cFigure::Point position;
+    double spacing = 2;
+    cRectangleFigure *valueFigure = nullptr;
 
   protected:
     virtual void refreshDisplay();
 
   public:
-    BarFigure(double value, double minValue, double maxValue, const char *name = nullptr);
+    BarFigure(const char *name = nullptr);
 
-    virtual double getWidth() const { return width; }
-    virtual double getHeight() const { return height; }
+    void setColor(const cFigure::Color& color) { valueFigure->setFillColor(color); }
 
-    virtual void setPosition(const cFigure::Point& position);
-    virtual void setValue(double value);
+    void setSpacing(double spacing) { this->spacing = spacing; }
+    void setMinValue(double minValue) { this->minValue = minValue; }
+    void setMaxValue(double maxValue) { this->maxValue = maxValue; }
+    void setValue(double value);
 };
 
 } // namespace inet

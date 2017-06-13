@@ -1,5 +1,22 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-24  Levente Mészáros
+
+	Added 'g(erp)' mode set and renamed 'g' to 'g(mixed)' for disambiguation.
+	Currently we don't have a mechanism to dynamically negotiate ERP only networks.
+	Added better error reporting for non-existing mode set.
+	Added ERP only OFDM modes.
+
+2017-05-17  Zoltan Bojthe
+
+	Added descriptors - for watch inside of Ieee80211ReceptionIndication, etc
+
+2017-05-17  Zoltan Bojthe
+
+	Fixed typo: getCenterFreqency() renamed to getCenterFrequency()
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2017-01-12  gutipeon

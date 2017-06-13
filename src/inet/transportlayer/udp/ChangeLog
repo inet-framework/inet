@@ -1,5 +1,17 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-31  Zoltan Bojthe
+
+	CID 179353, 179354: Using uninitialized variables (localAddr, remoteAddr,
+	localPort, remotePort)
+
+2017-05-24  Levente Mészáros
+
+	Added standard layered protocol signals to allow generic visualizers to
+	work with UDP.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-06-23  Zoltan Bojthe

@@ -24,6 +24,11 @@ namespace visualizer {
 
 Define_Module(PhysicalLinkCanvasVisualizer);
 
+bool PhysicalLinkCanvasVisualizer::isLinkStart(cModule *module) const
+{
+    return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
+}
+
 bool PhysicalLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;

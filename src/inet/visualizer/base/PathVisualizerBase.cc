@@ -231,28 +231,54 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
 {
     Enter_Method_Silent();
     if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
-        if (isPathEnd(static_cast<cModule *>(source))) {
+        if (isPathStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
+
+//FIXME merge it
+#if 1  // INTEGRATION
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 auto module = getContainingNode(check_and_cast<cModule *>(source));
                 mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { addToIncompletePath(id, module); });
             }
+#else  // MASTER
+            auto packet = check_and_cast<cPacket *>(object);
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr)
+                removeIncompletePath(treeId);
+            auto networkNode = getContainingNode(module);
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                addToIncompletePath(treeId, networkNode);
+#endif
         }
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
         if (isPathElement(static_cast<cModule *>(source))) {
+//FIXME merge it
+#if 1  // INTEGRATION
             auto packet = check_and_cast<Packet *>(object);
             if (packetFilter.matches(packet)) {
                 auto module = getContainingNode(check_and_cast<cModule *>(source));
                 mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { addToIncompletePath(id, module); });
             }
+#else  // MASTER
+            auto module = check_and_cast<cModule *>(source);
+            auto packet = check_and_cast<cPacket *>(object);
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr)
+                addToIncompletePath(treeId, getContainingNode(module));
+#endif
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
+
+//FIXME merge it
+#if 1  // INTEGRATION
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
@@ -260,6 +286,16 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
                     updatePathVisualization(*getIncompletePath(id), packet);
                     removeIncompletePath(id);
                 });
+#else  // MASTER
+            auto packet = check_and_cast<cPacket *>(object);
+            auto treeId = packet->getEncapsulationTreeId();
+            auto path = getIncompletePath(treeId);
+            if (path != nullptr) {
+                auto networkNode = getContainingNode(module);
+                if (nodeFilter.matches(networkNode) && packetFilter.matches(packet))
+                    updatePathVisualization(*path, packet);
+                removeIncompletePath(treeId);
+#endif
             }
         }
     }

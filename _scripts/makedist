@@ -30,6 +30,8 @@ rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
 
 git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error copying repo ---; exit 1;}
+(cd showcases; git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/showcases/ || { echo --- error copying showcases ---; exit 1;})
+(cd tutorials; git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/tutorials/ || { echo --- error copying tutorials ---; exit 1;})
 
 echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 
@@ -53,6 +55,9 @@ if [ "$todofiles" != "" ]; then
     echo "Removing underscore files: $todofiles"
     rm -rf $todofiles
 fi
+
+rm -rf showcases/doc showcases/*/doc showcases/*/*/doc
+rm -rf tutorials/doc tutorials/*/doc tutorials/*/*/doc
 
 # pack and create tar.gz archives
 echo Creating $FILENAME.

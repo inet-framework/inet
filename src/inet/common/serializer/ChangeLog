@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-01  Zoltan Bojthe
+
+	CID 179379 Unused value
+
 2017-02-20  Rudolf Hornig
 
 	Fixed build error on Windows.

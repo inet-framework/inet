@@ -1,5 +1,19 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-25  Levente Mészáros
+
+	Switched to use PacketQueue.
+
+2017-05-24  Levente Mészáros
+
+	Added frame name to loggging.
+
+2017-05-24  Levente Mészáros
+
+	Renamed state transmission to Receive-Unexpected-Ack.
+
 2017-01-13  Levente Mészáros
 
 	Renamed to transmitter/receiver address.

@@ -1,5 +1,18 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Zoltan Bojthe
+
+	Fixed default IPv4 TimeToLive value
+
+2017-06-01  Zoltan Bojthe
+
+	CID 179357, 179358, 179360-179365, 179369 : Uninitialized member fields
+	CID 179325 Out-of-bounds access:  alloc_strlen: Allocating
+	insufficient memory for the terminating null of the string.
+	CID 179283 Failed to override method
+
 2017-04-06  Zoltan Bojthe
 
 	Fixed int64 printf format.

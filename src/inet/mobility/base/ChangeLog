@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-31  Zoltan Bojthe
+
+	CID 77882 Uninitialized scalar variable
+	CID 179367 Uninitialized pointer field
+
 2017-01-13  Levente Mészáros
 
 	Fixed orientation angle calculation.

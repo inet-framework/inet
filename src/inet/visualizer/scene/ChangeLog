@@ -1,5 +1,37 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Removed getPosition from INITSTAGE_LOCAL due to mobility is initialized later.
+
+2017-06-06  Levente Mészáros
+
+	Added tags parameter.
+
+2017-06-01  Levente Mészáros
+
+	Added displacementPriority parameters, renamed displacement parameter to displacementHint.
+	Implemented a better displacement cost function.
+
+2017-05-30  Levente Mészáros
+
+	Added a separate annotation figure child.
+
+2017-05-29  Levente Mészáros
+
+	Added a more sophisticated annotation layout. The new layout allows annotations
+	to be positioned around the submodule with displacements like: top, left, topLeft, etc.
+
+2017-05-26  Levente Mészáros
+
+	Fixed positioning after switching to cPanelFigure.
+
+2017-05-25  Levente Mészáros
+
+	Changed NetworkNodeCanvasVisualization to cPanelFigure to solve zooming issues.
+
 2017-02-08  Levente Mészáros
 
 	Added viewScale parameter to SceneCanvasVisualizer.

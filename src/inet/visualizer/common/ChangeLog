@@ -1,5 +1,25 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-06  Levente Mészáros
+
+	Added tags parameter.
+	Added support for drawing one continuous box as opposed to one discrete box per element.
+
+2017-06-01  Levente Mészáros
+
+	Added displacementPriority parameters, renamed displacement parameter to displacementHint.
+
+2017-05-29  Levente Mészáros
+
+	Added more parameters to queue visualizers.
+	Added displacement parameters.
+
+2017-05-25  Levente Mészáros
+
+	Added queue visualizer modules.
+
 2017-01-02  Levente Mészáros
 
 	Added new visualizers: PacketDropVisualizer, PacketDropCanvasVisualizer,

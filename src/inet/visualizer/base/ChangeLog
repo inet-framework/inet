@@ -1,5 +1,70 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Added radio mode, reception state and transmission state visualization.
+
+2017-06-08  Zoltan Bojthe
+
+	Fixed warning: extra tokens at end of #endif directive [-Wextra-tokens]
+	Fixed feature related errors bugfix: some "signal == " was missed
+
+2017-06-08  Levente Mészáros
+
+	Added new energy storage visualizers.
+	Cleaned up link visualizer and path visualizer filtering.
+
+2017-06-06  Levente Mészáros
+
+	Added tags parameter to all visualizers.
+	Fixed bug related to using %u in statistic visualizer.
+	Added support for drawing one continuous box as opposed to one discrete
+	box per element.
+	Added displayRoutesIndividually and displayLabels flags.
+	Added nextHopModuleId to the map key of route visualizations.
+
+2017-06-01  Levente Mészáros
+
+	Added an optional but always active animationSpeed parameter.
+	Added displacementPriority parameters, renamed displacement parameter to displacementHint.
+	Changed default lineShift and labelFont parameters for better positioning at 1.0 zoom.
+	Fixed filter when there's no interface table.
+
+2017-05-30  Levente Mészáros
+
+	Added lineSmooth parameter.
+
+2017-05-30  Levente Mészáros
+
+	Fixed path building bug leading to NaN coordinates.
+
+2017-05-29  Levente Mészáros
+
+	Added format directrive for automatic IPv4/IPv6 address.
+	Added generic network address format directive.
+	Added check if loading the image is successful or not.
+	Added annotationSpacing parameter.
+	Added more parameters to queue visualizers.
+	Added displacement parameters to all visualizers.
+	Separated transmission and reception figures.
+	Changed default interface filter.
+
+2017-05-25  Levente Mészáros
+
+	Added queue visualizer modules.
+	Fixed displaying multiple routes between the same nodes.
+	Fixed moduleFilter in MobilityCanvasVisualizer.
+
+2017-05-24  Levente Mészáros
+
+	Switched to encapsulation tree id for identifiying packets.
+	Added line labels to path visualizers and link visualizers.
+	Changed source filter to accept all sources by default.
+	Dropped unused minValue, maxValue parameters.
+	Fixed compiler error when compiling without OSG (case of WITH_OSG is undefined)
+
 2017-02-20  Levente Mészáros
 
 	Implemented missing interfaceFilter in LinkVisualizer.

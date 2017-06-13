@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-31  Zoltan Bojthe
+
+	CID 179356 Uninitialized scalar field
+
+2017-05-22  Zoltan Bojthe
+
+	TCPWestwood bugfix - fingerprints changed
+
 2017-02-09  Levente Mészáros
 
 	Added TCPConnection class descriptor.
@@ -12,11 +22,11 @@
 
 2016-09-22  Zoltan Bojthe
 
-    omnetpp5: add/use refreshDisplay()
+	omnetpp5: add/use refreshDisplay()
 
 2016-09-19  Zoltan Bojthe
 
-    omnetpp5: remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500)
+	omnetpp5: remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500)
 
 2016-06-15  ------ inet-3.4.0 released ------
 

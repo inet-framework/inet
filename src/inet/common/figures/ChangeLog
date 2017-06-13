@@ -1,5 +1,42 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Refactored BarFigure.
+
+2017-06-06  Levente Mészáros
+
+	Added support for drawing one continuous box as opposed to one discrete box per element.
+
+2017-06-01  Levente Mészáros
+
+	Added label spacing.
+
+2017-05-29  Levente Mészáros
+
+	Added label tags.
+
+2017-05-25  Levente Mészáros
+
+	Added QueueFigure.
+	Added label rotation to LabeledLineFigure and LabeledPolylineFigure.
+	Temporarily added cPanelFigure from omnet repository.
+
+2017-05-24  Gyorgy Szaszko
+
+	Added numberSizeFactor parameter to PlotFigure.
+	Added labelOffset to indicator figures.
+
+2017-05-24  Levente Mészáros
+
+	Added preliminary LabeledPolylineFigure.
+
+2017-05-12  Zoltan Bojthe
+
+	Fixed name of PlotFigure
+
 2017-02-20  Levente Mészáros
 
 	Renamed spacing to inset and added mutator.

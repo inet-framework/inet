@@ -123,8 +123,8 @@ The highlights of this release are:
    more details.
 
 
-INET-3.6.0 (May, 2017) - stable
--------------------------------
+INET-3.6.0 (June, 2017) - stable
+--------------------------------
 
 This release contains some important new features, several bug fixes, and a few
 minor enhancements. It requires OMNeT++ 5.1 or later.
@@ -134,6 +134,9 @@ Highlights in this release:
  - On Windows, INET is no longer using the auto-import feature of the linker, because
    it generated more than 65536 symbols. Dependent projects crashed because of this.
    All INET APIs now should be prefixed with INET_API macro. (fixes #257)
+
+ - The makefile now generates separate precompiled header for debug and release mode.
+   This is required to be able to quicly switch between release and debug mode in the IDE.
 
  - The IEEE 802.11 MAC model has been extended with several new components. The
    implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
@@ -172,15 +175,24 @@ Highlights in this release:
    most notable are frame exchange sequences, block acknowledgement, and MSDU
    aggregation.
 
+   The new version was thoroughly tested against the old one using fingerprint
+   tests. The tests ensure that the new version doesn't introduce any regression.
+   In fact, the tests brought up a few problems in the old implementation that
+   were fixed in the new one.
+
  - The power model has been extended with support for charge/current based models
    as opposed to the existing energy/power based ones. A new energy management
    component has also been added to separate monitoring and controlling of energy
    consumers and generators from the rest of the model.
 
  - New visualizers has been added to display packet drops and link breaks, data
-   contained in interface tables, routes stored in routing tables, and transport
-   connections between network nodes. The new visualizers are also added to the
-   already existing integrated ones.
+   contained in interface tables, routes stored in routing tables, queues filled
+   with packets, residual capacity of energy storages, and transport connections
+   between network nodes. The new visualizers are also added to the already existing
+   integrated ones. Note: many features that work with the 2D visualizers currently
+   don't work with the 3D OSG visualizers.
+
+ - Added new features for various tutorials and showcases.
 
 
 INET-3.5.0 (Feb, 2017) - stable

@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-24  Levente Mészáros
+
+	Changed packet drop signals to be public for visualizations.
+
 2017-04-05  Zoltan Bojthe
 
 	Removed connection coloring. This feature is replaced by DataLinkVisualizer

@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-24  Levente Mészáros
+
+	Added 'g(erp)' mode set and renamed 'g' to 'g(mixed)' for disambiguation.
+	Currently we don't have a mechanism to dynamically negotiate ERP only networks.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-06-15  ------ inet-3.4.0 released ------

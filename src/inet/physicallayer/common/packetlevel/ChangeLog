@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-01  Zoltan Bojthe
+
+	RadioMedium: CID 77990 Uninitialized scalar field
+
 2017-02-07  Levente Mészáros
 
 	Fixed interference end time calculation.

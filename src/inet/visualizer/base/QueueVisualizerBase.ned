@@ -29,7 +29,7 @@ simple QueueVisualizerBase extends VisualizerBase
 
         bool displayQueues = default(false);
 
-        string queueFilter = default("**"); // which queues are considered, matches no queues by default
+        string queueFilter = default("**"); // which queues are considered, matches all queues by default
 
         string color = default("blue");
         double width = default(8);

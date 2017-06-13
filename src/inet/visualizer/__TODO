@@ -1,0 +1,29 @@
+ - separate opp features: WITH_VISUALIZER and WITH_OSGGEO
+ - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
+   e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
+ - path visualization is completely broken with fragmentation
+ - queue figure should be horizontal, parameter? battery figure?
+ - use optional submodule vectors in the integrated visualizers
+
+Change:
+ - review how LinkBreakVisualizer visualizes link breaks
+   - use empty arrow filled when there's activity
+   - separately mark uplink and downlink at both ends (showing what they think about the link)
+   - keep link state information
+ - remove updateInterval from MovingMobilityBase
+
+2D:
+
+3D:
+ - review and compare to 2D implementation
+ - iconTintColor parameters don't work
+ - lineStyle parameters don't work
+ - network node annotations overlap
+   - egymásra lógnak az interfaceTableVisualizer és a ieee80211Visualizer jelzesei
+   - infoVisualizer és mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymáson van
+   - amelyik node-nál nincs bekapcsolva interfaceTableVisualizer, ott a ieee80211Visualizer es a mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymásra lóg
+ - link break visualization position is wrong
+ - PhysicalLinkVisualizer nyilai nem látszanak rendesen, indulhatnának a source node szélétől, mehetnének a destination node széléig, nem a közepéig
+
+Feature:
+ - IEEE 802.11 association visualizer should display signal strength

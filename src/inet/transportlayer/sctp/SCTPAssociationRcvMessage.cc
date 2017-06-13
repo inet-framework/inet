@@ -103,7 +103,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
     const uint32 numberOfChunks = sctpmsg->getChunksArraySize();
     EV_DETAIL << "numberOfChunks=" << numberOfChunks << endl;
 
-    state->sctpmsg = (SCTPMessage *)sctpmsg->dup();
+    state->sctpmsg = sctpmsg->dup();
     bool authenticationNecessary = state->peerAuth;
     state->sackAlreadySent = false;
     if ((sctpmsg->getChecksumOk() == false || sctpmsg->hasBitError()) &&
@@ -2489,7 +2489,7 @@ void SCTPAssociation::processIncomingResetRequestArrived(SCTPIncomingSSNResetReq
             state->incomingRequest = nullptr;
             state->incomingRequestSet = false;
         }
-        state->incomingRequest = ((SCTPParameter *)requestParam)->dup();
+        state->incomingRequest = ((SCTPParameter *)requestParam)->dup();        //FIXME is the c-style conversion need here?
         state->incomingRequest->setName("StateIncoming");
         state->incomingRequestSet = true;
     }
@@ -2514,12 +2514,12 @@ void SCTPAssociation::processSSNTSNResetRequestArrived(SCTPSSNTSNResetRequestPar
             state->sendResponse = PERFORMED_WITH_OPTION;
             state->responseSn = requestParam->getSrReqSn();
             state->peerRequestType = SSN_TSN;
-            state->incomingRequest = (SCTPParameter *)requestParam->dup();
+            state->incomingRequest = (SCTPParameter *)requestParam->dup();        //FIXME is the c-style conversion need here?
             state->incomingRequestSet = true;
         }
     } else {
         sendStreamResetResponse(requestParam, DEFERRED, true);
-        state->incomingRequest = (SCTPParameter *)requestParam->dup();
+        state->incomingRequest = (SCTPParameter *)requestParam->dup();        //FIXME is the c-style conversion need here?
         state->incomingRequestSet = true;
         state->incomingRequest->setName("SSNDeferred");
         state->peerRequestSn = requestParam->getSrReqSn();
@@ -3004,7 +3004,7 @@ SCTPEventCode SCTPAssociation::processStreamResetArrived(SCTPStreamResetChunk *r
                 } else {
                     state->peerRequestSn = addStreamsParam->getSrReqSn();
                     state->peerRequestType = ADD_INCOMING;
-                    state->incomingRequest = ((SCTPParameter *)addStreamsParam)->dup();
+                    state->incomingRequest = ((SCTPParameter *)addStreamsParam)->dup();        //FIXME is the c-style conversion need here?
                     state->incomingRequestSet = true;
                     state->incomingRequest->setName("stateIncoming");
                     state->sendResponse = PERFORMED_WITH_ADDOUT;
@@ -3206,7 +3206,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
                         errorParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errorParam->setErrorCauseType(ERROR_DELETE_LAST_IP_ADDRESS);
                         errorParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 4) * 8);
-                        errorParam->encapsulate((cPacket *)delParam->dup());
+                        errorParam->encapsulate((cPacket *)delParam->dup());        //FIXME is the c-style conversion need here?
                         asconfAckChunk->addAsconfResponse(errorParam);
                     }
                     else if (addr == remoteAddr) {
@@ -3217,7 +3217,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
                         errParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errParam->setErrorCauseType(ERROR_DELETE_SOURCE_ADDRESS);
                         errParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 4);
-                        errParam->encapsulate((cPacket *)delParam->dup());
+                        errParam->encapsulate((cPacket *)delParam->dup());        //FIXME is the c-style conversion need here?
                         asconfAckChunk->addAsconfResponse(errParam);
                     }
                     else {

@@ -1,5 +1,28 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Cleaned up path visualizer filtering.
+
+2017-06-06  Levente Mészáros
+
+	Added tags parameter.
+	Added displayRoutesIndividually and displayLabels flags.
+
+2017-05-30  Levente Mészáros
+
+	Fixed path building bug leading to NaN coordinates.
+
+2017-05-25  Levente Mészáros
+
+	Fixed displaying multiple routes between the same nodes.
+
+2017-05-24  Levente Mészáros
+
+	Added line labels to path visualizers.
+
 2017-01-02  Levente Mészáros
 
 	Added new visualizers: RoutingTableVisualizer,

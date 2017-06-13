@@ -25,6 +25,11 @@ namespace visualizer {
 
 Define_Module(DataLinkCanvasVisualizer);
 
+bool DataLinkCanvasVisualizer::isLinkStart(cModule *module) const
+{
+    return dynamic_cast<MACProtocolBase *>(module) != nullptr || dynamic_cast<MACBase *>(module) != nullptr;
+}
+
 bool DataLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<MACProtocolBase *>(module) != nullptr || dynamic_cast<MACBase *>(module) != nullptr;

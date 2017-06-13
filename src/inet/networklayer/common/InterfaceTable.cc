@@ -518,9 +518,9 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
 {
     MulticastGroupList mglist;
     for (int i = 0; i < getNumInterfaces(); ++i) {
+#ifdef WITH_IPv4
         InterfaceEntry *ie = getInterface(i);
         int interfaceId = ie->getInterfaceId();
-#ifdef WITH_IPv4
         if (ie->ipv4Data()) {
             int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
             for (int j = 0; j < numOfMulticastGroups; ++j) {

@@ -1,5 +1,90 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-07  Levente Mészáros
+
+	Eliminated warning: unused variable
+
+2017-06-01  Zoltan Bojthe
+
+	CID 179298 Unchecked dynamic_cast
+	CID 179297 Unchecked dynamic_cast
+	CID 179296 Unchecked dynamic_cast
+
+2017-05-24  Levente Mészáros
+
+	Added datarate signal to rate controls.
+
+2017-05-24  Levente Mészáros
+
+	Added 'g(erp)' mode set and renamed 'g' to 'g(mixed)' for disambiguation.
+	Currently we don't have a mechanism to dynamically negotiate ERP only
+	networks.
+
+2017-05-23  Levente Mészáros
+
+	Fixed AmsduDeaggregation, it must create Qos frames, updated fingerprints.
+
+2017-05-23  Levente Mészáros
+
+	Fixed packet name for subframes in aggregation/deaggregation.
+
+2017-05-22  Levente Mészáros
+
+	Fixed yet another memory leak.
+	Changed casts to interface instead of implementation classes.
+	Fixed memory leaks and fingerprint errors, somewhat reverted previous changes.
+
+2017-05-18  Levente Mészáros
+
+	Fixed delete calls, protected frame is destructred by the frame sequence.
+
+2017-05-18  Levente Mészáros
+
+	Fixed memory leaks by splitting frame ownership between InProgressFrames and
+	FrameSequences.
+
+2017-05-17  Levente Mészáros
+
+	Added missing delete calls.
+
+2017-05-17  Benjamin Martin Seregi
+
+	Fixed (Non)QoSRecoveryProcedure and removed a TODO.
+
+	1. Typo in incrementStationLrc(): it incremented the SSRC. 2. When {SSRC,
+	SLRC} = {long,short}RetryLimit the procedure must not reset SSRC and
+	SLRC. 3. TODO in QoSRecoveryProcedure, see the above comment.
+
+2017-05-17  Benjamin Martin Seregi
+
+	InProgressFrames: seqAndFragNums must not refer to non-QoS frames.
+
+2017-05-17  Levente Mészáros
+
+	Added missing destructors.
+	Added missing deaggregation to controlFrameReceived.
+	Fixed typo in sequence number comparison.
+	Fixed deleting in progress frames when the frame sequence is finished.
+
+2017-05-17  Zoltan Bojthe
+
+	Added descriptors - for watch inside of Ieee80211ReceptionIndication, etc
+
+2017-05-11  Zoltan Bojthe
+
+	~ Ieee80211OldMac removed
+
+2017-05-16  Benjamin Martin Seregi
+
+	OriginatorQoSAckPolicy: frame might not be a QoS frame and a non-QoS
+	frame is not eligible for BA (it does not have an ackpolicy field).
+
+2017-05-15  Levente Mészáros
+
+	Fixed backward compatibility of bitrate parameters, updated fingerprints.
+
 2017-03-07  Levente Mészáros
 
 	Removed @nic from Ieee80211Mac, the MAC module is not the NIC module.

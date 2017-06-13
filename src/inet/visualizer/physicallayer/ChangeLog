@@ -1,8 +1,35 @@
 ====== inet-3.x ======
 
-2017-02-20  Levente Mészáros
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Added radio mode, reception state and transmission state visualization.
+	Cleaned up link visualizer filtering.
+
+2017-06-08  Zoltan Bojthe
+
+	Fixed feature related errors
+
+2017-06-06  Levente Mészáros
+
+	Added tags parameter.
+
+2017-06-01  Levente Mészáros
+
+	Added displacementPriority parameters, renamed displacement parameter to displacementHint.
+
+2017-05-29  Levente Mészáros
+
+	Add unit(m) to some parameters.
+	Added check if loading the image is successful or not.
+	Separated transmission and reception figures.
+
+2017-05-24  Levente Mészáros
 
 	Added transmission and reception powers to icons.
+	Added checks for networkNodeFilter.
+	Added line labels to link visualizers.
 
 2017-02-20  Levente Mészáros
 

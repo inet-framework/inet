@@ -1,5 +1,19 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Added radio visualizer to the integrated ones.
+
+2017-06-08  Levente Mészáros
+
+	Added energy storage visualizers to integrated ones.
+
+2017-05-25  Levente Mészáros
+
+	Added queue visualizer modules to integrated visualizers.
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2016-06-15  ------ inet-3.4.0 released ------

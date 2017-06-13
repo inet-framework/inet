@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-22  Zoltan Bojthe
+
+	xmipv6: advRtrAddr was uninitialized
+
 2017-02-20  ------ inet-3.5.0 released ------
 
 2017-02-17  Rudolf Hornig

@@ -1,5 +1,19 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-08  Levente Mészáros
+
+	Added radio mode, reception state and transmission state visualization.
+
+2017-06-08  Levente Mészáros
+
+	Added new energy storage visualizers.
+
+2017-05-25  Levente Mészáros
+
+	Added queue visualizer modules.
+
 2017-01-02  Levente Mészáros
 
 	Added interfaces for new visualizers: IIeee80211Visualizer,

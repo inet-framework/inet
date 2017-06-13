@@ -336,7 +336,7 @@ void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const Interf
 //        // check for local delivery
 //        if (rt->isLocalMulticastAddress(destAddr))
 //        {
-//            GenericDatagram *datagramCopy = (GenericDatagram *) datagram->dup();
+//            GenericDatagram *datagramCopy = datagram->dup();
 //
 //            // FIXME code from the MPLS model: set packet dest address to routerId (???)
 //            datagramCopy->setDestinationAddress(rt->getRouterId());
@@ -394,7 +394,7 @@ void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const Interf
 //            // don't forward to input port
 //            if (destIE && destIE!=fromIE)
 //            {
-//                GenericDatagram *datagramCopy = (GenericDatagram *) datagram->dup();
+//                GenericDatagram *datagramCopy = datagram->dup();
 //
 //                // set datagram source address if not yet set
 //                if (datagramCopy->getSourceAddress().isUnspecified())

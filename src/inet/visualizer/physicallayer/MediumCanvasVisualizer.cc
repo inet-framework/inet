@@ -18,8 +18,10 @@
 #include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/figures/SignalFigure.h"
 #include "inet/common/ModuleAccess.h"
+#ifdef WITH_RADIO
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
+#endif // WITH_RADIO
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
@@ -438,12 +440,14 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, true);
             auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
+#ifdef WITH_RADIO
             if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
                 char tmp[32];
                 sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarTransmission->getPower()).get()));
                 labelFigure->setText(tmp);
             }
             else
+#endif // WITH_RADIO
                 labelFigure->setText("");
         }
     }
@@ -479,12 +483,14 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
                 auto labelFigure = check_and_cast<LabeledIconFigure *>(figure)->getLabelFigure();
+#ifdef WITH_RADIO
                 if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
                     char tmp[32];
                     sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
                     labelFigure->setText(tmp);
                 }
                 else
+#endif // WITH_RADIO
                     labelFigure->setText("");
             }
         }

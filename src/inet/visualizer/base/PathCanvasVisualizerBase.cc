@@ -55,8 +55,8 @@ bool isPointOnSegment(const LineSegment& segment, const Coord& point)
 {
     auto& p1 = segment.getPoint1();
     auto& p2 = segment.getPoint2();
-    return (p2.x <= std::max(p1.x, point.x) && p2.x >= std::min(p1.x, point.x) &&
-            p2.y <= std::max(p1.y, point.y) && p2.y >= std::min(p1.y, point.y));
+    return (std::min(p1.x, p2.x) <= point.x && point.x <= std::max(p1.x, p2.x) &&
+            std::min(p1.y, p2.y) <= point.y && point.y <= std::max(p1.y, p2.y));
 }
 
 PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, LabeledPolylineFigure *figure) :
@@ -112,14 +112,13 @@ void PathCanvasVisualizerBase::refreshDisplay() const
                 auto& segment2 = segments[index];
                 Coord intersection = intersectLines(segment1, segment2);
                 if (std::isfinite(intersection.x) && std::isfinite(intersection.y)) {
-                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection)) {
+                    if (isPointOnSegment(segment1, intersection) && isPointOnSegment(segment2, intersection))
                         points.push_back(canvasProjection->computeCanvasPoint(intersection));
-                    }
                     else {
                         double distance = segment1.getPoint2().distance(segment2.getPoint1());
                         double distance1 = intersection.distance(segment1.getPoint2());
                         double distance2 = intersection.distance(segment2.getPoint1());
-                        if (distance1 + distance2 < 2 * distance)
+                        if (distance1 + distance2 < 4 * distance)
                             points.push_back(canvasProjection->computeCanvasPoint(intersection));
                         else {
                             points.push_back(canvasProjection->computeCanvasPoint(segment1.getPoint2()));

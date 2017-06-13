@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-24  Levente Mészáros
+
+	Fixed adding default routes for interfaces where it's disabled.
+
 2017-01-13  Levente Mészáros
 
 	Split configureNode into configureInterface and configureRoutingTable.
