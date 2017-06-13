@@ -10,6 +10,7 @@
                        inet.transportlayer.tcp_common
                        inet.applications.tcpapp
                        inet.common.serializer.tcp
+                       inet.common.serializer.application.tcpapp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_COMMON"

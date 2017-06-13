@@ -126,9 +126,9 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
     }
 }
 
+#ifdef WITH_TCP_COMMON
 void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<tcp::TcpHeader>& tcpHeader) const
 {
-#ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
     // flags
     bool flags = false;
@@ -153,21 +153,21 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3A
     // urgent
     if (tcpHeader->getUrgBit())
         os << "urg " << tcpHeader->getUrgentPointer() << " ";
-#endif // ifdef WITH_TCP_COMMON
 }
+#endif // ifdef WITH_TCP_COMMON
 
+#ifdef WITH_UDP
 void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<UdpHeader>& udpHeader) const
 {
-#ifdef WITH_UDP
 
     os << " UDP: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
        << ": (" << udpHeader->getTotalLengthField() << ")";
-#endif // ifdef WITH_UDP
 }
+#endif // ifdef WITH_UDP
 
+#ifdef WITH_IPv4
 void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<ICMPHeader>& icmpHeader) const
 {
-#ifdef WITH_IPv4
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {
             const auto& echoRq = CHK(std::dynamic_pointer_cast<ICMPEchoRequest>(icmpHeader));
@@ -193,8 +193,8 @@ void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3
             os << "ICMP " << srcAddr << " to " << destAddr << " type=" << icmpHeader->getType() << " code=" << icmpHeader->getCode();
             break;
     }
-#endif // ifdef WITH_IPv4
 }
+#endif // ifdef WITH_IPv4
 
 } // namespace inet
 

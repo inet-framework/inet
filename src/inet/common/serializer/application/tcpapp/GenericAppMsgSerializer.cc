@@ -15,7 +15,7 @@
 
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/application/GenericAppMsgSerializer.h"
+#include "inet/common/serializer/application/tcpapp/GenericAppMsgSerializer.h"
 
 namespace inet {
 

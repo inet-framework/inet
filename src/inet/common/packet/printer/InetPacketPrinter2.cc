@@ -55,7 +55,9 @@
 
 namespace inet {
 
+#ifdef WITH_RADIO
 using namespace physicallayer;
+#endif // ifdef WITH_RADIO
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
@@ -210,10 +212,10 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
     return outs;
 }
 
+#ifdef WITH_IPv4
 std::string InetPacketPrinter2::formatARPPacket(const ARPPacket *packet) const
 {
     std::ostringstream os;
-#ifdef WITH_IPv4
     switch (packet->getOpcode()) {
         case ARP_REQUEST:
             os << "ARP req: " << packet->getDestIPAddress()
@@ -245,16 +247,16 @@ std::string InetPacketPrinter2::formatARPPacket(const ARPPacket *packet) const
                << "(" << packet->getSrcMACAddress() << ")";
             break;
     }
-#endif // ifdef WITH_IPv4
     return os.str();
 }
+#endif // ifdef WITH_IPv4
 
+#ifdef WITH_IEEE80211
 std::string InetPacketPrinter2::formatIeee80211Frame(const ieee80211::Ieee80211MacHeader *packet) const
 {
     using namespace ieee80211;
 
     std::ostringstream os;
-#ifdef WITH_IEEE80211
     os << "WLAN ";
     switch (packet->getType()) {
         case ST_ASSOCIATIONREQUEST:
@@ -352,14 +354,14 @@ std::string InetPacketPrinter2::formatIeee80211Frame(const ieee80211::Ieee80211M
             os << "??? (" << packet->getClassName() << ")";
             break;
     }
-#endif // ifdef WITH_IEEE80211
     return os.str();
 }
+#endif // ifdef WITH_IEEE80211
 
+#ifdef WITH_TCP_COMMON
 std::string InetPacketPrinter2::formatTCPPacket(const tcp::TcpHeader *tcpSeg) const
 {
     std::ostringstream os;
-#ifdef WITH_TCP_COMMON
     os << "TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ":";
     // flags
     bool flags = false;
@@ -404,19 +406,19 @@ std::string InetPacketPrinter2::formatTCPPacket(const tcp::TcpHeader *tcpSeg) co
     // urgent
     if (tcpSeg->getUrgBit())
         os << " urg " << tcpSeg->getUrgentPointer();
-#endif // ifdef WITH_TCP_COMMON
     return os.str();
 }
+#endif // ifdef WITH_TCP_COMMON
 
+#ifdef WITH_UDP
 std::string InetPacketPrinter2::formatUDPPacket(const UdpHeader *udpPacket) const
 {
     std::ostringstream os;
-#ifdef WITH_UDP
     os << "UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
        << ": (" << udpPacket->getTotalLengthField() << " bytes)";
-#endif // ifdef WITH_UDP
     return os.str();
 }
+#endif // ifdef WITH_UDP
 
 //std::string InetPacketPrinter2::formatPingPayload(const PingPayload *packet) const
 //{
@@ -446,10 +448,10 @@ std::string InetPacketPrinter2::formatUDPPacket(const UdpHeader *udpPacket) cons
 //    return os.str();
 //}
 
+#ifdef WITH_IPv4
 std::string InetPacketPrinter2::formatICMPPacket(const ICMPHeader *icmpHeader) const
 {
     std::ostringstream os;
-#ifdef WITH_IPv4
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST:
             os << "ICMP echo request " << srcAddr << " to " << destAddr;
@@ -476,14 +478,14 @@ std::string InetPacketPrinter2::formatICMPPacket(const ICMPHeader *icmpHeader) c
             os << "ICMP " << srcAddr << " to " << destAddr << " type=" << icmpHeader->getType() << " code=" << icmpHeader->getCode();
             break;
     }
-#endif // ifdef WITH_IPv4
     return os.str();
 }
+#endif // ifdef WITH_IPv4
 
+#ifdef WITH_RIP
 std::string InetPacketPrinter2::formatRIPPacket(const RIPPacket *packet) const
 {
     std::ostringstream os;
-#ifdef WITH_RIP
     os << "RIP: ";
     switch (packet->getCommand()) {
         case RIP_REQUEST:
@@ -515,21 +517,21 @@ std::string InetPacketPrinter2::formatRIPPacket(const RIPPacket *packet) const
         else
             os << " m=" << entry.metric;
     }
-#endif // ifdef WITH_RIP
     return os.str();
 }
+#endif // ifdef WITH_RIP
 
+#ifdef WITH_RADIO
 std::string InetPacketPrinter2::formatSignal(const Signal *packet) const
 {
     std::ostringstream os;
-#ifdef WITH_RADIO
     // Note: Do NOT try to print transmission's properties here! getTransmission() will likely
     // return an invalid pointer here, because the transmission is no longer kept in the Medium.
     // const ITransmission *transmission = packet->getTransmission();
     os << "duration=" << SIMTIME_DBL(packet->getDuration()) * 1000 << "ms";
-#endif // ifdef WITH_RADIO
     return os.str();
 }
+#endif // ifdef WITH_RADIO
 
 } // namespace inet
 
