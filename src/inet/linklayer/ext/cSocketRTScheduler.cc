@@ -23,6 +23,8 @@
 
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
@@ -200,24 +202,21 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
             return;
     }
 
-    // put the IP packet from wire into data[] array of ExtFrame
-    ExtFrame *notificationMsg = new ExtFrame("rtEvent");
-    notificationMsg->setDataArraySize(hdr->caplen - headerLength);
-    for (uint16 j = 0; j < hdr->caplen - headerLength; j++)
-        notificationMsg->setData(j, bytes[j + headerLength]);
+    // put the IP packet from wire into Packet
+    uint32_t pklen = hdr->caplen - headerLength;
+    Packet *notificationMsg = new Packet("rtEvent");
+    const auto& bytesChunk = std::make_shared<BytesChunk>(bytes + headerLength, pklen);
+    bytesChunk->markImmutable();
+    notificationMsg->append(bytesChunk);
 
     // signalize new incoming packet to the interface via cMessage
-    EV << "Captured " << hdr->caplen - headerLength << " bytes for an IP packet.\n";
+    EV << "Captured " << pklen << " bytes for an IP packet.\n";
     timeval curTime;
     gettimeofday(&curTime, nullptr);
     curTime = timeval_substract(curTime, cSocketRTScheduler::baseTime);
     simtime_t t = curTime.tv_sec + curTime.tv_usec * 1e-6;
     // TBD assert that it's somehow not smaller than previous event's time
-#if OMNETPP_BUILDNUM <= 1003
-    notificationMsg->setArrival(module, -1, t);
-#else
     notificationMsg->setArrival(module->getId(), -1, t);
-#endif
     FES(getSimulation())->insert(notificationMsg);
 }
 

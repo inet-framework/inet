@@ -26,12 +26,15 @@
 #include <platdep/sockets.h>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ext/ExtInterface.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/common/serializer/ipv4/IPv4Serializer.h"
+//#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
@@ -46,17 +49,15 @@ void ExtInterface::initialize(int stage)
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
-        if (dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler()) != nullptr) {
-            rtScheduler = check_and_cast<cSocketRTScheduler *>(getSimulation()->getScheduler());
-            //device = getEnvir()->config()->getAsString("Capture", "device", "lo0");
+        if (auto scheduler = dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler())) {
+            rtScheduler = scheduler;
             device = par("device");
-            //const char *filter = getEnvir()->config()->getAsString("Capture", "filter-string", "ip");
             const char *filter = par("filterString");
             rtScheduler->setInterfaceModule(this, device, filter);
             connected = true;
         }
         else {
-            // this simulation run works without external interface..
+            // this simulation run works without external interface
             connected = false;
         }
         numSent = numRcvd = numDropped = 0;
@@ -89,31 +90,30 @@ void ExtInterface::handleMessage(cMessage *msg)
         return;
     }
 
-    if (dynamic_cast<ExtFrame *>(msg) != nullptr) {
+    Packet *packet = check_and_cast<Packet *>(msg);
+
+    if (msg->isSelfMessage()) {
         // incoming real packet from wire (captured by pcap)
-        uint32 packetLength;
-        ExtFrame *rawPacket = check_and_cast<ExtFrame *>(msg);
-
-        packetLength = rawPacket->getDataArraySize();
-        for (uint32 i = 0; i < packetLength; i++)
-            buffer[i] = rawPacket->getData(i);
-
-        Buffer b(const_cast<unsigned char *>(buffer), packetLength);
-        Context c;
-        IPv4Header *ipPacket = check_and_cast<IPv4Header *>(IPv4Serializer().deserializePacket(b, c));
-        EV << "Delivering an IPv4 packet from "
-           << ipPacket->getSrcAddress()
+        const auto& nwHeader = packet->peekHeader<IPv4Header>();
+        EV << "Delivering a packet from "
+           << nwHeader->getSourceAddress()
            << " to "
-           << ipPacket->getDestAddress()
+           << nwHeader->getDestinationAddress()
            << " and length of"
-           << ipPacket->getByteLength()
-           << " bytes to IPv4 layer.\n";
-        send(ipPacket, "upperLayerOut");
+           << packet->getByteLength()
+           << " bytes to networklayer.\n";
+        packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "upperLayerOut");
         numRcvd++;
     }
     else {
-        memset(buffer, 0, sizeof(buffer));
-        IPv4Header *ipPacket = check_and_cast<IPv4Header *>(msg);
+        auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol != &Protocol::ipv4)
+            throw cRuntimeError("ExtInterface accepts ipv4 packets only");
+
+        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
 
         if (connected) {
             struct sockaddr_in addr;
@@ -122,24 +122,17 @@ void ExtInterface::handleMessage(cMessage *msg)
             addr.sin_len = sizeof(struct sockaddr_in);
 #endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_port = 0;
-            addr.sin_addr.s_addr = htonl(ipPacket->getDestAddress().getInt());
-            Buffer b(const_cast<unsigned char *>(buffer), sizeof(buffer));
-            Context c;
-            c.throwOnSerializerNotFound = false;
-            IPv4Serializer().serializePacket(ipPacket, b, c);
-            if (b.hasError() || c.errorOccured) {
-                EV_ERROR << "Cannot serialize and send packet << '" << ipPacket->getName() << "' with protocol " << ipPacket->getTransportProtocol() << ".\n";
-                numDropped++;
-                delete (msg);
-                return;
-            }
-            int32 packetLength = b.getPos();
+            addr.sin_addr.s_addr = htonl(ipv4Header->getDestAddress().getInt());
+            auto bytesChunk = packet->peekAllBytes();
+            size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
+            ASSERT(packetLength == packet->getByteLength());
+
             EV << "Delivering an IPv4 packet from "
-               << ipPacket->getSrcAddress()
+               << ipv4Header->getSrcAddress()
                << " to "
-               << ipPacket->getDestAddress()
+               << ipv4Header->getDestAddress()
                << " and length of "
-               << ipPacket->getByteLength()
+               << packet->getByteLength()
                << " bytes to link layer.\n";
             rtScheduler->sendBytes(buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
             numSent++;
