@@ -253,7 +253,7 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
         {
-            throw cRuntimeError("Unaccepted msg: %s(%s)", msg->getName(), msg->getClassName());
+            throw cRuntimeError("Unaccepted packet: %s(%s)", packet->getName(), packet->getClassName());
         }
     }
 }
@@ -342,8 +342,6 @@ void PingApp::sendPingRequest()
     sprintf(name, "ping%ld", sendSeqNo);
 
     ASSERT(pid != -1);
-
-    IL3AddressType *addressType = destAddr.getAddressType();
 
     Packet *outPacket = new Packet(name);
     auto payload = std::make_shared<ByteCountChunk>(byte(packetSize));
