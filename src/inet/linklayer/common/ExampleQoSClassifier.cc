@@ -19,6 +19,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "ExampleQoSClassifier.h"
 #include "UserPriority.h"
 

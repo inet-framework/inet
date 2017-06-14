@@ -40,7 +40,7 @@ Ptr<TransportHeaderBase> peekTransportHeader(Packet *packet)
 
 Ptr<TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
 {
-#ifdef WITH_IPv4
+#ifdef WITH_TCP_COMMON
     if (protocol == &Protocol::tcp)
         return packet->peekHeader<tcp::TcpHeader>();
 #endif
