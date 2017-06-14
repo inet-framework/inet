@@ -165,6 +165,9 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     L3Address nextHop;
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
+
+    EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getName() << "\n";
+
     if (datagramPreRoutingHook(packet, inIE, destIE, nextHop) != IHook::ACCEPT)
         return;
 
