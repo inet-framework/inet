@@ -39,9 +39,11 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
     offset(offset),
     length(length == bit(-1) ? chunk->getChunkLength() - offset : length)
 {
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     bit chunkLength = chunk->getChunkLength();
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->offset && this->offset <= chunkLength);
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->length && this->offset + this->length <= chunkLength);
+    ASSERT(bit(0) <= this->offset && this->offset <= chunkLength);
+    ASSERT(bit(0) <= this->length && this->offset + this->length <= chunkLength);
+#endif
 }
 
 Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
@@ -154,3 +156,4 @@ std::string SliceChunk::str() const
 }
 
 } // namespace
+

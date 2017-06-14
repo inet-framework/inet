@@ -27,7 +27,7 @@
 #endif
 
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION(condition) assert(condition)
+#define CHUNK_CHECK_IMPLEMENTATION(condition)   ASSERT(condition)
 #else
 #define CHUNK_CHECK_IMPLEMENTATION(condition) ;
 #endif
@@ -42,7 +42,7 @@
 #endif
 
 #if CHUNK_CHECK_USAGE_ENABLED
-#define CHUNK_CHECK_USAGE(condition, format, ...) if (!(condition)) throw cRuntimeError("Error: " format, ##__VA_ARGS__)
+#define CHUNK_CHECK_USAGE(condition, format, ...)   ((void) ((condition) ? 0 :  throw cRuntimeError("Error: " format, ##__VA_ARGS__)))
 #else
 #define CHUNK_CHECK_USAGE(condition, format, ...) ;
 #endif

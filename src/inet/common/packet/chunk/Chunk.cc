@@ -80,20 +80,28 @@ void Chunk::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit o
 {
     Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = stream.getLength();
+#endif
     serializer->serialize(stream, chunk, offset, length);
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto endPosition = stream.getLength();
     auto expectedChunkLength = length == bit(-1) ? chunk->getChunkLength() - offset : length;
-    CHUNK_CHECK_IMPLEMENTATION(expectedChunkLength == endPosition - startPosition);
+    ASSERT(expectedChunkLength == endPosition - startPosition);
+#endif
 }
 
 Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = byte(stream.getPosition());
+#endif
     auto chunk = serializer->deserialize(stream, typeInfo);
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto endPosition = byte(stream.getPosition());
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkLength() == endPosition - startPosition);
+    ASSERT(chunk->getChunkLength() == endPosition - startPosition);
+#endif
     if (stream.isReadBeyondEnd())
         chunk->markIncomplete();
     return chunk;
