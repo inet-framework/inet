@@ -85,9 +85,10 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         std::size_t found = pkName.find("-frag-");
         if (found != std::string::npos)
             pkName.resize(found);
-        Packet *pk = new Packet(pkName.c_str());
-        pk->transferTagsFrom(buf->packet);
         auto hdr = Ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
+        Packet *pk = buf->packet;
+        pk->setName(pkName.c_str());
+        pk->removeAll();
         const auto& payload = buf->buf.getData();
         hdr->setTotalLengthField(hdr->getHeaderLength() + byte(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);
@@ -95,7 +96,6 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         hdr->markImmutable();
         pk->prepend(hdr);
         pk->append(payload);
-        delete buf->packet;
         bufs.erase(i);
         return pk;
     }
