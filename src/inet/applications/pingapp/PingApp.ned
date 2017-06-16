@@ -65,7 +65,7 @@ simple PingApp like IApp
         string srcAddr = default(""); // source address (useful with multi-homing)
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
-        double hopLimit = default(32); // TTL or hopLimit for IP packets
+        double hopLimit = default(-1); // TTL or hopLimit for IP packets
         double count = default(-1); // number of pings requests sent to a single destination address, -1 means continuously (only first address will be used from destAddr)
         double startTime @unit("s") = default(uniform(0s, this.sleepDuration + this.sendInterval)); // send first ping at startTime
         double stopTime @unit("s") = default(-1s); // time to finish sending, negative values mean forever

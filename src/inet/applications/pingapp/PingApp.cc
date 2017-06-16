@@ -400,7 +400,8 @@ void PingApp::sendPingRequest()
     auto addressReq = outPacket->ensureTag<L3AddressReq>();
     addressReq->setSrcAddress(srcAddr);
     addressReq->setDestAddress(destAddr);
-    outPacket->ensureTag<HopLimitReq>()->setHopLimit(hopLimit);
+    if (hopLimit != -1)
+        outPacket->ensureTag<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
     l3Socket->send(outPacket);
 
