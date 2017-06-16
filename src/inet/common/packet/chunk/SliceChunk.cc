@@ -41,8 +41,8 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
 {
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     bit chunkLength = chunk->getChunkLength();
-    ASSERT(bit(0) <= this->offset && this->offset <= chunkLength);
-    ASSERT(bit(0) <= this->length && this->offset + this->length <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->offset && this->offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->length && this->offset + this->length <= chunkLength);
 #endif
 }
 

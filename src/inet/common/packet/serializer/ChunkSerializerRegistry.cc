@@ -21,7 +21,7 @@ ChunkSerializerRegistry ChunkSerializerRegistry::globalRegistry;
 
 void ChunkSerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
 {
-    assert(serializer != nullptr);
+    CHUNK_CHECK_USAGE(serializer != nullptr, "invalid serializer");
     serializers[&typeInfo] = serializer;
 }
 
