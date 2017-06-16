@@ -165,8 +165,10 @@ void Flood::handleLowerPacket(cPacket *m)
             if (floodHeader->getTtl() > 1) {
                 EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
-                floodHeader->setTtl(floodHeader->getTtl() - 1);
                 auto dMsg = packet->dup();
+                auto newFloodHeader = dMsg->removeHeader<FloodHeader>();
+                newFloodHeader->setTtl(newFloodHeader->getTtl() - 1);
+                dMsg->insertHeader(newFloodHeader);
                 setDownControlInfo(dMsg, MACAddress::BROADCAST_ADDRESS);
                 sendDown(dMsg);
                 nbDataPacketsForwarded++;
