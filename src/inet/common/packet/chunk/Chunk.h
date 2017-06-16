@@ -316,6 +316,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         ForwardIterator(bit position) : Iterator(true, position, -1) { }
         ForwardIterator(byte position) : Iterator(true, position, -1) { }
         explicit ForwardIterator(bit position, int index) : Iterator(true, position, index) { }
+        ForwardIterator& operator=(const ForwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
     /**
@@ -327,6 +328,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         BackwardIterator(bit position) : Iterator(false, position, -1) { }
         BackwardIterator(byte position) : Iterator(false, position, -1) { }
         explicit BackwardIterator(bit position, int index) : Iterator(false, position, index) { }
+        BackwardIterator& operator=(const BackwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
   public:

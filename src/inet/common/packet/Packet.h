@@ -547,6 +547,10 @@ class INET_API Packet : public cPacket
     //@}
 
     /**
+     * Removes all data from packet
+     */
+    void removeAll();
+    /**
      * Returns a human readable string representation.
      */
     virtual std::string str() const override { return contents->str(); }

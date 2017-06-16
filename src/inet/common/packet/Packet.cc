@@ -276,4 +276,13 @@ void Packet::removePoppedChunks()
     removePoppedTrailers();
 }
 
+void Packet::removeAll()
+{
+    contents = EmptyChunk::singleton;
+    headerIterator = Chunk::ForwardIterator(bit(0), 0);
+    trailerIterator = Chunk::BackwardIterator(bit(0), 0);
+    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+}
+
 } // namespace
+
