@@ -44,6 +44,17 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
         virtual ~PacketDropVisualization();
     };
 
+    class INET_API DetailsFilter
+    {
+      protected:
+        cMatchExpression matchExpression;
+
+      public:
+        void setPattern(const char *pattern);
+
+        bool matches(const PacketDropDetails *details) const;
+    };
+
   protected:
     /** @name Parameters */
     //@{
@@ -51,6 +62,7 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
+    DetailsFilter detailsFilter;
     const char *icon = nullptr;
     cFigure::Color iconTintColor;
     double iconTintAmount = NaN;

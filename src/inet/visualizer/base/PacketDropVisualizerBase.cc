@@ -41,6 +41,18 @@ PacketDropVisualizerBase::PacketDropVisualization::~PacketDropVisualization()
     delete packet;
 }
 
+void PacketDropVisualizerBase::DetailsFilter::setPattern(const char* pattern)
+{
+    matchExpression.setPattern(pattern, true, true, true);
+}
+
+bool PacketDropVisualizerBase::DetailsFilter::matches(const PacketDropDetails *details) const
+{
+    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, details);
+    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+    return const_cast<DetailsFilter *>(this)->matchExpression.matches(&matchableObject);
+}
+
 PacketDropVisualizerBase::~PacketDropVisualizerBase()
 {
     for (auto packetDrop : packetDropVisualizations)
@@ -58,6 +70,7 @@ void PacketDropVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         packetFilter.setPattern(par("packetFilter"));
+        detailsFilter.setPattern(par("detailsFilter"));
         icon = par("icon");
         iconTintAmount = par("iconTintAmount");
         if (iconTintAmount != 0)
