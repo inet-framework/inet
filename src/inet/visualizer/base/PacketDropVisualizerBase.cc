@@ -137,9 +137,9 @@ void PacketDropVisualizerBase::unsubscribe()
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (
+    if (signal == NF_PACKET_DROP
 #ifdef WITH_ETHERNET
-            signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
+            || signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
 #endif // WITH_ETHERNET
             ) {
         auto packet = check_and_cast<cPacket *>(object);
