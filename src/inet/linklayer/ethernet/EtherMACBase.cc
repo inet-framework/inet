@@ -521,7 +521,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>
     EV_WARN << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
     numDroppedNotForUs++;
     PacketDropDetails details;
-    details.setReason(PACKET_NOT_FOR_US);
+    details.setReason(NOT_ADDRESSED_TO_US);
     emit(NF_PACKET_DROP, packet, &details);
     delete packet;
     return true;

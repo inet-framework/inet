@@ -10,16 +10,16 @@ namespace inet;
 
 enum PacketDropReason
 {
-    QUEUE_OVERFLOW              = 0;
-    RETRY_LIMIT_REACHED         = 1;
-    HOP_LIMIT_REACHED           = 2;
-    INTERFACE_DOWN              = 3;
-    FORWARDING_DISABLED         = 4;
-    NO_INTERFACE_FOUND          = 5;
-    NO_ROUTE_FOUND              = 6;
-    ADDRESS_RESOLUTION_FAILED   = 7;
-    PACKET_INCORRECTLY_RECEIVED = 8;
-    PACKET_NOT_FOR_US           = 9;
+    ADDRESS_RESOLUTION_FAILED = 0;
+    FORWARDING_DISABLED       = 1;
+    HOP_LIMIT_REACHED         = 2;
+    INCORRECTLY_RECEIVED      = 3;
+    INTERFACE_DOWN            = 4;
+    NO_INTERFACE_FOUND        = 5;
+    NO_ROUTE_FOUND            = 6;
+    NOT_ADDRESSED_TO_US       = 7;
+    QUEUE_OVERFLOW            = 8;
+    RETRY_LIMIT_REACHED       = 9;
 }
 
 class PacketDropDetails

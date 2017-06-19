@@ -237,7 +237,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
     if (hasBitError || !verifyCrcAndLength(packet)) {
         numDroppedBitError++;
         PacketDropDetails details;
-        details.setReason(PACKET_INCORRECTLY_RECEIVED);
+        details.setReason(INCORRECTLY_RECEIVED);
         emit(NF_PACKET_DROP, packet, &details);
         delete packet;
         return;

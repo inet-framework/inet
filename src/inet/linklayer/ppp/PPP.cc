@@ -277,7 +277,7 @@ void PPP::handleMessage(cMessage *msg)
         if (PK(msg)->hasBitError()) {
             EV_WARN << "Bit error in " << msg << endl;
             PacketDropDetails details;
-            details.setReason(PACKET_INCORRECTLY_RECEIVED);
+            details.setReason(INCORRECTLY_RECEIVED);
             emit(NF_PACKET_DROP, msg, &details);
             numBitErr++;
             delete msg;

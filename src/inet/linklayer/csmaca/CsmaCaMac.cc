@@ -358,7 +358,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   isLowerMessage(msg) && frame->hasBitError(),
                                   IDLE,
                 PacketDropDetails details;
-                details.setReason(PACKET_INCORRECTLY_RECEIVED);
+                details.setReason(INCORRECTLY_RECEIVED);
                 emit(NF_PACKET_DROP, frame, &details);
                 delete frame;
                 numCollision++;
