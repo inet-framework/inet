@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "inet/common/NotifierConsts.h"
 #include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {
@@ -24,7 +25,6 @@ namespace inet {
 simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
 simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
-simsignal_t PassiveQueueBase::dropPkByQueueSignal = registerSignal("dropPkByQueue");
 simsignal_t PassiveQueueBase::queueingTimeSignal = registerSignal("queueingTime");
 
 void PassiveQueueBase::initialize()
@@ -61,7 +61,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
 
         if (droppedMsg) {
             numQueueDropped++;
-            emit(dropPkByQueueSignal, droppedMsg);
+            emit(NF_PACKET_DROP, droppedMsg);
             delete droppedMsg;
         }
         else

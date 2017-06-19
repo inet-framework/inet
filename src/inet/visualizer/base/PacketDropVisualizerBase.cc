@@ -113,7 +113,6 @@ void PacketDropVisualizerBase::refreshDisplay() const
 void PacketDropVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(PassiveQueueBase::dropPkByQueueSignal, this);
 #ifdef WITH_ETHERNET
     subscriptionModule->subscribe(EtherMACBase::dropPkIfaceDownSignal, this);
     subscriptionModule->subscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
@@ -127,7 +126,6 @@ void PacketDropVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(PassiveQueueBase::dropPkByQueueSignal, this);
 #ifdef WITH_ETHERNET
         subscriptionModule->unsubscribe(EtherMACBase::dropPkIfaceDownSignal, this);
         subscriptionModule->unsubscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
@@ -139,9 +137,9 @@ void PacketDropVisualizerBase::unsubscribe()
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == PassiveQueueBase::dropPkByQueueSignal
+    if (
 #ifdef WITH_ETHERNET
-            || signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
+            signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
 #endif // WITH_ETHERNET
             ) {
         auto packet = check_and_cast<cPacket *>(object);
