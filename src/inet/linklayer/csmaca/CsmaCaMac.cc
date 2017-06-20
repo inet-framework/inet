@@ -583,8 +583,10 @@ void CsmaCaMac::giveUpCurrentTransmission()
 {
     PacketDropDetails details;
     details.setReason(RETRY_LIMIT_REACHED);
-    emit(NF_PACKET_DROP, getCurrentTransmission(), &details);
-    emit(NF_LINK_BREAK, getCurrentTransmission());
+    auto packet = getCurrentTransmission();
+    emit(NF_PACKET_DROP, packet, &details);
+    packet->popHeader<CsmaCaMacDataHeader>();
+    emit(NF_LINK_BREAK, packet);
     popTransmissionQueue();
     resetStateVariables();
     numGivenUp++;
