@@ -81,9 +81,9 @@ cModule *findModuleUnderContainingNode(const cModule *from)
     return nullptr;
 }
 
-cModule *findContainingNicModule(cModule *from)
+cModule *findContainingNicModule(const cModule *from)
 {
-    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
+    for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
         cProperties *props = curmod->getProperties();
         if (props && props->getAsBool("nic"))
             return curmod;
@@ -93,7 +93,7 @@ cModule *findContainingNicModule(cModule *from)
     return nullptr;
 }
 
-cModule *getContainingNicModule(cModule *from)
+cModule *getContainingNicModule(const cModule *from)
 {
     cModule *curmod = findContainingNicModule(from);
     if (!curmod)
