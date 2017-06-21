@@ -39,8 +39,6 @@ void Chunk::handleChange()
     CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable");
 }
 
-static std::string attributeValue;
-
 int Chunk::getBitsArraySize()
 {
     return (bit(getChunkLength()).get() + 31) / 32;
@@ -51,7 +49,9 @@ int Chunk::getBytesArraySize()
     return ((bit(getChunkLength()).get() + 7) / 8 + 15) / 16;
 }
 
-const char *Chunk::getBits(int index)
+static std::string attributeValue;
+
+const char *Chunk::getBitsAsString(int index)
 {
     int offset = index * 32;
     int length = std::min(32, (int)bit(getChunkLength()).get() - offset);
@@ -68,7 +68,7 @@ const char *Chunk::getBits(int index)
     return attributeValue.c_str();
 }
 
-const char *Chunk::getBytes(int index)
+const char *Chunk::getBytesAsString(int index)
 {
     int offset = index * 8 * 16;
     int length = std::min(8 * 16, (int)bit(getChunkLength()).get() - offset);

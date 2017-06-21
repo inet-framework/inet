@@ -356,8 +356,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     virtual int getBitsArraySize(); // only for class descriptor
     virtual int getBytesArraySize(); // only for class descriptor
-    virtual const char *getBits(int index); // only for class descriptor
-    virtual const char *getBytes(int index); // only for class descriptor
+    virtual const char *getBitsAsString(int index); // only for class descriptor
+    virtual const char *getBytesAsString(int index); // only for class descriptor
 
     /**
      * Creates a new chunk of the given type that represents the designated part

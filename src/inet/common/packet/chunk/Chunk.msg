@@ -35,8 +35,8 @@ class Chunk extends cObject
     bool correct @packetData(false) @getter("isCorrect");
     bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
     bit chunkLength @packetData(false);
-    string bits[];
-    string bytes[];
+    string bits[] @getter("getBitsAsString");
+    string bytes[] @getter("getBytesAsString");
 }
 
 class BitsChunk extends Chunk
