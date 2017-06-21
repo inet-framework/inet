@@ -243,6 +243,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 {
   friend class SliceChunk;
   friend class SequenceChunk;
+  friend class ChunkDescriptor;
 
   protected:
     /**
@@ -353,7 +354,11 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
   protected:
     virtual void handleChange() override;
 
-  protected:
+    virtual int getBitsArraySize(); // only for class descriptor
+    virtual int getBytesArraySize(); // only for class descriptor
+    virtual const char *getBits(int index); // only for class descriptor
+    virtual const char *getBytes(int index); // only for class descriptor
+
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk. The designated part starts at the provided offset

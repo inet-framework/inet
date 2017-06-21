@@ -35,20 +35,20 @@ class Chunk extends cObject
     bool correct @packetData(false) @getter("isCorrect");
     bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
     bit chunkLength @packetData(false);
+    string bits[];
+    string bytes[];
 }
 
 class BitsChunk extends Chunk
 {
     @existingClass(true);
     @descriptor(readonly);
-    // TODO: data should be displayed as: 010... (multiple lines)
 }
 
 class BytesChunk extends Chunk
 {
     @existingClass(true);
     @descriptor(readonly);
-    // TODO: data should be displayed as: AA 00 FF ... (multiple lines, plus readable text part?)
 }
 
 class SequenceChunk extends Chunk

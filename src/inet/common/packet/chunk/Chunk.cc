@@ -39,6 +39,55 @@ void Chunk::handleChange()
     CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable");
 }
 
+static std::string attributeValue;
+
+int Chunk::getBitsArraySize()
+{
+    return (bit(getChunkLength()).get() + 31) / 32;
+}
+
+int Chunk::getBytesArraySize()
+{
+    return ((bit(getChunkLength()).get() + 7) / 8 + 15) / 16;
+}
+
+const char *Chunk::getBits(int index)
+{
+    int offset = index * 32;
+    int length = std::min(32, (int)bit(getChunkLength()).get() - offset);
+    MemoryOutputStream outputStream;
+    serialize(outputStream, shared_from_this(), bit(offset), bit(length));
+    std::vector<bool> bits;
+    outputStream.copyData(bits);
+    attributeValue = "";
+    for (int i = 0; i < length; i++) {
+        if (i != 0 && i % 4 == 0)
+            attributeValue += " ";
+        attributeValue += (bits[i] ? "1" : "0");
+    }
+    return attributeValue.c_str();
+}
+
+const char *Chunk::getBytes(int index)
+{
+    int offset = index * 8 * 16;
+    int length = std::min(8 * 16, (int)bit(getChunkLength()).get() - offset);
+    MemoryOutputStream outputStream;
+    serialize(outputStream, shared_from_this(), bit(offset), bit(length));
+    ASSERT(outputStream.getLength() == bit(length));
+    std::vector<uint8_t> bytes;
+    outputStream.copyData(bytes);
+    attributeValue = "";
+    char tmp[3] = "  ";
+    for (int i = 0; i < bytes.size(); i++) {
+        if (i != 0)
+            attributeValue += " ";
+        sprintf(tmp, "%02X", bytes[i]);
+        attributeValue += tmp;
+    }
+    return attributeValue.c_str();
+}
+
 Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     auto chunkType = chunk->getChunkType();
