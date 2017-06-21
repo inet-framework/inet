@@ -10,25 +10,16 @@ cplusplus{{
 
 namespace inet::visualizer;
 
-cplusplus{{
-typedef cPacket * PacketPtr;
-typedef cObject * InterfacePtr;
-typedef cModule * ModulePtr;
-}}
-
-class inet::PacketDropDetails extends cObject;
-class PacketPtr extends cObject;
-class InterfacePtr extends cObject;
-class ModulePtr extends cObject;
 class noncobject Coord;
+class inet::PacketDropDetails extends cObject;
 
 class PacketDrop extends inet::PacketDropDetails
 {
     @existingClass();
     @readOnly();
-    PacketPtr packet_ = nullptr;
-    ModulePtr module = nullptr;
-    ModulePtr networkNode = nullptr;
-    InterfacePtr interfaceEntry = nullptr;
+    cPacket *packet_;
+    cModule *module;
+    cModule *networkNode;
+    cObject *interfaceEntry;
     Coord position @opaque;
 }
