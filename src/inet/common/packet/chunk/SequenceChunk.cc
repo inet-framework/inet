@@ -233,10 +233,14 @@ void SequenceChunk::doInsertToBeginning(const Ptr<SliceChunk>& sliceChunk)
             bit chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToBeginning(elementChunk);
+            else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
+                doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 doInsertToBeginning(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
+            else
+                CHUNK_CHECK_IMPLEMENTATION(false);
         }
     }
     else
@@ -293,10 +297,14 @@ void SequenceChunk::doInsertToEnd(const Ptr<SliceChunk>& sliceChunk)
             bit chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToEnd(elementChunk);
+            else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
+                doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 doInsertToEnd(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
+            else
+                CHUNK_CHECK_IMPLEMENTATION(false);
             offset += elementChunk->getChunkLength();
         }
     }
