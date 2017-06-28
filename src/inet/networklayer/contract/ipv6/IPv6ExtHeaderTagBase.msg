@@ -18,24 +18,22 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.networklayer.ipv6.IPv6Header;
 
 namespace inet;
 
 cplusplus {{
-class Ipv6ExtensionHeader;
-typedef Ipv6ExtensionHeader *IPv6ExtensionHeaderPtr;
-std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
+std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh);
 
 #ifndef WITH_IPv6
-inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {return os;}
+class Ipv6ExtensionHeader {}
+inline std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader* eh) {return os;}
 #endif
 }}
-
-class noncobject IPv6ExtensionHeaderPtr;
 
 class IPv6ExtHeaderTagBase
 {
     @customize(true);
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
+    abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
 }
 
