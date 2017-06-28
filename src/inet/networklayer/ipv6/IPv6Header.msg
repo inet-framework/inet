@@ -32,14 +32,19 @@ namespace inet;
 
 cplusplus {{
 class Ipv6ExtensionHeader;
-typedef Ipv6ExtensionHeader *IPv6ExtensionHeaderPtr;
-std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
+std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader eh);
 
 const int IPv6_HEADER_BYTES = 40;
 }}
 
-
-class noncobject IPv6ExtensionHeaderPtr;
+//
+// This serves as the base class for all the IPv6 extension headers.
+//
+class Ipv6ExtensionHeader
+{
+    short extensionType;
+    short byteLength = 0;   // byteLength = n * 8;
+}
 
 //
 // IPv6 datagram. RFC 2460 Section 3.
@@ -63,16 +68,7 @@ class Ipv6Header extends NetworkHeaderBase
     short hopLimit = 0;
     int protocolId @enum(IPProtocolId) @override;
 
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
+    abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }
 
-
-//
-// This serves as the base class for all the other extension headers.
-//
-class Ipv6ExtensionHeader
-{
-    short extensionType;
-    short byteLength = 0;   // byteLength = n * 8;
-}
 

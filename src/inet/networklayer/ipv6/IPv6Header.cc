@@ -22,7 +22,7 @@ namespace inet {
 
 Register_Class(Ipv6Header);
 
-std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
+std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh)
 {
     return os << "(" << eh->getClassName() << ") " << eh->str();
 }
@@ -53,20 +53,18 @@ unsigned int Ipv6Header::getExtensionHeaderArraySize() const
     return extensionHeaders.size();
 }
 
-IPv6ExtensionHeaderPtr& Ipv6Header::getMutableExtensionHeader(unsigned int k)
+Ipv6ExtensionHeader *Ipv6Header::getMutableExtensionHeader(unsigned int k)
 {
-    static IPv6ExtensionHeaderPtr null;
     handleChange();
     if (k >= extensionHeaders.size())
-        return null = nullptr;
+        return nullptr;
     return extensionHeaders[k];
 }
 
-const IPv6ExtensionHeaderPtr& Ipv6Header::getExtensionHeader(unsigned int k) const
+const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(unsigned int k) const
 {
-    static IPv6ExtensionHeaderPtr null;
     if (k >= extensionHeaders.size())
-        return null = nullptr;
+        return nullptr;
     return extensionHeaders[k];
 }
 
@@ -94,7 +92,7 @@ const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IPProtocolId ex
     return nullptr;
 }
 
-void Ipv6Header::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
+void Ipv6Header::setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
@@ -232,7 +230,7 @@ Ipv6Header::~Ipv6Header()
 
 void Ipv6Header::clean()
 {
-    IPv6ExtensionHeaderPtr eh;
+    Ipv6ExtensionHeader *eh;
 
     while (!extensionHeaders.empty()) {
         eh = extensionHeaders.back();
