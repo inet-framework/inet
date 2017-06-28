@@ -29,7 +29,6 @@ namespace inet {
 namespace tcp {
 class Sack;
 class TCPOption;
-typedef TCPOption *TCPOptionPtr;
 }
 }
 
@@ -107,7 +106,6 @@ class Sack extends SackItem
 }
 
 // Header Options (optional):
-class noncobject TCPOptionPtr;
 class TCPOption
 {
     unsigned short kind @enum(TCPOptionNumbers) = -1;  // option kind
@@ -231,6 +229,6 @@ class TcpHeader extends TransportHeaderBase
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
-    abstract TCPOptionPtr headerOption[];
+    abstract TCPOption *headerOption[];
 }
 

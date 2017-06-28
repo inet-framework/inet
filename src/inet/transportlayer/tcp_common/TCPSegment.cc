@@ -131,7 +131,7 @@ unsigned int TcpHeader::getHeaderOptionArraySize() const
     return headerOptionList.size();
 }
 
-void TcpHeader::setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption)
+void TcpHeader::setHeaderOption(unsigned int k, TCPOption *headerOption)
 {
     throw cRuntimeError(this, "setHeaderOption() not supported, use addHeaderOption()");
 }

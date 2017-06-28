@@ -600,7 +600,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
             out << "\n  TCP Header Option(s) " << direction << ":\n";
 
             for (int i = 0; i < numOptions; i++) {
-                TCPOption *option = tcpHeader->getHeaderOption(i);
+                const TCPOption *option = tcpHeader->getHeaderOption(i);
                 out << "    " << (i + 1) << ". option kind=" << option->getKind() << " length=" << option->getLength() << "\n";
             }
         }
