@@ -240,7 +240,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            if (macQueue.size() <= queueLength) {
+            if (macQueue.size() < queueLength) {
                 macQueue.push_back(static_cast<CSMAFrame *>(msg));
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
@@ -635,7 +635,7 @@ void CSMA::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void CSMA::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    if (macQueue.size() <= queueLength) {
+    if (macQueue.size() < queueLength) {
         macQueue.push_back(static_cast<CSMAFrame *>(msg));
         EV_DETAIL << "(21) FSM State NOT IDLE, EV_SEND_REQUEST"
                   << " and [TxBuff avail]: enqueue packet and don't move." << endl;
