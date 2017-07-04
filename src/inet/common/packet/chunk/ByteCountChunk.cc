@@ -19,19 +19,22 @@ namespace inet {
 
 ByteCountChunk::ByteCountChunk() :
     Chunk(),
-    length(-1)
+    length(-1),
+    data('?')
 {
 }
 
 ByteCountChunk::ByteCountChunk(const ByteCountChunk& other) :
     Chunk(other),
-    length(other.length)
+    length(other.length),
+    data(other.data)
 {
 }
 
-ByteCountChunk::ByteCountChunk(byte length) :
+ByteCountChunk::ByteCountChunk(byte length, uint8_t data) :
     Chunk(),
-    length(length)
+    length(length),
+    data(data)
 {
     CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
 }
@@ -74,6 +77,12 @@ void ByteCountChunk::setLength(byte length)
     CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
     handleChange();
     this->length = length;
+}
+
+void ByteCountChunk::setData(uint8_t data)
+{
+    handleChange();
+    this->data = data;
 }
 
 bool ByteCountChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
