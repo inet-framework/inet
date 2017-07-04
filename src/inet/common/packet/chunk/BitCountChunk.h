@@ -33,6 +33,7 @@ class INET_API BitCountChunk : public Chunk
      * The chunk length in bits, or -1 if not yet specified.
      */
     bit length;
+    bool data;
 
   protected:
     virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
@@ -44,7 +45,7 @@ class INET_API BitCountChunk : public Chunk
     //@{
     BitCountChunk();
     BitCountChunk(const BitCountChunk& other);
-    BitCountChunk(bit length);
+    BitCountChunk(bit length, bool data = false);
 
     virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
     virtual Ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
@@ -54,6 +55,9 @@ class INET_API BitCountChunk : public Chunk
     //@{
     bit getLength() const { return length; }
     void setLength(bit length);
+
+    bool getData() const { return data; }
+    void setData(bool data);
     //@}
 
     /** @name Overridden chunk functions */
