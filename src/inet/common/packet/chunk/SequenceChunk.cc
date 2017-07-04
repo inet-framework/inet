@@ -40,7 +40,7 @@ void SequenceChunk::forEachChild(cVisitor *v)
         v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
-Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -88,7 +88,7 @@ Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter c
     return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     auto sequenceChunk = std::make_shared<SequenceChunk>();
     sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));

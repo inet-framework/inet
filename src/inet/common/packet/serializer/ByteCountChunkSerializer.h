@@ -24,7 +24,7 @@ class INET_API ByteCountChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 
 } // namespace

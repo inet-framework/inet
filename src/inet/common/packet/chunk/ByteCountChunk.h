@@ -36,9 +36,9 @@ class INET_API ByteCountChunk : public Chunk
     uint8_t data;
 
   protected:
-    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -48,7 +48,7 @@ class INET_API ByteCountChunk : public Chunk
     ByteCountChunk(byte length, uint8_t data = '?');
 
     virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
-    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

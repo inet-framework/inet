@@ -52,7 +52,7 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
         throw cRuntimeError("Unknown network protocol: %d", nwProtId);
 }
 
-Ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     throw cRuntimeError("TransportPseudoHeader is not a valid deserializable data");
 }

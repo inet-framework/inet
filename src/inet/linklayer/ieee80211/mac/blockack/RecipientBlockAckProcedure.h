@@ -33,7 +33,7 @@ class INET_API RecipientBlockAckProcedure : public IRecipientBlockAckProcedure
         int numSentBlockAck = 0;
 
     protected:
-        virtual Ptr<Ieee80211BlockAck> buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
+        virtual const Ptr<Ieee80211BlockAck> buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
 
     public:
         virtual void processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback) override;

@@ -151,12 +151,12 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     void expungeRoutes();
 
     /* Control packet creators */
-    Ptr<AODVRREPACK> createRREPACK();
-    Ptr<AODVRREP> createHelloMessage();
-    Ptr<AODVRREQ> createRREQ(const L3Address& destAddr);
-    Ptr<AODVRREP> createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
-    Ptr<AODVRREP> createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute);
-    Ptr<AODVRERR> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
+    const Ptr<AODVRREPACK> createRREPACK();
+    const Ptr<AODVRREP> createHelloMessage();
+    const Ptr<AODVRREQ> createRREQ(const L3Address& destAddr);
+    const Ptr<AODVRREP> createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    const Ptr<AODVRREP> createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute);
+    const Ptr<AODVRERR> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
     void handleRREP(const Ptr<AODVRREP>& rrep, const L3Address& sourceAddr);

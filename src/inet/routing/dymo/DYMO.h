@@ -157,21 +157,21 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     bit computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
-    Ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
+    const Ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
     void sendRREQ(const Ptr<RREQ>& rreq);
     void processRREQ(Packet *packet, const Ptr<const RREQ>& rreq);
     bit computeRREQLength(const Ptr<RREQ> &rreq);
 
     // handling RREP packets
-    Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg);
-    Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route);
+    const Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg);
+    const Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route);
     void sendRREP(const Ptr<RREP>& rrep);
     void sendRREP(const Ptr<RREP>& rrep, IRoute *route);
     void processRREP(Packet *packet, const Ptr<const RREP>& rrep);
     bit computeRREPLength(const Ptr<RREP> &rrep);
 
     // handling RERR packets
-    Ptr<RERR> createRERR(std::vector<L3Address>& addresses);
+    const Ptr<RERR> createRERR(std::vector<L3Address>& addresses);
     void sendRERR(const Ptr<RERR>& rerr);
     void sendRERRForUndeliverablePacket(const L3Address& destination);
     void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);

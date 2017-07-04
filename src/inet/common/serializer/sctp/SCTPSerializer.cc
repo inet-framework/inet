@@ -679,7 +679,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         for (uint32 i = 0; i < ADD_PADDING(pLen); i++, k++)
                             unknown->value[i] = cookieChunk->getUnrecognizedParameters(k);
                         ecParPtr += ADD_PADDING(pLen + 4);
-                        //sctpEV3<<"ecParPtr="<<ecParPtr<<"\n";
+                        //sctpEV3<<"ecParPtr="<<ecParconst Ptr<<"\n";
                         uLen -= ADD_PADDING(pLen);
                     }
                     error->length = htons(ecLen);

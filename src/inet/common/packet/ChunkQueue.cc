@@ -57,20 +57,20 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
         remove(iterator.getPosition());
 }
 
-Ptr<const Chunk> ChunkQueue::peek(bit length, int flags) const
+const Ptr<const Chunk> ChunkQueue::peek(bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     return contents->peek(iterator, length, flags);
 }
 
-Ptr<const Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
+const Ptr<const Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
-Ptr<const Chunk> ChunkQueue::pop(bit length, int flags)
+const Ptr<const Chunk> ChunkQueue::pop(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     const auto& chunk = peek(length, flags);

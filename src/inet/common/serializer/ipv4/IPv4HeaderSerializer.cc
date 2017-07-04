@@ -147,7 +147,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
     }
 }
 
-Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     byte bufsize = stream.getRemainingLength();

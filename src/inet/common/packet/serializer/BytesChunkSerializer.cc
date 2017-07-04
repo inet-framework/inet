@@ -29,7 +29,7 @@ void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
 
-Ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto bytesChunk = std::make_shared<BytesChunk>();
     byte length = stream.getRemainingLength();

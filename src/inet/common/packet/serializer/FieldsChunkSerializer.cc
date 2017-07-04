@@ -45,7 +45,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     }
 }
 
-Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));

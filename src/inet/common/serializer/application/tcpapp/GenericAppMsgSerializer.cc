@@ -37,7 +37,7 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeByteRepeatedly('?', remainders);
 }
 
-Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
     auto msg = std::make_shared<GenericAppMsg>();

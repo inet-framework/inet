@@ -158,7 +158,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
     }    // switch
 }
 
-Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];

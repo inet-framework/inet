@@ -46,7 +46,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
 #endif
 }
 
-Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -71,7 +71,7 @@ Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter conv
     return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == bit(-1) ? chunkLength : length, flags);
 }
 
-Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     bit chunkLength = chunk->getChunkLength();
     bit sliceLength = length == bit(-1) ? chunkLength - offset : length;

@@ -313,7 +313,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates and schedules a timer for either a HoTI or a CoTI transmission.
      */
-    void createTestInitTimer(Ptr<MobilityHeader> testInit, const IPv6Address& dest, InterfaceEntry *ie, simtime_t sendTime = 0);
+    void createTestInitTimer(const Ptr<MobilityHeader> testInit, const IPv6Address& dest, InterfaceEntry *ie, simtime_t sendTime = 0);
 
     /**
      * If a TestInit timer was fired, this method gets called. The message is sent and the Binding Update List accordingly updated.

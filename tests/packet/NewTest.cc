@@ -40,7 +40,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto applicationHeader = std::make_shared<ApplicationHeader>();
     auto position = stream.getPosition();
@@ -62,7 +62,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
     auto position = stream.getPosition();
@@ -89,7 +89,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const C
     stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ipHeader = std::make_shared<IpHeader>();
     auto position = stream.getPosition();
@@ -109,7 +109,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetHeader = std::make_shared<EthernetHeader>();
     auto position = stream.getPosition();
@@ -126,7 +126,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
 }
 
-Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetTrailer = std::make_shared<EthernetTrailer>();
     auto position = stream.getPosition();
@@ -212,7 +212,7 @@ void NewSender::sendIp(Packet *packet)
     sendEthernet(ipDatagram);
 }
 
-Ptr<TcpHeader> NewSender::createTcpHeader()
+const Ptr<TcpHeader> NewSender::createTcpHeader()
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
     tcpHeader->setChunkLength(byte(20));

@@ -373,7 +373,7 @@ void AODVRouting::sendRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr,
     sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
 
-Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
+const Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
 {
     auto rreqPacket = std::make_shared<AODVRREQ>(); // TODO: "AODV-RREQ");
 
@@ -428,7 +428,7 @@ Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
     return rreqPacket;
 }
 
-Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
+const Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
 {
     auto rrep = std::make_shared<AODVRREP>(); // TODO: "AODV-RREP");
     rrep->setPacketType(RREP);
@@ -508,7 +508,7 @@ Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRou
     return rrep;
 }
 
-Ptr<AODVRREP> AODVRouting::createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute)
+const Ptr<AODVRREP> AODVRouting::createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute)
 {
     ASSERT(originatorRoute != nullptr);
     auto grrep = std::make_shared<AODVRREP>(); // TODO: "AODV-GRREP");
@@ -1103,7 +1103,7 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
     sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, jitterPar->doubleValue());
 }
 
-Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
+const Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
 {
     auto rerr = std::make_shared<AODVRERR>(); // TODO: "AODV-RERR");
     unsigned int destCount = unreachableNodes.size();
@@ -1319,7 +1319,7 @@ void AODVRouting::sendGRREP(const Ptr<AODVRREP>& grrep, const L3Address& destAdd
     sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
 
-Ptr<AODVRREP> AODVRouting::createHelloMessage()
+const Ptr<AODVRREP> AODVRouting::createHelloMessage()
 {
     // called a Hello message, with the RREP
     // message fields set as follows:
@@ -1609,7 +1609,7 @@ bool AODVRouting::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t 
     return false;
 }
 
-Ptr<AODVRREPACK> AODVRouting::createRREPACK()
+const Ptr<AODVRREPACK> AODVRouting::createRREPACK()
 {
     auto rrepACK = std::make_shared<AODVRREPACK>(); // TODO: "AODV-RREPACK");
     rrepACK->setPacketType(RREPACK);

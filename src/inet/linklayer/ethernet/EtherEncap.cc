@@ -156,7 +156,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     packet->pushTrailer(ethFcs);
 }
 
-Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
+const Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
 {
     // EV_STATICCONTEXT;
 

@@ -32,7 +32,7 @@ class INET_API ARPPacketSerializer : public FieldsChunkSerializer
     IPv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     ARPPacketSerializer() : FieldsChunkSerializer() {}

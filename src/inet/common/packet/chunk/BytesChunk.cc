@@ -34,7 +34,7 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -59,7 +59,7 @@ Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter conv
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     MemoryOutputStream outputStream(chunk->getChunkLength());
     Chunk::serialize(outputStream, chunk, offset, length);

@@ -33,11 +33,11 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
         std::map<std::pair<MACAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
 
     protected:
-        virtual Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
+        virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
         virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest);
         virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
         virtual void terminateAgreement(MACAddress originatorAddr, Tid tid);
-        virtual Ptr<Ieee80211Delba> buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode);
+        virtual const Ptr<Ieee80211Delba> buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode);
         virtual simtime_t computeEarliestExpirationTime();
         virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 

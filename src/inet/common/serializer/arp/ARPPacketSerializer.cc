@@ -56,7 +56,7 @@ void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeIPv4Address(arpPacket->getDestIPAddress());
 }
 
-Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto arpPacket = std::make_shared<ARPPacket>();
     if (stream.readUint16Be() != 1)

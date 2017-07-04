@@ -49,9 +49,9 @@ class INET_API SliceChunk : public Chunk
   protected:
     Chunk *_getChunk() const { return chunk.get(); } // only for class descriptor
 
-    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -61,7 +61,7 @@ class INET_API SliceChunk : public Chunk
     SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
-    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

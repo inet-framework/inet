@@ -29,7 +29,7 @@ void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 
 }
 
-Ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
 
 }

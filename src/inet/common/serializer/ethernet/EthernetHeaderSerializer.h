@@ -29,7 +29,7 @@ class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetMacHeaderSerializer() : FieldsChunkSerializer() {}
@@ -39,7 +39,7 @@ class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetPaddingSerializer() : FieldsChunkSerializer() {}
@@ -49,7 +49,7 @@ class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetFcsSerializer() : FieldsChunkSerializer() {}
@@ -62,7 +62,7 @@ class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetPhyHeaderSerializer() : FieldsChunkSerializer() {}

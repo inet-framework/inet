@@ -215,7 +215,7 @@ void GPSR::processUDPPacket(Packet *packet)
 // handling beacons
 //
 
-Ptr<GPSRBeacon> GPSR::createBeacon()
+const Ptr<GPSRBeacon> GPSR::createBeacon()
 {
     const auto& beacon = std::make_shared<GPSRBeacon>();
     beacon->setAddress(getSelfAddress());

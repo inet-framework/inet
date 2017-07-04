@@ -28,35 +28,35 @@ class ApplicationHeaderSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TcpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class IpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetHeaderSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetTrailerSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class NewMedium
@@ -88,7 +88,7 @@ class NewSender
     void sendEthernet(Packet *packet);
     void sendIp(Packet *packet);
     void sendTcp(Packet *packet);
-    Ptr<TcpHeader> createTcpHeader();
+    const Ptr<TcpHeader> createTcpHeader();
 
   public:
     NewSender(NewMedium& medium) : medium(medium) { }

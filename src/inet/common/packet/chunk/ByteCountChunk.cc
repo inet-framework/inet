@@ -39,7 +39,7 @@ ByteCountChunk::ByteCountChunk(byte length, uint8_t data) :
     CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
 }
 
-Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -64,7 +64,7 @@ Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter 
     return converter(const_cast<ByteCountChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;

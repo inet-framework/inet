@@ -42,7 +42,7 @@ class INET_API ChunkSerializer : public cObject
      * provided type. The current stream position is updated according to the
      * length of the returned chunk.
      */
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
 } // namespace

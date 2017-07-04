@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
+const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
     throw cRuntimeError("Unsupported feature");
     auto blockAckReq = std::make_shared<Ieee80211CompressedBlockAckReq>();
@@ -30,7 +30,7 @@ Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBlockAckRe
     return blockAckReq;
 }
 
-Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildBasicBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
+const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildBasicBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
     auto blockAckReq = std::make_shared<Ieee80211BasicBlockAckReq>();
     blockAckReq->setReceiverAddress(receiverAddress);

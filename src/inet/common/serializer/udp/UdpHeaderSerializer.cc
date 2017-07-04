@@ -35,7 +35,7 @@ void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(udpHeader->getCrc());
 }
 
-Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto udpHeader = std::make_shared<UdpHeader>();
     udpHeader->setSourcePort(stream.readUint16Be());

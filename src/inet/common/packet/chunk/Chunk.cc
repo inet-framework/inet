@@ -98,7 +98,7 @@ const char *Chunk::getBytesAsString(int index)
     return asStringValue.c_str();
 }
 
-Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     auto chunkType = chunk->getChunkType();
     if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
@@ -122,7 +122,7 @@ void Chunk::seekIterator(Iterator& iterator, bit position) const
     iterator.setIndex(position == bit(0) ? 0 : -1);
 }
 
-Ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     const auto& chunk = peekUnchecked(nullptr, nullptr, iterator, length, flags);
     return checkPeekResult<Chunk>(chunk, flags);
@@ -150,7 +150,7 @@ void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk,
 #endif
 }
 
-Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
+const Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED

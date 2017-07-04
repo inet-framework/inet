@@ -107,7 +107,7 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<IGMPMessage> packet = nullptr;
     byte startPos = stream.getPosition();

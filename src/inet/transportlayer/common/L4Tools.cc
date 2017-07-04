@@ -32,13 +32,13 @@
 
 namespace inet {
 
-Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet)
+const Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return peekTransportHeader(protocol, packet);
 }
 
-Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
+const Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_TCP_COMMON
     if (protocol == &Protocol::tcp)
@@ -54,13 +54,13 @@ Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Pac
     throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
 }
 
-Ptr<TransportHeaderBase> removeTransportHeader(Packet *packet)
+const Ptr<TransportHeaderBase> removeTransportHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return removeTransportHeader(protocol, packet);
 }
 
-Ptr<TransportHeaderBase> removeTransportHeader(const Protocol *protocol, Packet *packet)
+const Ptr<TransportHeaderBase> removeTransportHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_TCP_COMMON
     if (protocol == &Protocol::tcp)

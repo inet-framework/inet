@@ -35,7 +35,7 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByteRepeatedly('?', remainders);
 }
 
-Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
     auto applicationPacket = std::make_shared<ApplicationPacket>();

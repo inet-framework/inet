@@ -54,9 +54,9 @@ class INET_API SequenceChunk : public Chunk
 
     std::deque<Ptr<const Chunk>> dupChunks() const;
 
-    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -66,7 +66,7 @@ class INET_API SequenceChunk : public Chunk
     SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
-    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
     //@}
 
     virtual void forEachChild(cVisitor *v) override;

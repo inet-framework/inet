@@ -27,7 +27,7 @@ void SliceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     Chunk::serialize(stream, sliceChunk->getChunk(), sliceChunk->getOffset() + offset, length == bit(-1) ? sliceChunk->getLength() - offset : length);
 }
 
-Ptr<Chunk> SliceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> SliceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     throw cRuntimeError("Invalid operation");
 }

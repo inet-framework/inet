@@ -42,21 +42,21 @@ static std::vector<uint8_t> makeVector(int length)
     return bytes;
 }
 
-static Ptr<ByteCountChunk> makeImmutableByteCountChunk(byte length)
+static const Ptr<ByteCountChunk> makeImmutableByteCountChunk(byte length)
 {
     auto chunk = std::make_shared<ByteCountChunk>(length);
     chunk->markImmutable();
     return chunk;
 }
 
-static Ptr<BytesChunk> makeImmutableBytesChunk(const std::vector<uint8_t>& bytes)
+static const Ptr<BytesChunk> makeImmutableBytesChunk(const std::vector<uint8_t>& bytes)
 {
     auto chunk = std::make_shared<BytesChunk>(bytes);
     chunk->markImmutable();
     return chunk;
 }
 
-static Ptr<ApplicationHeader> makeImmutableApplicationHeader(int someData)
+static const Ptr<ApplicationHeader> makeImmutableApplicationHeader(int someData)
 {
     auto chunk = std::make_shared<ApplicationHeader>();
     chunk->setSomeData(someData);
@@ -64,35 +64,35 @@ static Ptr<ApplicationHeader> makeImmutableApplicationHeader(int someData)
     return chunk;
 }
 
-static Ptr<TcpHeader> makeImmutableTcpHeader()
+static const Ptr<TcpHeader> makeImmutableTcpHeader()
 {
     auto chunk = std::make_shared<TcpHeader>();
     chunk->markImmutable();
     return chunk;
 }
 
-static Ptr<IpHeader> makeImmutableIpHeader()
+static const Ptr<IpHeader> makeImmutableIpHeader()
 {
     auto chunk = std::make_shared<IpHeader>();
     chunk->markImmutable();
     return chunk;
 }
 
-static Ptr<EthernetHeader> makeImmutableEthernetHeader()
+static const Ptr<EthernetHeader> makeImmutableEthernetHeader()
 {
     auto chunk = std::make_shared<EthernetHeader>();
     chunk->markImmutable();
     return chunk;
 }
 
-static Ptr<EthernetTrailer> makeImmutableEthernetTrailer()
+static const Ptr<EthernetTrailer> makeImmutableEthernetTrailer()
 {
     auto chunk = std::make_shared<EthernetTrailer>();
     chunk->markImmutable();
     return chunk;
 }
 
-Ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
@@ -106,7 +106,7 @@ void TlvHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     throw cRuntimeError("Invalid operation");
 }
 
-Ptr<Chunk> TlvHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t type = stream.readUint8();
     stream.seek(stream.getPosition() - byte(1));
@@ -128,7 +128,7 @@ void TlvHeaderBoolSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
-Ptr<Chunk> TlvHeaderBoolSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderBoolSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeaderBool>();
     assert(tlvHeader->getType() == stream.readUint8());
@@ -147,7 +147,7 @@ void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeUint16Be(tlvHeader->getInt16Value());
 }
 
-Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeaderInt>();
     assert(tlvHeader->getType() == stream.readUint8());
@@ -836,7 +836,7 @@ static void testDuplication()
 {
     // 1. copy of immutable packet shares chunk
     Packet packet1;
-    Ptr<ByteCountChunk> byteCountChunk1 = makeImmutableByteCountChunk(byte(10));
+    const Ptr<ByteCountChunk> byteCountChunk1 = makeImmutableByteCountChunk(byte(10));
     packet1.append(byteCountChunk1);
     auto packet2 = packet1.dup();
     assert(packet2->getTotalLength() == byte(10));

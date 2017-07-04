@@ -54,7 +54,7 @@ void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<const Ieee
 // until the MPDU with the highest sequence number that has been received, and the STA shall set bits in the
 // Block Ack bitmap corresponding to all other MPDUs to 0.
 //
-Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
+const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
     if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         ASSERT(agreement != nullptr);

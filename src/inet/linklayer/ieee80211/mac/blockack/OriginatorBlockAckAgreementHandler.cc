@@ -63,7 +63,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     scheduleInactivityTimer(agreementHandlerCallback);
 }
 
-Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
 {
     auto addbaRequest = std::make_shared<Ieee80211AddbaRequest>();
     addbaRequest->setReceiverAddress(receiverAddr);
@@ -108,7 +108,7 @@ OriginatorBlockAckAgreement* OriginatorBlockAckAgreementHandler::getAgreement(MA
     return it != blockAckAgreements.end() ? it->second : nullptr;
 }
 
-Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
+const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
 {
     auto delba = std::make_shared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);

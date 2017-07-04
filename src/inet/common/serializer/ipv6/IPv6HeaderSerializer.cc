@@ -123,7 +123,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
     stream.readBytes(buffer, byte(IPv6_HEADER_BYTES));

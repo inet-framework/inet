@@ -103,7 +103,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processUDPPacket(Packet *packet);
 
     // handling beacons
-    Ptr<GPSRBeacon> createBeacon();
+    const Ptr<GPSRBeacon> createBeacon();
     void sendBeacon(const Ptr<GPSRBeacon>& beacon, double delay);
     void processBeacon(Packet *packet);
 

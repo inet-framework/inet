@@ -97,7 +97,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<ICMPv6Header> _pkt = nullptr;
     uint8_t type = stream.readByte();     // type

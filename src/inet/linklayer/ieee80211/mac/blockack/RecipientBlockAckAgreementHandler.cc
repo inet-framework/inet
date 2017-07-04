@@ -101,7 +101,7 @@ RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::addAgreement(cons
 // field set to TIMEOUT and shall issue a MLME-DELBA.indication primitive with the ReasonCode
 // parameter having a value of TIMEOUT. The procedure is illustrated in Figure 10-14.
 //
-Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
+const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
 {
     auto delba = std::make_shared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);
@@ -111,7 +111,7 @@ Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddress rec
     return delba;
 }
 
-Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& frame, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& frame, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     auto addbaResponse = std::make_shared<Ieee80211AddbaResponse>();
     addbaResponse->setReceiverAddress(frame->getTransmitterAddress());

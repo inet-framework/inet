@@ -65,7 +65,7 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
         throw cRuntimeError("Cannot serialize '%s'", ethernetHeader->getClassName());
 }
 
-Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<EtherFrame> ethernetMacHeader = nullptr;
     MACAddress destAddr = stream.readMACAddress();
@@ -106,7 +106,7 @@ void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     stream.writeByteRepeatedly(0, byte(chunk->getChunkLength()).get());
 }
 
-Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
 {
     throw cRuntimeError("Invalid operation");
 }
@@ -119,7 +119,7 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(ethernetFcs->getFcs());
 }
 
-Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetFcs = std::make_shared<EthernetFcs>();
     ethernetFcs->setFcs(stream.readUint32Be());
@@ -133,7 +133,7 @@ void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByte(0xD5); // SFD
 }
 
-Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetPhyHeader = std::make_shared<EtherPhyFrame>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble

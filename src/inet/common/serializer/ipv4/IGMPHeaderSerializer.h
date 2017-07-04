@@ -32,7 +32,7 @@ class INET_API IGMPHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     IGMPHeaderSerializer() : FieldsChunkSerializer() {}

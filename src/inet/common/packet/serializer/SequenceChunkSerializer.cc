@@ -45,7 +45,7 @@ void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     }
 }
 
-Ptr<Chunk> SequenceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> SequenceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     throw cRuntimeError("Invalid operation");
 }

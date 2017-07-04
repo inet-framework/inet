@@ -99,14 +99,14 @@ class INET_API ChunkQueue : public cNamedObject
      * chunk in its current representation. If the length is unspecified, then
      * the length of the result is chosen according to the internal representation.
      */
-    Ptr<const Chunk> peek(bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peek(bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns the designated data at the given offset as an immutable chunk in
      * its current representation. If the length is unspecified, then the length
      * of the result is chosen according to the internal representation.
      */
-    Ptr<const Chunk> peekAt(bit offset, bit length, int flags = 0) const;
+    const Ptr<const Chunk> peekAt(bit offset, bit length, int flags = 0) const;
 
     /**
      * Returns true if the designated data is available at the head of the queue
@@ -124,7 +124,7 @@ class INET_API ChunkQueue : public cNamedObject
      * the length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    Ptr<const T> peek(bit length = bit(-1), int flags = 0) const {
+    const Ptr<const T> peek(bit length = bit(-1), int flags = 0) const {
         return contents->peek<T>(iterator, length, flags);
     }
 
@@ -134,7 +134,7 @@ class INET_API ChunkQueue : public cNamedObject
      * length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    Ptr<const T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
+    const Ptr<const T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
@@ -144,7 +144,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the current representation. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<const Chunk> peekAll(int flags = 0) const {
+    const Ptr<const Chunk> peekAll(int flags = 0) const {
         return peekAt(bit(0), getLength(), flags);
     }
 
@@ -152,7 +152,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bits. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
+    const Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
         return peekAt<BitsChunk>(bit(0), getLength(), flags);
     }
 
@@ -160,7 +160,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bytes. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
+    const Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
         return peekAt<BytesChunk>(bit(0), getLength(), flags);
     }
     //@}
@@ -172,7 +172,7 @@ class INET_API ChunkQueue : public cNamedObject
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    Ptr<const Chunk> pop(bit length = bit(-1), int flags = 0);
+    const Ptr<const Chunk> pop(bit length = bit(-1), int flags = 0);
 
     /**
      * Pops the designated data from the head of the queue and returns it as
@@ -181,7 +181,7 @@ class INET_API ChunkQueue : public cNamedObject
      * internal representation.
      */
     template <typename T>
-    Ptr<const T> pop(bit length = bit(-1), int flags = 0) {
+    const Ptr<const T> pop(bit length = bit(-1), int flags = 0) {
         const auto& chunk = peek<T>(length, flags);
         if (chunk != nullptr)
             moveIteratorOrRemove(chunk->getChunkLength());

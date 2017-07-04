@@ -32,13 +32,13 @@
 
 namespace inet {
 
-Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet)
+const Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return peekNetworkHeader(protocol, packet);
 }
 
-Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
+const Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4)
@@ -58,13 +58,13 @@ Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet 
     throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
 }
 
-Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet)
+const Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return removeNetworkHeader(protocol, packet);
 }
 
-Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet)
+const Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4)

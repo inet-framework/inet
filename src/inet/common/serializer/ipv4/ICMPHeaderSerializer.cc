@@ -58,7 +58,7 @@ void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto icmpHeader = std::make_shared<ICMPHeader>();
     uint8_t type = stream.readByte();

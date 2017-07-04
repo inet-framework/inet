@@ -1470,7 +1470,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry *ie
     }
 }
 
-void xMIPv6::createTestInitTimer(Ptr<MobilityHeader> testInit, const IPv6Address& dest, InterfaceEntry *ie, simtime_t sendTime)
+void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const IPv6Address& dest, InterfaceEntry *ie, simtime_t sendTime)
 {
     EV_DETAIL << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << simTime()
               << " seconds+++++++++++++++++ \n";

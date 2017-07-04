@@ -48,7 +48,7 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     }
 }
 
-Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     if (true) {
         uint8_t buffer[OFDM_PLCP_HEADER_LENGTH];

@@ -25,10 +25,10 @@
 #include "inet/networklayer/contract/NetworkHeaderBase.h"
 
 namespace inet {
-    Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet);
-    Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet);
-    Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet);
-    Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet);
+    const Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet);
+    const Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet);
+    const Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet);
+    const Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet);
 };
 
 #endif    // __INET_L3TOOLS_H

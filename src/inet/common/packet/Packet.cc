@@ -60,7 +60,7 @@ void Packet::setHeaderPopOffset(bit offset)
     CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
 }
 
-Ptr<const Chunk> Packet::peekHeader(bit length, int flags) const
+const Ptr<const Chunk> Packet::peekHeader(bit length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
@@ -71,7 +71,7 @@ Ptr<const Chunk> Packet::peekHeader(bit length, int flags) const
         return contents->peek(headerIterator, dataLength, flags);
 }
 
-Ptr<const Chunk> Packet::popHeader(bit length, int flags)
+const Ptr<const Chunk> Packet::popHeader(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekHeader(length, flags);
@@ -82,7 +82,7 @@ Ptr<const Chunk> Packet::popHeader(bit length, int flags)
     return chunk;
 }
 
-Ptr<Chunk> Packet::removeHeader(bit length, int flags)
+const Ptr<Chunk> Packet::removeHeader(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     CHUNK_CHECK_USAGE(headerIterator.getPosition() == bit(0), "popped header length is non-zero");
@@ -111,7 +111,7 @@ void Packet::setTrailerPopOffset(bit offset)
     CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
 }
 
-Ptr<const Chunk> Packet::peekTrailer(bit length, int flags) const
+const Ptr<const Chunk> Packet::peekTrailer(bit length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
@@ -122,7 +122,7 @@ Ptr<const Chunk> Packet::peekTrailer(bit length, int flags) const
         return contents->peek(trailerIterator, dataLength, flags);
 }
 
-Ptr<const Chunk> Packet::popTrailer(bit length, int flags)
+const Ptr<const Chunk> Packet::popTrailer(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekTrailer(length, flags);
@@ -133,7 +133,7 @@ Ptr<const Chunk> Packet::popTrailer(bit length, int flags)
     return chunk;
 }
 
-Ptr<Chunk> Packet::removeTrailer(bit length, int flags)
+const Ptr<Chunk> Packet::removeTrailer(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     CHUNK_CHECK_USAGE(trailerIterator.getPosition() == bit(0), "popped trailer length is non-zero");
@@ -155,7 +155,7 @@ void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
     append(chunk);
 }
 
-Ptr<const Chunk> Packet::peekDataAt(bit offset, bit length, int flags) const
+const Ptr<const Chunk> Packet::peekDataAt(bit offset, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
@@ -164,7 +164,7 @@ Ptr<const Chunk> Packet::peekDataAt(bit offset, bit length, int flags) const
     return contents->peek(Chunk::Iterator(true, peekOffset, -1), peekLength, flags);
 }
 
-Ptr<const Chunk> Packet::peekAt(bit offset, bit length, int flags) const
+const Ptr<const Chunk> Packet::peekAt(bit offset, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");

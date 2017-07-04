@@ -586,7 +586,7 @@ bit DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 // handling RREQ packets
 //
 
-Ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
+const Ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
 {
     auto rreq = std::make_shared<RREQ>(); // TODO: "RREQ");
     AddressBlock& originatorNode = rreq->getOriginatorNode();
@@ -706,12 +706,12 @@ bit DYMO::computeRREQLength(const Ptr<RREQ>& rreq)
 // handling RREP packets
 //
 
-Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg)
+const Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg)
 {
     return createRREP(rteMsg, nullptr);
 }
 
-Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route)
+const Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
     auto rrep = std::make_shared<RREP>(); // TODO: "RREP");
@@ -824,7 +824,7 @@ bit DYMO::computeRREPLength(const Ptr<RREP>& rrep)
 // handling RERR packets
 //
 
-Ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
+const Ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
 {
     auto rerr = std::make_shared<RERR>(); // TODO: "RERR");
     for (auto & unreachableAddresse : unreachableAddresses) {

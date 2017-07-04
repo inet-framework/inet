@@ -365,15 +365,15 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * and has the provided length. This function isn't a constructor to allow
      * creating instances of message compiler generated field based chunk classes.
      */
-    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
     typedef bool (*PeekPredicate)(const Ptr<Chunk>&);
-    typedef Ptr<Chunk> (*PeekConverter)(const Ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length, int flags);
+    typedef const Ptr<Chunk> (*PeekConverter)(const Ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length, int flags);
 
-    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
-    Ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
+    const Ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
         CHUNK_CHECK_USAGE(iterator.isForward() || length != bit(-1), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
@@ -382,7 +382,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     }
 
     template <typename T>
-    Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
+    const Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
         if (chunk == nullptr) {
             if (!(flags & PF_ALLOW_NULLPTR))
                 throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
@@ -407,7 +407,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
      */
-    virtual Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
+    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
     //@}
 
     /** @name Mutability related functions */
@@ -521,7 +521,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Returns the simplified representation of this chunk eliminating all potential
      * redundancies. This function may return a nullptr for emptry chunks.
      */
-    virtual Ptr<Chunk> simplify() const {
+    virtual const Ptr<Chunk> simplify() const {
         return peek(bit(0), getChunkLength(), PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED);
     }
 
@@ -532,7 +532,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual Ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
+    virtual const Ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
@@ -556,9 +556,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
-    Ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
+    const Ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
         const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
-        const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
+        const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
         return checkPeekResult<T>(std::static_pointer_cast<T>(chunk), flags);
     }
@@ -585,12 +585,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * stream starting from the current stream position up to the length
      * required by the deserializer of the chunk.
      */
-    static Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo);
+    static const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo);
     //@}
 };
 
 template <typename T>
-Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
+const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
 {
     if (chunk.use_count() == 1) {
         const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
