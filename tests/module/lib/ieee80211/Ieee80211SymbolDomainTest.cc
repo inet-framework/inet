@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 0
+#if 1
 
 #include "Ieee80211SymbolDomainTest.h"
 #include "inet/common/ModuleAccess.h"
@@ -65,14 +65,18 @@ void Ieee80211SymbolDomainTest::parseInput(const char* fileName)
 
 void Ieee80211SymbolDomainTest::test() const
 {
-    BitVector *signalField = new BitVector();
-    BitVector *dataField = new BitVector();
+    const auto& signalField = std::make_shared<BitsChunk>();
+    const auto& dataField = std::make_shared<BitsChunk>();
     for (unsigned int i = 0; i < 24; i++)
-        signalField->appendBit(input.getBit(i));
+        signalField->setBit(i, input.getBit(i));
     for (unsigned int i = 24; i < input.getSize(); i++)
-        dataField->appendBit(input.getBit(i));
-    TransmissionPacketModel signalPacketModel(NULL, signalField, bps(NaN));
-    TransmissionPacketModel dataPacketModel(NULL, dataField, bps(NaN));
+        dataField->setBit(i-24, input.getBit(i));
+    auto signalPacket = new Packet("signal");
+    signalPacket->insertHeader(signalField);
+    auto dataPacket = new Packet("data");
+    dataPacket->insertHeader(dataField);
+    TransmissionPacketModel signalPacketModel(signalPacket, bps(NaN));
+    TransmissionPacketModel dataPacketModel(dataPacket, bps(NaN));
     const ITransmissionBitModel *signalBitModel = ieee80211OFDMSignalEncoder->encode(&signalPacketModel);
     const ITransmissionBitModel *dataBitModel = ieee80211OFDMDataEncoder->encode(&dataPacketModel);
     const ITransmissionSymbolModel *transmissionSignalSymbolModel = ieee80211OFDMSignalModulator->modulate(signalBitModel);

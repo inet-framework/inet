@@ -17,7 +17,6 @@
 //
 
 #include "Ieee80211TesterMac.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 
 namespace inet {
@@ -26,16 +25,17 @@ Define_Module(Ieee80211TesterMac);
 
 void Ieee80211TesterMac::handleLowerPacket(cPacket *msg)
 {
+    auto pk = check_and_cast<Packet *>(msg);
     actions = par("actions").stringValue();
     int len = strlen(actions);
     if (msgCounter >= len)
         throw cRuntimeError("No action is defined for this msg %s", msg->getName());
     if (actions[msgCounter] == 'A') {
-        auto frame = check_and_cast<Ieee80211Frame *>(msg);
-        if (rx->lowerFrameReceived(frame))
-            processLowerFrame(frame);
+        const auto& frame = pk->peekHeader<Ieee80211MacHeader>();
+        if (rx->lowerFrameReceived(pk, frame))
+            processLowerFrame(pk, frame);
         else { // corrupted frame received
-            if (qosSta)
+            if (mib->qos)
                 hcf->corruptedFrameReceived();
             else
                 dcf->corruptedFrameReceived();

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 0
+#if 1
 #ifndef __INET_IEEE80211SYMBOLMODELTEST_H
 #define __INET_IEEE80211SYMBOLMODELTEST_H
 

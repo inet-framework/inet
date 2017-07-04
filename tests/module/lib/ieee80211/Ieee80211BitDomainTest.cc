@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if 0
+#if 1
 
 #include "Ieee80211BitDomainTest.h"
 #include "inet/common/BitVector.h"
