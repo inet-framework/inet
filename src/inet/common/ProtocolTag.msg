@@ -55,14 +55,6 @@ class PacketProtocolTag extends ProtocolTagBase
 }
 
 //
-// This tag specifies the transport protocol of the packet.
-// It is present from the transport protocol to the physical layer.
-//
-class TransportProtocolTag extends ProtocolTagBase
-{
-}
-
-//
 // This request determines the transport protocol that should be used to send the packet.
 // It may be present from the application to the transport protocol.
 //
@@ -71,32 +63,27 @@ class TransportProtocolReq extends ProtocolTagBase
 }
 
 //
-// This indication specifies the transport protocol that was used to receive the packet.
-// It is present from the transport protocol to the application.
+// This indication specifies the transport protocol that was used to receive
+// the packet. It may be present from the transport protocol to the application
+// and from the transport protocol to the physical layer.
 //
 class TransportProtocolInd extends ProtocolTagBase
 {
+    ChunkPtr transportProtocolHeader = nullptr;
 }
 
 //
-// This tag specifies the network protocol of the packet.
-// It is present from the network protocol to the physical layer.
-//
-class NetworkProtocolTag extends ProtocolTagBase
-{
-}
-
-//
-// This request determines the network protocol that should be used to send the packet.
-// It may be present from the application to the network protocol.
+// This request determines the network protocol that should be used to send the
+// packet. It may be present from the application to the network protocol and
+// from the network protocol to the physical layer.
 //
 class NetworkProtocolReq extends ProtocolTagBase
 {
 }
 
 //
-// This indication specifies the network protocol that was used to receive the packet.
-// It is present from the network protocol to the application.
+// This indication specifies the network protocol that was used to receive the
+// packet. It may be present from the network protocol to the application.
 //
 class NetworkProtocolInd extends ProtocolTagBase
 {
@@ -104,25 +91,19 @@ class NetworkProtocolInd extends ProtocolTagBase
 }
 
 //
-// This tag specifies the mac protocol of the packet.
-// It is present from the mac protocol to the physical layer.
-//
-class MacProtocolTag extends ProtocolTagBase
-{
-}
-
-//
-// This request determines the mac protocol that should be used to send the packet.
-// It may be present from the application to the mac protocol.
+// This request determines the mac protocol that should be used to send the
+// packet. It may be present from the application to the mac protocol and from
+// the mac protocol to the physical layer.
 //
 class MacProtocolReq extends ProtocolTagBase
 {
 }
 
 //
-// This indication specifies the mac protocol that was used to receive the packet.
-// It is present from the mac protocol to the application.
+// This indication specifies the mac protocol that was used to receive the
+// packet. It may be present from the mac protocol to the application.
 //
 class MacProtocolInd extends ProtocolTagBase
 {
+    ChunkPtr macProtocolHeader = nullptr;
 }
