@@ -216,9 +216,6 @@ void IPv6::endService(cPacket *msg)
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
         auto ipv6Header = packet->peekHeader<IPv6Header>();
-        if (ipv6Header->getPayloadLength() != 0) {      // payloadLength == 0 occured with Jumbo payload
-            ASSERT(byte(ipv6Header->getChunkLength()).get() + ipv6Header->getPayloadLength() <= packet->getByteLength());         //TODO ICMPv6 parameter error?
-        }
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
@@ -855,8 +852,8 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
 
     int noOfFragments = (payloadLength + fragmentLength - 1) / fragmentLength;
     EV_INFO << "Breaking datagram into " << noOfFragments << " fragments\n";
-    std::string fragMsgName = ipv6Header->getName();
-    fragMsgName += "-frag";
+    std::string fragMsgName = packet->getName();
+    fragMsgName += "-frag-";
 
     //FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
 
@@ -865,7 +862,10 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         bool lastFragment = (offset + fragmentLength >= payloadLength);
         int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
 
-        Packet *fragPk = new Packet(fragMsgName.c_str());
+        std::string curFragName = fragMsgName + std::to_string(offset);
+        if (lastFragment)
+            curFragName += "-last";
+        Packet *fragPk = new Packet(curFragName.c_str());
         const auto& fragHdr = std::static_pointer_cast<IPv6Header>(ipv6Header->dupShared());
         auto *fh = new IPv6FragmentHeader();
         fh->setIdentification(identification);
