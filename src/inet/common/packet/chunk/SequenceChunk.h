@@ -38,17 +38,6 @@ class INET_API SequenceChunk : public Chunk
     std::deque<Ptr<const Chunk>> chunks;
 
   protected:
-    template <typename T>
-    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
-        if (chunk.use_count() == 1) {
-            // KLUDGE: TODO: factor out
-            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
-            return std::const_pointer_cast<T>(chunk);
-        }
-        else
-            return std::static_pointer_cast<T>(chunk->dupShared());
-    }
-
     int getNumChunks() const { return chunks.size(); } // only for class descriptor
     const Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
 

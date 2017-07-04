@@ -74,17 +74,6 @@ class INET_API ChunkBuffer : public cNamedObject
     std::vector<Region> regions;
 
   protected:
-    template <typename T>
-    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
-        if (chunk.use_count() == 1) {
-            // KLUDGE: TODO: factor out
-            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
-            return std::const_pointer_cast<T>(chunk);
-        }
-        else
-            return std::static_pointer_cast<T>(chunk->dupShared());
-    }
-
     Region *getRegion(int i) const { return const_cast<Region *>(&regions[i]); } // only for class descriptor
 
     void eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end);

@@ -589,6 +589,17 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     //@}
 };
 
+template <typename T>
+Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
+{
+    if (chunk.use_count() == 1) {
+        const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
+        return std::const_pointer_cast<T>(chunk);
+    }
+    else
+        return std::static_pointer_cast<T>(chunk->dupShared());
+}
+
 inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { return os << chunk->str(); }
 
 inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }

@@ -56,17 +56,6 @@ class INET_API ChunkQueue : public cNamedObject
   protected:
     const Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
-    template <typename T>
-    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
-        if (chunk.use_count() == 1) {
-            // KLUDGE: TODO: factor out
-            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
-            return std::const_pointer_cast<T>(chunk);
-        }
-        else
-            return std::static_pointer_cast<T>(chunk->dupShared());
-    }
-
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
         contents->seekIterator(copy, iterator.getPosition());
