@@ -131,12 +131,12 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
      * Encapsulate packet coming from higher layers into GenericDatagram, using
      * the control info attached to the packet.
      */
-    virtual GenericDatagramHeader *encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE);
+    virtual void encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE);
 
     /**
      * Decapsulate and return encapsulated packet.
      */
-    virtual cPacket *decapsulate(Packet *datagram);
+    virtual void decapsulate(Packet *datagram);
 
     /**
      * Send datagrams up to the higher layers.

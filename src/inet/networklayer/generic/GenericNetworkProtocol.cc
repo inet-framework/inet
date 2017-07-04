@@ -417,7 +417,7 @@ void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const Interf
 //    }
 }
 
-cPacket *GenericNetworkProtocol::decapsulate(Packet *packet)
+void GenericNetworkProtocol::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
@@ -438,11 +438,9 @@ cPacket *GenericNetworkProtocol::decapsulate(Packet *packet)
     l3AddressInd->setSrcAddress(header->getSourceAddress());
     l3AddressInd->setDestAddress(header->getDestinationAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(header->getHopLimit());
-
-    return packet;
 }
 
-GenericDatagramHeader *GenericNetworkProtocol::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
+void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
 {
     auto header = std::make_shared<GenericDatagramHeader>();
     header->setChunkLength(byte(par("headerLength")));
@@ -493,15 +491,13 @@ GenericDatagramHeader *GenericNetworkProtocol::encapsulate(Packet *transportPack
     header->markImmutable();
     transportPacket->pushHeader(header);
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-
-    return header.get();
 }
 
-void GenericNetworkProtocol::sendDatagramToHL(Packet *datagram)
+void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    const auto& header = packet->peekHeader<GenericDatagramHeader>();
     int protocol = header->getTransportProtocol();
-    cPacket *packet = decapsulate(datagram);
+    decapsulate(packet);
     // deliver to sockets
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
