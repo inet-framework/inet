@@ -417,7 +417,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual bool isImmutable() const { return flags & CF_IMMUTABLE; }
     virtual void markImmutable() { flags |= CF_IMMUTABLE; }
     void markMutableIfExclusivelyOwned() {
-        // NOTE: one for external reference and one for local variable
+        // NOTE: one for the external reference and one for the temporary return value of shared_from_this()
         CHUNK_CHECK_USAGE(shared_from_this().use_count() == 2, "chunk is not exclusively owned");
         flags &= ~CF_IMMUTABLE;
     }
@@ -522,7 +522,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * redundancies. This function may return a nullptr for emptry chunks.
      */
     virtual Ptr<Chunk> simplify() const {
-        return peek(bit(0), getChunkLength());
+        return peek(bit(0), getChunkLength(), PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED);
     }
 
     /**
