@@ -966,9 +966,9 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
            << " waiting packets from the queue\n";
 
         while (!packetQueue.isEmpty()) {
-            cPacket *msg = packetQueue.pop();
-            EV << "Sending out queued packet " << msg << "\n";
-            sendPacketToIeee802NIC(msg, entry->ie, entry->macAddress, ETHERTYPE_IPv4);
+            Packet *packet = check_and_cast<Packet *>(packetQueue.pop());
+            EV << "Sending out queued packet " << packet << "\n";
+            sendPacketToIeee802NIC(packet, entry->ie, entry->macAddress, ETHERTYPE_IPv4);
         }
         pendingPackets.erase(it);
     }
@@ -1007,7 +1007,7 @@ MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAd
     return arp->resolveL3Address(nextHopAddr, destIE);
 }
 
-void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
+void IPv4::sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
 {
     // remove old control info
     delete packet->removeControlInfo();
@@ -1020,7 +1020,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     sendPacketToNIC(packet, ie);
 }
 
-void IPv4::sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie)
+void IPv4::sendPacketToNIC(Packet *packet, const InterfaceEntry *ie)
 {
     EV_INFO << "Sending " << packet << " to output interface = " << ie->getName() << ".\n";
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);

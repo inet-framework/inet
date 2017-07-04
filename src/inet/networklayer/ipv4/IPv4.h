@@ -213,9 +213,9 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 
     virtual MACAddress resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE);
 
-    virtual void sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
+    virtual void sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 
-    virtual void sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie);
+    virtual void sendPacketToNIC(Packet *packet, const InterfaceEntry *ie);
 
     virtual void sendIcmpError(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
 
