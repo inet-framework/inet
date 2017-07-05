@@ -111,7 +111,6 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     GPSROption *createGpsrOption(L3Address destination);
     int computeOptionLength(GPSROption *gpsrOption);
     void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& datagram);
-    void removeGpsrOptionFromNetworkDatagram(const Ptr<NetworkHeaderBase>& datagram);
 
     // returns nullptr if not found
     const GPSROption *findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& datagram);

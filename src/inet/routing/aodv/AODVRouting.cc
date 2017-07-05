@@ -182,7 +182,7 @@ void AODVRouting::handleMessage(cMessage *msg)
 INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(Packet *datagram)
 {
     Enter_Method("datagramPreRoutingHook");
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
@@ -261,7 +261,7 @@ L3Address AODVRouting::getSelfIPAddress() const
 
 void AODVRouting::delayDatagram(Packet *datagram)
 {
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_DETAIL << "Queuing datagram, source " << networkHeader->getSourceAddress() << ", destination " << networkHeader->getDestinationAddress() << endl;
     const L3Address& target = networkHeader->getDestinationAddress();
     targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
@@ -993,11 +993,10 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
         EV_DETAIL << "Received link break signal" << endl;
-        // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac. etc
         Packet *datagram = check_and_cast<Packet *>(obj);
-        if (datagram->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-            const auto& ipv4Header = datagram->peekHeader<IPv4Header>();
-            L3Address unreachableAddr = ipv4Header->getDestinationAddress();
+        const auto& networkHeader = findNetworkProtocolHeader(datagram);
+        if (networkHeader != nullptr) {
+            L3Address unreachableAddr = networkHeader->getDestinationAddress();
             if (unreachableAddr.getAddressType() == addressType) {
                 // A node initiates processing for a RERR message in three situations:
                 //
@@ -1294,7 +1293,7 @@ void AODVRouting::completeRouteDiscovery(const L3Address& target)
     // reinject the delayed datagrams
     for (auto it = lt; it != ut; it++) {
         Packet *datagram = it->second;
-        const auto& networkHeader = peekNetworkHeader(datagram);
+        const auto& networkHeader = getNetworkProtocolHeader(datagram);
         EV_DETAIL << "Sending queued datagram: source " << networkHeader->getSourceAddress() << ", destination " << networkHeader->getDestinationAddress() << endl;
         networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram));
     }
@@ -1486,7 +1485,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram, con
     // timer to expire after current time plus DELETE_PERIOD.
 
     Enter_Method("datagramForwardHook");
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
     IRoute *ipSource = routingTable->findBestMatchingRoute(sourceAddr);

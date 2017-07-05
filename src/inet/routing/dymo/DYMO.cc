@@ -234,7 +234,7 @@ bool DYMO::hasOngoingRouteDiscovery(const L3Address& target)
 
 void DYMO::delayDatagram(Packet *datagram)
 {
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_INFO << "Queuing datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
     const L3Address& target = networkHeader->getDestinationAddress();
     targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
@@ -242,14 +242,14 @@ void DYMO::delayDatagram(Packet *datagram)
 
 void DYMO::reinjectDelayedDatagram(Packet *datagram)
 {
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_INFO << "Sending queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
     networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram));
 }
 
 void DYMO::dropDelayedDatagram(Packet *datagram)
 {
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_WARN << "Dropping queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
     networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(datagram));
 }
@@ -1370,7 +1370,7 @@ void DYMO::incrementSequenceNumber()
 
 INetfilter::IHook::Result DYMO::ensureRouteForDatagram(Packet *datagram)
 {
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& source = networkHeader->getSourceAddress();
     const L3Address& destination = networkHeader->getDestinationAddress();
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
@@ -1443,10 +1443,8 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     if (signalID == NF_LINK_BREAK) {
         EV_WARN << "Received link break" << endl;
         Packet *datagram = check_and_cast<Packet *>(obj);
-        if (true) { // TODO: datagram->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-            // TODO: get nexthop and interface from the packet
-            // auto networkProtocolControlInfo = datagram->getControlInfo();
-            const auto& networkHeader = peekNetworkHeader(datagram);
+        const auto& networkHeader = findNetworkProtocolHeader(datagram);
+        if (networkHeader != nullptr) {
             const L3Address& destination = networkHeader->getDestinationAddress();
             if (destination.getAddressType() == addressType) {
                 IRoute *route = routingTable->findBestMatchingRoute(destination);
@@ -1456,8 +1454,6 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
                 }
             }
         }
-        else
-            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
     }
 }
 
