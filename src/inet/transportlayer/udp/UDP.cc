@@ -393,7 +393,7 @@ void UDP::processPacketFromApp(Packet *packet)
     udpHeader->markImmutable();
     packet->pushHeader(udpHeader);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    packet->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
 
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
@@ -1239,7 +1239,7 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    const auto& networkHeader = peekNetworkHeader(packet);
+    const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_UDP) {
         packet->removeFromBeginning(networkHeader->getChunkLength());
         auto udpHeader = packet->removeHeader<UdpHeader>();

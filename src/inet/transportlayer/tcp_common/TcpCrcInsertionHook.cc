@@ -30,7 +30,7 @@ namespace tcp {
 INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    const auto& networkHeader = peekNetworkHeader(packet);
+    const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_TCP) {
         packet->removeFromBeginning(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeHeader<TcpHeader>();
