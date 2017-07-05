@@ -79,7 +79,7 @@ void BitCountChunk::setLength(bit length)
     this->length = length;
 }
 
-void BitCountChunk::setData(bool bit)
+void BitCountChunk::setData(bool data)
 {
     handleChange();
     this->data = data;
