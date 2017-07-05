@@ -96,14 +96,14 @@ class INET_API SliceChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_SLICE; }
     virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= bit(0)); return length; }
 
-    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override;
-    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
 
-    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) override { return false; }
-    virtual bool canRemoveFromEnd(bit length) override { return false; }
+    virtual bool canRemoveFromBeginning(bit length) const override { return false; }
+    virtual bool canRemoveFromEnd(bit length) const override { return false; }
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;

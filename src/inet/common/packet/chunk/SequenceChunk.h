@@ -35,24 +35,35 @@ class INET_API SequenceChunk : public Chunk
     /**
      * The list of chunks that make up this chunk.
      */
-    std::deque<Ptr<Chunk>> chunks;
+    std::deque<Ptr<const Chunk>> chunks;
 
   protected:
+    template <typename T>
+    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
+        if (chunk.use_count() == 1) {
+            // KLUDGE: TODO: factor out
+            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
+            return std::const_pointer_cast<T>(chunk);
+        }
+        else
+            return std::static_pointer_cast<T>(chunk->dupShared());
+    }
+
     int getNumChunks() const { return chunks.size(); } // only for class descriptor
-    Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
+    const Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
 
     int getElementIndex(bool isForward, int index) const { return isForward ? index : chunks.size() - index - 1; }
-    const Ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
+    const Ptr<const Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
 
-    void doInsertToBeginning(const Ptr<Chunk>& chunk);
-    void doInsertToBeginning(const Ptr<SliceChunk>& chunk);
-    void doInsertToBeginning(const Ptr<SequenceChunk>& chunk);
+    void doInsertToBeginning(const Ptr<const Chunk>& chunk);
+    void doInsertToBeginning(const Ptr<const SliceChunk>& chunk);
+    void doInsertToBeginning(const Ptr<const SequenceChunk>& chunk);
 
-    void doInsertToEnd(const Ptr<Chunk>& chunk);
-    void doInsertToEnd(const Ptr<SliceChunk>& chunk);
-    void doInsertToEnd(const Ptr<SequenceChunk>& chunk);
+    void doInsertToEnd(const Ptr<const Chunk>& chunk);
+    void doInsertToEnd(const Ptr<const SliceChunk>& chunk);
+    void doInsertToEnd(const Ptr<const SequenceChunk>& chunk);
 
-    std::deque<Ptr<Chunk>> dupChunks() const;
+    std::deque<Ptr<const Chunk>> dupChunks() const;
 
     virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
@@ -63,7 +74,7 @@ class INET_API SequenceChunk : public Chunk
     //@{
     SequenceChunk();
     SequenceChunk(const SequenceChunk& other);
-    SequenceChunk(const std::deque<Ptr<Chunk>>& chunks);
+    SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
     virtual Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
@@ -72,8 +83,8 @@ class INET_API SequenceChunk : public Chunk
     virtual void forEachChild(cVisitor *v) override;
 
     /** @name Field accessor functions */
-    const std::deque<Ptr<Chunk>>& getChunks() const { return chunks; }
-    void setChunks(const std::deque<Ptr<Chunk>>& chunks);
+    const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
+    void setChunks(const std::deque<Ptr<const Chunk>>& chunks);
     //@}
 
     /** @name Overridden flag functions */
@@ -100,17 +111,17 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override { return true; }
-    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override { return true; }
+    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override { return true; }
+    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override { return true; }
 
-    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
     //@}
 
     /** @name Removing data related functions */
     //@{
-    virtual bool canRemoveFromBeginning(bit length) override { return true; }
-    virtual bool canRemoveFromEnd(bit length) override { return true; }
+    virtual bool canRemoveFromBeginning(bit length) const override { return true; }
+    virtual bool canRemoveFromEnd(bit length) const override { return true; }
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;

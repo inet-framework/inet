@@ -50,17 +50,18 @@ class INET_API ChunkQueue : public cNamedObject
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
      */
-    Ptr<Chunk> contents;
+    Ptr<const Chunk> contents;
     Chunk::Iterator iterator;
 
   protected:
-    Chunk *getContents() const { return contents.get(); } // only for class descriptor
+    const Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
     template <typename T>
-    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<T>& chunk) const {
+    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
         if (chunk.use_count() == 1) {
-            chunk->markMutableIfExclusivelyOwned();
-            return chunk;
+            // KLUDGE: TODO: factor out
+            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
+            return std::const_pointer_cast<T>(chunk);
         }
         else
             return std::static_pointer_cast<T>(chunk->dupShared());
@@ -78,7 +79,7 @@ class INET_API ChunkQueue : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    ChunkQueue(const char *name = nullptr, const Ptr<Chunk>& contents = EmptyChunk::singleton);
+    ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& contents = EmptyChunk::singleton);
     ChunkQueue(const ChunkQueue& other);
 
     virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }
@@ -109,14 +110,14 @@ class INET_API ChunkQueue : public cNamedObject
      * chunk in its current representation. If the length is unspecified, then
      * the length of the result is chosen according to the internal representation.
      */
-    Ptr<Chunk> peek(bit length = bit(-1), int flags = 0) const;
+    Ptr<const Chunk> peek(bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns the designated data at the given offset as an immutable chunk in
      * its current representation. If the length is unspecified, then the length
      * of the result is chosen according to the internal representation.
      */
-    Ptr<Chunk> peekAt(bit offset, bit length, int flags = 0) const;
+    Ptr<const Chunk> peekAt(bit offset, bit length, int flags = 0) const;
 
     /**
      * Returns true if the designated data is available at the head of the queue
@@ -134,7 +135,7 @@ class INET_API ChunkQueue : public cNamedObject
      * the length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    Ptr<T> peek(bit length = bit(-1), int flags = 0) const {
+    Ptr<const T> peek(bit length = bit(-1), int flags = 0) const {
         return contents->peek<T>(iterator, length, flags);
     }
 
@@ -144,7 +145,7 @@ class INET_API ChunkQueue : public cNamedObject
      * length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    Ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
+    Ptr<const T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
@@ -154,7 +155,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the current representation. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<Chunk> peekAll(int flags = 0) const {
+    Ptr<const Chunk> peekAll(int flags = 0) const {
         return peekAt(bit(0), getLength(), flags);
     }
 
@@ -162,7 +163,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bits. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<BitsChunk> peekAllBits(int flags = 0) const {
+    Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
         return peekAt<BitsChunk>(bit(0), getLength(), flags);
     }
 
@@ -170,7 +171,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bytes. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    Ptr<BytesChunk> peekAllBytes(int flags = 0) const {
+    Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
         return peekAt<BytesChunk>(bit(0), getLength(), flags);
     }
     //@}
@@ -182,7 +183,7 @@ class INET_API ChunkQueue : public cNamedObject
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    Ptr<Chunk> pop(bit length = bit(-1), int flags = 0);
+    Ptr<const Chunk> pop(bit length = bit(-1), int flags = 0);
 
     /**
      * Pops the designated data from the head of the queue and returns it as
@@ -191,7 +192,7 @@ class INET_API ChunkQueue : public cNamedObject
      * internal representation.
      */
     template <typename T>
-    Ptr<T> pop(bit length = bit(-1), int flags = 0) {
+    Ptr<const T> pop(bit length = bit(-1), int flags = 0) {
         const auto& chunk = peek<T>(length, flags);
         if (chunk != nullptr)
             moveIteratorOrRemove(chunk->getChunkLength());
@@ -209,7 +210,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Inserts the provided chunk at the tail of the queue.
      */
-    void push(const Ptr<Chunk>& chunk);
+    void push(const Ptr<const Chunk>& chunk);
     //@}
 
     /**

@@ -72,14 +72,14 @@ class INET_API BytesChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BYTES; }
     virtual bit getChunkLength() const override { return byte(bytes.size()); }
 
-    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override;
-    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
 
-    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
-    virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromBeginning(bit length) const override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(bit length) const override { return bit(length).get() % 8 == 0; }
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;

@@ -99,7 +99,7 @@ void BitCountChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
     handleChange();
-    const auto& bitCountChunk = std::static_pointer_cast<BitCountChunk>(chunk);
+    const auto& bitCountChunk = std::static_pointer_cast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 
@@ -107,7 +107,7 @@ void BitCountChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
     handleChange();
-    const auto& bitCountChunk = std::static_pointer_cast<BitCountChunk>(chunk);
+    const auto& bitCountChunk = std::static_pointer_cast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 

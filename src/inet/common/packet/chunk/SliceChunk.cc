@@ -94,41 +94,41 @@ void SliceChunk::setLength(bit length)
     this->length = length;
 }
 
-bool SliceChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
-        const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+        const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length;
     }
     else
         return false;
 }
 
-bool SliceChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
-        const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+        const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset;
     }
     else
         return false;
 }
 
-void SliceChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void SliceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
-    const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+    const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
     offset -= otherSliceChunk->length;
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void SliceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
-    const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+    const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
     length += otherSliceChunk->length;
 }

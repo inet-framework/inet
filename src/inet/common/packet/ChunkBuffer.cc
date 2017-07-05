@@ -91,24 +91,18 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         // consecutive regions
         if (previousRegion.data->canInsertAtEnd(nextRegion.data)) {
             // merge into previous
-            if (previousRegion.data.use_count() == 1)
-                previousRegion.data->markMutableIfExclusivelyOwned();
-            else
-                previousRegion.data = previousRegion.data->dupShared();
-            previousRegion.data->insertAtEnd(nextRegion.data);
-            previousRegion.data = previousRegion.data->simplify();
-            previousRegion.data->markImmutable();
+            const auto& newData = makeExclusivelyOwnedMutableChunk(previousRegion.data);
+            newData->insertAtEnd(nextRegion.data);
+            newData->markImmutable();
+            previousRegion.data = newData->simplify();
             nextRegion.data = nullptr;
         }
         else if (nextRegion.data->canInsertAtBeginning(previousRegion.data)) {
             // merge into next
-            if (nextRegion.data.use_count() == 1)
-                nextRegion.data->markMutableIfExclusivelyOwned();
-            else
-                nextRegion.data = nextRegion.data->dupShared();
-            nextRegion.data->insertAtBeginning(previousRegion.data);
-            nextRegion.data = nextRegion.data->simplify();
-            nextRegion.data->markImmutable();
+            const auto& newData = makeExclusivelyOwnedMutableChunk(nextRegion.data);
+            newData->insertAtBeginning(previousRegion.data);
+            newData->markImmutable();
+            nextRegion.data = newData->simplify();
             nextRegion.offset = previousRegion.offset;
             previousRegion.data = nullptr;
         }
@@ -124,7 +118,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
     }
 }
 
-void ChunkBuffer::replace(bit offset, const Ptr<Chunk>& chunk)
+void ChunkBuffer::replace(bit offset, const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(offset >= bit(0), "offset is invalid");
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");

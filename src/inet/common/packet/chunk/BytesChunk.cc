@@ -94,29 +94,29 @@ void BytesChunk::copyFromBuffer(const uint8_t *buffer, size_t bufferLength)
     bytes.assign(buffer, buffer + bufferLength);
 }
 
-bool BytesChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-bool BytesChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-void BytesChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void BytesChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
-    const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
+    const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void BytesChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
-    const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
+    const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 

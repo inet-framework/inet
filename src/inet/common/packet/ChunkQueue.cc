@@ -18,7 +18,7 @@
 
 namespace inet {
 
-ChunkQueue::ChunkQueue(const char *name, const Ptr<Chunk>& contents) :
+ChunkQueue::ChunkQueue(const char *name, const Ptr<const Chunk>& contents) :
     cNamedObject(name),
     contents(contents),
     iterator(Chunk::ForwardIterator(bit(0), 0))
@@ -38,9 +38,10 @@ void ChunkQueue::remove(bit length)
     if (contents->getChunkLength() == length)
         contents = EmptyChunk::singleton;
     else if (contents->canRemoveFromBeginning(length)) {
-        contents = makeExclusivelyOwnedMutableChunk(contents);
-        contents->removeFromBeginning(length);
-        contents->markImmutable();
+        const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
+        newContents->removeFromBeginning(length);
+        newContents->markImmutable();
+        contents = newContents;
     }
     else
         contents = contents->peek(length, contents->getChunkLength() - length);
@@ -56,20 +57,20 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
         remove(iterator.getPosition());
 }
 
-Ptr<Chunk> ChunkQueue::peek(bit length, int flags) const
+Ptr<const Chunk> ChunkQueue::peek(bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     return contents->peek(iterator, length, flags);
 }
 
-Ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
+Ptr<const Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
-Ptr<Chunk> ChunkQueue::pop(bit length, int flags)
+Ptr<const Chunk> ChunkQueue::pop(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     const auto& chunk = peek(length, flags);
@@ -85,7 +86,7 @@ void ChunkQueue::clear()
     contents = EmptyChunk::singleton;
 }
 
-void ChunkQueue::push(const Ptr<Chunk>& chunk)
+void ChunkQueue::push(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
@@ -94,18 +95,19 @@ void ChunkQueue::push(const Ptr<Chunk>& chunk)
         contents = chunk;
     else {
         if (contents->canInsertAtEnd(chunk)) {
-            contents = makeExclusivelyOwnedMutableChunk(contents);
-            contents->insertAtEnd(chunk);
-            contents = contents->simplify();
+            const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
+            newContents->insertAtEnd(chunk);
+            newContents->markImmutable();
+            contents = newContents->simplify();
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
             sequenceChunk->insertAtEnd(contents);
             sequenceChunk->insertAtEnd(chunk);
+            sequenceChunk->markImmutable();
             contents = sequenceChunk;
             contents->seekIterator(iterator, iterator.getPosition());
         }
-        contents->markImmutable();
     }
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }

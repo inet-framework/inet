@@ -38,13 +38,13 @@ class FieldsChunk : public Chunk
     * the original bytes are also stored here. The serialized representation
     * is deleted if a chunk is modified.
     */
-    const std::vector<uint8_t> *serializedBytes;
+    mutable const std::vector<uint8_t> *serializedBytes;
 
   protected:
     /** @name Field accessor functions */
     //@{
     const std::vector<uint8_t> *getSerializedBytes() const { return serializedBytes; }
-    void setSerializedBytes(const std::vector<uint8_t> *bytes) { CHUNK_CHECK_IMPLEMENTATION(byte(bytes->size()) == chunkLength); this->serializedBytes = bytes; }
+    void setSerializedBytes(const std::vector<uint8_t> *bytes) const { CHUNK_CHECK_IMPLEMENTATION(byte(bytes->size()) == chunkLength); this->serializedBytes = bytes; }
     //@}
 
     virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;

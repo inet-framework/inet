@@ -135,9 +135,9 @@ std::string Chunk::str() const
     return os.str();
 }
 
-void Chunk::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length)
+void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length)
 {
-    Chunk *chunkPointer = chunk.get();
+    const Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = stream.getLength();

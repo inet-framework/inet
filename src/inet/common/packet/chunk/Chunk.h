@@ -458,22 +458,22 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const Ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Removing data related functions */
@@ -481,12 +481,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromBeginning(bit length) { return false; }
+    virtual bool canRemoveFromBeginning(bit length) const { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromEnd(bit length) { return false; }
+    virtual bool canRemoveFromEnd(bit length) const { return false; }
 
     /**
      * Removes the requested part from the beginning of this chunk and returns.
@@ -577,7 +577,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
+    static void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be

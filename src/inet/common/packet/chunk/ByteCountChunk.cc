@@ -85,29 +85,29 @@ void ByteCountChunk::setData(uint8_t data)
     this->data = data;
 }
 
-bool ByteCountChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-bool ByteCountChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-void ByteCountChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void ByteCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
-    const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
+    const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void ByteCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
-    const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
+    const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 

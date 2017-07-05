@@ -28,7 +28,7 @@ SequenceChunk::SequenceChunk(const SequenceChunk& other) :
 {
 }
 
-SequenceChunk::SequenceChunk(const std::deque<Ptr<Chunk>>& chunks) :
+SequenceChunk::SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks) :
     Chunk(),
     chunks(chunks)
 {
@@ -37,7 +37,7 @@ SequenceChunk::SequenceChunk(const std::deque<Ptr<Chunk>>& chunks) :
 void SequenceChunk::forEachChild(cVisitor *v)
 {
     for (const auto& chunk : chunks)
-        v->visit(chunk.get());
+        v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
 Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
@@ -57,7 +57,8 @@ Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter c
     }
     // 3. peeking a part represented by an element chunk with its index returns that element chunk
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
-        const auto& chunk = getElementChunk(iterator);
+        // KLUDGE: TODO: std::const_pointer_cast<Chunk>
+        const auto& chunk = std::const_pointer_cast<Chunk>(getElementChunk(iterator));
         if (length == bit(-1) || chunk->getChunkLength() == length) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
@@ -66,7 +67,8 @@ Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter c
     // 4. peeking a part represented by an element chunk returns that element chunk
     bit position = bit(0);
     for (size_t i = 0; i < chunks.size(); i++) {
-        const auto& chunk = chunks[getElementIndex(iterator.isForward(), i)];
+        // KLUDGE: TODO: std::const_pointer_cast<Chunk>
+        const auto& chunk = std::const_pointer_cast<Chunk>(chunks[getElementIndex(iterator.isForward(), i)]);
         bit chunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
         if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength())) {
@@ -93,15 +95,15 @@ Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr
     return sequenceChunk;
 }
 
-std::deque<Ptr<Chunk>> SequenceChunk::dupChunks() const
+std::deque<Ptr<const Chunk>> SequenceChunk::dupChunks() const
 {
-    std::deque<Ptr<Chunk>> copies;
+    std::deque<Ptr<const Chunk>> copies;
     for (const auto& chunk : chunks)
         copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
     return copies;
 }
 
-void SequenceChunk::setChunks(const std::deque<Ptr<Chunk>>& chunks)
+void SequenceChunk::setChunks(const std::deque<Ptr<const Chunk>>& chunks)
 {
     handleChange();
     this->chunks = chunks;
@@ -121,7 +123,7 @@ void SequenceChunk::markImmutable()
 {
     Chunk::markImmutable();
     for (const auto& chunk : chunks)
-        chunk->markImmutable();
+        std::const_pointer_cast<Chunk>(chunk)->markImmutable();
 }
 
 bool SequenceChunk::isIncomplete() const
@@ -198,28 +200,25 @@ void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
         iterator.setIndex(-1);
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<Chunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_front(chunk);
     else {
-        auto& firstChunk = chunks.front();
+        const auto& firstChunk = chunks.front();
         if (!firstChunk->canInsertAtBeginning(chunk))
             chunks.push_front(chunk);
         else {
-            if (firstChunk.use_count() == 1)
-                firstChunk->markMutableIfExclusivelyOwned();
-            else
-                firstChunk = firstChunk->dupShared();
-            firstChunk->insertAtBeginning(chunk);
-            firstChunk->markImmutable();
-            chunks.front() = firstChunk->simplify();
+            const auto& mutableFirstChunk = makeExclusivelyOwnedMutableChunk(firstChunk);
+            mutableFirstChunk->insertAtBeginning(chunk);
+            mutableFirstChunk->markImmutable();
+            chunks.front() = mutableFirstChunk->simplify();
         }
     }
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -244,48 +243,45 @@ void SequenceChunk::doInsertToBeginning(const Ptr<SliceChunk>& sliceChunk)
         }
     }
     else
-        doInsertToBeginning(std::static_pointer_cast<Chunk>(sliceChunk));
+        doInsertToBeginning(std::static_pointer_cast<const Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<const SequenceChunk>& chunk)
 {
     for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
         doInsertToBeginning(*it);
 }
 
-void SequenceChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void SequenceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
+        doInsertToBeginning(std::static_pointer_cast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToBeginning(std::static_pointer_cast<SequenceChunk>(chunk));
+        doInsertToBeginning(std::static_pointer_cast<const SequenceChunk>(chunk));
     else
         doInsertToBeginning(chunk);
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<Chunk>& chunk)
+void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_back(chunk);
     else {
-        auto& lastChunk = chunks.back();
+        const auto& lastChunk = chunks.back();
         if (!lastChunk->canInsertAtEnd(chunk))
             chunks.push_back(chunk);
         else {
-            if (lastChunk.use_count() == 1)
-                lastChunk->markMutableIfExclusivelyOwned();
-            else
-                lastChunk = lastChunk->dupShared();
-            lastChunk->insertAtEnd(chunk);
-            lastChunk->markImmutable();
-            chunks.back() = lastChunk->simplify();
+            const auto& mutableLastChunk = makeExclusivelyOwnedMutableChunk(lastChunk);
+            mutableLastChunk->insertAtEnd(chunk);
+            mutableLastChunk->markImmutable();
+            chunks.back() = mutableLastChunk->simplify();
         }
     }
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -309,22 +305,22 @@ void SequenceChunk::doInsertToEnd(const Ptr<SliceChunk>& sliceChunk)
         }
     }
     else
-        doInsertToEnd(std::static_pointer_cast<Chunk>(sliceChunk));
+        doInsertToEnd(std::static_pointer_cast<const Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToEnd(const Ptr<const SequenceChunk>& chunk)
 {
     for (const auto& elementChunk : chunk->chunks)
         doInsertToEnd(elementChunk);
 }
 
-void SequenceChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void SequenceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
+        doInsertToEnd(std::static_pointer_cast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToEnd(std::static_pointer_cast<SequenceChunk>(chunk));
+        doInsertToEnd(std::static_pointer_cast<const SequenceChunk>(chunk));
     else
         doInsertToEnd(chunk);
 }

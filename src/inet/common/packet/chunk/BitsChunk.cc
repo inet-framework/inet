@@ -83,29 +83,29 @@ void BitsChunk::setBit(int index, bool bit)
     bits[index] = bit;
 }
 
-bool BitsChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
+bool BitsChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-bool BitsChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
+bool BitsChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-void BitsChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void BitsChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();
-    const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
+    const auto& bitsChunk = std::static_pointer_cast<const BitsChunk>(chunk);
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void BitsChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();
-    const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
+    const auto& bitsChunk = std::static_pointer_cast<const BitsChunk>(chunk);
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 

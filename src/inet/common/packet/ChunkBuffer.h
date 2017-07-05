@@ -51,13 +51,13 @@ class INET_API ChunkBuffer : public cNamedObject
          * This chunk is always immutable to allow arbitrary peeking. Nevertheless
          * it's reused if possible to allow efficient merging with newly added chunks.
          */
-        Ptr<Chunk> data;
+        Ptr<const Chunk> data;
 
       protected:
-        Chunk *getData() const { return data.get(); } // only for class descriptor
+        const Chunk *getData() const { return data.get(); } // only for class descriptor
 
       public:
-        Region(bit offset, const Ptr<Chunk>& data) : offset(offset), data(data) { }
+        Region(bit offset, const Ptr<const Chunk>& data) : offset(offset), data(data) { }
         Region(const Region& other) : offset(other.offset), data(other.data) { }
 
         bit getStartOffset() const { return offset; }
@@ -74,6 +74,17 @@ class INET_API ChunkBuffer : public cNamedObject
     std::vector<Region> regions;
 
   protected:
+    template <typename T>
+    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk) const {
+        if (chunk.use_count() == 1) {
+            // KLUDGE: TODO: factor out
+            const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
+            return std::const_pointer_cast<T>(chunk);
+        }
+        else
+            return std::static_pointer_cast<T>(chunk->dupShared());
+    }
+
     Region *getRegion(int i) const { return const_cast<Region *>(&regions[i]); } // only for class descriptor
 
     void eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end);
@@ -119,7 +130,7 @@ class INET_API ChunkBuffer : public cNamedObject
     /**
      * Returns the data of the given region in its current representation.
      */
-    const Ptr<Chunk>& getRegionData(int index) const { return regions.at(index).data; }
+    const Ptr<const Chunk>& getRegionData(int index) const { return regions.at(index).data; }
     //@}
 
     /**
@@ -128,7 +139,7 @@ class INET_API ChunkBuffer : public cNamedObject
      * merged with the provided chunk.
      */
     // TODO: add flag to decide between keeping or overwriting old data when replacing with new data
-    void replace(bit offset, const Ptr<Chunk>& chunk);
+    void replace(bit offset, const Ptr<const Chunk>& chunk);
 
     /**
      * Erases the stored data at the provided offset and length.
