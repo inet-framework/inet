@@ -36,6 +36,7 @@
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -238,6 +239,8 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
     //
 
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
+    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
 
     if (!verifyCrc(ipv4Header)) {
         EV_WARN << "CRC error found, drop packet\n";
@@ -278,10 +281,9 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
 
 Packet *IPv4::prepareForForwarding(Packet *packet) const
 {
-    packet->removePoppedChunks();
-    const auto& ipv4Header = packet->removeHeader<IPv4Header>();
+    const auto& ipv4Header = removeNetworkProtocolHeader<IPv4Header>(packet);
     ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
-    packet->insertHeader(ipv4Header);
+    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     return packet;
 }
 
@@ -700,8 +702,6 @@ void IPv4::decapsulate(Packet *packet)
     auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getTransportProtocol());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
-    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(ipv4Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv4Header->getDestAddress());
@@ -711,13 +711,11 @@ void IPv4::decapsulate(Packet *packet)
 void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
     L3Address nextHop(nextHopAddr);
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     // fill in source address
-    if (ipv4Header->getSrcAddress().isUnspecified()) {
-        auto ipv4HeaderCopy = packet->removeHeader<IPv4Header>();
-        ipv4HeaderCopy->setSrcAddress(destIe->ipv4Data()->getIPAddress());
-        ipv4HeaderCopy->markImmutable();
-        packet->pushHeader(ipv4HeaderCopy);
+    if (packet->peekHeader<IPv4Header>()->getSrcAddress().isUnspecified()) {
+        auto ipv4Header = removeNetworkProtocolHeader<IPv4Header>(packet);
+        ipv4Header->setSrcAddress(destIe->ipv4Data()->getIPAddress());
+        insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
     if (datagramPostRoutingHook(packet, getSourceInterfaceFrom(packet), destIe, nextHop) == INetfilter::IHook::ACCEPT)
         fragmentAndSend(packet, destIe, nextHop.toIPv4());
@@ -727,7 +725,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 {
     if (crcMode == CRC_COMPUTED) {
         packet->removePoppedHeaders();
-        const auto& ipv4Header = packet->removeHeader<IPv4Header>();
+        const auto& ipv4Header = removeNetworkProtocolHeader<IPv4Header>(packet);
         ipv4Header->setCrc(0);
         MemoryOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
@@ -739,8 +737,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         // 2. compute the CRC
         uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
         ipv4Header->setCrc(crc);
-        ipv4Header->markImmutable();
-        packet->pushHeader(ipv4Header);
+        insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
 
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
@@ -909,9 +906,7 @@ void IPv4::encapsulate(Packet *transportPacket)
         default:
             throw cRuntimeError("Unknown CRC mode");
     }
-    ipv4Header->markImmutable();
-    transportPacket->pushHeader(ipv4Header);
-    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
     // setting IPv4 options is currently not supported
 }
 
@@ -1024,7 +1019,6 @@ void IPv4::sendPacketToNIC(Packet *packet, const InterfaceEntry *ie)
 {
     EV_INFO << "Sending " << packet << " to output interface = " << ie->getName() << ".\n";
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     send(packet, "queueOut");

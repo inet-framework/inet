@@ -27,6 +27,7 @@
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
@@ -161,6 +162,8 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     }
 
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
+    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
 
     L3Address nextHop;
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
@@ -208,9 +211,9 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
             datagram->removePoppedHeaders();
-            const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+            const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
             newHeader->setSourceAddress(destAddr); // allows two apps on the same host to communicate
-            datagram->insertHeader(newHeader);
+            insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
             header = newHeader;
         }
         numLocalDeliver++;
@@ -261,18 +264,18 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 
     if (!fromHL) {
         datagram->removePoppedHeaders();
-        const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+        const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
         newHeader->setHopLimit(header->getHopLimit() - 1);
-        datagram->insertHeader(newHeader);
+        insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
         header = newHeader;
     }
 
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified()) {
         datagram->removePoppedHeaders();
-        const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+        const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
         newHeader->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
-        datagram->insertHeader(newHeader);
+        insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
         header = newHeader;
     }
 
@@ -488,9 +491,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 
     delete transportPacket->removeControlInfo();
 
-    header->markImmutable();
-    transportPacket->pushHeader(header);
-    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+    insertNetworkProtocolHeader(transportPacket, Protocol::gnp, header);
 }
 
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)

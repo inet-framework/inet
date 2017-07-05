@@ -28,6 +28,7 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
@@ -216,6 +217,8 @@ void IPv6::endService(cPacket *msg)
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
         auto ipv6Header = packet->peekHeader<IPv6Header>();
+        packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
+        packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
@@ -371,9 +374,9 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
         packet->removePoppedChunks();
-        auto newIpv6Header = packet->removeHeader<IPv6Header>();
+        const auto& newIpv6Header = removeNetworkProtocolHeader<IPv6Header>(packet);
         newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
-        packet->insertHeader(newIpv6Header);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         ipv6Header = newIpv6Header;
     }
 
@@ -510,9 +513,9 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         // TBD: in IPv4, arrange TTL check like this
         // KLUDGE: TODO
         packet->removePoppedChunks();
-        const auto& newIpv6Header = packet->removeHeader<IPv6Header>();
+        const auto& newIpv6Header = removeNetworkProtocolHeader<IPv6Header>(packet);
         newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
-        packet->insertHeader(newIpv6Header);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         ipv6Header = newIpv6Header;
     }
 
@@ -783,9 +786,7 @@ void IPv6::encapsulate(Packet *transportPacket)
 
     ipv6Header->setChunkLength(byte(ipv6Header->calculateHeaderByteLength()));
     transportPacket->removePoppedHeaders();
-    transportPacket->insertHeader(ipv6Header);
-
-    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+    insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
     // setting IP options is currently not supported
 }
 
@@ -893,7 +894,6 @@ void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, co
     packet->removeTag<DispatchProtocolReq>();         // send to NIC
     packet->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     send(packet, "queueOut");
 }
