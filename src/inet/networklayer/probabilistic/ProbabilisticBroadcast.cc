@@ -293,7 +293,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     pkt->setFinalDestAddr(broadcastAddress);
     pkt->setAppTtl(timeToLive);
     pkt->setId(getNextID());
-    pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocol(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     // clean-up
     delete controlInfo;
 
@@ -343,8 +343,8 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
 void ProbabilisticBroadcast::decapsulate(Packet *packet)
 {
     auto macHeader = packet->popHeader<ProbabilisticBroadcastHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(macHeader->getTransportProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(macHeader->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(macHeader->getProtocol());
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(macHeader->getProtocol());
     packet->ensureTag<L3AddressInd>()->setSrcAddress(macHeader->getSrcAddr());
 }
 

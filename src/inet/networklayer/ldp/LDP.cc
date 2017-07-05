@@ -1198,7 +1198,7 @@ bool LDP::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 {
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     IPv4Address destAddr = ipv4Header->getDestAddress();
-    int protocol = ipv4Header->getTransportProtocol();
+    int protocol = ipv4Header->getProtocolId();
 
     // never match and always route via L3 if:
 

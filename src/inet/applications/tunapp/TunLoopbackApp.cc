@@ -70,8 +70,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
             throw cRuntimeError("Cannot handle packet");
 
         const auto& networkHeader = removeNetworkProtocolHeader(packet, networkProtocol);
-        // TODO: generalize protocol group, because it's not necessarily ipprotocol
-        const auto& transportProtocol = *ProtocolGroup::ipprotocol.getProtocol(networkHeader->getTransportProtocol());
+        const auto& transportProtocol = *networkHeader->getProtocol();
         const auto& transportHeader = removeTransportProtocolHeader(packet, transportProtocol);
 
         transportHeader->setDestinationPort(transportHeader->getSourcePort());

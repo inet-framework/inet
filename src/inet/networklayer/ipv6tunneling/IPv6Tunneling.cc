@@ -365,13 +365,13 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
     auto ipv6Header = packet->peekHeader<IPv6Header>();
     int vIfIndex = -1;
 
-    if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6EXT_MOB) {
+    if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB) {
         // only look at non-split tunnel
         // (HoTI is only sent over HA tunnel)
         vIfIndex = doPrefixMatch(ipv6Header->getDestAddress());
     }
 
-    if ((ipv6Header->getTransportProtocol() != IP_PROT_IPv6EXT_MOB) || (vIfIndex == -1)) {
+    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB) || (vIfIndex == -1)) {
         // look up all tunnels for dgram's destination
         vIfIndex = getVIfIndexForDest(ipv6Header->getDestAddress());
         //EV << "looked up again!" << endl;
@@ -414,7 +414,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 
         // get rid of the encapsulation of the IPv6 module
         packet->popHeader<IPv6Header>();
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
             // construct Type 2 Routing Header (RFC 3775 - 6.4.1)
@@ -512,7 +512,7 @@ void IPv6Tunneling::decapsulateDatagram(Packet *packet)
     // The following code is used for triggering RO to a CN
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (rt->isMobileNode() && (srcAddr == ie->ipv6Data()->getHomeAgentAddress())
-        && (ipv6Header->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
+        && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
     {
         EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
         xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);

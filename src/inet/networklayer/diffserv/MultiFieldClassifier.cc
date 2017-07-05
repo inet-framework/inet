@@ -52,7 +52,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *dat
         return false;
     if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
         return false;
-    int dgramProtocol = datagram->getTransportProtocol();
+    int dgramProtocol = datagram->getProtocolId();
     if (protocol >= 0 && dgramProtocol != protocol)
         return false;
     if (tosMask != 0 && (tos & tosMask) != (datagram->getTypeOfService() & tosMask))
@@ -92,7 +92,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *dat
         return false;
     if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
         return false;
-    int dgramProtocol = datagram->getTransportProtocol();
+    int dgramProtocol = datagram->getProtocolId();
     if (protocol >= 0 && dgramProtocol != protocol)
         return false;
     if (tosMask != 0 && (tos & tosMask) != (datagram->getTrafficClass() & tosMask))

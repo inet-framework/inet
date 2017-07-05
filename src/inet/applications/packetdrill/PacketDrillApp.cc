@@ -589,7 +589,7 @@ void PacketDrillApp::closeAllSockets()
     datagram->setIdentification(0);
     datagram->setVersion(4);
     datagram->setHeaderLength(20);
-    datagram->setTransportProtocol(IPPROTO_SCTP);
+    datagram->setProtocolId(IPPROTO_SCTP);
     datagram->setTimeToLive(32);
     datagram->setMoreFragments(0);
     datagram->setDontFragment(0);
@@ -1547,7 +1547,7 @@ bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liv
     if (!(storedDatagram->getDestAddress() == liveDatagram->getDestAddress())) {
         return false;
     }
-    if (!(storedDatagram->getTransportProtocol() == liveDatagram->getTransportProtocol())) {
+    if (!(storedDatagram->getProtocolId() == liveDatagram->getProtocolId())) {
         return false;
     }
     if (!(storedDatagram->getTimeToLive() == liveDatagram->getTimeToLive())) {
@@ -1571,7 +1571,7 @@ bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liv
     if (!(storedDatagram->getHeaderLength() == liveDatagram->getHeaderLength())) {
         return false;
     }
-    switch (storedDatagram->getTransportProtocol()) {
+    switch (storedDatagram->getProtocolId()) {
         case IP_PROT_UDP: {
             UdpHeader *storedUdp = check_and_cast<UdpHeader *>(storedDatagram->getEncapsulatedPacket());
             UdpHeader *liveUdp = check_and_cast<UdpHeader *>(liveDatagram->getEncapsulatedPacket());
@@ -1606,7 +1606,7 @@ bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liv
             delete liveSctp;
             break;
         }
-        default: EV_INFO << "Transport protocol %d is not supported yet" << storedDatagram->getTransportProtocol();
+        default: EV_INFO << "Transport protocol %d is not supported yet" << storedDatagram->getProtocolId();
     }
     return true;
 }

@@ -387,7 +387,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
 #ifdef WITH_xMIPv6
     // tunneling support - CB
     // check if destination is covered by tunnel lists
-    if ((ipv6Header->getTransportProtocol() != IP_PROT_IPv6) &&    // if datagram was already tunneled, don't tunnel again
+    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) &&    // if datagram was already tunneled, don't tunnel again
         (ipv6Header->getExtensionHeaderArraySize() == 0) &&    // we do not already have extension headers - FIXME: check for RH2 existence
         ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) ||    // for MNs: only if source address is a HoA // 27.08.07 - CB
          rt->isHomeAgent() ||    // but always check for tunnel if node is a HA
@@ -395,7 +395,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         )
         )
     {
-        if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6EXT_MOB)
+        if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
             // as T2RH or HoA Opt. are not allowed with these messages
             interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL); // 10.06.08 - CB
@@ -639,7 +639,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 #endif /* WITH_xMIPv6 */
 
     auto origPacket = packet->dup();
-    int protocol = ipv6Header->getTransportProtocol();
+    int protocol = ipv6Header->getProtocolId();
     decapsulate(packet);
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
@@ -719,8 +719,8 @@ void IPv6::decapsulate(Packet *packet)
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ipv6Header->getProtocol());
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
@@ -774,7 +774,7 @@ void IPv6::encapsulate(Packet *transportPacket)
 
     ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
-    ipv6Header->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv6Header->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
     auto extHeadersTag = transportPacket->removeTag<IPv6ExtHeaderReq>();

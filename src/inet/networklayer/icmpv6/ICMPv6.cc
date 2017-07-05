@@ -74,7 +74,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
         // ICMP errors are delivered to the appropriate higher layer protocols
         EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
         const auto& bogusIpv6Header = packet->peekDataAt<IPv6Header>(icmpv6msg->getChunkLength());
-        int transportProtocol = bogusIpv6Header->getTransportProtocol();
+        int transportProtocol = bogusIpv6Header->getProtocolId();
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
             errorOut(icmpv6msg);
@@ -302,7 +302,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     }
 
     // do not reply with error message to error message
-    if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6_ICMP) {
+    if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP) {
         auto recICMPMsg = packet->peekDataAt<ICMPv6Header>(ipv6Header->getChunkLength());
         if (recICMPMsg->getType() < 128) {
             EV_INFO << "ICMP error received -- do not reply to it" << endl;

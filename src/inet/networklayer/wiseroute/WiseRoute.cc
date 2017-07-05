@@ -264,7 +264,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
@@ -354,8 +354,8 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 void WiseRoute::decapsulate(Packet *packet)
 {
     auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(wiseRouteHeader->getTransportProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(wiseRouteHeader->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(wiseRouteHeader->getProtocol());
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(wiseRouteHeader->getProtocol());
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->ensureTag<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
     nbHops = nbHops + wiseRouteHeader->getNbHops();

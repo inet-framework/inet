@@ -20,6 +20,7 @@
 
 #include <list>
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/ipv6/IPv6Header_m.h"
 
 namespace inet {
@@ -131,6 +132,8 @@ class INET_API IPv6Header : public IPv6Header_Base
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
+    virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);

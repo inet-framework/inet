@@ -1478,7 +1478,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         const auto& datagram = std::make_shared<IPv4Header>();
         datagram->setDestAddress(multGroup);
         datagram->setSrcAddress(multOrigin);
-        datagram->setTransportProtocol(IP_PROT_PIM);
+        datagram->setProtocolId(IP_PROT_PIM);
         datagram->setHeaderLength(IP_HEADER_BYTES);
         datagram->setTotalLengthField(IP_HEADER_BYTES);
         datagram->markImmutable();
@@ -1589,7 +1589,7 @@ void PIMSM::forwardMulticastData(Packet *data, int outInterfaceId)
     const auto& datagram = data->popHeader<IPv4Header>();
 
     // set control info
-    data->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    data->ensureTag<PacketProtocolTag>()->setProtocol(datagram->getProtocol());
     data->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     // XXX data->ensureTag<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
     data->ensureTag<L3AddressReq>()->setDestAddress(datagram->getDestAddress());

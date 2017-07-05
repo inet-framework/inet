@@ -289,7 +289,7 @@ void SCTPNatHook::sendBackError(IPv4Header *dgram)
     dgram->setDestAddress(dgram->getSrcAddress());
     if (!tmpaddr.isUnspecified())
         dgram->setSrcAddress(tmpaddr);
-    dgram->setTransportProtocol(IP_PROT_SCTP);
+    dgram->setProtocolId(IP_PROT_SCTP);
     delete oldmsg;
 }
 

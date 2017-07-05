@@ -433,8 +433,8 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
     }
 
     // attach control info
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(header->getTransportProtocol()));
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(header->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(header->getProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(header->getProtocol());
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
@@ -452,7 +452,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
     L3Address dest = l3AddressReq->getDestAddress();
     delete l3AddressReq;
 
-    header->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    header->setProtocol(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol());
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
@@ -497,7 +497,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
-    int protocol = header->getTransportProtocol();
+    int protocol = header->getProtocolId();
     decapsulate(packet);
     // deliver to sockets
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);

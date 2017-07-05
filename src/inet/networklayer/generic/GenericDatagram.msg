@@ -49,7 +49,7 @@ class GenericDatagramHeader extends NetworkHeaderBase
     @customize(true);
     L3Address srcAddr;
     L3Address destAddr;
-    int transportProtocol @override @enum(IPProtocolId) = IP_PROT_NONE;
+    int protocolId @override @enum(IPProtocolId) = IP_PROT_NONE;
     short hopLimit;
     TLVOptions tlvOptions;
 }

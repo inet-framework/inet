@@ -261,8 +261,8 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
 void Flood::decapsulate(Packet *packet)
 {
     auto floodHeader = packet->popHeader<FloodHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodHeader->getTransportProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodHeader->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(floodHeader->getProtocol());
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(floodHeader->getProtocol());
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     auto addressInd = packet->ensureTag<L3AddressInd>();
     addressInd->setSrcAddress(floodHeader->getSourceAddress());
@@ -301,7 +301,7 @@ void Flood::encapsulate(Packet *appPkt)
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(appPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+        pkt->setProtocol(appPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol());
         netwAddr = addressReq->getDestAddress();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;

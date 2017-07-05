@@ -19,6 +19,7 @@
 #define __INET_IPV4DATAGRAM_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/ipv4/IPv4Header_m.h"
 
 namespace inet {
@@ -101,6 +102,8 @@ class INET_API IPv4Header : public IPv4Header_Base
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv4()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv4()); }
+    virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

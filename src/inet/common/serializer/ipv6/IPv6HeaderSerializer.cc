@@ -57,7 +57,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     ip6h.ip6_flow = htonl(flowinfo);
     ip6h.ip6_hlim = htons(dgram->getHopLimit());
 
-    ip6h.ip6_nxt = dgram->getExtensionHeaderArraySize() != 0 ? dgram->getExtensionHeader(0)->getExtensionType() : dgram->getTransportProtocol();
+    ip6h.ip6_nxt = dgram->getExtensionHeaderArraySize() != 0 ? dgram->getExtensionHeader(0)->getExtensionType() : dgram->getProtocolId();
 
     for (i = 0; i < 4; i++) {
         ip6h.ip6_src.__u6_addr.__u6_addr32[i] = htonl(dgram->getSrcAddress().words()[i]);
@@ -73,7 +73,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     //FIXME serialize extension headers
     for (i = 0; i < dgram->getExtensionHeaderArraySize(); i++) {
         const IPv6ExtensionHeader *extHdr = dgram->getExtensionHeader(i);
-        stream.writeByte(i + 1 < dgram->getExtensionHeaderArraySize() ? dgram->getExtensionHeader(i + 1)->getExtensionType() : dgram->getTransportProtocol());
+        stream.writeByte(i + 1 < dgram->getExtensionHeaderArraySize() ? dgram->getExtensionHeader(i + 1)->getExtensionType() : dgram->getProtocolId());
         ASSERT((extHdr->getByteLength() & 7) == 0);
         stream.writeByte((extHdr->getByteLength() - 8) / 8);
         switch (extHdr->getExtensionType()) {
@@ -134,7 +134,7 @@ const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
     flowinfo >>= 20;
     dest->setTrafficClass(flowinfo & 0xFF);
 
-    dest->setTransportProtocol(ip6h.ip6_nxt);
+    dest->setProtocolId(ip6h.ip6_nxt);
     dest->setHopLimit(ntohs(ip6h.ip6_hlim));
 
     IPv6Address temp;

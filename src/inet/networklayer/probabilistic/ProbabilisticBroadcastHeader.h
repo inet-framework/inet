@@ -18,6 +18,7 @@
 #ifndef __INET_ProbabilisticBroadcastHeader_H
 #define __INET_ProbabilisticBroadcastHeader_H
 
+#include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
@@ -40,6 +41,8 @@ class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeade
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
     virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
+    virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

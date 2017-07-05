@@ -32,5 +32,5 @@ class FloodHeader extends NetworkHeaderBase
     L3Address     destAddr;
     int           ttl = 1;    // time to live field
     unsigned long seqNum = 0; // sequence number
-    int           transportProtocol @override = -1;
+    int           protocolId @override = -1;
 }

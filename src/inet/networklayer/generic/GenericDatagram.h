@@ -19,6 +19,7 @@
 #define __INET_GENERICDATAGRAM_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
@@ -40,6 +41,8 @@ class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base
     virtual void setSourceAddress(const L3Address& addr) override { setSrcAddr(addr); }
     virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
     virtual void setDestinationAddress(const L3Address& addr) override { setDestAddr(addr); }
+    virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

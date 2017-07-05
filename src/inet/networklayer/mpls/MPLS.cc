@@ -83,14 +83,14 @@ void MPLS::processPacketFromL3(Packet *msg)
     const auto& ipHeader = msg->peekHeader<IPv4Header>();
 
     // XXX temporary solution, until TCPSocket and IPv4 are extended to support nam tracing
-    if (ipHeader->getTransportProtocol() == IP_PROT_TCP) {
+    if (ipHeader->getProtocolId() == IP_PROT_TCP) {
         const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
             ASSERT(!msg->hasPar("color"));
             msg->addPar("color") = LDP_TRAFFIC;
         }
     }
-    else if (ipHeader->getTransportProtocol() == IP_PROT_ICMP) {
+    else if (ipHeader->getProtocolId() == IP_PROT_ICMP) {
         // ASSERT(!msg->hasPar("color")); XXX this did not hold sometimes...
         if (!msg->hasPar("color"))
             msg->addPar("color") = ICMP_TRAFFIC;

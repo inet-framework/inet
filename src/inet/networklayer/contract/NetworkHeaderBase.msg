@@ -19,11 +19,14 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
+
+typedef const Protocol ConstProtocol;
 
 class INET_API NetworkHeaderBase : public FieldsChunk
 {
@@ -34,8 +37,10 @@ class INET_API NetworkHeaderBase : public FieldsChunk
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const L3Address& address) = 0;
-    virtual int getTransportProtocol() const = 0;
-    virtual void setTransportProtocol(int protocol) = 0;
+    virtual int getProtocolId() const = 0;
+    virtual void setProtocolId(int protocol) = 0;
+    virtual ConstProtocol *getProtocol() const = 0;
+    virtual void setProtocol(ConstProtocol *protocol) = 0;
 };
 
 } // namespace inet
@@ -46,6 +51,7 @@ namespace inet;
 
 class FieldsChunk extends cObject;
 class noncobject L3Address;
+class noncobject ConstProtocol;
 
 class NetworkHeaderBase extends FieldsChunk
 {
@@ -53,6 +59,7 @@ class NetworkHeaderBase extends FieldsChunk
 
     L3Address sourceAddress @opaque;
     L3Address destinationAddress @opaque;
-    int transportProtocol;
+    int protocolId;
+    ConstProtocol *protocol;
 };
 

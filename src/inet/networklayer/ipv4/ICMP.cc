@@ -92,7 +92,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     }
 
     // do not reply with error message to error message
-    if (ipv4Header->getTransportProtocol() == IP_PROT_ICMP) {
+    if (ipv4Header->getProtocolId() == IP_PROT_ICMP) {
         const auto& recICMPMsg = packet->peekDataAt<ICMPHeader>(byte(ipv4Header->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
@@ -178,7 +178,7 @@ void ICMP::processICMPMessage(Packet *packet)
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
             const auto& bogusL3Packet = packet->peekDataAt<IPv4Header>(icmpmsg->getChunkLength());
-            int transportProtocol = bogusL3Packet->getTransportProtocol();
+            int transportProtocol = bogusL3Packet->getProtocolId();
             if (transportProtocol == IP_PROT_ICMP) {
                 // received ICMP error answer to an ICMP packet:
                 //FIXME should send up dest unreachable answers to pingapps

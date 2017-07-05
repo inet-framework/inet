@@ -47,7 +47,7 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         ip_off |= IP_DF;
     iphdr.ip_off = htons(ip_off);
     iphdr.ip_ttl = ipv4Header->getTimeToLive();
-    iphdr.ip_p = ipv4Header->getTransportProtocol();
+    iphdr.ip_p = ipv4Header->getProtocolId();
     iphdr.ip_src.s_addr = htonl(ipv4Header->getSrcAddress().getInt());
     iphdr.ip_dst.s_addr = htonl(ipv4Header->getDestAddress().getInt());
     iphdr.ip_len = htons(ipv4Header->getTotalLengthField());
@@ -161,7 +161,7 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv4Header->setHeaderLength(IP_HEADER_BYTES);
     ipv4Header->setSrcAddress(IPv4Address(ntohl(iphdr.ip_src.s_addr)));
     ipv4Header->setDestAddress(IPv4Address(ntohl(iphdr.ip_dst.s_addr)));
-    ipv4Header->setTransportProtocol(iphdr.ip_p);
+    ipv4Header->setProtocolId(iphdr.ip_p);
     ipv4Header->setTimeToLive(iphdr.ip_ttl);
     ipv4Header->setIdentification(ntohs(iphdr.ip_id));
     uint16_t ip_off = ntohs(iphdr.ip_off);

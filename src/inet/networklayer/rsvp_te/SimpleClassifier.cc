@@ -58,7 +58,7 @@ bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std:
     // never label OSPF(TED) and RSVP traffic
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
 
-    switch (ipv4Header->getTransportProtocol()) {
+    switch (ipv4Header->getProtocolId()) {
         case IP_PROT_OSPF:
         case IP_PROT_RSVP:
             return false;

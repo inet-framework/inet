@@ -35,7 +35,7 @@ const Protocol *findTransportProtocol(Packet *packet)
     return transportProtocolInd == nullptr ? nullptr : transportProtocolInd->getProtocol();
 }
 
-const Protocol& getTransportProtocol(Packet *packet)
+const Protocol& getProtocolId(Packet *packet)
 {
     auto protocol = findTransportProtocol(packet);
     if (protocol == nullptr)

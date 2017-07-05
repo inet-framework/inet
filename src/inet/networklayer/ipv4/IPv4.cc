@@ -302,7 +302,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         // check for local delivery
         // Note: multicast routers will receive IGMP datagrams even if their interface is not joined to the group
         if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
-            (rt->isMulticastForwardingEnabled() && ipv4Header->getTransportProtocol() == IP_PROT_IGMP))
+            (rt->isMulticastForwardingEnabled() && ipv4Header->getProtocolId() == IP_PROT_IGMP))
             reassembleAndDeliver(packet->dup(), fromIE);
         else
             EV_WARN << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
@@ -662,7 +662,7 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *from
 {
     auto ipv4HeaderPosition = packet->getHeaderPopOffset();
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
-    int protocol = ipv4Header->getTransportProtocol();
+    int protocol = ipv4Header->getProtocolId();
     decapsulate(packet);
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
@@ -699,7 +699,7 @@ void IPv4::decapsulate(Packet *packet)
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
 
-    auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getTransportProtocol());
+    auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getProtocolId());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
@@ -836,7 +836,7 @@ void IPv4::encapsulate(Packet *transportPacket)
     IPv4Address dest = l3AddressReq->getDestAddress().toIPv4();
     delete l3AddressReq;
 
-    ipv4Header->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv4Header->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;

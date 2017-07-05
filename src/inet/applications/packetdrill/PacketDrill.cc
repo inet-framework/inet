@@ -64,7 +64,7 @@ IPv4Header* PacketDrill::makeIPPacket(int protocol, enum direction_t direction, 
         pdapp->increaseIdOutbound();
     } else
         throw cRuntimeError("Unknown direction type %d", direction);
-    datagram->setTransportProtocol(protocol);
+    datagram->setProtocolId(protocol);
     datagram->setTimeToLive(32);
     datagram->setMoreFragments(0);
     datagram->setDontFragment(0);

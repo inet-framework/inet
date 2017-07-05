@@ -25,7 +25,7 @@
 namespace inet {
 
 const Protocol *findTransportProtocol(Packet *packet);
-const Protocol& getTransportProtocol(Packet *packet);
+const Protocol& getProtocolId(Packet *packet);
 
 const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet);
 const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet);
