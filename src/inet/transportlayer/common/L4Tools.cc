@@ -15,9 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
-
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef WITH_TCP_COMMON
@@ -32,48 +29,70 @@
 
 namespace inet {
 
-const Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet)
+const Protocol *findTransportProtocol(Packet *packet)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    return peekTransportHeader(protocol, packet);
+    auto transportProtocolInd = packet->getTag<TransportProtocolInd>();
+    return transportProtocolInd == nullptr ? nullptr : transportProtocolInd->getProtocol();
 }
 
-const Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
+const Protocol& getTransportProtocol(Packet *packet)
+{
+    auto protocol = findTransportProtocol(packet);
+    if (protocol == nullptr)
+        throw cRuntimeError("Transport protocol not found");
+    else
+        return *protocol;
+}
+
+const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet)
+{
+    auto transportProtocolInd = packet->getTag<TransportProtocolInd>();
+    return transportProtocolInd == nullptr ? nullptr : std::dynamic_pointer_cast<const TransportHeaderBase>(transportProtocolInd->getTransportProtocolHeader());
+}
+
+const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)
+{
+    const auto& header = findTransportProtocolHeader(packet);
+    if (header == nullptr)
+        throw cRuntimeError("Transport protocol header not found");
+    else
+        return header;
+}
+
+const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_TCP_COMMON
-    if (protocol == &Protocol::tcp)
+    if (protocol == Protocol::tcp)
         return packet->peekHeader<tcp::TcpHeader>();
 #endif
 #ifdef WITH_UDP
-    if (protocol == &Protocol::udp)
+    if (protocol == Protocol::udp)
         return packet->peekHeader<UdpHeader>();
 #endif
-
-    //TODO add other L4 protocols
-
-    throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
+    // TODO: add other L4 protocols
+    throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
-const Ptr<TransportHeaderBase> removeTransportHeader(Packet *packet)
+void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<TransportHeaderBase>& header)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    return removeTransportHeader(protocol, packet);
+    auto transportProtocolInd = packet->ensureTag<TransportProtocolInd>();
+    transportProtocolInd->setProtocol(&Protocol::ipv4);
+    transportProtocolInd->setTransportProtocolHeader(header);
+    insertProtocolHeader(packet, protocol, header);
 }
 
-const Ptr<TransportHeaderBase> removeTransportHeader(const Protocol *protocol, Packet *packet)
+const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_TCP_COMMON
-    if (protocol == &Protocol::tcp)
-        return packet->removeHeader<tcp::TcpHeader>();
+    if (protocol == Protocol::tcp)
+        return removeTransportProtocolHeader<tcp::TcpHeader>(packet);
 #endif
 #ifdef WITH_UDP
-    if (protocol == &Protocol::udp)
-        return packet->removeHeader<UdpHeader>();
+    if (protocol == Protocol::udp)
+        return removeTransportProtocolHeader<UdpHeader>(packet);
 #endif
-
-    //TODO add other L4 protocols
-
-    throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
+    // TODO: add other L4 protocols
+    throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
 } // namespace inet

@@ -19,16 +19,30 @@
 #ifndef __INET_L3TOOLS_H
 #define __INET_L3TOOLS_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/Protocol.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/common/ProtocolTools.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
 namespace inet {
-    const Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet);
-    const Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet);
-    const Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet);
-    const Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet);
+
+const Protocol *findNetworkProtocol(Packet *packet);
+const Protocol& getNetworkProtocol(Packet *packet);
+
+const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet);
+const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet);
+
+const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
+
+void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header);
+
+template <typename T>
+const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
+{
+    packet->removeTag<NetworkProtocolInd>();
+    return removeProtocolHeader<T>(packet);
+}
+
+const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
+
 };
 
 #endif    // __INET_L3TOOLS_H

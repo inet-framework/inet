@@ -19,15 +19,30 @@
 #ifndef __INET_L4TOOLS_H
 #define __INET_L4TOOLS_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTools.h"
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 namespace inet {
-    const Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet);
-    const Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet);
-    const Ptr<TransportHeaderBase> removeTransportHeader(Packet *packet);
-    const Ptr<TransportHeaderBase> removeTransportHeader(const Protocol *protocol, Packet *packet);
-};
 
-#endif    // __INET_L4TOOLS_H
+const Protocol *findTransportProtocol(Packet *packet);
+const Protocol& getTransportProtocol(Packet *packet);
+
+const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet);
+const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet);
+
+const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol);
+
+void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<TransportHeaderBase>& header);
+
+template <typename T>
+const Ptr<T> removeTransportProtocolHeader(Packet *packet)
+{
+    packet->removeTag<TransportProtocolInd>();
+    return removeProtocolHeader<T>(packet);
+}
+
+const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, const Protocol& protocol);
+
+}
+
+#endif // __INET_L4TOOLS_H

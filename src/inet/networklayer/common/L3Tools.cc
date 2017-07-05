@@ -15,9 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
-
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 
 #ifdef WITH_IPv4
@@ -32,56 +29,78 @@
 
 namespace inet {
 
-const Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet)
+const Protocol *findNetworkProtocol(Packet *packet)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    return peekNetworkHeader(protocol, packet);
+    auto networkProtocolInd = packet->getTag<NetworkProtocolInd>();
+    return networkProtocolInd == nullptr ? nullptr : networkProtocolInd->getProtocol();
 }
 
-const Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
+const Protocol& getNetworkProtocol(Packet *packet)
+{
+    auto protocol = findNetworkProtocol(packet);
+    if (protocol == nullptr)
+        throw cRuntimeError("Network protocol not found");
+    else
+        return *protocol;
+}
+
+const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet)
+{
+    auto networkProtocolInd = packet->getTag<NetworkProtocolInd>();
+    return networkProtocolInd == nullptr ? nullptr : std::dynamic_pointer_cast<const NetworkHeaderBase>(networkProtocolInd->getNetworkProtocolHeader());
+}
+
+const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet)
+{
+    const auto& header = findNetworkProtocolHeader(packet);
+    if (header == nullptr)
+        throw cRuntimeError("Network protocol header not found");
+    else
+        return header;
+}
+
+const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_IPv4
-    if (protocol == &Protocol::ipv4)
+    if (protocol == Protocol::ipv4)
         return packet->peekHeader<IPv4Header>();
 #endif
 #ifdef WITH_IPv6
-    if (protocol == &Protocol::ipv6)
+    if (protocol == Protocol::ipv6)
         return packet->peekHeader<IPv6Header>();
 #endif
 #ifdef WITH_GENERIC
-    if (protocol == &Protocol::gnp)
+    if (protocol == Protocol::gnp)
         return packet->peekHeader<GenericDatagramHeader>();
 #endif
-
-    //TODO add other L3 protocols
-
-    throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
+    // TODO: add other L3 protocols
+    throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
-const Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet)
+void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    return removeNetworkHeader(protocol, packet);
+    auto networkProtocolInd = packet->ensureTag<NetworkProtocolInd>();
+    networkProtocolInd->setProtocol(&protocol);
+    networkProtocolInd->setNetworkProtocolHeader(header);
+    insertProtocolHeader(packet, protocol, header);
 }
 
-const Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet)
+const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_IPv4
-    if (protocol == &Protocol::ipv4)
-        return packet->removeHeader<IPv4Header>();
+    if (protocol == Protocol::ipv4)
+        return removeNetworkProtocolHeader<IPv4Header>(packet);
 #endif
 #ifdef WITH_IPv6
-    if (protocol == &Protocol::ipv6)
-        return packet->removeHeader<IPv6Header>();
+    if (protocol == Protocol::ipv6)
+        return removeNetworkProtocolHeader<IPv6Header>(packet);
 #endif
 #ifdef WITH_GENERIC
-    if (protocol == &Protocol::gnp)
-        return packet->removeHeader<GenericDatagramHeader>();
+    if (protocol == Protocol::gnp)
+        return removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
 #endif
-
-    //TODO add other L3 protocols
-
-    throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
+    // TODO: add other L3 protocols
+    throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
 } // namespace inet
