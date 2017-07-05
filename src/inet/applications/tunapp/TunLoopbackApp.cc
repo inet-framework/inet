@@ -18,7 +18,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/applications/tunapp/TunLoopbackApp.h"
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
@@ -64,13 +64,24 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         packetsReceived++;
 
         Packet *packet = check_and_cast<Packet *>(message);
-        const auto& networkHeader = removeNetworkHeader(packet);
-        const auto& transportHeader = removeTransportHeader(ProtocolGroup::ipprotocol.getProtocol(networkHeader->getTransportProtocol()), packet);
+        auto packetProtocol = getPacketProtocol(packet);
+        auto networkProtocol = getNetworkProtocol(packet);
+        if (packetProtocol != networkProtocol)
+            throw cRuntimeError("Cannot handle packet");
+
+        const auto& networkHeader = removeNetworkProtocolHeader(packet, networkProtocol);
+        // TODO: generalize protocol group, because it's not necessarily ipprotocol
+        const auto& transportProtocol = *ProtocolGroup::ipprotocol.getProtocol(networkHeader->getTransportProtocol());
+        const auto& transportHeader = removeTransportProtocolHeader(packet, transportProtocol);
 
         transportHeader->setDestinationPort(transportHeader->getSourcePort());
         transportHeader->setSourcePort(transportHeader->getDestinationPort());
         networkHeader->setSourceAddress(networkHeader->getDestinationAddress());
         networkHeader->setDestinationAddress(networkHeader->getSourceAddress());
+
+        insertTransportProtocolHeader(packet, transportProtocol, transportHeader);
+        insertNetworkProtocolHeader(packet, networkProtocol, networkHeader);
+
         delete message->removeControlInfo();
         message->clearTags();
         tunSocket.send(check_and_cast<Packet*>(message));
