@@ -491,18 +491,8 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(failedFrame))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             edcaInProgressFrames[ac]->dropFrame(packet);
-            // KLUDGE: removed headers and trailers to allow higher layer protocols to process the packet
-            auto headerPopOffset = packet->getHeaderPopOffset();
-            auto trailerPopOffset = packet->getTrailerPopOffset();
-            packet->popHeader<Ieee80211DataOrMgmtHeader>();
-            const auto& nextHeader = packet->peekHeader();
-            if (std::dynamic_pointer_cast<const Ieee8022LlcHeader>(nextHeader))
-                packet->popHeader<Ieee8022LlcHeader>();
-            packet->popTrailer<Ieee80211MacTrailer>();
             emit(NF_PACKET_DROP, packet);
             emit(NF_LINK_BREAK, packet);
-            packet->setHeaderPopOffset(headerPopOffset);
-            packet->setTrailerPopOffset(trailerPopOffset);
         }
         else {
             auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
