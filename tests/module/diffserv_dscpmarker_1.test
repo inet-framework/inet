@@ -14,6 +14,7 @@ simple TestApp
 
 #include <fstream>
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 
@@ -49,6 +50,7 @@ void TestApp::initialize()
       const auto& header = std::make_shared<IPv4Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
+      packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
       send(packet, "out", i);
     }
 
@@ -60,6 +62,7 @@ void TestApp::initialize()
       const auto& header = std::make_shared<IPv6Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
+      packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
       send(packet, "out", i);
     }
 }

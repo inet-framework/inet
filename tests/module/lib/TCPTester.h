@@ -43,7 +43,7 @@ class INET_API TCPTesterBase : public cSimpleModule
     PacketDump tcpdump;
 
   protected:
-    void dump(const Ptr<const inet::tcp::TcpHeader>& seg, bool fromA, const char *comment=NULL);
+    void dump(const Ptr<const inet::tcp::TcpHeader>& seg, int payloadLength, bool fromA, const char *comment=NULL);
 
   public:
     TCPTesterBase();

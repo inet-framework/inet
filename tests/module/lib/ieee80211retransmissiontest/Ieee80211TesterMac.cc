@@ -17,6 +17,7 @@
 //
 
 #include "Ieee80211TesterMac.h"
+//#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 
 namespace inet {

@@ -37,7 +37,7 @@ void TCPTesterBase::initialize()
     tcpdump.setOutStream(EVSTREAM);
 }
 
-void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, bool fromA, const char *comment)
+void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, int tcpLength, bool fromA, const char *comment)
 {
 #if OMNETPP_VERSION < 0x0500
     if (getEnvir()->isDisabled())
@@ -51,7 +51,7 @@ void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, bool fromA,
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
     std::ostringstream out;
     tcpdump.setOutStream(out);
-    tcpdump.tcpDump(fromA, lbl, const_cast<TcpHeader*>(seg.get()), std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
+    tcpdump.tcpDump(fromA, lbl, const_cast<TcpHeader*>(seg.get()), tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
     EV_DEBUG_C("testing") << out.str();
     tcpdump.setOutStream(EVSTREAM);
 }
@@ -198,19 +198,19 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     if (!cmd)
     {
         // dump & forward
-        dump(seg, fromA);
+        dump(seg, pk->getByteLength(), fromA);
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_DELETE)
     {
         bubble("deleting");
-        dump(seg, fromA, "deleting");
+        dump(seg, pk->getByteLength(), fromA, "deleting");
         delete pk;
     }
     else if (cmd->command==CMD_COPY)
     {
         bubble("removing original");
-        dump(seg, fromA, "removing original");
+        dump(seg, pk->getByteLength(), fromA, "removing original");
         for (unsigned int i=0; i<cmd->delays.size(); i++)
         {
             simtime_t d = cmd->delays[i];
@@ -300,13 +300,13 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     if (x<=pdelete)
     {
         bubble("deleting");
-        dump(seg, fromA, "deleting");
+        dump(seg, pk->getByteLength(), fromA, "deleting");
         delete pk;
     }
     else if (x-=pdelete, x<=pdelay)
     {
         bubble("delay: removing original");
-        dump(seg, fromA, "delay: removing original");
+        dump(seg, pk->getByteLength(), fromA, "delay: removing original");
         double d = delay->doubleValue();
         pk->setContextPointer((void*)fromA);
         scheduleAt(simTime()+d, pk);
@@ -314,7 +314,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     else if (x-=pdelay, x<=pcopy)
     {
         bubble("copy: removing original");
-        dump(seg, fromA, "copy: removing original");
+        dump(seg, pk->getByteLength(), fromA, "copy: removing original");
         int n = numCopies->longValue();
         for (int i=0; i<n; i++)
         {
@@ -328,7 +328,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     else
     {
         // dump & forward
-        dump(seg, fromA);
+        dump(seg, pk->getByteLength(), fromA);
         send(pk, fromA ? "out2" : "out1");
     }
 }

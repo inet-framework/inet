@@ -17,6 +17,8 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
@@ -190,8 +192,10 @@ void TcpTestClient::scheduleNextSend()
         return;
     Command cmd = commands.front();
     commands.pop_front();
-    cPacket *msg = new cPacket(makeMsgName().c_str(),TEST_SEND);
-    msg->setByteLength(cmd.numBytes);
+    Packet *msg = new Packet(makeMsgName().c_str(),TEST_SEND);
+    const auto& bytes = std::make_shared<ByteCountChunk>(byte(cmd.numBytes));
+    bytes->markImmutable();
+    msg->append(bytes);
     scheduleAt(cmd.tSend, msg);
 }
 
