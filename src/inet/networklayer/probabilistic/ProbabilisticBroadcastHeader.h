@@ -18,7 +18,7 @@
 #ifndef __INET_ProbabilisticBroadcastHeader_H
 #define __INET_ProbabilisticBroadcastHeader_H
 
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
 namespace inet {

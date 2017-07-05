@@ -20,7 +20,7 @@ cplusplus {{
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 }}
 
 namespace inet;

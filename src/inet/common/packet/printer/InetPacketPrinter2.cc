@@ -42,7 +42,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
 #ifdef WITH_RIP
 #include "inet/routing/rip/RIPPacket_m.h"

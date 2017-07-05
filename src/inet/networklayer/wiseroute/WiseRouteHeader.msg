@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 }}
 
 namespace inet;

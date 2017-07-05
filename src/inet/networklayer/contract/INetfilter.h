@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/NetworkHeaderBase.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
 namespace inet {
 
