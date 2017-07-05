@@ -52,9 +52,9 @@ int HcfFs::selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSe
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
     const auto& header = frameToTransmit->peekHeader<Ieee80211MacHeader>();
-    if (std::dynamic_pointer_cast<Ieee80211DataHeader>(header))
+    if (std::dynamic_pointer_cast<const Ieee80211DataHeader>(header))
         return 0;
-    else if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header))
+    else if (std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header))
         return 1;
     else
         throw cRuntimeError("frameToTransmit must be either a Data or a Management frame");

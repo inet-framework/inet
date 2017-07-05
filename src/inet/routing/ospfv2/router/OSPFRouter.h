@@ -126,7 +126,7 @@ class INET_API Router
      * @param areaID [in] Identifies the input Router, Network and Summary LSA's Area.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool installLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID);
+    bool installLSA(const OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID);
 
     /**
      * Find the LSA identified by the input lsaKey in the database.
@@ -175,7 +175,7 @@ class INET_API Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input IPv4 address falls into any of the Router's Areas' configured
@@ -275,7 +275,7 @@ class INET_API Router
      * @param lsa [in] The LSA to install. It will be copied into the database.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool installASExternalLSA(OSPFASExternalLSA *lsa);
+    bool installASExternalLSA(const OSPFASExternalLSA *lsa);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.

@@ -34,9 +34,9 @@ Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211MgmtFrameSerializer);
 
-void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
+    if (auto authenticationFrame = std::dynamic_pointer_cast<const Ieee80211AuthenticationFrame>(chunk))
     {
         //type = ST_AUTHENTICATION;
         // 1    Authentication algorithm number
@@ -48,17 +48,17 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
         // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrame>(chunk))
+    else if (auto deauthenticationFrame = std::dynamic_pointer_cast<const Ieee80211DeauthenticationFrame>(chunk))
     {
         //type = ST_DEAUTHENTICATION;
         stream.writeUint16Be(deauthenticationFrame->getReasonCode());
     }
-    else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrame>(chunk))
+    else if (auto disassociationFrame =std::dynamic_pointer_cast<const Ieee80211DisassociationFrame>(chunk))
     {
         //type = ST_DISASSOCIATION;
         stream.writeUint16Be(disassociationFrame->getReasonCode());
     }
-    else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrame>(chunk))
+    else if (auto probeRequestFrame = std::dynamic_pointer_cast<const Ieee80211ProbeRequestFrame>(chunk))
     {
         //type = ST_PROBEREQUEST;
         // 1    SSID
@@ -81,7 +81,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationRequestFrame = std::dynamic_pointer_cast<Ieee80211AssociationRequestFrame>(chunk))
+    else if (auto associationRequestFrame = std::dynamic_pointer_cast<const Ieee80211AssociationRequestFrame>(chunk))
     {
         //type = ST_ASSOCIATIONREQUEST;
         // 1    Capability
@@ -110,7 +110,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 9    QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrame>(chunk))
+    else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<const Ieee80211ReassociationRequestFrame>(chunk))
     {
         //type = ST_REASSOCIATIONREQUEST;
         // 1    Capability
@@ -143,7 +143,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 10   QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationResponseFrame = std::dynamic_pointer_cast<Ieee80211AssociationResponseFrame>(chunk))
+    else if (auto associationResponseFrame = std::dynamic_pointer_cast<const Ieee80211AssociationResponseFrame>(chunk))
     {
         //type = ST_ASSOCIATIONRESPONSE;
         // 1    Capability
@@ -165,7 +165,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrame>(chunk))
+    else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<const Ieee80211ReassociationResponseFrame>(chunk))
     {
         //type = ST_REASSOCIATIONRESPONSE;
         // 1    Capability
@@ -187,7 +187,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto beaconFrame = std::dynamic_pointer_cast<Ieee80211BeaconFrame>(chunk))
+    else if (auto beaconFrame = std::dynamic_pointer_cast<const Ieee80211BeaconFrame>(chunk))
     {
         //type = ST_BEACON;
         // 1    Timestamp
@@ -232,7 +232,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 24   QoS Capability                         The QoS Capability element is present when dot11QosOption- Implemented is true and EDCA Parameter Set element is not present.
         // Last Vendor Specific                        One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto probeResponseFrame = std::dynamic_pointer_cast<Ieee80211ProbeResponseFrame>(chunk))
+    else if (auto probeResponseFrame = std::dynamic_pointer_cast<const Ieee80211ProbeResponseFrame>(chunk))
     {
         //type = ST_PROBERESPONSE;
         // 1      Timestamp

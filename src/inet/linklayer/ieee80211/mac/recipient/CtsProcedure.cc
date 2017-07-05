@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback)
+void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback)
 {
     numReceivedRts++;
     // A STA that is addressed by an RTS frame shall transmit a CTS frame after a SIFS period
@@ -37,7 +37,7 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RtsF
     else ;
 }
 
-Ptr<Ieee80211CtsFrame> CtsProcedure::buildCts(const Ptr<Ieee80211RtsFrame>& rtsFrame) const
+Ptr<Ieee80211CtsFrame> CtsProcedure::buildCts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
     const Ptr<Ieee80211CtsFrame>& cts = std::make_shared<Ieee80211CtsFrame>();
     // The RA field of the CTS frame shall be the value
@@ -47,7 +47,7 @@ Ptr<Ieee80211CtsFrame> CtsProcedure::buildCts(const Ptr<Ieee80211RtsFrame>& rtsF
     return cts;
 }
 
-void CtsProcedure::processTransmittedCts(const Ptr<Ieee80211CtsFrame>& ctsFrame)
+void CtsProcedure::processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame)
 {
     numSentCts++;
 }

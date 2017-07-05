@@ -13,7 +13,7 @@ cplusplus{{
 namespace inet;
 
 cplusplus{{
-typedef Ptr<Chunk> ChunkPtr;
+typedef Ptr<const Chunk> ChunkPtr;
 typedef const Protocol * ProtocolPtr;
 
 using namespace units::values;

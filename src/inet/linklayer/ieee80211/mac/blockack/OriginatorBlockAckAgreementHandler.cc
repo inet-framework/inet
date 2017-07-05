@@ -21,7 +21,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<Ieee80211AddbaRequest>& addbaRequest)
+void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest)
 {
     OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0);
     auto agreementId = std::make_pair(addbaRequest->getReceiverAddress(), addbaRequest->getTid());
@@ -81,9 +81,9 @@ Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest
 // The inactivity timer at the originator is reset when a BlockAck frame
 // corresponding to the TID for which the Block Ack policy is set is received.
 //
-void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback)
+void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback)
 {
-    if (auto basicBlockAck = std::dynamic_pointer_cast<Ieee80211BasicBlockAck>(blockAck)) {
+    if (auto basicBlockAck = std::dynamic_pointer_cast<const Ieee80211BasicBlockAck>(blockAck)) {
         auto agreement = getAgreement(basicBlockAck->getTransmitterAddress(), basicBlockAck->getTidInfo());
         if (agreement) {
             agreement->calculateExpirationTime();
@@ -130,7 +130,7 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MACAddress originato
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
+void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IProcedureCallback* callback)
 {
     auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
@@ -142,7 +142,7 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
+void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto agreement = getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
     if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
@@ -154,7 +154,7 @@ void OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<Ieee
     }
 }
 
-void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement* agreement, const Ptr<Ieee80211AddbaResponse>& addbaResp)
+void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement* agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp)
 {
     agreement->setIsAddbaResponseReceived(true);
     agreement->setBufferSize(addbaResp->getBufferSize());
@@ -162,7 +162,7 @@ void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgree
     agreement->calculateExpirationTime();
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<Ieee80211AddbaRequest>& addbaReq)
+void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
 {
     auto agreement = getAgreement(addbaReq->getReceiverAddress(), addbaReq->getTid());
     if (agreement)
@@ -171,12 +171,12 @@ void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<Ie
         throw cRuntimeError("Block Ack Agreement should have already been added");
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<Ieee80211Delba>& delba)
+void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
     terminateAgreement(delba->getReceiverAddress(), delba->getTid());
 }
 
-void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
+void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
 {
     if (blockAckAgreementPolicy->isDelbaAccepted(delba))
         terminateAgreement(delba->getTransmitterAddress(), delba->getTid());

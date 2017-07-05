@@ -220,7 +220,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void finish() override;
 
     /** Checks destination address and drops the frame when frame is not for us; returns true if frame is dropped */
-    virtual bool dropFrameNotForUs(Packet *packet, const Ptr<EtherFrame>& frame);
+    virtual bool dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>& frame);
 
     /**
      * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,

@@ -139,7 +139,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrame>& body);
+    virtual void storeAPInfo(const MACAddress& address, const Ptr<const Ieee80211BeaconFrame>& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
@@ -177,16 +177,16 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
     /** @name Processing of different frame types */
     //@{
-    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
-    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header) override;
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
     //@}
 
     /** @name Processing of different agent commands */

@@ -23,7 +23,7 @@ namespace serializer {
 
 Register_Serializer(UdpHeader, UdpHeaderSerializer);
 
-void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& udpHeader = std::static_pointer_cast<const UdpHeader>(chunk);
     stream.writeUint16Be(udpHeader->getSourcePort());

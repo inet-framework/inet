@@ -62,7 +62,7 @@ IPv6::~IPv6()
 }
 
 #ifdef WITH_xMIPv6
-IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, IPv6Header *ipv6Header, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const IPv6Header *ipv6Header, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
         packet(packet),
         ipv6Header(ipv6Header),
         ie(ie),
@@ -257,7 +257,7 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
 {
     const auto& ipv6Header = packet->peekHeader<IPv6Header>();
-    IPv6Address& destAddr = ipv6Header->getDestAddress();
+    const IPv6Address& destAddr = ipv6Header->getDestAddress();
     // remove control info
     delete packet->removeControlInfo();
 
@@ -299,7 +299,8 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress)) {
         EV_INFO << "local delivery\n";
         if (ipv6Header->getSrcAddress().isUnspecified())
-            ipv6Header->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+            // KLUDGE: TODO: std::const_pointer_cast<IPv6Header>
+            std::const_pointer_cast<IPv6Header>(ipv6Header)->setSrcAddress(destAddress); // allows two apps on the same host to communicate
 
         if (destIE && !destIE->isLoopback()) {
             EV_INFO << "datagram destination address is local, ignoring destination interface specified in the control info\n";
@@ -370,10 +371,10 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
         packet->removePoppedChunks();
-        ipv6Header = nullptr;
-        ipv6Header = packet->removeHeader<IPv6Header>();
-        ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
-        packet->insertHeader(ipv6Header);
+        auto newIpv6Header = packet->removeHeader<IPv6Header>();
+        newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
+        packet->insertHeader(newIpv6Header);
+        ipv6Header = newIpv6Header;
     }
 
     // routing
@@ -509,10 +510,10 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         // TBD: in IPv4, arrange TTL check like this
         // KLUDGE: TODO
         packet->removePoppedChunks();
-        ipv6Header = nullptr;
-        ipv6Header = packet->removeHeader<IPv6Header>();
-        ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
-        packet->insertHeader(ipv6Header);
+        const auto& newIpv6Header = packet->removeHeader<IPv6Header>();
+        newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
+        packet->insertHeader(newIpv6Header);
+        ipv6Header = newIpv6Header;
     }
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
@@ -688,7 +689,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 void IPv6::handleReceivedICMP(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<ICMPv6Header>();
-    if (std::dynamic_pointer_cast<IPv6NDMessage>(icmpHeader) != nullptr) {
+    if (std::dynamic_pointer_cast<const IPv6NDMessage>(icmpHeader) != nullptr) {
         EV_INFO << "Neighbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");
     }
@@ -938,14 +939,15 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
 }
 
 #ifdef WITH_xMIPv6
-bool IPv6::processExtensionHeaders(Packet *packet, IPv6Header *ipv6Header)
+bool IPv6::processExtensionHeaders(Packet *packet, const IPv6Header *ipv6Header)
 {
     int noExtHeaders = ipv6Header->getExtensionHeaderArraySize();
     EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;
 
     // walk through all extension headers
     for (int i = 0; i < noExtHeaders; i++) {
-        IPv6ExtensionHeader *eh = ipv6Header->removeFirstExtensionHeader();
+        // KLUDGE: TODO: const_cast<IPv6Header>
+        IPv6ExtensionHeader *eh = const_cast<IPv6Header *>(ipv6Header)->removeFirstExtensionHeader();
 
         if (IPv6RoutingHeader *rh = dynamic_cast<IPv6RoutingHeader *>(eh)) {
             EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;

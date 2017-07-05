@@ -332,7 +332,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     return replyPk;
 }
 
-Packet *HttpServerBase::generateResourceMessage(const Ptr<HttpRequestMessage>& request, std::string resource, HttpContentType category)
+Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessage>& request, std::string resource, HttpContentType category)
 {
     EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
 
@@ -371,7 +371,7 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<HttpRequestMessage>& r
     return replyPk;
 }
 
-Packet *HttpServerBase::generateErrorReply(const Ptr<HttpRequestMessage>& request, int code)
+Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& request, int code)
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());

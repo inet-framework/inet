@@ -29,10 +29,10 @@ using namespace physicallayer;
 Register_Serializer(Ieee80211PhyHeader, Ieee80211PhyHeaderSerializer);
 Register_Serializer(Ieee80211OfdmPhyHeader, Ieee80211PhyHeaderSerializer);
 
-void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& phyHeader = std::static_pointer_cast<const Ieee80211PhyHeader>(chunk);
-    if (auto ofdmPhyHeader = std::dynamic_pointer_cast<Ieee80211OfdmPhyHeader>(chunk)) {
+    if (auto ofdmPhyHeader = std::dynamic_pointer_cast<const Ieee80211OfdmPhyHeader>(chunk)) {
         Ieee80211OFDMPLCPHeader phyhdr;
         phyhdr.length = ofdmPhyHeader->getLengthField(); // Byte length of the payload
         phyhdr.rate = ofdmPhyHeader->getRate();

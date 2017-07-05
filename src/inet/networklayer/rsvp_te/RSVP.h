@@ -210,9 +210,9 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual PathStateBlock_t *createPSB(const Ptr<RSVPPathMsg>& msg);
     virtual PathStateBlock_t *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
     virtual void removePSB(PathStateBlock_t *psb);
-    virtual ResvStateBlock_t *createRSB(const Ptr<RSVPResvMsg>& msg);
+    virtual ResvStateBlock_t *createRSB(const Ptr<const RSVPResvMsg>& msg);
     virtual ResvStateBlock_t *createEgressRSB(PathStateBlock_t *psb);
-    virtual void updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg);
+    virtual void updateRSB(ResvStateBlock_t *rsb, const RSVPResvMsg *msg);
     virtual void removeRSB(ResvStateBlock_t *rsb);
     virtual void removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index);
 
@@ -258,8 +258,8 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     virtual HelloState_t *findHello(IPv4Address peer);
 
-    virtual void print(RSVPPathMsg *p);
-    virtual void print(RSVPResvMsg *r);
+    virtual void print(const RSVPPathMsg *p);
+    virtual void print(const RSVPResvMsg *r);
 
     virtual void readTrafficFromXML(const cXMLElement *traffic);
     virtual void readTrafficSessionFromXML(const cXMLElement *session);

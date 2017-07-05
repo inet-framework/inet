@@ -63,7 +63,7 @@ class INET_API MessageHandler : public IMessageHandler
     void printLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket *ackPacket, IPv4Address destination, int outputIfIndex) const;
 
     // Authentication not implemented
-    bool authenticatePacket(OSPFPacket *packet) { return true; }
+    bool authenticatePacket(const OSPFPacket *packet) { return true; }
 };
 
 } // namespace ospf

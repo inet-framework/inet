@@ -35,7 +35,7 @@ class INET_API RSVPPathMsg : public RSVPPathMsg_Base
     virtual RSVPPathMsg *dup() const override { return new RSVPPathMsg(*this); }
 
     inline IPv4Address getSrcAddress() { return getSender_descriptor().Sender_Template_Object.SrcAddress; }
-    inline int getLspId() { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
+    inline int getLspId() const { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
     inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
@@ -62,7 +62,7 @@ class INET_API RSVPPathTear : public RSVPPathTear_Base
     inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
     inline IPv4Address getSrcAddress() { return getSenderTemplate().SrcAddress; }
-    inline int getLspId() { return getSenderTemplate().Lsp_Id; }
+    inline int getLspId() const { return getSenderTemplate().Lsp_Id; }
 };
 
 /**
@@ -83,7 +83,7 @@ class INET_API RSVPPathError : public RSVPPathError_Base
     inline int getLspId() { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
 
-    inline SenderTemplateObj_t& getSenderTemplate() { return getSender_descriptor().Sender_Template_Object; }
+    inline const SenderTemplateObj_t& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
     inline void setSenderTemplate(const SenderTemplateObj_t& s) { getSender_descriptor().Sender_Template_Object = s; }
     inline SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
     inline void setSenderTspec(const SenderTspecObj_t& s) { getSender_descriptor().Sender_Tspec_Object = s; }

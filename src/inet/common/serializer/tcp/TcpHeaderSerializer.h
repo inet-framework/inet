@@ -34,7 +34,7 @@ class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
     virtual void serializeOption(MemoryOutputStream& stream, const TCPOption *option) const;
     virtual TCPOption *deserializeOption(MemoryInputStream& stream) const;
 
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:

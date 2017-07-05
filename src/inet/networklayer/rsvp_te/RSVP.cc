@@ -911,7 +911,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
     }
 }
 
-RSVP::ResvStateBlock_t *RSVP::createRSB(const Ptr<RSVPResvMsg>& msg)
+RSVP::ResvStateBlock_t *RSVP::createRSB(const Ptr<const RSVPResvMsg>& msg)
 {
     ResvStateBlock_t rsbEle;
 
@@ -946,7 +946,7 @@ RSVP::ResvStateBlock_t *RSVP::createRSB(const Ptr<RSVPResvMsg>& msg)
     return rsb;
 }
 
-void RSVP::updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg)
+void RSVP::updateRSB(ResvStateBlock_t *rsb, const RSVPResvMsg *msg)
 {
     ASSERT(rsb);
 
@@ -1570,7 +1570,8 @@ void RSVP::processResvMsg(Packet *pk)
             EV_DETAIL << "matching PSB not found for lspid=" << msg->getFlowDescriptor()[m].Filter_Spec_Object.Lsp_Id << endl;
 
             // remove descriptor from message
-            msg->getFlowDescriptor().erase(msg->getFlowDescriptor().begin() + m);
+            // KLUDGE: TODO: std::const_pointer_cast<RSVPResvMsg>
+            std::const_pointer_cast<RSVPResvMsg>(msg)->getFlowDescriptor().erase(msg->getFlowDescriptor().begin() + m);
             --m;
         }
     }
@@ -2064,12 +2065,12 @@ std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a)
     return os;
 }
 
-void RSVP::print(RSVPPathMsg *p)
+void RSVP::print(const RSVPPathMsg *p)
 {
     EV_INFO << "PATH_MESSAGE: lspid " << p->getLspId() << " ERO " << vectorToString(p->getERO()) << endl;
 }
 
-void RSVP::print(RSVPResvMsg *r)
+void RSVP::print(const RSVPResvMsg *r)
 {
     EV_INFO << "RESV_MESSAGE: " << endl;
     for (auto & elem : r->getFlowDescriptor()) {

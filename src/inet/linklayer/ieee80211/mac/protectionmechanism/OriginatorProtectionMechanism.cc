@@ -38,7 +38,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 // intervals. If the calculated duration includes a fractional microsecond, that value is rounded up to the next
 // higher integer. For RTS frames sent by QoS STAs, see 8.2.5.
 //
-simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingHeader)
+simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
@@ -59,7 +59,7 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
 //     an individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this data frame, plus two ACK frames, plus three SIFS intervals.
 //
-simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingHeader)
+simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader)->getDuration(LENGTH_ACK);
     if (dataHeader->getReceiverAddress().isMulticast())
@@ -85,7 +85,7 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
 //     individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this management frame, plus two ACK frames, plus three SIFS intervals.
 //
-simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingHeader)
+simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
     if (mgmtHeader->getReceiverAddress().isMulticast())
@@ -99,13 +99,13 @@ simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *m
     }
 }
 
-simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtHeader>& pendingHeader)
+simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(header))
+    if (auto rtsFrame = std::dynamic_pointer_cast<const Ieee80211RtsFrame>(header))
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingHeader);
-    else if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header))
+    else if (auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header))
         return computeDataFrameDurationField(packet, dataHeader, pendingPacket, pendingHeader);
-    else if (auto mgmtHeader = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header))
+    else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header))
         return computeMgmtFrameDurationField(packet, mgmtHeader, pendingPacket, pendingHeader);
     else
         throw cRuntimeError("Unknown frame");

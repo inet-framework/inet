@@ -372,19 +372,19 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
         if (rtcpPacket) {
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:
-                    processIncomingRTCPSenderReportPacket(CHK(std::dynamic_pointer_cast<RTCPSenderReportPacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPSenderReportPacket(CHK(std::dynamic_pointer_cast<const RTCPSenderReportPacket>(rtcpPacket)), address, port);
                     break;
 
                 case RTCP_PT_RR:
-                    processIncomingRTCPReceiverReportPacket(CHK(std::dynamic_pointer_cast<RTCPReceiverReportPacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPReceiverReportPacket(CHK(std::dynamic_pointer_cast<const RTCPReceiverReportPacket>(rtcpPacket)), address, port);
                     break;
 
                 case RTCP_PT_SDES:
-                    processIncomingRTCPSDESPacket(CHK(std::dynamic_pointer_cast<RTCPSDESPacket>(rtcpPacket)), address, port, arrivalTime);
+                    processIncomingRTCPSDESPacket(CHK(std::dynamic_pointer_cast<const RTCPSDESPacket>(rtcpPacket)), address, port, arrivalTime);
                     break;
 
                 case RTCP_PT_BYE:
-                    processIncomingRTCPByePacket(CHK(std::dynamic_pointer_cast<RTCPByePacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPByePacket(CHK(std::dynamic_pointer_cast<const RTCPByePacket>(rtcpPacket)), address, port);
                     break;
 
                 default:
@@ -396,7 +396,7 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
     delete packet;
 }
 
-void RTCP::processIncomingRTCPSenderReportPacket(const Ptr<RTCPSenderReportPacket>& rtcpSenderReportPacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPSenderReportPacket(const Ptr<const RTCPSenderReportPacket>& rtcpSenderReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpSenderReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -430,7 +430,7 @@ void RTCP::processIncomingRTCPSenderReportPacket(const Ptr<RTCPSenderReportPacke
     }
 }
 
-void RTCP::processIncomingRTCPReceiverReportPacket(const Ptr<RTCPReceiverReportPacket>& rtcpReceiverReportPacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPReceiverReportPacket(const Ptr<const RTCPReceiverReportPacket>& rtcpReceiverReportPacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpReceiverReportPacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);
@@ -462,7 +462,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(const Ptr<RTCPReceiverReportP
     }
 }
 
-void RTCP::processIncomingRTCPSDESPacket(const Ptr<RTCPSDESPacket>& rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
+void RTCP::processIncomingRTCPSDESPacket(const Ptr<const RTCPSDESPacket>& rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
 {
     const cArray& sdesChunks = rtcpSDESPacket->getSdesChunks();
 
@@ -488,7 +488,7 @@ void RTCP::processIncomingRTCPSDESPacket(const Ptr<RTCPSDESPacket>& rtcpSDESPack
     }
 }
 
-void RTCP::processIncomingRTCPByePacket(const Ptr<RTCPByePacket>& rtcpByePacket, IPv4Address address, int port)
+void RTCP::processIncomingRTCPByePacket(const Ptr<const RTCPByePacket>& rtcpByePacket, IPv4Address address, int port)
 {
     uint32 ssrc = rtcpByePacket->getSsrc();
     RTPParticipantInfo *participantInfo = findParticipantInfo(ssrc);

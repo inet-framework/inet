@@ -31,7 +31,7 @@ class INET_API ARPPacketSerializer : public FieldsChunkSerializer
     MACAddress readMACAddress(MemoryInputStream& stream, unsigned int size) const;
     IPv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
 
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:

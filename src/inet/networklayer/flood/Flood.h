@@ -124,7 +124,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     virtual void handleLowerPacket(cPacket *) override;
 
     /** @brief Checks whether a message was already broadcasted*/
-    bool notBroadcasted(FloodHeader *);
+    bool notBroadcasted(const FloodHeader *);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);

@@ -151,14 +151,16 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
             EV_WARN << "CRC error, packet dropped\n";
             delete packet;
             return;
-        case CRC_DECLARED_CORRECT:
+        case CRC_DECLARED_CORRECT: {
             // modify to calculated, for serializing
             packet->removePoppedHeaders();
-            tcpsegP = packet->removeHeader<TcpHeader>();
-            tcpsegP->setCrcMode(CRC_COMPUTED);
-            tcpsegP->setCrc(0);
-            packet->insertHeader(tcpsegP);
+            const auto& newTcpsegP = packet->removeHeader<TcpHeader>();
+            newTcpsegP->setCrcMode(CRC_COMPUTED);
+            newTcpsegP->setCrc(0);
+            packet->insertHeader(newTcpsegP);
+            tcpsegP = newTcpsegP;
             break;
+        }
         default:
             break;
     }

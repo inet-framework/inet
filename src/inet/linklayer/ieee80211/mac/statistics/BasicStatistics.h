@@ -53,11 +53,11 @@ class INET_API BasicStatistics : /*public IStatistics, */public cSimpleModule
 //    public:
 //        virtual void setMacUtils(MacUtils *utils) override;
 //        virtual void setRateControl(IRateControl *rateControl) override;
-//        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
-//        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
-//        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
-//        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
-//        virtual void frameReceived(const Ptr<Ieee80211MacHeader>& header) override;
+//        virtual void frameTransmissionSuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
+//        virtual void frameTransmissionUnsuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
+//        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) override;
+//        virtual void frameTransmissionGivenUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+//        virtual void frameReceived(const Ptr<const Ieee80211MacHeader>& header) override;
 //        virtual void erroneousFrameReceived() override;
 };
 

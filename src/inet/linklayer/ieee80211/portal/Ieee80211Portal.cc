@@ -67,9 +67,9 @@ void Ieee80211Portal::encapsulate(Packet *packet)
     packet->ensureTag<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
     const auto& ieee8022SnapHeader = std::make_shared<Ieee8022SnapHeader>();
     ieee8022SnapHeader->setOui(0);
-    if (const auto& eth2frame = std::dynamic_pointer_cast<EthernetIIFrame>(ethernetHeader))
+    if (const auto& eth2frame = std::dynamic_pointer_cast<const EthernetIIFrame>(ethernetHeader))
         ieee8022SnapHeader->setProtocolId(eth2frame->getEtherType());
-    else if (const auto& snapframe = std::dynamic_pointer_cast<EtherFrameWithSNAP>(ethernetHeader))
+    else if (const auto& snapframe = std::dynamic_pointer_cast<const EtherFrameWithSNAP>(ethernetHeader))
         ieee8022SnapHeader->setProtocolId(snapframe->getLocalcode());
     else
         throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethernetHeader->getClassName());

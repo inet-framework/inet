@@ -25,8 +25,8 @@
 #include "inet/networklayer/contract/NetworkHeaderBase.h"
 
 namespace inet {
-    Ptr<NetworkHeaderBase> peekNetworkHeader(Packet *packet);
-    Ptr<NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet);
+    Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet);
+    Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet);
     Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet);
     Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet);
 };

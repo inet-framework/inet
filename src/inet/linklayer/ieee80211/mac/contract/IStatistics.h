@@ -46,11 +46,11 @@ class INET_API IStatistics
         virtual void setRateControl(IRateControl *rateControl) = 0;  // is interested in the statistics
 
         // events to compute statistics from; TODO there should be many more, e.g. about the contention, queueing time, etc
-        virtual void frameTransmissionSuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessful(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
-        virtual void frameTransmissionGivenUp(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
-        virtual void frameReceived(const Ptr<Ieee80211MacHeader>& header) = 0;
+        virtual void frameTransmissionSuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionGivenUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual void frameReceived(const Ptr<const Ieee80211MacHeader>& header) = 0;
         virtual void erroneousFrameReceived() = 0;
 };
 

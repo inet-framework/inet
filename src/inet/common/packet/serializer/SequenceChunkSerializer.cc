@@ -21,7 +21,7 @@ namespace inet {
 
 Register_Serializer(SequenceChunk, SequenceChunkSerializer);
 
-void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const
+void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const
 {
     bit currentOffset = bit(0);
     bit serializeBegin = offset;

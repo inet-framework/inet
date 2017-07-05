@@ -24,7 +24,7 @@ namespace serializer {
 
 Register_Serializer(TransportPseudoHeader, TransportPseudoHeaderSerializer);
 
-void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     //FIXME: ipv6, generic ????
     const auto& transportPseudoHeader = std::static_pointer_cast<const TransportPseudoHeader>(chunk);

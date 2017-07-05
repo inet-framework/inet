@@ -225,7 +225,7 @@ void Flood::handleLowerPacket(cPacket *m)
  * the list is full and a new message has to be entered, the oldest
  * entry is deleted.
  **/
-bool Flood::notBroadcasted(FloodHeader *msg)
+bool Flood::notBroadcasted(const FloodHeader *msg)
 {
     if (!plainFlooding)
         return true;

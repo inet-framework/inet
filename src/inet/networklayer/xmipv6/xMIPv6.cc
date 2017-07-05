@@ -209,34 +209,34 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
 
     EV_INFO << "Processing of MIPv6 related mobility message" << endl;
 
-    if (const auto& bu = std::dynamic_pointer_cast<BindingUpdate>(mipv6Msg)) {
+    if (const auto& bu = std::dynamic_pointer_cast<const BindingUpdate>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING UPDATE (BU)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBUMessage()>>>>>>>\n";
         processBUMessage(inPacket, bu);
     }
-    else if (const auto& ba = std::dynamic_pointer_cast<BindingAcknowledgement>(mipv6Msg)) {
+    else if (const auto& ba = std::dynamic_pointer_cast<const BindingAcknowledgement>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING ACKNOWLEDGEMENT (BA)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBAMessage()>>>>>>>\n";
         processBAMessage(inPacket, ba);
     }
     // 28.08.07 - CB
-    else if (const auto& hoti = std::dynamic_pointer_cast<HomeTestInit>(mipv6Msg)) {
+    else if (const auto& hoti = std::dynamic_pointer_cast<const HomeTestInit>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST INIT (HoTI)" << endl;
         processHoTIMessage(inPacket, hoti);
     }
-    else if (const auto& coti = std::dynamic_pointer_cast<CareOfTestInit>(mipv6Msg)) {
+    else if (const auto& coti = std::dynamic_pointer_cast<const CareOfTestInit>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST INIT (CoTI)" << endl;
         processCoTIMessage(inPacket, coti);
     }
-    else if (const auto& ht = std::dynamic_pointer_cast<HomeTest>(mipv6Msg)) {
+    else if (const auto& ht = std::dynamic_pointer_cast<const HomeTest>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST (HoT)" << endl;
         processHoTMessage(inPacket, ht);
     }
-    else if (const auto& cot = std::dynamic_pointer_cast<CareOfTest>(mipv6Msg)) {
+    else if (const auto& cot = std::dynamic_pointer_cast<const CareOfTest>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST (CoT)" << endl;
         processCoTMessage(inPacket, cot);
     }
-    else if (const auto& brr = std::dynamic_pointer_cast<BindingRefreshRequest>(mipv6Msg)) {
+    else if (const auto& brr = std::dynamic_pointer_cast<const BindingRefreshRequest>(mipv6Msg)) {
         EV_INFO << "Message recognised as Binding Refresh Request" << endl;
         processBRRMessage(inPacket, brr);
     }
@@ -692,7 +692,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const IPv6Address& des
    }
  */
 
-void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu)
+void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
 {
     EV_INFO << "Entered BU processing method" << endl;
 
@@ -717,7 +717,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu)
     if (validBUMessage) {
         auto ifTag = inPacket->getMandatoryTag<InterfaceInd>();
         auto addrTag = inPacket->getMandatoryTag<L3AddressInd>();
-        IPv6Address& HoA = bu->getHomeAddressMN();
+        const IPv6Address& HoA = bu->getHomeAddressMN();
         IPv6Address CoA = addrTag->getSrcAddress().toIPv6();
         IPv6Address destAddress = addrTag->getDestAddress().toIPv6();
         uint buLifetime = bu->getLifetime() * 4;    /* 6.1.7 One time unit is 4 seconds. */
@@ -954,7 +954,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu)
     delete inPacket;
 }
 
-bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<BindingUpdate>& bu)
+bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& bu)
 {
     auto ifTag = packet->getMandatoryTag<InterfaceInd>();
     // Performs BU Validation according to RFC3775 Sec 9.5.1
@@ -1054,7 +1054,7 @@ bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<BindingUpdate>& bu)
     return true;    //result;
 }
 
-bool xMIPv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu)
+bool xMIPv6::validateBUderegisterMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)
 {
     /*To begin processing the Binding Update, the home agent MUST perform
        the following test:
@@ -1136,7 +1136,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
         statVectorBAtoMN.record(2);*/
 }
 
-void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<BindingAcknowledgement>& ba)
+void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledgement>& ba)
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false;
@@ -1325,7 +1325,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<BindingAcknowledgement
     delete inPacket;
 }
 
-bool xMIPv6::validateBAck(Packet *packet, BindingAcknowledgement& ba)
+bool xMIPv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
 {
     /*11.7.3
        Upon receiving a packet carrying a Binding Acknowledgement, a mobile
@@ -1716,7 +1716,7 @@ void xMIPv6::createAndSendCoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
     createTestInitTimer(CoTI, cnDest, ie);
 }
 
-void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<HomeTestInit>& homeTestInit)
+void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& homeTestInit)
 {
     // 9.4.1 & 9.4.3
     IPv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -1740,7 +1740,7 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<HomeTestInit>& homeT
     delete inPacket;
 }
 
-void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<CareOfTestInit>& coti)
+void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& coti)
 {
     // 9.4.2 & 9.4.4
     IPv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -1764,7 +1764,7 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<CareOfTestInit>& cot
     delete inPacket;
 }
 
-void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<HomeTest>& homeTest)
+void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& homeTest)
 {
     if (!validateHoTMessage(inPacket, *homeTest))
         EV_WARN << "HoT validation not passed: dropping message" << endl;
@@ -1800,7 +1800,7 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<HomeTest>& homeTest)
     delete inPacket;
 }
 
-bool xMIPv6::validateHoTMessage(Packet *inPacket, HomeTest& homeTest)
+bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 {
     // RFC - 11.6.2
     IPv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -1847,7 +1847,7 @@ bool xMIPv6::validateHoTMessage(Packet *inPacket, HomeTest& homeTest)
     return true;
 }
 
-void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<CareOfTest>& CoT)
+void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& CoT)
 {
     if (!validateCoTMessage(inPacket, *CoT))
         EV_WARN << "CoT validation not passed: dropping message" << endl;
@@ -1893,7 +1893,7 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<CareOfTest>& CoT)
     delete inPacket;
 }
 
-bool xMIPv6::validateCoTMessage(Packet *inPacket, CareOfTest& CoT)
+bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 {
     // RFC - 11.6.2
     IPv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -2458,7 +2458,7 @@ void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie
     sendMobilityMessageToIPv6Module(outPacket, dest, CoA, ie->getInterfaceId());
 }
 
-void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<BindingRefreshRequest>& brr)
+void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshRequest>& brr)
 {
     /*11.7.4
        When a mobile node receives a packet containing a Binding Refresh
@@ -2591,7 +2591,7 @@ void xMIPv6::handleBULExpiry(cMessage *msg)
     }
 }
 
-void xMIPv6::createBCEntryExpiryTimer(IPv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime)
+void xMIPv6::createBCEntryExpiryTimer(const IPv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime)
 {
     cMessage *bcExpiryMsg = new cMessage("BCEntryExpiry", MK_BC_EXPIRY);
 

@@ -32,7 +32,7 @@ void QoSCtsPolicy::initialize(int stage)
     }
 }
 
-simtime_t QoSCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
+simtime_t QoSCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
     return rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
 }
@@ -43,7 +43,7 @@ simtime_t QoSCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee8021
 // response minus the time, in microseconds, between the end of the PPDU carrying the RTS frame and the end
 // of the PPDU carrying the CTS frame.
 //
-simtime_t QoSCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
+simtime_t QoSCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
     simtime_t duration = rtsFrame->getDuration() - modeSet->getSifsTime() - computeCtsDuration(rtsPacket, rtsFrame);
     return duration < 0 ? 0 : duration;
@@ -54,7 +54,7 @@ simtime_t QoSCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<Iee
 // a SIFS period if the NAV at the STA receiving the RTS frame indicates that
 // the medium is idle.
 //
-bool QoSCtsPolicy::isCtsNeeded(const Ptr<Ieee80211RtsFrame>& rtsFrame) const
+bool QoSCtsPolicy::isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
    return rx->isMediumFree();
 }

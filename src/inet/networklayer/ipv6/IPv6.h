@@ -99,12 +99,12 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     {
       protected:
         Packet *packet = nullptr;
-        IPv6Header *ipv6Header = nullptr;
+        const IPv6Header *ipv6Header = nullptr;
         const InterfaceEntry *ie = nullptr;
         MACAddress macAddr;
         bool fromHL = false;
       public:
-        ScheduledDatagram(Packet *packet, IPv6Header *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
+        ScheduledDatagram(Packet *packet, const IPv6Header *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
         const InterfaceEntry *getIE() { return ie; }
         const IPv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
@@ -253,7 +253,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * and the packet has to be dropped or if the datagram has been forwarded to another
      * module for further processing.
      */
-    bool processExtensionHeaders(Packet *packet, IPv6Header *ipv6Header);
+    bool processExtensionHeaders(Packet *packet, const IPv6Header *ipv6Header);
 #endif /* WITH_xMIPv6 */
 };
 

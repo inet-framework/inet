@@ -853,7 +853,7 @@ bool RIPRouting::isValidResponse(Packet *packet)
     // validate entries
     int numEntries = ripPacket->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = ripPacket->getEntry(i);
+        const RIPEntry& entry = ripPacket->getEntry(i);
 
         // check that metric is in range [1,16]
         if (entry.metric < 1 || entry.metric > RIP_INFINITE_METRIC) {

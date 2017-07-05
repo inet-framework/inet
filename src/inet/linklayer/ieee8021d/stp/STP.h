@@ -75,13 +75,13 @@ class INET_API STP : public STPBase
     /*
      * Bridge Protocol Data Unit handling
      */
-    void handleBPDU(Packet *packet, const Ptr<BPDU>& bpdu);
+    void handleBPDU(Packet *packet, const Ptr<const BPDU>& bpdu);
     virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
      */
-    void handleTCN(Packet *packet, const Ptr<BPDU>& tcn);
+    void handleTCN(Packet *packet, const Ptr<const BPDU>& tcn);
     virtual void handleMessage(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -113,8 +113,8 @@ class INET_API STP : public STPBase
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int interfaceId, const Ptr<BPDU>& bpdu);
-    void setSuperiorBPDU(int interfaceId, const Ptr<BPDU>& bpdu);
+    bool isSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu);
+    void setSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu);
 
     void handleTick();
 

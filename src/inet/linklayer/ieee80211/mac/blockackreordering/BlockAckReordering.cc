@@ -24,7 +24,7 @@ namespace ieee80211 {
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     // The reception of QoS data frames using Normal Ack policy shall not be used by the
@@ -60,17 +60,17 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<Ieee80211BlockAckReq>& frame)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& frame)
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
     int startingSequenceNumber = -1;
     Tid tid = -1;
-    if (auto basicReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(frame)) {
+    if (auto basicReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(frame)) {
         tid = basicReq->getTidInfo();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
     }
-    else if (auto compressedReq = std::dynamic_pointer_cast<Ieee80211CompressedBlockAck>(frame)) {
+    else if (auto compressedReq = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAck>(frame)) {
         tid = compressedReq->getTidInfo();
         startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }
@@ -209,7 +209,7 @@ ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
         return it->second;
 }
 
-void BlockAckReordering::processReceivedDelba(const Ptr<Ieee80211Delba>& delba)
+void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
     Tid tid = delba->getTid();
     MACAddress originatorAddr = delba->getTransmitterAddress();

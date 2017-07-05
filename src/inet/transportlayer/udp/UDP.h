@@ -197,7 +197,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // crc
-    virtual bool verifyCrc(const Protocol *networkProtocol, const Ptr<UdpHeader>& udpHeader, Packet *packet);
+    virtual bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
     virtual void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet);
     virtual uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
 

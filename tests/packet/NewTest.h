@@ -27,35 +27,35 @@ namespace inet {
 class ApplicationHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TcpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class IpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetTrailerSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 

@@ -29,7 +29,7 @@ namespace serializer {
 
 Register_Serializer(IGMPMessage, IGMPHeaderSerializer);
 
-void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& igmpMessage = std::static_pointer_cast<const IGMPMessage>(chunk);
 

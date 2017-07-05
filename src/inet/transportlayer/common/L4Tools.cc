@@ -32,13 +32,13 @@
 
 namespace inet {
 
-Ptr<TransportHeaderBase> peekTransportHeader(Packet *packet)
+Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return peekTransportHeader(protocol, packet);
 }
 
-Ptr<TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
+Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_TCP_COMMON
     if (protocol == &Protocol::tcp)

@@ -50,7 +50,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
      *
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void handleAndDispatchFrame(Packet *packet, const Ptr<EtherFrame>& frame);
+    virtual void handleAndDispatchFrame(Packet *packet, const Ptr<const EtherFrame>& frame);
 
     /**
      * Utility function: sends the frame on all ports except inputport.

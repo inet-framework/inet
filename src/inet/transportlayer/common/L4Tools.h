@@ -24,8 +24,8 @@
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 namespace inet {
-    Ptr<TransportHeaderBase> peekTransportHeader(Packet *packet);
-    Ptr<TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet);
+    Ptr<const TransportHeaderBase> peekTransportHeader(Packet *packet);
+    Ptr<const TransportHeaderBase> peekTransportHeader(const Protocol *protocol, Packet *packet);
     Ptr<TransportHeaderBase> removeTransportHeader(Packet *packet);
     Ptr<TransportHeaderBase> removeTransportHeader(const Protocol *protocol, Packet *packet);
 };

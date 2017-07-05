@@ -26,7 +26,7 @@ BlockAckRecord::BlockAckRecord(MACAddress originatorAddress, Tid tid) :
 {
 }
 
-void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<Ieee80211DataHeader>& header)
+void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
     SequenceNumber sequenceNumber = header->getSequenceNumber();
     FragmentNumber fragmentNumber = header->getFragmentNumber();

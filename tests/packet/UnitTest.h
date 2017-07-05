@@ -36,21 +36,21 @@ class CompoundHeaderSerializer : public SequenceChunkSerializer
 class TlvHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TlvHeaderBoolSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TlvHeaderIntSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 

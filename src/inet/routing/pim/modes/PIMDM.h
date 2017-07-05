@@ -224,7 +224,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
     void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId);
     void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
     void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
-    void sendGraftAckPacket(Packet *pk, const Ptr<PIMGraft>& graftPacket);
+    void sendGraftAckPacket(Packet *pk, const Ptr<const PIMGraft>& graftPacket);
     void sendStateRefreshPacket(IPv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
     void sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie);
     void sendToIP(Packet *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);

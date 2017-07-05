@@ -120,7 +120,7 @@ class INET_API BindingCache : public cSimpleModule
      * Added by CB, 4.9.07
      * Delete the entry from the cache with the provided HoA.
      */
-    void deleteEntry(IPv6Address& HoA);
+    void deleteEntry(const IPv6Address& HoA);
 
     /**
      * Returns the value of the homeRegistration flag for the given HoA.

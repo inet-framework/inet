@@ -55,7 +55,7 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     virtual void startFrameTransmission();
     virtual void processFrameFromUpperLayer(Packet *pk);
     virtual void processMsgFromNetwork(EtherTraffic *traffic);
-    virtual void processReceivedDataFrame(Packet *packet, const Ptr<EtherFrame>& frame);
+    virtual void processReceivedDataFrame(Packet *packet, const Ptr<const EtherFrame>& frame);
     virtual void processPauseCommand(int pauseUnits);
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);

@@ -31,8 +31,8 @@ class INET_API IRecipientBlockAckProcedure
     public:
         virtual ~IRecipientBlockAckProcedure() { };
 
-        virtual void processReceivedBlockAckReq(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback) = 0;
-        virtual void processTransmittedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck) = 0;
+        virtual void processReceivedBlockAckReq(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback) = 0;
+        virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) = 0;
 };
 
 } /* namespace ieee80211 */

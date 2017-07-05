@@ -219,15 +219,15 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
         switch (ptrHdr->getType()) {
             case BGP_OPEN:
                 //BGPOpenMessage* ptrMsg = check_and_cast<BGPOpenMessage*>(msg);
-                processMessage(*check_and_cast<BGPOpenMessage *>(ptrHdr.get()));
+                processMessage(*check_and_cast<const BGPOpenMessage *>(ptrHdr.get()));
                 break;
 
             case BGP_KEEPALIVE:
-                processMessage(*check_and_cast<BGPKeepAliveMessage *>(ptrHdr.get()));
+                processMessage(*check_and_cast<const BGPKeepAliveMessage *>(ptrHdr.get()));
                 break;
 
             case BGP_UPDATE:
-                processMessage(*check_and_cast<BGPUpdateMessage *>(ptrHdr.get()));
+                processMessage(*check_and_cast<const BGPUpdateMessage *>(ptrHdr.get()));
                 break;
 
             default:

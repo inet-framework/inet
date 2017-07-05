@@ -99,19 +99,19 @@ simtime_t TxopProcedure::getRemaining() const
 }
 
 // FIXME: implement!
-bool TxopProcedure::isFinalFragment(const Ptr<Ieee80211MacHeader>& header) const
+bool TxopProcedure::isFinalFragment(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
 // FIXME: implement!
-bool TxopProcedure::isTxopInitiator(const Ptr<Ieee80211MacHeader>& header) const
+bool TxopProcedure::isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
 // FIXME: implement!
-bool TxopProcedure::isTxopTerminator(const Ptr<Ieee80211MacHeader>& header) const
+bool TxopProcedure::isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }

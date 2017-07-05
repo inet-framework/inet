@@ -41,16 +41,16 @@ Register_Serializer(Ieee80211MultiTidBlockAck, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211MacTrailer, Ieee80211MacTrailerSerializer);
 
-void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    if (auto ackFrame = std::dynamic_pointer_cast<Ieee80211AckFrame>(chunk))
+    if (auto ackFrame = std::dynamic_pointer_cast<const Ieee80211AckFrame>(chunk))
     {
         stream.writeByte(0xD4);
         stream.writeByte(0);
         stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ackFrame->getReceiverAddress());
     }
-    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RtsFrame>(chunk))
+    else if (auto rtsFrame = std::dynamic_pointer_cast<const Ieee80211RtsFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
@@ -58,14 +58,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeMACAddress(rtsFrame->getReceiverAddress());
         stream.writeMACAddress(rtsFrame->getTransmitterAddress());
     }
-    else if (auto ctsFrame = std::dynamic_pointer_cast<Ieee80211CtsFrame>(chunk))
+    else if (auto ctsFrame = std::dynamic_pointer_cast<const Ieee80211CtsFrame>(chunk))
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
         stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ctsFrame->getReceiverAddress());
     }
-    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(chunk))
+    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(chunk))
     {
         uint8_t type = dataOrMgmtFrame->getType();
         stream.writeByte(((type & 0x0F) << 4) | ((type & 0x30) >> 2));  //without Qos=0x08, with Qos=0x88
@@ -83,7 +83,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataHeader>(chunk)) {
+        if (auto dataFrame = std::dynamic_pointer_cast<const Ieee80211DataHeader>(chunk)) {
             if (dataFrame->getFromDS() && dataFrame->getToDS())
                 stream.writeMACAddress(dataFrame->getAddress4());
 
@@ -96,14 +96,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             }
         }
 
-        if (std::dynamic_pointer_cast<Ieee80211ActionFrame>(chunk))
+        if (std::dynamic_pointer_cast<const Ieee80211ActionFrame>(chunk))
         {
             //type = ST_ACTION;
             // 1    Action
             // Last One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
     }
-    else if (auto msduSubframe = std::dynamic_pointer_cast<Ieee80211MsduSubframeHeader>(chunk))
+    else if (auto msduSubframe = std::dynamic_pointer_cast<const Ieee80211MsduSubframeHeader>(chunk))
     {
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());
@@ -206,9 +206,9 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
     }
 }
 
-void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& macTrailer = std::dynamic_pointer_cast<Ieee80211MacTrailer>(chunk);
+    const auto& macTrailer = std::dynamic_pointer_cast<const Ieee80211MacTrailer>(chunk);
     auto fcsMode = macTrailer->getFcsMode();
 //    if (fcsMode != FCS_COMPUTED)
 //        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");

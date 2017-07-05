@@ -38,7 +38,7 @@ namespace serializer {
 
 Register_Serializer(IPv6Header, IPv6HeaderSerializer);
 
-void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& dgram = std::static_pointer_cast<const IPv6Header>(chunk);
     unsigned int i;

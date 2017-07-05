@@ -169,12 +169,14 @@ void TCP::handleMessage(cMessage *msg)
             // process segment
             TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
             if (conn) {
-                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
+                // KLUDGE: TODO: std::const_pointer_cast<TcpHeader>
+                bool ret = conn->processTCPSegment(packet, std::const_pointer_cast<TcpHeader>(tcpHeader), srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
+                // KLUDGE: TODO: std::const_pointer_cast<TcpHeader>
+                segmentArrivalWhileClosed(packet, std::const_pointer_cast<TcpHeader>(tcpHeader), srcAddr, destAddr);
             }
         }
     }
@@ -319,7 +321,7 @@ void TCP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPConnection *TCP::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;

@@ -68,10 +68,10 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 
       public:
         TalkspurtInfo() {}
-        void startTalkspurt(SimpleVoIPPacket *pk);
+        void startTalkspurt(const SimpleVoIPPacket *pk);
         void finishTalkspurt() { status = FINISHED; packets.clear(); }
-        bool checkPacket(SimpleVoIPPacket *pk);
-        void addPacket(SimpleVoIPPacket *pk);
+        bool checkPacket(const SimpleVoIPPacket *pk);
+        void addPacket(const SimpleVoIPPacket *pk);
         bool isActive() { return status == ACTIVE; }
     };
 

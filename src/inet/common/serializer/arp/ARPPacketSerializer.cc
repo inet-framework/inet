@@ -42,7 +42,7 @@ IPv4Address ARPPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsi
     return address;
 }
 
-void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& arpPacket = std::static_pointer_cast<const ARPPacket>(chunk);
     stream.writeUint16Be(1); //ethernet

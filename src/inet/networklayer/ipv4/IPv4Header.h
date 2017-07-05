@@ -82,7 +82,7 @@ class INET_API IPv4Header : public IPv4Header_Base
      * or nullptr. If index is 0, then the first, if 1 then the
      * second option is returned.
      */
-    virtual TLVOptionBase *findOptionByType(short int optionType, int index = 0);
+    virtual const TLVOptionBase *findOptionByType(short int optionType, int index = 0) const;
 
     /**
      * Adds an TLVOptionBase to the datagram.

@@ -321,10 +321,10 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, c
         auto packet = check_and_cast<Packet *>(obj);
         if (!packet->hasHeader<Ieee80211DataOrMgmtHeader>())
             return;
-        const Ptr<Ieee80211DataOrMgmtHeader>& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+        const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
         if (header->getType() != ST_BEACON)
             return;
-        const Ptr<Ieee80211MgmtHeader>& beacon = std::dynamic_pointer_cast<Ieee80211MgmtHeader>(header);
+        const Ptr<const Ieee80211MgmtHeader>& beacon = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header);
         APInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
             ap->rxPower = packet->getMandatoryTag<SignalPowerInd>()->getPower().get();
@@ -542,7 +542,7 @@ int Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
     return statusCode == SC_SUCCESSFUL ? PRC_SUCCESS : PRC_REFUSED;
 }
 
-void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     MACAddress address = header->getTransmitterAddress();
@@ -616,7 +616,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
     delete packet;
 }
 
-void Ieee80211MgmtSTA::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Deauthentication frame\n";
     const MACAddress& address = header->getAddress3();    // source address
@@ -639,12 +639,12 @@ void Ieee80211MgmtSTA::handleDeauthenticationFrame(Packet *packet, const Ptr<Iee
     delete packet;
 }
 
-void Ieee80211MgmtSTA::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTA::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Association Response frame\n";
 
@@ -699,18 +699,18 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Packet *packet, const Ptr<
     sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
-void Ieee80211MgmtSTA::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTA::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Reassociation Response frame\n";
     //TBD handle with the same code as Association Response?
 }
 
-void Ieee80211MgmtSTA::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Disassociation frame\n";
     const MACAddress& address = header->getAddress3();    // source address
@@ -732,7 +732,7 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Packet *packet, const Ptr<Ieee8
     assocAP.beaconTimeoutMsg = nullptr;
 }
 
-void Ieee80211MgmtSTA::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
@@ -752,12 +752,12 @@ void Ieee80211MgmtSTA::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211Mgmt
     delete packet;
 }
 
-void Ieee80211MgmtSTA::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTA::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtSTA::handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Probe Response frame\n";
     const auto& probeResponseBody = packet->peekData<Ieee80211ProbeResponseFrame>();
@@ -765,7 +765,7 @@ void Ieee80211MgmtSTA::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80
     delete packet;
 }
 
-void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrame>& body)
+void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ptr<const Ieee80211BeaconFrame>& body)
 {
     APInfo *ap = lookupAP(address);
     if (ap) {

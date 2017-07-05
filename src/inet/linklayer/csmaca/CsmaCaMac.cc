@@ -626,7 +626,7 @@ bool CsmaCaMac::isReceiving()
 bool CsmaCaMac::isAck(Packet *frame)
 {
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
-    return std::dynamic_pointer_cast<CsmaCaMacAckHeader>(macHeader) != nullptr;
+    return std::dynamic_pointer_cast<const CsmaCaMacAckHeader>(macHeader) != nullptr;
 }
 
 bool CsmaCaMac::isBroadcast(Packet *frame)

@@ -66,7 +66,7 @@ class INET_API TLVOptions : public TLVOptions_Base
     /*
      * Get the option at the specified position of optionVector. Throws an error if m invalid.
      */
-    TLVOptionBase& at(int m) { return *optionVector.at(m); }
+    TLVOptionBase& at(int m) const { return *optionVector.at(m); }
 
     /*
      * Get the option at the specified position of optionVector. Throws an error if m invalid.

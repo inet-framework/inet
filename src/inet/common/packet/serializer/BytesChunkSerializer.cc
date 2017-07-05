@@ -21,7 +21,7 @@ namespace inet {
 
 Register_Serializer(BytesChunk, BytesChunkSerializer);
 
-void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const
+void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const
 {
     const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     bit serializedLength = length == bit(-1) ? bytesChunk->getChunkLength() - offset: length;

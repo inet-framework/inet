@@ -92,7 +92,7 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFram
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)
         //    fragments = mpduCrcFooBarIfNeeded(fragments);
-        // const Ptr<Ieee80211DataOrMgmtHeader>& aMpdu = nullptr;
+        // const Ptr<const Ieee80211DataOrMgmtHeader>& aMpdu = nullptr;
         // if (aMpduAggregation)
         //    aMpdu = aMpduAggregateIfNeeded(fragments);
         // if (aMpdu)

@@ -86,7 +86,7 @@ void STP::handleMessage(cMessage *msg)
     }
 }
 
-void STP::handleBPDU(Packet *packet, const Ptr<BPDU>& bpdu)
+void STP::handleBPDU(Packet *packet, const Ptr<const BPDU>& bpdu)
 {
     int arrivalGate = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
@@ -130,7 +130,7 @@ void STP::handleBPDU(Packet *packet, const Ptr<BPDU>& bpdu)
     delete packet;
 }
 
-void STP::handleTCN(Packet *packet, const Ptr<BPDU>& tcn)
+void STP::handleTCN(Packet *packet, const Ptr<const BPDU>& tcn)
 {
     EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
@@ -220,7 +220,7 @@ void STP::generateTCN()
     }
 }
 
-bool STP::isSuperiorBPDU(int interfaceId, const Ptr<BPDU>& bpdu)
+bool STP::isSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
@@ -257,7 +257,7 @@ bool STP::isSuperiorBPDU(int interfaceId, const Ptr<BPDU>& bpdu)
     return true;
 }
 
-void STP::setSuperiorBPDU(int interfaceId, const Ptr<BPDU>& bpdu)
+void STP::setSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu)
 {
     // BDPU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())

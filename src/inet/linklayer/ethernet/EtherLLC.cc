@@ -153,7 +153,7 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
     const auto& ethHeader = EtherEncap::decapsulate(packet);
 
 
-    EtherFrameWithLLC *frame = dynamic_cast<EtherFrameWithLLC *>(ethHeader.get());
+    auto frame = dynamic_cast<const EtherFrameWithLLC *>(ethHeader.get());
     if (frame == nullptr) {
         EV << "Incoming packet does not have an LLC ethernet header, dropped. Header is " << (ethHeader ? ethHeader->getClassName() : "nullptr") << "\n";
         delete packet;

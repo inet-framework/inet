@@ -87,30 +87,30 @@ void ICMPv6::processICMPv6Message(Packet *packet)
     }
     else {
         auto icmpv6msg = packet->popHeader<ICMPv6Header>();
-        if (std::dynamic_pointer_cast<ICMPv6DestUnreachableMsg>(icmpv6msg)) {
+        if (std::dynamic_pointer_cast<const ICMPv6DestUnreachableMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<ICMPv6PacketTooBigMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const ICMPv6PacketTooBigMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<ICMPv6TimeExceededMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const ICMPv6TimeExceededMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<ICMPv6ParamProblemMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const ICMPv6ParamProblemMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
             errorOut(icmpv6msg);
         }
-        else if (auto echoRequest = std::dynamic_pointer_cast<ICMPv6EchoRequestMsg>(icmpv6msg)) {
+        else if (auto echoRequest = std::dynamic_pointer_cast<const ICMPv6EchoRequestMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
             processEchoRequest(packet, echoRequest);
         }
-        else if (auto echoReply = std::dynamic_pointer_cast<ICMPv6EchoReplyMsg>(icmpv6msg)) {
+        else if (auto echoReply = std::dynamic_pointer_cast<const ICMPv6EchoReplyMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
             processEchoReply(packet, echoReply);
         }
@@ -140,7 +140,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
  * The data received in the ICMPv6 Echo Request message MUST be returned
  * entirely and unmodified in the ICMPv6 Echo Reply message.
  */
-void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<ICMPv6EchoRequestMsg>& requestHeader)
+void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const ICMPv6EchoRequestMsg>& requestHeader)
 {
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
@@ -172,7 +172,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<ICMPv6EchoReque
     sendToIP(replyPacket);
 }
 
-void ICMPv6::processEchoReply(Packet *packet, const Ptr<ICMPv6EchoReplyMsg>& reply)
+void ICMPv6::processEchoReply(Packet *packet, const Ptr<const ICMPv6EchoReplyMsg>& reply)
 {
     delete packet;
 }
@@ -313,7 +313,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void ICMPv6::errorOut(const Ptr<ICMPv6Header>& icmpv6msg)
+void ICMPv6::errorOut(const Ptr<const ICMPv6Header>& icmpv6msg)
 {
 }
 

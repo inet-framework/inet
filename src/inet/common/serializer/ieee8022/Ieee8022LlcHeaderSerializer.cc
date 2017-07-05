@@ -26,7 +26,7 @@ namespace serializer {
 Register_Serializer(Ieee8022LlcHeader, Ieee8022LlcHeaderSerializer);
 Register_Serializer(Ieee8022SnapHeader, Ieee8022LlcHeaderSerializer);
 
-void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& llcHeader = CHK(std::dynamic_pointer_cast<const Ieee8022LlcHeader>(chunk));
     stream.writeByte(llcHeader->getSsap());

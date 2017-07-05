@@ -1099,7 +1099,8 @@ void LDP::processLABEL_WITHDRAW(Packet *pk)
     fecDown.erase(dit);
 
     EV_INFO << "sending back relase message" << endl;
-    packet->setType(LABEL_RELEASE);
+    // KLUDGE: TODO: std::const_pointer_cast<LDPLabelMapping>
+    std::const_pointer_cast<LDPLabelMapping>(packet)->setType(LABEL_RELEASE);
 
     // send msg to peer over TCP
     sendToPeer(fromIP, pk);

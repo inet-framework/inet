@@ -35,13 +35,13 @@ class INET_API IMACAddressTable
      * @param vid VLAN ID
      * @return Output port for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(MACAddress& address, unsigned int vid = 0) = 0;
+    virtual int getPortForAddress(const MACAddress& address, unsigned int vid = 0) = 0;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int portno, MACAddress& address, unsigned int vid = 0) = 0;
+    virtual bool updateTableWithAddress(int portno, const MACAddress& address, unsigned int vid = 0) = 0;
 
     /**
      *  @brief Clears portno cache

@@ -39,7 +39,7 @@ void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
     ProbabilisticBroadcast::handleLowerPacket(msg);
 }
 
-void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastHeader *m)
+void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcastHeader *m)
 {
     //find the network address of the node who sent the msg
     NeighborMap::key_type nodeAddress = m->getSrcAddr();

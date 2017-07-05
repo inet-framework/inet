@@ -215,7 +215,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
             const auto& icmpHeader = packet->popHeader<ICMPHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
-                const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPEchoReply>(icmpHeader));
+                const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
@@ -229,7 +229,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
             const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
-                const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPv6EchoReplyMsg>(icmpHeader));
+                const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPv6EchoReplyMsg>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {

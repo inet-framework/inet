@@ -51,8 +51,8 @@ class INET_API Tx : public cSimpleModule, public ITx
         Tx() {}
         ~Tx();
 
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
-        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
+        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
+        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
         virtual void radioTransmissionFinished() override;
 };
 

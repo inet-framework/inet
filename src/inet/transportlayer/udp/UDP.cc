@@ -1286,7 +1286,7 @@ void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
     }
 }
 
-bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<UdpHeader>& udpHeader, Packet *packet)
+bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet)
 {
     switch (udpHeader->getCrcMode()) {
         case CRC_DISABLED:

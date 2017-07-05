@@ -632,7 +632,7 @@ void IGMPv2::sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest)
     send(msg, "ipOut");
 }
 
-void IGMPv2::processIgmpMessage(Packet *packet, const Ptr<IGMPMessage>& igmp)
+void IGMPv2::processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& igmp)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (igmp->getType()) {
@@ -722,8 +722,8 @@ void IGMPv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     numQueriesRecv++;
 
-    IPv4Address& groupAddr = igmpQry->getGroupAddress();
-    const Ptr<IGMPv2Query>& v2Query = std::dynamic_pointer_cast<IGMPv2Query>(igmpQry);
+    const IPv4Address& groupAddr = igmpQry->getGroupAddress();
+    const Ptr<const IGMPv2Query>& v2Query = std::dynamic_pointer_cast<const IGMPv2Query>(igmpQry);
     simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
 
     if (groupAddr.isUnspecified()) {
@@ -791,7 +791,7 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, Packet *packet)
 
     const auto& msg = packet->peekHeader<IGMPv2Report>();
 
-    IPv4Address& groupAddr = msg->getGroupAddress();
+    const IPv4Address& groupAddr = msg->getGroupAddress();
 
     EV_INFO << "IGMPv2: received V2 Membership Report for group=" << groupAddr << " iface=" << ie->getName() << "\n";
 
@@ -858,7 +858,7 @@ void IGMPv2::processLeave(InterfaceEntry *ie, Packet *packet)
             return;
         }
 
-        IPv4Address& groupAddr = msg->getGroupAddress();
+        const IPv4Address& groupAddr = msg->getGroupAddress();
         RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
         RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
         if (groupData) {

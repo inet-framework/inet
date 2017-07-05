@@ -111,7 +111,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(Packet *frame);
     virtual void processReceivedJam(EtherJam *jam);
-    virtual void processReceivedPauseFrame(Packet *packet, EtherPauseFrame *frame);
+    virtual void processReceivedPauseFrame(Packet *packet, const EtherPauseFrame *frame);
     virtual void processConnectDisconnect() override;
     virtual void addReception(simtime_t endRxTime);
     virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);

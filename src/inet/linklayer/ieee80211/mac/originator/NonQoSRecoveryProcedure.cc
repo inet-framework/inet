@@ -63,7 +63,7 @@ void NonQoSRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationC
         cwCalculator->incrementCw();
 }
 
-void NonQoSRecoveryProcedure::incrementCounter(const Ptr<Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
+void NonQoSRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     if (retryCounter.find(id) != retryCounter.end())
@@ -105,7 +105,7 @@ void NonQoSRecoveryProcedure::ctsFrameReceived(StationRetryCounters *stationCoun
 // This LRC and the SLRC shall be reset when a MAC frame of length greater than dot11RTSThreshold
 // succeeds for that MPDU of type Data or MMPDU.
 //
-void NonQoSRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters)
+void NonQoSRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters)
 {
     auto id = SequenceControlField(ackedHeader->getSequenceNumber(), ackedHeader->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
@@ -132,7 +132,7 @@ void NonQoSRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<Ieee802
 // After dropping a frame because it reached its retry limit we need to clear the
 // retry counters
 //
-void NonQoSRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
+void NonQoSRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
@@ -156,7 +156,7 @@ void NonQoSRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<Ieee80
 // transmission of a MAC frame of length greater than dot11RTSThreshold fails for that MPDU
 // of type Data or MMPDU.
 //
-void NonQoSRecoveryProcedure::dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& failedHeader, StationRetryCounters *stationCounters)
+void NonQoSRecoveryProcedure::dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& failedHeader, StationRetryCounters *stationCounters)
 {
     if (packet->getByteLength() >= rtsThreshold) {
         incrementStationLrc(stationCounters);
@@ -171,7 +171,7 @@ void NonQoSRecoveryProcedure::dataOrMgmtFrameTransmissionFailed(Packet *packet, 
 //
 // If the RTS transmission fails, the SRC for the MSDU or MMPDU and the SSRC are incremented.
 //
-void NonQoSRecoveryProcedure::rtsFrameTransmissionFailed(const Ptr<Ieee80211DataOrMgmtHeader>& protectedHeader, StationRetryCounters *stationCounters)
+void NonQoSRecoveryProcedure::rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader, StationRetryCounters *stationCounters)
 {
     incrementStationSrc(stationCounters);
     incrementCounter(protectedHeader, shortRetryCounter);
@@ -183,7 +183,7 @@ void NonQoSRecoveryProcedure::rtsFrameTransmissionFailed(const Ptr<Ieee80211Data
 // or MMPDU is equal to dot11LongRetryLimit. When either of these limits is reached, retry attempts
 // shall cease, and the MPDU of type Data (and any MSDU of which it is a part) or MMPDU shall be discarded.
 //
-bool NonQoSRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& failedHeader)
+bool NonQoSRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& failedHeader)
 {
     if (packet->getByteLength() >= rtsThreshold)
         return getRc(packet, failedHeader, longRetryCounter) >= longRetryLimit;
@@ -192,7 +192,7 @@ bool NonQoSRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<Ieee
 }
 
 
-int NonQoSRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
+int NonQoSRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (packet->getByteLength() >= rtsThreshold)
         return getRc(packet, header, longRetryCounter);
@@ -201,12 +201,12 @@ int NonQoSRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<Ieee80211Da
 }
 
 
-int NonQoSRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+int NonQoSRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& frame)
 {
     return getRc(packet, frame, shortRetryCounter);
 }
 
-int NonQoSRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& frame)
+int NonQoSRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& frame)
 {
     return getRc(packet, frame, longRetryCounter);
 }
@@ -216,12 +216,12 @@ void NonQoSRecoveryProcedure::resetContentionWindow()
     cwCalculator->resetCw();
 }
 
-bool NonQoSRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& protectedHeader)
+bool NonQoSRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& protectedHeader)
 {
     return getRc(packet, protectedHeader, shortRetryCounter) >= shortRetryLimit;
 }
 
-int NonQoSRecoveryProcedure::getRc(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
+int NonQoSRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
     auto count = retryCounter.find(SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
     if (count != retryCounter.end())
@@ -230,9 +230,9 @@ int NonQoSRecoveryProcedure::getRc(Packet *packet, const Ptr<Ieee80211DataOrMgmt
         return 0;
 }
 
-bool NonQoSRecoveryProcedure::isMulticastFrame(const Ptr<Ieee80211MacHeader>& header)
+bool NonQoSRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeader>& header)
 {
-    if (auto oneAddressHeader = std::dynamic_pointer_cast<Ieee80211OneAddressHeader>(header))
+    if (auto oneAddressHeader = std::dynamic_pointer_cast<const Ieee80211OneAddressHeader>(header))
         return oneAddressHeader->getReceiverAddress().isMulticast();
     return false;
 }

@@ -160,13 +160,14 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         //FIXME frame is immutable
         packet->removeFromBeginning(frame->getChunkLength());
-        frame = std::dynamic_pointer_cast<EtherFrame>(frame->dupShared());
-        frame->setSrc(address);
-        frame->markImmutable();
-        packet->pushHeader(frame);
+        const auto& newFrame = std::dynamic_pointer_cast<EtherFrame>(frame->dupShared());
+        newFrame->setSrc(address);
+        newFrame->markImmutable();
+        packet->pushHeader(newFrame);
+        frame = newFrame;
     }
 
-    bool isPauseFrame = (dynamic_cast<EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isPauseFrame = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
 
     if (!isPauseFrame) {
         numFramesFromHL++;
@@ -240,7 +241,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (EtherPauseFrame * pauseFrame = dynamic_cast<EtherPauseFrame *>(frame.get())) {
+    if (auto pauseFrame = dynamic_cast<const EtherPauseFrame *>(frame.get())) {
         int pauseUnits = pauseFrame->getPauseTime();
         delete packet;
         numPauseFramesRcvd++;
@@ -328,7 +329,7 @@ void EtherMACFullDuplex::handleEndPausePeriod()
     beginSendFrames();
 }
 
-void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<EtherFrame>& frame)
+void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<const EtherFrame>& frame)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();

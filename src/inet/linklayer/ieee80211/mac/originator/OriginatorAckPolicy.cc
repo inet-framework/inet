@@ -31,9 +31,9 @@ void OriginatorAckPolicy::initialize(int stage)
     }
 }
 
-bool OriginatorAckPolicy::isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& header) const
+bool OriginatorAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header)) {
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header)) {
         return !dataOrMgmtHeader->getReceiverAddress().isMulticast(); // TODO: + mgmt with NoAck check
     }
     return false;
@@ -46,7 +46,7 @@ bool OriginatorAckPolicy::isAckNeeded(const Ptr<Ieee80211DataOrMgmtHeader>& head
 // ACKTimeout interval, the STA concludes that the transmission of the MPDU has failed, and this STA shall
 // invoke its backoff procedure upon expiration of the ACKTimeout interval.
 //
-simtime_t OriginatorAckPolicy::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header) const
+simtime_t OriginatorAckPolicy::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
     return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, header)->getPhyRxStartDelay() : ackTimeout;
 }

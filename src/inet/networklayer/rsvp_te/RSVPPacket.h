@@ -41,7 +41,7 @@ class INET_API RSVPPacket : public RSVPPacket_Base
     inline int getExTunnelId() { return getSession().Extended_Tunnel_Id; }
     inline int getSetupPri() { return getSession().setupPri; }
     inline int getHoldingPri() { return getSession().holdingPri; }
-    inline bool isInSession(SessionObj_t *s)
+    inline bool isInSession(SessionObj_t *s) const
     {
         return getSession().DestAddress == s->DestAddress &&
                getSession().Tunnel_Id == s->Tunnel_Id &&

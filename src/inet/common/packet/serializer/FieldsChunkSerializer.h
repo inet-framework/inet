@@ -27,7 +27,7 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
      * Serializes a chunk into a stream by writing all bytes representing the
      * chunk at the end of the stream.
      */
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const = 0;
 
     /**
      * Deserializes a chunk from a stream by reading the bytes at the current
@@ -37,7 +37,7 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 

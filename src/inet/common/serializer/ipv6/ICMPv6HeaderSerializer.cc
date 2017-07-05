@@ -37,7 +37,7 @@ Register_Serializer(ICMPv6ParamProblemMsg, ICMPv6HeaderSerializer);
 Register_Serializer(ICMPv6TimeExceededMsg, ICMPv6HeaderSerializer);
 Register_Serializer(IPv6NeighbourSolicitation, ICMPv6HeaderSerializer);
 
-void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pkt = std::static_pointer_cast<const ICMPv6Header>(chunk);
 

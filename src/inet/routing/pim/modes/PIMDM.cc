@@ -400,11 +400,11 @@ void PIMDM::processGraftPacket(Packet *pk)
     }
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
-        JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
+        const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const EncodedAddress& source = group.getJoinedSourceAddress(j);
             processGraft(source.IPaddress, groupAddr, sender, incomingInterface->getInterfaceId());
         }
     }
@@ -547,11 +547,11 @@ void PIMDM::processGraftAckPacket(Packet *pk)
     IPv4Address destAddress = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
-        JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
+        const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const EncodedAddress& source = group.getJoinedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             UpstreamInterface *upstream = route->upstreamInterface;
 
@@ -1596,7 +1596,7 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
  * Neighbor Address field SHOULD be set to the sender of the Graft
  * message and SHOULD be ignored upon receipt.
  */
-void PIMDM::sendGraftAckPacket(Packet *pk, const Ptr<PIMGraft>& graftPacket)
+void PIMDM::sendGraftAckPacket(Packet *pk, const Ptr<const PIMGraft>& graftPacket)
 {
     EV_INFO << "Sending GraftAck message.\n";
 

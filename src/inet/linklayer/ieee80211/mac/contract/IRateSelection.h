@@ -37,10 +37,10 @@ class INET_API IRateSelection
 {
     public:
         virtual ~IRateSelection() {}
-        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) = 0;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
+        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
 
-        virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header) = 0;
+        virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
 };
 
 } // namespace ieee80211

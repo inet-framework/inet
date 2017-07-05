@@ -164,11 +164,11 @@ void AODVRouting::handleMessage(cMessage *msg)
                     break;
 
                 case RERR:
-                    handleRERR(std::dynamic_pointer_cast<AODVRERR>(ctrlPacket), sourceAddr);
+                    handleRERR(std::dynamic_pointer_cast<const AODVRERR>(ctrlPacket), sourceAddr);
                     break;
 
                 case RREPACK:
-                    handleRREPACK(std::dynamic_pointer_cast<AODVRREPACK>(ctrlPacket), sourceAddr);
+                    handleRREPACK(std::dynamic_pointer_cast<const AODVRREPACK>(ctrlPacket), sourceAddr);
                     break;
 
                 default:
@@ -1123,7 +1123,7 @@ Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreac
     return rerr;
 }
 
-void AODVRouting::handleRERR(const Ptr<AODVRERR>& rerr, const L3Address& sourceAddr)
+void AODVRouting::handleRERR(const Ptr<const AODVRERR>& rerr, const L3Address& sourceAddr)
 {
     EV_INFO << "AODV Route Error arrived with source addr: " << sourceAddr << endl;
 
@@ -1623,7 +1623,7 @@ void AODVRouting::sendRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& 
     sendAODVPacket(rrepACK, destAddr, 100, 0);
 }
 
-void AODVRouting::handleRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr)
+void AODVRouting::handleRREPACK(const Ptr<const AODVRREPACK>& rrepACK, const L3Address& neighborAddr)
 {
     // Note that the RREP-ACK packet does not contain any information about
     // which RREP it is acknowledging.  The time at which the RREP-ACK is

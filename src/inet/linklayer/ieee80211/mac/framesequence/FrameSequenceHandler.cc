@@ -96,7 +96,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << "\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
                 // TODO: lifetime
-                // if (auto dataFrame = dynamic_cast<const Ptr<Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
+                // if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
                 //    transmitLifetimeHandler->frameTransmitted(dataFrame);
                 break;
             }
@@ -160,7 +160,7 @@ void FrameSequenceHandler::abortFrameSequence()
     auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
     auto header = frameToTransmit->peekHeader<Ieee80211MacHeader>();
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))
         callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));

@@ -66,7 +66,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
 void Ieee8022Llc::decapsulate(Packet *frame)
 {
     const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
-    if (auto snapHeader = std::dynamic_pointer_cast<Ieee8022SnapHeader>(llcHeader)) {
+    if (auto snapHeader = std::dynamic_pointer_cast<const Ieee8022SnapHeader>(llcHeader)) {
         int etherType = snapHeader->getProtocolId();
         if (etherType != -1) {
             frame->ensureTag<EtherTypeInd>()->setEtherType(etherType);

@@ -34,8 +34,8 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
 
     protected:
         virtual Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
-        virtual void createAgreement(const Ptr<Ieee80211AddbaRequest>& addbaRequest);
-        virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<Ieee80211AddbaResponse>& addbaResp);
+        virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest);
+        virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
         virtual void terminateAgreement(MACAddress originatorAddr, Tid tid);
         virtual Ptr<Ieee80211Delba> buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode);
         virtual simtime_t computeEarliestExpirationTime();
@@ -43,12 +43,12 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
 
     public:
         virtual ~OriginatorBlockAckAgreementHandler();
-        virtual void processTransmittedAddbaReq(const Ptr<Ieee80211AddbaRequest>& addbaReq) override;
-        virtual void processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
-        virtual void processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) override;
-        virtual void processReceivedAddbaResp(const Ptr<Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
-        virtual void processReceivedDelba(const Ptr<Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
-        virtual void processTransmittedDelba(const Ptr<Ieee80211Delba>& delba) override;
+        virtual void processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
+        virtual void processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
+        virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) override;
+        virtual void processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
+        virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
+        virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
         virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
         virtual OriginatorBlockAckAgreement *getAgreement(MACAddress receiverAddr, Tid tid) override;

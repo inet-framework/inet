@@ -191,7 +191,7 @@ void IPv4::endService(cPacket *packet)
     }
 }
 
-bool IPv4::verifyCrc(const Ptr<IPv4Header>& ipv4Header)
+bool IPv4::verifyCrc(const Ptr<const IPv4Header>& ipv4Header)
 {
     switch (ipv4Header->getCrcMode()) {
         case CRC_DECLARED_CORRECT: {
@@ -289,7 +289,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
 {
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     ASSERT(ipv4Header);
-    IPv4Address& destAddr = ipv4Header->getDestAddress();
+    const IPv4Address& destAddr = ipv4Header->getDestAddress();
 
     // route packet
 
@@ -385,7 +385,7 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
     }
 
     // send
-    IPv4Address& destAddr = ipv4Header->getDestAddress();
+    const IPv4Address& destAddr = ipv4Header->getDestAddress();
 
     EV_DETAIL << "Sending datagram " << packet << " with destination = " << destAddr << "\n";
 
@@ -541,7 +541,7 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destI
     }
 }
 
-const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(IPv4Header *ipv4Header)
+const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(const IPv4Header *ipv4Header)
 {
     return rt->getInterfaceForDestAddr(ipv4Header->getSrcAddress());
 }

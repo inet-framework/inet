@@ -62,7 +62,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 {
     auto frameToTransmit = getFrameToTransmit();
-    if (std::dynamic_pointer_cast<Ieee80211RtsFrame>(frame->peekHeader<Ieee80211MacHeader>()))
+    if (std::dynamic_pointer_cast<const Ieee80211RtsFrame>(frame->peekHeader<Ieee80211MacHeader>()))
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {
@@ -98,7 +98,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, 
         auto frame = *it;
         auto header = frame->peekHeader<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
-            auto dataheader = CHK(std::dynamic_pointer_cast<Ieee80211DataHeader>(header));
+            auto dataheader = CHK(std::dynamic_pointer_cast<const Ieee80211DataHeader>(header));
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber(), dataheader->getFragmentNumber())))) != 0) {
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);

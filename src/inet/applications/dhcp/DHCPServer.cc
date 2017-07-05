@@ -283,7 +283,7 @@ void DHCPServer::processDHCPMessage(Packet *packet)
     numReceived++;
 }
 
-void DHCPServer::sendNAK(const Ptr<DHCPMessage>& msg)
+void DHCPServer::sendNAK(const Ptr<const DHCPMessage>& msg)
 {
     // EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     Packet *pk = new Packet("DHCPNAK");
@@ -314,7 +314,7 @@ void DHCPServer::sendNAK(const Ptr<DHCPMessage>& msg)
     sendToUDP(pk, serverPort, destAddr, clientPort);
 }
 
-void DHCPServer::sendACK(DHCPLease *lease, const Ptr<DHCPMessage>& packet)
+void DHCPServer::sendACK(DHCPLease *lease, const Ptr<const DHCPMessage>& packet)
 {
     EV_INFO << "Sending the ACK to " << lease->mac << "." << endl;
 
@@ -382,7 +382,7 @@ void DHCPServer::sendACK(DHCPLease *lease, const Ptr<DHCPMessage>& packet)
     sendToUDP(pk, serverPort, destAddr, clientPort);
 }
 
-void DHCPServer::sendOffer(DHCPLease *lease, const Ptr<DHCPMessage>& packet)
+void DHCPServer::sendOffer(DHCPLease *lease, const Ptr<const DHCPMessage>& packet)
 {
     EV_INFO << "Offering " << *lease << endl;
 
@@ -466,7 +466,7 @@ DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
     return nullptr;
 }
 
-DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddress& clientMAC)
+DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, const MACAddress& clientMAC)
 {
     int beginAddr = ipAddressStart.getInt();    // the first address that we might use
 

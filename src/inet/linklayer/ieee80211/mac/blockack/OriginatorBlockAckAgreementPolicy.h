@@ -42,9 +42,9 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
         virtual void initialize(int stage) override;
 
     public:
-        virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataHeader>& header) override;
-        virtual bool isAddbaReqAccepted(const Ptr<Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement) override;
-        virtual bool isDelbaAccepted(const Ptr<Ieee80211Delba>& delba) override;
+        virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
+        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement) override;
+        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
 
         virtual simtime_t computeAddbaFailureTimeout() const override;
 

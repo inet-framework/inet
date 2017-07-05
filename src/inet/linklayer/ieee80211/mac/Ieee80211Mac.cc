@@ -291,7 +291,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
     else
         throw cRuntimeError("Unknown mode");
     if (header->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header);
+        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
         int tid = dataHeader->getTid();
         if (tid < 8)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
@@ -348,7 +348,7 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
     if (!(header->getType() & 0x30))
         send(frame, "mgmtOut");
     else
-        ds->processDataFrame(frame, std::dynamic_pointer_cast<Ieee80211DataHeader>(header));
+        ds->processDataFrame(frame, std::dynamic_pointer_cast<const Ieee80211DataHeader>(header));
 }
 
 void Ieee80211Mac::sendDownFrame(Packet *frame)
@@ -368,7 +368,7 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
-void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header)
+void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(\"%s\")", packet->getName());
     take(packet);
@@ -380,7 +380,7 @@ void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMg
         dcf->processUpperFrame(packet, header);
 }
 
-void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
+void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("processLowerFrame(\"%s\")", packet->getName());
     take(packet);

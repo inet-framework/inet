@@ -258,7 +258,7 @@ Interface *Area::findVirtualLink(RouterID routerID)
     return nullptr;
 }
 
-bool Area::installRouterLSA(OSPFRouterLSA *lsa)
+bool Area::installRouterLSA(const OSPFRouterLSA *lsa)
 {
     LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
     auto lsaIt = routerLSAsByID.find(linkStateID);
@@ -279,7 +279,7 @@ bool Area::installRouterLSA(OSPFRouterLSA *lsa)
     }
 }
 
-bool Area::installNetworkLSA(OSPFNetworkLSA *lsa)
+bool Area::installNetworkLSA(const OSPFNetworkLSA *lsa)
 {
     LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
     auto lsaIt = networkLSAsByID.find(linkStateID);
@@ -300,7 +300,7 @@ bool Area::installNetworkLSA(OSPFNetworkLSA *lsa)
     }
 }
 
-bool Area::installSummaryLSA(OSPFSummaryLSA *lsa)
+bool Area::installSummaryLSA(const OSPFSummaryLSA *lsa)
 {
     LSAKeyType lsaKey;
 
@@ -723,7 +723,7 @@ bool Area::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
     return false;
 }
 
-bool Area::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
+bool Area::floodLSA(const OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
     long interfaceCount = associatedInterfaces.size();
@@ -1441,7 +1441,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
             unsigned int linkCount = routerVertex->getLinksArraySize();
             for (i = 0; i < linkCount; i++) {
-                Link& link = routerVertex->getLinks(i);
+                const Link& link = routerVertex->getLinks(i);
                 LinkType linkType = static_cast<LinkType>(link.getType());
                 OSPFLSA *joiningVertex;
                 LSAType joiningVertexType;
@@ -1693,7 +1693,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                                 RouterLSA *toRouterLSA = dynamic_cast<RouterLSA *>(justAddedVertex);
                                 if (toRouterLSA != nullptr) {
                                     for (i = 0; i < linkCount; i++) {
-                                        Link& link = routerLSA->getLinks(i);
+                                        const Link& link = routerLSA->getLinks(i);
 
                                         if ((link.getType() == POINTTOPOINT_LINK) &&
                                             (link.getLinkID() == toRouterLSA->getHeader().getLinkStateID()) &&
@@ -1709,7 +1709,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                                     NetworkLSA *toNetworkLSA = dynamic_cast<NetworkLSA *>(justAddedVertex);
                                     if (toNetworkLSA != nullptr) {
                                         for (i = 0; i < linkCount; i++) {
-                                            Link& link = routerLSA->getLinks(i);
+                                            const Link& link = routerLSA->getLinks(i);
 
                                             if ((link.getType() == TRANSIT_LINK) &&
                                                 (link.getLinkID() == toNetworkLSA->getHeader().getLinkStateID()) &&
@@ -1796,7 +1796,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
         unsigned int linkCount = routerVertex->getLinksArraySize();
         for (j = 0; j < linkCount; j++) {
-            Link& link = routerVertex->getLinks(j);
+            const Link& link = routerVertex->getLinks(j);
             if (link.getType() != STUB_LINK) {
                 continue;
             }
@@ -1926,7 +1926,7 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                             unsigned int linkCount = destinationRouterLSA->getLinksArraySize();
                             IPv4Address rootID = IPv4Address(parentRouter->getRouterID());
                             for (j = 0; j < linkCount; j++) {
-                                Link& link = destinationRouterLSA->getLinks(j);
+                                const Link& link = destinationRouterLSA->getLinks(j);
                                 if (link.getLinkID() == rootID) {
                                     NextHop nextHop;
                                     nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
@@ -1983,7 +1983,7 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                     RouterID destinationRouterID = destinationRouterLSA->getHeader().getLinkStateID();
                     unsigned int linkCount = destinationRouterLSA->getLinksArraySize();
                     for (i = 0; i < linkCount; i++) {
-                        Link& link = destinationRouterLSA->getLinks(i);
+                        const Link& link = destinationRouterLSA->getLinks(i);
                         NextHop nextHop;
 
                         if (((link.getType() == TRANSIT_LINK) &&
@@ -2017,7 +2017,7 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
     return hops;
 }
 
-std::vector<NextHop> *Area::calculateNextHops(Link& destination, OSPFLSA *parent) const
+std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *parent) const
 {
     std::vector<NextHop> *hops = new std::vector<NextHop>;
     unsigned long i;
@@ -2131,7 +2131,7 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
         RouterLSA *toRouterLSA = dynamic_cast<RouterLSA *>(toLSA);
         if (toRouterLSA != nullptr) {
             for (i = 0; i < linkCount; i++) {
-                Link& link = fromRouterLSA->getLinks(i);
+                const Link& link = fromRouterLSA->getLinks(i);
                 LinkType linkType = static_cast<LinkType>(link.getType());
 
                 if (((linkType == POINTTOPOINT_LINK) ||
@@ -2146,7 +2146,7 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
             NetworkLSA *toNetworkLSA = dynamic_cast<NetworkLSA *>(toLSA);
             if (toNetworkLSA != nullptr) {
                 for (i = 0; i < linkCount; i++) {
-                    Link& link = fromRouterLSA->getLinks(i);
+                    const Link& link = fromRouterLSA->getLinks(i);
 
                     if ((link.getType() == TRANSIT_LINK) &&
                         (link.getLinkID() == toNetworkLSA->getHeader().getLinkStateID()))
@@ -2300,7 +2300,7 @@ void Area::calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRouting
 
     for (i = 0; i < lsaCount; i++) {
         SummaryLSA *currentLSA = summaryLSAs[i];
-        OSPFLSAHeader& currentHeader = currentLSA->getHeader();
+        const OSPFLSAHeader& currentHeader = currentLSA->getHeader();
 
         unsigned long routeCost = currentLSA->getRouteCost();
         unsigned short lsAge = currentHeader.getLsAge();
@@ -2428,7 +2428,7 @@ void Area::recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable)
 
     for (i = 0; i < lsaCount; i++) {
         SummaryLSA *currentLSA = summaryLSAs[i];
-        OSPFLSAHeader& currentHeader = currentLSA->getHeader();
+        const OSPFLSAHeader& currentHeader = currentLSA->getHeader();
 
         unsigned long routeCost = currentLSA->getRouteCost();
         unsigned short lsAge = currentHeader.getLsAge();

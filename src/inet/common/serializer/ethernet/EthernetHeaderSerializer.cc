@@ -30,7 +30,7 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EtherPhyFrame, EthernetPhyHeaderSerializer);
 
-void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EtherFrame>(chunk);
     stream.writeMACAddress(ethernetHeader->getDest());
@@ -101,7 +101,7 @@ Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) c
     return ethernetMacHeader;
 }
 
-void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream.writeByteRepeatedly(0, byte(chunk->getChunkLength()).get());
 }
@@ -111,7 +111,7 @@ Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) con
     throw cRuntimeError("Invalid operation");
 }
 
-void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetFcs = std::static_pointer_cast<const EthernetFcs>(chunk);
     if (ethernetFcs->getFcsMode() != FCS_COMPUTED)
@@ -127,7 +127,7 @@ Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
     return ethernetFcs;
 }
 
-void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream.writeByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
     stream.writeByte(0xD5); // SFD

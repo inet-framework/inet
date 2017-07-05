@@ -247,17 +247,17 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Process a BU - only applicable to HAs and CNs.
      */
-    void processBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
+    void processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu);
 
     /**
      * Validate a BU - only applicable to HAs and CNs
      */
-    bool validateBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
+    bool validateBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu);
 
     /**
      * Similiar to validateBUMessage(). However, this one is used only by HA to verify deregistration BU.
      */
-    bool validateBUderegisterMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
+    bool validateBUderegisterMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu);
 
     /**
      * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
@@ -269,12 +269,12 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
      */
-    void processBAMessage(Packet *inPacket, const Ptr<BindingAcknowledgement>& ba);
+    void processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledgement>& ba);
 
     /**
      * Validates a Binding Acknowledgement for a mobile node.
      */
-    bool validateBAck(Packet *inPacket, BindingAcknowledgement& ba);
+    bool validateBAck(Packet *inPacket, const BindingAcknowledgement& ba);
 
     /**
      * Creates and sends Binding Error message.
@@ -350,33 +350,33 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Create and send a HoT message.
      */
-    void processHoTIMessage(Packet *inPacket, const Ptr<HomeTestInit>& HoTI);
+    void processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& HoTI);
 
     /**
      * Create and send a CoT message.
      */
-    void processCoTIMessage(Packet *inPacket, const Ptr<CareOfTestInit>& CoTI);
+    void processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& CoTI);
 
     /**
      * First verifies a received HoT message and sends a BU to the CN if the care-of keygen token
      * is available as well. Retransmission of HoTI message is rescheduled.
      */
-    void processHoTMessage(Packet *inPacket, const Ptr<HomeTest>& HoT);
+    void processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& HoT);
 
     /**
      * Verifies a HoT according to the RFC, Section 11.6.2
      */
-    bool validateHoTMessage(Packet *inPacket, HomeTest& HoT);
+    bool validateHoTMessage(Packet *inPacket, const HomeTest& HoT);
 
     /**
      * Like processHoTMessage(), but related to CoT.
      */
-    void processCoTMessage(Packet *inPacket, const Ptr<CareOfTest>& CoT);
+    void processCoTMessage(Packet *inPacket, const Ptr<const CareOfTest>& CoT);
 
     /**
      * Like validateHoTMessage(), but related to CoT.
      */
-    bool validateCoTMessage(Packet *inPacket, CareOfTest& CoT);
+    bool validateCoTMessage(Packet *inPacket, const CareOfTest& CoT);
 
     /**
      * Send a BU depending on current status of:
@@ -437,7 +437,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Processes the Binding Refresh Message.
      */
-    void processBRRMessage(Packet *inPacket, const Ptr<BindingRefreshRequest>& brr);
+    void processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshRequest>& brr);
 
   protected:
 //
@@ -508,7 +508,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates or overwrites a timer for BC expiry that fires at provided scheduledTime.
      */
-    void createBCEntryExpiryTimer(IPv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime);
+    void createBCEntryExpiryTimer(const IPv6Address& HoA, InterfaceEntry *ie, simtime_t scheduledTime);
 
     /**
      * Handles the expiry of a BC entry.

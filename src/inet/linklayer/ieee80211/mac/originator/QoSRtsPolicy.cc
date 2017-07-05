@@ -43,11 +43,11 @@ void QoSRtsPolicy::initialize(int stage)
 // be set on a per-STA basis. This mechanism allows STAs to be configured to initiate RTS/CTS either always,
 // never, or only on frames longer than a specified length.
 //
-bool QoSRtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& protectedHeader) const
+bool QoSRtsPolicy::isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const
 {
-    if (std::dynamic_pointer_cast<Ieee80211BlockAckReq>(protectedHeader))
+    if (std::dynamic_pointer_cast<const Ieee80211BlockAckReq>(protectedHeader))
         return false;
-    if (std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(protectedHeader))
+    if (std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(protectedHeader))
         return packet->getByteLength() >= rtsThreshold && !protectedHeader->getReceiverAddress().isMulticast();
     else
         return false;
@@ -60,7 +60,7 @@ bool QoSRtsPolicy::isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& pr
 // the transmission of the RTS has failed, and this STA shall invoke its backoff procedure upon expiration of the
 // CTSTimeout interval.
 //
-simtime_t QoSRtsPolicy::getCtsTimeout(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) const
+simtime_t QoSRtsPolicy::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
     return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(packet, rtsFrame)->getPhyRxStartDelay() : ctsTimeout;
 }

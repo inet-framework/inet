@@ -33,7 +33,7 @@ simsignal_t SimpleVoIPReceiver::playoutLossRateSignal = registerSignal("VoIPPlay
 simsignal_t SimpleVoIPReceiver::mosSignal = registerSignal("VoIPMosSignal");
 simsignal_t SimpleVoIPReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
-void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
+void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoIPPacket *pk)
 {
     status = ACTIVE;
     talkspurtID = pk->getTalkspurtID();
@@ -44,14 +44,14 @@ void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
     addPacket(pk);
 }
 
-bool SimpleVoIPReceiver::TalkspurtInfo::checkPacket(SimpleVoIPPacket *pk)
+bool SimpleVoIPReceiver::TalkspurtInfo::checkPacket(const SimpleVoIPPacket *pk)
 {
     return talkspurtID == pk->getTalkspurtID()
            && talkspurtNumPackets == pk->getTalkspurtNumPackets()
            && voiceDuration == pk->getVoiceDuration();
 }
 
-void SimpleVoIPReceiver::TalkspurtInfo::addPacket(SimpleVoIPPacket *pk)
+void SimpleVoIPReceiver::TalkspurtInfo::addPacket(const SimpleVoIPPacket *pk)
 {
     VoIPPacketInfo packet;
     packet.packetID = pk->getPacketID();

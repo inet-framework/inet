@@ -82,19 +82,19 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtoco
     /**
      *  Respond to the machine that tried to ping us.
      */
-    virtual void processEchoRequest(Packet *packet, const Ptr<ICMPv6EchoRequestMsg>& header);
+    virtual void processEchoRequest(Packet *packet, const Ptr<const ICMPv6EchoRequestMsg>& header);
 
     /**
      *  Forward the ping reply to the "pingOut" of this module.
      */
-    virtual void processEchoReply(Packet *packet, const Ptr<ICMPv6EchoReplyMsg>& header);
+    virtual void processEchoReply(Packet *packet, const Ptr<const ICMPv6EchoReplyMsg>& header);
 
     /**
      * Validate the received IPv6 datagram before responding with error message.
      */
     virtual bool validateDatagramPromptingError(Packet *packet);
 
-    virtual void errorOut(const Ptr<ICMPv6Header>& header);
+    virtual void errorOut(const Ptr<const ICMPv6Header>& header);
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 

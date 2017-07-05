@@ -85,7 +85,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
             }
 
             for (unsigned int i = 0; i < lsaCount; i++) {
-                OSPFLSA *currentLSA;
+                const OSPFLSA *currentLSA;
 
                 switch (currentType) {
                     case ROUTERLSA_TYPE:
@@ -197,7 +197,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
 
                     // Add externalIPRoute in IPRoutingTable if this route is learned by BGP
                     if (currentType == AS_EXTERNAL_LSA_TYPE) {
-                        OSPFASExternalLSA *externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
+                        const OSPFASExternalLSA *externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
                         if (externalLSA->getContents().getExternalRouteTag() == OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP) {
                             IPv4Address externalAddr = currentLSA->getHeader().getLinkStateID();
                             int ifName = intf->getIfIndex();
@@ -213,8 +213,9 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
                          (router->isLocalAddress(currentLSA->getHeader().getLinkStateID()))))
                     {
                         if (ackFlags.noLSAInstanceInDatabase) {
-                            currentLSA->getHeader().setLsAge(MAX_AGE);
-                            router->floodLSA(currentLSA, areaID);
+                            auto lsaCopy = currentLSA->dup();
+                            lsaCopy->getHeader().setLsAge(MAX_AGE);
+                            router->floodLSA(lsaCopy, areaID);
                         }
                         else {
                             if (ackFlags.lsaIsNewer) {
@@ -288,7 +289,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
     }
 }
 
-void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
+void LinkStateUpdateHandler::acknowledgeLSA(const OSPFLSAHeader& lsaHeader,
         Interface *intf,
         LinkStateUpdateHandler::AcknowledgementFlags acknowledgementFlags,
         RouterID lsaSource)

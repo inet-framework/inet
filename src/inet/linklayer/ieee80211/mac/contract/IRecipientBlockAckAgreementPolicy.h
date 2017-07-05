@@ -28,8 +28,8 @@ class INET_API IRecipientBlockAckAgreementPolicy
     public:
         virtual ~IRecipientBlockAckAgreementPolicy() { }
 
-        virtual bool isAddbaReqAccepted(const Ptr<Ieee80211AddbaRequest>& addbaReq) = 0;
-        virtual bool isDelbaAccepted(const Ptr<Ieee80211Delba>& delba) = 0;
+        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) = 0;
+        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;
 
         virtual simtime_t getBlockAckTimeoutValue() const = 0;
         virtual bool aMsduSupported() const = 0;

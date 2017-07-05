@@ -29,8 +29,8 @@ class INET_API IRtsPolicy
     public:
         virtual ~IRtsPolicy() { }
 
-        virtual bool isRtsNeeded(Packet *packet, const Ptr<Ieee80211MacHeader>& protectedHeader) const = 0;
-        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame) const = 0;
+        virtual bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& protectedHeader) const = 0;
+        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
         virtual int getRtsThreshold() const = 0;
 };
 

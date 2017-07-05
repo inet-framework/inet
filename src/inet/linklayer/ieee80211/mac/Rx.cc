@@ -62,7 +62,7 @@ void Rx::handleMessage(cMessage *msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-bool Rx::lowerFrameReceived(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
+bool Rx::lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
@@ -99,7 +99,7 @@ bool Rx::isReceptionInProgress() const
            (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
-bool Rx::isFcsOk(Packet *packet, const Ptr<Ieee80211MacHeader>& header) const
+bool Rx::isFcsOk(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) const
 {
     // TODO: real FCS check based on fcs mode, see UDP for example
     // TODO: e.g. packet->peekData()->isCorrect();

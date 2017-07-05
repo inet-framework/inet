@@ -156,7 +156,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     packet->pushTrailer(ethFcs);
 }
 
-Ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
+Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
 {
     // EV_STATICCONTEXT;
 
@@ -164,7 +164,7 @@ Ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
     packet->popTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));
 
     // remove Padding if possible
-    if (auto header = dynamic_cast<EtherFrameWithPayloadLength *>(ethHeader.get())) {
+    if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get())) {
         bit payloadLength = byte(header->getPayloadLength());
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
@@ -193,10 +193,10 @@ void EtherEncap::processFrameFromMAC(Packet *packet)
     macAddressInd->setSrcAddress(ethHeader->getSrc());
     macAddressInd->setDestAddress(ethHeader->getDest());
     int etherType = -1;
-    if (auto eth2frame = dynamic_cast<EthernetIIFrame *>(ethHeader.get())) {
+    if (auto eth2frame = dynamic_cast<const EthernetIIFrame *>(ethHeader.get())) {
         etherType = eth2frame->getEtherType();
     }
-    else if (auto snapframe = dynamic_cast<EtherFrameWithSNAP *>(ethHeader.get())) {
+    else if (auto snapframe = dynamic_cast<const EtherFrameWithSNAP *>(ethHeader.get())) {
         etherType = snapframe->getLocalcode();
     }
     if (etherType != -1) {

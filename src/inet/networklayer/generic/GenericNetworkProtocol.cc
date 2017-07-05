@@ -208,9 +208,10 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
             datagram->removePoppedHeaders();
-            header = datagram->removeHeader<GenericDatagramHeader>();
-            header->setSourceAddress(destAddr); // allows two apps on the same host to communicate
-            datagram->insertHeader(header);
+            const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+            newHeader->setSourceAddress(destAddr); // allows two apps on the same host to communicate
+            datagram->insertHeader(newHeader);
+            header = newHeader;
         }
         numLocalDeliver++;
 
@@ -260,17 +261,19 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 
     if (!fromHL) {
         datagram->removePoppedHeaders();
-        header = datagram->removeHeader<GenericDatagramHeader>();
-        header->setHopLimit(header->getHopLimit() - 1);
-        datagram->insertHeader(header);
+        const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+        newHeader->setHopLimit(header->getHopLimit() - 1);
+        datagram->insertHeader(newHeader);
+        header = newHeader;
     }
 
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified()) {
         datagram->removePoppedHeaders();
-        header = datagram->removeHeader<GenericDatagramHeader>();
-        header->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
-        datagram->insertHeader(header);
+        const auto& newHeader = datagram->removeHeader<GenericDatagramHeader>();
+        newHeader->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
+        datagram->insertHeader(newHeader);
+        header = newHeader;
     }
 
     // default: send datagram to fragmentation

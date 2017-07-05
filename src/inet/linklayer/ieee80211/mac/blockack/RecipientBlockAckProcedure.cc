@@ -26,10 +26,10 @@ namespace ieee80211 {
 // STA shall transmit a BlockAck frame after a SIFS period, without regard to the busy/idle state of the medium.
 // The rules that specify the contents of this BlockAck frame are defined in 9.21.
 //
-void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacketReq, const Ptr<Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
+void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacketReq, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
 {
     numReceivedBlockAckReq++;
-    if (auto basicBlockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto agreement = blockAckAgreementHandler->getAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
@@ -43,7 +43,7 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
         throw cRuntimeError("Unsupported BlockAckReq");
 }
 
-void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck)
+void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
     numSentBlockAck++;
 }
@@ -54,9 +54,9 @@ void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<Ieee80211B
 // until the MPDU with the highest sequence number that has been received, and the STA shall set bits in the
 // Block Ack bitmap corresponding to all other MPDUs to 0.
 //
-Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
+Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
-    if (auto basicBlockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         ASSERT(agreement != nullptr);
         auto blockAck = std::make_shared<Ieee80211BasicBlockAck>();
         int startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();

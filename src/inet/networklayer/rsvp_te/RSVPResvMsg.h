@@ -34,8 +34,8 @@ class INET_API RSVPResvMsg : public RSVPResvMsg_Base
     RSVPResvMsg& operator=(const RSVPResvMsg& other) { RSVPResvMsg_Base::operator=(other); return *this; }
     virtual RSVPResvMsg *dup() const override { return new RSVPResvMsg(*this); }
 
-    inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+    inline IPv4Address getNHOP() const { return getHop().Next_Hop_Address; }
+    inline IPv4Address getLIH() const { return getHop().Logical_Interface_Handle; }
 };
 
 /**

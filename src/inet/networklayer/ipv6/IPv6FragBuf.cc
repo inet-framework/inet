@@ -45,7 +45,7 @@ void IPv6FragBuf::init(ICMPv6 *icmp)
     icmpModule = icmp;
 }
 
-Packet *IPv6FragBuf::addFragment(Packet *pk, IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now)
+Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now)
 {
     // find datagram buffer
     Key key;

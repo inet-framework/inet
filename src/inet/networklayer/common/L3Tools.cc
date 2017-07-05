@@ -32,13 +32,13 @@
 
 namespace inet {
 
-Ptr<NetworkHeaderBase> peekNetworkHeader(Packet *packet)
+Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     return peekNetworkHeader(protocol, packet);
 }
 
-Ptr<NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
+Ptr<const NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
 {
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4)

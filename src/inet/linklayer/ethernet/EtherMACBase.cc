@@ -441,7 +441,7 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
             throw cRuntimeError("invalid FCS mode in ethernet frame");
     }
     bit payloadLength = bit(-1);
-    if (auto header = dynamic_cast<EtherFrameWithPayloadLength *>(ethHeader.get()))
+    if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get()))
         payloadLength = byte(header->getPayloadLength());
 
     return (payloadLength == bit(-1) || payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
@@ -486,7 +486,7 @@ void EtherMACBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<EtherFrame>& frame)
+bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were
@@ -508,7 +508,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<EtherFrame>& fram
     if (frame->getDest().isBroadcast())
         return false;
 
-    bool isPause = (dynamic_cast<EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isPause = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
 
     if (!isPause && (promiscuous || frame->getDest().isMulticast()))
         return false;

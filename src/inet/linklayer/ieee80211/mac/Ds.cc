@@ -33,7 +33,7 @@ void Ds::initialize(int stage)
     }
 }
 
-void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataHeader>& header)
+void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& header)
 {
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         mac->sendUp(frame);
@@ -84,7 +84,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<Ieee80211DataHeader>& header)
         throw cRuntimeError("Unknown mode");
 }
 
-void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<Ieee80211DataOrMgmtHeader>& incomingHeader)
+void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211DataOrMgmtHeader>& incomingHeader)
 {
     incomingFrame->removePoppedChunks();
     const auto& outgoingHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(incomingHeader->dupShared());

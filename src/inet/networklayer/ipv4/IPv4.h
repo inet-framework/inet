@@ -114,7 +114,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
-    virtual const InterfaceEntry *getShortestPathInterfaceToSource(IPv4Header *datagram);
+    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const IPv4Header *datagram);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -126,7 +126,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     void arpResolutionTimedOut(IARP::Notification *entry);
 
     // utility: verifying CRC
-    bool verifyCrc(const Ptr<IPv4Header>& ipv4Header);
+    bool verifyCrc(const Ptr<const IPv4Header>& ipv4Header);
 
     /**
      * Encapsulate packet coming from higher layers into IPv4Header, using

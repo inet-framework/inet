@@ -50,7 +50,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Nei
         EV_INFO << "  Processing packet contents:\n";
 
         for (unsigned long i = 0; i < requestCount; i++) {
-            LSARequest& request = lsRequestPacket->getRequests(i);
+            const LSARequest& request = lsRequestPacket->getRequests(i);
             LSAKeyType lsaKey;
 
             EV_INFO << "    LSARequest: type=" << request.lsType

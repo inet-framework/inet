@@ -161,9 +161,9 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     /* Control Packet handlers */
     void handleRREP(const Ptr<AODVRREP>& rrep, const L3Address& sourceAddr);
     void handleRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(const Ptr<AODVRERR>& rerr, const L3Address& sourceAddr);
+    void handleRERR(const Ptr<const AODVRERR>& rerr, const L3Address& sourceAddr);
     void handleHelloMessage(const Ptr<AODVRREP>& helloMessage);
-    void handleRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr);
+    void handleRREPACK(const Ptr<const AODVRREPACK>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
     void sendRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive);

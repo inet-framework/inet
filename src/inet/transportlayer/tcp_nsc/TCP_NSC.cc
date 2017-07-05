@@ -362,14 +362,16 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
             EV_WARN << "CRC error, packet dropped\n";
             delete packet;
             return;
-        case CRC_DECLARED_CORRECT:
+        case CRC_DECLARED_CORRECT: {
             // modify to calculated, for serializing
             packet->removePoppedHeaders();
-            tcpHdr = packet->removeHeader<TcpHeader>();
-            tcpHdr->setCrcMode(CRC_COMPUTED);
-            tcpHdr->setCrc(0);
-            packet->insertHeader(tcpHdr);
+            const auto& newTcpHdr = packet->removeHeader<TcpHeader>();
+            newTcpHdr->setCrcMode(CRC_COMPUTED);
+            newTcpHdr->setCrc(0);
+            packet->insertHeader(newTcpHdr);
+            tcpHdr = newTcpHdr;
             break;
+        }
         default:
             break;
     }

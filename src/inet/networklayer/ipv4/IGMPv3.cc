@@ -866,7 +866,7 @@ void IGMPv3::processQuery(Packet *packet)
     assert(msg != nullptr);
 
     IPv4Address groupAddr = msg->getGroupAddress();
-    IPv4AddressVector& queriedSources = msg->getSourceList();
+    IPv4AddressVector queriedSources = msg->getSourceList();
     double maxRespTime = msg->getMaxRespTime().dbl();
 
     ASSERT(ie->isMulticast());

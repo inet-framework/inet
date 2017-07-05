@@ -19,9 +19,9 @@
 
 namespace inet {
 
-void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const
+void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const
 {
-    auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(chunk);
+    auto fieldsChunk = std::static_pointer_cast<const FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
         stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == bit(-1) ? chunk->getChunkLength() - offset : length);
     else if (offset == bit(0) && (length == bit(-1) || length == chunk->getChunkLength())) {

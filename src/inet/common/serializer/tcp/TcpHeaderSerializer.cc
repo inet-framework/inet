@@ -31,7 +31,7 @@ namespace serializer {
 
 Register_Serializer(TcpHeader, TcpHeaderSerializer);
 
-void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     struct tcphdr tcp;

@@ -28,10 +28,10 @@ class INET_API ITransmitLifetimeHandler
     public:
         virtual ~ITransmitLifetimeHandler() {}
 
-        virtual void frameGotInProgess(const Ptr<Ieee80211DataHeader>& header) = 0;
-        virtual void frameTransmitted(const Ptr<Ieee80211DataHeader>& header) = 0;
+        virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header) = 0;
+        virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header) = 0;
 
-        virtual bool isLifetimeExpired(const Ptr<Ieee80211DataHeader>& header) = 0;
+        virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header) = 0;
 };
 
 } /* namespace ieee80211 */

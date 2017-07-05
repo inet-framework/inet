@@ -176,7 +176,7 @@ void Interface::sendHelloPacket(IPv4Address destination, short ttl)
     parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
 }
 
-void Interface::sendLSAcknowledgement(OSPFLSAHeader *lsaHeader, IPv4Address destination)
+void Interface::sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Address destination)
 {
     OSPFOptions options;
     const auto& lsAckPacket = std::make_shared<OSPFLinkStateAcknowledgementPacket>();
@@ -303,7 +303,7 @@ bool Interface::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
 /**
  * @see RFC2328 Section 13.3.
  */
-bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
+bool Interface::floodLSA(const OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
 
@@ -436,14 +436,14 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
     return floodedBackOut;
 }
 
-Packet *Interface::createUpdatePacket(OSPFLSA *lsa)
+Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
 {
     LSAType lsaType = static_cast<LSAType>(lsa->getHeader().getLsType());
-    OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA *>(lsa) : nullptr;
-    OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA *>(lsa) : nullptr;
-    OSPFSummaryLSA *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
-                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OSPFSummaryLSA *>(lsa) : nullptr;
-    OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA *>(lsa) : nullptr;
+    const OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<const OSPFRouterLSA *>(lsa) : nullptr;
+    const OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<const OSPFNetworkLSA *>(lsa) : nullptr;
+    const OSPFSummaryLSA *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
+                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<const OSPFSummaryLSA *>(lsa) : nullptr;
+    const OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<const OSPFASExternalLSA *>(lsa) : nullptr;
 
     if (((lsaType == ROUTERLSA_TYPE) && (routerLSA != nullptr)) ||
         ((lsaType == NETWORKLSA_TYPE) && (networkLSA != nullptr)) ||
@@ -535,7 +535,7 @@ Packet *Interface::createUpdatePacket(OSPFLSA *lsa)
     return nullptr;
 }
 
-void Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
+void Interface::addDelayedAcknowledgement(const OSPFLSAHeader& lsaHeader)
 {
     if (interfaceType == Interface::BROADCAST) {
         if ((getState() == Interface::DESIGNATED_ROUTER_STATE) ||

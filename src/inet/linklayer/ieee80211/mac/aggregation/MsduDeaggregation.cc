@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& header, const Ptr<Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<Ieee80211DataHeader>& aMsduHeader)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& header, const Ptr<const Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<const Ieee80211DataHeader>& aMsduHeader)
 {
     bool toDS = aMsduHeader->getToDS();
     bool fromDS = aMsduHeader->getFromDS();

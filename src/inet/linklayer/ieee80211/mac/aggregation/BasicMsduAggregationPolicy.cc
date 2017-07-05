@@ -36,7 +36,7 @@ bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragat
             (aggregationLengthThreshold == -1 || aggregationLengthThreshold <= aMsduLength));
 }
 
-bool BasicMsduAggregationPolicy::isEligible(const Ptr<Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<Ieee80211DataHeader>& testHeader, int aMsduLength)
+bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<const Ieee80211DataHeader>& testHeader, int aMsduLength)
 {
     const auto& testTrailer = testPacket->peekTrailer<Ieee80211MacTrailer>();
 //   Only QoS data frames have a TID.
@@ -72,18 +72,18 @@ std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue 
     ASSERT(!queue->isEmpty());
     bit aMsduLength = bit(0);
     auto firstPacket = check_and_cast<Packet *>(queue->front());
-    Ptr<Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
+    Ptr<const Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
     auto frames = new std::vector<Packet*>();
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
         const auto& dataFrame = dataPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
         const auto& macTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
-        if (!std::dynamic_pointer_cast<Ieee80211DataHeader>(dataFrame))
+        if (!std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataFrame))
             break;
         if (!firstFrame)
             firstFrame = dataFrame;
-        if (!isEligible(std::static_pointer_cast<Ieee80211DataHeader>(dataFrame), firstPacket, std::static_pointer_cast<Ieee80211DataHeader>(firstFrame), byte(aMsduLength).get()))
+        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataFrame), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), byte(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
         aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() - macTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header

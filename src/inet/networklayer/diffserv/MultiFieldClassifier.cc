@@ -46,7 +46,7 @@ namespace inet {
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4
-bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *datagram)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
@@ -86,7 +86,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv6Header *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *datagram)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;

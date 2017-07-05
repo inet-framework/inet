@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<Ieee80211DataOrMgmtHeader>& header, bool incoming)
+QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming)
 {
     bool isTimePriorityFrame = false; // TODO
     const MACAddress& address = incoming ? header->getTransmitterAddress() : header->getReceiverAddress();
@@ -61,7 +61,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
     }
     else if (type == DATA)
     {
-        const Ptr<Ieee80211DataHeader>& qosDataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(header);
+        const Ptr<const Ieee80211DataHeader>& qosDataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
         Key key(header->getReceiverAddress(), qosDataHeader->getTid());
         auto it = lastSentSeqNums.find(key);
         if (it == lastSentSeqNums.end())

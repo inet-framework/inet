@@ -66,7 +66,7 @@ void RateSelection::initialize(int stage)
     }
 }
 
-const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
+const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     auto modeReqTag = packet->getTag<Ieee80211ModeReq>();
     if (modeReqTag)
@@ -83,7 +83,7 @@ const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<Ieee80211
 // frame in the frame exchange sequence (as defined in 9.7), if this rate belongs to the PHY mandatory rates, or
 // else at the highest possible rate belonging to the PHY rates in the BSSBasicRateSet.
 //
-const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (responseAckFrameMode)
         return responseAckFrameMode;
@@ -94,7 +94,7 @@ const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet,
     }
 }
 
-const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RtsFrame>& rtsFrame)
+const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
     if (responseCtsFrameMode)
         return responseCtsFrameMode;
@@ -118,13 +118,13 @@ const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet,
 // Poll+CF-ACK, the rate chosen to transmit the frame must be supported by both the addressed recipient STA
 // and the STA to which the ACK is intended.
 //
-const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
         return multicastFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
+    if (std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
+    if (std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
     if (dataOrMgmtRateControl)
         return dataOrMgmtRateControl->getRate();
@@ -138,15 +138,15 @@ const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<Ieee80
 // (see 10.3.10.1), or at one of the rates in the PHY mandatory rate set so they will
 // be understood by all STAs.
 //
-const IIeee80211Mode* RateSelection::computeControlFrameMode(const Ptr<Ieee80211MacHeader>& header)
+const IIeee80211Mode* RateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header)
 {
     // TODO: BSSBasicRateSet
     return fastestMandatoryMode;
 }
 
-const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
+const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<Ieee80211DataOrMgmtHeader>(header))
+    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header))
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
         return computeControlFrameMode(header);
@@ -161,13 +161,13 @@ void RateSelection::receiveSignal(cComponent* source, simsignal_t signalID, cObj
     }
 }
 
-void RateSelection::frameTransmitted(Packet *packet, const Ptr<Ieee80211MacHeader>& header)
+void RateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     auto receiverAddr = header->getReceiverAddress();
     lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
 }
 
-void RateSelection::setFrameMode(Packet *packet, const Ptr<Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
+void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
 {
     ASSERT(mode != nullptr);
     packet->ensureTag<Ieee80211ModeReq>()->setMode(mode);

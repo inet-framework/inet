@@ -85,17 +85,17 @@ void BitCountChunk::setData(bool bit)
     this->data = data;
 }
 
-bool BitCountChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
+bool BitCountChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
-bool BitCountChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
+bool BitCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
-void BitCountChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
+void BitCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
     handleChange();
@@ -103,7 +103,7 @@ void BitCountChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::insertAtEnd(const Ptr<Chunk>& chunk)
+void BitCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
     handleChange();

@@ -41,15 +41,15 @@ class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
 #ifdef WITH_TCP_COMMON
-    void printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<tcp::TcpHeader>& tcpHeader) const;
+    void printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const tcp::TcpHeader>& tcpHeader) const;
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-    void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<UdpHeader>& udpHeader) const;
+    void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const UdpHeader>& udpHeader) const;
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<ICMPHeader>& icmpHeader) const;
+    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const ICMPHeader>& icmpHeader) const;
 #endif // ifdef WITH_IPv4
-    void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<Chunk>& chunk) const;
+    void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const Chunk>& chunk) const;
 
   public:
     InetPacketPrinter() {}
@@ -75,7 +75,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
         if (Packet *pck = dynamic_cast<Packet *>(pk)) {
             auto packet = new Packet(pck->getName(), pck->peekData());
             while (const auto& chunk = packet->popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
-                if (const auto& sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+                if (const auto& sliceChunk = std::dynamic_pointer_cast<const SliceChunk>(chunk)) {
                     os << "slice from " << sliceChunk->getOffset() << ", length=" << sliceChunk->getLength();  //FIXME TODO show the sliced chunk
                 }
                 else
@@ -90,10 +90,10 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << separ << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<Chunk>& chunk) const
+void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const Chunk>& chunk) const
 {
 #ifdef WITH_IPv4
-    if (const auto& ipv4Header = std::dynamic_pointer_cast<IPv4Header>(chunk)) {
+    if (const auto& ipv4Header = std::dynamic_pointer_cast<const IPv4Header>(chunk)) {
         if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset() > 0)
             os << (ipv4Header->getMoreFragments() ? "" : "last ")
                << "fragment with offset=" << ipv4Header->getFragmentOffset() << " of ";
@@ -101,21 +101,21 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
     else
 #endif    // WITH_IPv4
 #ifdef WITH_TCP_COMMON
-    if (const auto& tcpHeader = std::dynamic_pointer_cast<tcp::TcpHeader>(chunk)) {
+    if (const auto& tcpHeader = std::dynamic_pointer_cast<const tcp::TcpHeader>(chunk)) {
         printTCPPacket(os, srcAddr, destAddr, packet, tcpHeader);
         return;
     }
     else
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-    if (const auto& udpHeader = std::dynamic_pointer_cast<UdpHeader>(chunk)) {
+    if (const auto& udpHeader = std::dynamic_pointer_cast<const UdpHeader>(chunk)) {
         printUDPPacket(os, srcAddr, destAddr, packet, udpHeader);
         return;
     }
     else
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-    if (const auto &icmpHeader = std::dynamic_pointer_cast<ICMPHeader>(chunk)) {
+    if (const auto &icmpHeader = std::dynamic_pointer_cast<const ICMPHeader>(chunk)) {
         printICMPPacket(os, srcAddr, destAddr, packet, icmpHeader);
         return;
     }
@@ -127,7 +127,7 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
 }
 
 #ifdef WITH_TCP_COMMON
-void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<tcp::TcpHeader>& tcpHeader) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const tcp::TcpHeader>& tcpHeader) const
 {
     os << " TCP: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
     // flags
@@ -157,7 +157,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3A
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<UdpHeader>& udpHeader) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const UdpHeader>& udpHeader) const
 {
 
     os << " UDP: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
@@ -166,18 +166,18 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3A
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
-void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<ICMPHeader>& icmpHeader) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const ICMPHeader>& icmpHeader) const
 {
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {
-            const auto& echoRq = CHK(std::dynamic_pointer_cast<ICMPEchoRequest>(icmpHeader));
+            const auto& echoRq = CHK(std::dynamic_pointer_cast<const ICMPEchoRequest>(icmpHeader));
             os << "ping " << srcAddr << " to " << destAddr
                << " id=" << echoRq->getIdentifier() << " seq=" << echoRq->getSeqNumber();
             break;
         }
 
         case ICMP_ECHO_REPLY: {
-            const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPEchoReply>(icmpHeader));
+            const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(icmpHeader));
             os << "pong " << srcAddr << " to " << destAddr
                << " id=" << echoReply->getIdentifier() << " seq=" << echoReply->getSeqNumber();
             break;

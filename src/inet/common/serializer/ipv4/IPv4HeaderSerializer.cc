@@ -27,7 +27,7 @@ namespace serializer {
 
 Register_Serializer(IPv4Header, IPv4HeaderSerializer);
 
-void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     struct ip iphdr;

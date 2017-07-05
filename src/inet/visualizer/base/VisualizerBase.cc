@@ -88,14 +88,14 @@ InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule 
     return interfaceTable->getInterfaceByInterfaceModule(module);
 }
 
-void VisualizerBase::mapChunkIds(const Ptr<Chunk>& chunk, const std::function<void(int)>& thunk) const
+void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
-        for (const auto& elementChunk : std::static_pointer_cast<SequenceChunk>(chunk)->getChunks())
+        for (const auto& elementChunk : std::static_pointer_cast<const SequenceChunk>(chunk)->getChunks())
             mapChunkIds(elementChunk, thunk);
     }
     else if (chunk->getChunkType() == Chunk::CT_SLICE)
-        thunk(std::static_pointer_cast<SliceChunk>(chunk)->getChunk()->getChunkId());
+        thunk(std::static_pointer_cast<const SliceChunk>(chunk)->getChunk()->getChunkId());
     else
         thunk(chunk->getChunkId());
 }

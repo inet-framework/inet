@@ -47,14 +47,14 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
     protected:
         virtual void initialize() override;
         virtual Packet *defragment(Packet *dataOrMgmtFrame);
-        virtual std::vector<Packet*> dataOrMgmtFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtHeader>& header);
+        virtual std::vector<Packet*> dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
     public:
         virtual ~RecipientMacDataService();
 
-        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataHeader>& dataHeader) override;
-        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211MgmtHeader>& mgmtHeader) override;
-        virtual std::vector<Packet*> controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211MacHeader>& controlHeader) override;
+        virtual std::vector<Packet*> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader) override;
+        virtual std::vector<Packet*> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
+        virtual std::vector<Packet*> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader) override;
 
 };
 

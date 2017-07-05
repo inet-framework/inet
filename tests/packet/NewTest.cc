@@ -27,12 +27,12 @@ Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
 Register_Serializer(EthernetTrailer, EthernetTrailerSerializer);
 Define_Module(NewTest);
 
-static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const Ptr<TcpHeader>& tcpHeader, const Ptr<BytesChunk>& tcpSegment)
+static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const BytesChunk>& tcpSegment)
 {
     return 42;
 }
 
-void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& applicationHeader = std::static_pointer_cast<const ApplicationHeader>(chunk);
     auto position = stream.getLength();
@@ -49,7 +49,7 @@ Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) c
     return applicationHeader;
 }
 
-void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     auto position = stream.getLength();
@@ -81,7 +81,7 @@ Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
     return tcpHeader;
 }
 
-void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ipHeader = std::static_pointer_cast<const IpHeader>(chunk);
     auto position = stream.getLength();
@@ -101,7 +101,7 @@ Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
     return ipHeader;
 }
 
-void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EthernetHeader>(chunk);
     auto position = stream.getLength();
@@ -118,7 +118,7 @@ Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) cons
     return ethernetHeader;
 }
 
-void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
     auto position = stream.getLength();

@@ -286,7 +286,7 @@ bool ARP::addressRecognized(IPv4Address destAddr, InterfaceEntry *ie)
     }
 }
 
-void ARP::dumpARPPacket(ARPPacket *arp)
+void ARP::dumpARPPacket(const ARPPacket *arp)
 {
     EV_DETAIL << (arp->getOpcode() == ARP_REQUEST ? "ARP_REQ" : arp->getOpcode() == ARP_REPLY ? "ARP_REPLY" : "unknown type")
               << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()

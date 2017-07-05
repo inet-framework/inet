@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 Register_Class(MsduAggregation);
 
-void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<Ieee80211DataHeader>& header)
+void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<const Ieee80211DataHeader>& header)
 {
     // Note: Addr1 (RA), Addr2 (TA)
     // Table 8-19—Address field contents

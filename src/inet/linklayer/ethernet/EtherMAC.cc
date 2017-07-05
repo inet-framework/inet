@@ -236,13 +236,14 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         //FIXME frame is immutable
         packet->removeFromBeginning(frame->getChunkLength());
-        frame = std::dynamic_pointer_cast<EtherFrame>(frame->dupShared());
-        frame->setSrc(address);
-        frame->markImmutable();
-        packet->pushHeader(frame);
+        const auto& newFrame = std::dynamic_pointer_cast<EtherFrame>(frame->dupShared());
+        newFrame->setSrc(address);
+        newFrame->markImmutable();
+        packet->pushHeader(newFrame);
+        frame = newFrame;
     }
 
-    bool isPauseFrame = (dynamic_cast<EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isPauseFrame = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
 
     if (!isPauseFrame) {
         numFramesFromHL++;
@@ -790,7 +791,7 @@ void EtherMAC::frameReceptionComplete()
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (auto pauseFrame = dynamic_cast<EtherPauseFrame *>(frame.get())) {
+    if (auto pauseFrame = dynamic_cast<const EtherPauseFrame *>(frame.get())) {
         processReceivedPauseFrame(packet, pauseFrame);
     }
     else {
@@ -818,7 +819,7 @@ void EtherMAC::processReceivedDataFrame(Packet *packet)
     send(packet, "upperLayerOut");
 }
 
-void EtherMAC::processReceivedPauseFrame(Packet *packet, EtherPauseFrame *frame)
+void EtherMAC::processReceivedPauseFrame(Packet *packet, const EtherPauseFrame *frame)
 {
     int pauseUnits = frame->getPauseTime();
     delete packet;

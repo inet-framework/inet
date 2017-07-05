@@ -40,7 +40,7 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *i
         EV_DETAIL << "  Processing packet contents:\n";
 
         for (int i = 0; i < lsaCount; i++) {
-            OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
+            const OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
             OSPFLSA *lsaOnRetransmissionList;
             LSAKeyType lsaKey;
 
