@@ -110,7 +110,7 @@ class INET_API PacketDump
     /**
      * Dumps info about the given TCP segment.
      */
-    void tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, const std::string& srcAddr,
+    void tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, int tcpLength, const std::string& srcAddr,
             const std::string& destAddr, const char *comment = nullptr);
 
     /**

@@ -392,7 +392,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
     if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(msg)) {
-        tcpDump(l2r, "", tcpseg, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
+        tcpDump(l2r, "", tcpseg, msg->getByteLength(), std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
     else
 #endif // ifdef WITH_TCP_COMMON
@@ -601,13 +601,14 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Header *dgram, const 
 #endif // ifdef WITH_IPv6
 }
 
-void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg,
+void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, int tcpLength,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     using namespace tcp;
 
     std::ostream& out = *outp;
 
+    int payloadLength = tcpLength - tcpseg->getHeaderLength();
     // seq and time (not part of the tcpdump format)
     char buf[30];
     sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
@@ -660,7 +661,10 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg,
     }
 
     // data-seqno
-    out << "seq " << tcpseg->getSequenceNo();
+    if (payloadLength > 0 || tcpseg->getSynBit()) {
+        out << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo() + payloadLength;
+        out << "(" << payloadLength << ") ";
+    }
 
     // ack
     if (tcpseg->getAckBit())
