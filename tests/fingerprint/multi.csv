@@ -2,7 +2,7 @@
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             78fd-29ef/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             7e6a-59da/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             494f-b5f5/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             c980-a1a1/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             03eb-3a1c/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             7e6a-59da/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             7299-ec8a/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            10s,             b299-6c83/tplx
