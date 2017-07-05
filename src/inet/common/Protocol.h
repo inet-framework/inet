@@ -36,6 +36,9 @@ class INET_API Protocol
   public:
     Protocol(const char *name);
 
+    bool operator==(const Protocol& other) const { return id == other.id; }
+    bool operator!=(const Protocol& other) const { return id != other.id; }
+
     const int getId() const { return id; }
     const char *getName() const { return name; }
 
@@ -46,6 +49,7 @@ class INET_API Protocol
 
     static const Protocol *findProtocol(const char *name);
     static const Protocol *getProtocol(const char *name);
+
 
   public:
     // in alphanumeric order
