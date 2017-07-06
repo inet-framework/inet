@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.1 (July, 2017) - stable
+--------------------------------
+
+ - Minor compatibility fix to work with OMNeT++ 5.2 Preview 1
+ - Turned on the parallel build option in the IDE project file.
+
 INET-3.6.0 (June, 2017) - stable
 --------------------------------
 
