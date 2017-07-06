@@ -35,7 +35,7 @@ void NodeStatus::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         state = getStateByName(par("initialStatus"));
-        origIcon = getDisplayString().getTagArg("i", 0);
+        WATCH(state);
     }
 }
 
@@ -132,12 +132,14 @@ void NodeStatus::refreshDisplay() const
             throw cRuntimeError("Unknown status");
     }
     cModule *node = getContainingNode(this);
-    const char *myicon = state == UP ? origIcon.c_str() : icon;
-    getDisplayString().setTagArg("i", 0, myicon);
-    if (*icon)
+    if (*icon) {
+        getDisplayString().setTagArg("i2", 0, icon);
         node->getDisplayString().setTagArg("i2", 0, icon);
-    else
+    }
+    else {
+        getDisplayString().removeTag("i2");
         node->getDisplayString().removeTag("i2");
+    }
 }
 
 } // namespace inet

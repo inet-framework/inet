@@ -42,7 +42,6 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
 
   private:
     State state;
-    std::string origIcon;
 
   public:
     virtual State getState() const { return state; }
