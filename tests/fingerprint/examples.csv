@@ -423,10 +423,10 @@
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            6411-3f50/tplx
 
 /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         556b-67bf/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         ffa8-fa2b/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         83e2-8959/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         3dca-c175/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         510a-fea2/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         ebe1-9d60/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         373e-456c/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         ed01-c22c/tplx
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            b161-baca/tplx
 
