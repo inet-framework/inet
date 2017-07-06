@@ -93,7 +93,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     amsduHeader->setAMsduPresent(true);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
+    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + bit(QOSCONTROL_BITS));
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);
