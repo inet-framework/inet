@@ -1234,6 +1234,18 @@ typedef value<double, units::bakers_dozen> bakers_dozen;
 
 } // namespace values
 
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::bit>& value)
+{
+    if (value.get() % 8 == 0)
+        os << values::byte(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::bit>::fn(os);
+    }
+    return os;
+}
+
 namespace constants {
 
 // Physical constants:
