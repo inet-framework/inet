@@ -138,6 +138,15 @@ class INET_API ElapsedTimeFilter : public cResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {fire(this, t, getElapsedTime(), details);}
 };
 
+class INET_API PacketDropReasonFilter : public cObjectResultFilter
+{
+  protected:
+    int reason = -1;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
 } // namespace filters
 
 } // namespace utils

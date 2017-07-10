@@ -20,6 +20,7 @@
 #include "inet/common/ResultFilters.h"
 
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/NotifierConsts_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
@@ -158,6 +159,24 @@ double ElapsedTimeFilter::getElapsedTime()
     return t - startTime;
 }
 
+void PacketDropReasonFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (check_and_cast<PacketDropDetails *>(details)->getReason() == reason)
+        fire(this, t, object, details);
+}
+
+// TODO: replace these filters with a single filter that supports parameters when it becomes available in omnetpp
+#define REGISTER_PACKET_DROP_REASON_FILTER(NAME, CLASS, REASON) class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonAddressResolutionFailed", AddressResolutionFailedPacketDropReasonFilter, ADDRESS_RESOLUTION_FAILED);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonForwardingDisabled", ForwardingDisabledPacketDropReasonFilter, FORWARDING_DISABLED);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonHopLimitReached", HopLimitReachedPacketDropReasonFilter, HOP_LIMIT_REACHED);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonIncorrectlyReceived", IncorrectlyReceivedPacketDropReasonFilter, INCORRECTLY_RECEIVED);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonInterfaceDown", InterfaceDownPacketDropReasonFilter, INTERFACE_DOWN);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNoInterfaceFound", NoInterfaceFoundPacketDropReasonFilter, NO_INTERFACE_FOUND);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNoRouteFound", NoRouteFoundPacketDropReasonFilter, NO_ROUTE_FOUND);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNotAddressedToUs", NotAddressedToUsPacketDropReasonFilter, NOT_ADDRESSED_TO_US);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonQueueOverflow", QueueOverflowPacketDropReasonFilter, QUEUE_OVERFLOW);
+REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonRetryLimitReached", RetryLimitReachedPacketDropReasonFilter, RETRY_LIMIT_REACHED);
 
 } // namespace filters
 
