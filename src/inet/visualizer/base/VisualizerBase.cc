@@ -79,15 +79,6 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         throw cRuntimeError("Unknown contact mode: %s", contactMode);
 }
 
-InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule *module) const
-{
-    L3AddressResolver addressResolver;
-    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-    if (interfaceTable == nullptr)
-        return nullptr;
-    return interfaceTable->getInterfaceByInterfaceModule(module);
-}
-
 void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
@@ -98,6 +89,15 @@ void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::funct
         thunk(std::static_pointer_cast<const SliceChunk>(chunk)->getChunk()->getChunkId());
     else
         thunk(chunk->getChunkId());
+}
+
+InterfaceEntry *getInterfaceEntry(cModule *networkNode, cModule *module)
+{
+    L3AddressResolver addressResolver;
+    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+    if (interfaceTable == nullptr)
+        return nullptr;
+    return interfaceTable->getInterfaceByInterfaceModule(module);
 }
 
 } // namespace visualizer

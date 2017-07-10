@@ -19,26 +19,75 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/queue/PassiveQueueBase.h"
+#include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
-#include "inet/linklayer/ethernet/EtherMACBase.h"
-#include "inet/common/NotifierConsts.h"
-
 
 namespace inet {
 
 namespace visualizer {
 
-PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(int moduleId, const cPacket *packet, const Coord& position) :
-    moduleId(moduleId),
+PacketDrop::PacketDrop(int reason, const cPacket* packet, const int moduleId, const Coord& position) :
     packet(packet),
+    moduleId(moduleId),
     position(position)
+{
+    this->reason = reason;
+}
+
+PacketDrop::~PacketDrop()
+{
+    delete packet;
+}
+
+const cModule* PacketDrop::getModule() const
+{
+    return check_and_cast<cModule *>(cSimulation::getActiveSimulation()->getComponent(moduleId));
+}
+
+const cModule *PacketDrop::getNetworkNode() const
+{
+    auto module = getModule();
+    return module != nullptr ? getContainingNode(module) : nullptr;
+}
+
+const InterfaceEntry *PacketDrop::getInterfaceEntry() const
+{
+    auto module = getModule();
+    return module != nullptr ? inet::visualizer::getInterfaceEntry(const_cast<cModule *>(getNetworkNode()), const_cast<cModule *>(getContainingNicModule(module))) : nullptr;
+}
+
+PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(const PacketDrop* packetDrop) :
+    packetDrop(packetDrop)
 {
 }
 
 PacketDropVisualizerBase::PacketDropVisualization::~PacketDropVisualization()
 {
-    delete packet;
+    delete packetDrop;
+}
+
+PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop* packetDrop) :
+        packetDrop(packetDrop)
+{
+}
+
+const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'n':
+            result = packetDrop->getPacket_()->getName();
+            break;
+        case 'c':
+            result = packetDrop->getPacket_()->getClassName();
+            break;
+        case 'r':
+            result = std::to_string(packetDrop->getReason());
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 void PacketDropVisualizerBase::DetailsFilter::setPattern(const char* pattern)
@@ -55,8 +104,8 @@ bool PacketDropVisualizerBase::DetailsFilter::matches(const PacketDropDetails *d
 
 PacketDropVisualizerBase::~PacketDropVisualizerBase()
 {
-    for (auto packetDrop : packetDropVisualizations)
-        delete packetDrop->packet;
+    for (auto packetDropVisualization : packetDropVisualizations)
+        delete packetDropVisualization;
     if (displayPacketDrops)
         unsubscribe();
 }
@@ -73,8 +122,8 @@ void PacketDropVisualizerBase::initialize(int stage)
         detailsFilter.setPattern(par("detailsFilter"));
         icon = par("icon");
         iconTintAmount = par("iconTintAmount");
-        if (iconTintAmount != 0)
-            iconTintColor = cFigure::Color(par("iconTintColor"));
+        iconTintColorSet.parseColors(par("iconTintColor"));
+        labelFormat.parseFormat(par("labelFormat"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
         fadeOutMode = par("fadeOutMode");
@@ -94,6 +143,10 @@ void PacketDropVisualizerBase::handleParameterChange(const char *name)
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
             packetFilter.setPattern(par("packetFilter"));
+        else if (!strcmp(name, "detailsFilter"))
+            detailsFilter.setPattern(par("detailsFilter"));
+        else if (!strcmp(name, "labelFormat"))
+            labelFormat.parseFormat(par("labelFormat"));
         removeAllPacketDropVisualizations();
     }
 }
@@ -102,24 +155,24 @@ void PacketDropVisualizerBase::refreshDisplay() const
 {
     AnimationPosition currentAnimationPosition;
     std::vector<const PacketDropVisualization *> removedPacketDropVisualizations;
-    for (auto packetDrop : packetDropVisualizations) {
+    for (auto packetDropVisualization : packetDropVisualizations) {
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentAnimationPosition.getSimulationTime() - packetDrop->packetDropAnimationPosition.getSimulationTime()).dbl();
+            delta = (currentAnimationPosition.getSimulationTime() - packetDropVisualization->packetDropAnimationPosition.getSimulationTime()).dbl();
         else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationPosition.getAnimationTime() - packetDrop->packetDropAnimationPosition.getAnimationTime();
+            delta = currentAnimationPosition.getAnimationTime() - packetDropVisualization->packetDropAnimationPosition.getAnimationTime();
         else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentAnimationPosition.getRealTime() - packetDrop->packetDropAnimationPosition.getRealTime();
+            delta = currentAnimationPosition.getRealTime() - packetDropVisualization->packetDropAnimationPosition.getRealTime();
         else
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         if (delta > fadeOutTime)
-            removedPacketDropVisualizations.push_back(packetDrop);
+            removedPacketDropVisualizations.push_back(packetDropVisualization);
         else
-            setAlpha(packetDrop, 1 - delta / fadeOutTime);
+            setAlpha(packetDropVisualization, 1 - delta / fadeOutTime);
     }
-    for (auto packetDrop : removedPacketDropVisualizations) {
-        const_cast<PacketDropVisualizerBase *>(this)->removePacketDropVisualization(packetDrop);
-        delete packetDrop;
+    for (auto packetDropVisualization : removedPacketDropVisualizations) {
+        const_cast<PacketDropVisualizerBase *>(this)->removePacketDropVisualization(packetDropVisualization);
+        delete packetDropVisualization;
     }
 }
 
@@ -142,9 +195,17 @@ void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t sig
 {
     Enter_Method_Silent();
     if (signal == NF_PACKET_DROP) {
+        auto module = check_and_cast<cModule *>(source);
         auto packet = check_and_cast<cPacket *>(object);
-        if (packetFilter.matches(packet))
-            addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), packet->dup()));
+        auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+        auto networkNode = getContainingNode(module);
+        auto interfaceModule = getContainingNicModule(module);
+        auto interfaceEntry = getInterfaceEntry(networkNode, interfaceModule);
+        if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet) && detailsFilter.matches(packetDropDetails)) {
+            auto packetDrop = new PacketDrop(packetDropDetails->getReason(), packet->dup(), module->getId(), getPosition(networkNode));
+            auto packetDropVisualization = createPacketDropVisualization(packetDrop);
+            addPacketDropVisualization(packetDropVisualization);
+        }
     }
     else
         throw cRuntimeError("Unknown signal");
@@ -166,6 +227,12 @@ void PacketDropVisualizerBase::removeAllPacketDropVisualizations()
         removePacketDropVisualization(packetDropVisualization);
         delete packetDropVisualization;
     }
+}
+
+std::string PacketDropVisualizerBase::getPacketDropVisualizationText(const PacketDrop *packetDrop) const
+{
+    DirectiveResolver directiveResolver(packetDrop);
+    return labelFormat.formatString(&directiveResolver);
 }
 
 } // namespace visualizer
