@@ -19,6 +19,7 @@
 #define __INET_NOTIFIERCONSTS_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/NotifierConsts_m.h"
 
 namespace inet {
 

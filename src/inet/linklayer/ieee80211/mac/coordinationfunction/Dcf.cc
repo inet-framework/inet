@@ -100,7 +100,9 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
     else {
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
 }
@@ -255,7 +257,9 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
     if (recoveryProcedure->isRtsFrameRetryLimitReached(packet, protectedHeader)) {
         recoveryProcedure->retryLimitReached(packet, protectedHeader);
         inProgressFrames->dropFrame(packet);
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(RETRY_LIMIT_REACHED);
+        emit(NF_PACKET_DROP, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
 }
@@ -319,7 +323,9 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(packet, failedFrame);
         inProgressFrames->dropFrame(packet);
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(RETRY_LIMIT_REACHED);
+        emit(NF_PACKET_DROP, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
     else {

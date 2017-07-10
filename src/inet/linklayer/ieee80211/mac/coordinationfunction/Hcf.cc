@@ -142,7 +142,9 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
     else {
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
 }
@@ -243,7 +245,9 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(internallyCollidedHeader))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(internallyCollidedFrame, mgmtHeader);
             else ; // TODO: + NonQoSDataFrame
-            emit(NF_PACKET_DROP, internallyCollidedFrame);
+            PacketDropDetails details;
+            details.setReason(RETRY_LIMIT_REACHED);
+            emit(NF_PACKET_DROP, internallyCollidedFrame, &details);
             emit(NF_LINK_BREAK, internallyCollidedFrame);
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
             if (hasFrameToTransmit(ac))
@@ -376,7 +380,9 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             else ; // TODO: nonqos data
             edcaInProgressFrames[ac]->dropFrame(packet);
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(RETRY_LIMIT_REACHED);
+            emit(NF_PACKET_DROP, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }
     }
@@ -491,7 +497,9 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(failedFrame))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtHeader);
             edcaInProgressFrames[ac]->dropFrame(packet);
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(RETRY_LIMIT_REACHED);
+            emit(NF_PACKET_DROP, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }
         else {

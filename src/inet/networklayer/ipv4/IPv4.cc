@@ -345,7 +345,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else if (!rt->isForwardingEnabled()) {
             EV_WARN << "forwarding off, dropping packet\n";
             numDropped++;
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(FORWARDING_DISABLED);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
         }
         else
@@ -362,7 +364,9 @@ void IPv4::handlePacketFromHL(Packet *packet)
     if (ift->getNumInterfaces() == 0) {
         EV_ERROR << "No interfaces exist, dropping packet\n";
         numDropped++;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(NO_INTERFACE_FOUND);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
         return;
     }
@@ -411,7 +415,9 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
         else {
             EV_ERROR << "No multicast interface, packet dropped\n";
             numUnroutable++;
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(NO_INTERFACE_FOUND);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
         }
     }
@@ -501,7 +507,9 @@ void IPv4::routeUnicastPacket(Packet *packet, const InterfaceEntry *fromIE, cons
     if (!destIE) {    // no route found
         EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
         numUnroutable++;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(NO_ROUTE_FOUND);
+        emit(NF_PACKET_DROP, packet, &details);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
@@ -541,7 +549,9 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destI
     }
     else {
         numDropped++;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
 }
@@ -576,7 +586,9 @@ void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
         if (!route) {
             EV_ERROR << "No route, packet dropped.\n";
             numUnroutable++;
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(NO_ROUTE_FOUND);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
             return;
         }
@@ -587,14 +599,16 @@ void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
         // TODO: no need to emit fromIE when tags will be used in place of control infos
         emit(NF_IPv4_DATA_ON_NONRPF, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
         numDropped++;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
     else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(ipv4Header.get())) {
         EV_ERROR << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
     else {
@@ -749,7 +763,9 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     // hop counter check
     if (ipv4Header->getTimeToLive() <= 0) {
         // drop datagram, destruction responsibility in ICMP
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        details.setReason(HOP_LIMIT_REACHED);
+        emit(NF_PACKET_DROP, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
@@ -766,7 +782,8 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (ipv4Header->getDontFragment()) {
-        emit(NF_PACKET_DROP, packet);
+        PacketDropDetails details;
+        emit(NF_PACKET_DROP, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
@@ -983,7 +1000,9 @@ void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
         for (int i = 0; i < packetQueue.getLength(); i++) {
             auto packet = packetQueue.get(i);
-            emit(NF_PACKET_DROP, packet);
+            PacketDropDetails details;
+            details.setReason(ADDRESS_RESOLUTION_FAILED);
+            emit(NF_PACKET_DROP, packet, &details);
         }
         packetQueue.clear();
         pendingPackets.erase(it);

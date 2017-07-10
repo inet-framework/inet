@@ -61,7 +61,9 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
 
         if (droppedMsg) {
             numQueueDropped++;
-            emit(NF_PACKET_DROP, droppedMsg);
+            PacketDropDetails details;
+            details.setReason(QUEUE_OVERFLOW);
+            emit(NF_PACKET_DROP, droppedMsg, &details);
             delete droppedMsg;
         }
         else
