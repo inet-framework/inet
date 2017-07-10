@@ -80,4 +80,7 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
         int retryLimit = default(7); // maximum number of retries
         @class(CsmaCaMac);
         @signal[NF_LINK_BREAK](type=Packet);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
