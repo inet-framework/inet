@@ -166,17 +166,17 @@ void PacketDropReasonFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t
 }
 
 // TODO: replace these filters with a single filter that supports parameters when it becomes available in omnetpp
-#define REGISTER_PACKET_DROP_REASON_FILTER(NAME, CLASS, REASON) class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonAddressResolutionFailed", AddressResolutionFailedPacketDropReasonFilter, ADDRESS_RESOLUTION_FAILED);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonForwardingDisabled", ForwardingDisabledPacketDropReasonFilter, FORWARDING_DISABLED);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonHopLimitReached", HopLimitReachedPacketDropReasonFilter, HOP_LIMIT_REACHED);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonIncorrectlyReceived", IncorrectlyReceivedPacketDropReasonFilter, INCORRECTLY_RECEIVED);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonInterfaceDown", InterfaceDownPacketDropReasonFilter, INTERFACE_DOWN);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNoInterfaceFound", NoInterfaceFoundPacketDropReasonFilter, NO_INTERFACE_FOUND);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNoRouteFound", NoRouteFoundPacketDropReasonFilter, NO_ROUTE_FOUND);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonNotAddressedToUs", NotAddressedToUsPacketDropReasonFilter, NOT_ADDRESSED_TO_US);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonQueueOverflow", QueueOverflowPacketDropReasonFilter, QUEUE_OVERFLOW);
-REGISTER_PACKET_DROP_REASON_FILTER("packetDropReasonRetryLimitReached", RetryLimitReachedPacketDropReasonFilter, RETRY_LIMIT_REACHED);
+#define Register_PacketDropReason_ResultFilter(NAME, CLASS, REASON) class CLASS : public PacketDropReasonFilter { public: CLASS() { reason = REASON; } }; Register_ResultFilter(NAME, CLASS);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsAddressResolutionFailed", AddressResolutionFailedPacketDropReasonFilter, ADDRESS_RESOLUTION_FAILED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsForwardingDisabled", ForwardingDisabledPacketDropReasonFilter, FORWARDING_DISABLED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsHopLimitReached", HopLimitReachedPacketDropReasonFilter, HOP_LIMIT_REACHED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsIncorrectlyReceived", IncorrectlyReceivedPacketDropReasonFilter, INCORRECTLY_RECEIVED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsInterfaceDown", InterfaceDownPacketDropReasonFilter, INTERFACE_DOWN);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsNoInterfaceFound", NoInterfaceFoundPacketDropReasonFilter, NO_INTERFACE_FOUND);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsNoRouteFound", NoRouteFoundPacketDropReasonFilter, NO_ROUTE_FOUND);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsNotAddressedToUs", NotAddressedToUsPacketDropReasonFilter, NOT_ADDRESSED_TO_US);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsQueueOverflow", QueueOverflowPacketDropReasonFilter, QUEUE_OVERFLOW);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsRetryLimitReached", RetryLimitReachedPacketDropReasonFilter, RETRY_LIMIT_REACHED);
 
 } // namespace filters
 
