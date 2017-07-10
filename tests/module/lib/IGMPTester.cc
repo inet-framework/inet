@@ -53,7 +53,7 @@ static ostream &operator<<(ostream &out, const IPv4AddressVector addresses)
     return out;
 }
 
-static ostream &operator<<(ostream &out, IGMPMessage* msg)
+static ostream &operator<<(ostream &out, const IGMPMessage* msg)
 {
     out << msg->getClassName() << "<";
 
@@ -61,19 +61,18 @@ static ostream &operator<<(ostream &out, IGMPMessage* msg)
     {
         case IGMP_MEMBERSHIP_QUERY:
         {
-            IGMPQuery *query = check_and_cast<IGMPQuery*>(msg);
+            auto *query = check_and_cast<const IGMPQuery*>(msg);
             out << "group=" << query->getGroupAddress();
-            if (dynamic_cast<IGMPv3Query*>(msg))
+            if (auto v3Query = dynamic_cast<const IGMPv3Query*>(msg))
             {
-                IGMPv3Query *v3Query = dynamic_cast<IGMPv3Query*>(msg);
                 out << ", sourceList=" << v3Query->getSourceList()
                     << ", maxRespTime=" << v3Query->getMaxRespTime()
                     << ", suppressRouterProc=" << (int)v3Query->getSuppressRouterProc()
                     << ", robustnessVariable=" << (int)v3Query->getRobustnessVariable()
                     << ", queryIntervalCode=" << (int)v3Query->getQueryIntervalCode();
             }
-            else if (dynamic_cast<IGMPv2Query*>(msg))
-                out << ", maxRespTime=" << dynamic_cast<IGMPv2Query*>(msg)->getMaxRespTime();
+            else if (auto v2Query = dynamic_cast<const IGMPv2Query*>(msg))
+                out << ", maxRespTime=" << v2Query->getMaxRespTime();
             break;
         }
         case IGMPV1_MEMBERSHIP_REPORT:
@@ -87,10 +86,10 @@ static ostream &operator<<(ostream &out, IGMPMessage* msg)
             break;
         case IGMPV3_MEMBERSHIP_REPORT:
         {
-            IGMPv3Report *report = check_and_cast<IGMPv3Report*>(msg);
+            auto report = check_and_cast<const IGMPv3Report*>(msg);
             for (unsigned int i = 0; i < report->getGroupRecordArraySize(); i++)
             {
-                GroupRecord &record = report->getGroupRecord(i);
+                const GroupRecord &record = report->getGroupRecord(i);
                 out << (i>0?", ":"") << record.groupAddress << "=";
                 switch (record.recordType)
                 {
@@ -141,8 +140,9 @@ void IGMPTester::initialize(int stage)
 
 void IGMPTester::handleMessage(cMessage *msg)
 {
-    Packet *igmpMsg = check_and_cast<Packet*>(msg);
-    EV << "IGMPTester: Received: " << igmpMsg << ".\n";
+    Packet *pk = check_and_cast<Packet*>(msg);
+    const auto& igmpMsg = pk->peekHeader<IGMPMessage>();
+    EV << "IGMPTester: Received: " << igmpMsg.get() << ".\n";
     delete msg;
 }
 
@@ -239,7 +239,6 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         msg->markImmutable();
         packet->prepend(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : group);
-
     }
     else if (type == "IGMPv2Report")
     {
@@ -254,6 +253,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         cXMLElementList records = node.getElementsByTagName("record");
         Packet *packet = new Packet("IGMPv3 report");
         const auto& msg = std::make_shared<IGMPv3Report>();
+        unsigned int byteLength = 8;   // IGMPv3Report header size
 
         msg->setGroupRecordArraySize(records.size());
         for (int i = 0; i < (int)records.size(); ++i)
@@ -275,7 +275,9 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
                                 recordTypeStr == "BLOCK" ? BLOCK_OLD_SOURCE : 0;
             ASSERT(record.groupAddress.isMulticast());
             ASSERT(record.recordType);
+            byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
         }
+        msg->setChunkLength(byte(byteLength));
         msg->markImmutable();
         packet->prepend(msg);
 
