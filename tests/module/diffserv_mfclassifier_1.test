@@ -84,7 +84,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setSourcePort(1000);
         packet->insertHeader(udpPacket);
-        ipv4Header->setTransportProtocol(17);
+        ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -96,7 +96,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setDestinationPort(1000);
         packet->insertHeader(udpPacket);
-        ipv4Header->setTransportProtocol(17);
+        ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -105,7 +105,7 @@ void TestApp::initialize()
     {
         Packet *packet = new Packet("ipv4-7");
         const auto& ipv4Header = std::make_shared<IPv4Header>();
-        ipv4Header->setTransportProtocol(17);
+        ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -171,7 +171,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setSourcePort(2100);
         packet->insertHeader(udpPacket);
-        ipv4Header->setTransportProtocol(17);
+        ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -183,7 +183,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setSourcePort(2200);
         packet->insertHeader(udpPacket);
-        ipv6Header->setTransportProtocol(17);
+        ipv6Header->setProtocolId(17);
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
@@ -195,7 +195,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setDestinationPort(2300);
         packet->insertHeader(udpPacket);
-        ipv4Header->setTransportProtocol(17);
+        ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
@@ -207,7 +207,7 @@ void TestApp::initialize()
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setDestinationPort(2400);
         packet->insertHeader(udpPacket);
-        ipv6Header->setTransportProtocol(17);
+        ipv6Header->setProtocolId(17);
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
