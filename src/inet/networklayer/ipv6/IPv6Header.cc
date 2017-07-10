@@ -183,6 +183,7 @@ int IPv6Header::calculateFragmentLength() const
 
 IPv6ExtensionHeader *IPv6Header::removeFirstExtensionHeader()
 {
+    handleChange();
     if (extensionHeaders.empty())
         return nullptr;
     IPv6ExtensionHeader *eh = extensionHeaders.front();
@@ -192,6 +193,7 @@ IPv6ExtensionHeader *IPv6Header::removeFirstExtensionHeader()
 
 IPv6ExtensionHeader *IPv6Header::removeExtensionHeader(IPProtocolId extensionType)
 {
+    handleChange();
     for (unsigned int i = 0; i < extensionHeaders.size(); i++) {
         if (extensionHeaders[i]->getExtensionType() == extensionType) {
             IPv6ExtensionHeader *eh = extensionHeaders[i];
