@@ -34,7 +34,8 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
     }
     // If the NAV at the STA receiving the RTS indicates the medium is not idle,
     // that STA shall not respond to the RTS frame.
-    else ;
+    else
+        EV_WARN << "Ignoring received RTS according to CTS policy (probably the medium is not free).\n";
 }
 
 const Ptr<Ieee80211CtsFrame> CtsProcedure::buildCts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
