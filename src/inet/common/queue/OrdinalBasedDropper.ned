@@ -36,7 +36,7 @@ simple OrdinalBasedDropper like IHook
         @signal[NF_PACKET_DROP](type=cMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=NF_PACKET_DROP; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in;
         output out;
