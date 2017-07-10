@@ -340,7 +340,6 @@ class INET_API TCPConnection : public cObject
 
     // variables associated with TCP state
     TCPStateVariables *state = nullptr;
-    TCPStateVariables *getState() const { return state; }
 
     // TCP queues
     TCPSendQueue *sendQueue = nullptr;
@@ -615,6 +614,7 @@ class INET_API TCPConnection : public cObject
     /** @name Various getters **/
     //@{
     int getFsmState() const { return fsm.getState(); }
+    const TCPStateVariables *getState() const { return state; }
     TCPStateVariables *getState() { return state; }
     TCPSendQueue *getSendQueue() { return sendQueue; }
     TCPSACKRexmitQueue *getRexmitQueue() { return rexmitQueue; }

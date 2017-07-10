@@ -317,7 +317,6 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
 {
     Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(signalID));
 
-    IRoute *route;
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
 
@@ -352,7 +351,7 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
     }
     else if (signalID == NF_ROUTE_DELETED) {
         // remove references to the deleted route and invalidate the RIP route
-        route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
+        const IRoute *route = check_and_cast<const IRoute *>(obj);
         if (route->getSource() != this) {
             for (auto & elem : ripRoutes)
                 if ((elem)->getRoute() == route) {
@@ -363,7 +362,7 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
     }
     else if (signalID == NF_ROUTE_ADDED) {
         // add or update the RIP route
-        route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
+        IRoute *route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
         if (route->getSource() != this) {
             if (isLoopbackInterfaceRoute(route)) {
                 /*ignore*/
@@ -388,7 +387,7 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
         }
     }
     else if (signalID == NF_ROUTE_CHANGED) {
-        route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
+        const IRoute *route = check_and_cast<const IRoute *>(obj);
         if (route->getSource() != this) {
             RIPRoute *ripRoute = findRoute(route);
             if (ripRoute) {

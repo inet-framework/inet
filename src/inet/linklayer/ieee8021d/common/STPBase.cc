@@ -127,7 +127,7 @@ void STPBase::refreshDisplay() const
         }
 
         // mark root switch
-        if (isOperational && (const_cast<STPBase*>(this)->getRootInterfaceId() == -1))
+        if (isOperational && getRootInterfaceId() == -1)
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");
