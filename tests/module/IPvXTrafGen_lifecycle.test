@@ -211,17 +211,17 @@ Sending packet: \(cPacket\)appData-10
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[0].trafGen 	sentPk:count 	15
+scalar Test.sender[0].trafGen sentPk:count 15
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[1].trafGen 	sentPk:count 	13
+scalar Test.sender[1].trafGen sentPk:count 13
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.recip.trafGen 	rcvdPk:count 	21
+scalar Test.recip.trafGen rcvdPk:count 21
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -396,27 +396,27 @@ Test\.switch started
 %# result.sca
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[0].cli 	sentPk:count 	14
+scalar Test.sender[0].cli sentPk:count 14
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[0].cli 	rcvdPk:count 	10
+scalar Test.sender[0].cli rcvdPk:count 10
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[1].cli 	sentPk:count 	14
+scalar Test.sender[1].cli sentPk:count 14
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[1].cli 	rcvdPk:count 	8
+scalar Test.sender[1].cli rcvdPk:count 8
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.recip.srv 	rcvdPk:count 	18
+scalar Test.recip.srv rcvdPk:count 18
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.recip.srv 	sentPk:count 	18
+scalar Test.recip.srv sentPk:count 18
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
