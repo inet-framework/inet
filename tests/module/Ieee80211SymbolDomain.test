@@ -26,15 +26,15 @@ import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMModulator;
 network SymbolDomainTest
 {
     submodules:
-		ieee80211SymbolDomainTest : Ieee80211SymbolDomainTest;
-		ieee80211OFDMSignalEncoder : Ieee80211OFDMEncoder;
-		ieee80211OFDMDataEncoder : Ieee80211OFDMEncoder;
-		ieee80211OFDMSignalDecoder: Ieee80211OFDMDecoder;
-		ieee80211OFDMDataDecoder: Ieee80211OFDMDecoder;
-		ieee80211OFDMSignalModulator : Ieee80211OFDMModulator;
-		ieee80211OFDMDataModulator : Ieee80211OFDMModulator;
-	    ieee80211OFDMSignalDemodulator : Ieee80211OFDMDemodulator;
-		ieee80211OFDMDataDemodulator : Ieee80211OFDMDemodulator;
+        ieee80211SymbolDomainTest : Ieee80211SymbolDomainTest;
+        ieee80211OFDMSignalEncoder : Ieee80211OFDMEncoder;
+        ieee80211OFDMDataEncoder : Ieee80211OFDMEncoder;
+        ieee80211OFDMSignalDecoder: Ieee80211OFDMDecoder;
+        ieee80211OFDMDataDecoder: Ieee80211OFDMDecoder;
+        ieee80211OFDMSignalModulator : Ieee80211OFDMModulator;
+        ieee80211OFDMDataModulator : Ieee80211OFDMModulator;
+        ieee80211OFDMSignalDemodulator : Ieee80211OFDMDemodulator;
+        ieee80211OFDMDataDemodulator : Ieee80211OFDMDemodulator;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
