@@ -295,15 +295,21 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
-    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
+    auto ipv6Header = packet->peekHeader<IPv6Header>();
     IPv6Address destAddress = ipv6Header->getDestAddress();
 
     // check for local delivery
     if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress)) {
         EV_INFO << "local delivery\n";
-        if (ipv6Header->getSrcAddress().isUnspecified())
-            // KLUDGE: TODO: std::const_pointer_cast<IPv6Header>
-            std::const_pointer_cast<IPv6Header>(ipv6Header)->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+        if (ipv6Header->getSrcAddress().isUnspecified()) {
+            // allows two apps on the same host to communicate
+            packet->removePoppedChunks();
+            ipv6Header = nullptr;
+            const auto& newIpv6Header = removeNetworkProtocolHeader<IPv6Header>(packet);
+            newIpv6Header->setSrcAddress(destAddress);
+            insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
+            ipv6Header = newIpv6Header;
+        }
 
         if (destIE && !destIE->isLoopback()) {
             EV_INFO << "datagram destination address is local, ignoring destination interface specified in the control info\n";
@@ -374,8 +380,9 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
         packet->removePoppedChunks();
+        ipv6Header = nullptr;
         const auto& newIpv6Header = removeNetworkProtocolHeader<IPv6Header>(packet);
-        newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
+        newIpv6Header->setHopLimit(newIpv6Header->getHopLimit() - 1);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         ipv6Header = newIpv6Header;
     }
@@ -510,9 +517,8 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         // hop counter decrement: only if datagram arrived from network, and will be
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
-        // TBD: in IPv4, arrange TTL check like this
-        // KLUDGE: TODO
         packet->removePoppedChunks();
+        ipv6Header = nullptr;
         const auto& newIpv6Header = removeNetworkProtocolHeader<IPv6Header>(packet);
         newIpv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
@@ -947,16 +953,16 @@ bool IPv6::processExtensionHeaders(Packet *packet, const IPv6Header *ipv6Header)
     // walk through all extension headers
     for (int i = 0; i < noExtHeaders; i++) {
         // KLUDGE: TODO: const_cast<IPv6Header>
-        IPv6ExtensionHeader *eh = const_cast<IPv6Header *>(ipv6Header)->removeFirstExtensionHeader();
+        const IPv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(i);
 
-        if (IPv6RoutingHeader *rh = dynamic_cast<IPv6RoutingHeader *>(eh)) {
+        if (const IPv6RoutingHeader *rh = dynamic_cast<const IPv6RoutingHeader *>(eh)) {
             EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
 
             // type 2 routing header should be processed by MIPv6 module
             // if no MIP support, ignore the header
             if (rt->hasMIPv6Support() && rh->getRoutingType() == 2) {
                 // for simplicity, we set a context pointer on the datagram
-                packet->setContextPointer(rh);
+                packet->setContextPointer((void *)rh);
                 EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
                 send(packet, "xMIPv6Out");
                 return false;
@@ -966,23 +972,23 @@ bool IPv6::processExtensionHeaders(Packet *packet, const IPv6Header *ipv6Header)
                 EV_INFO << "Ignoring unknown routing header" << endl;
             }
         }
-        else if (dynamic_cast<IPv6DestinationOptionsHeader *>(eh)) {
+        else if (dynamic_cast<const IPv6DestinationOptionsHeader *>(eh)) {
             //IPv6DestinationOptionsHeader* doh = (IPv6DestinationOptionsHeader*) (eh);
             //EV << "object of type=" << typeid(eh).name() << endl;
 
-            if (rt->hasMIPv6Support() && dynamic_cast<HomeAddressOption *>(eh)) {
-                packet->setContextPointer(eh);
+            if (rt->hasMIPv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
+                packet->setContextPointer((void *)eh);
                 EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
                 send(packet, "xMIPv6Out");
                 return false;
             }
             else {
-                delete eh;
+//                delete eh;
                 EV_INFO << "Ignoring unknown destination options header" << endl;
             }
         }
         else {
-            delete eh;
+//            delete eh;
             EV_INFO << "Ignoring unknown extension header" << endl;
         }
     }
