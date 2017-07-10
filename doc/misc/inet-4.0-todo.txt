@@ -33,3 +33,5 @@ should be included in INET 4.0.
  - avoid specifying module icon sizes by default, override icon size in submodules
  - sort includes alphabetically
  - pretty print white spaces
+
+ - review all examples and check if they still do what is intended
