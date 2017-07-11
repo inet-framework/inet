@@ -21,6 +21,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
@@ -60,21 +61,15 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *ipv
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
 
-#ifdef WITH_UDP
-        if (ipv4HeaderProtocolId == IP_PROT_UDP) {
-            const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
-            srcPort = udpHeader->getSourcePort();
-            destPort = udpHeader->getDestinationPort();
-        }
-#endif
-
-#ifdef WITH_TCP_COMMON
-        if (ipv4HeaderProtocolId == IP_PROT_TCP) {
-            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
-            srcPort = tcpHeader->getSourcePort();
-            destPort = tcpHeader->getDestinationPort();
-        }
-#endif
+        const Protocol *protocolPtr = ipv4Header->getProtocol();
+        if (!protocolPtr || !isTransportProtocol(*protocolPtr))
+            return false;
+        auto headerOffset = packet->getHeaderPopOffset();
+        packet->setHeaderPopOffset(headerOffset + ipv4Header->getChunkLength());
+        const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
+        packet->setHeaderPopOffset(headerOffset);
+        srcPort = transportHeader->getSourcePort();
+        destPort = transportHeader->getDestinationPort();
 
         if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
             return false;
@@ -99,21 +94,16 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *ipv
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
-#ifdef WITH_UDP
-        if (ipv6HeaderProtocolId == IP_PROT_UDP) {
-            const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv6Header->getChunkLength());
-            srcPort = udpHeader->getSourcePort();
-            destPort = udpHeader->getDestinationPort();
-        }
-#endif
 
-#ifdef WITH_TCP_COMMON
-        if (ipv6HeaderProtocolId == IP_PROT_TCP) {
-            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv6Header->getChunkLength());
-            srcPort = tcpHeader->getSourcePort();
-            destPort = tcpHeader->getDestinationPort();
-        }
-#endif
+        const Protocol *protocolPtr = ipv6Header->getProtocol();
+        if (!protocolPtr || !isTransportProtocol(*protocolPtr))
+            return false;
+        auto headerOffset = packet->getHeaderPopOffset();
+        packet->setHeaderPopOffset(headerOffset + ipv6Header->getChunkLength());
+        const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
+        packet->setHeaderPopOffset(headerOffset);
+        srcPort = transportHeader->getSourcePort();
+        destPort = transportHeader->getDestinationPort();
 
         if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
             return false;
