@@ -59,6 +59,15 @@ const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)
         return header;
 }
 
+bool isTransportProtocol(const Protocol& protocol)
+{
+    return
+            (protocol == Protocol::tcp)
+            || (protocol == Protocol::udp)
+            // TODO: add other L4 protocols
+            ;
+}
+
 const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol)
 {
 #ifdef WITH_TCP_COMMON
