@@ -126,7 +126,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
         // yes, this may happen - if we'are both ingress and egress
         packet->removePoppedChunks();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-        packet->removeTag<DispatchProtocolReq>();         // send to NIC
+        delete packet->removeTag<DispatchProtocolReq>();
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(packet);
     }
@@ -135,7 +135,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
         packet->removePoppedChunks();
         packet->pushHeader(mplsHeader);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
-        packet->removeTag<DispatchProtocolReq>();         // send to NIC
+        delete packet->removeTag<DispatchProtocolReq>();
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(packet);
     }
@@ -261,7 +261,7 @@ void MPLS::processMPLSPacketFromL2(Packet *packet)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-        packet->removeTag<DispatchProtocolReq>();         // send to NIC
+        delete packet->removeTag<DispatchProtocolReq>();
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
         sendToL2(packet);
@@ -273,7 +273,7 @@ void MPLS::processMPLSPacketFromL2(Packet *packet)
 
         if (outgoingInterface) {
             packet->removePoppedChunks();
-            packet->removeTag<DispatchProtocolReq>();         // send to NIC
+            delete packet->removeTag<DispatchProtocolReq>();
             packet->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
             packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(packet);

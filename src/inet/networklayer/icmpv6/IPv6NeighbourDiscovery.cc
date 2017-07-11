@@ -750,7 +750,7 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
 void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
         const IPv6Address& srcAddr, int interfaceId)
 {
-    msg->removeTag<DispatchProtocolReq>();         // send to NIC
+    delete msg->removeTag<DispatchProtocolReq>();
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = msg->ensureTag<L3AddressReq>();

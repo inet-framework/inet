@@ -211,7 +211,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
     // add control info with MAC address
     msg->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     msg->ensureTag<MacAddressReq>()->setDestAddress(macAddress);
-    msg->removeTag<DispatchProtocolReq>();         // send to NIC
+    delete msg->removeTag<DispatchProtocolReq>();
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 

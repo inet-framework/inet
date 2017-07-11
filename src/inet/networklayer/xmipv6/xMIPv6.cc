@@ -639,7 +639,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const IPv6Address& des
         const IPv6Address& srcAddr, int interfaceId, simtime_t sendTime)    // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
-    msg->removeTag<DispatchProtocolReq>();         // send to NIC
+    delete msg->removeTag<DispatchProtocolReq>();
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->ensureTag<L3AddressReq>()->setSrcAddress(srcAddr);

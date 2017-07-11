@@ -918,7 +918,7 @@ void IPv4::sendDatagramToOutput(Packet *packet, const InterfaceEntry *ie, IPv4Ad
         bool isIeee802Lan = ie->isBroadcast() && !ie->getMacAddress().isUnspecified();    // we only need/can do ARP on IEEE 802 LANs
         if (!isIeee802Lan) {
             delete packet->removeControlInfo();
-            packet->removeTag<DispatchProtocolReq>();         // send to NIC
+            delete packet->removeTag<DispatchProtocolReq>();
             sendPacketToNIC(packet, ie);
         }
         else {
@@ -1012,7 +1012,7 @@ void IPv4::sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, cons
     // add control info with MAC address
     packet->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddress);
-    packet->removeTag<DispatchProtocolReq>();         // send to NIC
+    delete packet->removeTag<DispatchProtocolReq>();
 
     sendPacketToNIC(packet, ie);
 }

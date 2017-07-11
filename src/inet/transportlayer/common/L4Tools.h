@@ -37,7 +37,7 @@ void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, con
 template <typename T>
 const Ptr<T> removeTransportProtocolHeader(Packet *packet)
 {
-    packet->removeTag<TransportProtocolInd>();
+    delete packet->removeTag<TransportProtocolInd>();
     return removeProtocolHeader<T>(packet);
 }
 

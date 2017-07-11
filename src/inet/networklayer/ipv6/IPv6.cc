@@ -899,7 +899,7 @@ void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, co
 {
     packet->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_IPv6);
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddr);
-    packet->removeTag<DispatchProtocolReq>();         // send to NIC
+    delete packet->removeTag<DispatchProtocolReq>();
     packet->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);

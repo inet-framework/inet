@@ -82,7 +82,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        message->removeTag<DispatchProtocolReq>();         // send to NIC
+        delete message->removeTag<DispatchProtocolReq>();
         message->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
@@ -91,7 +91,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                duplicate->removeTag<DispatchProtocolReq>();         // send to NIC
+                delete duplicate->removeTag<DispatchProtocolReq>();
                 duplicate->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }
