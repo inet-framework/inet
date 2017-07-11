@@ -321,7 +321,7 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
     os << " TTL=" << ttl;
     if (auto dscpTag = pk->getTag<DscpInd>())
-        os << " DSCP =" << dscpTag->getDifferentiatedServicesCodePoint();
+        os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;
     return os.str();
 }
