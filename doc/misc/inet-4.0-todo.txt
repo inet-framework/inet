@@ -24,6 +24,7 @@ should be included in INET 4.0.
  - implement all necessary message compiler changes to avoid clutter in msg files
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
+ - simplify INetfilter interface by removing parameters other than the datagram
 
  - update all NED and C++ documentation
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
