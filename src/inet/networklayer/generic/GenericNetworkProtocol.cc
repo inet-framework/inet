@@ -52,6 +52,8 @@ GenericNetworkProtocol::GenericNetworkProtocol() :
 
 GenericNetworkProtocol::~GenericNetworkProtocol()
 {
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
     for (auto & elem : queuedDatagramsForHooks) {
         delete elem.datagram;
     }

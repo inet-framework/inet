@@ -60,6 +60,8 @@ IPv6::IPv6() :
 
 IPv6::~IPv6()
 {
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
 }
 
 #ifdef WITH_xMIPv6

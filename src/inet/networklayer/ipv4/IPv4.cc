@@ -65,6 +65,8 @@ IPv4::IPv4() :
 
 IPv4::~IPv4()
 {
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
     flush();
 }
 
