@@ -54,6 +54,7 @@ class NetworkHeaderBase extends cObject;
 class IPv6Header extends NetworkHeaderBase
 {
     @customize(true);
+    chunkLength = byte(IPv6_HEADER_BYTES);
     IPv6Address srcAddress;
     IPv6Address destAddress;
     int payloadLength = -1;    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
