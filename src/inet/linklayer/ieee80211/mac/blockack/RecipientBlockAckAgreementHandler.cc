@@ -111,23 +111,23 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddre
     return delba;
 }
 
-const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& frame, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     auto addbaResponse = std::make_shared<Ieee80211AddbaResponse>();
-    addbaResponse->setReceiverAddress(frame->getTransmitterAddress());
+    addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
     // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
-    Tid tid = frame->getTid();
+    Tid tid = addbaRequest->getTid();
     addbaResponse->setTid(tid);
-    addbaResponse->setBlockAckPolicy(!frame->getBlockAckPolicy() && blockAckAgreementPolicy->delayedBlockAckPolicySupported() ? false : true);
-    addbaResponse->setBufferSize(frame->getBufferSize() <= blockAckAgreementPolicy->getMaximumAllowedBufferSize() ? frame->getBufferSize() : blockAckAgreementPolicy->getMaximumAllowedBufferSize());
-    addbaResponse->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue() == 0 ? blockAckAgreementPolicy->getBlockAckTimeoutValue() : frame->getBlockAckTimeoutValue());
+    addbaResponse->setBlockAckPolicy(!addbaRequest->getBlockAckPolicy() && blockAckAgreementPolicy->delayedBlockAckPolicySupported() ? false : true);
+    addbaResponse->setBufferSize(addbaRequest->getBufferSize() <= blockAckAgreementPolicy->getMaximumAllowedBufferSize() ? addbaRequest->getBufferSize() : blockAckAgreementPolicy->getMaximumAllowedBufferSize());
+    addbaResponse->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue() == 0 ? blockAckAgreementPolicy->getBlockAckTimeoutValue() : addbaRequest->getBlockAckTimeoutValue());
     addbaResponse->setAMsduSupported(blockAckAgreementPolicy->aMsduSupported());
     return addbaResponse;
 }
 
-void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& frame)
+void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
 {
-    auto id = std::make_pair(frame->getReceiverAddress(), frame->getTid());
+    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
     auto it = blockAckAgreements.find(id);
     if (it != blockAckAgreements.end()) {
         RecipientBlockAckAgreement *agreement = it->second;

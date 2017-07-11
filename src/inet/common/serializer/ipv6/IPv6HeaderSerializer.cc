@@ -40,7 +40,7 @@ Register_Serializer(IPv6Header, IPv6HeaderSerializer);
 
 void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& dgram = std::static_pointer_cast<const IPv6Header>(chunk);
+    const auto& ipv6Header = std::static_pointer_cast<const IPv6Header>(chunk);
     unsigned int i;
     uint32_t flowinfo;
 
@@ -51,29 +51,29 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
     flowinfo = 0x06;
     flowinfo <<= 8;
-    flowinfo |= dgram->getTrafficClass();
+    flowinfo |= ipv6Header->getTrafficClass();
     flowinfo <<= 20;
-    flowinfo |= dgram->getFlowLabel();
+    flowinfo |= ipv6Header->getFlowLabel();
     ip6h.ip6_flow = htonl(flowinfo);
-    ip6h.ip6_hlim = htons(dgram->getHopLimit());
+    ip6h.ip6_hlim = htons(ipv6Header->getHopLimit());
 
-    ip6h.ip6_nxt = dgram->getExtensionHeaderArraySize() != 0 ? dgram->getExtensionHeader(0)->getExtensionType() : dgram->getProtocolId();
+    ip6h.ip6_nxt = ipv6Header->getExtensionHeaderArraySize() != 0 ? ipv6Header->getExtensionHeader(0)->getExtensionType() : ipv6Header->getProtocolId();
 
     for (i = 0; i < 4; i++) {
-        ip6h.ip6_src.__u6_addr.__u6_addr32[i] = htonl(dgram->getSrcAddress().words()[i]);
+        ip6h.ip6_src.__u6_addr.__u6_addr32[i] = htonl(ipv6Header->getSrcAddress().words()[i]);
     }
     for (i = 0; i < 4; i++) {
-        ip6h.ip6_dst.__u6_addr.__u6_addr32[i] = htonl(dgram->getDestAddress().words()[i]);
+        ip6h.ip6_dst.__u6_addr.__u6_addr32[i] = htonl(ipv6Header->getDestAddress().words()[i]);
     }
 
-    ip6h.ip6_plen = htons(dgram->getPayloadLength());
+    ip6h.ip6_plen = htons(ipv6Header->getPayloadLength());
 
     stream.writeBytes((uint8_t *)&ip6h, byte(IPv6_HEADER_BYTES));
 
     //FIXME serialize extension headers
-    for (i = 0; i < dgram->getExtensionHeaderArraySize(); i++) {
-        const IPv6ExtensionHeader *extHdr = dgram->getExtensionHeader(i);
-        stream.writeByte(i + 1 < dgram->getExtensionHeaderArraySize() ? dgram->getExtensionHeader(i + 1)->getExtensionType() : dgram->getProtocolId());
+    for (i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
+        const IPv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
+        stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
         ASSERT((extHdr->getByteLength() & 7) == 0);
         stream.writeByte((extHdr->getByteLength() - 8) / 8);
         switch (extHdr->getExtensionType()) {

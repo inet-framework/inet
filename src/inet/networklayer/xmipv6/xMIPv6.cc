@@ -2025,13 +2025,13 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
     //createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-void xMIPv6::processType2RH(Packet *packet, IPv6Header *datagram, IPv6RoutingHeader *rh)
+void xMIPv6::processType2RH(Packet *packet, IPv6Header *ipv6Header, IPv6RoutingHeader *rh)
 {
     //EV << "Processing RH2..." << endl;
 
-    if (!validateType2RH(*datagram, *rh)) {
+    if (!validateType2RH(*ipv6Header, *rh)) {
         delete rh;
-        delete datagram;
+        delete ipv6Header;
         return;
     }
 
@@ -2052,7 +2052,7 @@ void xMIPv6::processType2RH(Packet *packet, IPv6Header *datagram, IPv6RoutingHea
     /*The segments left field in the routing header is 1 on the wire.*/
     if (rh->getSegmentsLeft() != 1) {
         EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
-        delete datagram;
+        delete ipv6Header;
         return;
     }
 
@@ -2067,7 +2067,7 @@ void xMIPv6::processType2RH(Packet *packet, IPv6Header *datagram, IPv6RoutingHea
            destination field with the Home Address field in the routing header,
            decrements segments left by one from the value it had on the wire,
            and resubmits the packet to IP for processing the next header.*/
-        datagram->setDestAddress(HoA);
+        ipv6Header->setDestAddress(HoA);
         validRH2 = true;
     }
     else {
@@ -2087,7 +2087,7 @@ void xMIPv6::processType2RH(Packet *packet, IPv6Header *datagram, IPv6RoutingHea
         delete packet;
 }
 
-bool xMIPv6::validateType2RH(IPv6Header& datagram, const IPv6RoutingHeader& rh)
+bool xMIPv6::validateType2RH(IPv6Header& ipv6Header, const IPv6RoutingHeader& rh)
 {
     // cf. RFC 3775 - 6.4
 
@@ -2096,7 +2096,7 @@ bool xMIPv6::validateType2RH(IPv6Header& datagram, const IPv6RoutingHeader& rh)
         return false;
     }
 
-    IPv6Address CoA = datagram.getSrcAddress();
+    IPv6Address CoA = ipv6Header.getSrcAddress();
     IPv6Address HoA = rh.getAddress(0);
 
     /* The IP address contained in the routing header, since it is the mobile
@@ -2116,12 +2116,12 @@ bool xMIPv6::validateType2RH(IPv6Header& datagram, const IPv6RoutingHeader& rh)
     return true;
 }
 
-void xMIPv6::processHoAOpt(Packet *packet, IPv6Header *datagram, HomeAddressOption *hoaOpt)
+void xMIPv6::processHoAOpt(Packet *packet, IPv6Header *ipv6Header, HomeAddressOption *hoaOpt)
 {
     // datagram from MN to CN
     bool validHoAOpt = false;
     IPv6Address& HoA = hoaOpt->getHomeAddress();
-    IPv6Address& CoA = datagram->getSrcAddress();
+    IPv6Address& CoA = ipv6Header->getSrcAddress();
 
     /*9.3.1
        Packets containing a
@@ -2133,7 +2133,7 @@ void xMIPv6::processHoAOpt(Packet *packet, IPv6Header *datagram, HomeAddressOpti
     ASSERT(bc != nullptr);
 
     if (bc->isInBindingCache(HoA, CoA)) {
-        datagram->setSrcAddress(HoA);
+        ipv6Header->setSrcAddress(HoA);
         validHoAOpt = true;
     }
     else {

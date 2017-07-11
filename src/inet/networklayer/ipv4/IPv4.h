@@ -114,7 +114,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
-    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const IPv4Header *datagram);
+    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const IPv4Header *ipv4Header);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -174,7 +174,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Determines the output interface for the given multicast datagram.
      */
-    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const IPv4Header *datagram, const InterfaceEntry *multicastIFOption);
+    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const IPv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().

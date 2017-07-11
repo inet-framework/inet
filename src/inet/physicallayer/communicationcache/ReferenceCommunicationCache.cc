@@ -90,7 +90,7 @@ std::vector<const ITransmission *> *ReferenceCommunicationCache::computeInterfer
         for (const auto &receptionCacheEntry : *static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries)) {
             const IArrival *arrival = receptionCacheEntry.arrival;
             if (arrival != nullptr && !(arrival->getEndTime() < startTime || endTime < arrival->getStartTime()))
-                interferingTransmissions->push_back(transmissionCacheEntry.frame->getTransmission());
+                interferingTransmissions->push_back(transmissionCacheEntry.signal->getTransmission());
         }
     }
     return interferingTransmissions;

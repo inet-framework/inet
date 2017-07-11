@@ -149,9 +149,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     }
                 }
             } else {
-                IPv4Header *datagram = check_and_cast<IPv4Header *>(outboundPackets->pop());
+                IPv4Header *ipv4Header = check_and_cast<IPv4Header *>(outboundPackets->pop());
                 IPv4Header *live = check_and_cast<IPv4Header*>(msg);
-                PacketDrillInfo *info = (PacketDrillInfo *)datagram->getContextPointer();
+                PacketDrillInfo *info = (PacketDrillInfo *)ipv4Header->getContextPointer();
                 if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
                         == STATUS_ERR) {
@@ -159,7 +159,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     delete msg;
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                 }
-                if (!compareDatagram(datagram, live)) {
+                if (!compareDatagram(ipv4Header, live)) {
                     delete (PacketDrillInfo *)msg->getContextPointer();
                     delete msg;
                     throw cTerminationException("Packetdrill error: Datagrams are not the same");
@@ -171,7 +171,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
                 delete (PacketDrillInfo *)msg->getContextPointer();
                 delete msg;
-                delete datagram;
+                delete ipv4Header;
             }
         } else if (msg->getArrivalGate()->isName("udpIn")) {
             PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
@@ -583,22 +583,22 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->setName("SCTPCleanUp");
     sctpmsg->setChecksumOk(true);
     sctpmsg->addChunk(abortChunk);
-    IPv4Datagram *datagram = new IPv4Datagram("IPCleanup");
-    datagram->setSrcAddress(remoteAddress.toIPv4());
-    datagram->setDestAddress(localAddress.toIPv4());
-    datagram->setIdentification(0);
-    datagram->setVersion(4);
-    datagram->setHeaderLength(20);
-    datagram->setProtocolId(IPPROTO_SCTP);
-    datagram->setTimeToLive(32);
-    datagram->setMoreFragments(0);
-    datagram->setDontFragment(0);
-    datagram->setFragmentOffset(0);
-    datagram->setTypeOfService(0);
-    datagram->setByteLength(20);
-    datagram->encapsulate(sctpmsg);
+    IPv4Datagram *ipv4Header = new IPv4Datagram("IPCleanup");
+    ipv4Header->setSrcAddress(remoteAddress.toIPv4());
+    ipv4Header->setDestAddress(localAddress.toIPv4());
+    ipv4Header->setIdentification(0);
+    ipv4Header->setVersion(4);
+    ipv4Header->setHeaderLength(20);
+    ipv4Header->setProtocolId(IPPROTO_SCTP);
+    ipv4Header->setTimeToLive(32);
+    ipv4Header->setMoreFragments(0);
+    ipv4Header->setDontFragment(0);
+    ipv4Header->setFragmentOffset(0);
+    ipv4Header->setTypeOfService(0);
+    ipv4Header->setByteLength(20);
+    ipv4Header->encapsulate(sctpmsg);
     EV_DETAIL << "Send Abort to cleanup association." << endl;
-    send(datagram, "tunOut");
+    send(ipv4Header, "tunOut");
 }
 
 bool PacketDrillApp::findSeqNumMap(uint32 num)

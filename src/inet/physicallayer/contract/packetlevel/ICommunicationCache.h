@@ -60,9 +60,9 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) = 0;
     virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) = 0;
 
-    virtual const ISignal *getCachedFrame(const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const ITransmission *transmission, const ISignal *signal) = 0;
-    virtual void removeCachedFrame(const ITransmission *transmission) = 0;
+    virtual const ISignal *getCachedSignal(const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual void removeCachedSignal(const ITransmission *transmission) = 0;
     //@}
 
     /** @name Reception Cache */
@@ -103,9 +103,9 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission, const IReceptionResult *receptionResult) = 0;
     virtual void removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const ISignal *getCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal) = 0;
-    virtual void removeCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual const ISignal *getCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual void removeCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
     //@}
 };
 

@@ -268,12 +268,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Sends a copy of the provided signal to all affected receivers on
      * the radio medium.
      */
-    virtual void sendToAffectedRadios(IRadio *transmitter, const ISignal *frame);
+    virtual void sendToAffectedRadios(IRadio *transmitter, const ISignal *signal);
 
     /**
      * Sends a copy of the provided signal to all receivers on the radio medium.
      */
-    virtual void sendToAllRadios(IRadio *transmitter, const ISignal *frame);
+    virtual void sendToAllRadios(IRadio *transmitter, const ISignal *signal);
     //@}
 
     /** @name Reception */
@@ -332,7 +332,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
 
-    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const ISignal *frame);
+    virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const ISignal *signal);
 
     virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
     virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) override;

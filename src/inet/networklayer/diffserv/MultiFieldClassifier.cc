@@ -46,31 +46,31 @@ namespace inet {
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4
-bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *ipv4Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
         return false;
-    int dgramProtocol = datagram->getProtocolId();
-    if (protocol >= 0 && dgramProtocol != protocol)
+    int ipv4HeaderProtocolId = ipv4Header->getProtocolId();
+    if (protocol >= 0 && ipv4HeaderProtocolId != protocol)
         return false;
-    if (tosMask != 0 && (tos & tosMask) != (datagram->getTypeOfService() & tosMask))
+    if (tosMask != 0 && (tos & tosMask) != (ipv4Header->getTypeOfService() & tosMask))
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
 
 #ifdef WITH_UDP
-        if (dgramProtocol == IP_PROT_UDP) {
-            const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
+        if (ipv4HeaderProtocolId == IP_PROT_UDP) {
+            const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
             srcPort = udpHeader->getSourcePort();
             destPort = udpHeader->getDestinationPort();
         }
 #endif
 
 #ifdef WITH_TCP_COMMON
-        if (dgramProtocol == IP_PROT_TCP) {
-            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
+        if (ipv4HeaderProtocolId == IP_PROT_TCP) {
+            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
             srcPort = tcpHeader->getSourcePort();
             destPort = tcpHeader->getDestinationPort();
         }
@@ -86,30 +86,30 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv4Header *dat
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *ipv6Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !ipv6Header->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
         return false;
-    int dgramProtocol = datagram->getProtocolId();
-    if (protocol >= 0 && dgramProtocol != protocol)
+    int ipv6HeaderProtocolId = ipv6Header->getProtocolId();
+    if (protocol >= 0 && ipv6HeaderProtocolId != protocol)
         return false;
-    if (tosMask != 0 && (tos & tosMask) != (datagram->getTrafficClass() & tosMask))
+    if (tosMask != 0 && (tos & tosMask) != (ipv6Header->getTrafficClass() & tosMask))
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
 #ifdef WITH_UDP
-        if (dgramProtocol == IP_PROT_UDP) {
-            const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
+        if (ipv6HeaderProtocolId == IP_PROT_UDP) {
+            const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv6Header->getChunkLength());
             srcPort = udpHeader->getSourcePort();
             destPort = udpHeader->getDestinationPort();
         }
 #endif
 
 #ifdef WITH_TCP_COMMON
-        if (dgramProtocol == IP_PROT_TCP) {
-            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
+        if (ipv6HeaderProtocolId == IP_PROT_TCP) {
+            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv6Header->getChunkLength());
             srcPort = tcpHeader->getSourcePort();
             destPort = tcpHeader->getDestinationPort();
         }

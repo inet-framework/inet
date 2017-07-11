@@ -392,7 +392,7 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
     EV_DETAIL << "Sending datagram " << packet << " with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
-        destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header.get(), destIE);
+        destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
 
         // loop back a copy
         if (multicastLoop && (!destIE || !destIE->isLoopback())) {
@@ -438,7 +438,7 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
  *   3. if no route, choose the interface according to the source address
  *   4. or if the source address is unspecified, choose the first MULTICAST interface
  */
-const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const IPv4Header *ipv4Header, const InterfaceEntry *multicastIFOption)
+const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const Ptr<const IPv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption)
 {
     const InterfaceEntry *ie = nullptr;
     if (multicastIFOption) {

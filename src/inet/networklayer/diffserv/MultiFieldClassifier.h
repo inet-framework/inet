@@ -49,10 +49,10 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
         Filter() {}
     #ifdef WITH_IPv4
-        bool matches(Packet *packet, const IPv4Header *datagram);
+        bool matches(Packet *packet, const IPv4Header *ipv4Header);
     #endif // ifdef WITH_IPv4
     #ifdef WITH_IPv6
-        bool matches(Packet *packet, const IPv6Header *datagram);
+        bool matches(Packet *packet, const IPv6Header *ipv6Header);
     #endif // ifdef WITH_IPv6
     };
 

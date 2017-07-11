@@ -1051,15 +1051,15 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);
-    const IPv4Header *datagram;
+    const IPv4Header *ipv4Header;
     PIMInterface *pimInterface;
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST) {
-        datagram = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            unroutableMulticastPacketArrived(datagram->getSrcAddress(), datagram->getDestAddress(), datagram->getTimeToLive());
+            unroutableMulticastPacketArrived(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), ipv4Header->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED) {
@@ -1077,18 +1077,18 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface->getInterfaceId());
+            multicastPacketArrivedOnNonRpfInterface(ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
-        datagram = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(),
-                    datagram->getDestAddress(), datagram->getSrcAddress(), datagram->getTimeToLive());
+                    ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), ipv4Header->getTimeToLive());
     }
     // RPF interface has changed
     else if (signalID == NF_ROUTE_ADDED) {

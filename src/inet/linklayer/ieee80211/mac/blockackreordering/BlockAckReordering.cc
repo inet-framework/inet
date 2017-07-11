@@ -60,24 +60,24 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& frame)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
     int startingSequenceNumber = -1;
     Tid tid = -1;
-    if (auto basicReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(frame)) {
+    if (auto basicReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         tid = basicReq->getTidInfo();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
     }
-    else if (auto compressedReq = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAck>(frame)) {
+    else if (auto compressedReq = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
         tid = compressedReq->getTidInfo();
         startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }
     else {
         throw cRuntimeError("Multi-Tid BlockAckReq is currently an unimplemented feature");
     }
-    auto id = std::make_pair(tid, frame->getTransmitterAddress());
+    auto id = std::make_pair(tid, blockAckReq->getTransmitterAddress());
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
         ReceiveBuffer *receiveBuffer = it->second;

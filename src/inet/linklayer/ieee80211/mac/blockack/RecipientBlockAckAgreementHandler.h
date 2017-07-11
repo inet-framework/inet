@@ -40,8 +40,8 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     protected:
         virtual void terminateAgreement(MACAddress originatorAddr, Tid tid);
         virtual RecipientBlockAckAgreement* addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq);
-        virtual void updateAgreement(const Ptr<const Ieee80211AddbaResponse>& frame);
-        virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& frame, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
+        virtual void updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse);
+        virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
         virtual const Ptr<Ieee80211Delba> buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode);
         virtual simtime_t computeEarliestExpirationTime();
         virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback* callback);

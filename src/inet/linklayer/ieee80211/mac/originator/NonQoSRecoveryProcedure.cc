@@ -201,14 +201,14 @@ int NonQoSRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8
 }
 
 
-int NonQoSRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& frame)
+int NonQoSRecoveryProcedure::getShortRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    return getRc(packet, frame, shortRetryCounter);
+    return getRc(packet, dataOrMgmtHeader, shortRetryCounter);
 }
 
-int NonQoSRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& frame)
+int NonQoSRecoveryProcedure::getLongRetryCount(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    return getRc(packet, frame, longRetryCounter);
+    return getRc(packet, dataOrMgmtHeader, longRetryCounter);
 }
 
 void NonQoSRecoveryProcedure::resetContentionWindow()

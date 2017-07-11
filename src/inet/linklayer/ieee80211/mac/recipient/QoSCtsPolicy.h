@@ -37,7 +37,7 @@ class INET_API QoSCtsPolicy : public ModeSetListener, public ICtsPolicy
         virtual simtime_t computeCtsDuration(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
 
     public:
-        virtual simtime_t computeCtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& frame) const override;
+        virtual simtime_t computeCtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
         virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
 
 };

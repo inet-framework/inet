@@ -48,30 +48,30 @@ PacketDrill::~PacketDrill()
 
 IPv4Header* PacketDrill::makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr)
 {
-    IPv4Header *datagram = new IPv4Header("IPInject");
-    datagram->setVersion(4);
-    datagram->setHeaderLength(20);
+    IPv4Header *ipv4Header = new IPv4Header("IPInject");
+    ipv4Header->setVersion(4);
+    ipv4Header->setHeaderLength(20);
 
     if (direction == DIRECTION_INBOUND) {
-        datagram->setSrcAddress(remoteAddr.toIPv4());
-        datagram->setDestAddress(localAddr.toIPv4());
-        datagram->setIdentification(pdapp->getIdInbound());
+        ipv4Header->setSrcAddress(remoteAddr.toIPv4());
+        ipv4Header->setDestAddress(localAddr.toIPv4());
+        ipv4Header->setIdentification(pdapp->getIdInbound());
         pdapp->increaseIdInbound();
     } else if (direction == DIRECTION_OUTBOUND) {
-        datagram->setSrcAddress(localAddr.toIPv4());
-        datagram->setDestAddress(remoteAddr.toIPv4());
-        datagram->setIdentification(pdapp->getIdOutbound());
+        ipv4Header->setSrcAddress(localAddr.toIPv4());
+        ipv4Header->setDestAddress(remoteAddr.toIPv4());
+        ipv4Header->setIdentification(pdapp->getIdOutbound());
         pdapp->increaseIdOutbound();
     } else
         throw cRuntimeError("Unknown direction type %d", direction);
-    datagram->setProtocolId(protocol);
-    datagram->setTimeToLive(32);
-    datagram->setMoreFragments(0);
-    datagram->setDontFragment(0);
-    datagram->setFragmentOffset(0);
-    datagram->setTypeOfService(0);
-    datagram->setByteLength(20);
-    return datagram;
+    ipv4Header->setProtocolId(protocol);
+    ipv4Header->setTimeToLive(32);
+    ipv4Header->setMoreFragments(0);
+    ipv4Header->setDontFragment(0);
+    ipv4Header->setFragmentOffset(0);
+    ipv4Header->setTypeOfService(0);
+    ipv4Header->setByteLength(20);
+    return ipv4Header;
 }
 
 

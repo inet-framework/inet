@@ -30,7 +30,7 @@ class INET_API ICtsPolicy
         virtual ~ICtsPolicy() { }
 
         virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
-        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& frame) const = 0;
+        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
 };
 
 } /* namespace ieee80211 */

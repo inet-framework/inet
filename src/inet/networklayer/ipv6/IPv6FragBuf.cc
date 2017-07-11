@@ -45,13 +45,13 @@ void IPv6FragBuf::init(ICMPv6 *icmp)
     icmpModule = icmp;
 }
 
-Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now)
+Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *ipv6Header, IPv6FragmentHeader *fh, simtime_t now)
 {
     // find datagram buffer
     Key key;
     key.id = fh->getIdentification();
-    key.src = datagram->getSrcAddress();
-    key.dest = datagram->getDestAddress();
+    key.src = ipv6Header->getSrcAddress();
+    key.dest = ipv6Header->getDestAddress();
 
     auto i = bufs.find(key);
 
@@ -67,7 +67,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *datagram, IPv6Fra
         buf = &(i->second);
     }
 
-    int fragmentLength = pk->getByteLength() - byte(datagram->getChunkLength()).get(); //datagram->calculateFragmentLength();
+    int fragmentLength = pk->getByteLength() - byte(ipv6Header->getChunkLength()).get(); //datagram->calculateFragmentLength();
     unsigned short offset = fh->getFragmentOffset();
     bool moreFragments = fh->getMoreFragments();
 
@@ -96,7 +96,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *datagram, IPv6Fra
     }
 
     // add fragment to buffer
-    buf->buf.replace(byte(offset), pk->peekDataAt(datagram->getChunkLength(), byte(fragmentLength)));
+    buf->buf.replace(byte(offset), pk->peekDataAt(ipv6Header->getChunkLength(), byte(fragmentLength)));
 
     if (!moreFragments) {
         buf->buf.setExpectedLength(byte(offset + fragmentLength));

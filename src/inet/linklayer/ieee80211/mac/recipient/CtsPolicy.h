@@ -40,7 +40,7 @@ class INET_API CtsPolicy : public ModeSetListener, public ICtsPolicy
 
     public:
         virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
-        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& frame) const override;
+        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const override;
 };
 
 } /* namespace ieee80211 */
