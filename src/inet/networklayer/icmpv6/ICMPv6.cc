@@ -105,6 +105,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
         else if (std::dynamic_pointer_cast<const ICMPv6ParamProblemMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
             errorOut(icmpv6msg);
+            delete packet;
         }
         else if (auto echoRequest = std::dynamic_pointer_cast<const ICMPv6EchoRequestMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
@@ -229,6 +230,7 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     else {
         sendToIP(errorMsg, ipv6Header->getSrcAddress());
     }
+    delete origDatagram;
 }
 
 void ICMPv6::sendToIP(Packet *msg, const IPv6Address& dest)
