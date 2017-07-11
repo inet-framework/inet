@@ -48,7 +48,7 @@ void TestApp::initialize()
         ipv4Header->setSrcAddress(IPv4Address("192.168.1.1"));
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-                                                                                                                                        send(packet, "out");
+        send(packet, "out");
     }
 
     {
@@ -56,7 +56,7 @@ void TestApp::initialize()
         const auto& ipv6Header = std::make_shared<IPv6Header>();
         ipv6Header->setSrcAddress(IPv6Address("fe80::1122:3344:5566"));
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -105,6 +105,9 @@ void TestApp::initialize()
     {
         Packet *packet = new Packet("ipv4-7");
         const auto& ipv4Header = std::make_shared<IPv4Header>();
+        const auto& udpPacket = std::make_shared<UdpHeader>();
+        udpPacket->setDestinationPort(999);
+        packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(17);
         packet->insertHeader(ipv4Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
@@ -264,15 +267,16 @@ network TestNetwork
   <filter gate="3" destAddress="fe80::1122:3344:5566"/>
   <filter gate="4" srcPort="1000"/>
   <filter gate="5" destPort="1000"/>
-  <filter gate="6" protocol="17"/>
-  <filter gate="7" tos="0x2e" tosMask="0x3f"/>
+  <filter gate="6" tos="0x2e" tosMask="0x3f"/>
 
-  <filter gate="8" srcAddress="192.168.0.0" srcPrefixLength="16"/>
-  <filter gate="9" srcAddress="fe80::" srcPrefixLength="10"/>
-  <filter gate="10" destAddress="192.168.0.0" destPrefixLength="16"/>
-  <filter gate="11" destAddress="fe80::" destPrefixLength="10"/>
-  <filter gate="12" srcPortMin="2000" srcPortMax="2999"/>
-  <filter gate="13" destPortMin="2000" destPortMax="2999"/>
+  <filter gate="7" srcAddress="192.168.0.0" srcPrefixLength="16"/>
+  <filter gate="8" srcAddress="fe80::" srcPrefixLength="10"/>
+  <filter gate="9" destAddress="192.168.0.0" destPrefixLength="16"/>
+  <filter gate="10" destAddress="fe80::" destPrefixLength="10"/>
+  <filter gate="11" srcPortMin="2000" srcPortMax="2999"/>
+  <filter gate="12" destPortMin="2000" destPortMax="2999"/>
+
+  <filter gate="13" protocol="17"/>
 </filters>
 
 
@@ -297,17 +301,17 @@ ipv4-3: in[2]
 ipv6-4: in[3]
 ipv4-5: in[4]
 ipv4-6: in[5]
-ipv4-7: in[6]
-ipv4-8: in[7]
-ipv6-9: in[7]
-ipv4-10: in[8]
-ipv6-11: in[9]
-ipv4-12: in[10]
-ipv6-13: in[11]
-ipv4-14: in[12]
-ipv6-15: in[12]
-ipv4-16: in[13]
-ipv6-17: in[13]
+ipv4-7: in[13]
+ipv4-8: in[6]
+ipv6-9: in[6]
+ipv4-10: in[7]
+ipv6-11: in[8]
+ipv4-12: in[9]
+ipv6-13: in[10]
+ipv4-14: in[11]
+ipv6-15: in[11]
+ipv4-16: in[12]
+ipv6-17: in[12]
 ipv4-18: defaultIn[0]
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
