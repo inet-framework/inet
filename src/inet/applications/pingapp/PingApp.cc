@@ -435,7 +435,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
         0 : simTime() - sendTimeHistory[seqNo % PING_HISTORY_SIZE];
 
     if (printPing) {
-        cout << getFullPath() << ": reply of " << std::dec << pingPayload->getChunkLength()
+        cout << getFullPath() << ": reply of " << packet->getByteLength()
              << " bytes from " << src
              << " icmp_seq=" << seqNo << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
