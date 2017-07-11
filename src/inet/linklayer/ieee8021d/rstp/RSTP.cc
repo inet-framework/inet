@@ -291,6 +291,7 @@ void RSTP::handleIncomingFrame(Packet *packet)
     }
     else
         EV_DETAIL << "Expired BPDU" << endl;
+    delete packet;
 }
 
 void RSTP::processBPDU(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId)
