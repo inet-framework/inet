@@ -19,6 +19,12 @@ namespace inet {
 
 ChunkSerializerRegistry ChunkSerializerRegistry::globalRegistry;
 
+ChunkSerializerRegistry::~ChunkSerializerRegistry()
+{
+    for (auto it : serializers)
+        delete it.second;
+}
+
 void ChunkSerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
 {
     CHUNK_CHECK_USAGE(serializer != nullptr, "invalid serializer");

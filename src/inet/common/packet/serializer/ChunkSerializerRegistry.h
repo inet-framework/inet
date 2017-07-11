@@ -31,6 +31,8 @@ class INET_API ChunkSerializerRegistry
     std::map<const std::type_info *, const ChunkSerializer *> serializers;
 
   public:
+    ~ChunkSerializerRegistry();
+
     void registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer);
 
     const ChunkSerializer *getSerializer(const std::type_info& typeInfo) const;
