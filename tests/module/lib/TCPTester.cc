@@ -171,7 +171,7 @@ void TCPScriptableTester::dispatchSegment(Packet *pk)
     Command *cmd = (Command *)pk->getContextPointer();
     bool fromA = cmd->fromA;
     bubble("introducing copy");
-    dump(seg, fromA, "introducing copy");
+    dump(seg, pk->getByteLength(), fromA, "introducing copy");
     send(pk, fromA ? "out2" : "out1");
 }
 
@@ -219,7 +219,7 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             if (d==0)
             {
                 bubble("forwarding after 0 delay");
-                dump(seg, fromA, "introducing copy");
+                dump(seg, pk->getByteLength(), fromA, "introducing copy");
                 send(segcopy, fromA ? "out2" : "out1");
             }
             else
@@ -276,7 +276,7 @@ void TCPRandomTester::dispatchSegment(Packet *pk)
         throw cRuntimeError("Unknown message");
     bool fromA = (bool)pk->getContextPointer();
     bubble("introducing copy");
-    dump(seg, fromA, "introducing copy");
+    dump(seg, pk->getByteLength(), fromA, "introducing copy");
     send(pk, fromA ? "out2" : "out1");
 }
 
