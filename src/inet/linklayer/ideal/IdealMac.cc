@@ -203,6 +203,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     if (msg->hasBitError()) {
         EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
         // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
+        delete msg;
         return;
     }
 
@@ -293,6 +294,7 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
 
     EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
     emit(dropPkNotForUsSignal, packet);
+    delete packet;
     return true;
 }
 
