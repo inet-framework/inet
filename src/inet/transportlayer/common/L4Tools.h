@@ -31,7 +31,8 @@ const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet)
 const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet);
 
 bool isTransportProtocol(const Protocol& protocol);
-const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol);
+
+const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags = 0);
 
 void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<TransportHeaderBase>& header);
 

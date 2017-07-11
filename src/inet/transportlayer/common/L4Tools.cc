@@ -68,17 +68,19 @@ bool isTransportProtocol(const Protocol& protocol)
             ;
 }
 
-const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol)
+const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags)
 {
 #ifdef WITH_TCP_COMMON
     if (protocol == Protocol::tcp)
-        return packet->peekHeader<tcp::TcpHeader>();
+        return packet->peekHeader<tcp::TcpHeader>(bit(-1), flags);
 #endif
 #ifdef WITH_UDP
     if (protocol == Protocol::udp)
-        return packet->peekHeader<UdpHeader>();
+        return packet->peekHeader<UdpHeader>(bit(-1), flags);
 #endif
     // TODO: add other L4 protocols
+    if (flags & Chunk::PF_ALLOW_NULLPTR)
+        return nullptr;
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
