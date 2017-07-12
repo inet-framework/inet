@@ -46,4 +46,6 @@ simple LMacLayer extends MACProtocolBase like IMACProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(LMacLayer);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

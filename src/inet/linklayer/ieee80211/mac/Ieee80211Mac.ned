@@ -105,6 +105,10 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @signal[NF_MODESET_CHANGED](type=inet::physicallayer::Ieee80211ModeSet);
     gates:
         input mgmtIn;

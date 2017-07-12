@@ -94,4 +94,8 @@ simple CSMA extends MACProtocolBase like IMACProtocol
 
         @class(CSMA);
         @signal[NF_LINK_BREAK](type=Packet);
+        @statistic[packetDropNotAddressToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
