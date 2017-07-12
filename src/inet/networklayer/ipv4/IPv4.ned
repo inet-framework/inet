@@ -105,6 +105,12 @@ simple IPv4
         @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Header);
         @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Header);
         @signal[NF_IPv4_MDATA_REGISTER](type=Packet);
+        @statistic[packetDropAddressResolutionFailed](title="packet drop: address resolution failed"; source=packetDropReasonIsAddressResolutionFailed(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropHopLimitReached](title="packet drop: hop limit reached"; source=packetDropReasonIsHopLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropForwardingDisabled](title="packet drop: forwarding disabled"; source=packetDropReasonIsForwardingDisabled(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNoInterfaceFound](title="packet drop: no interface found"; source=packetDropReasonIsNoInterfaceFound(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNoRouteFound](title="packet drop: no route found"; source=packetDropReasonIsNoRouteFound(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UdpHeader);
         output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UdpHeader);
