@@ -24,7 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-enum INET_API Displacement
+enum Displacement
 {
     DISPLACEMENT_NONE          = 0x00,
     DISPLACEMENT_TOP_LEFT      = 0x01,

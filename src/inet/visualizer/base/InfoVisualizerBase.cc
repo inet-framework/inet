@@ -39,9 +39,6 @@ const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
         case 'd':
             result = module->getDisplayString().getTagArg("t", 0);
             break;
-        case 'i':
-            result = module->info();
-            break;
         case 's':
             result = module->str();
             break;
