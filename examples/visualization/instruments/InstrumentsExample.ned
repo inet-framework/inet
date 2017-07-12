@@ -1,7 +1,6 @@
 package inet.examples.visualization.instruments;
 
 import inet.common.misc.SignalSource;
-import inet.common.figures.DelegateSignalConfigurator;
 
 network InstrumentsExample
 {
