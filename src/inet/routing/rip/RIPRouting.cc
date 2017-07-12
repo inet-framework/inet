@@ -315,7 +315,7 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
  */
 void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(signalID));
+    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
 
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;

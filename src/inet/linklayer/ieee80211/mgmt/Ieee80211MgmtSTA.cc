@@ -314,7 +314,7 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, l
 void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
+    printSignalBanner(signalID, obj);
 
     // Note that we are only subscribed during scanning!
     if (signalID == NF_LINK_FULL_PROMISCUOUS) {

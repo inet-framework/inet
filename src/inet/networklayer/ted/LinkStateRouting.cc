@@ -89,7 +89,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
 void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
+    printSignalBanner(signalID, obj);
 
     ASSERT(signalID == NF_TED_CHANGED);
 

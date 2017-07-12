@@ -177,7 +177,7 @@ void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
+    printSignalBanner(signalID, obj);
 
     if (signalID == NF_INTERFACE_CREATED) {
         //TODO something like this:

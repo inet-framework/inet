@@ -102,7 +102,7 @@ void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 {
     // nothing needed here at the moment
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
+    printSignalBanner(signalID, obj);
 }
 
 //---

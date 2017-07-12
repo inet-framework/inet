@@ -503,7 +503,7 @@ void DHCPClient::handleDHCPMessage(Packet *packet)
 void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
+    printSignalBanner(signalID, obj);
 
     // host associated. link is up. change the state to init.
     if (signalID == NF_L2_ASSOCIATED) {
