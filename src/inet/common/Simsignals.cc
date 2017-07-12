@@ -20,17 +20,11 @@
 
 namespace inet {
 
-simsignal_t NF_SUBSCRIBERLIST_CHANGED = cComponent::registerSignal("NF_SUBSCRIBERLIST_CHANGED");
-
-simsignal_t NF_NODE_FAILURE = cComponent::registerSignal("NF_NODE_FAILURE");
-simsignal_t NF_NODE_RECOVERY = cComponent::registerSignal("NF_NODE_RECOVERY");
-
 simsignal_t NF_PP_TX_BEGIN = cComponent::registerSignal("NF_PP_TX_BEGIN");
 simsignal_t NF_PP_TX_END = cComponent::registerSignal("NF_PP_TX_END");
 simsignal_t NF_PP_RX_END = cComponent::registerSignal("NF_PP_RX_END");
 simsignal_t NF_TX_ACKED = cComponent::registerSignal("NF_TX_ACKED");
 simsignal_t NF_L2_Q_DROP = cComponent::registerSignal("NF_L2_Q_DROP");
-simsignal_t packetDropSignal = cComponent::registerSignal("packetDrop");
 simsignal_t NF_MAC_BECAME_IDLE = cComponent::registerSignal("NF_MAC_BECAME_IDLE");
 simsignal_t NF_L2_BEACON_LOST = cComponent::registerSignal("NF_L2_BEACON_LOST");
 simsignal_t NF_L2_ASSOCIATED = cComponent::registerSignal("NF_L2_ASSOCIATED");
@@ -98,8 +92,8 @@ simsignal_t NF_ISIS_ADJ_CHANGED = cComponent::registerSignal("NF_ISIS_ADJ_CHANGE
 simsignal_t NF_OVERLAY_TRANSPORTADDRESS_CHANGED = cComponent::registerSignal("NF_OVERLAY_TRANSPORTADDRESS_CHANGED");
 simsignal_t NF_OVERLAY_NODE_GRACEFUL_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_GRACEFUL_LEAVE");
 simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_LEAVE");
-simsignal_t NF_BATTERY_CHANGED = cComponent::registerSignal("NF_BATTERY_CHANGED");
-simsignal_t NF_BATTERY_CPUTIME_CONSUMED = cComponent::registerSignal("NF_BATTERY_CPUTIME_CONSUMED");
+
+simsignal_t packetDropSignal = cComponent::registerSignal("packetDrop");
 
 void printSignalBanner(simsignal_t signalID, const cObject *obj)
 {
