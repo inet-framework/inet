@@ -33,7 +33,7 @@ simple OrdinalBasedDropper like IHook
         @display("i=status/lightning");
         @signal[rcvdPk](type=cMessage);
         @signal[sentPk](type=cMessage);
-        @signal[dropPk](type=cMessage);
+        @signal[NF_PACKET_DROP](type=cMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

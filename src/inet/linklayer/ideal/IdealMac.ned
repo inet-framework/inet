@@ -49,7 +49,7 @@ simple IdealMac extends MACProtocolBase like ILinkLayer
         double ackTimeout @unit("s") = default(100ms);
 
         @class(IdealMac);
-        @signal[dropPkNotForUs](type=Packet);
+        @signal[NF_PACKET_DROP](type=Packet);
         @signal[NF_LINK_BREAK](type=Packet);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

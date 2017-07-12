@@ -41,8 +41,6 @@ class IPassiveQueue;
 class INET_API IdealMac : public MACProtocolBase
 {
   protected:
-    static simsignal_t dropPkNotForUsSignal;
-
     // parameters
     int headerLength = 0;    // IdealMacFrame header length in bytes
     double bitrate = 0;    // [bits per sec]

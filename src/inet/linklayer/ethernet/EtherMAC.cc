@@ -224,7 +224,9 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
 
     if (!connected || disabled) {
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
-        emit(dropPkFromHLIfaceDownSignal, packet);
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(NF_PACKET_DROP, packet, &details);
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
@@ -344,7 +346,9 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
         if (EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(msg)) {    // do not count JAM and IFG packets
             Packet *packet = decapsulate(phyFrame);
-            emit(dropPkIfaceDownSignal, packet);
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
             numDroppedIfaceDown++;
         }
@@ -782,7 +786,9 @@ void EtherMAC::frameReceptionComplete()
 
     if (hasBitError || !verifyCrcAndLength(packet)) {
         numDroppedBitError++;
-        emit(dropPkBitErrorSignal, packet);
+        PacketDropDetails details;
+        details.setReason(PACKET_INCORRECTLY_RECEIVED);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
         return;
     }

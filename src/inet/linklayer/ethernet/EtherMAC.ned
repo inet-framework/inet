@@ -129,10 +129,7 @@ simple EtherMAC like IEtherMAC
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
         @signal[rxPkFromHL](type=Packet);
-        @signal[dropPkNotForUs](type=Packet);
-        @signal[dropPkBitError](type=Packet);
-        @signal[dropPkFromHLIfaceDown](type=Packet);
-        @signal[dropPkIfaceDown](type=Packet);        // emitted at begin of receiving
+        @signal[NF_PACKET_DROP](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
         @signal[packetSentToUpper](type=Packet);

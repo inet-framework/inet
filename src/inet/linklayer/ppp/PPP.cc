@@ -37,8 +37,6 @@ Define_Module(PPP);
 
 simsignal_t PPP::txStateSignal = registerSignal("txState");
 simsignal_t PPP::rxPkOkSignal = registerSignal("rxPkOk");
-simsignal_t PPP::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
-simsignal_t PPP::dropPkBitErrorSignal = registerSignal("dropPkBitError");
 simsignal_t PPP::packetSentToLowerSignal = registerSignal("packetSentToLower");
 simsignal_t PPP::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
 simsignal_t PPP::packetSentToUpperSignal = registerSignal("packetSentToUpper");
@@ -183,7 +181,9 @@ void PPP::refreshOutGateConnection(bool connected)
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
                 EV_ERROR << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedIfaceDown++;
-                emit(dropPkIfaceDownSignal, msg);
+                PacketDropDetails details;
+                details.setReason(INTERFACE_DOWN);
+                emit(NF_PACKET_DROP, msg, &details);
                 delete msg;
             }
         }
@@ -276,7 +276,9 @@ void PPP::handleMessage(cMessage *msg)
         // check for bit errors
         if (PK(msg)->hasBitError()) {
             EV_WARN << "Bit error in " << msg << endl;
-            emit(dropPkBitErrorSignal, msg);
+            PacketDropDetails details;
+            details.setReason(PACKET_INCORRECTLY_RECEIVED);
+            emit(NF_PACKET_DROP, msg, &details);
             numBitErr++;
             delete msg;
         }
@@ -300,7 +302,9 @@ void PPP::handleMessage(cMessage *msg)
         if (datarateChannel == nullptr) {
             EV_WARN << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
-            emit(dropPkIfaceDownSignal, msg);
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, msg, &details);
             delete msg;
 
             if (queueModule && 0 == queueModule->getNumPendingRequests())
@@ -399,7 +403,9 @@ void PPP::flushQueue()
     if (queueModule) {
         while (!queueModule->isEmpty()) {
             cMessage *msg = queueModule->pop();
-            emit(dropPkIfaceDownSignal, msg);    //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
         queueModule->clear();    // clear request count
@@ -408,7 +414,9 @@ void PPP::flushQueue()
     else {
         while (!txQueue.isEmpty()) {
             cMessage *msg = (cMessage *)txQueue.pop();
-            emit(dropPkIfaceDownSignal, msg);    //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
     }

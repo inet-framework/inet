@@ -31,7 +31,7 @@ simple DropTailQueue like IOutputQueue
         @signal[rcvdPk](type=cPacket);
         @signal[enqueuePk](type=cPacket);
         @signal[dequeuePk](type=cPacket);
-        @signal[dropPkByQueue](type=cPacket);
+        @signal[NF_PACKET_DROP](type=cPacket);
         @signal[queueingTime](type=simtime_t; unit=s);
         @signal[queueLength](type=long);
         @statistic[rcvdPk](title="received packets"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

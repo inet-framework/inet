@@ -55,8 +55,7 @@ simple PPP
 
         @signal[txState](type=long);    // 1:transmit, 0:idle
         @signal[rxPkOk](type=Packet);
-        @signal[dropPkIfaceDown](type=cPacket);  //TODO currently both upper and lower; todo separate them
-        @signal[dropPkBitError](type=cPacket);
+        @signal[NF_PACKET_DROP](type=cPacket);  //TODO currently both upper and lower; todo separate them
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);

@@ -113,10 +113,6 @@ void PacketDropVisualizerBase::refreshDisplay() const
 void PacketDropVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-#ifdef WITH_ETHERNET
-    subscriptionModule->subscribe(EtherMACBase::dropPkIfaceDownSignal, this);
-    subscriptionModule->subscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
-#endif // WITH_ETHERNET
     subscriptionModule->subscribe(NF_PACKET_DROP, this);
 
 }
@@ -125,23 +121,14 @@ void PacketDropVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-#ifdef WITH_ETHERNET
-        subscriptionModule->unsubscribe(EtherMACBase::dropPkIfaceDownSignal, this);
-        subscriptionModule->unsubscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
-#endif // WITH_ETHERNET
+    if (subscriptionModule != nullptr)
         subscriptionModule->unsubscribe(NF_PACKET_DROP, this);
-    }
 }
 
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == NF_PACKET_DROP
-#ifdef WITH_ETHERNET
-            || signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
-#endif // WITH_ETHERNET
-            ) {
+    if (signal == NF_PACKET_DROP) {
         auto packet = check_and_cast<cPacket *>(object);
         if (packetFilter.matches(packet))
             addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), packet->dup()));

@@ -121,10 +121,6 @@ simsignal_t EtherMACBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
 simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
-simsignal_t EtherMACBase::dropPkBitErrorSignal = registerSignal("dropPkBitError");
-simsignal_t EtherMACBase::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
-simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
-simsignal_t EtherMACBase::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
 simsignal_t EtherMACBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
 simsignal_t EtherMACBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
@@ -377,7 +373,9 @@ void EtherMACBase::processConnectDisconnect()
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
                 EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedPkFromHLIfaceDown++;
-                emit(dropPkIfaceDownSignal, msg);
+                PacketDropDetails details;
+                details.setReason(INTERFACE_DOWN);
+                emit(NF_PACKET_DROP, msg, &details);
                 delete msg;
             }
         }
@@ -453,14 +451,18 @@ void EtherMACBase::flushQueue()
     if (txQueue.innerQueue) {
         while (!txQueue.innerQueue->isEmpty()) {
             cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
-            emit(dropPkFromHLIfaceDownSignal, msg);
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, msg, &details);
             delete msg;
         }
     }
     else {
         while (!txQueue.extQueue->isEmpty()) {
             cMessage *msg = txQueue.extQueue->pop();
-            emit(dropPkFromHLIfaceDownSignal, msg);
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, msg, &details);
             delete msg;
         }
         txQueue.extQueue->clear();    // clear request count
@@ -518,7 +520,9 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>
 
     EV_WARN << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
     numDroppedNotForUs++;
-    emit(dropPkNotForUsSignal, packet);
+    PacketDropDetails details;
+    details.setReason(PACKET_NOT_FOR_US);
+    emit(NF_PACKET_DROP, packet, &details);
     delete packet;
     return true;
 }

@@ -58,8 +58,6 @@ class INET_API PPP : public MACBase
 
     static simsignal_t txStateSignal;
     static simsignal_t rxPkOkSignal;
-    static simsignal_t dropPkIfaceDownSignal;
-    static simsignal_t dropPkBitErrorSignal;
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;
     static simsignal_t packetSentToUpperSignal;

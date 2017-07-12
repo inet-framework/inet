@@ -35,7 +35,6 @@ class INET_API OrdinalBasedDropper : public cSimpleModule
 
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
-    static simsignal_t dropPkSignal;
 
     bool generateFurtherDrops;
     std::vector<unsigned int> dropsVector;

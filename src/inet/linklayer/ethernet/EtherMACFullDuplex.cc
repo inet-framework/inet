@@ -148,7 +148,9 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
 
     if (!connected || disabled) {
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << packet << endl;
-        emit(dropPkFromHLIfaceDownSignal, packet);
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(NF_PACKET_DROP, packet, &details);
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
@@ -205,7 +207,9 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << traffic << endl;
         if (EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(traffic)) {    // do not count JAM and IFG packets
             Packet *packet = decapsulate(phyFrame);
-            emit(dropPkIfaceDownSignal, packet);
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
             numDroppedIfaceDown++;
         }
@@ -232,7 +236,9 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
 
     if (hasBitError || !verifyCrcAndLength(packet)) {
         numDroppedBitError++;
-        emit(dropPkBitErrorSignal, packet);
+        PacketDropDetails details;
+        details.setReason(PACKET_INCORRECTLY_RECEIVED);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
         return;
     }

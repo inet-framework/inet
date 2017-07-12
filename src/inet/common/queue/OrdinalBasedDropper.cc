@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/NotifierConsts.h"
 #include "inet/common/queue/OrdinalBasedDropper.h"
 
 namespace inet {
@@ -23,7 +24,6 @@ Define_Module(OrdinalBasedDropper);
 
 simsignal_t OrdinalBasedDropper::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t OrdinalBasedDropper::sentPkSignal = registerSignal("sentPk");
-simsignal_t OrdinalBasedDropper::dropPkSignal = registerSignal("dropPk");
 
 void OrdinalBasedDropper::initialize()
 {
@@ -55,7 +55,8 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
     if (generateFurtherDrops) {
         if (numPackets == dropsVector[0]) {
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
-            emit(dropPkSignal, msg);
+            PacketDropDetails details;
+            emit(NF_PACKET_DROP, msg, &details);
             delete msg;
             numDropped++;
             dropsVector.erase(dropsVector.begin());

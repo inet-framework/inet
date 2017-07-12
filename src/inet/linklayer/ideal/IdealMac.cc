@@ -35,8 +35,6 @@ namespace inet {
 
 Define_Module(IdealMac);
 
-simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
-
 IdealMac::IdealMac()
 {
 }
@@ -297,7 +295,9 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
         return false;
 
     EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
-    emit(dropPkNotForUsSignal, packet);
+    PacketDropDetails details;
+    details.setReason(NOT_ADDRESSED_TO_US);
+    emit(NF_PACKET_DROP, packet, &details);
     delete packet;
     return true;
 }
