@@ -31,11 +31,11 @@ simple DropTailQueue like IOutputQueue
         @signal[rcvdPk](type=cPacket);
         @signal[enqueuePk](type=cPacket);
         @signal[dequeuePk](type=cPacket);
-        @signal[NF_PACKET_DROP](type=cPacket);
+        @signal[packetDrop](type=cPacket);
         @signal[queueingTime](type=simtime_t; unit=s);
         @signal[queueLength](type=long);
         @statistic[rcvdPk](title="received packets"; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="dropped packets"; source=NF_PACKET_DROP; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="dropped packets"; source=packetDrop; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[queueingTime](title="queueing time"; record=histogram,vector; interpolationmode=none);
         @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
     gates:

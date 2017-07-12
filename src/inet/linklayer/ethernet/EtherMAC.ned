@@ -129,7 +129,7 @@ simple EtherMAC like IEtherMAC
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
         @signal[rxPkFromHL](type=Packet);
-        @signal[NF_PACKET_DROP](type=Packet);
+        @signal[packetDrop](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
         @signal[packetSentToUpper](type=Packet);
@@ -145,9 +145,9 @@ simple EtherMAC like IEtherMAC
         @statistic[txPausePkUnits](title="pause units sent"; record=count,sum,vector; interpolationmode=none);
         @statistic[rxPausePkUnits](title="pause units received"; record=count,sum,vector; interpolationmode=none);
         @statistic[rxPkFromHL](title="packet bytes from higher layer"; source=rxPkFromHL; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(NF_PACKET_DROP); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[collision](title="collision"; record=count,vector; interpolationmode=none);
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 

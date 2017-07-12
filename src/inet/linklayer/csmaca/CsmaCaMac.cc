@@ -202,7 +202,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        emit(NF_PACKET_DROP, msg, &details);
+        emit(packetDropSignal, msg, &details);
         delete msg;
         return;
     }
@@ -359,7 +359,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   IDLE,
                 PacketDropDetails details;
                 details.setReason(INCORRECTLY_RECEIVED);
-                emit(NF_PACKET_DROP, frame, &details);
+                emit(packetDropSignal, frame, &details);
                 delete frame;
                 numCollision++;
                 resetStateVariables();
@@ -584,7 +584,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     PacketDropDetails details;
     details.setReason(RETRY_LIMIT_REACHED);
     auto packet = getCurrentTransmission();
-    emit(NF_PACKET_DROP, packet, &details);
+    emit(packetDropSignal, packet, &details);
     packet->popHeader<CsmaCaMacDataHeader>();
     emit(NF_LINK_BREAK, packet);
     popTransmissionQueue();

@@ -585,7 +585,7 @@ void LMacLayer::handleLowerPacket(cPacket *msg)
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(NF_PACKET_DROP, msg, &details);
+        emit(packetDropSignal, msg, &details);
         delete msg;
         return;
     }

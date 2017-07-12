@@ -226,7 +226,7 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
@@ -348,7 +348,7 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
             Packet *packet = decapsulate(phyFrame);
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             delete packet;
             numDroppedIfaceDown++;
         }
@@ -788,7 +788,7 @@ void EtherMAC::frameReceptionComplete()
         numDroppedBitError++;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
         return;
     }

@@ -120,7 +120,7 @@ extern INET_API simsignal_t    // admin
 //...
 
 // general
-    NF_PACKET_DROP;
+    packetDropSignal;
 
 /**
  * Utility function

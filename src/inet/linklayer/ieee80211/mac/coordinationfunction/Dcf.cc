@@ -102,7 +102,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
     }
 }
@@ -156,7 +156,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             EV_INFO << "This frame is not for us" << std::endl;
             PacketDropDetails details;
             details.setReason(NOT_ADDRESSED_TO_US);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             delete packet;
         }
         cancelEvent(startRxTimer);
@@ -167,7 +167,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         EV_INFO << "This frame is not for us" << std::endl;
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
     }
 }
@@ -265,7 +265,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         inProgressFrames->dropFrame(packet);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
 }
@@ -331,7 +331,7 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
         inProgressFrames->dropFrame(packet);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
     else {

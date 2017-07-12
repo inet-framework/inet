@@ -375,7 +375,7 @@ void EtherMACBase::processConnectDisconnect()
                 numDroppedPkFromHLIfaceDown++;
                 PacketDropDetails details;
                 details.setReason(INTERFACE_DOWN);
-                emit(NF_PACKET_DROP, msg, &details);
+                emit(packetDropSignal, msg, &details);
                 delete msg;
             }
         }
@@ -453,7 +453,7 @@ void EtherMACBase::flushQueue()
             cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, msg, &details);
+            emit(packetDropSignal, msg, &details);
             delete msg;
         }
     }
@@ -462,7 +462,7 @@ void EtherMACBase::flushQueue()
             cMessage *msg = txQueue.extQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, msg, &details);
+            emit(packetDropSignal, msg, &details);
             delete msg;
         }
         txQueue.extQueue->clear();    // clear request count
@@ -522,7 +522,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>
     numDroppedNotForUs++;
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(NF_PACKET_DROP, packet, &details);
+    emit(packetDropSignal, packet, &details);
     delete packet;
     return true;
 }

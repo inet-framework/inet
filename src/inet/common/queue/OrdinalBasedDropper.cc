@@ -56,7 +56,7 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
         if (numPackets == dropsVector[0]) {
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
             PacketDropDetails details;
-            emit(NF_PACKET_DROP, msg, &details);
+            emit(packetDropSignal, msg, &details);
             delete msg;
             numDropped++;
             dropsVector.erase(dropsVector.begin());

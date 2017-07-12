@@ -144,7 +144,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
     }
 }
@@ -177,7 +177,7 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             EV_INFO << "This frame is not for us" << std::endl;
             PacketDropDetails details;
             details.setReason(NOT_ADDRESSED_TO_US);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             delete packet;
         }
         cancelEvent(startRxTimer);
@@ -190,7 +190,7 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         EV_INFO << "This frame is not for us" << std::endl;
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
     }
 }
@@ -253,7 +253,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             else ; // TODO: + NonQoSDataFrame
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
-            emit(NF_PACKET_DROP, internallyCollidedFrame, &details);
+            emit(packetDropSignal, internallyCollidedFrame, &details);
             emit(NF_LINK_BREAK, internallyCollidedFrame);
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
             if (hasFrameToTransmit(ac))
@@ -388,7 +388,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             edcaInProgressFrames[ac]->dropFrame(packet);
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }
     }
@@ -505,7 +505,7 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             edcaInProgressFrames[ac]->dropFrame(packet);
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }
         else {

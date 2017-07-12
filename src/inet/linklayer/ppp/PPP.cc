@@ -183,7 +183,7 @@ void PPP::refreshOutGateConnection(bool connected)
                 numDroppedIfaceDown++;
                 PacketDropDetails details;
                 details.setReason(INTERFACE_DOWN);
-                emit(NF_PACKET_DROP, msg, &details);
+                emit(packetDropSignal, msg, &details);
                 delete msg;
             }
         }
@@ -278,7 +278,7 @@ void PPP::handleMessage(cMessage *msg)
             EV_WARN << "Bit error in " << msg << endl;
             PacketDropDetails details;
             details.setReason(INCORRECTLY_RECEIVED);
-            emit(NF_PACKET_DROP, msg, &details);
+            emit(packetDropSignal, msg, &details);
             numBitErr++;
             delete msg;
         }
@@ -304,7 +304,7 @@ void PPP::handleMessage(cMessage *msg)
             numDroppedIfaceDown++;
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, msg, &details);
+            emit(packetDropSignal, msg, &details);
             delete msg;
 
             if (queueModule && 0 == queueModule->getNumPendingRequests())
@@ -405,7 +405,7 @@ void PPP::flushQueue()
             cMessage *msg = queueModule->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            emit(packetDropSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
         queueModule->clear();    // clear request count
@@ -416,7 +416,7 @@ void PPP::flushQueue()
             cMessage *msg = (cMessage *)txQueue.pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            emit(packetDropSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
     }

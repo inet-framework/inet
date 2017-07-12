@@ -52,7 +52,7 @@ void IdealMac::flushQueue()
         cMessage *msg = queueModule->pop();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(NF_PACKET_DROP, msg, &details);
+        emit(packetDropSignal, msg, &details);
         delete msg;
     }
     queueModule->clear();    // clear request count
@@ -204,7 +204,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
         EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete msg;
         return;
     }
@@ -297,7 +297,7 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
     EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(NF_PACKET_DROP, packet, &details);
+    emit(packetDropSignal, packet, &details);
     delete packet;
     return true;
 }

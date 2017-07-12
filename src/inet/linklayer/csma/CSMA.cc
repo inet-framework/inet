@@ -259,7 +259,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
                 PacketDropDetails details;
                 details.setReason(QUEUE_OVERFLOW);
-                emit(NF_PACKET_DROP, msg, &details);
+                emit(packetDropSignal, msg, &details);
                 delete msg;
                 updateMacState(IDLE_1);
             }
@@ -421,7 +421,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                     nbDroppedFrames++;
                     PacketDropDetails details;
                     details.setReason(RETRY_LIMIT_REACHED);
-                    emit(NF_PACKET_DROP, mac, &details);
+                    emit(packetDropSignal, mac, &details);
                     delete mac;
                     manageQueue();
                 }
@@ -584,7 +584,7 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
         macQueue.pop_front();
         txAttempts = 0;
         // TODO: send dropped signal
-        // emit(packetDropped, mac);
+        // emit(packetDrop, mac);
         emit(NF_LINK_BREAK, mac);
         delete mac;
     }
@@ -658,7 +658,7 @@ void CSMA::updateStatusNotIdle(cMessage *msg)
                   << " and [TxBuff not avail]: dropping packet and don't move."
                   << endl;
         // TODO: send dropped signal
-        // emit(packetDropped, msg);
+        // emit(packetDrop, msg);
         delete msg;
     }
 }

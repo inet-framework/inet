@@ -150,7 +150,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << packet << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         numDroppedPkFromHLIfaceDown++;
         delete packet;
 
@@ -209,7 +209,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
             Packet *packet = decapsulate(phyFrame);
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(NF_PACKET_DROP, packet, &details);
+            emit(packetDropSignal, packet, &details);
             delete packet;
             numDroppedIfaceDown++;
         }
@@ -238,7 +238,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
         numDroppedBitError++;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(NF_PACKET_DROP, packet, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
         return;
     }
