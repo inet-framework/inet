@@ -40,9 +40,19 @@ void Edcaf::initialize(int stage)
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
-        if (hasGUI())
-            updateDisplayString();
     }
+}
+
+void Edcaf::refreshDisplay() const
+{
+    std::string text(printAccessCategory(ac));
+    if (owning)
+        text += "\nOwning";
+    else if (contention->isContentionInProgress())
+        text += "\nContending";
+    else
+        text += "\nIdle";
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void Edcaf::calculateTimingParameters()
@@ -110,8 +120,6 @@ void Edcaf::channelAccessGranted()
         owning = true;
         callback->channelGranted(this);
     }
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
@@ -119,8 +127,6 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     ASSERT(owning);
     owning = false;
     this->callback = nullptr;
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
@@ -134,8 +140,6 @@ void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
 //                  << eifs << ", slotTime = " << slotTime << std::endl;
         contention->startContention(cw, ifs, eifs, slotTime, this);
     }
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::expectedChannelAccess(simtime_t time)
@@ -179,16 +183,6 @@ void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();
     }
-}
-
-void Edcaf::updateDisplayString()
-{
-    std::string displayString(printAccessCategory(ac));
-    if (owning)
-        displayString += "\n(Channel owner)";
-    else if (contention->isContentionInProgress())
-        displayString += "\n(Contention in progress)";
-    getDisplayString().setTagArg("t", 0, displayString.c_str());
 }
 
 } // namespace ieee80211
