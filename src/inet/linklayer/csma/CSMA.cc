@@ -585,8 +585,10 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
         cMessage *mac = macQueue.front();
         macQueue.pop_front();
         txAttempts = 0;
-        // TODO: send dropped signal
-        // emit(packetDrop, mac);
+        PacketDropDetails details;
+        details.setReason(RETRY_LIMIT_REACHED);
+        details.setLimit(macMaxFrameRetries);
+        emit(packetDropSignal, mac, &details);
         emit(NF_LINK_BREAK, mac);
         delete mac;
     }
@@ -659,8 +661,10 @@ void CSMA::updateStatusNotIdle(cMessage *msg)
         EV_DETAIL << "(22) FSM State NOT IDLE, EV_SEND_REQUEST"
                   << " and [TxBuff not avail]: dropping packet and don't move."
                   << endl;
-        // TODO: send dropped signal
-        // emit(packetDrop, msg);
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        details.setLimit(queueLength);
+        emit(packetDropSignal, msg, &details);
         delete msg;
     }
 }
@@ -848,6 +852,14 @@ void CSMA::handleSelfMessage(cMessage *msg)
 void CSMA::handleLowerPacket(cPacket *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
+    if (msg->hasBitError()) {
+        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDropSignal, msg, &details);
+        delete msg;
+        return;
+    }
     const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
     const MACAddress& src = csmaHeader->getSrcAddr();
     const MACAddress& dest = csmaHeader->getDestAddr();
@@ -933,6 +945,9 @@ void CSMA::handleLowerPacket(cPacket *msg)
     }
     else {
         EV_DETAIL << "packet not for me, deleting...\n";
+        PacketDropDetails details;
+        details.setReason(NOT_ADDRESSED_TO_US);
+        emit(packetDropSignal, msg, &details);
         delete packet;
     }
 }

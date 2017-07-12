@@ -398,6 +398,10 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Unicast-Not-For-Us,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   IDLE,
+                PacketDropDetails details;
+                details.setReason(NOT_ADDRESSED_TO_US);
+                details.setLimit(retryLimit);
+                emit(packetDropSignal, frame, &details);
                 delete frame;
                 resetStateVariables();
             );

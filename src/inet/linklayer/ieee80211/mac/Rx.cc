@@ -77,6 +77,9 @@ bool Rx::lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
     else {
         EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDropSignal, packet, &details);
         delete packet;
         for (auto contention : contentions)
             contention->corruptedFrameReceived();

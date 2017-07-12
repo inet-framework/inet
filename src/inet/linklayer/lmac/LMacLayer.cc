@@ -172,6 +172,10 @@ void LMacLayer::handleUpperPacket(cPacket *msg)
     else {
         // queue is full, message has to be deleted
         EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is deleted\n";
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        details.setLimit(queueLength);
+        emit(packetDropSignal, packet, &details);
         delete packet;
         EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
     }
@@ -352,6 +356,9 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
+                    PacketDropDetails details;
+                    details.setReason(NOT_ADDRESSED_TO_US);
+                    emit(packetDropSignal, mac, &details);
                     delete mac;
                 }
                 // in any case, go back to sleep
@@ -551,6 +558,9 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
+                    PacketDropDetails details;
+                    details.setReason(NOT_ADDRESSED_TO_US);
+                    emit(packetDropSignal, mac, &details);
                     delete mac;
                 }
                 // in any case, go back to sleep
