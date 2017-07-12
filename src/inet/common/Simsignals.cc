@@ -101,16 +101,11 @@ simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_
 simsignal_t NF_BATTERY_CHANGED = cComponent::registerSignal("NF_BATTERY_CHANGED");
 simsignal_t NF_BATTERY_CPUTIME_CONSUMED = cComponent::registerSignal("NF_BATTERY_CPUTIME_CONSUMED");
 
-const char *notificationCategoryName(simsignal_t signalID)
+void printSignalBanner(simsignal_t signalID, const cObject *obj)
 {
-    return cComponent::getSignalName(signalID);
-}
-
-void printNotificationBanner(simsignal_t signalID, const cObject *obj)
-{
-    EV << "** Notification at T=" << simTime()
+    EV << "** Signal at T=" << simTime()
        << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
-       << notificationCategoryName(signalID) << " "
+       << cComponent::getSignalName(signalID) << " "
        << (obj ? obj->str() : "") << "\n";
 }
 

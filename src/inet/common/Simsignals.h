@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NOTIFIERCONSTS_H
-#define __INET_NOTIFIERCONSTS_H
+#ifndef __INET_SIMSIGNALS_H
+#define __INET_SIMSIGNALS_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/Simsignals_m.h"
@@ -24,9 +24,9 @@
 namespace inet {
 
 /**
- * signals for NotificationBoard
+ * Signals for publish/subscribe mechanisms.
  */
-// TODO document associated notification detail structs
+// TODO document associated signals detail structs
 extern INET_API simsignal_t    // admin
     NF_SUBSCRIBERLIST_CHANGED,
 
@@ -125,14 +125,9 @@ extern INET_API simsignal_t    // admin
 /**
  * Utility function
  */
-const char *notificationCategoryName(simsignal_t signalID);
-
-/**
- * Utility function
- */
-void printNotificationBanner(simsignal_t signalID, const cObject *obj);
+void printSignalBanner(simsignal_t signalID, const cObject *obj);
 
 } // namespace inet
 
-#endif // ifndef __INET_NOTIFIERCONSTS_H
+#endif // ifndef __INET_SIMSIGNALS_H
 
