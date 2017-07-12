@@ -550,7 +550,7 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destI
     else {
         numDropped++;
         PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
+        details.setReason(NO_INTERFACE_FOUND);
         emit(packetDropSignal, packet, &details);
         delete packet;
     }
