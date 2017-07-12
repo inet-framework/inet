@@ -421,6 +421,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                     nbDroppedFrames++;
                     PacketDropDetails details;
                     details.setReason(RETRY_LIMIT_REACHED);
+                    details.setLimit(macMaxCSMABackoffs);
                     emit(packetDropSignal, mac, &details);
                     delete mac;
                     manageQueue();

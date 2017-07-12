@@ -253,6 +253,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             else ; // TODO: + NonQoSDataFrame
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
+            details.setLimit(-1); // TODO:
             emit(packetDropSignal, internallyCollidedFrame, &details);
             emit(NF_LINK_BREAK, internallyCollidedFrame);
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
@@ -388,6 +389,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             edcaInProgressFrames[ac]->dropFrame(packet);
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
+            details.setLimit(-1); // TODO:
             emit(packetDropSignal, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }
@@ -505,6 +507,7 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             edcaInProgressFrames[ac]->dropFrame(packet);
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
+            details.setLimit(-1); // TODO:
             emit(packetDropSignal, packet, &details);
             emit(NF_LINK_BREAK, packet);
         }

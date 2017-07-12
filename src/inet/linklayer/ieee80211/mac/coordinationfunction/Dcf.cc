@@ -265,6 +265,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         inProgressFrames->dropFrame(packet);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
+        details.setLimit(recoveryProcedure->getShortRetryLimit());
         emit(packetDropSignal, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
@@ -331,6 +332,7 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
         inProgressFrames->dropFrame(packet);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
+        details.setLimit(-1); // TODO:
         emit(packetDropSignal, packet, &details);
         emit(NF_LINK_BREAK, packet);
     }
