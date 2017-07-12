@@ -19,7 +19,7 @@
 #define __INET_NOTIFIERCONSTS_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/SimsignalDetails_m.h"
+#include "inet/common/Simsignals_m.h"
 
 namespace inet {
 

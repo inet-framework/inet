@@ -4,7 +4,7 @@
 
 cplusplus{{
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/SimsignalDetails_m.h"
+#include "inet/common/Simsignals_m.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 }}
 
