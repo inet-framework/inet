@@ -78,7 +78,7 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
         int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
 
         @class(BMacLayer);
-        @signal[NF_LINK_BREAK](type=Packet);
+        @signal[linkBreak](type=Packet);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

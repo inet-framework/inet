@@ -592,7 +592,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     auto packet = getCurrentTransmission();
     emit(packetDropSignal, packet, &details);
     packet->popHeader<CsmaCaMacDataHeader>();
-    emit(NF_LINK_BREAK, packet);
+    emit(linkBreakSignal, packet);
     popTransmissionQueue();
     resetStateVariables();
     numGivenUp++;

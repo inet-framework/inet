@@ -589,7 +589,7 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(macMaxFrameRetries);
         emit(packetDropSignal, mac, &details);
-        emit(NF_LINK_BREAK, mac);
+        emit(linkBreakSignal, mac);
         delete mac;
     }
     manageQueue();

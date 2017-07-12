@@ -256,7 +256,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
             emit(packetDropSignal, internallyCollidedFrame, &details);
-            emit(NF_LINK_BREAK, internallyCollidedFrame);
+            emit(linkBreakSignal, internallyCollidedFrame);
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
@@ -392,7 +392,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
             emit(packetDropSignal, packet, &details);
-            emit(NF_LINK_BREAK, packet);
+            emit(linkBreakSignal, packet);
         }
     }
     else
@@ -510,7 +510,7 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
             emit(packetDropSignal, packet, &details);
-            emit(NF_LINK_BREAK, packet);
+            emit(linkBreakSignal, packet);
         }
         else {
             auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();

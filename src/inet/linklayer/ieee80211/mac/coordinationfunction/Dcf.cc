@@ -268,7 +268,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(recoveryProcedure->getShortRetryLimit());
         emit(packetDropSignal, packet, &details);
-        emit(NF_LINK_BREAK, packet);
+        emit(linkBreakSignal, packet);
     }
 }
 
@@ -335,7 +335,7 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(-1); // TODO:
         emit(packetDropSignal, packet, &details);
-        emit(NF_LINK_BREAK, packet);
+        emit(linkBreakSignal, packet);
     }
     else {
         auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();

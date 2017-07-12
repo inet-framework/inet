@@ -137,7 +137,7 @@ void DYMO::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"));
-        host->subscribe(NF_LINK_BREAK, this);
+        host->subscribe(linkBreakSignal, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
@@ -1440,7 +1440,7 @@ bool DYMO::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
-    if (signalID == NF_LINK_BREAK) {
+    if (signalID == linkBreakSignal) {
         EV_WARN << "Received link break" << endl;
         Packet *datagram = check_and_cast<Packet *>(obj);
         const auto& networkHeader = findNetworkProtocolHeader(datagram);

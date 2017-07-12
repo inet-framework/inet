@@ -229,7 +229,7 @@ void IdealMac::handleSelfMessage(cMessage *message)
         auto idealMacHeader = lastSentPk->popHeader<IdealMacHeader>();
         lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
         // packet lost
-        emit(NF_LINK_BREAK, lastSentPk);
+        emit(linkBreakSignal, lastSentPk);
         delete lastSentPk;
         lastSentPk = nullptr;
         getNextMsgFromHL();

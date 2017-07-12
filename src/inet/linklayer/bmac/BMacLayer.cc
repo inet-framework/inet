@@ -402,7 +402,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     //drop the packet
                     cMessage *mac = macQueue.front();
                     macQueue.pop_front();
-                    emit(NF_LINK_BREAK, mac);
+                    emit(linkBreakSignal, mac);
                     delete mac;
 
                     // if something in the queue, wakeup soon.

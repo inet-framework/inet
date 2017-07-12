@@ -55,7 +55,7 @@ module Hcf
 
         @class(Hcf);
         @display("i=block/queue");
-        @signal[NF_LINK_BREAK](type=Packet);
+        @signal[linkBreak](type=Packet);
         @signal[packetDrop](type=Packet);
 
     submodules:

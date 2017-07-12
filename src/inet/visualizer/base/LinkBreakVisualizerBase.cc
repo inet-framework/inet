@@ -104,7 +104,7 @@ void LinkBreakVisualizerBase::refreshDisplay() const
 void LinkBreakVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(NF_LINK_BREAK, this);
+    subscriptionModule->subscribe(linkBreakSignal, this);
 }
 
 void LinkBreakVisualizerBase::unsubscribe()
@@ -112,13 +112,13 @@ void LinkBreakVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr)
-        subscriptionModule->unsubscribe(NF_LINK_BREAK, this);
+        subscriptionModule->unsubscribe(linkBreakSignal, this);
 }
 
 void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == NF_LINK_BREAK) {
+    if (signal == linkBreakSignal) {
         MACAddress transmitterAddress;
         MACAddress receiverAddress;
         // TODO: revive
