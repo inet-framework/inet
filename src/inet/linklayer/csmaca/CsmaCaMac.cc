@@ -357,7 +357,9 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Bit-Error,
                                   isLowerMessage(msg) && frame->hasBitError(),
                                   IDLE,
-                // TODO: reason? emit(NF_PACKET_DROP, frame);
+                PacketDropDetails details;
+                details.setReason(PACKET_INCORRECTLY_RECEIVED);
+                emit(NF_PACKET_DROP, frame, &details);
                 delete frame;
                 numCollision++;
                 resetStateVariables();
@@ -579,6 +581,9 @@ void CsmaCaMac::finishCurrentTransmission()
 
 void CsmaCaMac::giveUpCurrentTransmission()
 {
+    PacketDropDetails details;
+    details.setReason(RETRY_LIMIT_REACHED);
+    emit(NF_PACKET_DROP, getCurrentTransmission(), &details);
     emit(NF_LINK_BREAK, getCurrentTransmission());
     popTransmissionQueue();
     resetStateVariables();

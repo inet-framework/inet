@@ -480,6 +480,9 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 }
                 else {
                     EV_DETAIL << "Received " << mac << " is not for us, dropping frame." << endl;
+                    PacketDropDetails details;
+                    details.setReason(NOT_ADDRESSED_TO_US);
+                    emit(NF_PACKET_DROP, msg, &details);
                     delete msg;
                     msg = nullptr;
                     mac = nullptr;
@@ -559,6 +562,9 @@ void BMacLayer::handleLowerPacket(cPacket *msg)
 {
     if (msg->hasBitError()) {
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        PacketDropDetails details;
+        details.setReason(PACKET_INCORRECTLY_RECEIVED);
+        emit(NF_PACKET_DROP, msg, &details);
         delete msg;
         return;
     }

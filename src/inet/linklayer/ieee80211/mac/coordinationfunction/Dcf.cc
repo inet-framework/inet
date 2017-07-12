@@ -154,6 +154,9 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
+            PacketDropDetails details;
+            details.setReason(NOT_ADDRESSED_TO_US);
+            emit(NF_PACKET_DROP, packet, &details);
             delete packet;
         }
         cancelEvent(startRxTimer);
@@ -162,6 +165,9 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         recipientProcessReceivedFrame(packet, header);
     else {
         EV_INFO << "This frame is not for us" << std::endl;
+        PacketDropDetails details;
+        details.setReason(NOT_ADDRESSED_TO_US);
+        emit(NF_PACKET_DROP, packet, &details);
         delete packet;
     }
 }

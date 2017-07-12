@@ -52,7 +52,9 @@ void IdealMac::flushQueue()
     ASSERT(queueModule);
     while (!queueModule->isEmpty()) {
         cMessage *msg = queueModule->pop();
-        //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(NF_PACKET_DROP, msg, &details);
         delete msg;
     }
     queueModule->clear();    // clear request count
@@ -202,7 +204,9 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     if (msg->hasBitError()) {
         EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
-        // TODO: add reason? emit(NF_PACKET_DROP, frame);
+        PacketDropDetails details;
+        details.setReason(PACKET_INCORRECTLY_RECEIVED);
+        emit(NF_PACKET_DROP, packet, &details);
         delete msg;
         return;
     }
