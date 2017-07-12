@@ -20,14 +20,10 @@
 
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 
-//#include "inet/common/RawPacket.h"
-//#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
-
-//TODO need solution for fragments with encapsulated RawPacket contains bytes of fragment or bytes of total packet
 
 IPv4FragBuf::IPv4FragBuf()
 {
