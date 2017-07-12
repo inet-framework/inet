@@ -177,6 +177,8 @@ Register_PacketDropReason_ResultFilter("packetDropReasonIsNoRouteFound", NoRoute
 Register_PacketDropReason_ResultFilter("packetDropReasonIsNotAddressedToUs", NotAddressedToUsPacketDropReasonFilter, NOT_ADDRESSED_TO_US);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsQueueOverflow", QueueOverflowPacketDropReasonFilter, QUEUE_OVERFLOW);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsRetryLimitReached", RetryLimitReachedPacketDropReasonFilter, RETRY_LIMIT_REACHED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsLifetimeExpired", LifetimeExpiredPacketDropReasonFilter, LIFETIME_EXPIRED);
+Register_PacketDropReason_ResultFilter("packetDropReasonIsCongestion", CongestionDropReasonFilter, CONGESTION);
 
 } // namespace filters
 

@@ -2,10 +2,6 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-cplusplus{{
-#include "inet/common/INETDefs.h"
-}}
-
 namespace inet;
 
 enum PacketDropReason
@@ -20,9 +16,12 @@ enum PacketDropReason
     NOT_ADDRESSED_TO_US       = 7;
     QUEUE_OVERFLOW            = 8;
     RETRY_LIMIT_REACHED       = 9;
+    LIFETIME_EXPIRED          = 10;
+    CONGESTION                = 11;
 }
 
 class PacketDropDetails
 {
     int reason @enum(PacketDropReason) = -1;
+    int limit = -1;
 }
