@@ -868,7 +868,7 @@ class INET_API LinearIntplMappingIterator : public MappingIterator
     /**
      * @brief This method isn't supported by an interpolated mapping.
      */
-    virtual const Argument& getNextPosition() const override { assert(false); return *((Argument *)nullptr); }
+    virtual const Argument& getNextPosition() const override { assert(false); throw cRuntimeError("getNextPosition() isn't supported by an interpolated mapping"); }
 };
 
 /**
