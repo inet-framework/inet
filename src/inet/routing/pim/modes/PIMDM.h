@@ -24,7 +24,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/routing/pim/PIMPacket_m.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/routing/pim/tables/PIMNeighborTable.h"
 #include "inet/routing/pim/tables/PIMInterfaceTable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"

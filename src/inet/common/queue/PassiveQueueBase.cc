@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {

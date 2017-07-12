@@ -22,7 +22,7 @@
 
 #if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
@@ -193,7 +193,7 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 
 #else /*OMNETPP_VERSION*/
 
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

@@ -22,7 +22,7 @@
 #include "inet/linklayer/base/MACBase.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

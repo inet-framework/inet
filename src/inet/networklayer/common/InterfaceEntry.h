@@ -25,7 +25,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 

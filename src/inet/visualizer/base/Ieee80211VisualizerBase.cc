@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"

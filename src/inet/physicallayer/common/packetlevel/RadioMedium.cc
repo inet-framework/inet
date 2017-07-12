@@ -17,7 +17,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

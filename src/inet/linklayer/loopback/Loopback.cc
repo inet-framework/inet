@@ -26,7 +26,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {

@@ -18,7 +18,7 @@
 
 #include "Edcaf.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace ieee80211 {

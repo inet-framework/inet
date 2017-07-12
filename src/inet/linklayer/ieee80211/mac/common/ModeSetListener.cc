@@ -16,7 +16,7 @@
 // 
 
 #include "ModeSetListener.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

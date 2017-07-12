@@ -28,7 +28,7 @@
 
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 

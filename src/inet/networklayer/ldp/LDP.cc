@@ -24,7 +24,7 @@
 //#include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/LIBTable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
