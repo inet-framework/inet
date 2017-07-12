@@ -936,9 +936,9 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 sctpSocket.setEnableHeartbeats(false);
             else if (expr_params->spp_flags->getNum() & SPP_HB_ENABLE)
                 sctpSocket.setEnableHeartbeats(true);
-            if (expr_params->spp_hbinterval > 0)
+            if (expr_params->spp_hbinterval->getNum() > 0)
                 sctpSocket.setHbInterval(expr_params->spp_hbinterval->getNum());
-            if (expr_params->spp_pathmaxrxt > 0)
+            if (expr_params->spp_pathmaxrxt->getNum() > 0)
                 sctpSocket.setPathMaxRetrans(expr_params->spp_pathmaxrxt->getNum());
             break;
         }
