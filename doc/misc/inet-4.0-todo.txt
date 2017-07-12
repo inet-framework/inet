@@ -25,6 +25,13 @@ should be included in INET 4.0.
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - simplify INetfilter interface by removing parameters other than the datagram
+ - use InterfaceEntry class instead of cCompoundModule for the corresponding network interface (merge the two)
+ - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
+ - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
+   providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
+   but we should avoid having these classes for a random collections of utility functions!
+ - add separate classes/functions for iterating over the network nodes in a network or
+   finding a network node based on its mac address/ip address or finding the position of a network node, etc.
 
  - update all NED and C++ documentation
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
