@@ -39,6 +39,17 @@ void Dcaf::initialize(int stage)
     }
 }
 
+void Dcaf::refreshDisplay() const
+{
+    std::string text;
+    if (owning)
+        text = "Owning";
+    else if (contention->isContentionInProgress())
+        text = "Contending";
+    else
+        text = "Idle";
+    getDisplayString().setTagArg("t", 0, text.c_str());
+}
 
 void Dcaf::calculateTimingParameters()
 {
