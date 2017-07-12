@@ -113,8 +113,6 @@ void PacketDropVisualizerBase::refreshDisplay() const
 void PacketDropVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
     subscriptionModule->subscribe(PassiveQueueBase::dropPkByQueueSignal, this);
 #ifdef WITH_ETHERNET
     subscriptionModule->subscribe(EtherMACBase::dropPkIfaceDownSignal, this);
@@ -129,8 +127,6 @@ void PacketDropVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
         subscriptionModule->unsubscribe(PassiveQueueBase::dropPkByQueueSignal, this);
 #ifdef WITH_ETHERNET
         subscriptionModule->unsubscribe(EtherMACBase::dropPkIfaceDownSignal, this);
@@ -143,8 +139,7 @@ void PacketDropVisualizerBase::unsubscribe()
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal
-            || signal == PassiveQueueBase::dropPkByQueueSignal
+    if (signal == PassiveQueueBase::dropPkByQueueSignal
 #ifdef WITH_ETHERNET
             || signal == EtherMACBase::dropPkIfaceDownSignal || signal == EtherMACBase::dropPkFromHLIfaceDownSignal
 #endif // WITH_ETHERNET

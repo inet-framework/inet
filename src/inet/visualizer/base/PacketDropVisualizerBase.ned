@@ -23,10 +23,9 @@ package inet.visualizer.base;
 // default, see module parameters for how to enable the visualization. The
 // actual visualization of packet drops is done in derived modules.
 //
-// This module subscribes for packetFromLowerDropped and packetFromUpperDropped
-// on the module determined by the subscriptionModule parameter. If the
-// visualizer receives a packet dropped signal, then it stores the dropped
-// packet and starts the drop visualization.
+// This module subscribes for NF_PACKET_DROP on the module determined by the
+// subscriptionModule parameter. If the visualizer receives a packet dropped
+// signal, then it stores the dropped packet and starts the drop visualization.
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~IPacketDropVisualizer, ~VisualizerBase
 //

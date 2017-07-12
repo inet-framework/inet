@@ -202,7 +202,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     if (msg->hasBitError()) {
         EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
-        // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
+        // TODO: add reason? emit(NF_PACKET_DROP, frame);
         delete msg;
         return;
     }

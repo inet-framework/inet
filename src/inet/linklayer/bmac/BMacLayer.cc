@@ -618,7 +618,7 @@ bool BMacLayer::addToQueue(cMessage *msg)
         // queue is full, message has to be deleted
         EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is"
                      " deleted\n";
-        emit(packetFromUpperDroppedSignal, msg);
+        emit(NF_PACKET_DROP, msg);
         nbDroppedDataPackets++;
         return false;
     }

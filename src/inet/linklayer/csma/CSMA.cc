@@ -257,7 +257,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
             else {
                 // queue is full, message has to be deleted
                 EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
-                emit(packetFromUpperDroppedSignal, msg);
+                emit(NF_PACKET_DROP, msg);
                 delete msg;
                 updateMacState(IDLE_1);
             }
@@ -417,7 +417,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                     macQueue.pop_front();
                     txAttempts = 0;
                     nbDroppedFrames++;
-                    emit(packetFromUpperDroppedSignal, mac);
+                    emit(NF_PACKET_DROP, mac);
                     delete mac;
                     manageQueue();
                 }

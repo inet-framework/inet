@@ -27,11 +27,9 @@ class INET_API LayeredProtocolBase : public OperationalBase
   public:
     static simsignal_t packetSentToUpperSignal;
     static simsignal_t packetReceivedFromUpperSignal;
-    static simsignal_t packetFromUpperDroppedSignal;
 
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;
-    static simsignal_t packetFromLowerDroppedSignal;
 
   protected:
     virtual void handleMessageWhenUp(cMessage *message) override;

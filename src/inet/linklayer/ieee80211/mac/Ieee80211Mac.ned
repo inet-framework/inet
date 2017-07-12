@@ -30,10 +30,9 @@ module LayeredProtocolBase
     parameters:
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
-        @signal[packetFromUpperDropped](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
-        @signal[packetFromLowerDropped](type=Packet);
+        @signal[NF_PACKET_DROP](type=Packet);
 }
 
 // near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
