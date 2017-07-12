@@ -214,6 +214,7 @@ bool IPv4::verifyCrc(const Ptr<const IPv4Header>& ipv4Header)
                 std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
                 // 2. compute the CRC
                 auto computedCrc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+                delete [] buffer;
                 return computedCrc == 0;
             }
             else
@@ -738,6 +739,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
         // 2. compute the CRC
         uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+        delete [] buffer;
         ipv4Header->setCrc(crc);
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
