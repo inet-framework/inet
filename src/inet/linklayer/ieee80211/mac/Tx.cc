@@ -31,7 +31,7 @@ Define_Module(Tx);
 Tx::~Tx()
 {
     cancelAndDelete(endIfsTimer);
-    if (frame && !transmitting)
+    if (frame)
         delete frame;
 }
 

@@ -49,8 +49,8 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
             // handle broadcast/multicast frames
             if (header->getAddress3().isMulticast()) {
                 EV << "Handling multicast frame\n";
-                mac->sendUp(frame->dup());
                 distributeDataFrame(frame, header);
+                mac->sendUp(frame);
                 return;
             }
             // look up destination address in our STA list
@@ -61,8 +61,10 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
             }
             else {
                 // dest address is our STA, but is it already associated?
-                if (it->second == Ieee80211Mib::ASSOCIATED)
+                if (it->second == Ieee80211Mib::ASSOCIATED) {
                     distributeDataFrame(frame, header); // send it out to the destination STA
+                    delete frame;
+                }
                 else {
                     EV << "Frame's destination STA is not in associated state -- dropping frame\n";
                     delete frame;
