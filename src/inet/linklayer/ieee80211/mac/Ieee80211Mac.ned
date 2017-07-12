@@ -17,37 +17,13 @@
 
 package inet.linklayer.ieee80211.mac;
 
+import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.ieee80211.IIeee80211Mac;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 import inet.linklayer.ieee80211.mac.contract.IStatistics;
 import inet.linklayer.ieee80211.mac.contract.ITx;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
-
-// near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
-module LayeredProtocolBase
-{
-    parameters:
-        @signal[packetSentToUpper](type=Packet);
-        @signal[packetReceivedFromUpper](type=Packet);
-        @signal[packetSentToLower](type=Packet);
-        @signal[packetReceivedFromLower](type=Packet);
-        @signal[packetDrop](type=Packet);
-}
-
-// near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
-module MACProtocolBase extends LayeredProtocolBase
-{
-    parameters:
-        string interfaceTableModule;
-        int mtu @unit("B") = default(2304B);
-        @display("i=block/rxtx");
-    gates:
-        input upperLayerIn @labels(INetworkHeader/down);
-        output upperLayerOut @labels(INetworkHeader/up);
-        input lowerLayerIn @labels(ILinkLayerFrame/up);
-        output lowerLayerOut @labels(ILinkLayerFrame/down);
-}
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
@@ -92,6 +68,7 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         string modeSet @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
         string fcsMode @enum("declared","computed") = default("declared");
 
+        int mtu @unit("B") = default(2304B);
         bool qosStation = default(false);
 
         *.mibModule = default(absPath(mibModule));
@@ -150,7 +127,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
 {
     parameters:
         string rateControlType = default("");
-        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n","p") = default("g(mixed)");
         double bitrate @unit("bps") = default(-1bps); // for backward compatibility
         double basicBitrate @unit("bps") = default(-1bps); // for backward compatibility
         double dataBitrate @unit("bps") = default(bitrate);
