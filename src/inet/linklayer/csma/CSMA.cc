@@ -259,6 +259,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
                 PacketDropDetails details;
                 details.setReason(QUEUE_OVERFLOW);
+                details.setLimit(queueLength);
                 emit(packetDropSignal, msg, &details);
                 delete msg;
                 updateMacState(IDLE_1);

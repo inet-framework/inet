@@ -202,6 +202,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
+        details.setLimit(maxQueueSize);
         emit(packetDropSignal, msg, &details);
         delete msg;
         return;

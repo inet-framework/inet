@@ -626,6 +626,7 @@ bool BMacLayer::addToQueue(cMessage *msg)
                      " deleted\n";
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
+        details.setLimit(queueLength);
         emit(packetDropSignal, msg, &details);
         nbDroppedDataPackets++;
         return false;

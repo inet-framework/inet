@@ -102,6 +102,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         EV_INFO << "Frame " << packet->getName() << " has been dropped because the PendingQueue is full." << endl;
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
+        details.setLimit(pendingQueue->getMaxQueueSize());
         emit(packetDropSignal, packet, &details);
         delete packet;
     }
