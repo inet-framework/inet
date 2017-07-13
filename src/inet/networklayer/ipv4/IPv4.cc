@@ -396,7 +396,7 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
     // send
     const IPv4Address& destAddr = ipv4Header->getDestAddress();
 
-    EV_DETAIL << "Sending datagram " << packet << " with destination = " << destAddr << "\n";
+    EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
         destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
