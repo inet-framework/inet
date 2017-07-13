@@ -200,10 +200,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
 {
     if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
-        PacketDropDetails details;
-        details.setReason(QUEUE_OVERFLOW);
-        details.setLimit(maxQueueSize);
-        emit(packetDropSignal, msg, &details);
+        emitPacketDropSignal(msg, QUEUE_OVERFLOW, maxQueueSize);
         delete msg;
         return;
     }
@@ -359,10 +356,8 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Bit-Error,
                                   isLowerMessage(msg) && frame->hasBitError(),
                                   IDLE,
-                PacketDropDetails details;
-                details.setReason(INCORRECTLY_RECEIVED);
-                emit(packetDropSignal, frame, &details);
                 numCollision++;
+                emitPacketDropSignal(frame, INCORRECTLY_RECEIVED);
                 resetStateVariables();
                 deleteFrame = true;
             );
@@ -399,12 +394,9 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Unicast-Not-For-Us,
                                   isLowerMessage(msg) && !isForUs(frame),
                                   IDLE,
-                PacketDropDetails details;
-                details.setReason(NOT_ADDRESSED_TO_US);
-                details.setLimit(retryLimit);
-                emit(packetDropSignal, frame, &details);
-                deleteFrame = true;
+                emitPacketDropSignal(frame, NOT_ADDRESSED_TO_US, retryLimit);
                 resetStateVariables();
+                deleteFrame = true;
             );
         }
         FSMA_State(WAITSIFS)
@@ -589,11 +581,8 @@ void CsmaCaMac::finishCurrentTransmission()
 
 void CsmaCaMac::giveUpCurrentTransmission()
 {
-    PacketDropDetails details;
-    details.setReason(RETRY_LIMIT_REACHED);
-    details.setLimit(retryLimit);
     auto packet = getCurrentTransmission();
-    emit(packetDropSignal, packet, &details);
+    emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBreakSignal, packet);
     popTransmissionQueue();
     resetStateVariables();
@@ -628,6 +617,14 @@ void CsmaCaMac::resetStateVariables()
 {
     backoffPeriod = -1;
     retryCounter = 0;
+}
+
+void CsmaCaMac::emitPacketDropSignal(cPacket *frame, PacketDropReason reason, int limit)
+{
+    PacketDropDetails details;
+    details.setReason(reason);
+    details.setLimit(limit);
+    emit(packetDropSignal, frame, &details);
 }
 
 bool CsmaCaMac::isMediumFree()
