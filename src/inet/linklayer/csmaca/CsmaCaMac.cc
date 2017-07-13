@@ -440,12 +440,14 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto macHeader = std::make_shared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(byte(headerLength));
     auto dest = frame->getMandatoryTag<MacAddressReq>()->getDestAddress();
-    macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(frame->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    auto transportProtocol = frame->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
+    macHeader->setNetworkProtocol(networkProtocol);
     macHeader->setTransmitterAddress(address);
     macHeader->setReceiverAddress(frame->getMandatoryTag<MacAddressReq>()->getDestAddress());
-    auto upReq = frame->getTag<UserPriorityReq>();
-    int up = upReq == nullptr ? UP_BE : upReq->getUserPriority();
-    macHeader->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
+    auto userPriorityReq = frame->getTag<UserPriorityReq>();
+    int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
+    macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
     macHeader->markImmutable();
     frame->pushHeader(macHeader);
 }
@@ -458,8 +460,10 @@ void CsmaCaMac::decapsulate(Packet *frame)
     addressInd->setDestAddress(macHeader->getReceiverAddress());
     frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     frame->ensureTag<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
-    frame->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
-    frame->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    auto networkProtocol = macHeader->getNetworkProtocol();
+    auto transportProtocol = ProtocolGroup::ethertype.getProtocol(networkProtocol);
+    frame->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
 }
 
 /****************************************************************
