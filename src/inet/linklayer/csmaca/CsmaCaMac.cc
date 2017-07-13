@@ -234,6 +234,7 @@ void CsmaCaMac::handleLowerPacket(cPacket *msg)
 
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
+    bool deleteFrame = false;
     Packet *frame = dynamic_cast<Packet *>(msg);
     FSMA_Switch(fsm)
     {
@@ -340,7 +341,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numSent++;
                 cancelAckTimer();
                 finishCurrentTransmission();
-                delete frame;
+                deleteFrame = true;
             );
             FSMA_Event_Transition(Give-Up-Transmission,
                                   msg == endAckTimeout && retryCounter == retryLimit,
@@ -361,15 +362,15 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 PacketDropDetails details;
                 details.setReason(INCORRECTLY_RECEIVED);
                 emit(packetDropSignal, frame, &details);
-                delete frame;
                 numCollision++;
                 resetStateVariables();
+                deleteFrame = true;
             );
             FSMA_Event_Transition(Receive-Unexpected-Ack,
                                   isLowerMessage(msg) && isAck(frame),
                                   IDLE,
-                delete frame;
                 resetStateVariables();
+                deleteFrame = true;
             );
             FSMA_Event_Transition(Receive-Broadcast,
                                   isLowerMessage(msg) && isBroadcast(frame),
@@ -402,7 +403,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 details.setReason(NOT_ADDRESSED_TO_US);
                 details.setLimit(retryLimit);
                 emit(packetDropSignal, frame, &details);
-                delete frame;
+                deleteFrame = true;
                 resetStateVariables();
             );
         }
@@ -423,6 +424,8 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         else if (!transmissionQueue.isEmpty())
             handleWithFsm(transmissionQueue.front());
     }
+    if (deleteFrame)
+        delete frame;
 }
 
 void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
