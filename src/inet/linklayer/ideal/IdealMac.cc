@@ -201,7 +201,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     auto packet = check_and_cast<Packet *>(msg);
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     if (msg->hasBitError()) {
-        EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
+        EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDropSignal, packet, &details);
@@ -217,7 +217,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
             senderMac->acked(packet);
         // decapsulate and attach control info
         decapsulate(packet);
-        EV << "Passing up contained packet `" << packet->getName() << "' to higher layer\n";
+        EV << "Passing up contained packet '" << packet->getName() << "' to higher layer\n";
         sendUp(packet);
     }
 }
@@ -294,7 +294,7 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
     if (promiscuous || idealMacHeader->getDest().isMulticast())
         return false;
 
-    EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
+    EV << "Frame '" << packet->getName() << "' not destined to us, discarding\n";
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
     emit(packetDropSignal, packet, &details);
