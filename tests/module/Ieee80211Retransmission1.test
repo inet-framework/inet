@@ -61,18 +61,18 @@ ned-path = .;../../../../src;../../lib
 **.arpType = "GlobalARP"
 
 # Sender
-**.sender.numUdpApps = 1
-**.sender.udpApp[0].typename = "MpduGen"
-**.sender.udpApp[0].destAddress = "receiver"
-**.sender.udpApp[0].destPort = 21
-**.sender.udpApp[0].longPacketSize = 1700B
-**.sender.udpApp[0].shortPacketSize = 500B
-**.sender.udpApp[0].startTime = 0.05s
+**.sender.numApps = 1
+**.sender.app[0].typename = "MpduGen"
+**.sender.app[0].destAddress = "receiver"
+**.sender.app[0].destPort = 21
+**.sender.app[0].longPacketSize = 1700B
+**.sender.app[0].shortPacketSize = 500B
+**.sender.app[0].startTime = 0.05s
 
 # Receiver
-**.receiver.numUdpApps = 1
-**.receiver.udpApp[0].typename = "UDPSink"
-**.receiver.udpApp[0].localPort = 21
+**.receiver.numApps = 1
+**.receiver.app[0].typename = "UDPSink"
+**.receiver.app[0].localPort = 21
 **.sender.wlan[*].macType = "Ieee80211Mac"
 **.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
@@ -80,7 +80,7 @@ ned-path = .;../../../../src;../../lib
 **.receiver.wlan[*].macType = "Ieee80211TesterMac"
 **.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
 
-**.sender.udpApp[0].packets = "SS"
+**.sender.app[0].packets = "SS"
 **.receiver.wlan[*].mac.actions = "AA"
 
 %contains-regex: stdout

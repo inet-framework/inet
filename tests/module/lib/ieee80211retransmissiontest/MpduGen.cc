@@ -53,7 +53,7 @@ void MpduGen::processPacket(cPacket *pk)
 
 void MpduGen::sendPackets()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     const char *destAddrStr = par("destAddress");
@@ -74,6 +74,8 @@ void MpduGen::sendPackets()
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
+        payload->markImmutable();
+        packet->append(payload);
         emit(sentPkSignal, packet);
         socket.sendTo(packet, destAddr, destPort);
         numSent++;
