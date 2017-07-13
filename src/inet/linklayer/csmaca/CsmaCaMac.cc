@@ -594,7 +594,6 @@ void CsmaCaMac::giveUpCurrentTransmission()
     details.setLimit(retryLimit);
     auto packet = getCurrentTransmission();
     emit(packetDropSignal, packet, &details);
-    packet->popHeader<CsmaCaMacDataHeader>();
     emit(linkBreakSignal, packet);
     popTransmissionQueue();
     resetStateVariables();
