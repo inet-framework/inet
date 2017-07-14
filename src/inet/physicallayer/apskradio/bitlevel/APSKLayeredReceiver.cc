@@ -162,14 +162,14 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     auto packet = packetModel->getPacket()->dup();
+    packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(packet, bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
     auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-    packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, receptionPacketModel->isPacketErrorless()
-    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
+    return new LayeredReceptionResult(reception, decisions, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *APSKLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
