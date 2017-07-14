@@ -303,7 +303,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
             int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtHeader) : 0;
             dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
         }
-        recoveryProcedure->ackFrameReceived(packet, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
+        recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
         ackHandler->processReceivedAck(std::dynamic_pointer_cast<const Ieee80211AckFrame>(frame), lastTransmittedDataOrMgmtHeader);
         inProgressFrames->dropFrame(lastTransmittedPacket);
     }
