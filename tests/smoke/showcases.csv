@@ -59,9 +59,10 @@
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c DifferentApplicationConnections -r 0
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r 0
 /showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0
-/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRTSoff -r 0
-/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRTSon -r 0
-/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRTSoff -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRtsOff -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOnRtsOn -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRtsOff -r 0
+/showcases/wireless/hiddennode/,     -f omnetpp.ini -c WallOffRtsOn -r 0
 /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r 0
 /showcases/wireless/power/,          -f omnetpp.ini -c General -r 0
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r 0
