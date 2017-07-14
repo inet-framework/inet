@@ -33,7 +33,7 @@ void LayeredProtocolBase::handleMessageWhenUp(cMessage *message)
             handleUpperCommand(message);
         else {
             emit(packetReceivedFromUpperSignal, message);
-            handleUpperPacket(PK(message));
+            handleUpperPacket(check_and_cast<Packet *>(message));
         }
     }
     else if (isLowerMessage(message)) {
@@ -41,7 +41,7 @@ void LayeredProtocolBase::handleMessageWhenUp(cMessage *message)
             handleLowerCommand(message);
         else {
             emit(packetReceivedFromLowerSignal, message);
-            handleLowerPacket(PK(message));
+            handleLowerPacket(check_and_cast<Packet *>(message));
         }
     }
     else

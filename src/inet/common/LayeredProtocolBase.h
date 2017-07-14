@@ -19,6 +19,7 @@
 #define __INET_LAYEREDPROTOCOLBASE_H
 
 #include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -38,8 +39,8 @@ class INET_API LayeredProtocolBase : public OperationalBase
     virtual void handleUpperCommand(cMessage *message);
     virtual void handleLowerCommand(cMessage *message);
 
-    virtual void handleUpperPacket(cPacket *packet) = 0;
-    virtual void handleLowerPacket(cPacket *packet) = 0;
+    virtual void handleUpperPacket(Packet *packet) = 0;
+    virtual void handleLowerPacket(Packet *packet) = 0;
 
     virtual bool isUpperMessage(cMessage *message) = 0;
     virtual bool isLowerMessage(cMessage *message) = 0;

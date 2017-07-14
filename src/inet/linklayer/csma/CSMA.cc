@@ -205,7 +205,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
  * Encapsulates the message to be transmitted and pass it on
  * to the FSM main method for further processing.
  */
-void CSMA::handleUpperPacket(cPacket *msg)
+void CSMA::handleUpperPacket(Packet *msg)
 {
     //MacPkt*macPkt = encapsMsg(msg);
     auto macPkt = std::make_shared<CSMAHeader>();
@@ -849,7 +849,7 @@ void CSMA::handleSelfMessage(cMessage *msg)
  * Compares the address of this Host with the destination address in
  * frame. Generates the corresponding event.
  */
-void CSMA::handleLowerPacket(cPacket *msg)
+void CSMA::handleLowerPacket(Packet *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
     if (msg->hasBitError()) {

@@ -156,10 +156,10 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     /*@{*/
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *msg) override;
+    virtual void handleUpperPacket(Packet *msg) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleLowerPacket(Packet *msg) override;
 
     /** @brief Handle self messages */
     virtual void handleSelfMessage(cMessage *msg) override;

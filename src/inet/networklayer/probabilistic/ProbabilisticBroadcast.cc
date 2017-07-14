@@ -50,7 +50,7 @@ void ProbabilisticBroadcast::initialize(int stage)
     }
 }
 
-void ProbabilisticBroadcast::handleUpperPacket(cPacket *msg)
+void ProbabilisticBroadcast::handleUpperPacket(Packet *msg)
 {
     // encapsulate message in a network layer packet.
     auto packet = check_and_cast<Packet *>(msg);
@@ -62,7 +62,7 @@ void ProbabilisticBroadcast::handleUpperPacket(cPacket *msg)
     insertNewMessage(packet, true);
 }
 
-void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
+void ProbabilisticBroadcast::handleLowerPacket(Packet *msg)
 {
     MACAddress macSrcAddr;
     auto packet = check_and_cast<Packet *>(msg);

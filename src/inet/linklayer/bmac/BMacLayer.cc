@@ -184,7 +184,7 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
  * packet. Then initiate sending of the packet, if the node is sleeping. Do
  * nothing, if node is working.
  */
-void BMacLayer::handleUpperPacket(cPacket *msg)
+void BMacLayer::handleUpperPacket(Packet *msg)
 {
     bool pktAdded = addToQueue(msg);
     if (!pktAdded)
@@ -558,7 +558,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle BMAC preambles and received data packets.
  */
-void BMacLayer::handleLowerPacket(cPacket *msg)
+void BMacLayer::handleLowerPacket(Packet *msg)
 {
     if (msg->hasBitError()) {
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";

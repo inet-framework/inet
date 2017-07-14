@@ -132,7 +132,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
     }
 }
 
-void WiseRoute::handleLowerPacket(cPacket *msg)
+void WiseRoute::handleLowerPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     auto wiseRouteHeader = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
@@ -238,7 +238,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
     }
 }
 
-void WiseRoute::handleUpperPacket(cPacket *msg)
+void WiseRoute::handleUpperPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     L3Address finalDestAddr;

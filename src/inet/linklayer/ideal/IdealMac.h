@@ -81,8 +81,8 @@ class INET_API IdealMac : public MACProtocolBase
 
     /** implements MACProtocolBase functions */
     //@{
-    virtual void handleUpperPacket(cPacket *msg) override;
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleUpperPacket(Packet *msg) override;
+    virtual void handleLowerPacket(Packet *msg) override;
     virtual void handleSelfMessage(cMessage *message) override;
     //@}
 

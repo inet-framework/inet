@@ -77,10 +77,10 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     virtual void finish() override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *) override;
+    virtual void handleLowerPacket(Packet *) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *) override;
+    virtual void handleUpperPacket(Packet *) override;
 
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMessage(cMessage *) override;

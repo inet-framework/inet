@@ -118,10 +118,10 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
   protected:
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *) override;
+    virtual void handleUpperPacket(Packet *) override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *) override;
+    virtual void handleLowerPacket(Packet *) override;
 
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(const FloodHeader *);

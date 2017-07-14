@@ -182,7 +182,7 @@ void IdealMac::getNextMsgFromHL()
     ASSERT(outStandingRequests <= 1);
 }
 
-void IdealMac::handleUpperPacket(cPacket *msg)
+void IdealMac::handleUpperPacket(Packet *msg)
 {
     outStandingRequests--;
     if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
@@ -196,7 +196,7 @@ void IdealMac::handleUpperPacket(cPacket *msg)
     }
 }
 
-void IdealMac::handleLowerPacket(cPacket *msg)
+void IdealMac::handleLowerPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();

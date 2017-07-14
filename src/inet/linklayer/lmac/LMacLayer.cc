@@ -155,7 +155,7 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  * Check whether the queue is not full: if yes, print a warning and drop the packet.
  * Sending of messages is automatic.
  */
-void LMacLayer::handleUpperPacket(cPacket *msg)
+void LMacLayer::handleUpperPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
@@ -589,7 +589,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle LMAC control packets and data packets. Recognize collisions, change own slot if necessary and remember who is using which slot.
  */
-void LMacLayer::handleLowerPacket(cPacket *msg)
+void LMacLayer::handleLowerPacket(Packet *msg)
 {
     if (msg->hasBitError()) {
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";

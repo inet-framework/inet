@@ -102,7 +102,7 @@ void Flood::finish()
  * If the maximum number of entries is reached the first (oldest) entry
  * is deleted.
  **/
-void Flood::handleUpperPacket(cPacket *m)
+void Flood::handleUpperPacket(Packet *m)
 {
     auto packet = check_and_cast<Packet *>(m);
     encapsulate(packet);
@@ -144,7 +144,7 @@ void Flood::handleUpperPacket(cPacket *m)
  * list (@ref
  * notBroadcasted). Otherwise the message will be deleted.
  **/
-void Flood::handleLowerPacket(cPacket *m)
+void Flood::handleLowerPacket(Packet *m)
 {
     auto packet = check_and_cast<Packet *>(m);
     auto floodHeader = packet->peekHeader<FloodHeader>();

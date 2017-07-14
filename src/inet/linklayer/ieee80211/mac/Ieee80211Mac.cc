@@ -159,7 +159,7 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     processUpperFrame(packet, header);
 }
 
-void Ieee80211Mac::handleUpperPacket(cPacket *msg)
+void Ieee80211Mac::handleUpperPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::STATION && !mib->bssStationData.isAssociated) {
@@ -183,7 +183,7 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
     processUpperFrame(packet, header);
 }
 
-void Ieee80211Mac::handleLowerPacket(cPacket *msg)
+void Ieee80211Mac::handleLowerPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     auto header = packet->peekHeader<Ieee80211MacHeader>();

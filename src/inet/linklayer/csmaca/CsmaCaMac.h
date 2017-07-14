@@ -146,8 +146,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
      */
     //@{
     virtual void handleSelfMessage(cMessage *msg) override;
-    virtual void handleUpperPacket(cPacket *msg) override;
-    virtual void handleLowerPacket(cPacket *msg) override;
+    virtual void handleUpperPacket(Packet *msg) override;
+    virtual void handleLowerPacket(Packet *msg) override;
     virtual void handleWithFsm(cMessage *msg);
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;

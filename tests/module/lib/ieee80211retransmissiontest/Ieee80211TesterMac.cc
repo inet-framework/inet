@@ -24,7 +24,7 @@ namespace inet {
 
 Define_Module(Ieee80211TesterMac);
 
-void Ieee80211TesterMac::handleLowerPacket(cPacket *msg)
+void Ieee80211TesterMac::handleLowerPacket(Packet *msg)
 {
     auto pk = check_and_cast<Packet *>(msg);
     actions = par("actions").stringValue();

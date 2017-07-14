@@ -196,7 +196,7 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
     handleWithFsm(msg);
 }
 
-void CsmaCaMac::handleUpperPacket(cPacket *msg)
+void CsmaCaMac::handleUpperPacket(Packet *msg)
 {
     if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
@@ -216,7 +216,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
         handleWithFsm(msg);
 }
 
-void CsmaCaMac::handleLowerPacket(cPacket *msg)
+void CsmaCaMac::handleLowerPacket(Packet *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 

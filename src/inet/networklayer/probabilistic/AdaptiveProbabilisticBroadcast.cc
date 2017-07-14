@@ -29,7 +29,7 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
     }
 }
 
-void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
+void AdaptiveProbabilisticBroadcast::handleLowerPacket(Packet *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     const auto& macHeader = packet->peekHeader<ProbabilisticBroadcastHeader>();
