@@ -300,8 +300,8 @@ void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmitted
     if (frame->getType() == ST_ACK) {
         auto lastTransmittedDataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(lastTransmittedFrame);
         if (dataAndMgmtRateControl) {
-            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(packet, lastTransmittedDataOrMgmtHeader) : 0;
-            dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
+            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader) : 0;
+            dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
         }
         recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
         ackHandler->processReceivedAck(std::dynamic_pointer_cast<const Ieee80211AckFrame>(frame), lastTransmittedDataOrMgmtHeader);

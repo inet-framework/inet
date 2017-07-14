@@ -552,19 +552,19 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             if (dataAndMgmtRateControl) {
                 int retryCount;
                 if (dataHeader->getRetry())
-                    retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(packet, dataHeader);
+                    retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(lastTransmittedPacket, dataHeader);
                 else
                     retryCount = 0;
-                edcaDataRecoveryProcedures[ac]->ackFrameReceived(packet, dataHeader);
-                dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
+                edcaDataRecoveryProcedures[ac]->ackFrameReceived(lastTransmittedPacket, dataHeader);
+                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
         }
         else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
-                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(packet, dataHeader);
-                dataAndMgmtRateControl->frameTransmitted(packet, retryCount, true, false);
+                int retryCount = edcaMgmtAndNonQoSRecoveryProcedure->getRetryCount(lastTransmittedPacket, dataHeader);
+                dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
-            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(packet, mgmtHeader, stationRetryCounters[ac]);
+            edcaMgmtAndNonQoSRecoveryProcedure->ackFrameReceived(lastTransmittedPacket, mgmtHeader, stationRetryCounters[ac]);
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO: qos, nonqos frame
