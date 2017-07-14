@@ -623,7 +623,7 @@ void CsmaCaMac::resetStateVariables()
     retryCounter = 0;
 }
 
-void CsmaCaMac::emitPacketDropSignal(cPacket *frame, PacketDropReason reason, int limit)
+void CsmaCaMac::emitPacketDropSignal(Packet *frame, PacketDropReason reason, int limit)
 {
     PacketDropDetails details;
     details.setReason(reason);

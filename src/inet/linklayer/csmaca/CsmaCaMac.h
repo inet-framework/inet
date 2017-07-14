@@ -195,7 +195,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual Packet *getCurrentTransmission();
     virtual void popTransmissionQueue();
     virtual void resetStateVariables();
-    virtual void emitPacketDropSignal(cPacket *frame, PacketDropReason reason, int limit = -1);
+    virtual void emitPacketDropSignal(Packet *frame, PacketDropReason reason, int limit = -1);
 
     virtual bool isMediumFree();
     virtual bool isReceiving();
