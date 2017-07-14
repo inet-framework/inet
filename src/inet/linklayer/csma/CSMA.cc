@@ -205,17 +205,17 @@ InterfaceEntry *CSMA::createInterfaceEntry()
  * Encapsulates the message to be transmitted and pass it on
  * to the FSM main method for further processing.
  */
-void CSMA::handleUpperPacket(Packet *msg)
+void CSMA::handleUpperPacket(Packet *packet)
 {
     //MacPkt*macPkt = encapsMsg(msg);
     auto macPkt = std::make_shared<CSMAHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(bit(headerLength));
-    MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
-    EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() << ", CInfo removed, mac addr=" << dest << endl;
-    macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    MACAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << dest << endl;
+    macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
-    delete msg->removeControlInfo();
+    delete packet->removeControlInfo();
     macPkt->setSrcAddr(address);
 
     if (useMACAcks) {
@@ -234,8 +234,6 @@ void CSMA::handleUpperPacket(Packet *msg)
 
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
-    assert(static_cast<cPacket *>(msg));
-    Packet *packet = check_and_cast<Packet *>(msg);
     macPkt->markImmutable();
     packet->pushHeader(macPkt);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
@@ -849,15 +847,14 @@ void CSMA::handleSelfMessage(cMessage *msg)
  * Compares the address of this Host with the destination address in
  * frame. Generates the corresponding event.
  */
-void CSMA::handleLowerPacket(Packet *msg)
+void CSMA::handleLowerPacket(Packet *packet)
 {
-    Packet *packet = check_and_cast<Packet *>(msg);
-    if (msg->hasBitError()) {
-        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+    if (packet->hasBitError()) {
+        EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, msg, &details);
-        delete msg;
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         return;
     }
     const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
@@ -947,7 +944,7 @@ void CSMA::handleLowerPacket(Packet *msg)
         EV_DETAIL << "packet not for me, deleting...\n";
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDropSignal, packet, &details);
         delete packet;
     }
 }

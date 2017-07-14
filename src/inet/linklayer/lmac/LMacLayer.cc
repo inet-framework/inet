@@ -155,9 +155,8 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  * Check whether the queue is not full: if yes, print a warning and drop the packet.
  * Sending of messages is automatic.
  */
-void LMacLayer::handleUpperPacket(Packet *msg)
+void LMacLayer::handleUpperPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
 
     // message has to be queued if another message is waiting to be send
@@ -589,18 +588,18 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle LMAC control packets and data packets. Recognize collisions, change own slot if necessary and remember who is using which slot.
  */
-void LMacLayer::handleLowerPacket(Packet *msg)
+void LMacLayer::handleLowerPacket(Packet *packet)
 {
-    if (msg->hasBitError()) {
-        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+    if (packet->hasBitError()) {
+        EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, msg, &details);
-        delete msg;
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
-    handleSelfMessage(msg);
+    handleSelfMessage(packet);
 }
 
 /**

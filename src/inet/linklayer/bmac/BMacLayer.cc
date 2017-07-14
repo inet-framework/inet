@@ -184,9 +184,9 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
  * packet. Then initiate sending of the packet, if the node is sleeping. Do
  * nothing, if node is working.
  */
-void BMacLayer::handleUpperPacket(Packet *msg)
+void BMacLayer::handleUpperPacket(Packet *packet)
 {
-    bool pktAdded = addToQueue(msg);
+    bool pktAdded = addToQueue(packet);
     if (!pktAdded)
         return;
     // force wakeup now
@@ -558,19 +558,19 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle BMAC preambles and received data packets.
  */
-void BMacLayer::handleLowerPacket(Packet *msg)
+void BMacLayer::handleLowerPacket(Packet *packet)
 {
-    if (msg->hasBitError()) {
-        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+    if (packet->hasBitError()) {
+        EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, msg, &details);
-        delete msg;
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         return;
     }
     else
         // simply pass the massage as self message, to be processed by the FSM.
-        handleSelfMessage(msg);
+        handleSelfMessage(packet);
 }
 
 void BMacLayer::sendDataPacket()

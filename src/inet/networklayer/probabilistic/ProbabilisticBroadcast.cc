@@ -50,10 +50,9 @@ void ProbabilisticBroadcast::initialize(int stage)
     }
 }
 
-void ProbabilisticBroadcast::handleUpperPacket(Packet *msg)
+void ProbabilisticBroadcast::handleUpperPacket(Packet *packet)
 {
     // encapsulate message in a network layer packet.
-    auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
     auto macHeader = packet->peekHeader<ProbabilisticBroadcastHeader>();
     nbDataPacketsSent++;
@@ -62,10 +61,9 @@ void ProbabilisticBroadcast::handleUpperPacket(Packet *msg)
     insertNewMessage(packet, true);
 }
 
-void ProbabilisticBroadcast::handleLowerPacket(Packet *msg)
+void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 {
     MACAddress macSrcAddr;
-    auto packet = check_and_cast<Packet *>(msg);
     auto macHeader = std::dynamic_pointer_cast<ProbabilisticBroadcastHeader>(packet->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     packet->removePoppedChunks();
     auto macAddressInd = packet->getMandatoryTag<MacAddressInd>();

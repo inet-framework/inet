@@ -196,15 +196,15 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
     handleWithFsm(msg);
 }
 
-void CsmaCaMac::handleUpperPacket(Packet *msg)
+void CsmaCaMac::handleUpperPacket(Packet *packet)
 {
     if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
-        EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
-        emitPacketDropSignal(msg, QUEUE_OVERFLOW, maxQueueSize);
-        delete msg;
+        EV << "message " << packet << " received from higher layer but MAC queue is full, dropping message\n";
+        emitPacketDropSignal(packet, QUEUE_OVERFLOW, maxQueueSize);
+        delete packet;
         return;
     }
-    auto frame = check_and_cast<Packet *>(msg);
+    auto frame = check_and_cast<Packet *>(packet);
     encapsulate(frame);
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
@@ -213,20 +213,20 @@ void CsmaCaMac::handleUpperPacket(Packet *msg)
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else
-        handleWithFsm(msg);
+        handleWithFsm(packet);
 }
 
-void CsmaCaMac::handleLowerPacket(Packet *msg)
+void CsmaCaMac::handleLowerPacket(Packet *packet)
 {
-    EV << "received message from lower layer: " << msg << endl;
+    EV << "received message from lower layer: " << packet << endl;
 
-    auto frame = check_and_cast<Packet *>(msg);
+    auto frame = check_and_cast<Packet *>(packet);
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     EV << "Self address: " << address
        << ", receiver address: " << macHeader->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
 
-    handleWithFsm(msg);
+    handleWithFsm(packet);
 }
 
 void CsmaCaMac::handleWithFsm(cMessage *msg)

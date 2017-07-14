@@ -182,7 +182,7 @@ void IdealMac::getNextMsgFromHL()
     ASSERT(outStandingRequests <= 1);
 }
 
-void IdealMac::handleUpperPacket(Packet *msg)
+void IdealMac::handleUpperPacket(Packet *packet)
 {
     outStandingRequests--;
     if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
@@ -191,21 +191,20 @@ void IdealMac::handleUpperPacket(Packet *msg)
     }
     else {
         // We are idle, so we can start transmitting right away.
-        EV << "Received " << msg << " for transmission\n";
-        startTransmitting(check_and_cast<Packet *>(msg));
+        EV << "Received " << packet << " for transmission\n";
+        startTransmitting(packet);
     }
 }
 
-void IdealMac::handleLowerPacket(Packet *msg)
+void IdealMac::handleLowerPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
-    if (msg->hasBitError()) {
+    if (packet->hasBitError()) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
         emit(packetDropSignal, packet, &details);
-        delete msg;
+        delete packet;
         return;
     }
 

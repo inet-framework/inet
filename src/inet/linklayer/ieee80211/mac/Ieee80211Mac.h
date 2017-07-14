@@ -91,10 +91,10 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void handleMgmtPacket(Packet *packet);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(Packet *msg) override;
+    virtual void handleUpperPacket(Packet *packet) override;
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerPacket(Packet *msg) override;
+    virtual void handleLowerPacket(Packet *packet) override;
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;

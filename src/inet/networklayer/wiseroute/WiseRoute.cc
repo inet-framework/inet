@@ -132,9 +132,8 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
     }
 }
 
-void WiseRoute::handleLowerPacket(Packet *msg)
+void WiseRoute::handleLowerPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     auto wiseRouteHeader = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
@@ -238,9 +237,8 @@ void WiseRoute::handleLowerPacket(Packet *msg)
     }
 }
 
-void WiseRoute::handleUpperPacket(Packet *msg)
+void WiseRoute::handleUpperPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     L3Address finalDestAddr;
     L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
@@ -248,7 +246,7 @@ void WiseRoute::handleUpperPacket(Packet *msg)
 
     pkt->setChunkLength(byte(headerLength));
 
-    auto addrTag = msg->getTag<L3AddressReq>();
+    auto addrTag = packet->getTag<L3AddressReq>();
     if (addrTag == nullptr) {
         EV << "WiseRoute warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
@@ -264,7 +262,7 @@ void WiseRoute::handleUpperPacket(Packet *msg)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();

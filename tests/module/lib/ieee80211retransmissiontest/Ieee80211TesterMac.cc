@@ -24,17 +24,16 @@ namespace inet {
 
 Define_Module(Ieee80211TesterMac);
 
-void Ieee80211TesterMac::handleLowerPacket(Packet *msg)
+void Ieee80211TesterMac::handleLowerPacket(Packet *packet)
 {
-    auto pk = check_and_cast<Packet *>(msg);
     actions = par("actions").stringValue();
     int len = strlen(actions);
     if (msgCounter >= len)
-        throw cRuntimeError("No action is defined for this msg %s", msg->getName());
+        throw cRuntimeError("No action is defined for this msg %s", packet->getName());
     if (actions[msgCounter] == 'A') {
-        const auto& frame = pk->peekHeader<Ieee80211MacHeader>();
-        if (rx->lowerFrameReceived(pk, frame))
-            processLowerFrame(pk, frame);
+        const auto& frame = packet->peekHeader<Ieee80211MacHeader>();
+        if (rx->lowerFrameReceived(packet, frame))
+            processLowerFrame(packet, frame);
         else { // corrupted frame received
             if (mib->qos)
                 hcf->corruptedFrameReceived();
@@ -43,7 +42,7 @@ void Ieee80211TesterMac::handleLowerPacket(Packet *msg)
         }
     }
     else if (actions[msgCounter] == 'B')
-        delete msg; // block
+        delete packet; // block
     else
         throw cRuntimeError("Unknown action = %c", actions[msgCounter]);
     msgCounter++;

@@ -159,12 +159,11 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     processUpperFrame(packet, header);
 }
 
-void Ieee80211Mac::handleUpperPacket(Packet *msg)
+void Ieee80211Mac::handleUpperPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::STATION && !mib->bssStationData.isAssociated) {
-        EV << "STA is not associated with an access point, discarding packet " << msg << "\n";
-        delete msg;
+        EV << "STA is not associated with an access point, discarding packet " << packet << "\n";
+        delete packet;
         return;
     }
     encapsulate(packet);
@@ -183,9 +182,8 @@ void Ieee80211Mac::handleUpperPacket(Packet *msg)
     processUpperFrame(packet, header);
 }
 
-void Ieee80211Mac::handleLowerPacket(Packet *msg)
+void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     auto header = packet->peekHeader<Ieee80211MacHeader>();
     if (rx->lowerFrameReceived(packet, header)) {
         processLowerFrame(packet, header);
