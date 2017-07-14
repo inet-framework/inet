@@ -77,16 +77,16 @@ std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue 
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
-        const auto& dataFrame = dataPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
-        const auto& macTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
-        if (!std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataFrame))
+        const auto& dataHeader = dataPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
+        const auto& dataTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
+        if (!std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataHeader))
             break;
         if (!firstFrame)
-            firstFrame = dataFrame;
-        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataFrame), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), byte(aMsduLength).get()))
+            firstFrame = dataHeader;
+        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataHeader), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), byte(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() - macTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), byte(aMsduLength).get())) {
         delete frames;

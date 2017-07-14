@@ -186,9 +186,9 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto frame = packet->peekHeader<Ieee80211MacHeader>();
-    if (rx->lowerFrameReceived(packet, frame)) {
-        processLowerFrame(packet, frame);
+    auto header = packet->peekHeader<Ieee80211MacHeader>();
+    if (rx->lowerFrameReceived(packet, header)) {
+        processLowerFrame(packet, header);
     }
     else { // corrupted frame received
         if (mib->qos)

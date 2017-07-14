@@ -175,13 +175,13 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 
 void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 {
-    const auto& frame = packet->peekHeader<Ieee80211MacHeader>();
-    RateSelection::setFrameMode(packet, frame, rateSelection->computeMode(packet, frame));
+    const auto& header = packet->peekHeader<Ieee80211MacHeader>();
+    RateSelection::setFrameMode(packet, header, rateSelection->computeMode(packet, header));
     auto pendingPacket = inProgressFrames->getPendingFrameFor(packet);
-    auto duration = originatorProtectionMechanism->computeDurationField(packet, frame, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
-    const auto& header = packet->removeHeader<Ieee80211MacHeader>();
-    header->setDuration(duration);
-    packet->insertHeader(header);
+    auto duration = originatorProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingPacket == nullptr ? nullptr : pendingPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
+    const auto& updatedHeader = packet->removeHeader<Ieee80211MacHeader>();
+    updatedHeader->setDuration(duration);
+    packet->insertHeader(updatedHeader);
     tx->transmitFrame(packet, packet->peekHeader<Ieee80211MacHeader>(), ifs, this);
 }
 
@@ -293,54 +293,54 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
     }
 }
 
-void Dcf::originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket)
+void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
-    auto frame = packet->peekHeader<Ieee80211MacHeader>();
-    auto lastTransmittedFrame = lastTransmittedPacket->peekHeader<Ieee80211MacHeader>();
-    if (frame->getType() == ST_ACK) {
-        auto lastTransmittedDataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(lastTransmittedFrame);
+    auto receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+    auto lastTransmittedHeader = lastTransmittedPacket->peekHeader<Ieee80211MacHeader>();
+    if (receivedHeader->getType() == ST_ACK) {
+        auto lastTransmittedDataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         if (dataAndMgmtRateControl) {
-            int retryCount = lastTransmittedFrame->getRetry() ? recoveryProcedure->getRetryCount(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader) : 0;
+            int retryCount = lastTransmittedHeader->getRetry() ? recoveryProcedure->getRetryCount(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader) : 0;
             dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
         }
         recoveryProcedure->ackFrameReceived(lastTransmittedPacket, lastTransmittedDataOrMgmtHeader, stationRetryCounters);
-        ackHandler->processReceivedAck(std::dynamic_pointer_cast<const Ieee80211AckFrame>(frame), lastTransmittedDataOrMgmtHeader);
+        ackHandler->processReceivedAck(std::dynamic_pointer_cast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
         inProgressFrames->dropFrame(lastTransmittedPacket);
     }
-    else if (frame->getType() == ST_RTS)
+    else if (receivedHeader->getType() == ST_RTS)
         ; // void
-    else if (frame->getType() == ST_CTS)
+    else if (receivedHeader->getType() == ST_CTS)
         recoveryProcedure->ctsFrameReceived(stationRetryCounters);
     else
         throw cRuntimeError("Unknown frame type");
 }
 
-void Dcf::originatorProcessFailedFrame(Packet *packet)
+void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
     EV_INFO << "Data/Mgmt frame transmission failed\n";
-    const auto& failedFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-    ASSERT(failedFrame->getType() != ST_DATA_WITH_QOS);
-    ASSERT(ackHandler->getAckStatus(failedFrame) == AckHandler::Status::WAITING_FOR_ACK);
-    recoveryProcedure->dataOrMgmtFrameTransmissionFailed(packet, failedFrame, stationRetryCounters);
-    bool retryLimitReached = recoveryProcedure->isRetryLimitReached(packet, failedFrame);
+    const auto& failedHeader = failedPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
+    ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
+    ASSERT(ackHandler->getAckStatus(failedHeader) == AckHandler::Status::WAITING_FOR_ACK);
+    recoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedPacket, failedHeader, stationRetryCounters);
+    bool retryLimitReached = recoveryProcedure->isRetryLimitReached(failedPacket, failedHeader);
     if (dataAndMgmtRateControl) {
-        int retryCount = recoveryProcedure->getRetryCount(packet, failedFrame);
-        dataAndMgmtRateControl->frameTransmitted(packet, retryCount, false, retryLimitReached);
+        int retryCount = recoveryProcedure->getRetryCount(failedPacket, failedHeader);
+        dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, false, retryLimitReached);
     }
-    ackHandler->processFailedFrame(failedFrame);
+    ackHandler->processFailedFrame(failedHeader);
     if (retryLimitReached) {
-        recoveryProcedure->retryLimitReached(packet, failedFrame);
-        inProgressFrames->dropFrame(packet);
+        recoveryProcedure->retryLimitReached(failedPacket, failedHeader);
+        inProgressFrames->dropFrame(failedPacket);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(-1); // TODO:
-        emit(packetDropSignal, packet, &details);
-        emit(linkBreakSignal, packet);
+        emit(packetDropSignal, failedPacket, &details);
+        emit(linkBreakSignal, failedPacket);
     }
     else {
-        auto h = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
+        auto h = failedPacket->removeHeader<Ieee80211DataOrMgmtHeader>();
         h->setRetry(true);
-        packet->insertHeader(h);
+        failedPacket->insertHeader(h);
     }
 }
 

@@ -104,8 +104,8 @@ bool CtsFs::completeStep(FrameSequenceContext* context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_CTS;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -159,8 +159,8 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto mgmtFrame = packet->peekHeader<Ieee80211MgmtHeader>();
-            return new ReceiveStep(context->getAckTimeout(packet, mgmtFrame));
+            auto mgmtHeader = packet->peekHeader<Ieee80211MgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, mgmtHeader));
         }
         case 2:
             return nullptr;
@@ -180,8 +180,8 @@ bool ManagementAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -231,8 +231,8 @@ IFrameSequenceStep *AckFs::prepareStep(FrameSequenceContext *context)
         case 0: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
+            auto dataOrMgmtHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 1:
             return nullptr;
@@ -248,8 +248,8 @@ bool AckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -267,8 +267,8 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto packet = context->getInProgressFrames()->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
+            auto dataOrMgmtHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtHeader);
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
             rtsPacket->append(rtsFrame);
@@ -297,8 +297,8 @@ bool RtsCtsFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_CTS;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -321,8 +321,8 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
+            auto dataOrMgmtHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 2:
             return nullptr;
@@ -341,8 +341,8 @@ bool FragFrameAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -365,8 +365,8 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
+            auto dataOrMgmtHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 2:
             return nullptr;
@@ -385,8 +385,8 @@ bool LastFrameAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -436,8 +436,8 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
-            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211MacHeader>();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_BLOCKACK;
+            const auto& receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK;
         }
         default:
             throw cRuntimeError("Unknown step");
