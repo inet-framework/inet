@@ -80,7 +80,7 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     }
     else
         throw cRuntimeError("Unknown data modulation");
-    return new const ReceptionBitModel(bit(signalBitLength), signalBitRate, bit(dataBitLength), dataBitRate, corruptedBits);
+    return new ReceptionBitModel(bit(signalBitLength), signalBitRate, bit(dataBitLength), dataBitRate, corruptedBits);
 }
 
 const IReceptionSymbolModel *Ieee80211OFDMErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const
@@ -141,7 +141,7 @@ const IReceptionSampleModel *Ieee80211OFDMErrorModel::computeSampleModel(const L
     double sampleRate = transmissionSampleModel->getSampleRate();
     const std::vector<W> *samples = transmissionSampleModel->getSamples();
     W rssi = W(0); // TODO: error model
-    return new const ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
+    return new ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
 }
 
 const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
@@ -152,7 +152,7 @@ const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const L
     const Packet *packet = transmissionPacketModel->getPacket();
     double per = 0.0;
     bool packetErrorless = per == 0.0;
-    return new const ReceptionPacketModel(packet, bps(NaN), per, packetErrorless);
+    return new ReceptionPacketModel(packet, bps(NaN), per, packetErrorless);
 }
 } /* namespace physicallayer */
 } /* namespace inet */
