@@ -168,6 +168,26 @@ class INET_API MemoryOutputStream {
     /** @name Basic type streaming functions */
     //@{
     /**
+     * Writes a 2 bit unsigned integer to the end of the stream in MSB to LSB
+     * bit order.
+     */
+    void writeUint2(uint8_t value) {
+        writeBit(value & 0x2);
+        writeBit(value & 0x1);
+    }
+
+    /**
+     * Writes a 4 bit unsigned integer to the end of the stream in MSB to LSB
+     * bit order.
+     */
+    void writeUint4(uint8_t value) {
+        writeBit(value & 0x8);
+        writeBit(value & 0x4);
+        writeBit(value & 0x2);
+        writeBit(value & 0x1);
+    }
+
+    /**
      * Writes an 8 bit unsigned integer to the end of the stream in MSB to LSB
      * bit order.
      */

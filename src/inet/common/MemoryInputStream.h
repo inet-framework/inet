@@ -244,6 +244,30 @@ class INET_API MemoryInputStream {
     /** @name Basic type streaming functions */
     //@{
     /**
+     * Reads a 2 bit unsigned integer at the current position of the stream in
+     * MSB to LSB bit order.
+     */
+    uint8_t readUint2() {
+        uint8_t value = 0;
+        if (readBit()) value |= 0x2;
+        if (readBit()) value |= 0x1;
+        return value;
+    }
+
+    /**
+     * Reads a 4 bit unsigned integer at the current position of the stream in
+     * MSB to LSB bit order.
+     */
+    uint8_t readUint4() {
+        uint8_t value = 0;
+        if (readBit()) value |= 0x8;
+        if (readBit()) value |= 0x4;
+        if (readBit()) value |= 0x2;
+        if (readBit()) value |= 0x1;
+        return value;
+    }
+
+    /**
      * Reads an 8 bit unsigned integer at the current position of the stream in
      * MSB to LSB bit order.
      */
