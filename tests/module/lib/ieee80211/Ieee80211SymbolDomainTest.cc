@@ -65,16 +65,16 @@ void Ieee80211SymbolDomainTest::parseInput(const char* fileName)
 
 void Ieee80211SymbolDomainTest::test() const
 {
-    const auto& signalField = std::make_shared<BitsChunk>();
-    const auto& dataField = std::make_shared<BitsChunk>();
-    for (unsigned int i = 0; i < 24; i++)
-        signalField->setBit(i, input.getBit(i));
-    for (unsigned int i = 24; i < input.getSize(); i++)
-        dataField->setBit(i-24, input.getBit(i));
-    auto signalPacket = new Packet("signal");
-    signalPacket->insertHeader(signalField);
-    auto dataPacket = new Packet("data");
-    dataPacket->insertHeader(dataField);
+    const auto& signalField = std::make_shared<BytesChunk>(std::vector<uint8_t>(3));
+    const auto& dataField = std::make_shared<BytesChunk>(std::vector<uint8_t>(input.getNumberOfBytes() - 3));
+    for (unsigned int i = 0; i < 3; i++)
+        signalField->setByte(i, input.getBytes()[i]);
+    signalField->markImmutable();
+    for (unsigned int i = 3; i < input.getNumberOfBytes(); i++)
+        dataField->setByte(i - 3, input.getBytes()[i]);
+    dataField->markImmutable();
+    auto signalPacket = new Packet("signal", signalField);
+    auto dataPacket = new Packet("data", dataField);
     TransmissionPacketModel signalPacketModel(signalPacket, bps(NaN));
     TransmissionPacketModel dataPacketModel(dataPacket, bps(NaN));
     const ITransmissionBitModel *signalBitModel = ieee80211OFDMSignalEncoder->encode(&signalPacketModel);
@@ -87,12 +87,16 @@ void Ieee80211SymbolDomainTest::test() const
     const IReceptionBitModel *receptionDataBitModel = ieee80211OFDMDataDemodulator->demodulate(&receptionDataSymbolModel);
     const IReceptionPacketModel *receptionSignalPacketModel = ieee80211OFDMSignalDecoder->decode(receptionSignalBitModel);
     const IReceptionPacketModel *receptionDataPacketModel = ieee80211OFDMDataDecoder->decode(receptionDataBitModel);
+    delete dataPacket;
+    delete signalPacket;
     delete dataBitModel;
     delete signalBitModel;
     delete transmissionDataSymbolModel;
     delete transmissionSignalSymbolModel;
     delete receptionDataBitModel;
     delete receptionSignalBitModel;
+    delete receptionDataPacketModel->getPacket();
+    delete receptionSignalPacketModel->getPacket();
     delete receptionDataPacketModel;
     delete receptionSignalPacketModel;
 }
