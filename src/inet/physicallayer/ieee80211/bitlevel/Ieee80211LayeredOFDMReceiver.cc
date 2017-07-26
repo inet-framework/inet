@@ -203,14 +203,6 @@ unsigned int Ieee80211LayeredOFDMReceiver::getSignalFieldLength(const BitVector 
     return length.toDecimal();
 }
 
-uint8_t Ieee80211LayeredOFDMReceiver::getRate(const BitVector *serializedPacket) const
-{
-    ShortBitVector rate;
-    for (unsigned int i = 0; i < 4; i++)
-        rate.appendBit(serializedPacket->getBit(i));
-    return rate.toDecimal();
-}
-
 const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createSignalFieldSymbolModel(const IReceptionSymbolModel *receptionSymbolModel) const
 {
     const Ieee80211OFDMReceptionSymbolModel *signalFieldSymbolModel = nullptr;
@@ -377,7 +369,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
         const auto& signalFieldBytesChunk = signalFieldPacketModel->getPacket()->peekAllBytes();
-        uint8_t rate = getRate(new BitVector(signalFieldBytesChunk->getBytes()));
+        uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
         // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
     }

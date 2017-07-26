@@ -90,7 +90,6 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
     const IReceptionPacketModel *createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const;
 
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
-    uint8_t getRate(const BitVector *serializedPacket) const;
     unsigned int getSignalFieldLength(const BitVector *signalField) const;
     unsigned int calculatePadding(unsigned int dataFieldLengthInBits, const APSKModulationBase *modulation, double codeRate) const;
     double getCodeRateFromDecoderModule(const IDecoder *decoder) const;
