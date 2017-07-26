@@ -622,7 +622,17 @@ static void testStreaming()
     assert(inputStreamBytes.isReadBeyondEnd());
     assert(inputStreamBytes.getRemainingLength() == byte(0));
 
-    // 3. uint8_t
+    // 3. bit-byte conversion
+    MemoryOutputStream outputStreamConversion;
+    outputStreamConversion.writeBits({false, false, false, false, true, true, true, true});
+    outputStreamConversion.writeBits({true, true, true, true, false, false, false, false});
+    MemoryInputStream inputStreamConversion(outputStreamConversion.getData());
+    std::vector<uint8_t> data;
+    inputStreamConversion.readBytes(data, byte(2));
+    assert(data[0] == 0x0F);
+    assert(data[1] == 0xF0);
+
+    // 4. uint8_t
     uint64_t uint8 = 0x42;
     MemoryOutputStream outputStream1;
     outputStream1.writeUint8(uint8);
@@ -631,7 +641,7 @@ static void testStreaming()
     assert(!inputStream1.isReadBeyondEnd());
     assert(inputStream1.getRemainingLength() == bit(0));
 
-    // 4. uint16_t
+    // 5. uint16_t
     uint64_t uint16 = 0x4242;
     MemoryOutputStream outputStream2;
     outputStream2.writeUint16Be(uint16);
@@ -640,7 +650,7 @@ static void testStreaming()
     assert(!inputStream2.isReadBeyondEnd());
     assert(inputStream2.getRemainingLength() == bit(0));
 
-    // 5. uint32_t
+    // 6. uint32_t
     uint64_t uint32 = 0x42424242;
     MemoryOutputStream outputStream3;
     outputStream3.writeUint32Be(uint32);
@@ -649,7 +659,7 @@ static void testStreaming()
     assert(!inputStream3.isReadBeyondEnd());
     assert(inputStream3.getRemainingLength() == bit(0));
 
-    // 6. uint64_t
+    // 7. uint64_t
     uint64_t uint64 = 0x4242424242424242L;
     MemoryOutputStream outputStream4;
     outputStream4.writeUint64Be(uint64);
@@ -658,7 +668,7 @@ static void testStreaming()
     assert(!inputStream4.isReadBeyondEnd());
     assert(inputStream4.getRemainingLength() == bit(0));
 
-    // 7. MACAddress
+    // 8. MACAddress
     MACAddress macAddress("0A:AA:01:02:03:04");
     MemoryOutputStream outputStream5;
     outputStream5.writeMACAddress(macAddress);
@@ -667,7 +677,7 @@ static void testStreaming()
     assert(!inputStream5.isReadBeyondEnd());
     assert(inputStream5.getRemainingLength() == bit(0));
 
-    // 8. IPv4Address
+    // 9. IPv4Address
     IPv4Address ipv4Address("192.168.10.1");
     MemoryOutputStream outputStream6;
     outputStream6.writeIPv4Address(ipv4Address);
@@ -676,7 +686,7 @@ static void testStreaming()
     assert(!inputStream6.isReadBeyondEnd());
     assert(inputStream6.getRemainingLength() == bit(0));
 
-    // 9. IPv6Address
+    // 10. IPv6Address
     IPv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
     MemoryOutputStream outputStream7;
     outputStream7.writeIPv6Address(ipv6Address);
