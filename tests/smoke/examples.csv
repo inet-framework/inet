@@ -260,15 +260,18 @@
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Random -r 0   # Random extended
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv4 -r 0   # _IPv4 extended
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv6 -r 0   # _IPv6 extended
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Generic -r 0   # _Generic extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0
-# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c AbstractMulti -r 0   # AbstractMulti extended
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Multi -r 0   # _Multi extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0
-# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Dynamic -r 0   # Dynamic extended
+# /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Dynamic -r 0   # _Dynamic extended
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0
@@ -364,10 +367,6 @@
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
-/examples/tests/IPv6_fragmentation/, -f _defaults.ini -c General -r 0
-/examples/tests/IPv6_fragmentation/, -f omnetpp.ini -c General -r 0
-/examples/tests/eth_100m_fd_tx_ifg/, -f _defaults.ini -c General -r 0
-/examples/tests/eth_100m_fd_tx_ifg/, -f omnetpp.ini -c General -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c SimpleVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c DisableVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c MultipleVisualizations -r 0
@@ -401,13 +400,6 @@
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0
 /examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0
-# /examples/wireless/aggregationtest/, -f omnetpp.ini -c AggregationTest1 -r 0   # AggregationTest1 extended
-# /examples/wireless/aggregationtest/, -f omnetpp.ini -c AggregationTest2 -r 0   # AggregationTest2 extended
-/examples/wireless/aggregationtest/, -f omnetpp.ini -c WithoutAggregation -r 0
-/examples/wireless/aggregationtest/, -f omnetpp.ini -c WithAggregation -r 0
-/examples/wireless/aggregationtest/, -f omnetpp.ini -c WithAggregationAndWithHighRTSThreshold -r 0
-/examples/wireless/aggregationtest/, -f omnetpp.ini -c UDPWithoutAggregation -r 0
-/examples/wireless/aggregationtest/, -f omnetpp.ini -c UDPWithAggregation -r 0
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0
 /examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0
