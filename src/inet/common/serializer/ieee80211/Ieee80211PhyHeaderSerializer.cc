@@ -17,7 +17,6 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ieee80211/Ieee80211PhyHeaderSerializer.h"
-#include "inet/common/serializer/ieee80211/Ieee80211PLCPHeaders.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
