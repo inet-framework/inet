@@ -33,6 +33,8 @@ should be included in INET 4.0.
  - add separate classes/functions for iterating over the network nodes in a network or
    finding a network node based on its mac address/ip address or finding the position of a network node, etc.
  - add missing interface NED files for all L2 protocols
+ - remove obsolete dataTransferMode and the like
+ - rewrite serializers that use structure bit fields, this is undefined behavior
 
  - update all NED and C++ documentation
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
