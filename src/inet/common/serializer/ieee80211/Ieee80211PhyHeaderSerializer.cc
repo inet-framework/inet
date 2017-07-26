@@ -33,14 +33,14 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
 {
     const auto& phyHeader = std::static_pointer_cast<const Ieee80211PhyHeader>(chunk);
     if (auto ofdmPhyHeader = std::dynamic_pointer_cast<const Ieee80211OfdmPhyHeader>(chunk)) {
-        Ieee80211OFDMPLCPHeader phyhdr;
-        phyhdr.length = ofdmPhyHeader->getLengthField(); // Byte length of the payload
-        phyhdr.rate = ofdmPhyHeader->getRate();
-        phyhdr.parity = 0; // TODO What is the correct value for this? Check the reference.
-        phyhdr.reserved = 0;
-        phyhdr.service = 0;
-        phyhdr.tail = 0;
-        stream.writeBytes((uint8_t *)&phyhdr, byte(OFDM_PLCP_HEADER_LENGTH));
+        stream.writeUint4(ofdmPhyHeader->getRate());
+        stream.writeBit(false);
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 8));
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 4));
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 0));
+        stream.writeBit(false);
+        stream.writeBitRepeatedly(false, 6);
+        stream.writeUint16Be(0);
     }
     else {
         // TODO:
@@ -51,12 +51,17 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
 const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     if (true) {
-        uint8_t buffer[OFDM_PLCP_HEADER_LENGTH];
-        stream.readBytes(buffer, byte(OFDM_PLCP_HEADER_LENGTH));
         auto ofdmPhyHeader = std::make_shared<Ieee80211OfdmPhyHeader>();
-        const struct Ieee80211OFDMPLCPHeader& phyhdr = *static_cast<const struct Ieee80211OFDMPLCPHeader *>((void *)&buffer);
-        ofdmPhyHeader->setLengthField(phyhdr.length);
-        ofdmPhyHeader->setRate(phyhdr.rate);
+        ofdmPhyHeader->setRate(stream.readUint4());
+        stream.readBit();
+        uint16_t lengthField = 0;
+        lengthField |= ((uint16_t)stream.readUint4()) << 8;
+        lengthField |= ((uint16_t)stream.readUint4()) << 4;
+        lengthField |= ((uint16_t)stream.readUint4()) << 0;
+        ofdmPhyHeader->setLengthField(lengthField);
+        stream.readBit();
+        stream.readBitRepeatedly(false, 6);
+        stream.readUint16Be();
         return ofdmPhyHeader;
     }
     else {
