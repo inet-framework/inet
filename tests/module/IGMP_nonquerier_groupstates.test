@@ -1,4 +1,5 @@
-%description: Tests group specific state transitions of Non-Querier IGMP routers
+%description:
+Tests group specific state transitions of Non-Querier IGMP routers
 
 RFC 2236 7.:
                               ________________
