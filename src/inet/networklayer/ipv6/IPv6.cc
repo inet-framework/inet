@@ -183,7 +183,8 @@ void IPv6::endService(cPacket *msg)
         // take care of datagram which was supposed to be sent over a tentative address
         if (sDgram->getIE()->ipv6Data()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
-            queue.insert(sDgram);
+            //queue.insert(sDgram);
+            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to IPv4 ARP)
         }
         else {
             // address is not tentative anymore - send out datagram
@@ -833,7 +834,8 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         if (ie->ipv6Data()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
-            queue.insert(sDgram);
+            // queue.insert(sDgram);
+            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to IPv4 ARP)
             return;
         }
     #endif /* WITH_xMIPv6 */
