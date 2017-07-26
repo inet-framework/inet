@@ -80,7 +80,7 @@ void BitsChunk::setBits(const std::vector<bool>& bits)
 void BitsChunk::setBit(int index, bool bit)
 {
     handleChange();
-    bits[index] = bit;
+    bits.at(index) = bit;
 }
 
 bool BitsChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const

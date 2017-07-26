@@ -75,7 +75,7 @@ void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
 void BytesChunk::setByte(int index, uint8_t byte)
 {
     handleChange();
-    bytes[index] = byte;
+    bytes.at(index) = byte;
 }
 
 size_t BytesChunk::copyToBuffer(uint8_t *buffer, size_t bufferLength) const
