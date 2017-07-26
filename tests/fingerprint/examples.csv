@@ -431,9 +431,9 @@
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            b161-baca/tplx
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
-# /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,             0000-0000
-# /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,            0000-0000
-# /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 200s,            0000-0000
+/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       10s,               d302-86a3/tplx
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               d887-1a02/tplx
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                de04-2497/tplx
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              8fca-81dd/tplx
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              8fb1-43e7/tplx
