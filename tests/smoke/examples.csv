@@ -77,9 +77,6 @@
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0
-# /examples/hiddennode_new80211/,      -f omnetpp.ini -c hiddennode1 -r 0   # hiddennode1 extended
-# /examples/hiddennode_new80211/,      -f omnetpp.ini -c hiddennode2 -r 0   # hiddennode2 extended
-/examples/hiddennode_new80211/,      -f omnetpp.ini -c hiddennode3 -r 0
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0
@@ -209,7 +206,22 @@
 /examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0
+/examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0
+/examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0
+# /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv4 -r 0   # _ipv4 extended
+# /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv6 -r 0   # _ipv6 extended
+# /examples/inet/udpclientserver/,     -f omnetpp.ini -c _gn -r 0   # _gn extended
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_gn -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_gn -r 0
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_gn -r 0
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0
@@ -218,6 +230,7 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0
+/examples/ipv6/fragmentation/,       -f omnetpp.ini -c General -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0
@@ -232,14 +245,17 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0
+# /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv4 -r 0   # _IPv4 extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0
+# /examples/manetrouting/dymo/,        -f omnetpp.ini -c _IPv6 -r 0   # _IPv6 extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0
+# /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Generic -r 0   # _Generic extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0
-# /examples/manetrouting/dymo/,        -f omnetpp.ini -c AbstractMulti -r 0   # AbstractMulti extended
+# /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Multi -r 0   # _Multi extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0
-# /examples/manetrouting/dymo/,        -f omnetpp.ini -c Dynamic -r 0   # Dynamic extended
+# /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Dynamic -r 0   # _Dynamic extended
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0    # IPv6 module doesn't support starting in node DOWN state.
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0
@@ -348,10 +364,15 @@
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
+/examples/tests/IPv6_fragmentation/, -f _defaults.ini -c General -r 0
+/examples/tests/IPv6_fragmentation/, -f omnetpp.ini -c General -r 0
+/examples/tests/eth_100m_fd_tx_ifg/, -f _defaults.ini -c General -r 0
+/examples/tests/eth_100m_fd_tx_ifg/, -f omnetpp.ini -c General -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c SimpleVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c DisableVisualization -r 0
 /examples/visualization/advanced/,   -f omnetpp.ini -c MultipleVisualizations -r 0
 /examples/visualization/datalink/,   -f omnetpp.ini -c DynamicDataLinkVisualization -r 0
+/examples/visualization/earth/,      -f omnetpp.ini -c General -r 0
 /examples/visualization/environment/, -f omnetpp.ini -c General -r 0
 /examples/visualization/ieee80211/,  -f omnetpp.ini -c General -r 0
 /examples/visualization/info/,       -f omnetpp.ini -c General -r 0
@@ -415,10 +436,13 @@
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractBMac -r 0   # AbstractBMac extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractLMac -r 0   # AbstractLMac extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractCSMA -r 0   # AbstractCSMA extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractCsmaCa -r 0   # AbstractCsmaCa extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211Mac -r 0   # AbstractIeee80211Mac extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIdealRadio -r 0   # AbstractIdealRadio extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKScalarRadio -r 0   # AbstractAPSKScalarRadio extended
 # /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKDimensionalRadio -r 0   # AbstractAPSKDimensionalRadio extended
+/examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211ScalarRadio -r 0
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211DimensionalRadio -r 0   # AbstractIeee80211DimensionalRadio extended
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithIdealRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKScalarRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKDimensionalRadio -r 0
@@ -428,11 +452,15 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithIdealRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKScalarRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKDimensionalRadio -r 0
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithIdealRadio -r 0
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithAPSKScalarRadio -r 0
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithAPSKDimensionalRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0
@@ -440,9 +468,9 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0   # MacNonQos extended
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0   # MacQos extended
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0
-/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0
+/examples/wireless/ratecontrol/,     -f omnetpp.ini -c Mac -r 0
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0   # AbstractIdealMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0
