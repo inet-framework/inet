@@ -106,13 +106,16 @@ The highlights of this release are:
    packet, queue and buffer abstractions used by protocols.
 
    All the usual TCP/IP protocols have been changed to use the new packet API.
-   This includes among others TCP, UDP, IPv4, IPv6, Ethernet, PPP, etc. The most
-   notable exception is the IEEE 802.11 MAC protocol, which is not yet ported due
-   to the ongoing implementation in the master branch. Due to the flat nature of
-   the new packet data structure all old packet data structures (subclasses of
-   cPacket) have been replaced with chunks (subclasses of FieldChunk).
+   This includes among others TCP, UDP, IPv4, IPv6, Ethernet, PPP, 802.11 etc.
+   Due to the flat nature of the new packet data structure all old packet data
+   structures (subclasses of cPacket) have been replaced with chunks (subclasses
+   of FieldChunk).
    
-   TODO: dataTransferMode, TCPReceiveQueue
+   The various old transfer mode parameters which were used to distinguish between
+   communicating with simple byte counts, field based objects, or byte streams are
+   obsolete. Applications and protocols are free to use any kind of chunk in any
+   combination. Other protocols will be able to handle such packets transparently
+   using the new API. 
 
    Furthermore, all old packet serializer classes have been changed to integrate
    with the new packet API. This allows the transparent processing of packets
