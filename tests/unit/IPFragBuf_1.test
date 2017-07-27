@@ -3,8 +3,10 @@ Test the IP fragmentation reassembly buffer (IPv4FragBuf class)
 
 %includes:
 #include <vector>
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 %global:
 
@@ -24,18 +26,33 @@ typedef std::vector<Frag> FragVector;
 
 bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
 {
-    IPv4Datagram *frag = new IPv4Datagram();
+/*
+    EV << "insert frag: src=" << f.src
+       << " dest=" << f.dest
+       << " offset=" << f.offset
+       << " id=" << f.id
+       << " bytes=" << f.bytes
+       << " islast=" << f.islast
+       << "\n";
+*/
+    Packet *pk = new Packet("IPv4");
+    const auto& frag = std::make_shared<IPv4Header>();
     frag->setIdentification(f.id);
     frag->setSrcAddress(IPv4Address(f.src));
     frag->setDestAddress(IPv4Address(f.dest));
     frag->setFragmentOffset(f.offset);
     frag->setMoreFragments(!f.islast);
     frag->setHeaderLength(24);
-    frag->setByteLength(24+f.bytes);
+    frag->setChunkLength(byte(24));
+    frag->setTotalLengthField(24 + f.bytes);
+    const auto& payload = std::make_shared<ByteCountChunk>(byte(f.bytes));
+    pk->insertHeader(payload);
+    pk->insertHeader(frag);
+    ASSERT(pk->getByteLength() == 24+f.bytes);
 
-    IPv4Datagram *dgram = fragbuf.addFragment(frag, 0);
-    delete dgram;
-    return dgram!=NULL;
+    Packet *pk2 = fragbuf.addFragment(pk, 0);
+    delete pk2;
+    return pk2!=NULL;
 }
 
 %activity:
@@ -53,6 +70,15 @@ for (f.src=1024; f.src<1026; f.src++) {
                 f.offset=i*100;
                 f.bytes=100;
                 f.islast = (i==n-1);
+/*
+                EV << "generate frag: src=" << f.src
+                   << " dest=" << f.dest
+                   << " offset=" << f.offset
+                   << " id=" << f.id
+                   << " bytes=" << f.bytes
+                   << " islast=" << f.islast
+                   << "\n";
+*/
                 v.push_back(f);
             }
         }
@@ -63,7 +89,7 @@ for (f.src=1024; f.src<1026; f.src++) {
 for (int j=0; j<v.size(); j++)
 {
     Frag& f = v[j];
-    //EV << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
+//    EV << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
 }
 
 EV << numdatagrams << " datagrams in " << v.size() << " fragments\n";

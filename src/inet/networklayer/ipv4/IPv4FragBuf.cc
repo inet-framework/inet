@@ -61,6 +61,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     }
 
     // add fragment into reassembly buffer
+    ASSERT(ipv4Header->getTotalLengthField() > ipv4Header->getHeaderLength());
     int bytes = ipv4Header->getTotalLengthField() - ipv4Header->getHeaderLength();
     buf->buf.replace(byte(ipv4Header->getFragmentOffset()), packet->peekDataAt(byte(ipv4Header->getHeaderLength()), byte(bytes)));
     if (!ipv4Header->getMoreFragments()) {
