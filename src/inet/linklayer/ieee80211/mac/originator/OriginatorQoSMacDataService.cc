@@ -15,6 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 // 
 
+#include <algorithm>
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
@@ -30,6 +32,9 @@ void OriginatorQoSMacDataService::initialize()
     aMsduAggregationPolicy = dynamic_cast<IMsduAggregationPolicy*>(getSubmodule("msduAggregationPolicy"));
     if (aMsduAggregationPolicy)
         aMsduAggregation = new MsduAggregation();
+    aMpduAggregationPolicy = dynamic_cast<IMpduAggregationPolicy*>(getSubmodule("mpduAggregationPolicy"));
+    if (aMpduAggregationPolicy)
+        aMpduAggregation = new MpduAggregation();
     sequenceNumberAssigment = new QoSSequenceNumberAssignment();
     fragmentationPolicy = dynamic_cast<IFragmentationPolicy*>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
@@ -42,6 +47,19 @@ Packet *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendin
         for (auto f : *subframes)
             pendingQueue->remove(f);
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
+        delete subframes;
+        return aggregatedFrame;
+    }
+    return nullptr;
+}
+
+Packet *OriginatorQoSMacDataService::aMpduAggregateIfNeeded(std::vector<Packet *> *fragments)
+{
+    auto subframes = aMpduAggregationPolicy->computeAggregateFrames(fragments);
+    if (subframes) {
+        for (auto f : *subframes)
+            fragments->erase(std::remove(fragments->begin(), fragments->end(), f), fragments->end());
+        auto aggregatedFrame = aMpduAggregation->aggregateFrames(subframes);
         delete subframes;
         return aggregatedFrame;
     }
