@@ -608,7 +608,6 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, in
 
     std::ostream& out = *outp;
 
-    int payloadLength = tcpLength - tcpseg->getHeaderLength();
     // seq and time (not part of the tcpdump format)
     char buf[30];
     sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
@@ -629,6 +628,8 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, in
         out << destAddr << "." << tcpseg->getDestPort() << " < ";
         out << srcAddr << "." << tcpseg->getSrcPort() << ": ";
     }
+
+    int payloadLength = tcpLength - tcpseg->getHeaderLength();
 
     // flags
     bool flags = false;
