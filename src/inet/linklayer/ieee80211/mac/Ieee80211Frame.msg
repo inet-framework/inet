@@ -47,6 +47,7 @@ const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, w
 const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
 const short int MAX_NUM_FRAGMENTS = 16;
 const unsigned int LENGTH_A_MSDU_SUBFRAME_HEADER = 14 * 8; //48 + 48 + 16 bits
+const unsigned int LENGTH_A_MPDU_SUBFRAME_HEADER = 4 + 12 + 8 + 8;
 }}
 
 //
@@ -237,6 +238,12 @@ class Ieee80211MsduSubframeHeader extends FieldsChunk
     chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER);
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
+    int length;
+}
+
+class Ieee80211MpduSubframeHeader extends FieldsChunk
+{
+    chunkLength = bit(LENGTH_A_MPDU_SUBFRAME_HEADER);
     int length;
 }
 

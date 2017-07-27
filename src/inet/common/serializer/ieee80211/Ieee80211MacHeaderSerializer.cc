@@ -27,6 +27,7 @@ Register_Serializer(Ieee80211DataOrMgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframeHeader, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211MpduSubframeHeader, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211AckFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211RtsFrame, Ieee80211MacHeaderSerializer);
@@ -108,6 +109,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());
         stream.writeUint16Be(msduSubframe->getLength());
+    }
+    else if (auto mpduSubframe = std::dynamic_pointer_cast<const Ieee80211MpduSubframeHeader>(chunk))
+    {
+        stream.writeUint4(0);
+        stream.writeUint4(mpduSubframe->getLength() >> 8);
+        stream.writeUint8(mpduSubframe->getLength() & 0xFF);
+        stream.writeByte(0);
+        stream.writeByte(0x4E);
     }
     else
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
