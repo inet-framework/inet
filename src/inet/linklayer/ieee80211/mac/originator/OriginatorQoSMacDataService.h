@@ -50,13 +50,13 @@ class INET_API OriginatorQoSMacDataService : public IOriginatorMacDataService, p
         virtual void initialize() override;
 
         virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
-        virtual Fragments *fragmentIfNeeded(Packet *frame);
+        virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
         virtual Packet *aMsduAggregateIfNeeded(PendingQueue *pendingQueue);
 
     public:
         virtual ~OriginatorQoSMacDataService();
 
-        virtual Fragments *extractFramesToTransmit(PendingQueue *pendingQueue) override;
+        virtual std::vector<Packet *> *extractFramesToTransmit(PendingQueue *pendingQueue) override;
 };
 
 } /* namespace ieee80211 */

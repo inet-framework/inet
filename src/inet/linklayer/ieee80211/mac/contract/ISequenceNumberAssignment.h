@@ -31,7 +31,7 @@ class INET_API ISequenceNumberAssignment
         virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_ISEQUENCENUMBERASSIGMENT_H

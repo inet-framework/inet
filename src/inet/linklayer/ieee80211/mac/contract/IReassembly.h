@@ -33,7 +33,7 @@ class Ieee80211DataOrMgmtHeader;
 class INET_API IReassembly
 {
     public:
-        virtual ~IReassembly() {}
+        virtual ~IReassembly() { }
 
         /**
          * Add a fragment to the reassembly buffer. If the new fragment completes a frame,
@@ -53,4 +53,4 @@ class INET_API IReassembly
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // #ifndef __INET_IREASSEMBLY_H

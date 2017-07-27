@@ -40,7 +40,7 @@ class INET_API IFrameSequenceStep {
         };
 
     public:
-        virtual ~IFrameSequenceStep() {}
+        virtual ~IFrameSequenceStep() { }
 
         virtual Type getType() = 0;
         virtual Completion getCompletion() = 0;
@@ -69,7 +69,7 @@ class INET_API IReceiveStep : public IFrameSequenceStep
 class INET_API IFrameSequence
 {
     public:
-        virtual ~IFrameSequence() {}
+        virtual ~IFrameSequence() { }
 
         virtual void startSequence(FrameSequenceContext *context, int step) = 0;
         virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) = 0;
@@ -81,5 +81,4 @@ class INET_API IFrameSequence
 } // namespace ieee80211
 } // namespace inet
 
-#endif
-
+#endif // __INET_IFRAMESEQUENCE_H

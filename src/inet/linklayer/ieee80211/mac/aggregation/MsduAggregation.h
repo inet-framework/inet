@@ -29,7 +29,7 @@ class INET_API MsduAggregation : public IMsduAggregation, public cObject
         virtual void setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>& subframe, const Ptr<const Ieee80211DataHeader>& header);
 
     public:
-        virtual Packet *aggregateFrames(std::vector<Packet*> *frames) override;
+        virtual Packet *aggregateFrames(std::vector<Packet *> *frames) override;
 };
 
 } /* namespace ieee80211 */

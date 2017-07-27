@@ -39,7 +39,7 @@ Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
         return nullptr;
 }
 
-std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+std::vector<Packet *> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (duplicateRemoval && duplicateRemoval->isDuplicate(header)) {
         delete packet;
@@ -49,22 +49,22 @@ std::vector<Packet*> RecipientMacDataService::dataOrMgmtFrameReceived(Packet *pa
     if (basicReassembly) { // FIXME: defragmentation
         defragmentedFrame = defragment(packet);
     }
-    return defragmentedFrame != nullptr ? std::vector<Packet*>({defragmentedFrame}) : std::vector<Packet*>();
+    return defragmentedFrame != nullptr ? std::vector<Packet *>({defragmentedFrame}) : std::vector<Packet *>();
 }
 
-std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+std::vector<Packet *> RecipientMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
     return dataOrMgmtFrameReceived(dataPacket, dataHeader);
 }
 
-std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
+std::vector<Packet *> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     return dataOrMgmtFrameReceived(mgmtPacket, mgmtHeader);
 }
 
-std::vector<Packet*> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader)
+std::vector<Packet *> RecipientMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader)
 {
-    return std::vector<Packet*>(); // has nothing to do
+    return std::vector<Packet *>(); // has nothing to do
 }
 
 RecipientMacDataService::~RecipientMacDataService()

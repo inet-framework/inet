@@ -37,7 +37,7 @@ class INET_API IRecipientBlockAckAgreementPolicy
         virtual int getMaximumAllowedBufferSize() const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __IRECIPIENTBLOCKACKAGREEMENTPOLICY_H

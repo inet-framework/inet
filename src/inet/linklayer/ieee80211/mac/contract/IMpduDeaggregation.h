@@ -27,7 +27,7 @@ namespace ieee80211 {
 class INET_API IMpduDeaggregation
 {
     public:
-        virtual ~IMpduDeaggregation() {}
+        virtual ~IMpduDeaggregation() { }
 
         virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) = 0;
 };

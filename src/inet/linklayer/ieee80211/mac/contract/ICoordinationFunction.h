@@ -30,7 +30,7 @@ namespace ieee80211 {
 class INET_API ICoordinationFunction
 {
     public:
-        virtual ~ICoordinationFunction() {}
+        virtual ~ICoordinationFunction() { }
 
         virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
         virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
@@ -38,7 +38,7 @@ class INET_API ICoordinationFunction
 
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_ICOORDINATIONFUNCTION_H

@@ -622,7 +622,7 @@ bool Hcf::hasFrameToTransmit()
         throw cRuntimeError("Hcca is unimplemented");
 }
 
-void Hcf::sendUp(const std::vector<Packet*>& completeFrames)
+void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
 {
     for (auto frame : completeFrames) {
         // FIXME: mgmt module does not handle addba req ..

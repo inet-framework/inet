@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 Register_Class(Fragmentation);
 
-std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vector<int>& fragmentSizes)
+std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::vector<int>& fragmentSizes)
 {
     // Notes:
     // 1. only the MSDU is carried in the fragments (i.e. only frame's payload, without the 802.11 header)

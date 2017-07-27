@@ -54,7 +54,7 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
     subframeHeader->setSa(sa);
 }
 
-Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
+Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
     auto firstFrame = frames->at(0);
     auto firstHeader = firstFrame->peekHeader<Ieee80211DataHeader>();

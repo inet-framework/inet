@@ -53,7 +53,7 @@ void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOr
     sequenceNumberAssigment->assignSequenceNumber(header);
 }
 
-OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::fragmentIfNeeded(Packet *frame)
+std::vector<Packet *> *OriginatorQoSMacDataService::fragmentIfNeeded(Packet *frame)
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
@@ -63,7 +63,7 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::fragmentIfN
     return nullptr;
 }
 
-OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
+std::vector<Packet *> *OriginatorQoSMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
 {
     if (pendingQueue->isEmpty())
         return nullptr;
@@ -83,11 +83,11 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFram
         }
         // if (msduIntegrityAndProtection)
         //    frame = protectMsduIfNeeded(frame);
-        Fragments *fragments = nullptr;
+        std::vector<Packet *> *fragments = nullptr;
         if (fragmentationPolicy)
             fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new Fragments({packet});
+            fragments = new std::vector<Packet *>({packet});
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)

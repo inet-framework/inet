@@ -30,7 +30,7 @@ class INET_API IFrameSequenceHandler
         class INET_API ICallback
         {
             public:
-                virtual ~ICallback() {}
+                virtual ~ICallback() { }
 
                 virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
 
@@ -53,7 +53,7 @@ class INET_API IFrameSequenceHandler
         virtual void handleStartRxTimeout() = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IFRAMESEQUENCEHANDLER_H

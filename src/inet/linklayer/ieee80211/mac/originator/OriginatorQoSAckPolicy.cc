@@ -43,7 +43,7 @@ bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& h
 std::map<MACAddress, std::vector<Packet *>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
 {
     auto outstandingFrames = inProgressFrames->getOutstandingFrames();
-    std::map<MACAddress, std::vector<Packet*>> outstandingFramesPerReceiver;
+    std::map<MACAddress, std::vector<Packet *>> outstandingFramesPerReceiver;
     for (auto frame : outstandingFrames)
         outstandingFramesPerReceiver[frame->peekHeader<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
     return outstandingFramesPerReceiver;

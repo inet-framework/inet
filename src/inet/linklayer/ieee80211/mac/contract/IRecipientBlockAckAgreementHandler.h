@@ -32,7 +32,7 @@ namespace ieee80211 {
 class INET_API IRecipientBlockAckAgreementHandler
 {
     public:
-        virtual ~IRecipientBlockAckAgreementHandler() { };
+        virtual ~IRecipientBlockAckAgreementHandler() { }
 
         virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) = 0;
         virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
@@ -44,7 +44,7 @@ class INET_API IRecipientBlockAckAgreementHandler
         virtual RecipientBlockAckAgreement* getAgreement(Tid tid, MACAddress originatorAddr) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IRECIPIENTBLOCKACKAGREEMENTHANDLER_H

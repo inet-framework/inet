@@ -219,7 +219,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     }
 }
 
-void Dcf::sendUp(const std::vector<Packet*>& completeFrames)
+void Dcf::sendUp(const std::vector<Packet *>& completeFrames)
 {
     for (auto frame : completeFrames)
         mac->sendUpFrame(frame);

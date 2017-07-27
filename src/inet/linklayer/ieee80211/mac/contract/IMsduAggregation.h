@@ -27,12 +27,12 @@ namespace ieee80211 {
 class INET_API IMsduAggregation
 {
     public:
-        virtual ~IMsduAggregation() {}
+        virtual ~IMsduAggregation() { }
 
-        virtual Packet *aggregateFrames(std::vector<Packet*> *frames) = 0;
+        virtual Packet *aggregateFrames(std::vector<Packet *> *frames) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // __INET_IMSDUAGGREGATION_H

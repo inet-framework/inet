@@ -29,7 +29,7 @@ namespace ieee80211 {
 class INET_API IOriginatorQoSAckPolicy
 {
     public:
-        virtual ~IOriginatorQoSAckPolicy() { };
+        virtual ~IOriginatorQoSAckPolicy() { }
 
         virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
         virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;
@@ -41,7 +41,7 @@ class INET_API IOriginatorQoSAckPolicy
         virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IORIGINATORQOSACKPOLICY_H

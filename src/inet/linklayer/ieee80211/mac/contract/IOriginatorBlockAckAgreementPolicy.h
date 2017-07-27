@@ -42,7 +42,7 @@ class INET_API IOriginatorBlockAckAgreementPolicy
         virtual int getMaximumAllowedBufferSize() const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __IORIGINATORBLOCKACKAGREEMENTPOLICY_H

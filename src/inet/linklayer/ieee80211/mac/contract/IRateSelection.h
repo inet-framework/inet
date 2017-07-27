@@ -36,7 +36,8 @@ namespace ieee80211 {
 class INET_API IRateSelection
 {
     public:
-        virtual ~IRateSelection() {}
+        virtual ~IRateSelection() { }
+
         virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) = 0;
         virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
 
@@ -46,4 +47,4 @@ class INET_API IRateSelection
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // #ifndef __INET_IRATESELECTION_H

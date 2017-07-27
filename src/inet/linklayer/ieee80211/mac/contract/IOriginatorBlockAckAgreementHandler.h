@@ -48,4 +48,4 @@ class INET_API IOriginatorBlockAckAgreementHandler
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // #ifndef __INET_IORIGINATORBLOCKACKAGREEMENTHANDLER_H

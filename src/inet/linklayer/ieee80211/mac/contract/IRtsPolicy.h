@@ -34,7 +34,7 @@ class INET_API IRtsPolicy
         virtual int getRtsThreshold() const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IRTSPOLICY_H

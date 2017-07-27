@@ -29,12 +29,13 @@ namespace ieee80211 {
  */
 class INET_API IDs
 {
-  public:
-    virtual void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) = 0;
+    public:
+        virtual ~IDs() { }
+
+        virtual void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
-
+#endif // #ifndef __INET_IDS_H

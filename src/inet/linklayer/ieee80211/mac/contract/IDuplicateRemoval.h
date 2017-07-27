@@ -32,7 +32,7 @@ class INET_API IDuplicateRemoval
 
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET__IDUPLICATEREMOVAL_H

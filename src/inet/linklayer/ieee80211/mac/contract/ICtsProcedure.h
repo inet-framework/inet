@@ -30,11 +30,12 @@ class INET_API ICtsProcedure
 {
     public:
         virtual ~ICtsProcedure() { }
+
         virtual void processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
         virtual void processTransmittedCts(const Ptr<const Ieee80211CtsFrame>& ctsFrame) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_ICTSPROCEDURE_H

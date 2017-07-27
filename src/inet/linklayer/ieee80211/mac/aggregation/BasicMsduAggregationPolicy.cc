@@ -67,13 +67,13 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
     return true;
 }
 
-std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
+std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
 {
     ASSERT(!queue->isEmpty());
     bit aMsduLength = bit(0);
     auto firstPacket = check_and_cast<Packet *>(queue->front());
     Ptr<const Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
-    auto frames = new std::vector<Packet*>();
+    auto frames = new std::vector<Packet *>();
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
