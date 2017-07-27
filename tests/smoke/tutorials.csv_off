@@ -1,41 +1,4 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c one -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c two -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c three -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c four -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c five -r 0   # five extended
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c six -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seven -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eight -r 0   # eight extended
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nine -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c ten -r 0   # ten extended
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eleven -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twelve -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c thirteen -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c fourteen -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c fifteen -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c sixteen -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeen -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeenB -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c seventeenC -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenA -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenB -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenC -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c eighteenD -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenA -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenB -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c nineteenC -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twenty -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyone -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentytwo -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentythree -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyfour -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyfive -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentysix -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyseven -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentyeight -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c twentynine -r 0
-/tutorials/configurator/configuratortest/, -f omnetpp.ini -c thirty -r 0
 /tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0
 /tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0
 /tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0
