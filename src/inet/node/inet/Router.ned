@@ -56,9 +56,9 @@ module Router extends ApplicationLayerNodeBase
         bool hasRIP = default(false);
         bool hasBGP = default(false);
         bool hasPIM = default(false);
-        hasUdp = default(hasRIP);
-        hasTcp = default(hasBGP);
         bool hasDHCP = default(false);
+        hasUdp = default(hasRIP || hasDHCP);
+        hasTcp = default(hasBGP);
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
