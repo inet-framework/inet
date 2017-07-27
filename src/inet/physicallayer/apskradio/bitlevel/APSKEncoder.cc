@@ -17,7 +17,7 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyHeaderSerializer.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
 namespace inet {
 
@@ -68,6 +68,7 @@ std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
 const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
+    const auto& apskPhyHeader = packet->peekHeader<APSKPhyHeader>();
     const auto& bytesChunk = packet->peekAllBytes();
     auto bitLength = bytesChunk->getChunkLength();
     BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
@@ -89,7 +90,7 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
         interleaving = interleaver->getInterleaving();
         EV_DEBUG << "Interleaved bits are: " << *encodedBits << endl;
     }
-    bit netHeaderLength = byte(APSK_PHY_HEADER_BYTE_LENGTH);
+    bit netHeaderLength = apskPhyHeader->getChunkLength();
     if (forwardErrorCorrection == nullptr)
         return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), bitLength - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {

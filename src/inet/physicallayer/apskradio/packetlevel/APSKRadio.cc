@@ -19,7 +19,6 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyHeaderSerializer.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKRadio.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
@@ -56,7 +55,6 @@ void APSKRadio::encapsulate(Packet *packet) const
     }
     // KLUDGE:
     else if (auto layeredTransmitter = dynamic_cast<const APSKLayeredTransmitter *>(transmitter)) {
-        phyHeader->setChunkLength(byte(APSK_PHY_HEADER_BYTE_LENGTH));
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);

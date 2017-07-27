@@ -26,8 +26,6 @@ namespace inet {
 
 namespace physicallayer {
 
-#define APSK_PHY_HEADER_BYTE_LENGTH    6
-
 class INET_API APSKPhyHeaderSerializer : public ChunkSerializer
 {
   public:

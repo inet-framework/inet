@@ -25,4 +25,5 @@ class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk
 {
+    chunkLength = byte(6);
 }
