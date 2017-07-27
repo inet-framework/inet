@@ -70,6 +70,9 @@ void APSKRadio::encapsulate(Packet *packet) const
 
     ASSERT(modulation != nullptr);
 
+    phyHeader->setCrc(0);
+    phyHeader->setCrcMode(CRC_DISABLED);
+    phyHeader->setLengthField(packet->getByteLength());
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
     auto paddingBitLength = bit(computePaddingLength(bit(packet->getTotalLength()).get(), nullptr, modulation));

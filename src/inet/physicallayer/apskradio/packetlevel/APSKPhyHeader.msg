@@ -17,13 +17,18 @@
 
 cplusplus {{
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
 
+enum CrcMode;
 class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk
 {
     chunkLength = byte(6);
+    uint16_t lengthField;
+    uint16_t crc = 0;
+    int crcMode @enum(CrcMode) = -1;
 }

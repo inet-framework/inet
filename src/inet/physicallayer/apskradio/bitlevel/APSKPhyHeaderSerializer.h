@@ -18,7 +18,6 @@
 #ifndef __INET_APSKPHYHEADERSERIALIZER_H
 #define __INET_APSKPHYHEADERSERIALIZER_H
 
-#include "inet/common/BitVector.h"
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
@@ -29,7 +28,7 @@ namespace physicallayer {
 class INET_API APSKPhyHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const;
 };
 
