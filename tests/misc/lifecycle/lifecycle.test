@@ -16,8 +16,8 @@ run each stage one after the other.
 
 %file: test.ned
 
-import inet.base.LifecycleController;
-import inet.status.NodeStatus;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.lifecycle.NodeStatus;
 import inet.common.scenario.ScenarioManager;
 
 network Test
@@ -58,123 +58,123 @@ network Test
 [General]
 network = Test
 tkenv-plugin-path = ../../../../etc/plugins
-ned-path = .;../../../../../src;../../lib
+ned-path = .;../../../../../src;../lib
 cmdenv-express-mode = false
 
 %contains: stdout
-** Event #1  T=10   Test.scenarioManager (ScenarioManager, id=3)
+** Event #1  t=10   Test.scenarioManager (ScenarioManager, id=3)
 processing <at> command...
 processing <tell> command...
-Doing stage 0/4 of operation TestNodeStartOperation on Test.nodeA
+Doing stage 0/4 of operation inet::TestNodeStartOperation on Test.nodeA
 Test.nodeA starting up
 Test.nodeA.mobility starting to move
 Test.nodeA.radio turning on transmitter
-** Event #2  T=11   Test.nodeA.radio (TestRadio, id=9)
+** Event #2  t=11   Test.nodeA.radio (TestRadio, id=9)
 Test.nodeA.radio transmitter turned on
-Module Test.nodeA.radio completed stage 0 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 1/4 of operation TestNodeStartOperation on Test.nodeA
+Module Test.nodeA.radio completed stage 0 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 1/4 of operation inet::TestNodeStartOperation on Test.nodeA
 Test.nodeA.protocol opening connection
 Test.nodeA.radio turning on receiver
-** Event #3  T=13   Test.nodeA.radio (TestRadio, id=9)
+** Event #3  t=13   Test.nodeA.radio (TestRadio, id=9)
 Test.nodeA.radio receiver turned on
-Module Test.nodeA.radio completed stage 1 of operation TestNodeStartOperation, 1 more module(s) pending
-** Event #4  T=14   Test.nodeA.protocol (TestProtocol, id=8)
+Module Test.nodeA.radio completed stage 1 of operation inet::TestNodeStartOperation, 1 more module(s) pending
+** Event #4  t=14   Test.nodeA.protocol (TestProtocol, id=8)
 Test.nodeA.protocol connection open
-Module Test.nodeA.protocol completed stage 1 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 2/4 of operation TestNodeStartOperation on Test.nodeA
+Module Test.nodeA.protocol completed stage 1 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 2/4 of operation inet::TestNodeStartOperation on Test.nodeA
 Test.nodeA.protocol sending initial data
-** Event #5  T=16   Test.nodeA.protocol (TestProtocol, id=8)
+** Event #5  t=16   Test.nodeA.protocol (TestProtocol, id=8)
 Test.nodeA.protocol data sent
-Module Test.nodeA.protocol completed stage 2 of operation TestNodeStartOperation, 1 more module(s) pending
-** Event #6  T=19   Test.nodeA.mobility (TestMobility, id=7)
+Module Test.nodeA.protocol completed stage 2 of operation inet::TestNodeStartOperation, 1 more module(s) pending
+** Event #6  t=19   Test.nodeA.mobility (TestMobility, id=7)
 Test.nodeA.mobility moving started
-Module Test.nodeA.mobility completed stage 2 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 3/4 of operation TestNodeStartOperation on Test.nodeA
+Module Test.nodeA.mobility completed stage 2 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 3/4 of operation inet::TestNodeStartOperation on Test.nodeA
 Test.nodeA started
-** Event #7  T=20   Test.scenarioManager (ScenarioManager, id=3)
+** Event #7  t=20   Test.scenarioManager (ScenarioManager, id=3)
 processing <at> command...
 processing <tell> command...
-Doing stage 0/4 of operation TestNodeStartOperation on Test.nodeB
+Doing stage 0/4 of operation inet::TestNodeStartOperation on Test.nodeB
 Test.nodeB starting up
 Test.nodeB.mobility starting to move
 Test.nodeB.radio turning on transmitter
-** Event #8  T=21   Test.nodeB.radio (TestRadio, id=13)
+** Event #8  t=21   Test.nodeB.radio (TestRadio, id=13)
 Test.nodeB.radio transmitter turned on
-Module Test.nodeB.radio completed stage 0 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 1/4 of operation TestNodeStartOperation on Test.nodeB
+Module Test.nodeB.radio completed stage 0 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 1/4 of operation inet::TestNodeStartOperation on Test.nodeB
 Test.nodeB.protocol opening connection
 Test.nodeB.radio turning on receiver
-** Event #9  T=23   Test.nodeB.radio (TestRadio, id=13)
+** Event #9  t=23   Test.nodeB.radio (TestRadio, id=13)
 Test.nodeB.radio receiver turned on
-Module Test.nodeB.radio completed stage 1 of operation TestNodeStartOperation, 1 more module(s) pending
-** Event #10  T=24   Test.nodeB.protocol (TestProtocol, id=12)
+Module Test.nodeB.radio completed stage 1 of operation inet::TestNodeStartOperation, 1 more module(s) pending
+** Event #10  t=24   Test.nodeB.protocol (TestProtocol, id=12)
 Test.nodeB.protocol connection open
-Module Test.nodeB.protocol completed stage 1 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 2/4 of operation TestNodeStartOperation on Test.nodeB
+Module Test.nodeB.protocol completed stage 1 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 2/4 of operation inet::TestNodeStartOperation on Test.nodeB
 Test.nodeB.protocol sending initial data
-** Event #11  T=26   Test.nodeB.protocol (TestProtocol, id=12)
+** Event #11  t=26   Test.nodeB.protocol (TestProtocol, id=12)
 Test.nodeB.protocol data sent
-Module Test.nodeB.protocol completed stage 2 of operation TestNodeStartOperation, 1 more module(s) pending
-** Event #12  T=29   Test.nodeB.mobility (TestMobility, id=11)
+Module Test.nodeB.protocol completed stage 2 of operation inet::TestNodeStartOperation, 1 more module(s) pending
+** Event #12  t=29   Test.nodeB.mobility (TestMobility, id=11)
 Test.nodeB.mobility moving started
-Module Test.nodeB.mobility completed stage 2 of operation TestNodeStartOperation, 0 more module(s) pending, stage completed
-Doing stage 3/4 of operation TestNodeStartOperation on Test.nodeB
+Module Test.nodeB.mobility completed stage 2 of operation inet::TestNodeStartOperation, 0 more module(s) pending, stage completed
+Doing stage 3/4 of operation inet::TestNodeStartOperation on Test.nodeB
 Test.nodeB started
-** Event #13  T=30   Test.scenarioManager (ScenarioManager, id=3)
+** Event #13  t=30   Test.scenarioManager (ScenarioManager, id=3)
 processing <at> command...
 processing <tell> command...
-Doing stage 0/4 of operation TestNodeShutdownOperation on Test.nodeB
+Doing stage 0/4 of operation inet::TestNodeShutdownOperation on Test.nodeB
 Test.nodeB shutting down
 Test.nodeB.mobility stopping to move
 Test.nodeB.protocol sending final data
-** Event #14  T=32   Test.nodeB.protocol (TestProtocol, id=12)
+** Event #14  t=32   Test.nodeB.protocol (TestProtocol, id=12)
 Test.nodeB.protocol data sent
-Module Test.nodeB.protocol completed stage 0 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 1/4 of operation TestNodeShutdownOperation on Test.nodeB
+Module Test.nodeB.protocol completed stage 0 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 1/4 of operation inet::TestNodeShutdownOperation on Test.nodeB
 Test.nodeB.protocol closing connection
 Test.nodeB.radio turning off receiver
-** Event #15  T=34   Test.nodeB.radio (TestRadio, id=13)
+** Event #15  t=34   Test.nodeB.radio (TestRadio, id=13)
 Test.nodeB.radio receiver turned off
-Module Test.nodeB.radio completed stage 1 of operation TestNodeShutdownOperation, 1 more module(s) pending
-** Event #16  T=35   Test.nodeB.protocol (TestProtocol, id=12)
+Module Test.nodeB.radio completed stage 1 of operation inet::TestNodeShutdownOperation, 1 more module(s) pending
+** Event #16  t=35   Test.nodeB.protocol (TestProtocol, id=12)
 Test.nodeB.protocol connection closed
-Module Test.nodeB.protocol completed stage 1 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 2/4 of operation TestNodeShutdownOperation on Test.nodeB
+Module Test.nodeB.protocol completed stage 1 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 2/4 of operation inet::TestNodeShutdownOperation on Test.nodeB
 Test.nodeB.radio turning off transmitter
-** Event #17  T=36   Test.nodeB.radio (TestRadio, id=13)
+** Event #17  t=36   Test.nodeB.radio (TestRadio, id=13)
 Test.nodeB.radio transmitter turned off
-Module Test.nodeB.radio completed stage 2 of operation TestNodeShutdownOperation, 1 more module(s) pending
-** Event #18  T=39   Test.nodeB.mobility (TestMobility, id=11)
+Module Test.nodeB.radio completed stage 2 of operation inet::TestNodeShutdownOperation, 1 more module(s) pending
+** Event #18  t=39   Test.nodeB.mobility (TestMobility, id=11)
 Test.nodeB.mobility moving stopped
-Module Test.nodeB.mobility completed stage 2 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 3/4 of operation TestNodeShutdownOperation on Test.nodeB
+Module Test.nodeB.mobility completed stage 2 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 3/4 of operation inet::TestNodeShutdownOperation on Test.nodeB
 Test.nodeB shut down
-** Event #19  T=40   Test.scenarioManager (ScenarioManager, id=3)
+** Event #19  t=40   Test.scenarioManager (ScenarioManager, id=3)
 processing <at> command...
 processing <tell> command...
-Doing stage 0/4 of operation TestNodeShutdownOperation on Test.nodeA
+Doing stage 0/4 of operation inet::TestNodeShutdownOperation on Test.nodeA
 Test.nodeA shutting down
 Test.nodeA.mobility stopping to move
 Test.nodeA.protocol sending final data
-** Event #20  T=42   Test.nodeA.protocol (TestProtocol, id=8)
+** Event #20  t=42   Test.nodeA.protocol (TestProtocol, id=8)
 Test.nodeA.protocol data sent
-Module Test.nodeA.protocol completed stage 0 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 1/4 of operation TestNodeShutdownOperation on Test.nodeA
+Module Test.nodeA.protocol completed stage 0 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 1/4 of operation inet::TestNodeShutdownOperation on Test.nodeA
 Test.nodeA.protocol closing connection
 Test.nodeA.radio turning off receiver
-** Event #21  T=44   Test.nodeA.radio (TestRadio, id=9)
+** Event #21  t=44   Test.nodeA.radio (TestRadio, id=9)
 Test.nodeA.radio receiver turned off
-Module Test.nodeA.radio completed stage 1 of operation TestNodeShutdownOperation, 1 more module(s) pending
-** Event #22  T=45   Test.nodeA.protocol (TestProtocol, id=8)
+Module Test.nodeA.radio completed stage 1 of operation inet::TestNodeShutdownOperation, 1 more module(s) pending
+** Event #22  t=45   Test.nodeA.protocol (TestProtocol, id=8)
 Test.nodeA.protocol connection closed
-Module Test.nodeA.protocol completed stage 1 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 2/4 of operation TestNodeShutdownOperation on Test.nodeA
+Module Test.nodeA.protocol completed stage 1 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 2/4 of operation inet::TestNodeShutdownOperation on Test.nodeA
 Test.nodeA.radio turning off transmitter
-** Event #23  T=46   Test.nodeA.radio (TestRadio, id=9)
+** Event #23  t=46   Test.nodeA.radio (TestRadio, id=9)
 Test.nodeA.radio transmitter turned off
-Module Test.nodeA.radio completed stage 2 of operation TestNodeShutdownOperation, 1 more module(s) pending
-** Event #24  T=49   Test.nodeA.mobility (TestMobility, id=7)
+Module Test.nodeA.radio completed stage 2 of operation inet::TestNodeShutdownOperation, 1 more module(s) pending
+** Event #24  t=49   Test.nodeA.mobility (TestMobility, id=7)
 Test.nodeA.mobility moving stopped
-Module Test.nodeA.mobility completed stage 2 of operation TestNodeShutdownOperation, 0 more module(s) pending, stage completed
-Doing stage 3/4 of operation TestNodeShutdownOperation on Test.nodeA
+Module Test.nodeA.mobility completed stage 2 of operation inet::TestNodeShutdownOperation, 0 more module(s) pending, stage completed
+Doing stage 3/4 of operation inet::TestNodeShutdownOperation on Test.nodeA
 Test.nodeA shut down

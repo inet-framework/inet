@@ -1,4 +1,4 @@
-import inet.status.NodeStatus;
+import inet.common.lifecycle.NodeStatus;
 
 simple TestProtocol
 {
@@ -15,7 +15,7 @@ simple TestMobility
 module TestNode
 {
     parameters:
-        @node();
+        @networkNode;
         @display("bgb=224,247");
     submodules:
         status: NodeStatus {
