@@ -268,7 +268,7 @@
         id="SCTP_examples"
         name="SCTP examples"
         description = "Examples for SCTP"
-        initiallyEnabled = "true"
+        initiallyEnabled = "false"
         requires = "SCTP IPv4"
         labels = "protocols examples"
         nedPackages = "
