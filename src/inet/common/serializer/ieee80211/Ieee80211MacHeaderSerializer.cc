@@ -219,6 +219,7 @@ void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const 
 {
     const auto& macTrailer = std::dynamic_pointer_cast<const Ieee80211MacTrailer>(chunk);
     auto fcsMode = macTrailer->getFcsMode();
+    // TODO: re-enable this when FCS is properly computed in the MAC in all code paths
 //    if (fcsMode != FCS_COMPUTED)
 //        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
     stream.writeUint32Be(macTrailer->getFcs());
