@@ -58,26 +58,26 @@ module RSVP_LSR
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=58,242;is=s");
+                @display("p=58,272;is=s");
         }
         ted: TED {
             parameters:
-                @display("p=312,203");
+                @display("p=58,115;is=s");
         }
         linkStateRouting: LinkStateRouting {
             parameters:
                 peers = peers;
-                @display("p=254,115");
+                @display("p=545,106");
         }
         rsvp: RSVP {
             parameters:
                 peers = peers;
                 classifierModule = "^.classifier";
-                @display("p=156,67");
+                @display("p=458,106");
         }
         classifier: SimpleClassifier {
             parameters:
-                @display("p=330,67");
+                @display("p=58,362;is=s");
         }
         tn: MessageDispatcher {
             parameters:
@@ -96,7 +96,7 @@ module RSVP_LSR
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=132,345,row,90;q=l2queue");
+                @display("p=271,394,row,90;q=l2queue");
         }
         mpls: MPLS {
             parameters:
@@ -105,7 +105,7 @@ module RSVP_LSR
         }
         libTable: LIBTable {
             parameters:
-                @display("p=312,268");
+                @display("p=58,186;is=s");
         }
         ml: MessageDispatcher {
             parameters:
