@@ -205,7 +205,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return contents->str(); }
+    virtual std::string str() const override { return iterator.getPosition() == bit(0) ? contents->str() : contents->peek(iterator)->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }
