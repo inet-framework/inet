@@ -1273,7 +1273,7 @@ static void testReassemblyBuffer()
     auto byteCountChunk1 = makeImmutableByteCountChunk(byte(10));
     buffer1.replace(bit(0), byteCountChunk1);
     assert(buffer1.isComplete());
-    const auto& data1 = buffer1.getData();
+    const auto& data1 = buffer1.getReassembledData();
     assert(data1 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data1) != nullptr);
     assert(data1->getChunkLength() == byte(10));
@@ -1284,7 +1284,7 @@ static void testReassemblyBuffer()
     assert(!buffer2.isComplete());
     buffer2.replace(byte(10), byteCountChunk1);
     assert(buffer2.isComplete());
-    const auto& data2 = buffer2.getData();
+    const auto& data2 = buffer2.getReassembledData();
     assert(data2 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data2) != nullptr);
     assert(data2->getChunkLength() == byte(20));
@@ -1297,7 +1297,7 @@ static void testReassemblyBuffer()
     assert(!buffer3.isComplete());
     buffer3.replace(byte(10), byteCountChunk1);
     assert(buffer3.isComplete());
-    const auto& data3 = buffer3.getData();
+    const auto& data3 = buffer3.getReassembledData();
     assert(data3 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data3) != nullptr);
     assert(data3->getChunkLength() == byte(30));
