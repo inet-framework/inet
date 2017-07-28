@@ -1,16 +1,16 @@
 INET Framework for OMNEST/OMNeT++
 =================================
 
-The INET framework (inet.omnetpp.org) is an open-source communication networks 
+The INET framework (inet.omnetpp.org) is an open-source communication networks
 simulation package, written for the OMNEST/OMNeT++ simulation system. The INET 
-framework contains models for several Internet protocols: beyond TCP and IP there 
-is UDP, Ethernet, PPP and MPLS with LDP and RSVP-TE signalling. See the CREDITS 
-file for the names of people who have contributed to the INET Framework.
+framework contains models for numerous wired and wireless protocols, a detailed
+physical layer model, application models and more. See the CREDITS file for the
+names of people who have contributed to the INET Framework.
 
 IMPORTANT: The INET Framework is continuously being improved: new parts
 are added, bugs are corrected, and so on. We cannot assert that any protocol
 implemented here will work fully according to the specifications. YOU ARE
-RESPONSIBLE YOURSELF TO MAKE SURE THAT THE MODELS YOU USE IN YOUR SIMULATIONS
+RESPONSIBLE YOURSELF FOR MAKING SURE THAT THE MODELS YOU USE IN YOUR SIMULATIONS
 WORK CORRECTLY, AND YOU'RE GETTING VALID RESULTS.
 
 Contributions are highly welcome. You can make a difference!
@@ -48,3 +48,4 @@ If you want to use external interfaces in INET, please install libpcap-dev (on l
 or winpcap (on windows from www.winpcap.org) and enable the "Emulation" feature
 either in the IDE or using the inet_featuretool then regenerate the INET makefile
 using 'make makefiles'.
+
