@@ -45,7 +45,7 @@ int APSKRadio::computePaddingLength(int64_t bitLength, const ConvolutionalCode *
 void APSKRadio::encapsulate(Packet *packet) const
 {
     const APSKModulationBase *modulation = nullptr;
-    const ConvolutionalCode *forwardErrorCorrection = nullptr;
+    // TODO: const ConvolutionalCode *forwardErrorCorrection = nullptr;
     auto phyHeader = std::make_shared<APSKPhyHeader>();
 
     // KLUDGE:
@@ -58,7 +58,7 @@ void APSKRadio::encapsulate(Packet *packet) const
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
-            forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
+            // TODO: forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
         }
         modulation = check_and_cast<const APSKModulationBase *>(layeredTransmitter->getModulator()->getModulation());
     }

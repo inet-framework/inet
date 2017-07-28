@@ -439,7 +439,6 @@ void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = std::make_shared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(byte(headerLength));
-    auto dest = frame->getMandatoryTag<MacAddressReq>()->getDestAddress();
     auto transportProtocol = frame->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);

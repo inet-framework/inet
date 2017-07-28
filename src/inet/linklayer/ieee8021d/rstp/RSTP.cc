@@ -222,7 +222,7 @@ void RSTP::checkTC(const Ptr<const BPDU>& frame, int arrivalInterfaceId)
     if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
         EV_DETAIL << "TCN received" << endl;
         findContainingNode(this)->bubble("TCN received");
-        for (int i = 0; i < numPorts; i++) {
+        for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();
             if (interfaceId != arrivalInterfaceId) {
                 Ieee8021dInterfaceData *port2 = getPortInterfaceData(interfaceId);
@@ -368,7 +368,7 @@ bool RSTP::processBetterSource(const Ptr<const BPDU>& frame, unsigned int arriva
 
             case BETTER_ROOT:    // new port rstp info is better than the root in another gate -> root change
                 EV_DETAIL << "Better root received than the current root. Setting the arrival port to root." << endl;
-                for (int i = 0; i < numPorts; i++) {
+                for (unsigned int i = 0; i < numPorts; i++) {
                     int interfaceId = ifTable->getInterface(i)->getInterfaceId();
                     Ieee8021dInterfaceData *iPort = getPortInterfaceData(interfaceId);
                     if (!iPort->isEdge()) {    // avoiding clients reseting

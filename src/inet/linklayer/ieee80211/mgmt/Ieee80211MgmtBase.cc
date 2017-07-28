@@ -43,7 +43,6 @@ void Ieee80211MgmtBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         // obtain our address from MAC
-        cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
     }

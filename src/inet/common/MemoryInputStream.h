@@ -170,8 +170,8 @@ class INET_API MemoryInputStream {
      * the original bit order.
      */
     bit readBits(std::vector<bool>& bits, bit length) {
-        size_t i;
-        for (i = 0; i < bit(length).get(); i++) {
+        bit i;
+        for (i = bit(0); i < length; i++) {
             if (isReadBeyondEnd_)
                 break;
             bits.push_back(readBit());

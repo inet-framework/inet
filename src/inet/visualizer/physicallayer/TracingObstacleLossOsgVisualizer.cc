@@ -107,7 +107,7 @@ void TracingObstacleLossOsgVisualizer::setAlpha(const ObstacleLossVisualization 
 {
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);
     auto node = obstacleLossOsgVisualization->node;
-    for (int i = 0; i < node->getNumChildren(); i++) {
+    for (unsigned int i = 0; i < node->getNumChildren(); i++) {
         auto material = static_cast<osg::Material *>(node->getChild(i)->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
         material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
     }
