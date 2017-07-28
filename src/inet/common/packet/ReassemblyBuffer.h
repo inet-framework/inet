@@ -58,10 +58,13 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
 
     /**
      * Returns the reassembled data chunk if all data is present in the buffer,
-     * otherwise returns a nullptr.
+     * otherwise throws an exception.
      */
     const Ptr<const Chunk> getReassembledData() const {
-        return isComplete() ? regions[0].data : nullptr;
+        if (!isComplete())
+            throw cRuntimeError("Reassembly is incomplete");
+        else
+            return regions[0].data;
     }
 };
 
