@@ -123,7 +123,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *ipv6Header, IPv6F
         Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
         auto hdr = Ptr<IPv6Header>(buf->packet->peekHeader<IPv6Header>()->dup());
-        const auto& payload = buf->buf.getData();
+        const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
         hdr->setChunkLength(byte(hdr->calculateUnfragmentableHeaderByteLength()));
         hdr->markImmutable();

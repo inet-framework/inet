@@ -86,7 +86,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         Packet *pk = buf->packet;
         pk->setName(pkName.c_str());
         pk->removeAll();
-        const auto& payload = buf->buf.getData();
+        const auto& payload = buf->buf.getReassembledData();
         hdr->setTotalLengthField(hdr->getHeaderLength() + byte(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
