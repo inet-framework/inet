@@ -753,10 +753,10 @@
         id="idealwireless"
         name="Ideal Wireless"
         description = "Provides a simple wireless interface that consists
-        	of a unit disk radio and no real MAC protocol. It offers simplicity
-        	for scenarios where Layer 1 and 2 effects can be completely ignored.
-        	Parts: IdealWirelessNic (IdealWirelessMac plus IdealRadio), and
-            IdealRadioMedium."
+                of a unit disk radio and no real MAC protocol. It offers simplicity
+                for scenarios where Layer 1 and 2 effects can be completely ignored.
+                Parts: IdealWirelessNic (IdealWirelessMac plus IdealRadio), and
+                IdealRadioMedium."
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
@@ -1136,8 +1136,8 @@
         />
     <feature
         id="visualizershowcases"
-        name="Visualization showcaes"
-        description = "Simple showcases demonstrationg features and concepts related to visualizing state and behavior of communication networks."
+        name="Visualization showcases"
+        description = "Simple showcases demonstrating features and concepts related to visualizing state and behavior of communication networks."
         initiallyEnabled = "true"
         requires = "visualization physicalenvironment Ethernet Ieee80211 IPv4 AODV"
         labels = "showcase visualization"
@@ -1148,8 +1148,8 @@
         />
     <feature
         id="wirelessshowcases"
-        name="Wireless showcaes"
-        description = "Simple showcases demonstrationg wireless features."
+        name="Wireless showcases"
+        description = "Simple showcases demonstrating wireless features."
         initiallyEnabled = "true"
         requires = "visualization physicalenvironment apskradio Ieee80211 IPv4 AODV"
         labels = "showcase visualization"
