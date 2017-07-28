@@ -1126,7 +1126,7 @@ typedef value<double, units::K> K;
 typedef value<double, units::A> A;
 typedef value<double, units::mol> mol;
 typedef value<double, units::cd> cd;
-typedef value<double, units::m> b;
+typedef value<double, units::bit> b;
 
 // SI derived
 typedef value<double, units::rad> rad;
