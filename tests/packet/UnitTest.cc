@@ -1309,7 +1309,7 @@ static void testReorderBuffer()
     ReorderBuffer buffer1(byte(1000));
     auto byteCountChunk1 = makeImmutableByteCountChunk(byte(10));
     buffer1.replace(byte(1000), byteCountChunk1);
-    const auto& data1 = buffer1.popData();
+    const auto& data1 = buffer1.popAvailableData();
     assert(data1 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data1) != nullptr);
     assert(data1->getChunkLength() == byte(10));
@@ -1319,7 +1319,7 @@ static void testReorderBuffer()
     ReorderBuffer buffer2(byte(1000));
     buffer2.replace(byte(1000), byteCountChunk1);
     buffer2.replace(byte(1010), byteCountChunk1);
-    const auto& data2 = buffer2.popData();
+    const auto& data2 = buffer2.popAvailableData();
     assert(data2 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data2) != nullptr);
     assert(data2->getChunkLength() == byte(20));
@@ -1328,10 +1328,10 @@ static void testReorderBuffer()
     // 3. out of order consecutive chunks
     ReorderBuffer buffer3(byte(1000));
     buffer3.replace(byte(1020), byteCountChunk1);
-    assert(buffer2.popData() == nullptr);
+    assert(buffer2.popAvailableData() == nullptr);
     buffer3.replace(byte(1000), byteCountChunk1);
     buffer3.replace(byte(1010), byteCountChunk1);
-    const auto& data3 = buffer3.popData();
+    const auto& data3 = buffer3.popAvailableData();
     assert(data3 != nullptr);
     assert(std::dynamic_pointer_cast<const ByteCountChunk>(data3) != nullptr);
     assert(data3->getChunkLength() == byte(30));

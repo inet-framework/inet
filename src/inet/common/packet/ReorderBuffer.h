@@ -65,7 +65,7 @@ class INET_API ReorderBuffer : public ChunkBuffer
      * If there's no available data at the expected offset, then it returns a
      * nullptr and the buffer is not modified.
      */
-    const Ptr<const Chunk> popData(bit length = bit(-1)) {
+    const Ptr<const Chunk> popAvailableData(bit length = bit(-1)) {
         if (regions.size() > 0 && regions[0].offset == expectedOffset) {
             auto data = regions[0].data;
             bit dataLength = data->getChunkLength();

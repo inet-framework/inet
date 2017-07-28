@@ -97,7 +97,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     if (reorderBuffer.isEmpty())
         return nullptr;
 
-    auto chunk = reorderBuffer.popData();
+    auto chunk = reorderBuffer.popAvailableData();
     ASSERT(reorderBuffer.getExpectedOffset() <= seqToOffset(seq));
 
     if (chunk) {
