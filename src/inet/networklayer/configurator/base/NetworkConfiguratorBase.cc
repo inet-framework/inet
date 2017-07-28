@@ -36,6 +36,9 @@
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#endif
+
+#ifdef WITH_IDEALWIRELESS
 #include "inet/physicallayer/idealradio/IdealPhyHeader_m.h"
 #endif
 
