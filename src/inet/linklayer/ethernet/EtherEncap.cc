@@ -175,7 +175,8 @@ const Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
         // this code removes ethernet padding, needed for unchanged fingerprints
         for (;;) {
             const auto& chunk = packet->peekTrailer<Chunk>();
-            if (typeid(*chunk) != typeid(EthernetPadding))
+            auto tmp = chunk.get();
+            if (typeid(*tmp) != typeid(EthernetPadding))
                 break;
             packet->setTrailerPopOffset(packet->getTrailerPopOffset() - chunk->getChunkLength());
         }
