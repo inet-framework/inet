@@ -109,6 +109,7 @@ void RTPAVProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
             while (!_queue->isEmpty()) {
                 Packet *qPacket = check_and_cast<Packet *>(_queue->pop());
                 const auto& qRtpHeader = qPacket->popHeader<RtpHeader>();
+                (void)qRtpHeader;       // unused variable
                 const auto& mpegPacket = qPacket->peekHeader<RTPMpegHeader>();
                 if (pictureType == 0)
                     pictureType = mpegPacket->getPictureType();

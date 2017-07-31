@@ -172,7 +172,7 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
     memset(data, 0, maxBufferSize);
 
     ip_hdr *ih = (ip_hdr *)data;
-    tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
+    //tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
 
     // set the modified lwip IP header:
     ih->_hl = ipHdrLen / 4;

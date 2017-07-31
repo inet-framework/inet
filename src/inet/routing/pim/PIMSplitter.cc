@@ -81,6 +81,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
 void PIMSplitter::processPIMPacket(Packet *pkt)
 {
     const auto& pimPkt = pkt->peekHeader<PIMPacket>();
+    (void)pimPkt;       // unused variable
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 

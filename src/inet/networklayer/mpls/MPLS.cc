@@ -103,6 +103,7 @@ void MPLS::processPacketFromL3(Packet *msg)
 bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
 {
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    (void)ipv4Header;       // unused variable
     LabelOpVector outLabel;
     std::string outInterface;   //FIXME set based on interfaceID
     int color;

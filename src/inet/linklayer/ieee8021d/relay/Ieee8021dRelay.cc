@@ -201,6 +201,7 @@ void Ieee8021dRelay::learn(MACAddress srcAddr, int arrivalInterfaceId)
 void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
     const auto& bpdu = packet->peekHeader<BPDU>();
+    (void)bpdu;       // unused variable
     unsigned int portNum = packet->getMandatoryTag<InterfaceReq>()->getInterfaceId();
     MACAddress address = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
 

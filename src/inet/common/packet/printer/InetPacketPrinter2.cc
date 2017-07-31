@@ -165,7 +165,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
             if (const auto tc = packet->peekTrailer(bit(-1), Chunk::PF_ALLOW_NULLPTR).get())
                 if (typeid(*tc) == typeid(EthernetFcs)) {
                     const auto& fcs = packet->popTrailer<EthernetFcs>();
-                    //TODO do we show the FCS?
+                    (void)fcs;    //TODO do we show the FCS?
                 }
         }
 #endif // ifdef WITH_ETHERNET
