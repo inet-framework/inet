@@ -161,7 +161,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             return nullptr;
         }
     }
-    _pkt->setChksum(stream.readUint16Be());
+    _pkt->setChksum(chksum);
     return _pkt;
 }
 
