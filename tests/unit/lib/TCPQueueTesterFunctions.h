@@ -1,34 +1,29 @@
 #ifndef __TEST__TCPQUEUETESTER_FUNCTIONS
 
-#include "inet/transportlayer/tcp/queues/TCPMsgBasedRcvQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPMsgBasedSendQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 using namespace inet;
 using namespace tcp;
 
-// TCPMsgBasedSendQueue:
+// TCPSendQueue:
 
-void enqueue(TCPMsgBasedSendQueue *sq, const char *msgname, ulong numBytes);
-void tryenqueue(TCPMsgBasedSendQueue *sq, const char *msgname, ulong numBytes);
-TCPSegment *createSegmentWithBytes(TCPMsgBasedSendQueue *sq, uint32 fromSeq, uint32 toSeq);
-void discardUpTo(TCPMsgBasedSendQueue *sq, uint32 seqNum);
+void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes);
+void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes);
+Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq);
+void discardUpTo(TCPSendQueue *sq, uint32 seqNum);
 
 //////////////////////////////////////////////////////////////
 
-// TCPMsgBasedRcvQueue:
+// TCPReceiveQueue:
 
-void insertSegment(TCPMsgBasedRcvQueue *rq, TCPSegment *tcpseg);
-void tryinsertSegment(TCPMsgBasedRcvQueue *rq, TCPSegment *tcpseg);
-void extractBytesUpTo(TCPMsgBasedRcvQueue *rq, uint32 seq);
+void insertSegment(TCPReceiveQueue *rq, Packet *tcpseg);
+void tryinsertSegment(TCPReceiveQueue *rq, Packet *tcpseg);
+void extractBytesUpTo(TCPReceiveQueue *rq, uint32 seq);
 
-/////////////////////////////////////////////////////////////////////////
-
-// TCPVirtualDataRcvQueue:
-
-void insertSegment(TCPVirtualDataRcvQueue *q, uint32 beg, uint32 end);
-void tryinsertSegment(TCPVirtualDataRcvQueue *q, uint32 beg, uint32 end);
-void extractBytesUpTo(TCPVirtualDataRcvQueue *q, uint32 seq);
+void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end);
+void tryinsertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end);
 
 /////////////////////////////////////////////////////////////////////////
 

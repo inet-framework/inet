@@ -1,5 +1,5 @@
 %description:
-Test TCPVirtualDataRcvQueue class
+Test TCPReceiveQueue class
 - segments out of order
 - overlapped segments
 - sequence number turn out zero
@@ -12,8 +12,8 @@ Test TCPVirtualDataRcvQueue class
 using namespace ::inet::tcp;
 
 %activity:
-TCPVirtualDataRcvQueue rcvQueue;
-TCPVirtualDataRcvQueue *q = &rcvQueue;
+TCPReceiveQueue rcvQueue;
+TCPReceiveQueue *q = &rcvQueue;
 
 q->init(1000);
 
@@ -25,8 +25,8 @@ insertSegment(q, 1020, 1099);
 insertSegment(q, 1100, 1200);
 insertSegment(q, 1199, 1300);
 insertSegment(q,  900, 1100);
-insertSegment(q,  800,  899);
-insertSegment(q,  899,  900);
+tryinsertSegment(q,  800,  899);
+tryinsertSegment(q,  899,  900);
 
 extractBytesUpTo(q, 500);
 extractBytesUpTo(q, 1000);
@@ -103,20 +103,21 @@ extractBytesUpTo(q, 1004);
 EV << ".\n";
 
 %contains: stdout
+** Event #1  t=0   Test (Test, id=1)
 rcv_nxt=1000
 RQ:insertSeg [1000..1100) --> rcv_nxt=1100 [1000..1100)
 RQ:insertSeg [1000..1100) --> rcv_nxt=1100 [1000..1100)
 RQ:insertSeg [1020..1099) --> rcv_nxt=1100 [1000..1100)
 RQ:insertSeg [1100..1200) --> rcv_nxt=1200 [1000..1200)
 RQ:insertSeg [1199..1300) --> rcv_nxt=1300 [1000..1300)
-RQ:insertSeg [900..1100) --> rcv_nxt=1300 [900..1300)
-RQ:insertSeg [800..899) --> rcv_nxt=899 [800..899) [900..1300)
-RQ:insertSeg [899..900) --> rcv_nxt=1300 [800..1300)
-RQ:extractUpTo(500): --> rcv_nxt=1300 [800..1300)
-RQ:extractUpTo(1000): msglen=200 --> rcv_nxt=1300 [1000..1300)
-RQ:extractUpTo(1100): msglen=100 --> rcv_nxt=1300 [1100..1300)
-RQ:extractUpTo(1299): msglen=199 --> rcv_nxt=1300 [1299..1300)
-RQ:extractUpTo(1300): msglen=1 --> rcv_nxt=1300
+RQ:insertSeg [900..1100) --> rcv_nxt=1300 [1000..1300)
+RQ:insertSeg [800..899) --> Error: Error: offset is out of range --> rcv_nxt=1300 [1000..1300)
+RQ:insertSeg [899..900) --> Error: Error: offset is out of range --> rcv_nxt=1300 [1000..1300)
+RQ:extractUpTo(500): < > --> rcv_nxt=1300 [1000..1300)
+RQ:extractUpTo(1000): < > --> rcv_nxt=1300 [1000..1300)
+RQ:extractUpTo(1100): < < data: 100 bytes > > --> rcv_nxt=1300 [1100..1300)
+RQ:extractUpTo(1299): < < data: 199 bytes > > --> rcv_nxt=1300 [1299..1300)
+RQ:extractUpTo(1300): < < data: 1 bytes > > --> rcv_nxt=1300
 RQ:insertSeg [1500..1600) --> rcv_nxt=1300 [1500..1600)
 RQ:insertSeg [1700..1800) --> rcv_nxt=1300 [1500..1600) [1700..1800)
 RQ:insertSeg [1601..1699) --> rcv_nxt=1300 [1500..1600) [1601..1699) [1700..1800)
@@ -135,20 +136,20 @@ RQ:insertSeg [2120..2149) --> rcv_nxt=2100 [1300..2100) [2120..2149) [2150..2300
 RQ:insertSeg [2149..2200) --> rcv_nxt=2100 [1300..2100) [2120..2300)
 RQ:insertSeg [2100..2119) --> rcv_nxt=2119 [1300..2119) [2120..2300)
 RQ:insertSeg [2100..2200) --> rcv_nxt=2300 [1300..2300)
-RQ:extractUpTo(2000): msglen=700 --> rcv_nxt=2300 [2000..2300)
-RQ:extractUpTo(2300): msglen=300 --> rcv_nxt=2300
+RQ:extractUpTo(2000): < < data: 700 bytes > > --> rcv_nxt=2300 [2000..2300)
+RQ:extractUpTo(2300): < < data: 300 bytes > > --> rcv_nxt=2300
 rcv_nxt=4294967000
 RQ:insertSeg [4294967000..4294967100) --> rcv_nxt=4294967100 [4294967000..4294967100)
 RQ:insertSeg [4294967000..4294967100) --> rcv_nxt=4294967100 [4294967000..4294967100)
 RQ:insertSeg [4294967020..4294967099) --> rcv_nxt=4294967100 [4294967000..4294967100)
 RQ:insertSeg [4294967100..4294967200) --> rcv_nxt=4294967200 [4294967000..4294967200)
 RQ:insertSeg [4294967199..4) --> rcv_nxt=4 [4294967000..4)
-RQ:insertSeg [4294966900..4294967100) --> rcv_nxt=4 [4294966900..4)
-RQ:extractUpTo(4294966500): --> rcv_nxt=4 [4294966900..4)
-RQ:extractUpTo(4294967000): msglen=100 --> rcv_nxt=4 [4294967000..4)
-RQ:extractUpTo(4294967100): msglen=100 --> rcv_nxt=4 [4294967100..4)
-RQ:extractUpTo(3): msglen=199 --> rcv_nxt=4 [3..4)
-RQ:extractUpTo(4): msglen=1 --> rcv_nxt=4
+RQ:insertSeg [4294966900..4294967100) --> rcv_nxt=4 [4294967000..4)
+RQ:extractUpTo(4294966500): < > --> rcv_nxt=4 [4294967000..4)
+RQ:extractUpTo(4294967000): < > --> rcv_nxt=4 [4294967000..4)
+RQ:extractUpTo(4294967100): < < data: 100 bytes > > --> rcv_nxt=4 [4294967100..4)
+RQ:extractUpTo(3): < < data: 199 bytes > > --> rcv_nxt=4 [3..4)
+RQ:extractUpTo(4): < < data: 1 bytes > > --> rcv_nxt=4
 RQ:insertSeg [204..304) --> rcv_nxt=4 [204..304)
 RQ:insertSeg [404..504) --> rcv_nxt=4 [204..304) [404..504)
 RQ:insertSeg [305..403) --> rcv_nxt=4 [204..304) [305..403) [404..504)
@@ -167,7 +168,7 @@ RQ:insertSeg [824..853) --> rcv_nxt=804 [4..804) [824..853) [854..1004)
 RQ:insertSeg [853..904) --> rcv_nxt=804 [4..804) [824..1004)
 RQ:insertSeg [804..823) --> rcv_nxt=823 [4..823) [824..1004)
 RQ:insertSeg [804..904) --> rcv_nxt=1004 [4..1004)
-RQ:extractUpTo(704): msglen=700 --> rcv_nxt=1004 [704..1004)
-RQ:extractUpTo(1004): msglen=300 --> rcv_nxt=1004
+RQ:extractUpTo(704): < < data: 700 bytes > > --> rcv_nxt=1004 [704..1004)
+RQ:extractUpTo(1004): < < data: 300 bytes > > --> rcv_nxt=1004
 .
 

@@ -43,31 +43,22 @@ void TCPReceiveQueue::init(uint32 startSeq)
 
 std::string TCPReceiveQueue::str() const
 {
-    std::string res;
-    char buf[32];
-    sprintf(buf, "rcv_nxt=%u", rcv_nxt);
-    res = buf;
+    std::ostringstream buf;
+    buf << "rcv_nxt=" << rcv_nxt;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        sprintf(buf, " [%lu..%lu)", byte(reorderBuffer.getRegionStartOffset(i)).get(), byte(reorderBuffer.getRegionEndOffset(i)).get());
-        res += buf;
+        buf << " [" << offsetToSeq(reorderBuffer.getRegionStartOffset(i)) << ".." << offsetToSeq(reorderBuffer.getRegionEndOffset(i)) << ")";
     }
-    return res;
+    return buf.str();
 }
 
-uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
     uint32_t seq = tcpseg->getSequenceNo();
     uint32_t offs = 0;
     uint32_t buffSeq = offsetToSeq(reorderBuffer.getExpectedOffset());
-    if (seqLess(seq, buffSeq)) {
-        offs = buffSeq - seq;
-        seq = buffSeq;
-        tcpPayloadLength -= offs;
-    }
-    const auto& payload = packet->peekDataAt(byte(tcpHeaderLength + offs), byte(tcpPayloadLength));
 
 #ifndef NDEBUG
     if (!reorderBuffer.isEmpty()) {
@@ -82,6 +73,13 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<TcpHe
                     nb, ne, str().c_str());
     }
 #endif // ifndef NDEBUG
+
+    if (seqLess(seq, buffSeq)) {
+        offs = buffSeq - seq;
+        seq = buffSeq;
+        tcpPayloadLength -= offs;
+    }
+    const auto& payload = packet->peekDataAt(byte(tcpHeaderLength + offs), byte(tcpPayloadLength));
     reorderBuffer.replace(seqToOffset(seq), payload);
 
     if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionStartOffset(0))))
@@ -97,11 +95,14 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     if (reorderBuffer.isEmpty())
         return nullptr;
 
-    auto chunk = reorderBuffer.popAvailableData();
+    auto seqOffs = seqToOffset(seq);
+    auto maxLength = seqOffs - reorderBuffer.getExpectedOffset();
+    if (maxLength <= bit(0))
+        return nullptr;
+    auto chunk = reorderBuffer.popAvailableData(maxLength);
     ASSERT(reorderBuffer.getExpectedOffset() <= seqToOffset(seq));
 
     if (chunk) {
-        //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", RECEIVER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << chunk << std::endl;
         Packet *msg = new Packet("data");
         msg->append(chunk);
         return msg;

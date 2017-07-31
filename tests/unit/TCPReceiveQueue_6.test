@@ -1,5 +1,5 @@
 %description:
-Test TCPVirtualDataRcvQueue class
+Test TCPReceiveQueue class
 - out of range in the queue
 
 %includes:
@@ -10,8 +10,8 @@ Test TCPVirtualDataRcvQueue class
 using namespace ::inet::tcp;
 
 %activity:
-TCPVirtualDataRcvQueue rcvQueue;
-TCPVirtualDataRcvQueue *q = &rcvQueue;
+TCPReceiveQueue rcvQueue;
+TCPReceiveQueue *q = &rcvQueue;
 
 q->init(1000);
 
@@ -33,15 +33,21 @@ EV << ".\n";
 ///////////////////////////////////////////////////////////////
 
 %contains: stdout
+** Event #1  t=0   Test (Test, id=1)
 rcv_nxt=1000
 RQ:insertSeg [1000..1000001000) --> rcv_nxt=1000001000 [1000..1000001000)
 RQ:insertSeg [1000001000..2000001000) --> rcv_nxt=2000001000 [1000..2000001000)
 RQ:insertSeg [2000001000..3000001000) --> Error: The new segment is [2000001000, 3000001000) out of the acceptable range at the queue rcv_nxt=2000001000 [1000..2000001000) --> rcv_nxt=2000001000 [1000..2000001000)
-RQ:extractUpTo(500): --> rcv_nxt=2000001000 [1000..2000001000)
-RQ:extractUpTo(1000): --> rcv_nxt=2000001000 [1000..2000001000)
-RQ:extractUpTo(1100): msglen=100 --> rcv_nxt=2000001000 [1100..2000001000)
-RQ:extractUpTo(1000001000): msglen=999999900 --> rcv_nxt=2000001000 [1000001000..2000001000)
-RQ:extractUpTo(2000001000): msglen=1000000000 --> rcv_nxt=2000001000
-RQ:extractUpTo(2000001000): --> rcv_nxt=2000001000
+RQ:extractUpTo(500): < > --> rcv_nxt=2000001000 [1000..2000001000)
+RQ:extractUpTo(1000): < > --> rcv_nxt=2000001000 [1000..2000001000)
+RQ:extractUpTo(1100): < < data: 100 bytes > > --> rcv_nxt=2000001000 [1100..2000001000)
+RQ:extractUpTo(1000001000): < < data: 999999900 bytes > > --> rcv_nxt=2000001000 [1000001000..2000001000)
+RQ:extractUpTo(2000001000): < < data: 1000000000 bytes > > --> rcv_nxt=2000001000
+RQ:extractUpTo(2000001000): < > --> rcv_nxt=2000001000
 .
 
+<!> No more events, simulation completed -- at t=0s, event #1
+
+Calling finish() at end of Run #0...
+
+End.
