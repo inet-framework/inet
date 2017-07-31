@@ -14,3 +14,39 @@
 //
 
 #include "inet/common/packet/ReorderBuffer.h"
+
+namespace inet {
+
+bit ReorderBuffer::getAvailableDataLength() const
+{
+    if (regions.size() > 0 && regions[0].offset == expectedOffset)
+        return regions[0].data->getChunkLength();
+    else
+        return bit(0);
+}
+
+/**
+ * Returns the largest next available data chunk starting at the expected
+ * offset. The returned data chunk is automatically removed from the buffer.
+ * If there's no available data at the expected offset, then it returns a
+ * nullptr and the buffer is not modified.
+ */
+const Ptr<const Chunk> ReorderBuffer::popAvailableData(bit length)
+{
+    if (regions.size() > 0 && regions[0].offset == expectedOffset) {
+        auto data = regions[0].data;
+        bit dataLength = data->getChunkLength();
+        if (length != bit(-1)) {
+            data = data->peek(Chunk::ForwardIterator(bit(0)), length);
+            dataLength = length;
+        }
+        clear(expectedOffset, dataLength);
+        expectedOffset += dataLength;
+        return data;
+    }
+    else
+        return nullptr;
+}
+
+} // namespace inet
+
