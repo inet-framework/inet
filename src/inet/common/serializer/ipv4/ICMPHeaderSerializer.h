@@ -26,7 +26,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between ICMPHeader and binary (network byte order) ICMP header.
+ * Converts between IcmpHeader and binary (network byte order) ICMP header.
  */
 class INET_API ICMPHeaderSerializer : public FieldsChunkSerializer
 {

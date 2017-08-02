@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
 #include "inet/networklayer/mpls/LIBTable.h"

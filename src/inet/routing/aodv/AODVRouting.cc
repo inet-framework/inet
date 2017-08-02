@@ -24,9 +24,9 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/ipv4/ICMPHeader.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/common/ModuleAccess.h"
@@ -136,12 +136,12 @@ void AODVRouting::handleMessage(cMessage *msg)
         auto& protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
 
         if (protocol == &Protocol::icmpv4) {
-            ICMPHeader *icmpPacket = check_and_cast<ICMPHeader *>(msg);
+            IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
             // ICMP packet arrived, dropped
             delete icmpPacket;
         }
         else if (protocol == &Protocol::icmpv6) {
-            ICMPHeader *icmpPacket = check_and_cast<ICMPHeader *>(msg);
+            IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
             // ICMP packet arrived, dropped
             delete icmpPacket;
         }

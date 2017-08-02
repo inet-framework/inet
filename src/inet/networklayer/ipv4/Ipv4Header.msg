@@ -176,7 +176,7 @@ class IPv4OptionUnknown extends IPv4Option
 // Only one of the option fields can exist at a time.
 //
 // TODO: cleanup order of fields
-class IPv4Header extends NetworkHeaderBase
+class Ipv4Header extends NetworkHeaderBase
 {
     @customize(true);
 

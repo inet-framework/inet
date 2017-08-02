@@ -34,7 +34,7 @@
 
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...
@@ -950,7 +950,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             SCTPSimpleErrorCauseParameter *ecp = check_and_cast<SCTPSimpleErrorCauseParameter *>(parameter);
                             struct error_cause *errorc = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk));
                             errorc->cause_code = htons(ecp->getParameterType());
-                            if (check_and_cast<IPv4Header *>(ecp->getEncapsulatedPacket()) != nullptr) {
+                            if (check_and_cast<Ipv4Header *>(ecp->getEncapsulatedPacket()) != nullptr) {
                                 Buffer b((unsigned char *)error + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
                                 Context c;
                                 IPv4Serializer().serializePacket(ecp->getEncapsulatedPacket(), b, c);

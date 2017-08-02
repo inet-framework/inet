@@ -17,7 +17,7 @@ simple TestApp
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 
 namespace diffserv_baclassifier_1
@@ -48,7 +48,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv4-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<IPv4Header>();
+      const auto& header = std::make_shared<Ipv4Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);

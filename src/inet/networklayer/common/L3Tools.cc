@@ -18,7 +18,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/IPv6Header.h"
@@ -63,7 +63,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
 {
 #ifdef WITH_IPv4
     if (protocol == Protocol::ipv4)
-        return packet->peekHeader<IPv4Header>();
+        return packet->peekHeader<Ipv4Header>();
 #endif
 #ifdef WITH_IPv6
     if (protocol == Protocol::ipv6)
@@ -89,7 +89,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
 {
 #ifdef WITH_IPv4
     if (protocol == Protocol::ipv4)
-        return removeNetworkProtocolHeader<IPv4Header>(packet);
+        return removeNetworkProtocolHeader<Ipv4Header>(packet);
 #endif
 #ifdef WITH_IPv6
     if (protocol == Protocol::ipv6)

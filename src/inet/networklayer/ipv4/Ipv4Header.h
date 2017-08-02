@@ -20,26 +20,26 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/networklayer/ipv4/IPv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 
 /**
- * Represents an IPv4 datagram. More info in the IPv4Header.msg file
+ * Represents an IPv4 datagram. More info in the Ipv4Header.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv4Header : public IPv4Header_Base
+class INET_API Ipv4Header : public Ipv4Header_Base
 {
   private:
-    void copy(const IPv4Header& other);
+    void copy(const Ipv4Header& other);
     void clean();
 
   public:
-    IPv4Header() : IPv4Header_Base() {}
-    IPv4Header(const IPv4Header& other) : IPv4Header_Base(other) {}
-    IPv4Header& operator=(const IPv4Header& other) { IPv4Header_Base::operator=(other); return *this; }
+    Ipv4Header() : Ipv4Header_Base() {}
+    Ipv4Header(const Ipv4Header& other) : Ipv4Header_Base(other) {}
+    Ipv4Header& operator=(const Ipv4Header& other) { Ipv4Header_Base::operator=(other); return *this; }
 
-    virtual IPv4Header *dup() const override { return new IPv4Header(*this); }
+    virtual Ipv4Header *dup() const override { return new Ipv4Header(*this); }
 
     /**
      * getter/setter for totalLength field in datagram
@@ -76,7 +76,7 @@ class INET_API IPv4Header : public IPv4Header_Base
      * Returns the kth extension header in this datagram
      */
     virtual TLVOptionBase& getOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options.at(k))); }
-    virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<IPv4Header*>(this)->getOption(k); }
+    virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<Ipv4Header*>(this)->getOption(k); }
 
     /**
      * Returns the TLVOptionBase of the specified type,

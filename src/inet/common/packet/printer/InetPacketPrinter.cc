@@ -23,8 +23,8 @@
 #include "inet/networklayer/common/L3Address.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPHeader.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
@@ -47,7 +47,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
     void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const UdpHeader>& udpHeader) const;
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const ICMPHeader>& icmpHeader) const;
+    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const IcmpHeader>& icmpHeader) const;
 #endif // ifdef WITH_IPv4
     void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const Chunk>& chunk) const;
 
@@ -93,7 +93,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const Chunk>& chunk) const
 {
 #ifdef WITH_IPv4
-    if (const auto& ipv4Header = std::dynamic_pointer_cast<const IPv4Header>(chunk)) {
+    if (const auto& ipv4Header = std::dynamic_pointer_cast<const Ipv4Header>(chunk)) {
         if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset() > 0)
             os << (ipv4Header->getMoreFragments() ? "" : "last ")
                << "fragment with offset=" << ipv4Header->getFragmentOffset() << " of ";
@@ -115,7 +115,7 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
     else
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-    if (const auto &icmpHeader = std::dynamic_pointer_cast<const ICMPHeader>(chunk)) {
+    if (const auto &icmpHeader = std::dynamic_pointer_cast<const IcmpHeader>(chunk)) {
         printICMPPacket(os, srcAddr, destAddr, packet, icmpHeader);
         return;
     }
@@ -166,7 +166,7 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3A
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
-void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const ICMPHeader>& icmpHeader) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const IcmpHeader>& icmpHeader) const
 {
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {

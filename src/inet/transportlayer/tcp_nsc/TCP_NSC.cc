@@ -20,7 +20,7 @@
 #include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPHeader_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6

@@ -26,7 +26,7 @@
 namespace inet {
 
 // Foreign declarations:
-class IPv4Header;
+class Ipv4Header;
 class IPv6Header;
 namespace tcp { class TcpHeader; }
 class UdpHeader;
@@ -91,7 +91,7 @@ class INET_API PacketDump
      * Dumps info about the given IPv4 datagram. The l2r parameter denotes the
      * direction of the packet.
      */
-    void dumpIPv4(bool l2r, const char *label, IPv4Header *dgram, const char *comment = nullptr);
+    void dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const char *comment = nullptr);
 
     void dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment = nullptr);
 

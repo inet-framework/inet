@@ -25,13 +25,13 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(IPv4Header, IPv4HeaderSerializer);
+Register_Serializer(Ipv4Header, IPv4HeaderSerializer);
 
 void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     struct ip iphdr;
-    const auto& ipv4Header = std::static_pointer_cast<const IPv4Header>(chunk);
+    const auto& ipv4Header = std::static_pointer_cast<const Ipv4Header>(chunk);
     unsigned int headerLength = ipv4Header->getHeaderLength();
     ASSERT((headerLength & 3) == 0 && headerLength >= IP_HEADER_BYTES && headerLength <= IP_MAX_HEADER_BYTES);
     ASSERT(headerLength <= ipv4Header->getTotalLengthField());
@@ -153,7 +153,7 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     byte bufsize = stream.getRemainingLength();
     uint8_t buffer[IP_HEADER_BYTES];
     stream.readBytes(buffer, byte(IP_HEADER_BYTES));
-    auto ipv4Header = std::make_shared<IPv4Header>();
+    auto ipv4Header = std::make_shared<Ipv4Header>();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
     unsigned int totalLength, headerLength;
 

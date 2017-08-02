@@ -26,7 +26,7 @@
 namespace inet {
 
 // Foreign declarations:
-class IPv4Header;
+class Ipv4Header;
 class IPv6Header;
 
 /**

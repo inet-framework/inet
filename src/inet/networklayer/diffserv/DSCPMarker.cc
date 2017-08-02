@@ -21,7 +21,7 @@
 #include "inet/common/ProtocolTag_m.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -87,7 +87,7 @@ bool DSCPMarker::markPacket(Packet *packet, int dscp)
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {
         packet->removePoppedHeaders();
-        const auto& ipv4Header = packet->removeHeader<IPv4Header>();
+        const auto& ipv4Header = packet->removeHeader<Ipv4Header>();
         ipv4Header->setDiffServCodePoint(dscp);
         packet->insertHeader(ipv4Header);
         return true;

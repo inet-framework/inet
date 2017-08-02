@@ -26,8 +26,8 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/networklayer/ipv4/ICMPHeader.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
@@ -68,7 +68,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
   protected:
 #ifdef WITH_IPv4
     std::string formatARPPacket(const ARPPacket *packet) const;
-    std::string formatICMPPacket(const ICMPHeader *packet) const;
+    std::string formatICMPPacket(const IcmpHeader *packet) const;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IEEE80211
     std::string formatIeee80211Frame(const ieee80211::Ieee80211MacHeader *packet) const;
@@ -148,7 +148,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4
-            if (const auto *ipv4dgram = dynamic_cast<const IPv4Header *>(chunk)) {
+            if (const auto *ipv4dgram = dynamic_cast<const Ipv4Header *>(chunk)) {
                 out << "IPv4: " << srcAddr << " > " << destAddr;
                 if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0) {
                     out << " " << (ipv4dgram->getMoreFragments() ? "" : "last ")
@@ -180,7 +180,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-        else if (const auto ipv4Header = dynamic_cast<const ICMPHeader *>(chunk)) {
+        else if (const auto ipv4Header = dynamic_cast<const IcmpHeader *>(chunk)) {
             out << formatICMPPacket(ipv4Header);
         }
         else if (const auto arp = dynamic_cast<const ARPPacket *>(chunk)) {
@@ -425,7 +425,7 @@ std::string InetPacketPrinter2::formatUDPPacket(const UdpHeader *udpPacket) cons
 //    std::ostringstream os;
 //    os << "PING ";
 //#ifdef WITH_IPv4
-//    ICMPHeader *owner = dynamic_cast<ICMPHeader *>(packet->getOwner());
+//    IcmpHeader *owner = dynamic_cast<IcmpHeader *>(packet->getOwner());
 //    if (owner) {
 //        switch (owner->getType()) {
 //            case ICMP_ECHO_REQUEST:
@@ -449,7 +449,7 @@ std::string InetPacketPrinter2::formatUDPPacket(const UdpHeader *udpPacket) cons
 //}
 
 #ifdef WITH_IPv4
-std::string InetPacketPrinter2::formatICMPPacket(const ICMPHeader *icmpHeader) const
+std::string InetPacketPrinter2::formatICMPPacket(const IcmpHeader *icmpHeader) const
 {
     std::ostringstream os;
     switch (icmpHeader->getType()) {

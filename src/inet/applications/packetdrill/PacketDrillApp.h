@@ -27,7 +27,7 @@
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/applications/tcpapp/TCPSessionApp.h"
 #include "PacketDrill.h"
 #include "PacketDrillUtils.h"
@@ -161,7 +161,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallSctpSend(struct syscall_spec *syscall, cQueue *args, char **error);
 
-        bool compareDatagram(IPv4Header *storedDatagram, IPv4Header *liveDatagram);
+        bool compareDatagram(Ipv4Header *storedDatagram, Ipv4Header *liveDatagram);
 
         bool compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp);
 

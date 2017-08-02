@@ -20,7 +20,7 @@ package inet.networklayer.ipv4;
 
 //
 // Implements the IPv4 protocol. The protocol header is represented
-// by the ~IPv4Header message class.
+// by the ~Ipv4Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
@@ -101,9 +101,9 @@ simple IPv4
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetDrop](type=cPacket);
-        @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Header);
-        @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Header);
-        @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Header);
+        @signal[NF_IPv4_NEW_MULTICAST](type=Ipv4Header);
+        @signal[NF_IPv4_DATA_ON_NONRPF](type=Ipv4Header);
+        @signal[NF_IPv4_DATA_ON_RPF](type=Ipv4Header);
         @signal[NF_IPv4_MDATA_REGISTER](type=Packet);
         @statistic[packetDropAddressResolutionFailed](title="packet drop: address resolution failed"; source=packetDropReasonIsAddressResolutionFailed(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropHopLimitReached](title="packet drop: hop limit reached"; source=packetDropReasonIsHopLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -114,6 +114,6 @@ simple IPv4
     gates:
         input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UdpHeader);
         output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UdpHeader);
-        input queueIn @labels(IPv4Header,ARPPacket,Ieee802Ctrl);
-        output queueOut @labels(IPv4Header,ARPPacket,Ieee802Ctrl);
+        input queueIn @labels(Ipv4Header,ARPPacket,Ieee802Ctrl);
+        output queueOut @labels(Ipv4Header,ARPPacket,Ieee802Ctrl);
 }

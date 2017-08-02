@@ -121,7 +121,7 @@ inline bool isIcmpInfoType(int type)
 // in a "length became negative" error; use getEncapsulatedMsg() instead.
 //
 // TODO: add originator id and sequence number and create an ICMPControlInfo
-class ICMPHeader extends FieldsChunk
+class IcmpHeader extends FieldsChunk
 {
     int type = -1 @enum(ICMPType);   // 1 byte
     int code = -1;                   // 1 byte
@@ -129,7 +129,7 @@ class ICMPHeader extends FieldsChunk
     chunkLength = byte(8);
 }
 
-class ICMPEchoRequest extends ICMPHeader
+class ICMPEchoRequest extends IcmpHeader
 {
     type = ICMP_ECHO_REQUEST;
     code = 0;
@@ -137,7 +137,7 @@ class ICMPEchoRequest extends ICMPHeader
     int seqNumber; // sequence number           // 2 bytes
 }
 
-class ICMPEchoReply extends ICMPHeader
+class ICMPEchoReply extends IcmpHeader
 {
     type = ICMP_ECHO_REPLY;
     code = 0;

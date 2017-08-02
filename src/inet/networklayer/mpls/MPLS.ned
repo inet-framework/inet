@@ -57,8 +57,8 @@ simple MPLS
         string classifierModule; // The path to the module which implements the IClassifier C++ interface
         @display("i=block/switch");
     gates:
-        input netwIn @labels(IPv4Header);
-        output netwOut @labels(IPv4Header);
-        input ifIn @labels(MPLSPacket,IPv4Header);
-        output ifOut @labels(MPLSPacket,IPv4Header);
+        input netwIn @labels(Ipv4Header);
+        output netwOut @labels(Ipv4Header);
+        input ifIn @labels(MPLSPacket,Ipv4Header);
+        output ifOut @labels(MPLSPacket,Ipv4Header);
 }

@@ -22,7 +22,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -104,7 +104,7 @@ int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+        const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
         return ipv4Header->getDiffServCodePoint();
     }
 #endif // ifdef WITH_IPv4

@@ -37,7 +37,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPHeader.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
@@ -213,7 +213,7 @@ void PingApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
-            const auto& icmpHeader = packet->popHeader<ICMPHeader>();
+            const auto& icmpHeader = packet->popHeader<IcmpHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
                 const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);

@@ -17,19 +17,19 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ipv4/ICMPHeaderSerializer.h"
-#include "inet/networklayer/ipv4/ICMPHeader_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
 
 namespace inet {
 
 namespace serializer {
 
-Register_Serializer(ICMPHeader, ICMPHeaderSerializer);
+Register_Serializer(IcmpHeader, ICMPHeaderSerializer);
 Register_Serializer(ICMPEchoRequest, ICMPHeaderSerializer);
 Register_Serializer(ICMPEchoReply, ICMPHeaderSerializer);
 
 void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& icmpHeader = std::static_pointer_cast<const ICMPHeader>(chunk);
+    const auto& icmpHeader = std::static_pointer_cast<const IcmpHeader>(chunk);
     stream.writeByte(icmpHeader->getType());
     stream.writeByte(icmpHeader->getCode());
     stream.writeUint16Be(icmpHeader->getChksum());
@@ -60,7 +60,7 @@ void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 const Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto icmpHeader = std::make_shared<ICMPHeader>();
+    auto icmpHeader = std::make_shared<IcmpHeader>();
     uint8_t type = stream.readByte();
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());

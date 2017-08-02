@@ -37,7 +37,7 @@
 //#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 namespace inet {
 
@@ -94,7 +94,7 @@ void ExtInterface::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage()) {
         // incoming real packet from wire (captured by pcap)
-        const auto& nwHeader = packet->peekHeader<IPv4Header>();
+        const auto& nwHeader = packet->peekHeader<Ipv4Header>();
         EV << "Delivering a packet from "
            << nwHeader->getSourceAddress()
            << " to "
@@ -113,7 +113,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         if (protocol != &Protocol::ipv4)
             throw cRuntimeError("ExtInterface accepts ipv4 packets only");
 
-        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+        const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
 
         if (connected) {
             struct sockaddr_in addr;

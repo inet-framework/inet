@@ -28,7 +28,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -63,7 +63,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     IPv4Address origSrcAddr = ipv4Header->getSrcAddress();
     IPv4Address origDestAddr = ipv4Header->getDestAddress();
 
@@ -93,7 +93,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // do not reply with error message to error message
     if (ipv4Header->getProtocolId() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<ICMPHeader>(byte(ipv4Header->getHeaderLength()));
+        const auto& recICMPMsg = packet->peekDataAt<IcmpHeader>(byte(ipv4Header->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -111,7 +111,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
-    const auto& icmpHeader = std::make_shared<ICMPHeader>();
+    const auto& icmpHeader = std::make_shared<IcmpHeader>();
     icmpHeader->setChunkLength(byte(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
@@ -166,7 +166,7 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
 
 void ICMP::processICMPMessage(Packet *packet)
 {
-    const auto& icmpmsg = packet->peekHeader<ICMPHeader>();
+    const auto& icmpmsg = packet->peekHeader<IcmpHeader>();
     switch (icmpmsg->getType()) {
         case ICMP_REDIRECT:
             // TODO implement redirect handling
@@ -177,7 +177,7 @@ void ICMP::processICMPMessage(Packet *packet)
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            const auto& bogusL3Packet = packet->peekDataAt<IPv4Header>(icmpmsg->getChunkLength());
+            const auto& bogusL3Packet = packet->peekDataAt<Ipv4Header>(icmpmsg->getChunkLength());
             int transportProtocol = bogusL3Packet->getProtocolId();
             if (transportProtocol == IP_PROT_ICMP) {
                 // received ICMP error answer to an ICMP packet:

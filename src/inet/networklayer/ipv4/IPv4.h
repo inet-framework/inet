@@ -27,7 +27,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 #include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
@@ -35,7 +35,7 @@
 namespace inet {
 
 class ARPPacket;
-class ICMPHeader;
+class IcmpHeader;
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
@@ -46,7 +46,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 {
   public:
     /**
-     * Represents an IPv4Header, queued by a Hook
+     * Represents an Ipv4Header, queued by a Hook
      */
     class QueuedDatagramForHook
     {
@@ -114,7 +114,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
-    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const IPv4Header *ipv4Header);
+    virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ipv4Header *ipv4Header);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -126,17 +126,17 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     void arpResolutionTimedOut(IARP::Notification *entry);
 
     // utility: verifying CRC
-    bool verifyCrc(const Ptr<const IPv4Header>& ipv4Header);
+    bool verifyCrc(const Ptr<const Ipv4Header>& ipv4Header);
 
     /**
-     * Encapsulate packet coming from higher layers into IPv4Header, using
+     * Encapsulate packet coming from higher layers into Ipv4Header, using
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
     virtual void encapsulate(Packet *packet);
 
     /**
-     * Handle IPv4Header messages arriving from lower layer.
+     * Handle Ipv4Header messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
     virtual void handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE);
@@ -174,7 +174,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Determines the output interface for the given multicast datagram.
      */
-    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const IPv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption);
+    virtual const InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().

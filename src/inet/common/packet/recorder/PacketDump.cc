@@ -38,8 +38,8 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/networklayer/ipv4/ICMPHeader.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv4
@@ -376,7 +376,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     std::ostream& out = *outp;
 
 #ifdef WITH_IPv4
-    if (IPv4Header *ipv4Header = dynamic_cast<IPv4Header *>(msg)) {
+    if (Ipv4Header *ipv4Header = dynamic_cast<Ipv4Header *>(msg)) {
         dumpIPv4(l2r, "", ipv4Header, "");
     }
     else if (ARPPacket *arpPacket = dynamic_cast<ARPPacket *>(msg)) {
@@ -406,7 +406,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         // search for encapsulated IPv4[v6]Datagram in it
         while (msg) {
 #ifdef WITH_IPv4
-            if (IPv4Header *ipv4Header = dynamic_cast<IPv4Header *>(msg)) {
+            if (Ipv4Header *ipv4Header = dynamic_cast<Ipv4Header *>(msg)) {
                 dumpIPv4(l2r, "", ipv4Header);
                 break;
             }
@@ -490,7 +490,7 @@ void PacketDump::dumpARP(bool l2r, const char *label, ARPPacket *dgram, const ch
 #endif // ifdef WITH_IPv4
 }
 
-void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Header *dgram, const char *comment)
+void PacketDump::dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const char *comment)
 {
     std::ostream& out = *outp;
     char buf[30];

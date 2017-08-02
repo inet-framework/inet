@@ -30,7 +30,7 @@
 #include "inet/common/ModuleAccess.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -602,8 +602,8 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     packet->removePoppedHeaders();
     GPSROption *gpsrOption = createGpsrOption(nwHeader->getDestinationAddress());
 #ifdef WITH_IPv4
-    if (std::dynamic_pointer_cast<const IPv4Header>(nwHeader)) {
-        auto ipv4Header = removeNetworkProtocolHeader<IPv4Header>(packet);
+    if (std::dynamic_pointer_cast<const Ipv4Header>(nwHeader)) {
+        auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
         gpsrOption->setType(IPOPTION_TLV_GPSR);
         int oldHlen = ipv4Header->calculateHeaderByteLength();
         ASSERT(ipv4Header->getHeaderLength() == oldHlen);
@@ -656,7 +656,7 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     const GPSROption *gpsrOption = nullptr;
 
 #ifdef WITH_IPv4
-    if (auto dgram = std::dynamic_pointer_cast<const IPv4Header>(networkHeader)) {
+    if (auto dgram = std::dynamic_pointer_cast<const Ipv4Header>(networkHeader)) {
         gpsrOption = check_and_cast_nullable<const GPSROption *>(dgram->findOptionByType(IPOPTION_TLV_GPSR));
     }
     else

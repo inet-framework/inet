@@ -1196,7 +1196,7 @@ TCPSocket *LDP::getPeerSocket(IPv4Address peerAddr)
 
 bool LDP::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     IPv4Address destAddr = ipv4Header->getDestAddress();
     int protocol = ipv4Header->getProtocolId();
 

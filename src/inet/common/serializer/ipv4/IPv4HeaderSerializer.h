@@ -17,14 +17,14 @@
 #define __INET_IPV4HEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 namespace inet {
 
 namespace serializer {
 
 /**
- * Converts between IPv4Header and binary (network byte order) IPv4 header.
+ * Converts between Ipv4Header and binary (network byte order) IPv4 header.
  */
 class INET_API IPv4HeaderSerializer : public FieldsChunkSerializer
 {

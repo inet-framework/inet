@@ -23,7 +23,7 @@ class INET_API SCTPNatHook : public cSimpleModule, NetfilterBase::HookBase
     void finish() override;
 
   protected:
-    void sendBackError(IPv4Header *dgram);
+    void sendBackError(Ipv4Header *dgram);
 
   public:
     SCTPNatHook();

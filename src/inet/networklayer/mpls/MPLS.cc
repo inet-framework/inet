@@ -80,7 +80,7 @@ void MPLS::processPacketFromL3(Packet *msg)
         return;
     }
 
-    const auto& ipHeader = msg->peekHeader<IPv4Header>();
+    const auto& ipHeader = msg->peekHeader<Ipv4Header>();
 
     // XXX temporary solution, until TCPSocket and IPv4 are extended to support nam tracing
     if (ipHeader->getProtocolId() == IP_PROT_TCP) {
@@ -102,7 +102,7 @@ void MPLS::processPacketFromL3(Packet *msg)
 
 bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
 {
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     (void)ipv4Header;       // unused variable
     LabelOpVector outLabel;
     std::string outInterface;   //FIXME set based on interfaceID

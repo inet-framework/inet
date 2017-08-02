@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 
 #include "inet/networklayer/ipv4/ICMP.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ IPv4FragBuf::~IPv4FragBuf()
 
 Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     // find datagram buffer
     Key key;
     key.id = ipv4Header->getIdentification();
@@ -82,7 +82,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         std::size_t found = pkName.find("-frag-");
         if (found != std::string::npos)
             pkName.resize(found);
-        auto hdr = Ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
+        auto hdr = Ptr<Ipv4Header>(buf->packet->peekHeader<Ipv4Header>()->dup());
         Packet *pk = buf->packet;
         pk->setName(pkName.c_str());
         pk->removeAll();

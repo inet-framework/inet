@@ -24,8 +24,8 @@
 #include "UserPriority.h"
 
 #ifdef WITH_IPv4
-#  include "inet/networklayer/ipv4/IPv4Header.h"
-#  include "inet/networklayer/ipv4/ICMPHeader_m.h"
+#  include "inet/networklayer/ipv4/Ipv4Header.h"
+#  include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #endif
 #ifdef WITH_IPv6
 #  include "inet/networklayer/ipv6/IPv6Header.h"
@@ -61,7 +61,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 
 #ifdef WITH_IPv4
     if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+        const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
         if (ipv4Header->getProtocolId() == IP_PROT_ICMP)
             return UP_BE; // ICMP class
         ipProtocol = ipv4Header->getProtocolId();

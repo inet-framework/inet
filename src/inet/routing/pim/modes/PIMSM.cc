@@ -25,7 +25,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -279,7 +279,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
     Route *route;
-    const IPv4Header *ipv4Header;
+    const Ipv4Header *ipv4Header;
     PIMInterface *pimInterface;
 
     if (signalID == NF_IPv4_MCAST_REGISTERED) {
@@ -298,14 +298,14 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_NEW_MULTICAST) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        ipv4Header = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         IPv4Address srcAddr = ipv4Header->getSrcAddress();
         IPv4Address destAddr = ipv4Header->getDestAddress();
         unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
         EV << "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
-        ipv4Header = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             route = findRouteG(ipv4Header->getDestAddress());
@@ -317,7 +317,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         }
     }
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        ipv4Header = check_and_cast<const IPv4Header *>(obj);
+        ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             IPv4Address srcAddr = ipv4Header->getSrcAddress();
@@ -331,7 +331,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     else if (signalID == NF_IPv4_MDATA_REGISTER) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
         Packet *pk = check_and_cast<Packet *>(obj);
-        const auto& ipv4Header = pk->peekHeader<IPv4Header>();
+        const auto& ipv4Header = pk->peekHeader<Ipv4Header>();
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         route = findRouteSG(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
@@ -598,7 +598,7 @@ void PIMSM::processRegisterPacket(Packet *pk)
 
     IPv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address destAddr = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
-    const auto& encapData = pk->peekHeader<IPv4Header>();
+    const auto& encapData = pk->peekHeader<Ipv4Header>();
     IPv4Address source = encapData->getSrcAddress();
     IPv4Address group = encapData->getDestAddress();
     Route *routeG = findRouteG(group);
@@ -1284,7 +1284,7 @@ void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
 
 void PIMSM::multicastPacketForwarded(Packet *pk)
 {
-    const auto& ipv4Header = pk->peekHeader<IPv4Header>();
+    const auto& ipv4Header = pk->peekHeader<Ipv4Header>();
     IPv4Address source = ipv4Header->getSrcAddress();
     IPv4Address group = ipv4Header->getDestAddress();
 
@@ -1475,7 +1475,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         pk->pushHeader(msg);
 
         // set encapsulated packet (IPv4 header only)
-        const auto& ipv4Header = std::make_shared<IPv4Header>();
+        const auto& ipv4Header = std::make_shared<Ipv4Header>();
         ipv4Header->setDestAddress(multGroup);
         ipv4Header->setSrcAddress(multOrigin);
         ipv4Header->setProtocolId(IP_PROT_PIM);
@@ -1493,7 +1493,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
 
 void PIMSM::sendPIMRegister(Packet *ipv4Packet, IPv4Address dest, int outInterfaceId)
 {
-    ASSERT(ipv4Packet->peekHeader<IPv4Header>() != nullptr);
+    ASSERT(ipv4Packet->peekHeader<Ipv4Header>() != nullptr);
 
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
@@ -1586,7 +1586,7 @@ void PIMSM::forwardMulticastData(Packet *data, int outInterfaceId)
     //
     // Note: we should inject the datagram somehow into the normal IPv4 forwarding path.
     //
-    const auto& ipv4Header = data->popHeader<IPv4Header>();
+    const auto& ipv4Header = data->popHeader<Ipv4Header>();
 
     // set control info
     data->ensureTag<PacketProtocolTag>()->setProtocol(ipv4Header->getProtocol());

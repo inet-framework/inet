@@ -21,7 +21,7 @@
 #include <iomanip>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 using namespace std;
 

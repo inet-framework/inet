@@ -45,8 +45,8 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMP.h"
-#include "inet/networklayer/ipv4/ICMPHeader.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
@@ -476,11 +476,11 @@ void UDP::processICMPv4Error(Packet *packet)
     int localPort = -1, remotePort = -1;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<ICMPHeader>();
+    const auto& icmpHeader = packet->popHeader<IcmpHeader>();
     ASSERT(icmpHeader);
     type = icmpHeader->getType();
     code = icmpHeader->getCode();
-    const auto& ipv4Header = packet->popHeader<IPv4Header>();
+    const auto& ipv4Header = packet->popHeader<Ipv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
         const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv4Header->getSrcAddress();

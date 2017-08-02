@@ -6,7 +6,7 @@ Test the IP fragmentation reassembly buffer (IPv4FragBuf class)
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header.h"
 
 %global:
 
@@ -36,7 +36,7 @@ bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
        << "\n";
 */
     Packet *pk = new Packet("IPv4");
-    const auto& frag = std::make_shared<IPv4Header>();
+    const auto& frag = std::make_shared<Ipv4Header>();
     frag->setIdentification(f.id);
     frag->setSrcAddress(IPv4Address(f.src));
     frag->setDestAddress(IPv4Address(f.dest));
