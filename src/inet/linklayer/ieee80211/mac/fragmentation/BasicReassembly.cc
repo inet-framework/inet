@@ -59,7 +59,8 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         value.fragments[fragNum] = packet;
     else
         delete packet;
-    MACAddress txAddress = header->getTransmitterAddress();
+
+    //MACAddress txAddress = header->getTransmitterAddress();
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {

@@ -27,9 +27,9 @@ typedef int16_t SequenceNumber;
 typedef int8_t FragmentNumber;
 typedef int8_t Tid;
 
-static SequenceNumber sequenceNumberDistance(SequenceNumber number1, SequenceNumber number2) { return (number2 - number1 + 4096) % 4096; }
-static bool isSequenceNumberTooOld(SequenceNumber number, SequenceNumber nextExpected, SequenceNumber range) { return sequenceNumberDistance(nextExpected, number) > range; }
-static bool isSequenceNumberLess(SequenceNumber number1, SequenceNumber number2, SequenceNumber nextExpected, SequenceNumber range) {
+inline SequenceNumber sequenceNumberDistance(SequenceNumber number1, SequenceNumber number2) { return (number2 - number1 + 4096) % 4096; }
+inline bool isSequenceNumberTooOld(SequenceNumber number, SequenceNumber nextExpected, SequenceNumber range) { return sequenceNumberDistance(nextExpected, number) > range; }
+inline bool isSequenceNumberLess(SequenceNumber number1, SequenceNumber number2, SequenceNumber nextExpected, SequenceNumber range) {
     int d1 = sequenceNumberDistance(nextExpected, number1);
     int d2 = sequenceNumberDistance(nextExpected, number2);
     if (d1 < range && d2 < range)

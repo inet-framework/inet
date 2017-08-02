@@ -161,12 +161,9 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::refreshDisplay() const
 {
-    const char *str;
-
     if (connected) {
         char buf[80];
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
-        str = buf;
         getDisplayString().setTagArg("t", 0, buf);
     }
     else {

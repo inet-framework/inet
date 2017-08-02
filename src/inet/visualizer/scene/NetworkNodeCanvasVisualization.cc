@@ -32,12 +32,6 @@ NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cF
 {
 }
 
-static BoxedLabelFigure *createRectangle(const char *label) {
-    auto figure = new BoxedLabelFigure();
-    figure->setText(label);
-    return figure;
-}
-
 NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double displacementPenalty) :
     cGroupFigure(networkNode->getFullName()),
     networkNode(networkNode),
