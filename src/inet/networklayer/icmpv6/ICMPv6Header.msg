@@ -104,7 +104,7 @@ enum ICMPv6_PARAMETER_PROB
 //       as defined in RFC2463
 //    2. Any ICMP type with MSB set, i.e. >=128 is an Informational ICMP message
 //
-class ICMPv6Header extends FieldsChunk
+class Icmpv6Header extends FieldsChunk
 {
     chunkLength = byte(ICMPv6_HEADER_BYTES);
     int type @enum(ICMPv6Type);     // 1 byte
@@ -117,27 +117,27 @@ class ICMPv6Header extends FieldsChunk
 // Notes:
 //   1. As defined in RFC2463: Section 3
 //
-class ICMPv6DestUnreachableMsg extends ICMPv6Header
+class Icmpv6DestUnreachableMsg extends Icmpv6Header
 {
     type = ICMPv6_DESTINATION_UNREACHABLE;
     int code @enum(ICMPv6DEST_UN);
     // unused 4 bytes
 }
 
-class ICMPv6PacketTooBigMsg extends ICMPv6Header
+class Icmpv6PacketTooBigMsg extends Icmpv6Header
 {
     type = ICMPv6_PACKET_TOO_BIG;
     int code; //Set to 0 by sender and ignored by receiver.
     int MTU; //MTU of next-hop link
 }
 
-class ICMPv6TimeExceededMsg extends ICMPv6Header
+class Icmpv6TimeExceededMsg extends Icmpv6Header
 {
     type = ICMPv6_TIME_EXCEEDED;
     int code @enum(ICMPv6_TIME_EX);
 }
 
-class ICMPv6ParamProblemMsg extends ICMPv6Header
+class Icmpv6ParamProblemMsg extends Icmpv6Header
 {
     type = ICMPv6_PARAMETER_PROBLEM;
     int code @enum(ICMPv6_PARAMETER_PROB);
@@ -147,7 +147,7 @@ class ICMPv6ParamProblemMsg extends ICMPv6Header
 // ICMPv6 Echo Request packet (RFC2463: Section 4).
 // Data is attached through encapsulation (see ICMPv6.cc)
 //
-class ICMPv6EchoRequestMsg extends ICMPv6Header
+class Icmpv6EchoRequestMsg extends Icmpv6Header
 {
     type = ICMPv6_ECHO_REQUEST;
     int code = 0; //set to 0.
@@ -159,7 +159,7 @@ class ICMPv6EchoRequestMsg extends ICMPv6Header
 //
 // ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ICMPv6.cc)
 //
-class ICMPv6EchoReplyMsg extends ICMPv6Header
+class Icmpv6EchoReplyMsg extends Icmpv6Header
 {
     type = ICMPv6_ECHO_REPLY;
     int code = 0; //set to 0.

@@ -700,7 +700,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 
 void IPv6::handleReceivedICMP(Packet *msg)
 {
-    const auto& icmpHeader = msg->peekHeader<ICMPv6Header>();
+    const auto& icmpHeader = msg->peekHeader<Icmpv6Header>();
     if (std::dynamic_pointer_cast<const IPv6NDMessage>(icmpHeader) != nullptr) {
         EV_INFO << "Neighbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");

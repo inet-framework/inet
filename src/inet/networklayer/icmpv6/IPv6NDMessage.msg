@@ -24,7 +24,7 @@ cplusplus {{
 
 namespace inet;
 
-class ICMPv6Header extends cObject;
+class Icmpv6Header extends cObject;
 
 class noncobject IPv6Address;
 
@@ -82,14 +82,14 @@ class MIPv6HAInformation
 // Neighbour Discovery for IPv6.
 // RFC 2461
 //
-// ICMP fields inherited from ~ICMPv6Header:
+// ICMP fields inherited from ~Icmpv6Header:
 //    - Type
 //
 // ICMP fields not implemented:
 //    - Checksum
 //    - Reserved
 //
-class IPv6NDMessage extends ICMPv6Header
+class IPv6NDMessage extends Icmpv6Header
 {
     //customize=true;
     int code = 0;
@@ -137,7 +137,7 @@ class IPv6RouterAdvertisement extends IPv6NDMessage
 // Neighbour Solicitation Message Format
 // RFC 4861 Section 4.3
 //
-class IPv6NeighbourSolicitation extends IPv6NDMessage
+class Ipv6NeighbourSolicitation extends IPv6NDMessage
 {
     //Additional ICMP fields
     IPv6Address targetAddress;// MUST NOT be a multicast address.

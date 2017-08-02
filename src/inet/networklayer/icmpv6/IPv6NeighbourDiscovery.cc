@@ -184,7 +184,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv6) {
             //This information will serve as input parameters to various processors.
-            const auto& ndMsg = packet->peekHeader<ICMPv6Header>();
+            const auto& ndMsg = packet->peekHeader<Icmpv6Header>();
             processNDMessage(packet, ndMsg.get()); // KLUDGE: remove get()
         }
         else {    // not ND message
@@ -195,7 +195,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message type received.\n");
 }
 
-void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, const ICMPv6Header *icmpv6Header)
+void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, const Icmpv6Header *icmpv6Header)
 {
     if (auto rs = dynamic_cast<const IPv6RouterSolicitation *>(icmpv6Header)) {
         processRSPacket(packet, rs);
@@ -203,7 +203,7 @@ void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, const ICMPv6Header
     else if (auto ra = dynamic_cast<const IPv6RouterAdvertisement *>(icmpv6Header)) {
         processRAPacket(packet, ra);
     }
-    else if (auto ns = dynamic_cast<const IPv6NeighbourSolicitation *>(icmpv6Header)) {
+    else if (auto ns = dynamic_cast<const Ipv6NeighbourSolicitation *>(icmpv6Header)) {
         processNSPacket(packet, ns);
     }
     else if (auto na = dynamic_cast<const IPv6NeighbourAdvertisement *>(icmpv6Header)) {
@@ -1808,7 +1808,7 @@ void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAd
     MACAddress myMacAddr = ie->getMacAddress();
 
     //Construct a Neighbour Solicitation message
-    auto ns = std::make_shared<IPv6NeighbourSolicitation>();
+    auto ns = std::make_shared<Ipv6NeighbourSolicitation>();
     ns->setType(ICMPv6_NEIGHBOUR_SOL);
 
     //Neighbour Solicitation Specific Information
@@ -1831,7 +1831,7 @@ void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAd
 
 }
 
-void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, const IPv6NeighbourSolicitation *ns)
+void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns)
 {
     //Control Information
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
@@ -1865,7 +1865,7 @@ void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, const IPv6Neighbour
     delete packet;
 }
 
-bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, const IPv6NeighbourSolicitation *ns)
+bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns)
 {
     bool result = true;
 
@@ -1906,7 +1906,7 @@ bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, const IPv6Neighbou
     return result;
 }
 
-void IPv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, const IPv6NeighbourSolicitation *ns)
+void IPv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns)
 {
     //Control Information
     IPv6Address nsSrcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -1933,7 +1933,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, const 
     }
 }
 
-void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
     //MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
@@ -1949,7 +1949,7 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(Packet *packet, con
     }
 }
 
-void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     //RFC 2461, Section 7.2.3
     /*If the Source Address is not the unspecified address and, on link layers
@@ -1988,7 +1988,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, const
     sendSolicitedNA(packet, ns, ie);
 }
 
-void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     auto na = std::make_shared<IPv6NeighbourAdvertisement>();
     na->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // FIXME set correct length

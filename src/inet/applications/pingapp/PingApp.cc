@@ -227,9 +227,9 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_IPv6
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
-            const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
+            const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
-                const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPv6EchoReplyMsg>(icmpHeader));
+                const auto& echoReply = CHK(std::dynamic_pointer_cast<const Icmpv6EchoReplyMsg>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
@@ -364,7 +364,7 @@ void PingApp::sendPingRequest()
         }
         case L3Address::IPv6: {
 #ifdef WITH_IPv6
-            const auto& request = std::make_shared<ICMPv6EchoRequestMsg>();
+            const auto& request = std::make_shared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             request->markImmutable();

@@ -68,7 +68,7 @@ void ICMPv6::handleMessage(cMessage *msg)
 
 void ICMPv6::processICMPv6Message(Packet *packet)
 {
-    auto icmpv6msg = packet->peekHeader<ICMPv6Header>();
+    auto icmpv6msg = packet->peekHeader<Icmpv6Header>();
     int type = icmpv6msg->getType();
     if (type < 128) {
         // ICMP errors are delivered to the appropriate higher layer protocols
@@ -86,32 +86,32 @@ void ICMPv6::processICMPv6Message(Packet *packet)
         }
     }
     else {
-        auto icmpv6msg = packet->popHeader<ICMPv6Header>();
-        if (std::dynamic_pointer_cast<const ICMPv6DestUnreachableMsg>(icmpv6msg)) {
+        auto icmpv6msg = packet->popHeader<Icmpv6Header>();
+        if (std::dynamic_pointer_cast<const Icmpv6DestUnreachableMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const ICMPv6PacketTooBigMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const Icmpv6PacketTooBigMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const ICMPv6TimeExceededMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const Icmpv6TimeExceededMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const ICMPv6ParamProblemMsg>(icmpv6msg)) {
+        else if (std::dynamic_pointer_cast<const Icmpv6ParamProblemMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (auto echoRequest = std::dynamic_pointer_cast<const ICMPv6EchoRequestMsg>(icmpv6msg)) {
+        else if (auto echoRequest = std::dynamic_pointer_cast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
             processEchoRequest(packet, echoRequest);
         }
-        else if (auto echoReply = std::dynamic_pointer_cast<const ICMPv6EchoReplyMsg>(icmpv6msg)) {
+        else if (auto echoReply = std::dynamic_pointer_cast<const Icmpv6EchoReplyMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
             processEchoReply(packet, echoReply);
         }
@@ -141,12 +141,12 @@ void ICMPv6::processICMPv6Message(Packet *packet)
  * The data received in the ICMPv6 Echo Request message MUST be returned
  * entirely and unmodified in the ICMPv6 Echo Reply message.
  */
-void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const ICMPv6EchoRequestMsg>& requestHeader)
+void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6EchoRequestMsg>& requestHeader)
 {
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
     replyPacket->setName((std::string(requestPacket->getName()) + "-reply").c_str());
-    auto replyHeader = std::make_shared<ICMPv6EchoReplyMsg>();
+    auto replyHeader = std::make_shared<Icmpv6EchoReplyMsg>();
     replyHeader->setIdentifier(requestHeader->getIdentifier());
     replyHeader->setSeqNumber(requestHeader->getSeqNumber());
     replyHeader->markImmutable();
@@ -173,7 +173,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const ICMPv6Ech
     sendToIP(replyPacket);
 }
 
-void ICMPv6::processEchoReply(Packet *packet, const Ptr<const ICMPv6EchoReplyMsg>& reply)
+void ICMPv6::processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg>& reply)
 {
     delete packet;
 }
@@ -249,7 +249,7 @@ void ICMPv6::sendToIP(Packet *msg)
 
 Packet *ICMPv6::createDestUnreachableMsg(int code)
 {
-    auto errorMsg = std::make_shared<ICMPv6DestUnreachableMsg>();
+    auto errorMsg = std::make_shared<Icmpv6DestUnreachableMsg>();
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
     errorMsg->setCode(code);
     auto packet = new Packet("Dest Unreachable");
@@ -260,7 +260,7 @@ Packet *ICMPv6::createDestUnreachableMsg(int code)
 
 Packet *ICMPv6::createPacketTooBigMsg(int mtu)
 {
-    auto errorMsg = std::make_shared<ICMPv6PacketTooBigMsg>();
+    auto errorMsg = std::make_shared<Icmpv6PacketTooBigMsg>();
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
     errorMsg->setCode(0);    //Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
@@ -272,7 +272,7 @@ Packet *ICMPv6::createPacketTooBigMsg(int mtu)
 
 Packet *ICMPv6::createTimeExceededMsg(int code)
 {
-    auto errorMsg = std::make_shared<ICMPv6TimeExceededMsg>();
+    auto errorMsg = std::make_shared<Icmpv6TimeExceededMsg>();
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
     errorMsg->setCode(code);
     auto packet = new Packet("Time Exceeded");
@@ -283,7 +283,7 @@ Packet *ICMPv6::createTimeExceededMsg(int code)
 
 Packet *ICMPv6::createParamProblemMsg(int code)
 {
-    auto errorMsg = std::make_shared<ICMPv6ParamProblemMsg>();
+    auto errorMsg = std::make_shared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
     //TODO: What Pointer? section 3.4
@@ -305,7 +305,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
 
     // do not reply with error message to error message
     if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP) {
-        auto recICMPMsg = packet->peekDataAt<ICMPv6Header>(ipv6Header->getChunkLength());
+        auto recICMPMsg = packet->peekDataAt<Icmpv6Header>(ipv6Header->getChunkLength());
         if (recICMPMsg->getType() < 128) {
             EV_INFO << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -315,7 +315,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void ICMPv6::errorOut(const Ptr<const ICMPv6Header>& icmpv6msg)
+void ICMPv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
 {
 }
 

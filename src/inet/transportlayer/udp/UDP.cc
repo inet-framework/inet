@@ -522,7 +522,7 @@ void UDP::processICMPv6Error(Packet *packet)
     ushort localPort, remotePort;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
+    const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
     ASSERT(icmpHeader);
 
     type = icmpHeader->getType();

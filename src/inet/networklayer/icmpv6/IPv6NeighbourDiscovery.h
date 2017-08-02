@@ -170,7 +170,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void processNDMessage(Packet *packet, const ICMPv6Header *msg);
+    virtual void processNDMessage(Packet *packet, const Icmpv6Header *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
@@ -341,21 +341,21 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     /************Neighbour Solicitaton Stuff*******************************/
     virtual void createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
             const IPv6Address& dgSrcAddr, InterfaceEntry *ie);
-    virtual void processNSPacket(Packet *packet, const IPv6NeighbourSolicitation *ns);
-    virtual bool validateNSPacket(Packet *packet, const IPv6NeighbourSolicitation *ns);
-    virtual void processNSForTentativeAddress(Packet *packet, const IPv6NeighbourSolicitation *ns);
-    virtual void processNSForNonTentativeAddress(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
-    virtual void processNSWithSpecifiedSrcAddr(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void processNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns);
+    virtual bool validateNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns);
+    virtual void processNSForTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns);
+    virtual void processNSForNonTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void processNSWithSpecifiedSrcAddr(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
     /************End Of Neighbour Solicitation Stuff***********************/
 
     /************Neighbour Advertisment Stuff)*****************************/
 
 #ifdef WITH_xMIPv6
-    IPv6NeighbourAdvertisement *createAndSendNAPacket(IPv6NeighbourSolicitation *ns,
+    IPv6NeighbourAdvertisement *createAndSendNAPacket(Ipv6NeighbourSolicitation *ns,
             const IPv6Address& nsSrcAddr, const IPv6Address& nsDestAddr, InterfaceEntry *ie);
 #endif /* WITH_xMIPv6 */
 
-    virtual void sendSolicitedNA(Packet *packet, const IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void sendSolicitedNA(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
 
 #ifdef WITH_xMIPv6
 
@@ -397,7 +397,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  Send an unreachable message to the IPv6 module.
      *  TODO: Relocate to ICMPv6 module
      */
-    /*ICMPv6DestUnreachableMsg *createAndSendUnreachableMessage(
+    /*Icmpv6DestUnreachableMsg *createAndSendUnreachableMessage(
         const IPv6Address& destAddress, InterfaceEntry *ie);*/
 
 #ifdef WITH_xMIPv6

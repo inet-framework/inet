@@ -35,7 +35,7 @@ void IPv6ErrorHandling::initialize()
 void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    const auto& icmpv6Header = packet->popHeader<ICMPv6Header>();
+    const auto& icmpv6Header = packet->popHeader<Icmpv6Header>();
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     int type = (int)icmpv6Header->getType();
 
@@ -43,7 +43,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
 
     switch (type) {
         case ICMPv6_DESTINATION_UNREACHABLE: {
-            const auto& msg2 = std::dynamic_pointer_cast<const ICMPv6DestUnreachableMsg>(icmpv6Header);
+            const auto& msg2 = std::dynamic_pointer_cast<const Icmpv6DestUnreachableMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType1Msg(code);
@@ -51,7 +51,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_PACKET_TOO_BIG: {
-            const auto& msg2 = std::dynamic_pointer_cast<const ICMPv6PacketTooBigMsg>(icmpv6Header);
+            const auto& msg2 = std::dynamic_pointer_cast<const Icmpv6PacketTooBigMsg>(icmpv6Header);
             int code = msg2->getCode();
             int mtu = msg2->getMTU();
             EV_ERROR << " Code: " << code << " MTU: " << mtu;
@@ -61,7 +61,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_TIME_EXCEEDED: {
-            const auto& msg2 = std::dynamic_pointer_cast<const ICMPv6TimeExceededMsg>(icmpv6Header);
+            const auto& msg2 = std::dynamic_pointer_cast<const Icmpv6TimeExceededMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType3Msg(code);
@@ -69,7 +69,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_PARAMETER_PROBLEM: {
-            const auto& msg2 = std::dynamic_pointer_cast<const ICMPv6ParamProblemMsg>(icmpv6Header);
+            const auto& msg2 = std::dynamic_pointer_cast<const Icmpv6ParamProblemMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType4Msg(code);
