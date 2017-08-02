@@ -53,7 +53,7 @@ import inet.transportlayer.contract.IUDP;
 //     without actually computing it, the value is set to 0xC00D (not serializable)
 //  - "computed" means the outgoing packet will have the correctly computed CRC
 //     as defined by the RFC (serializable)
-// CRC operation modes for incoming UDP packets (crcMode field in UDPHeader chunk):
+// CRC operation modes for incoming UDP packets (crcMode field in UdpHeader chunk):
 //  - CRC_DISABLED means the incoming packet must have its CRC set to 0 (serializable)
 //  - CRC_DECLARED_CORRECT means the incoming packet is assumed to have a
 //    correct CRC without the actual value (not serializable)
