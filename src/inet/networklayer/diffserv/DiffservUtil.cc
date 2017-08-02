@@ -24,7 +24,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #include "inet/networklayer/diffserv/DiffservUtil.h"
@@ -204,7 +204,7 @@ cPacket *findIPDatagramInPacket(cPacket *packet)
             return packet;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (dynamic_cast<IPv6Header *>(packet))
+        if (dynamic_cast<Ipv6Header *>(packet))
             return packet;
 #endif // ifdef WITH_IPv6
     }

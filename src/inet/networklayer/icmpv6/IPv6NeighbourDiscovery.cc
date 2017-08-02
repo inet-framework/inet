@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 
@@ -228,7 +228,7 @@ void IPv6NeighbourDiscovery::finish()
 
 void IPv6NeighbourDiscovery::processIPv6Datagram(Packet *packet)
 {
-    const auto& msg = packet->peekHeader<IPv6Header>();
+    const auto& msg = packet->peekHeader<Ipv6Header>();
     EV_INFO << "Packet " << packet << " arrived from IPv6 module.\n";
 
     IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(packet->getControlInfo());

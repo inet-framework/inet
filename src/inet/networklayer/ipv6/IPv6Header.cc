@@ -15,45 +15,45 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 namespace inet {
 
-Register_Class(IPv6Header);
+Register_Class(Ipv6Header);
 
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
 {
     return os << "(" << eh->getClassName() << ") " << eh->str();
 }
 
-IPv6Header& IPv6Header::operator=(const IPv6Header& other)
+Ipv6Header& Ipv6Header::operator=(const Ipv6Header& other)
 {
     if (this == &other)
         return *this;
     clean();
-    IPv6Header_Base::operator=(other);
+    Ipv6Header_Base::operator=(other);
     copy(other);
     return *this;
 }
 
-void IPv6Header::copy(const IPv6Header& other)
+void Ipv6Header::copy(const Ipv6Header& other)
 {
     for (const auto & elem : other.extensionHeaders)
         addExtensionHeader((elem)->dup());
 }
 
-void IPv6Header::setExtensionHeaderArraySize(unsigned int size)
+void Ipv6Header::setExtensionHeaderArraySize(unsigned int size)
 {
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-unsigned int IPv6Header::getExtensionHeaderArraySize() const
+unsigned int Ipv6Header::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-IPv6ExtensionHeaderPtr& IPv6Header::getExtensionHeader(unsigned int k)
+IPv6ExtensionHeaderPtr& Ipv6Header::getExtensionHeader(unsigned int k)
 {
     static IPv6ExtensionHeaderPtr null;
     if (k >= extensionHeaders.size())
@@ -61,7 +61,7 @@ IPv6ExtensionHeaderPtr& IPv6Header::getExtensionHeader(unsigned int k)
     return extensionHeaders[k];
 }
 
-IPv6ExtensionHeader *IPv6Header::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
+Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
 {
     for (const auto & elem : extensionHeaders)
         if ((elem)->getExtensionType() == extensionType) {
@@ -73,12 +73,12 @@ IPv6ExtensionHeader *IPv6Header::findExtensionHeaderByType(IPProtocolId extensio
     return nullptr;
 }
 
-void IPv6Header::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
+void Ipv6Header::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
-void IPv6Header::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
+void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
 {
     if (atPos != -1)
         throw cRuntimeError(this, "addExtensionHeader() does not support atPos parameter.");
@@ -107,7 +107,7 @@ void IPv6Header::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
  *  Note that Destination Options header may come both after the Hop-by-Hop
  *  extension and before the payload (if Routing presents).
  */
-int IPv6Header::getExtensionHeaderOrder(IPv6ExtensionHeader *eh)
+int Ipv6Header::getExtensionHeaderOrder(Ipv6ExtensionHeader *eh)
 {
     switch (eh->getExtensionType()) {
         case IP_PROT_IPv6EXT_HOP:
@@ -137,7 +137,7 @@ int IPv6Header::getExtensionHeaderOrder(IPv6ExtensionHeader *eh)
     }
 }
 
-int IPv6Header::calculateHeaderByteLength() const
+int Ipv6Header::calculateHeaderByteLength() const
 {
     int len = 40;
     for (auto & elem : extensionHeaders)
@@ -148,7 +148,7 @@ int IPv6Header::calculateHeaderByteLength() const
 /**
  * Note: it is assumed that headers are ordered as described in RFC 2460 4.1
  */
-int IPv6Header::calculateUnfragmentableHeaderByteLength() const
+int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 {
     int lastUnfragmentableExtensionIndex = -1;
     for (int i = ((int)extensionHeaders.size()) - 1; i >= 0; i--) {
@@ -168,7 +168,7 @@ int IPv6Header::calculateUnfragmentableHeaderByteLength() const
 /**
  * Note: it is assumed that headers are ordered as described in RFC 2460 4.1
  */
-int IPv6Header::calculateFragmentLength() const
+int Ipv6Header::calculateFragmentLength() const
 {
     int len = byte(getChunkLength()).get() - IPv6_HEADER_BYTES;
     unsigned int i;
@@ -181,22 +181,22 @@ int IPv6Header::calculateFragmentLength() const
     return len;
 }
 
-IPv6ExtensionHeader *IPv6Header::removeFirstExtensionHeader()
+Ipv6ExtensionHeader *Ipv6Header::removeFirstExtensionHeader()
 {
     handleChange();
     if (extensionHeaders.empty())
         return nullptr;
-    IPv6ExtensionHeader *eh = extensionHeaders.front();
+    Ipv6ExtensionHeader *eh = extensionHeaders.front();
     extensionHeaders.erase(extensionHeaders.begin());
     return eh;
 }
 
-IPv6ExtensionHeader *IPv6Header::removeExtensionHeader(IPProtocolId extensionType)
+Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IPProtocolId extensionType)
 {
     handleChange();
     for (unsigned int i = 0; i < extensionHeaders.size(); i++) {
         if (extensionHeaders[i]->getExtensionType() == extensionType) {
-            IPv6ExtensionHeader *eh = extensionHeaders[i];
+            Ipv6ExtensionHeader *eh = extensionHeaders[i];
             extensionHeaders.erase(extensionHeaders.begin() + i);
             return eh;
         }
@@ -204,12 +204,12 @@ IPv6ExtensionHeader *IPv6Header::removeExtensionHeader(IPProtocolId extensionTyp
     return nullptr;
 }
 
-IPv6Header::~IPv6Header()
+Ipv6Header::~Ipv6Header()
 {
     clean();
 }
 
-void IPv6Header::clean()
+void Ipv6Header::clean()
 {
     IPv6ExtensionHeaderPtr eh;
 
@@ -220,7 +220,7 @@ void IPv6Header::clean()
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader& h)
+std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader& h)
 {
     out << "{type:" << h.getExtensionType() << ",length:" << h.getByteLength() << "}";
     return out;

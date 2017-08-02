@@ -7,7 +7,7 @@ Adapted from IPFragBuf_1.test.
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv6/IPv6FragBuf.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 %global:
@@ -29,10 +29,10 @@ typedef std::vector<Frag> FragVector;
 bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
 {
     Packet *pk = new Packet("IPv6");
-    const auto& frag = std::make_shared<IPv6Header>();
+    const auto& frag = std::make_shared<Ipv6Header>();
     frag->setSrcAddress(IPv6Address(0,0,0,f.src));
     frag->setDestAddress(IPv6Address(0,0,0,f.dest));
-    IPv6FragmentHeader *fh = new IPv6FragmentHeader();
+    Ipv6FragmentHeader *fh = new Ipv6FragmentHeader();
     fh->setIdentification(f.id);
     fh->setFragmentOffset(f.offset);
     fh->setMoreFragments(!f.islast);

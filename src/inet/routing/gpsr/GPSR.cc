@@ -617,13 +617,13 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     else
 #endif
 #ifdef WITH_IPv6
-    if (std::dynamic_pointer_cast<const IPv6Header>(nwHeader)) {
-        auto dgram = removeNetworkProtocolHeader<IPv6Header>(packet);
+    if (std::dynamic_pointer_cast<const Ipv6Header>(nwHeader)) {
+        auto dgram = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
         int oldHlen = dgram->calculateHeaderByteLength();
-        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr == nullptr) {
-            hdr = new IPv6HopByHopOptionsHeader();
+            hdr = new Ipv6HopByHopOptionsHeader();
             hdr->setByteLength(8);
             dgram->addExtensionHeader(hdr);
         }
@@ -662,8 +662,8 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_IPv6
-    if (auto dgram = std::dynamic_pointer_cast<const IPv6Header>(networkHeader)) {
-        IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+    if (auto dgram = std::dynamic_pointer_cast<const Ipv6Header>(networkHeader)) {
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)

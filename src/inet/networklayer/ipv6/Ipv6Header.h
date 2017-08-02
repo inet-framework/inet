@@ -29,24 +29,24 @@ namespace inet {
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv6Header : public IPv6Header_Base
+class INET_API Ipv6Header : public Ipv6Header_Base
 {
   protected:
-    typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
+    typedef std::vector<Ipv6ExtensionHeader *> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
   private:
-    void copy(const IPv6Header& other);
+    void copy(const Ipv6Header& other);
     void clean();
-    int getExtensionHeaderOrder(IPv6ExtensionHeader *eh);
+    int getExtensionHeaderOrder(Ipv6ExtensionHeader *eh);
 
   public:
-    IPv6Header() : IPv6Header_Base() {}
-    IPv6Header(const IPv6Header& other) : IPv6Header_Base(other) { copy(other); }
-    IPv6Header& operator=(const IPv6Header& other);
-    ~IPv6Header();
+    Ipv6Header() : Ipv6Header_Base() {}
+    Ipv6Header(const Ipv6Header& other) : Ipv6Header_Base(other) { copy(other); }
+    Ipv6Header& operator=(const Ipv6Header& other);
+    ~Ipv6Header();
 
-    virtual IPv6Header *dup() const override { return new IPv6Header(*this); }
+    virtual Ipv6Header *dup() const override { return new Ipv6Header(*this); }
 
     /**
      * Returns bits 0-5 of the Traffic Class field, a value in the 0..63 range
@@ -83,7 +83,7 @@ class INET_API IPv6Header : public IPv6Header_Base
      * Returns the kth extension header in this datagram
      */
     virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
-    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const override {return const_cast<IPv6Header*>(this)->getExtensionHeader(k);}
+    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const override {return const_cast<Ipv6Header*>(this)->getExtensionHeader(k);}
 
     /**
      * Returns the extension header of the specified type,
@@ -91,14 +91,14 @@ class INET_API IPv6Header : public IPv6Header_Base
      * second extension is returned. (The datagram might
      * contain two Destination Options extension.)
      */
-    virtual IPv6ExtensionHeader *findExtensionHeaderByType(IPProtocolId extensionType, int index = 0) const;
+    virtual Ipv6ExtensionHeader *findExtensionHeaderByType(IPProtocolId extensionType, int index = 0) const;
 
     /**
      * Adds an extension header to the datagram.
      * The atPos parameter should not be used, the extension
      * headers are stored in the order specified in RFC 2460 4.1.
      */
-    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
+    virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
 
     /**
      * Calculates the length of the IPv6 header plus the extension
@@ -121,12 +121,12 @@ class INET_API IPv6Header : public IPv6Header_Base
     /**
      * Removes and returns the first extension header of this datagram
      */
-    virtual IPv6ExtensionHeader *removeFirstExtensionHeader();
+    virtual Ipv6ExtensionHeader *removeFirstExtensionHeader();
 
     /**
      * Removes and returns the first extension header with the given type.
      */
-    virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
+    virtual Ipv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
@@ -136,7 +136,7 @@ class INET_API IPv6Header : public IPv6Header_Base
     virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
-std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);
+std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader&);
 
 } // namespace inet
 

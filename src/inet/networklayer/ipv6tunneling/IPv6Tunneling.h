@@ -35,7 +35,7 @@ namespace inet {
 
 // Foreign declarations:
 class IInterfaceTable;
-class IPv6Header;
+class Ipv6Header;
 class IPv6RoutingTable;
 
 /**

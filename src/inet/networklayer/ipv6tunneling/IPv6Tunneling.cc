@@ -38,7 +38,7 @@
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -362,7 +362,7 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress, TunnelType
 
 void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->peekHeader<IPv6Header>();
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
     int vIfIndex = -1;
 
     if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB) {
@@ -413,7 +413,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
         }
 
         // get rid of the encapsulation of the IPv6 module
-        packet->popHeader<IPv6Header>();
+        packet->popHeader<Ipv6Header>();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
@@ -422,7 +422,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
                Left value describes the number of route segments remaining; i.e.,
                number of explicitly listed intermediate nodes still to be visited
                before reaching the final destination.  Segments Left MUST be 1.*/
-            IPv6RoutingHeader *t2RH = new IPv6RoutingHeader();
+            Ipv6RoutingHeader *t2RH = new Ipv6RoutingHeader();
             t2RH->setRoutingType(2);
             t2RH->setSegmentsLeft(1);
             t2RH->setAddressArraySize(1);
@@ -475,7 +475,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 
 void IPv6Tunneling::decapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->peekHeader<IPv6Header>();
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // decapsulation is performed in IPv6 module
     IPv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 

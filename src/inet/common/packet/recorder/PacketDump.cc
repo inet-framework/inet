@@ -47,7 +47,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_IPv6
@@ -416,7 +416,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
             }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-            if (IPv6Header *ipv6Datagram = dynamic_cast<IPv6Header *>(msg)) {
+            if (Ipv6Header *ipv6Datagram = dynamic_cast<Ipv6Header *>(msg)) {
                 dumpIPv6(l2r, "", ipv6Datagram);
                 break;
             }
@@ -556,7 +556,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const 
 #endif // ifdef WITH_IPv4
 }
 
-void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Header *dgram, const char *comment)
+void PacketDump::dumpIPv6(bool l2r, const char *label, Ipv6Header *dgram, const char *comment)
 {
     using namespace tcp;
 

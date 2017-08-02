@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
 #ifdef WITH_GENERIC
 #include "inet/networklayer/generic/GenericDatagram.h"
@@ -67,7 +67,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
 #endif
 #ifdef WITH_IPv6
     if (protocol == Protocol::ipv6)
-        return packet->peekHeader<IPv6Header>();
+        return packet->peekHeader<Ipv6Header>();
 #endif
 #ifdef WITH_GENERIC
     if (protocol == Protocol::gnp)
@@ -93,7 +93,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
 #endif
 #ifdef WITH_IPv6
     if (protocol == Protocol::ipv6)
-        return removeNetworkProtocolHeader<IPv6Header>(packet);
+        return removeNetworkProtocolHeader<Ipv6Header>(packet);
 #endif
 #ifdef WITH_GENERIC
     if (protocol == Protocol::gnp)

@@ -19,7 +19,7 @@ simple TestApp
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 
 using namespace inet;
@@ -54,7 +54,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-2");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         ipv6Header->setSrcAddress(IPv6Address("fe80::1122:3344:5566"));
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -72,7 +72,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-4");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         ipv6Header->setDestAddress(IPv6Address("fe80::1122:3344:5566"));
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -126,7 +126,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-9");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         ipv6Header->setTrafficClass(0x2e);
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -144,7 +144,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-11");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         ipv6Header->setSrcAddress(IPv6Address("fe80::1"));
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -162,7 +162,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-13");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         ipv6Header->setDestAddress(IPv6Address("fe80::1"));
         packet->insertHeader(ipv6Header);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -183,7 +183,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-15");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setSourcePort(2200);
         packet->insertHeader(udpPacket);
@@ -207,7 +207,7 @@ void TestApp::initialize()
 
     {
         Packet *packet = new Packet("ipv6-17");
-        const auto& ipv6Header = std::make_shared<IPv6Header>();
+        const auto& ipv6Header = std::make_shared<Ipv6Header>();
         const auto& udpPacket = std::make_shared<UdpHeader>();
         udpPacket->setDestinationPort(2400);
         packet->insertHeader(udpPacket);

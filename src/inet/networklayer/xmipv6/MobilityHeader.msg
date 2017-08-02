@@ -25,7 +25,7 @@ cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/IPv6Header.h" // added by CB
+#include "inet/networklayer/ipv6/Ipv6Header.h" // added by CB
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
@@ -35,9 +35,9 @@ class FieldsChunk extends cObject;
 
 class noncobject IPv6Address;
 
-class noncobject IPv6ExtensionHeader;
+class noncobject Ipv6ExtensionHeader;
 
-class noncobject IPv6DestinationOptionsHeader;
+class noncobject Ipv6DestinationOptionsHeader;
 
 enum MobilityHeaderType
 {
@@ -52,7 +52,7 @@ enum MobilityHeaderType
     BINDING_ERROR = 7;
 }
 
-class MobilityHeader extends FieldsChunk  // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
+class MobilityHeader extends FieldsChunk  // extends Ipv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of Ipv6ExtensionHeader
 {
     int mobilityHeaderType @enum(MobilityHeaderType);
 }
@@ -172,7 +172,7 @@ class BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
-class HomeAddressOption extends IPv6DestinationOptionsHeader
+class HomeAddressOption extends Ipv6DestinationOptionsHeader
 {
     IPv6Address homeAddress;
 }

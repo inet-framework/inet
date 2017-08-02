@@ -23,8 +23,8 @@
 
 namespace inet {
 
-class IPv6Header;
-class IPv6ExtensionHeader;
+class Ipv6Header;
+class Ipv6ExtensionHeader;
 
 /**
  *
@@ -33,7 +33,7 @@ class IPv6ExtensionHeader;
 class INET_API IPv6ExtHeaderTagBase : public IPv6ExtHeaderTagBase_Base
 {
   protected:
-    typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
+    typedef std::vector<Ipv6ExtensionHeader *> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
   private:
@@ -67,12 +67,12 @@ class INET_API IPv6ExtHeaderTagBase : public IPv6ExtHeaderTagBase_Base
      * Adds an extension header to the datagram, at the given position.
      * The default (atPos==-1) is to add the header at the end.
      */
-    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
+    virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
 
     /**
      * Remove the first extension header and return it.
      */
-    IPv6ExtensionHeader *removeFirstExtensionHeader();
+    Ipv6ExtensionHeader *removeFirstExtensionHeader();
 
 };
 

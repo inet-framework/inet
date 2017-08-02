@@ -26,7 +26,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_UDP
@@ -110,7 +110,7 @@ int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekHeader<IPv6Header>();
+        const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
         return ipv6Header->getDiffServCodePoint();
     }
 #endif // ifdef WITH_IPv6

@@ -28,8 +28,8 @@
 namespace inet {
 
 class ICMPv6;
-class IPv6Header;
-class IPv6FragmentHeader;
+class Ipv6Header;
+class Ipv6FragmentHeader;
 
 /**
  * Reassembly buffer for fragmented IPv6 datagrams.
@@ -93,7 +93,7 @@ class INET_API IPv6FragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    Packet *addFragment(Packet *packet, const IPv6Header *dg, IPv6FragmentHeader *fh, simtime_t now);
+    Packet *addFragment(Packet *packet, const Ipv6Header *dg, Ipv6FragmentHeader *fh, simtime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their

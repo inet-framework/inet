@@ -28,7 +28,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_UDP
@@ -81,7 +81,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-bool MultiFieldClassifier::Filter::matches(Packet *packet, const IPv6Header *ipv6Header)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv6Header *ipv6Header)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;
@@ -174,7 +174,7 @@ int MultiFieldClassifier::classifyPacket(Packet *packet)
 
 #ifdef WITH_IPv6
     if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekHeader<IPv6Header>();
+        const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
         for (auto & elem : filters)
             if (elem.matches(packet, ipv6Header.get()))
                 return elem.gateIndex;

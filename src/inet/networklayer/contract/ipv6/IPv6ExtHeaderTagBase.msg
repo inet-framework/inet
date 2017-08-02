@@ -25,8 +25,8 @@ namespace inet;
 class noncobject IPv6ExtensionHeaderPtr;
 
 cplusplus {{
-class IPv6ExtensionHeader;
-typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
+class Ipv6ExtensionHeader;
+typedef Ipv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 
 #ifndef WITH_IPv6
@@ -40,5 +40,5 @@ class TagBase extends cObject;
 class IPv6ExtHeaderTagBase
 {
     @customize(true);
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
 }

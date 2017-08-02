@@ -18,7 +18,7 @@
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {
@@ -45,7 +45,7 @@ void IPv6ExtHeaderTagBase::clean()
 {
 #ifdef WITH_IPv6
     while (!extensionHeaders.empty()) {
-        IPv6ExtensionHeader *eh = extensionHeaders.back();
+        Ipv6ExtensionHeader *eh = extensionHeaders.back();
         extensionHeaders.pop_back();
         delete eh;
     }
@@ -78,7 +78,7 @@ void IPv6ExtHeaderTagBase::setExtensionHeader(unsigned int k, const IPv6Extensio
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
-void IPv6ExtHeaderTagBase::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
+void IPv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
 {
 #ifdef WITH_IPv6
     ASSERT(eh);
@@ -94,14 +94,14 @@ void IPv6ExtHeaderTagBase::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos
 #endif // ifdef WITH_IPv6
 }
 
-IPv6ExtensionHeader *IPv6ExtHeaderTagBase::removeFirstExtensionHeader()
+Ipv6ExtensionHeader *IPv6ExtHeaderTagBase::removeFirstExtensionHeader()
 {
     if (extensionHeaders.empty())
         return nullptr;
 
 #ifdef WITH_IPv6
     auto first = extensionHeaders.begin();
-    IPv6ExtensionHeader *ret = *first;
+    Ipv6ExtensionHeader *ret = *first;
     extensionHeaders.erase(first);
     return ret;
 #else // ifdef WITH_IPv6

@@ -19,7 +19,7 @@
 #include "inet/common/serializer/ipv6/headers/ip6.h"
 #include "inet/common/serializer/ipv6/IPv6HeaderSerializer.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 
 #if defined(_MSC_VER)
 #undef s_addr    /* MSVC #definition interferes with us */
@@ -36,11 +36,11 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(IPv6Header, IPv6HeaderSerializer);
+Register_Serializer(Ipv6Header, IPv6HeaderSerializer);
 
 void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ipv6Header = std::static_pointer_cast<const IPv6Header>(chunk);
+    const auto& ipv6Header = std::static_pointer_cast<const Ipv6Header>(chunk);
     unsigned int i;
     uint32_t flowinfo;
 
@@ -72,23 +72,23 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
     //FIXME serialize extension headers
     for (i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
-        const IPv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
+        const Ipv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
         stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
         ASSERT((extHdr->getByteLength() & 7) == 0);
         stream.writeByte((extHdr->getByteLength() - 8) / 8);
         switch (extHdr->getExtensionType()) {
             case IP_PROT_IPv6EXT_HOP: {
-                const IPv6HopByHopOptionsHeader *hdr = check_and_cast<const IPv6HopByHopOptionsHeader *>(extHdr);
+                const Ipv6HopByHopOptionsHeader *hdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(extHdr);
                 stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
-                const IPv6DestinationOptionsHeader *hdr = check_and_cast<const IPv6DestinationOptionsHeader *>(extHdr);
+                const Ipv6DestinationOptionsHeader *hdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(extHdr);
                 stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
-                const IPv6RoutingHeader *hdr = check_and_cast<const IPv6RoutingHeader *>(extHdr);
+                const Ipv6RoutingHeader *hdr = check_and_cast<const Ipv6RoutingHeader *>(extHdr);
                 stream.writeByte(hdr->getRoutingType());
                 stream.writeByte(hdr->getSegmentsLeft());
                 for (unsigned int j = 0; j < hdr->getAddressArraySize(); j++) {
@@ -98,19 +98,19 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 break;
             }
             case IP_PROT_IPv6EXT_FRAGMENT: {
-                const IPv6FragmentHeader *hdr = check_and_cast<const IPv6FragmentHeader *>(extHdr);
+                const Ipv6FragmentHeader *hdr = check_and_cast<const Ipv6FragmentHeader *>(extHdr);
                 ASSERT((hdr->getFragmentOffset() & 7) == 0);
                 stream.writeUint16Be(hdr->getFragmentOffset() | (hdr->getMoreFragments() ? 1 : 0));
                 stream.writeUint32Be(hdr->getIdentification());
                 break;
             }
             case IP_PROT_IPv6EXT_AUTH: {
-                const IPv6AuthenticationHeader *hdr = check_and_cast<const IPv6AuthenticationHeader *>(extHdr);
+                const Ipv6AuthenticationHeader *hdr = check_and_cast<const Ipv6AuthenticationHeader *>(extHdr);
                 stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ESP: {
-                const IPv6EncapsulatingSecurityPayloadHeader *hdr = check_and_cast<const IPv6EncapsulatingSecurityPayloadHeader *>(extHdr);
+                const Ipv6EncapsulatingSecurityPayloadHeader *hdr = check_and_cast<const Ipv6EncapsulatingSecurityPayloadHeader *>(extHdr);
                 stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
                 break;
             }
@@ -127,7 +127,7 @@ const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
     stream.readBytes(buffer, byte(IPv6_HEADER_BYTES));
-    auto dest = std::make_shared<IPv6Header>();
+    auto dest = std::make_shared<Ipv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);
     dest->setFlowLabel(flowinfo & 0xFFFFF);

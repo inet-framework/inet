@@ -23,7 +23,7 @@
 #include "inet/networklayer/ipv6/IPv6FragBuf.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 namespace inet {
@@ -45,7 +45,7 @@ void IPv6FragBuf::init(ICMPv6 *icmp)
     icmpModule = icmp;
 }
 
-Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *ipv6Header, IPv6FragmentHeader *fh, simtime_t now)
+Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, Ipv6FragmentHeader *fh, simtime_t now)
 {
     // find datagram buffer
     Key key;
@@ -122,7 +122,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const IPv6Header *ipv6Header, IPv6F
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
-        auto hdr = Ptr<IPv6Header>(buf->packet->peekHeader<IPv6Header>()->dup());
+        auto hdr = Ptr<Ipv6Header>(buf->packet->peekHeader<Ipv6Header>()->dup());
         const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
         hdr->setChunkLength(byte(hdr->calculateUnfragmentableHeaderByteLength()));

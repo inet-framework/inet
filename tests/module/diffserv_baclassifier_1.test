@@ -18,7 +18,7 @@ simple TestApp
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace diffserv_baclassifier_1
 {
@@ -60,7 +60,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv6-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<IPv6Header>();
+      const auto& header = std::make_shared<Ipv6Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);

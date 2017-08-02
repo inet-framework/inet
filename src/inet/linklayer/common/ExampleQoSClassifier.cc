@@ -28,7 +28,7 @@
 #  include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #endif
 #ifdef WITH_IPv6
-#  include "inet/networklayer/ipv6/IPv6Header.h"
+#  include "inet/networklayer/ipv6/Ipv6Header.h"
 #  include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #endif
 #ifdef WITH_UDP
@@ -71,7 +71,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 
 #ifdef WITH_IPv6
     if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekHeader<IPv6Header>();
+        const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP)
             return UP_BE; // ICMPv6 class
         ipProtocol = ipv6Header->getProtocolId();

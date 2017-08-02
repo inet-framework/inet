@@ -25,7 +25,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #include "inet/networklayer/diffserv/DSCP_m.h"
@@ -96,7 +96,7 @@ bool DSCPMarker::markPacket(Packet *packet, int dscp)
 #ifdef WITH_IPv6
     if (protocol == &Protocol::ipv6) {
         packet->removePoppedHeaders();
-        const auto& ipv6Header = packet->removeHeader<IPv6Header>();
+        const auto& ipv6Header = packet->removeHeader<Ipv6Header>();
         ipv6Header->setDiffServCodePoint(dscp);
         packet->insertHeader(ipv6Header);
         return true;

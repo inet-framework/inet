@@ -29,8 +29,8 @@ cplusplus {{
 namespace inet;
 
 cplusplus {{
-class IPv6ExtensionHeader;
-typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
+class Ipv6ExtensionHeader;
+typedef Ipv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 
 const int IPv6_HEADER_BYTES = 40;
@@ -51,7 +51,7 @@ class NetworkHeaderBase extends cObject;
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
-class IPv6Header extends NetworkHeaderBase
+class Ipv6Header extends NetworkHeaderBase
 {
     @customize(true);
     chunkLength = byte(IPv6_HEADER_BYTES);
@@ -65,14 +65,14 @@ class IPv6Header extends NetworkHeaderBase
     short hopLimit = 0;
     int protocolId @enum(IPProtocolId) @override;
 
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }
 
 
 //
 // This serves as the base class for all the other extension headers.
 //
-class IPv6ExtensionHeader
+class Ipv6ExtensionHeader
 {
     short extensionType;
     short byteLength = 0;   // byteLength = n * 8;

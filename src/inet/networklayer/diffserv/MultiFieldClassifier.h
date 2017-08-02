@@ -52,7 +52,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
         bool matches(Packet *packet, const Ipv4Header *ipv4Header);
     #endif // ifdef WITH_IPv4
     #ifdef WITH_IPv6
-        bool matches(Packet *packet, const IPv6Header *ipv6Header);
+        bool matches(Packet *packet, const Ipv6Header *ipv6Header);
     #endif // ifdef WITH_IPv6
     };
 

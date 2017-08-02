@@ -188,6 +188,7 @@ class SmokeTestCase(SimulationTestCase):
         command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false" \
+            " --cmdenv-express-mode=false" \
             " --result-dir=" + resultdir
 
         # print "COMMAND: " + command + '\n'

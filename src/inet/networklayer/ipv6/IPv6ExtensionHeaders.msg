@@ -20,7 +20,7 @@
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/IPv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
@@ -30,7 +30,7 @@ namespace inet;
 
 class noncobject IPv6Address;
 
-class noncobject IPv6ExtensionHeader;
+class noncobject Ipv6ExtensionHeader;
 
 class noncobject TLVOptions;
 
@@ -50,7 +50,7 @@ enum IPv6TLVOptionTypes
 // RFC 2460 Section 4.3
 // Next Header Value: 0
 //
-class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
+class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_HOP;
     // byteLength = utils::roundUp(2 + tlvOptions.getLength(), 8);
@@ -62,7 +62,7 @@ class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 // RFC 2460 Section 4.4
 // Next Header Value: 43
 //
-class IPv6RoutingHeader extends IPv6ExtensionHeader
+class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 {
     @customize(true);
     extensionType = IP_PROT_IPv6EXT_ROUTING;
@@ -78,7 +78,7 @@ class IPv6RoutingHeader extends IPv6ExtensionHeader
 // RFC 2460 Section 4.5
 // Next Header Value: 44
 //
-class IPv6FragmentHeader extends IPv6ExtensionHeader
+class Ipv6FragmentHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_FRAGMENT;
     byteLength = IPv6_FRAGMENT_HEADER_LENGTH;
@@ -92,7 +92,7 @@ class IPv6FragmentHeader extends IPv6ExtensionHeader
 // RFC 2460 Section 4.6
 // Next Header Value: 60
 //
-class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
+class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_DEST;
     byteLength = 8;    // utils::roundUp(2 + tlvOptions.getLength(), 8);
@@ -104,7 +104,7 @@ class IPv6DestinationOptionsHeader extends IPv6ExtensionHeader
 // RFC 2402
 // Not Implemented
 //
-class IPv6AuthenticationHeader extends IPv6ExtensionHeader
+class Ipv6AuthenticationHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_AUTH;
     byteLength = 8; // FIXME verify
@@ -115,7 +115,7 @@ class IPv6AuthenticationHeader extends IPv6ExtensionHeader
 // RFC 2406
 // Not Implemented
 //
-class IPv6EncapsulatingSecurityPayloadHeader extends IPv6ExtensionHeader
+class Ipv6EncapsulatingSecurityPayloadHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_ESP;
     byteLength = 8; // FIXME verify

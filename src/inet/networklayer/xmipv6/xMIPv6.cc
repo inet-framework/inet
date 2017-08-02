@@ -187,13 +187,13 @@ void xMIPv6::handleMessage(cMessage *msg)
         // normal datagram with an extension header
         else if (auto packet = dynamic_cast<Packet *>(msg)) {
             packet->removePoppedHeaders();
-            auto ipv6Header = packet->removeHeader<IPv6Header>();
-            IPv6ExtensionHeader *eh = (IPv6ExtensionHeader *)packet->getContextPointer();
+            auto ipv6Header = packet->removeHeader<Ipv6Header>();
+            Ipv6ExtensionHeader *eh = (Ipv6ExtensionHeader *)packet->getContextPointer();
 
-            if (auto rh = dynamic_cast<IPv6RoutingHeader *>(eh))
-                processType2RH(packet, (IPv6Header *)ipv6Header.get(), rh);
+            if (auto rh = dynamic_cast<Ipv6RoutingHeader *>(eh))
+                processType2RH(packet, (Ipv6Header *)ipv6Header.get(), rh);
             else if (auto hao = dynamic_cast<HomeAddressOption *>(eh))
-                processHoAOpt(packet, (IPv6Header *)ipv6Header.get(), hao);
+                processHoAOpt(packet, (Ipv6Header *)ipv6Header.get(), hao);
             else
                 throw cRuntimeError("Unknown Extension Header.");
             packet->insertHeader(ipv6Header);
@@ -2025,7 +2025,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
     //createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-void xMIPv6::processType2RH(Packet *packet, IPv6Header *ipv6Header, IPv6RoutingHeader *rh)
+void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingHeader *rh)
 {
     //EV << "Processing RH2..." << endl;
 
@@ -2087,7 +2087,7 @@ void xMIPv6::processType2RH(Packet *packet, IPv6Header *ipv6Header, IPv6RoutingH
         delete packet;
 }
 
-bool xMIPv6::validateType2RH(IPv6Header& ipv6Header, const IPv6RoutingHeader& rh)
+bool xMIPv6::validateType2RH(Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
 {
     // cf. RFC 3775 - 6.4
 
@@ -2116,7 +2116,7 @@ bool xMIPv6::validateType2RH(IPv6Header& ipv6Header, const IPv6RoutingHeader& rh
     return true;
 }
 
-void xMIPv6::processHoAOpt(Packet *packet, IPv6Header *ipv6Header, HomeAddressOption *hoaOpt)
+void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOption *hoaOpt)
 {
     // datagram from MN to CN
     bool validHoAOpt = false;
