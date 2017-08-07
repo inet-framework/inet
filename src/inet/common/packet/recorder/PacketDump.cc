@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "inet/common/packet/recorder/PacketDump.h"
+#include "inet/common/packet/Packet.h"
 
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader.h"
@@ -42,17 +43,10 @@
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #endif // ifdef WITH_IPv4
 
-#ifdef WITH_IPv4
-#undef WITH_IPv4        //FIXME //KLUDGE
-#endif // ifdef WITH_IPv4
-
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
-#ifdef WITH_IPv6
-#undef WITH_IPv6        //FIXME //KLUDGE
-#endif // ifdef WITH_IPv6
 
 namespace inet {
 
@@ -66,7 +60,8 @@ PacketDump::~PacketDump()
 {
 }
 
-void PacketDump::sctpDump(const char *label, sctp::SCTPMessage *sctpmsg,
+#ifdef WITH_SCTP
+void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SCTPMessage>& sctpmsg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     using namespace sctp;
@@ -78,9 +73,7 @@ void PacketDump::sctpDump(const char *label, sctp::SCTPMessage *sctpmsg,
     sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf;
 
-#ifndef WITH_SCTP
     out << "[sctp] " << srcAddr << " > " << destAddr;
-#else // ifndef WITH_SCTP
     uint32 numberOfChunks;
     SCTPChunk *chunk;
     uint8 type;
@@ -351,7 +344,6 @@ void PacketDump::sctpDump(const char *label, sctp::SCTPMessage *sctpmsg,
             out << endl;
         }
     }
-#endif // ifndef WITH_SCTP
 
     // comment
     if (comment)
@@ -359,6 +351,7 @@ void PacketDump::sctpDump(const char *label, sctp::SCTPMessage *sctpmsg,
 
     out << endl;
 }
+#endif // ifndef WITH_SCTP
 
 void PacketDump::dump(const char *label, const char *msg)
 {
@@ -374,67 +367,57 @@ void PacketDump::dump(const char *label, const char *msg)
 void PacketDump::dumpPacket(bool l2r, cPacket *msg)
 {
     std::ostream& out = *outp;
+    auto packet = dynamic_cast<Packet *>(msg);
+    if (packet == nullptr)
+        return;
 
+    std::string leftAddr = "A";
+    std::string rightAddr = "B";
+    packet = packet->dup();
+    while(const auto& chunk = packet->popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
 #ifdef WITH_IPv4
-    if (Ipv4Header *ipv4Header = dynamic_cast<Ipv4Header *>(msg)) {
-        dumpIPv4(l2r, "", ipv4Header, "");
-    }
-    else if (ARPPacket *arpPacket = dynamic_cast<ARPPacket *>(msg)) {
-        dumpARP(l2r, "", arpPacket, "");
-    }
-    else
-#endif // ifdef WITH_IPv4
-#ifdef WITH_SCTP
-    if (sctp::SCTPMessage *sctpMessage = dynamic_cast<sctp::SCTPMessage *>(msg)) {
-        sctpDump("", sctpMessage, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
-    }
-    else
-#endif // ifdef WITH_SCTP
-#ifdef WITH_TCP_COMMON
-    if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(msg)) {
-        tcpDump(l2r, "", tcpseg, msg->getByteLength(), std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
-    }
-    else
-#endif // ifdef WITH_TCP_COMMON
-#ifdef WITH_IPv4
-    if (dynamic_cast<ICMPMessage *>(msg)) {
-        out << "ICMPMessage " << msg->getName() << (msg->hasBitError() ? " (BitError)" : "") << endl;
-    }
-    else
-#endif // ifdef WITH_IPv4
-    {
-        // search for encapsulated IPv4[v6]Datagram in it
-        while (msg) {
-#ifdef WITH_IPv4
-            if (Ipv4Header *ipv4Header = dynamic_cast<Ipv4Header *>(msg)) {
-                dumpIPv4(l2r, "", ipv4Header);
-                break;
-            }
-            else if (ARPPacket *arpPacket = dynamic_cast<ARPPacket *>(msg)) {
-                dumpARP(l2r, "", arpPacket, "");
-                break;
-            }
+        if (const auto& ipv4Hdr = std::dynamic_pointer_cast<const Ipv4Header>(chunk)) {
+            leftAddr = ipv4Hdr->getSourceAddress().str();
+            rightAddr = ipv4Hdr->getDestinationAddress().str();
+            dumpIPv4(l2r, "", ipv4Hdr, "");
+        }
+        else
+        if (const auto& arpPacket = std::dynamic_pointer_cast<const ARPPacket>(chunk)) {
+            dumpARP(l2r, "", arpPacket, "");
+        }
+        else
+        if (const auto& icmpHeader = std::dynamic_pointer_cast<const IcmpHeader>(chunk)) {
+            out << "ICMPMessage " << packet->getName() << (packet->hasBitError() ? " (BitError)" : "") << endl;
+        }
+        else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-            if (Ipv6Header *ipv6Datagram = dynamic_cast<Ipv6Header *>(msg)) {
-                dumpIPv6(l2r, "", ipv6Datagram);
-                break;
-            }
-#endif // ifdef WITH_IPv6
-            out << "Packet " << msg->getClassName() << " '" << msg->getName() << "'"
-                << (msg->hasBitError() ? " (BitError)" : "") << ": ";
-            msg = msg->getEncapsulatedPacket();
+        if (const auto& ipv6Hdr = std::dynamic_pointer_cast<const Ipv6Header>(chunk)) {
+            dumpIPv6(l2r, "", ipv6Hdr);
         }
-
-        if (!msg) {
-            //We do not want this to end in an error if EtherAutoconf messages
-            //are passed, so just print a warning. -WEI
-            out << "CANNOT DECODE, packet doesn't contain either IPv4 or IPv6 Datagram\n";
+        else
+#endif // ifdef WITH_IPv6
+#ifdef WITH_SCTP
+        if (const auto& sctpMessage = std::dynamic_pointer_cast<const sctp::SCTPMessage>(chunk)) {
+            sctpDump("", packet, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
+        }
+        else
+#endif // ifdef WITH_SCTP
+#ifdef WITH_TCP_COMMON
+        if (const auto& tcpHdr = std::dynamic_pointer_cast<const tcp::TcpHeader>(chunk)) {
+            tcpDump(l2r, "", tcpHdr, msg->getByteLength(), (l2r ? leftAddr : rightAddr), (l2r ? rightAddr : leftAddr));
+        }
+        else
+#endif // ifdef WITH_TCP_COMMON
+        {
+            out << chunk->str();
         }
     }
+    delete packet;
 }
 
-void PacketDump::udpDump(bool l2r, const char *label, UdpHeader *udppkt,
+#ifdef WITH_UDP
+void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>& udpHeader,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     std::ostream& out = *outp;
@@ -443,34 +426,27 @@ void PacketDump::udpDump(bool l2r, const char *label, UdpHeader *udppkt,
     sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
     out << buf;
 
-#ifndef WITH_UDP
-    if (l2r)
-        out << "[UDP] " << srcAddr << " > " << destAddr << ": ";
-    else
-        out << "[UDP] " << destAddr << " < " << srcAddr << ": ";
-#else // ifndef WITH_UDP
       // seq and time (not part of the tcpdump format)
       // src/dest
     if (l2r) {
-        out << srcAddr << "." << udppkt->getSourcePort() << " > ";
-        out << destAddr << "." << udppkt->getDestinationPort() << ": ";
+        out << srcAddr << "." << udpHeader->getSourcePort() << " > ";
+        out << destAddr << "." << udpHeader->getDestinationPort() << ": ";
     }
     else {
-        out << destAddr << "." << udppkt->getDestinationPort() << " < ";
-        out << srcAddr << "." << udppkt->getSourcePort() << ": ";
+        out << destAddr << "." << udpHeader->getDestinationPort() << " < ";
+        out << srcAddr << "." << udpHeader->getSourcePort() << ": ";
     }
 
     //out << endl;
-    out << "UDP: Payload length=" << udppkt->getTotalLengthField() - UDP_HEADER_BYTES << endl;
+    out << "UDP: Payload length=" << udpHeader->getTotalLengthField() - UDP_HEADER_BYTES << endl;
 
 #ifdef WITH_SCTP
-    if (udppkt->getSourcePort() == 9899 || udppkt->getDestinationPort() == 9899) {
-        if (dynamic_cast<sctp::SCTPMessage *>(udppkt->getEncapsulatedPacket()))
-            sctpDump("", (sctp::SCTPMessage *)(udppkt->getEncapsulatedPacket()),
+    if (udpHeader->getSourcePort() == 9899 || udpHeader->getDestinationPort() == 9899) {
+        if (dynamic_cast<sctp::SCTPMessage *>(udpHeader->getEncapsulatedPacket()))
+            sctpDump("", (sctp::SCTPMessage *)(udpHeader->getEncapsulatedPacket()),
                     std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
 #endif // ifdef WITH_SCTP
-#endif // ifndef WITH_UDP
 
     // comment
     if (comment)
@@ -478,73 +454,39 @@ void PacketDump::udpDump(bool l2r, const char *label, UdpHeader *udppkt,
 
     out << endl;
 }
+#endif // ifdef WITH_UDP
 
-void PacketDump::dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment)
-{
 #ifdef WITH_IPv4
+void PacketDump::dumpARP(bool l2r, const char *label, const Ptr<const ARPPacket>& arp, const char *comment)
+{
     std::ostream& out = *outp;
     char buf[30];
     sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
-    out << buf << " src: " << dgram->getSrcIPAddress() << ", " << dgram->getSrcMACAddress()
-        << "; dest: " << dgram->getDestIPAddress() << ", " << dgram->getDestMACAddress() << endl;
-#endif // ifdef WITH_IPv4
+    out << buf << " src: " << arp->getSrcIPAddress() << ", " << arp->getSrcMACAddress()
+        << "; dest: " << arp->getDestIPAddress() << ", " << arp->getDestMACAddress() << endl;
 }
 
-void PacketDump::dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const char *comment)
+void PacketDump::dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const  char *comment)
 {
     std::ostream& out = *outp;
     char buf[30];
     std::string classes;
 
-#ifdef WITH_IPv4
-    cPacket *encapmsg = dgram->getEncapsulatedPacket();
+    // some other packet, dump what we can
+    // seq and time (not part of the tcpdump format)
+    sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
+    out << buf;
+    out << "[IPv4] " << ipv4Header->getSrcAddress() << " > " << ipv4Header->getDestAddress();
 
-#ifdef WITH_TCP_COMMON
-    if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(encapmsg)) {
-        // if TCP, dump as TCP
-        tcpDump(l2r, label, tcpseg, dgram->getSrcAddress().str(),
-                dgram->getDestAddress().str(), comment);
-    }
-    else
-#endif // ifdef WITH_TCP_COMMON
-#ifdef WITH_UDP
-    if (dynamic_cast<UdpHeader *>(encapmsg)) {
-        udpDump(l2r, label, (UdpHeader *)encapmsg, dgram->getSrcAddress().str(),
-                dgram->getDestAddress().str(), comment);
-    }
-    else
-#endif // ifdef WITH_UDP
-#ifdef WITH_SCTP
-    if (dynamic_cast<sctp::SCTPMessage *>(dgram->getEncapsulatedPacket())) {
-        sctp::SCTPMessage *sctpmsg = check_and_cast<sctp::SCTPMessage *>(dgram->getEncapsulatedPacket());
-        if (dgram->hasBitError())
-            sctpmsg->setBitError(true);
-        sctpDump(label, sctpmsg, dgram->getSrcAddress().str(), dgram->getDestAddress().str(), comment);
-    }
-    else
-#endif // ifdef WITH_SCTP
-    {
-        // some other packet, dump what we can
-        // seq and time (not part of the tcpdump format)
-        sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
-        out << buf;
-        out << "[IPv4] " << dgram->getSrcAddress() << " > " << dgram->getDestAddress();
+    if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset())
+        out << ((ipv4Header->getMoreFragments()) ? " inner" : " last") << " fragment from offset " << ipv4Header->getFragmentOffset();
 
-        if (dgram->getMoreFragments() || dgram->getFragmentOffset())
-            out << ((dgram->getMoreFragments()) ? " inner" : " last") << " fragment from offset " << dgram->getFragmentOffset();
+    // comment
+    if (comment)
+        out << " # " << comment;
 
-        if (encapmsg) {
-            // packet class and name
-            out << " ? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"";
-        }
+    out << endl;
 
-        // comment
-        if (comment)
-            out << " # " << comment;
-
-        out << endl;
-    }
-#else // ifdef WITH_IPv4
     sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf << "[IPv4]";
 
@@ -553,55 +495,32 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const 
         out << " # " << comment;
 
     out << endl;
-#endif // ifdef WITH_IPv4
 }
+#endif // ifdef WITH_IPv4
 
-void PacketDump::dumpIPv6(bool l2r, const char *label, Ipv6Header *dgram, const char *comment)
+#ifdef WITH_IPv6
+void PacketDump::dumpIPv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment)
 {
     using namespace tcp;
 
     std::ostream& out = *outp;
     char buf[30];
 
-#ifdef WITH_IPv6
-    cPacket *encapmsg = dgram->getEncapsulatedPacket();
-
-#ifdef WITH_TCP_COMMON
-    if (dynamic_cast<TcpHeader *>(encapmsg)) {
-        // if TCP, dump as TCP
-        tcpDump(l2r, label, (TcpHeader *)encapmsg, dgram->getSrcAddress().str(),
-                dgram->getDestAddress().str(), comment);
-    }
-    else
-#endif // ifdef WITH_TCP_COMMON
-    {
-        // some other packet, dump what we can
-        // seq and time (not part of the tcpdump format)
-        sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
-        out << buf;
-
-        // packet class and name
-        out << "? " << encapmsg->getClassName() << " \"" << encapmsg->getName() << "\"\n";
-
-        // comment
-        if (comment)
-            out << "# " << comment;
-
-        out << endl;
-    }
-#else // ifdef WITH_IPv6
     sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
-    out << buf << "[IPv4]";
+    out << buf;
+
+    out << ipv6Header->str();
 
     // comment
     if (comment)
         out << " # " << comment;
 
     out << endl;
-#endif // ifdef WITH_IPv6
 }
+#endif // ifdef WITH_IPv6
 
-void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, int tcpLength,
+#ifdef WITH_TCP_COMMON
+void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     using namespace tcp;
@@ -613,47 +532,41 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, in
     sprintf(buf, "[%.3f%s] ", SIMTIME_DBL(simTime()), label);
     out << buf;
 
-#ifndef WITH_TCP_COMMON
-    if (l2r)
-        out << srcAddr << " > " << destAddr << ": ";
-    else
-        out << destAddr << " < " << srcAddr << ": ";
-#else // ifndef WITH_TCP_COMMON
-      // src/dest ports
+    // src/dest ports
     if (l2r) {
-        out << srcAddr << "." << tcpseg->getSrcPort() << " > ";
-        out << destAddr << "." << tcpseg->getDestPort() << ": ";
+        out << srcAddr << "." << tcpHeader->getSrcPort() << " > ";
+        out << destAddr << "." << tcpHeader->getDestPort() << ": ";
     }
     else {
-        out << destAddr << "." << tcpseg->getDestPort() << " < ";
-        out << srcAddr << "." << tcpseg->getSrcPort() << ": ";
+        out << destAddr << "." << tcpHeader->getDestPort() << " < ";
+        out << srcAddr << "." << tcpHeader->getSrcPort() << ": ";
     }
 
-    int payloadLength = tcpLength - tcpseg->getHeaderLength();
+    int payloadLength = tcpLength - tcpHeader->getHeaderLength();
 
     // flags
     bool flags = false;
-    if (tcpseg->getUrgBit()) {
+    if (tcpHeader->getUrgBit()) {
         flags = true;
         out << "U ";
     }
-    if (tcpseg->getAckBit()) {
+    if (tcpHeader->getAckBit()) {
         flags = true;
         out << "A ";
     }
-    if (tcpseg->getPshBit()) {
+    if (tcpHeader->getPshBit()) {
         flags = true;
         out << "P ";
     }
-    if (tcpseg->getRstBit()) {
+    if (tcpHeader->getRstBit()) {
         flags = true;
         out << "R ";
     }
-    if (tcpseg->getSynBit()) {
+    if (tcpHeader->getSynBit()) {
         flags = true;
         out << "S ";
     }
-    if (tcpseg->getFinBit()) {
+    if (tcpHeader->getFinBit()) {
         flags = true;
         out << "F ";
     }
@@ -662,32 +575,32 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, in
     }
 
     // data-seqno
-    if (payloadLength > 0 || tcpseg->getSynBit()) {
-        out << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo() + payloadLength;
+    if (payloadLength > 0 || tcpHeader->getSynBit()) {
+        out << tcpHeader->getSequenceNo() << ":" << tcpHeader->getSequenceNo() + payloadLength;
         out << "(" << payloadLength << ") ";
     }
 
     // ack
-    if (tcpseg->getAckBit())
-        out << "ack " << tcpseg->getAckNo() << " ";
+    if (tcpHeader->getAckBit())
+        out << "ack " << tcpHeader->getAckNo() << " ";
 
     // window
-    out << "win " << tcpseg->getWindow() << " ";
+    out << "win " << tcpHeader->getWindow() << " ";
 
     // urgent
-    if (tcpseg->getUrgBit())
-        out << "urg " << tcpseg->getUrgentPointer() << " ";
+    if (tcpHeader->getUrgBit())
+        out << "urg " << tcpHeader->getUrgentPointer() << " ";
 
     // options present?
-    if (tcpseg->getHeaderLength() > 20) {
+    if (tcpHeader->getHeaderLength() > 20) {
         const char *direction = l2r ? "sent" : "received";
 
         if (verbose) {
-            unsigned short numOptions = tcpseg->getHeaderOptionArraySize();
+            unsigned short numOptions = tcpHeader->getHeaderOptionArraySize();
             out << "\n  TCP Header Option(s) " << direction << ":\n";
 
             for (int i = 0; i < numOptions; i++) {
-                TCPOption *option = tcpseg->getHeaderOption(i);
+                TCPOption *option = tcpHeader->getHeaderOption(i);
                 out << "    " << (i + 1) << ". option kind=" << option->getKind() << " length=" << option->getLength() << "\n";
             }
         }

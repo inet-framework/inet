@@ -124,7 +124,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
     EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
-    // TODO: revive packetDumper.dumpPacket(l2r, msg);
+    packetDumper.dumpPacket(l2r, msg);
 
     if (!pcapDumper.isOpen())
         return;

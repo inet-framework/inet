@@ -39,19 +39,14 @@ void TCPTesterBase::initialize()
 
 void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, int tcpLength, bool fromA, const char *comment)
 {
-#if OMNETPP_VERSION < 0x0500
-    if (getEnvir()->isDisabled())
-        return;
-#else
     if (getEnvir()->isExpressMode())
         return;
-#endif
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
     std::ostringstream out;
     tcpdump.setOutStream(out);
-    tcpdump.tcpDump(fromA, lbl, const_cast<TcpHeader*>(seg.get()), tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
+    tcpdump.tcpDump(fromA, lbl, seg, tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
     EV_DEBUG_C("testing") << out.str();
     tcpdump.setOutStream(EVSTREAM);
 }

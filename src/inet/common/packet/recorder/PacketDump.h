@@ -22,6 +22,7 @@
 #define __INET_PACKETDUMP_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -87,37 +88,48 @@ class INET_API PacketDump
      */
     void dumpPacket(bool l2r, cPacket *packet);
 
+#ifdef WITH_IPv4
     /**
      * Dumps info about the given IPv4 datagram. The l2r parameter denotes the
      * direction of the packet.
      */
-    void dumpIPv4(bool l2r, const char *label, Ipv4Header *dgram, const char *comment = nullptr);
+    void dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const char *comment = nullptr);
 
-    void dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment = nullptr);
+    void dumpARP(bool l2r, const char *label, const Ptr<const ARPPacket>& arp, const char *comment = nullptr);
+#endif // ifdef WITH_IPv4
 
+#ifdef WITH_IPv6
     /**
      * Dumps info about the given IPv6 datagram. The l2r parameter denotes
      * the direction of the packet.
      */
-    void dumpIPv6(bool l2r, const char *label, Ipv6Header *dgram, const char *comment = nullptr);
+    void dumpIPv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment = nullptr);
+#endif // ifdef WITH_IPv6
 
+#ifdef WITH_SCTP
     /**
      * Dumps info about the given SCTP message.
      */
-    void sctpDump(const char *label, sctp::SCTPMessage *sctpmsg, const std::string& srcAddr,
+    void sctpDump(const char *label, Packet *pk, const std::string& srcAddr,
             const std::string& destAddr, const char *comment = nullptr);
 
+#endif // ifdef WITH_SCTP
+
+#ifdef WITH_TCP_COMMON
     /**
      * Dumps info about the given TCP segment.
      */
-    void tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, int tcpLength, const std::string& srcAddr,
+    void tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength, const std::string& srcAddr,
             const std::string& destAddr, const char *comment = nullptr);
+#endif // ifdef WITH_TCP_COMMON
 
+#ifdef WITH_UDP
     /**
      * Dumps info about the given UDP packet.
      */
-    void udpDump(bool l2r, const char *label, UdpHeader *udppkt, const std::string& srcAddr,
+    void udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>& udpHeader, const std::string& srcAddr,
             const std::string& destAddr, const char *comment);
+#endif // ifdef WITH_UDP
 };
 
 } // namespace inet
