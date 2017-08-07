@@ -144,15 +144,15 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
 
         //TODO slicechunk???
 
-        if (const NetworkHeaderBase *dgram = dynamic_cast<const NetworkHeaderBase *>(chunk)) {
-            srcAddr = dgram->getSourceAddress();
-            destAddr = dgram->getDestinationAddress();
+        if (const NetworkHeaderBase *l3Header = dynamic_cast<const NetworkHeaderBase *>(chunk)) {
+            srcAddr = l3Header->getSourceAddress();
+            destAddr = l3Header->getDestinationAddress();
 #ifdef WITH_IPv4
-            if (const auto *ipv4dgram = dynamic_cast<const Ipv4Header *>(chunk)) {
+            if (const auto *ipv4Header = dynamic_cast<const Ipv4Header *>(chunk)) {
                 out << "IPv4: " << srcAddr << " > " << destAddr;
-                if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0) {
-                    out << " " << (ipv4dgram->getMoreFragments() ? "" : "last ")
-                        << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
+                if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset() > 0) {
+                    out << " " << (ipv4Header->getMoreFragments() ? "" : "last ")
+                        << "fragment with offset=" << ipv4Header->getFragmentOffset() << " of ";
                 }
             }
             else
@@ -170,8 +170,8 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_ETHERNET
 #ifdef WITH_TCP_COMMON
-        else if (const auto tcpheader = dynamic_cast<const tcp::TcpHeader *>(chunk)) {
-            out << formatTCPPacket(tcpheader);
+        else if (const auto tcpHeader = dynamic_cast<const tcp::TcpHeader *>(chunk)) {
+            out << formatTCPPacket(tcpHeader);
         }
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
