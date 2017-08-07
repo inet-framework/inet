@@ -19,7 +19,6 @@
 
 package inet.examples.ipv6.demonetworketh;
 
-import inet.common.packet.recorder.TCPDump;
 import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
@@ -42,14 +41,11 @@ network DemoNetworkEth
         r2: Router6;
         cli[n]: StandardHost6;
         srv[n]: StandardHost6;
-        linemonitor[n]: TCPDump;
     connections:
         for i=0..n-1 {
-            // FIXME adjust to the new TCPDump module
-            //            cli[i].ethg++ <--> ethernetline <--> linemonitor[i].a;
-            //            linemonitor[i].b <--> ethernetline <--> r1.ethg++;
             cli[i].ethg++ <--> ethernetline <--> r1.ethg++;
             srv[i].ethg++ <--> ethernetline <--> r2.ethg++;
         }
         r1.ethg++ <--> ethernetline <--> r2.ethg++;
 }
+
