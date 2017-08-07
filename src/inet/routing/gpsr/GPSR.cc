@@ -618,32 +618,32 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
 #endif
 #ifdef WITH_IPv6
     if (std::dynamic_pointer_cast<const Ipv6Header>(nwHeader)) {
-        auto dgram = removeNetworkProtocolHeader<Ipv6Header>(packet);
+        auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
-        int oldHlen = dgram->calculateHeaderByteLength();
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        int oldHlen = ipv6Header->calculateHeaderByteLength();
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr == nullptr) {
             hdr = new Ipv6HopByHopOptionsHeader();
             hdr->setByteLength(8);
-            dgram->addExtensionHeader(hdr);
+            ipv6Header->addExtensionHeader(hdr);
         }
         hdr->getTlvOptions().add(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
-        int newHlen = dgram->calculateHeaderByteLength();
-        dgram->setChunkLength(dgram->getChunkLength() + byte(newHlen - oldHlen));  // it was dgram->addByteLength(newHlen - oldHlen);
-        insertNetworkProtocolHeader(packet, Protocol::ipv6, dgram);
+        int newHlen = ipv6Header->calculateHeaderByteLength();
+        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + byte(newHlen - oldHlen));
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else
 #endif
 #ifdef WITH_GENERIC
     if (std::dynamic_pointer_cast<const GenericDatagramHeader>(nwHeader)) {
-        auto dgram = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
+        auto gnpHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
-        int oldHlen = dgram->getTlvOptions().getLength();
-        dgram->getTlvOptions().add(gpsrOption);
-        int newHlen = dgram->getTlvOptions().getLength();
-        dgram->setChunkLength(dgram->getChunkLength() + byte(newHlen - oldHlen));  // it was dgram->addByteLength(newHlen - oldHlen);
-        insertNetworkProtocolHeader(packet, Protocol::gnp, dgram);
+        int oldHlen = gnpHeader->getTlvOptions().getLength();
+        gnpHeader->getTlvOptions().add(gpsrOption);
+        int newHlen = gnpHeader->getTlvOptions().getLength();
+        gnpHeader->setChunkLength(gnpHeader->getChunkLength() + byte(newHlen - oldHlen));
+        insertNetworkProtocolHeader(packet, Protocol::gnp, gnpHeader);
     }
     else
 #endif
@@ -656,14 +656,14 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     const GPSROption *gpsrOption = nullptr;
 
 #ifdef WITH_IPv4
-    if (auto dgram = std::dynamic_pointer_cast<const Ipv4Header>(networkHeader)) {
-        gpsrOption = check_and_cast_nullable<const GPSROption *>(dgram->findOptionByType(IPOPTION_TLV_GPSR));
+    if (auto ipv4Header = std::dynamic_pointer_cast<const Ipv4Header>(networkHeader)) {
+        gpsrOption = check_and_cast_nullable<const GPSROption *>(ipv4Header->findOptionByType(IPOPTION_TLV_GPSR));
     }
     else
 #endif
 #ifdef WITH_IPv6
-    if (auto dgram = std::dynamic_pointer_cast<const Ipv6Header>(networkHeader)) {
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+    if (auto ipv6Header = std::dynamic_pointer_cast<const Ipv6Header>(networkHeader)) {
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)
@@ -673,10 +673,10 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_GENERIC
-    if (auto dgram = std::dynamic_pointer_cast<const GenericDatagramHeader>(networkHeader)) {
-        int i = (dgram->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
+    if (auto gnpHeader = std::dynamic_pointer_cast<const GenericDatagramHeader>(networkHeader)) {
+        int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast_nullable<const GPSROption *>(&(dgram->getTlvOptions().at(i)));
+            gpsrOption = check_and_cast_nullable<const GPSROption *>(&(gnpHeader->getTlvOptions().at(i)));
     }
     else
 #endif

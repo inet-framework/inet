@@ -86,18 +86,18 @@ void IPv6Tunneling::initialize(int stage)
 
 void IPv6Tunneling::handleMessage(cMessage *msg)
 {
-    Packet *dgram = check_and_cast<Packet *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
 
-    if (msg->getArrivalGate()->isName("upperLayerIn")) {
+    if (packet->getArrivalGate()->isName("upperLayerIn")) {
         // decapsulate
-        decapsulateDatagram(dgram);
+        decapsulateDatagram(packet);
     }
-    else if (msg->getArrivalGate()->isName("linkLayerIn")) {
+    else if (packet->getArrivalGate()->isName("linkLayerIn")) {
         // encapsulate
-        encapsulateDatagram(dgram);
+        encapsulateDatagram(packet);
     }
     else
-        throw cRuntimeError("IPv6Tunneling: Unknown gate: %s!", msg->getArrivalGate()->getFullName());
+        throw cRuntimeError("IPv6Tunneling: Unknown gate: %s!", packet->getArrivalGate()->getFullName());
 }
 
 bool IPv6Tunneling::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
