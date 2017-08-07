@@ -414,7 +414,7 @@ Packet *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
     return packet;
 }
 
-//FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHup.
+//FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
 bool EtherMACBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;

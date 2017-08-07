@@ -87,8 +87,7 @@ package inet.transportlayer.contract;
 //
 // <b>Communication with the IP layer</b>
 //
-// A TCP segment is represented by the class ~TCPSegment. The payload content
-// of TCPSegment is depends on the selected ~TCPDataTransferMode in ~TCPOpenCommand.
+// A TCP header is represented by the class ~TcpHeader.
 //
 // The TCP model relies on sending and receiving ~IPv4ControlInfo objects
 // attached to TCP segment objects as control info
