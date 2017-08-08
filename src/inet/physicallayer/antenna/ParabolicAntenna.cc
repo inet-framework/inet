@@ -24,10 +24,7 @@ namespace physicallayer {
 Define_Module(ParabolicAntenna);
 
 ParabolicAntenna::ParabolicAntenna() :
-    AntennaBase(),
-    maxGain(NaN),
-    minGain(NaN),
-    beamWidth(degree(NaN))
+    AntennaBase()
 {
 }
 
@@ -35,9 +32,9 @@ void ParabolicAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        maxGain = math::dB2fraction(par("maxGain"));
-        minGain = math::dB2fraction(par("minGain"));
-        beamWidth = degree(par("beamWidth"));
+        parameters.maxGain = math::dB2fraction(par("maxGain"));
+        parameters.minGain = math::dB2fraction(par("minGain"));
+        parameters.beamWidth = degree(par("beamWidth"));
     }
 }
 
@@ -45,15 +42,20 @@ std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) c
 {
     stream << "ParabolicAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << maxGain
-               << ", minGain = " << minGain
-               << ", beamWidth = " << beamWidth;
+        stream << ", maxGain = " << parameters.maxGain
+               << ", minGain = " << parameters.minGain
+               << ", beamWidth = " << parameters.beamWidth;
     return AntennaBase::printToStream(stream, level);
 }
 
-double ParabolicAntenna::computeGain(const EulerAngles direction) const
+std::shared_ptr<IAntennaSnapshot> ParabolicAntenna::createSnapshot()
 {
-    return std::max(minGain, maxGain * math::dB2fraction(-12 * pow(direction.alpha / math::deg2rad(beamWidth.get()), 2)));
+    return std::make_shared<Snapshot>(parameters);
+}
+
+double ParabolicAntenna::Snapshot::computeGain(const EulerAngles direction) const
+{
+    return std::max(parameters.minGain, parameters.maxGain * math::dB2fraction(-12 * pow(direction.alpha / math::deg2rad(parameters.beamWidth.get()), 2)));
 }
 
 } // namespace physicallayer

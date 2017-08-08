@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2017 Raphael Riebl, TH Ingolstadt
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,41 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IANTENNA_H
-#define __INET_IANTENNA_H
+#ifndef __INET_IANTENNASNAPSHOT_H
+#define __INET_IANTENNASNAPSHOT_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
-#include "inet/physicallayer/contract/packetlevel/IAntennaSnapshot.h"
-#include "inet/mobility/contract/IMobility.h"
-#include <memory>
+#include "inet/common/geometry/common/EulerAngles.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 /**
- * This interface represents a physical device (a part of the radio) which converts
- * electric signals into radio waves, and vice versa.
+ * This interface represents a simplified snapshot of IAntenna properties.
  */
-class INET_API IAntenna : public IPrintableObject
+class INET_API IAntennaSnapshot
 {
   public:
-    /**
-     * Returns the mobility of this antenna that describes its position and
-     * orientation over time.
-     */
-    virtual IMobility *getMobility() const = 0;
-
-    /**
-     * Returns the number of antennas in the array.
-     */
-    virtual int getNumAntennas() const = 0;
-
-    /**
-     * Returns the maximum possible antenna gain independent of any direction.
-     */
-    virtual double getMaxGain() const = 0;
-
     /**
      * Returns the antenna gain in the provided direction. The direction is
      * relative to the antenna geometry, so the result depends only on the
@@ -59,18 +39,11 @@ class INET_API IAntenna : public IPrintableObject
      * radio waves arriving from the the specified direction.
      */
     virtual double computeGain(const EulerAngles direction) const = 0;
-
-    /**
-     * Get snapshot of current antenna properties.
-     * The returned snapshot is guaranteed to be valid even if the original
-     * antenna and/or the radio are destroyed.
-     */
-    virtual std::shared_ptr<const IAntennaSnapshot> getSnapshot() const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IANTENNA_H
+#endif // ifndef __INET_IANTENNASNAPSHOT_H
 

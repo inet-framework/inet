@@ -31,13 +31,22 @@ class INET_API ConstantGainAntenna : public AntennaBase
 
   protected:
     virtual void initialize(int stage) override;
+    class Snapshot : public IAntennaSnapshot
+    {
+    public:
+      Snapshot(double gain_) : gain(gain_) {}
+      virtual double computeGain(const EulerAngles direction) const override { return gain; }
+
+    protected:
+      double gain;
+    };
 
   public:
     ConstantGainAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double getMaxGain() const override { return gain; }
-    virtual double computeGain(const EulerAngles direction) const override { return gain; }
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() override;
 };
 
 } // namespace physicallayer

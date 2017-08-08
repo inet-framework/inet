@@ -32,13 +32,23 @@ class INET_API CosineAntenna : public AntennaBase
 
   protected:
     virtual void initialize(int stage) override;
+    class Snapshot : public IAntennaSnapshot
+    {
+      public:
+        Snapshot(double maxGain, degree beamWidth);
+        virtual double computeGain(const EulerAngles direction) const override;
+
+      protected:
+        double maxGain;
+        degree beamWidth;
+    };
 
   public:
     CosineAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double getMaxGain() const override { return maxGain; }
-    virtual double computeGain(const EulerAngles direction) const override;
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() override;
 };
 
 } // namespace physicallayer

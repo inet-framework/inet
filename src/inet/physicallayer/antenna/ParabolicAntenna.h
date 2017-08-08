@@ -27,9 +27,24 @@ namespace physicallayer {
 class INET_API ParabolicAntenna : public AntennaBase
 {
   protected:
-    double maxGain;
-    double minGain;
-    degree beamWidth;
+    struct Parameters
+    {
+      double maxGain = NaN;
+      double minGain = NaN;
+      degree beamWidth = degree(NaN);
+    };
+
+    class Snapshot : public IAntennaSnapshot
+    {
+      public:
+        Snapshot(const Parameters& params) : parameters(params) {}
+        virtual double computeGain(const EulerAngles direction) const override;
+
+      protected:
+        Parameters parameters;
+    };
+
+    Parameters parameters;
 
   protected:
     virtual void initialize(int stage) override;
@@ -38,8 +53,8 @@ class INET_API ParabolicAntenna : public AntennaBase
     ParabolicAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getMaxGain() const override { return maxGain; }
-    virtual double computeGain(const EulerAngles direction) const override;
+    virtual double getMaxGain() const override { return parameters.maxGain; }
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() override;
 };
 
 } // namespace physicallayer
