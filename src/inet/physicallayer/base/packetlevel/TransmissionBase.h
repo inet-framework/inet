@@ -25,11 +25,14 @@ namespace inet {
 
 namespace physicallayer {
 
+class IRadioMedium;
+
 class INET_API TransmissionBase : public virtual ITransmission, public virtual ITransmissionAnalogModel, public cObject
 {
   protected:
     const int id;
-    const IRadio *transmitter;
+    const IRadioMedium *radioMedium;
+    const int transmitterId;
     const Packet *packet;
     const simtime_t startTime;
     const simtime_t endTime;
@@ -48,7 +51,8 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IRadio *getTransmitter() const override { return transmitter; }
+    virtual const IRadio *getTransmitter() const override;
+    virtual int getTransmitterId() const override { return transmitterId; }
     virtual const Packet *getPacket() const override { return packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }
