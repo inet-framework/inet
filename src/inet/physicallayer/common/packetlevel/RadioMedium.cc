@@ -470,6 +470,17 @@ void RadioMedium::removeRadio(const IRadio *radio)
     emit(radioRemovedSignal, radioModule);
 }
 
+const IRadio* RadioMedium::getRadio(int radioId) const
+{
+    const IRadio *radio = nullptr;
+    if (radios.size() > 0) {
+        int radioIndex = radioId - radios[0]->getId();
+        if (radioIndex >= 0)
+            radio = radios[radioIndex];
+    }
+    return radio;
+}
+
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
     transmissionCount++;
