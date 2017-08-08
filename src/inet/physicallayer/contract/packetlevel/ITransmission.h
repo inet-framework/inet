@@ -53,9 +53,15 @@ class INET_API ITransmission : public IPrintableObject
 
     /**
      * Returns the transmitter that transmitted this radio signal on the radio
-     * channel. This function never returns nullptr.
+     * channel. This function may return nullptr.
      */
     virtual const IRadio *getTransmitter() const = 0;
+
+    /**
+     * Returns the transmitter's id that transmitted this radio signal on the
+     * radio channel.
+     */
+    virtual int getTransmitterId() const = 0;
 
     /**
      * Returns the packet corresponding to this transmission. This function

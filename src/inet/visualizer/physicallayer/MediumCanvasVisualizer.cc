@@ -435,6 +435,7 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
             setAnimationSpeed();
         if (displayTransmissions) {
             auto transmitter = transmission->getTransmitter();
+            if (!transmitter) return;
             auto figure = getTransmissionFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
@@ -461,6 +462,7 @@ void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission
             setAnimationSpeed();
         if (displayTransmissions) {
             auto transmitter = transmission->getTransmitter();
+            if (!transmitter) return;
             auto figure = getTransmissionFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
