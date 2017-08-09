@@ -556,7 +556,7 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destI
     }
 }
 
-const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(const Ipv4Header *ipv4Header)
+const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const
 {
     return rt->getInterfaceForDestAddr(ipv4Header->getSrcAddress());
 }
@@ -604,7 +604,7 @@ void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
         delete packet;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
-    else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(ipv4Header.get())) {
+    else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(ipv4Header)) {
         EV_ERROR << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
         PacketDropDetails details;
