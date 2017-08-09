@@ -957,7 +957,6 @@ bool IPv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 
     // walk through all extension headers
     for (int i = 0; i < noExtHeaders; i++) {
-        // KLUDGE: TODO: const_cast<Ipv6Header>
         const Ipv6ExtensionHeader *eh = ipv6Header->getExtensionHeader(i);
 
         if (const Ipv6RoutingHeader *rh = dynamic_cast<const Ipv6RoutingHeader *>(eh)) {
