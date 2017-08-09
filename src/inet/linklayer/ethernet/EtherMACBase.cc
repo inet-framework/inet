@@ -22,6 +22,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -430,7 +431,16 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
             return false;
         case FCS_COMPUTED: {
             bool isFcsBad = false;
-            //FIXME check the Fcs in ethTrailer
+            // check the FCS
+            auto ethBytes = packet->peekDataAt<BytesChunk>(byte(0), packet->getDataLength() - ethTrailer->getChunkLength());
+            auto bufferLength = byte(ethBytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            // 1. fill in the data
+            ethBytes->copyToBuffer(buffer, bufferLength);
+            // 2. compute the FCS
+            auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+            delete [] buffer;
+            isFcsBad = (computedFcs != ethTrailer->getFcs());      //FIXME how to check fcs?
             if (isFcsBad)
                 return false;
             break;
