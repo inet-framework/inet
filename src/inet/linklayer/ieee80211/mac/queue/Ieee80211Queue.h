@@ -37,10 +37,10 @@ class INET_API Ieee80211Queue : public cQueue
         virtual bool insertAfter(Packet *where, Packet *frame);
 
         virtual Packet *remove(Packet *frame);
-        virtual Packet *pop();
+        virtual Packet *pop() override;
 
-        virtual Packet *front() const;
-        virtual Packet *back() const;
+        virtual Packet *front() const override;
+        virtual Packet *back() const override;
 
         virtual bool contains(Packet *frame) const;
 
