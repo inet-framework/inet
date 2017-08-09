@@ -36,7 +36,7 @@ namespace tcp {
 // helper functions for SACK
 //
 
-bool TCPConnection::processSACKOption(const Ptr<TcpHeader>& tcpseg, const TCPOptionSack& option)
+bool TCPConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSack& option)
 {
     if (option.getLength() % 8 != 2) {
         EV_ERROR << "ERROR: option length incorrect\n";

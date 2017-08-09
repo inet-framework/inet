@@ -30,13 +30,13 @@ namespace inet {
 
 namespace tcp {
 
-bool TCPConnection::tryFastRoute(const Ptr<TcpHeader>& tcpseg)
+bool TCPConnection::tryFastRoute(const Ptr<const TcpHeader>& tcpseg)
 {
     // fast route processing not yet implemented
     return false;
 }
 
-void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(packet, tcpseg);
@@ -86,7 +86,7 @@ void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeade
     }
 }
 
-TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
+TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest)
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(packet, tcpseg);
@@ -119,7 +119,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<TcpHea
     return event;
 }
 
-bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     //TODO must rewrite it
     //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
@@ -135,7 +135,7 @@ bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const
     return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
 }
 
-TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     //
     // RFC 793: first check sequence number
@@ -729,7 +729,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<T
 
 //----
 
-TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_DETAIL << "Processing segment in LISTEN\n";
 
@@ -864,7 +864,7 @@ TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<Tcp
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processSegmentInSynSent(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPEventCode TCPConnection::processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_DETAIL << "Processing segment in SYN_SENT\n";
 
@@ -1073,7 +1073,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(Packet *packet, const Ptr<Tc
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processRstInSynReceived(const Ptr<TcpHeader>& tcpseg)
+TCPEventCode TCPConnection::processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg)
 {
     EV_DETAIL << "Processing RST in SYN_RCVD\n";
 
@@ -1104,7 +1104,7 @@ TCPEventCode TCPConnection::processRstInSynReceived(const Ptr<TcpHeader>& tcpseg
     return TCP_E_RCV_RST;
 }
 
-bool TCPConnection::processAckInEstabEtc(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+bool TCPConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 

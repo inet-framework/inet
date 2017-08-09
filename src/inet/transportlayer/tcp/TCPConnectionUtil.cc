@@ -157,7 +157,7 @@ void TCPConnection::printConnBrief() const
               << "\n";
 }
 
-void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
@@ -450,7 +450,7 @@ void TCPConnection::selectInitialSeqNum()
     rexmitQueue->init(state->iss + 1);    // + 1 is for SYN
 }
 
-bool TCPConnection::isSegmentAcceptable(Packet *packet, const Ptr<TcpHeader>& tcpseg) const
+bool TCPConnection::isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeader>& tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
@@ -943,7 +943,7 @@ void TCPConnection::retransmitData()
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
-void TCPConnection::readHeaderOptions(const Ptr<TcpHeader>& tcpseg)
+void TCPConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
 {
     EV_INFO << "TCP Header Option(s) received:\n";
 
@@ -995,7 +995,7 @@ void TCPConnection::readHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     }
 }
 
-bool TCPConnection::processMSSOption(const Ptr<TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option)
+bool TCPConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option)
 {
     if (option.getLength() != 4) {
         EV_ERROR << "ERROR: MSS option length incorrect\n";
@@ -1030,7 +1030,7 @@ bool TCPConnection::processMSSOption(const Ptr<TcpHeader>& tcpseg, const TCPOpti
     return true;
 }
 
-bool TCPConnection::processWSOption(const Ptr<TcpHeader>& tcpseg, const TCPOptionWindowScale& option)
+bool TCPConnection::processWSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionWindowScale& option)
 {
     if (option.getLength() != 3) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1055,7 +1055,7 @@ bool TCPConnection::processWSOption(const Ptr<TcpHeader>& tcpseg, const TCPOptio
     return true;
 }
 
-bool TCPConnection::processTSOption(const Ptr<TcpHeader>& tcpseg, const TCPOptionTimestamp& option)
+bool TCPConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionTimestamp& option)
 {
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1103,7 +1103,7 @@ bool TCPConnection::processTSOption(const Ptr<TcpHeader>& tcpseg, const TCPOptio
     return true;
 }
 
-bool TCPConnection::processSACKPermittedOption(const Ptr<TcpHeader>& tcpseg, const TCPOptionSackPermitted& option)
+bool TCPConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSackPermitted& option)
 {
     if (option.getLength() != 2) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1281,7 +1281,7 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     return *tcpseg;
 }
 
-uint32 TCPConnection::getTSval(const Ptr<TcpHeader>& tcpseg) const
+uint32 TCPConnection::getTSval(const Ptr<const TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1292,7 +1292,7 @@ uint32 TCPConnection::getTSval(const Ptr<TcpHeader>& tcpseg) const
     return 0;
 }
 
-uint32 TCPConnection::getTSecr(const Ptr<TcpHeader>& tcpseg) const
+uint32 TCPConnection::getTSecr(const Ptr<const TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1365,7 +1365,7 @@ unsigned short TCPConnection::updateRcvWnd()
     return (unsigned short)scaled_rcv_wnd;
 }
 
-void TCPConnection::updateWndInfo(const Ptr<TcpHeader>& tcpseg, bool doAlways)
+void TCPConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways)
 {
     uint32 true_window = tcpseg->getWindow();
     // RFC 1323, page 10:

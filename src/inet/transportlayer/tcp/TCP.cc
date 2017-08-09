@@ -169,14 +169,12 @@ void TCP::handleMessage(cMessage *msg)
             // process segment
             TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
             if (conn) {
-                // KLUDGE: TODO: std::const_pointer_cast<TcpHeader>
-                bool ret = conn->processTCPSegment(packet, std::const_pointer_cast<TcpHeader>(tcpHeader), srcAddr, destAddr);
+                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                // KLUDGE: TODO: std::const_pointer_cast<TcpHeader>
-                segmentArrivalWhileClosed(packet, std::const_pointer_cast<TcpHeader>(tcpHeader), srcAddr, destAddr);
+                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
             }
         }
     }
@@ -207,7 +205,7 @@ TCPConnection *TCP::createConnection(int socketId)
     return new TCPConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
