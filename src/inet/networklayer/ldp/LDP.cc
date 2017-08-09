@@ -1099,6 +1099,7 @@ void LDP::processLABEL_WITHDRAW(Packet *pk)
     fecDown.erase(dit);
 
     EV_INFO << "sending back relase message" << endl;
+    pk->removePoppedHeaders();
     auto reply = pk->removeHeader<LDPLabelMapping>();
     pk->removeAll();
     pk->clearTags();
