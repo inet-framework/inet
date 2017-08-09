@@ -1066,10 +1066,10 @@ void LDP::processLABEL_RELEASE(Packet *pk)
 
 void LDP::processLABEL_WITHDRAW(Packet *pk)
 {
-    const auto& packet = pk->peekHeader<LDPLabelMapping>();
-    FEC_TLV fec = packet->getFec();
-    int label = packet->getLabel();
-    IPv4Address fromIP = packet->getSenderAddress();
+    const auto& ldpLabelMapping = pk->peekHeader<LDPLabelMapping>();
+    FEC_TLV fec = ldpLabelMapping->getFec();
+    int label = ldpLabelMapping->getLabel();
+    IPv4Address fromIP = ldpLabelMapping->getSenderAddress();
 
     EV_INFO << "Mapping withdraw received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
@@ -1099,8 +1099,11 @@ void LDP::processLABEL_WITHDRAW(Packet *pk)
     fecDown.erase(dit);
 
     EV_INFO << "sending back relase message" << endl;
-    // KLUDGE: TODO: std::const_pointer_cast<LDPLabelMapping>
-    std::const_pointer_cast<LDPLabelMapping>(packet)->setType(LABEL_RELEASE);
+    auto reply = pk->removeHeader<LDPLabelMapping>();
+    pk->removeAll();
+    pk->clearTags();
+    reply->setType(LABEL_RELEASE);
+    pk->insertHeader(reply);
 
     // send msg to peer over TCP
     sendToPeer(fromIP, pk);
