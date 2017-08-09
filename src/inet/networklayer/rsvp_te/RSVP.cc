@@ -1557,7 +1557,8 @@ void RSVP::processPathMsg(Packet *pk)
 void RSVP::processResvMsg(Packet *pk)
 {
     EV_INFO << "Received RESV_MESSAGE" << endl;
-    const auto& msg = pk->peekHeader<RSVPResvMsg>();
+    pk->removePoppedHeaders();
+    auto msg = pk->removeHeader<RSVPResvMsg>();
     print(msg.get());
 
     IPv4Address OI = msg->getLIH();
@@ -1568,10 +1569,8 @@ void RSVP::processResvMsg(Packet *pk)
         PathStateBlock_t *psb = findPSB(msg->getSession(), (SenderTemplateObj_t&)msg->getFlowDescriptor()[m].Filter_Spec_Object);
         if (!psb) {
             EV_DETAIL << "matching PSB not found for lspid=" << msg->getFlowDescriptor()[m].Filter_Spec_Object.Lsp_Id << endl;
-
             // remove descriptor from message
-            // KLUDGE: TODO: std::const_pointer_cast<RSVPResvMsg>
-            std::const_pointer_cast<RSVPResvMsg>(msg)->getFlowDescriptor().erase(msg->getFlowDescriptor().begin() + m);
+            msg->getFlowDescriptor().erase(msg->getFlowDescriptor().begin() + m);
             --m;
         }
     }
