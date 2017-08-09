@@ -207,11 +207,11 @@ bool IPv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
         case CRC_COMPUTED: {
             if (ipv4Header->isCorrect()) {
                 // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
-                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(byte(0), ipv4Header->getChunkLength())->getBytes();
-                auto bufferLength = ipv4HeaderBytes.size();
+                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(byte(0), ipv4Header->getChunkLength());
+                auto bufferLength = byte(ipv4HeaderBytes->getChunkLength()).get();
                 auto buffer = new uint8_t[bufferLength];
                 // 1. fill in the data
-                std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
+                ipv4HeaderBytes->copyToBuffer(buffer, bufferLength);
                 // 2. compute the CRC
                 auto computedCrc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
                 delete [] buffer;
