@@ -1,3 +1,17 @@
+diff --git a/Makefile.inc.in b/Makefile.inc.in
+index 75bc1ad..1143803 100644
+--- a/Makefile.inc.in
++++ b/Makefile.inc.in
+@@ -8,6 +8,9 @@ OMNETPP_VERSION = @OMNETPP_VERSION@
+ OMNETPP_BUILDID = @OMNETPP_BUILDID@
+ OMNETPP_EDITION = @OMNETPP_EDITION@
+ 
++# variable to show that the message compiler has a temporary patch applied
++OMNETPP_MSGC_PATCH_VER = 1
++
+ #
+ # Optional features (set to "yes" to enable the feature)
+ #
 diff --git a/include/omnetpp/cobject.h b/include/omnetpp/cobject.h
 index 70db509..5a356d1 100644
 --- a/include/omnetpp/cobject.h
@@ -12,7 +26,7 @@ index 70db509..5a356d1 100644
      /**
       * Constructor. It has an empty body. (The class does not have data members
 diff --git a/src/nedxml/msgcppgenerator.cc b/src/nedxml/msgcppgenerator.cc
-index 6b452ac..7c3819b 100644
+index 8bb700a..73c122c 100644
 --- a/src/nedxml/msgcppgenerator.cc
 +++ b/src/nedxml/msgcppgenerator.cc
 @@ -133,6 +133,7 @@ P check_and_cast(T *p)
