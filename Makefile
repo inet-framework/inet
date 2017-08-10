@@ -12,7 +12,6 @@ cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
 	@rm -f src/Makefile $(FEATURES_H)
-	@cd tutorials && $(MAKE) clean && rm -rf doc/tutorials
 
 MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET -I.
 
@@ -51,7 +50,6 @@ $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
 
 
 doc:
-	cd tutorials && $(MAKE) && mkdir -p ../doc/tutorials/wireless && cp -r wireless/html/* ../doc/tutorials/wireless
 	cd doc/src/tcp && $(MAKE)
 	cd doc/src/manual && $(MAKE)
 	doxygen doxy.cfg
