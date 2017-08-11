@@ -50,7 +50,7 @@ void Edcaf::calculateTimingParameters()
     slotTime = modeSet->getSlotTime();
     sifs = modeSet->getSifsTime();
     int aifsn = par("aifsn");
-    simtime_t aifs = sifs + fallback(getAifsNumber(ac), aifsn) * slotTime;
+    simtime_t aifs = sifs + fallback(aifsn, getAifsNumber(ac)) * slotTime;
     ifs = aifs;
     eifs = sifs + aifs + modeSet->getSlowestMandatoryMode()->getDuration(LENGTH_ACK);
     ASSERT(ifs > sifs);
