@@ -1,0 +1,48 @@
+#! /bin/sh
+
+# This script lets you easily run a simulation that uses INET, and was compiled into
+# an executable, with some additional code, but is not necessarily linked with INET.
+
+# Usage:
+# run_with_inet [--valgrind|--gdb] /path/to/program [<.ini files, omnetpp flags>]
+
+DIR=`dirname $0`
+
+TOOL=""
+
+# start with valgrind if the first argument is --valgrind
+VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+
+if [ "$1" = "--valgrind" ] ; then
+   echo "##### Running with Valgrind! ######"
+   TOOL="valgrind $VALGRIND_OPTIONS"
+   shift
+fi
+
+# start with gdb if the first argument is --gdb
+GDB_OPTIONS="-quiet -ex run"
+
+if [ "$1" = "--gdb" ] ; then
+   echo "##### Running with GDB! ######"
+   TOOL="gdb $GDB_OPTIONS --args"
+   shift
+fi
+
+
+PROGRAM="$1"
+shift
+
+if [[ "$PROGRAM"x == *_dbgx ]]; then
+    DBG="_dbg" # this should not be necessary once loadExtensionLibrary() guesses it
+else
+    DBG=""
+fi
+
+#echo "tool: '" $TOOL "'"
+#echo "program:" $PROGRAM "'"
+#echo "rest: '" "$@" "'"
+#echo "debug: '" $DBG "'"
+
+OPP_OPTIONS="-n $DIR;$DIR/../tutorials;$DIR/../showcases;$DIR/../examples;. --image-path=$DIR/../images $@"
+
+$TOOL $PROGRAM -l $DIR/INET$DBG $OPP_OPTIONS
