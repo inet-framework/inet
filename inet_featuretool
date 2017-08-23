@@ -54,6 +54,7 @@ def queryYesNo(question, default="yes"):
 
     while True:
         sys.stdout.write(question + prompt)
+        sys.stdout.flush()
         choice = raw_input().lower()
         if default is not None and choice == '':
             return valid[default]
