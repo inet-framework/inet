@@ -639,7 +639,7 @@ root directory where the following files are present:
                     warn("feature '%s' is missing from the %s file, adding it with default state." % (fid, FEATURESTATEFILE))
                     self.fsChanged = True
                 elif self.autoFixingMode:
-                    warn("feature '%s' is missing from the %s file, using the default state." % (fid, FEATURESTATEFILE))
+                    self.warnIfVerbose(2, "feature '%s' is missing from the %s file, using the default state." % (fid, FEATURESTATEFILE))
                 else:
                     fail("feature '%s' is missing from the %s file." % (fid, FEATURESTATEFILE))
 
