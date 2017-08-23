@@ -40,7 +40,7 @@ void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
-        headerLength = bit(par("headerBitLength"));
+        headerLength = bit(par("headerBitLength").longValue());
         bitrate = bps(par("bitrate"));
         communicationRange = m(par("communicationRange"));
         interferenceRange = m(par("interferenceRange"));

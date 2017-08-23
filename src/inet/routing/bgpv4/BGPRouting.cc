@@ -152,7 +152,7 @@ void BGPRouting::openTCPConnectionToPeer(SessionID sessionID)
         socket->abort();
         socket->renewSocket();
     }
-    socket->setCallbackObject(this, (void *)sessionID);
+    socket->setCallbackObject(this, (void *)(uintptr_t)sessionID);
     socket->setOutputGate(gate("socketOut"));
     socket->bind(intfEntry->ipv4Data()->getIPAddress(), 0);
     _socketMap.addSocket(socket);
@@ -174,7 +174,7 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
             delete msg;
             return;
         }
-        socket->setCallbackObject(this, (void *)i);
+        socket->setCallbackObject(this, (void *)(uintptr_t)i);
 
         _socketMap.addSocket(socket);
         _BGPSessions[i]->getSocket()->abort();
