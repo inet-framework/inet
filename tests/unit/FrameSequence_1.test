@@ -28,7 +28,7 @@ enum Role
 FrameSequenceContext *originatorContext = new FrameSequenceContext(MACAddress(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 FrameSequenceContext *recipientContext = new FrameSequenceContext(MACAddress(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-class DataFs : public IFrameSequence 
+class DataFs : public IFrameSequence
 {
     protected:
         int firstStep = -1;
@@ -54,7 +54,7 @@ class DataFs : public IFrameSequence
                         throw cRuntimeError("Unknown step");
                 }
             }
-			else {
+            else {
                 switch (step) {
                     case 0:
                         return new ReceiveStep();
@@ -92,7 +92,8 @@ class DataFs : public IFrameSequence
         virtual std::string getHistory() override { return ""; }
 };
 
-class INET_API AckFs : public IFrameSequence {
+class INET_API AckFs : public IFrameSequence
+{
     protected:
         int firstStep = -1;
         int step = -1;
@@ -117,7 +118,7 @@ class INET_API AckFs : public IFrameSequence {
             else {
                 switch (step) {
                     case 0: {
-                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("ACK");
+                        Ieee80211MacHeader *frame = new Ieee80211MacHeader("ACK");
                         frame->setType(ST_ACK);
                         return new TransmitStep(frame, 0);
                     }
@@ -155,7 +156,8 @@ class INET_API AckFs : public IFrameSequence {
         virtual std::string getHistory() override { return ""; }
 };
 
-class RtsCtsFs : public IFrameSequence {
+class RtsCtsFs : public IFrameSequence
+{
     protected:
         int firstStep = -1;
         int step = -1;
@@ -172,7 +174,7 @@ class RtsCtsFs : public IFrameSequence {
             if (context == originatorContext) {
                 switch (step) {
                     case 0: {
-                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("RTS");
+                        Ieee80211MacHeader *frame = new Ieee80211MacHeader("RTS");
                         frame->setType(ST_RTS);
                         return new TransmitStep(frame, 0);
                     }
@@ -189,7 +191,7 @@ class RtsCtsFs : public IFrameSequence {
                     case 0:
                         return new ReceiveStep();
                     case 1: {
-                            Ieee80211MacHeader *frame = new Ieee80211MacHeader("CTS");
+                        Ieee80211MacHeader *frame = new Ieee80211MacHeader("CTS");
                         frame->setType(ST_CTS);
                         return new TransmitStep(frame, 0);
                     }
@@ -200,7 +202,7 @@ class RtsCtsFs : public IFrameSequence {
                 }
             }
         }
-        
+
         bool completeStep(FrameSequenceContext *context) override {
             if (context == originatorContext) {
                 switch (step) {
@@ -250,7 +252,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
     Ieee80211Frame *recipientFrame = nullptr;
     recipientContext = new FrameSequenceContext(MACAddress(RECIPIENT), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     recipientFrameSequence->startSequence(recipientContext, 0);
-    
+
     // run frame sequence
     while (isOriginatorRunning || isRecipientRunning) {
         if (isOriginatorRunning) {
@@ -263,7 +265,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
             else
                 originatorContext->addStep(originatorStep);
         }
-        
+
         if (isRecipientRunning) {
             // advance recipient
             recipientStep = recipientFrameSequence->prepareStep(recipientContext);
@@ -275,7 +277,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 recipientContext->addStep(recipientStep);
         }
 
-        // handle originator transmit        
+        // handle originator transmit
         if (isOriginatorRunning) {
             if (originatorStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
                 ITransmitStep *transmitStep = check_and_cast<ITransmitStep *>(originatorStep);
@@ -283,7 +285,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 EV_INFO << "originator transmit: " << originatorFrame->getName() << "\n";
             }
         }
-        
+
         // handle recipient transmit
         if (isRecipientRunning) {
             if (recipientStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
@@ -330,7 +332,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 isRecipientRunning = false;
             }
         }
-        
+
         delete originatorFrame;
         delete recipientFrame;
         originatorFrame = nullptr;
