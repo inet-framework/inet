@@ -36,18 +36,27 @@ void DipoleAntenna::initialize(int stage)
         length = m(par("length"));
 }
 
-double DipoleAntenna::computeGain(EulerAngles direction) const
-{
-    double q = sin(direction.beta - M_PI_2);
-    return 1.5 * q * q;
-}
-
 std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "DipoleAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", length = " << length;
     return AntennaBase::printToStream(stream, level);
+}
+
+std::shared_ptr<IAntennaSnapshot> DipoleAntenna::createSnapshot()
+{
+    return std::make_shared<Snapshot>(length);
+}
+
+DipoleAntenna::Snapshot::Snapshot(m length_) : length(length_)
+{
+}
+
+double DipoleAntenna::Snapshot::computeGain(EulerAngles direction) const
+{
+    double q = sin(direction.beta - M_PI_2);
+    return 1.5 * q * q;
 }
 
 } // namespace physicallayer

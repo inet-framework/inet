@@ -331,6 +331,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
+    const IRadio* getRadio(int id) const override;
 
     virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
 

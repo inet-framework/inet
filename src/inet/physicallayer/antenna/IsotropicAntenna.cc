@@ -34,6 +34,11 @@ std::ostream& IsotropicAntenna::printToStream(std::ostream& stream, int level) c
     return AntennaBase::printToStream(stream, level);
 }
 
+std::shared_ptr<IAntennaSnapshot> IsotropicAntenna::createSnapshot()
+{
+    return std::make_shared<Snapshot>();
+}
+
 } // namespace physicallayer
 
 } // namespace inet

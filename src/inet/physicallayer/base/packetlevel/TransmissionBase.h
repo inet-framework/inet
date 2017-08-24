@@ -20,6 +20,7 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/base/packetlevel/TransmitterSnapshot.h"
 
 namespace inet {
 
@@ -29,7 +30,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 {
   protected:
     const int id;
-    const IRadio *transmitter;
+    const TransmitterSnapshot transmitter;
     const cPacket *macFrame;
     const simtime_t startTime;
     const simtime_t endTime;
@@ -48,7 +49,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IRadio *getTransmitter() const override { return transmitter; }
+    virtual const TransmitterSnapshot *getTransmitter() const override { return &transmitter; }
     virtual const cPacket *getPhyFrame() const override { return nullptr; }
     virtual const cPacket *getMacFrame() const override { return macFrame; }
 

@@ -205,11 +205,11 @@ bool RadioMedium::isInInterferenceRange(const ITransmission *transmission, const
 
 bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, const IListening *listening) const
 {
-    const IRadio *transmitter = transmission->getTransmitter();
+    const auto transmitter = transmission->getTransmitter();
     const IRadio *receiver = listening->getReceiver();
     const IArrival *arrival = getArrival(receiver, transmission);
     const simtime_t& minInterferenceTime = mediumLimitCache->getMinInterferenceTime();
-    return transmitter != receiver &&
+    return transmitter->getId() != receiver->getId() &&
            arrival->getEndTime() >= listening->getStartTime() + minInterferenceTime &&
            arrival->getStartTime() <= listening->getEndTime() - minInterferenceTime &&
            isInInterferenceRange(transmission, listening->getStartPosition(), listening->getEndPosition());
@@ -217,11 +217,11 @@ bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, c
 
 bool RadioMedium::isInterferingTransmission(const ITransmission *transmission, const IReception *reception) const
 {
-    const IRadio *transmitter = transmission->getTransmitter();
+    const auto transmitter = transmission->getTransmitter();
     const IRadio *receiver = reception->getReceiver();
     const IArrival *arrival = getArrival(receiver, transmission);
     const simtime_t& minInterferenceTime = mediumLimitCache->getMinInterferenceTime();
-    return transmitter != receiver &&
+    return transmitter->getId() != receiver->getId() &&
            arrival->getEndTime() > reception->getStartTime() + minInterferenceTime &&
            arrival->getStartTime() < reception->getEndTime() - minInterferenceTime &&
            isInInterferenceRange(transmission, reception->getStartPosition(), reception->getEndPosition());
@@ -470,6 +470,17 @@ void RadioMedium::removeRadio(const IRadio *radio)
     emit(radioRemovedSignal, radioModule);
 }
 
+const IRadio* RadioMedium::getRadio(int radioId) const
+{
+    const IRadio *radio = nullptr;
+    if (radios.size() > 0) {
+        int radioIndex = radioId - radios[0]->getId();
+        if (radioIndex >= 0)
+            radio = radios[radioIndex];
+    }
+    return radio;
+}
+
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
 {
     transmissionCount++;
@@ -671,13 +682,18 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
         for (const auto transmission : transmissions) {
-            const Radio *transmitterRadio = check_and_cast<const Radio *>(transmission->getTransmitter());
             if (signal == IRadio::listeningChangedSignal) {
                 const IArrival *arrival = getArrival(receiverRadio, transmission);
                 const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
                 delete communicationCache->getCachedListening(receiverRadio, transmission);
                 communicationCache->setCachedListening(receiverRadio, transmission, listening);
             }
+
+            const auto transmitter = transmission->getTransmitter();
+            auto transmitterRadio = dynamic_cast<const Radio*>(getRadio(transmitter->getId()));
+            if (!transmitterRadio)
+                continue;
+
             if (communicationCache->getCachedFrame(receiverRadio, transmission) == nullptr &&
                 receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
             {

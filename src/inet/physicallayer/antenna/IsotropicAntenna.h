@@ -29,9 +29,16 @@ class INET_API IsotropicAntenna : public AntennaBase
   public:
     IsotropicAntenna();
 
+    class Snapshot : public IAntennaSnapshot
+    {
+    public:
+      virtual double computeGain(const EulerAngles direction) const override { return 1; }
+    };
+
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double getMaxGain() const override { return 1; }
     virtual double computeGain(const EulerAngles direction) const override { return 1; }
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() override;
 };
 
 } // namespace physicallayer

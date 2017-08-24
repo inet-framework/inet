@@ -48,7 +48,17 @@ std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) cons
     return AntennaBase::printToStream(stream, level);
 }
 
-double CosineAntenna::computeGain(const EulerAngles direction) const
+std::shared_ptr<IAntennaSnapshot> CosineAntenna::createSnapshot()
+{
+    return std::make_shared<Snapshot>(maxGain, beamWidth);
+}
+
+CosineAntenna::Snapshot::Snapshot(double maxGain, degree beamWidth) :
+    maxGain(maxGain), beamWidth(beamWidth)
+{
+}
+
+double CosineAntenna::Snapshot::computeGain(const EulerAngles direction) const
 {
     double exponent = -3.0 / (20 * std::log10(std::cos(math::deg2rad(beamWidth.get()) / 4.0)));
     return maxGain * std::pow(std::cos(direction.alpha / 2.0), exponent);

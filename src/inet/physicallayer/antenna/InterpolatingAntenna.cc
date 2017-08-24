@@ -24,9 +24,7 @@ namespace physicallayer {
 Define_Module(InterpolatingAntenna);
 
 InterpolatingAntenna::InterpolatingAntenna() :
-    AntennaBase(),
-    minGain(NaN),
-    maxGain(NaN)
+    AntennaBase()
 {
 }
 
@@ -34,9 +32,9 @@ void InterpolatingAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        parseMap(elevationGainMap, par("elevationGains"));
-        parseMap(headingGainMap, par("headingGains"));
-        parseMap(bankGainMap, par("bankGains"));
+        parseMap(parameters.elevationGainMap, par("elevationGains"));
+        parseMap(parameters.headingGainMap, par("headingGains"));
+        parseMap(parameters.bankGainMap, par("bankGains"));
     }
 }
 
@@ -44,7 +42,7 @@ std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int leve
 {
     stream << "InterpolatingAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << maxGain;
+        stream << ", maxGain = " << parameters.maxGain;
     return AntennaBase::printToStream(stream, level);
 }
 
@@ -68,15 +66,25 @@ void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const cha
             throw cRuntimeError("Insufficient number of values");
         double angle = atof(angleString) * M_PI / 180;
         double gain = math::dB2fraction(atof(gainString));
-        if (std::isnan(minGain) || gain < minGain)
-            minGain = gain;
-        if (std::isnan(maxGain) || gain > maxGain)
-            maxGain = gain;
+        if (std::isnan(parameters.minGain) || gain < parameters.minGain)
+            parameters.minGain = gain;
+        if (std::isnan(parameters.maxGain) || gain > parameters.maxGain)
+            parameters.maxGain = gain;
         gainMap.insert(std::pair<double, double>(angle, gain));
     }
 }
 
-double InterpolatingAntenna::computeGain(const std::map<double, double>& gainMap, double angle) const
+std::shared_ptr<IAntennaSnapshot> InterpolatingAntenna::createSnapshot()
+{
+    return std::make_shared<Snapshot>(parameters);
+}
+
+InterpolatingAntenna::Snapshot::Snapshot(const AntennaParameters& parameters) :
+    parameters(parameters)
+{
+}
+
+double InterpolatingAntenna::Snapshot::computeGain(const std::map<double, double>& gainMap, double angle) const
 {
     angle = fmod(angle, 2 * M_PI);
     if (angle < 0.0) angle += 2 * M_PI;
@@ -99,11 +107,11 @@ double InterpolatingAntenna::computeGain(const std::map<double, double>& gainMap
     }
 }
 
-double InterpolatingAntenna::computeGain(EulerAngles direction) const
+double InterpolatingAntenna::Snapshot::computeGain(EulerAngles direction) const
 {
-    return computeGain(headingGainMap, direction.alpha) *
-           computeGain(elevationGainMap, direction.beta) *
-           computeGain(bankGainMap, direction.gamma);
+    return computeGain(parameters.headingGainMap, direction.alpha) *
+           computeGain(parameters.elevationGainMap, direction.beta) *
+           computeGain(parameters.bankGainMap, direction.gamma);
 }
 
 } // namespace physicallayer

@@ -41,6 +41,28 @@ std::ostream& AntennaBase::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
+bool AntennaBase::checkSnapshot() const
+{
+    // return false if some antenna parameters change during runtime
+    return true;
+}
+
+double AntennaBase::computeGain(const EulerAngles direction) const
+{
+    return getSnapshot()->computeGain(direction);
+}
+
+std::shared_ptr<const IAntennaSnapshot> AntennaBase::getSnapshot() const
+{
+    if (!snapshot || !checkSnapshot()) {
+        auto thiz = const_cast<AntennaBase*>(this);
+        thiz->snapshot = thiz->createSnapshot();
+    }
+
+    ASSERT(snapshot);
+    return snapshot;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

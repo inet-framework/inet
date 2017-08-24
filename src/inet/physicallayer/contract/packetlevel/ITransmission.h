@@ -24,6 +24,7 @@
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
+#include "inet/physicallayer/base/packetlevel/TransmitterSnapshot.h"
 
 namespace inet {
 
@@ -54,7 +55,7 @@ class INET_API ITransmission : public IPrintableObject
      * Returns the transmitter that transmitted this radio signal on the radio
      * channel. This function never returns nullptr.
      */
-    virtual const IRadio *getTransmitter() const = 0;
+    virtual const TransmitterSnapshot *getTransmitter() const = 0;
 
     /**
      * Returns the PHY frame corresponding to this transmission. This function

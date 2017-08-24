@@ -153,7 +153,9 @@ bool MediumVisualizerBase::isSignalTransmissionInProgress(const ITransmission *t
 
 bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission) const
 {
-    auto radio = check_and_cast<const cModule *>(transmission->getTransmitter());
+    const cModule *radio = dynamic_cast<const cModule *>(transmission->getTransmitter()->tryRadio());
+    if (!radio)
+        return false;
     auto networkNode = getContainingNode(radio);
     if (!networkNodeFilter.matches(networkNode))
         return false;

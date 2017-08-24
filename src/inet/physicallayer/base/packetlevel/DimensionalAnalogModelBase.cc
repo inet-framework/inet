@@ -52,9 +52,9 @@ std::ostream& DimensionalAnalogModelBase::printToStream(std::ostream& stream, in
 const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const IRadio *transmitterRadio = transmission->getTransmitter();
+    const TransmitterSnapshot *transmitterRadio = transmission->getTransmitter();
     const IAntenna *receiverAntenna = receiverRadio->getAntenna();
-    const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
+    const IAntennaSnapshot *transmitterAntenna = transmitterRadio->getAntenna();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IDimensionalSignal *dimensionalSignalAnalogModel = check_and_cast<const IDimensionalSignal *>(transmission->getAnalogModel());
     const simtime_t transmissionStartTime = transmission->getStartTime();

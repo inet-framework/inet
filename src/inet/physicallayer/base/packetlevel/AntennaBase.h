@@ -19,6 +19,8 @@
 #define __INET_ANTENNABASE_H
 
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
+#include "inet/physicallayer/contract/packetlevel/IAntennaSnapshot.h"
+#include <memory>
 
 namespace inet {
 
@@ -29,9 +31,21 @@ class INET_API AntennaBase : public IAntenna, public cModule
   protected:
     IMobility *mobility;
     int numAntennas;
+    std::shared_ptr<IAntennaSnapshot> snapshot;
 
   protected:
     virtual void initialize(int stage) override;
+
+    /**
+     * Check if snapshot is still valid.
+     * Returns true if valid, false if new snapshot shall be created.
+     */
+    virtual bool checkSnapshot() const;
+
+    /**
+     * Create a new snapshot from current antenna state.
+     */
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() = 0;
 
   public:
     AntennaBase();
@@ -39,6 +53,8 @@ class INET_API AntennaBase : public IAntenna, public cModule
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual IMobility *getMobility() const override { return mobility; }
     virtual int getNumAntennas() const override { return numAntennas; }
+    virtual double computeGain(const EulerAngles direction) const override;
+    virtual std::shared_ptr<const IAntennaSnapshot> getSnapshot() const override;
 };
 
 } // namespace physicallayer

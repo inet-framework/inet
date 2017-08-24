@@ -44,6 +44,11 @@ std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level
     return AntennaBase::printToStream(stream, level);
 }
 
+std::shared_ptr<IAntennaSnapshot> ConstantGainAntenna::createSnapshot()
+{
+    return std::make_shared<Snapshot>(gain);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

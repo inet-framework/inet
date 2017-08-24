@@ -42,7 +42,7 @@ std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) c
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", id = " << id;
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", transmitterId = " << transmitter->getId()
+        stream << ", transmitterId = " << transmitter.getId()
                << ", startTime = " << startTime
                << ", endTime = " << endTime
                << ", startPosition = " << startPosition

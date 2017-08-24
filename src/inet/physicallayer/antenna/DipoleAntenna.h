@@ -32,13 +32,23 @@ class INET_API DipoleAntenna : public AntennaBase
   protected:
     virtual void initialize(int stage) override;
 
+    class Snapshot : public IAntennaSnapshot
+    {
+    public:
+      Snapshot(m length);
+      virtual m getLength() const { return length; }
+      virtual double computeGain(const EulerAngles direction) const override;
+
+    protected:
+      m length;
+    };
+
   public:
     DipoleAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual m getLength() const { return length; }
     virtual double getMaxGain() const override { return 1.5; }
-    virtual double computeGain(const EulerAngles direction) const override;
+    virtual std::shared_ptr<IAntennaSnapshot> createSnapshot() override;
 };
 
 } // namespace physicallayer
