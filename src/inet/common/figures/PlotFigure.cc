@@ -24,7 +24,6 @@ using namespace inet;
 
 Register_Figure("plot", PlotFigure);
 
-#define M_PI    3.14159265358979323846
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;

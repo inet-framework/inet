@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Figure("gauge", GaugeFigure);
 
-#define M_PI 3.14159265358979323846
-
 static const double BORDER_WIDTH_PERCENT = 0.015;
 static const double CURVE_WIDTH_PERCENT = 0.02;
 static const double TICK_BIG_LENGTH_PERCENT = 0.44;
