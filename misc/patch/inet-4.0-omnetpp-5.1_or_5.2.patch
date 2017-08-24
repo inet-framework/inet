@@ -1,5 +1,5 @@
 diff --git a/Makefile.inc.in b/Makefile.inc.in
-index 75bc1ad..1143803 100644
+index 75bc1ad..e21a131 100644
 --- a/Makefile.inc.in
 +++ b/Makefile.inc.in
 @@ -8,6 +8,9 @@ OMNETPP_VERSION = @OMNETPP_VERSION@
@@ -26,7 +26,7 @@ index 70db509..5a356d1 100644
      /**
       * Constructor. It has an empty body. (The class does not have data members
 diff --git a/src/nedxml/msgcppgenerator.cc b/src/nedxml/msgcppgenerator.cc
-index 8bb700a..73c122c 100644
+index 8bb700a..a8076c8 100644
 --- a/src/nedxml/msgcppgenerator.cc
 +++ b/src/nedxml/msgcppgenerator.cc
 @@ -133,6 +133,7 @@ P check_and_cast(T *p)
@@ -46,7 +46,15 @@ index 8bb700a..73c122c 100644
  }
  
  MsgCppGenerator::~MsgCppGenerator()
-@@ -723,8 +726,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
+@@ -495,6 +498,7 @@ void MsgCppGenerator::generate(MsgFileElement *fileElement)
+ 
+     CC << "#include <iostream>\n";
+     CC << "#include <sstream>\n";
++    CC << "#include <memory>\n";
+     CC << "#include \"" << hfilenamewithoutdir << "\"\n\n";
+ 
+     CC << PARSIMPACK_BOILERPLATE;
+@@ -723,8 +727,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
      }
  
      if (info.generate_class) {
@@ -57,7 +65,7 @@ index 8bb700a..73c122c 100644
          }
      }
  
-@@ -732,6 +735,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
+@@ -732,6 +736,8 @@ void MsgCppGenerator::prepareFieldForCodeGeneration(ClassInfo& info, ClassInfo::
      it->feditable = getPropertyAsBool(it->fprops, "editable", false);
      it->editNotDisabled = getPropertyAsBool(it->fprops, "editable", true);
      it->fopaque = getPropertyAsBool(it->fprops, "opaque", false);
@@ -66,7 +74,7 @@ index 8bb700a..73c122c 100644
      it->tostring = getProperty(it->fprops, "tostring", "");
      it->fromstring = getProperty(it->fprops, "fromstring", "");
  
-@@ -950,6 +955,8 @@ void MsgCppGenerator::prepareForCodeGeneration(ClassInfo& info)
+@@ -950,6 +956,8 @@ void MsgCppGenerator::prepareForCodeGeneration(ClassInfo& info)
          info.fieldnamesuffix = "_var";
      }
  
@@ -75,7 +83,7 @@ index 8bb700a..73c122c 100644
      std::string s = getProperty(info.props, "implements");
      if (!s.empty()) {
          info.implements = StringTokenizer(s.c_str(), ",").asVector();
-@@ -1112,6 +1119,9 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1112,6 +1120,9 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
      else {
          H << "    virtual " << info.msgclass << " *dup() const override {return new " << info.msgclass << "(*this);}\n";
      }
@@ -85,7 +93,7 @@ index 8bb700a..73c122c 100644
      H << "    virtual void parsimPack(omnetpp::cCommBuffer *b) const override;\n";
      H << "    virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;\n";
      H << "\n";
-@@ -1120,29 +1130,31 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1120,29 +1131,31 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
          std::string pure;
          if (it->fisabstract)
              pure = " = 0";
@@ -126,7 +134,7 @@ index 8bb700a..73c122c 100644
          }
      }
      H << "};\n\n";
-@@ -1410,6 +1422,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1410,6 +1423,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -134,7 +142,7 @@ index 8bb700a..73c122c 100644
                  CC << "    if (k>=" << it->farraysize << ") throw omnetpp::cRuntimeError(\"Array of size " << it->farraysize << " indexed by %lu\", (unsigned long)k);\n";
                  CC << "    this->" << it->var << "[k] = " << it->argname << ";\n";
                  CC << "}\n\n";
-@@ -1417,6 +1430,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1417,6 +1431,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
              else if (it->fisarray && it->farraysize.empty()) {
                  CC << "void " << info.msgclass << "::" << it->alloc << "(" << it->fsizetype << " size)\n";
                  CC << "{\n";
@@ -142,7 +150,7 @@ index 8bb700a..73c122c 100644
                  CC << "    " << it->datatype << " *" << it->var << "2 = (size==0) ? nullptr : new " << it->datatype << "[size];\n";
                  CC << "    " << it->fsizetype << " sz = " << it->varsize << " < size ? " << it->varsize << " : size;\n";
                  CC << "    for (" << it->fsizetype << " i=0; i<sz; i++)\n";
-@@ -1444,6 +1458,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1444,6 +1459,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->fsizetype << " k, " << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -150,7 +158,7 @@ index 8bb700a..73c122c 100644
                  CC << "    if (k>=" << it->varsize << ") throw omnetpp::cRuntimeError(\"Array of size %d indexed by %d\", " << it->varsize << ", k);\n";
                  CC << "    this->" << it->var << "[k] = " << it->argname << ";\n";
                  CC << "}\n\n";
-@@ -1455,6 +1470,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
+@@ -1455,6 +1471,7 @@ void MsgCppGenerator::generateClass(const ClassInfo& info)
                  CC << "}\n\n";
                  CC << "void " << info.msgclass << "::" << it->setter << "(" << it->argtype << " " << it->argname << ")\n";
                  CC << "{\n";
@@ -158,7 +166,7 @@ index 8bb700a..73c122c 100644
                  CC << "    this->" << it->var << " = " << it->argname << ";\n";
                  CC << "}\n\n";
              }
-@@ -2005,7 +2021,7 @@ void MsgCppGenerator::generateDescriptorClass(const ClassInfo& info)
+@@ -2005,7 +2022,7 @@ void MsgCppGenerator::generateDescriptorClass(const ClassInfo& info)
              }
              cast = "(void *)";
              if (field.classtype == COBJECT || field.classtype == CNAMEDOBJECT || field.classtype == COWNEDOBJECT)
@@ -167,6 +175,17 @@ index 8bb700a..73c122c 100644
              if (field.fispointer) {
                  CC << "        case " << i << ": return " << cast << "(" << value << "); break;\n";
              }
+@@ -2222,6 +2239,10 @@ void MsgCppGenerator::generateTemplates()
+     CC << "template<typename T, typename A>\n";
+     CC << "std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec);\n\n";
+ 
++    CC << "// Template rule which fires if a shared_ptr doesn't have operator<<\n";
++    CC << "template<typename T>\n";
++    CC << "inline std::ostream& operator<<(std::ostream& out,const std::shared_ptr<T>& t) { return out << t.get(); }\n\n";
++
+     CC << "// Template rule which fires if a struct or class doesn't have operator<<\n";
+     CC << "template<typename T>\n";
+     CC << "inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}\n\n";
 diff --git a/src/nedxml/msgcppgenerator.h b/src/nedxml/msgcppgenerator.h
 index 76c74d4..7c2896b 100644
 --- a/src/nedxml/msgcppgenerator.h
