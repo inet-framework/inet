@@ -124,6 +124,12 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual void removeRadio(const IRadio *radio) = 0;
 
     /**
+     * Check if a given radio is known to this radio medium, i.e. it has been
+     * added before and not been removed yet.
+     */
+    virtual bool hasRadio(const IRadio *radio) const = 0;
+
+    /**
      * Returns a new radio frame containing the radio signal transmission that
      * represents the provided MAC frame. A copy of this radio frame is sent
      * to all affected radios. The MAC frame control info must be an instance

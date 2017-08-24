@@ -426,7 +426,7 @@ const IReceptionResult *RadioMedium::getReceptionResult(const IRadio *radio, con
 
 void RadioMedium::addRadio(const IRadio *radio)
 {
-    radios.push_back(radio);
+    radios.insert(radio);
     communicationCache->addRadio(radio);
     if (neighborCache)
         neighborCache->addRadio(radio);
@@ -449,13 +449,7 @@ void RadioMedium::addRadio(const IRadio *radio)
 
 void RadioMedium::removeRadio(const IRadio *radio)
 {
-    int radioIndex = radio->getId() - radios[0]->getId();
-    radios[radioIndex] = nullptr;
-    int radioCount = 0;
-    while (radios[radioCount] == nullptr && radioCount < (int)radios.size())
-        radioCount++;
-    if (radioCount != 0)
-        radios.erase(radios.begin(), radios.begin() + radioCount);
+    radios.erase(radio);
     communicationCache->removeRadio(radio);
     if (neighborCache)
         neighborCache->removeRadio(radio);
@@ -468,6 +462,11 @@ void RadioMedium::removeRadio(const IRadio *radio)
     if (macAddressFilter)
         getContainingNode(radioModule)->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
     emit(radioRemovedSignal, radioModule);
+}
+
+bool RadioMedium::hasRadio(const IRadio *radio) const
+{
+    return radios.find(radio) != radios.end();
 }
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
