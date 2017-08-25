@@ -77,11 +77,11 @@ module Router extends ApplicationLayerNodeBase
         }
         pim: <"PIMRouting"> like IPIMRouting if hasPIM {
             parameters:
-	            @display("p=700,300");
+                @display("p=700,300");
         }
         dhcp: <"DHCPServer"> like IApp if hasDHCP {
             parameters:
-                @display("p=566,80");
+                @display("p=800,100");
         }
 
     connections allowunconnected:

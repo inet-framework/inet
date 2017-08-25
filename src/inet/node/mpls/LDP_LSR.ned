@@ -59,7 +59,7 @@ module LDP_LSR
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=73,176;is=s");
+                @display("p=73,301;is=s");
         }
         ldp: LDP {
             parameters:
@@ -69,12 +69,12 @@ module LDP_LSR
         }
         ted: TED {
             parameters:
-                @display("p=340,244");
+                @display("p=73,114;is=s");
         }
         linkStateRouting: LinkStateRouting {
             parameters:
                 peers = peers;
-                @display("p=360,150");
+                @display("p=544,106");
         }
         tcp: <tcpType> like ITCP {
             parameters:
@@ -97,11 +97,11 @@ module LDP_LSR
                 @display("p=409,271;b=580,5,,,,1");
         }
         lo[numLoInterfaces]: LoopbackInterface {
-            @display("p=50,388");
+            @display("p=147,396");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=131,388,row,90;q=l2queue");
+                @display("p=267,396,row,90;q=l2queue");
         }
         mpls: MPLS {
             parameters:
@@ -111,7 +111,7 @@ module LDP_LSR
         }
         libTable: LIBTable {
             parameters:
-                @display("p=671,302");
+                @display("p=73,186;is=s");
         }
 
         ml: MessageDispatcher {
