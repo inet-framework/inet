@@ -13,7 +13,7 @@ should be included in INET 4.0.
  - port *all* protocols to the new packet API (e.g. 802.11)
  - eliminate all KLUDGES introduces by the 3 main infrastructure changes
  - eliminate all control infos attached to packets
- - removing ethernet padding should be done in upper protocols if length is not present
+ + removing ethernet padding should be done in upper protocols if length is not present
 
  - extract LLC from ethernet and 802.11
  - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost

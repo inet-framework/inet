@@ -170,17 +170,6 @@ const Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     }
-    else {
-        //FIXME KLUDGE: when type-or-length field is type, then padding length is unknown here,
-        // this code removes ethernet padding, needed for unchanged fingerprints
-        for (;;) {
-            const auto& chunk = packet->peekTrailer<Chunk>();
-            auto tmp = chunk.get();
-            if (typeid(*tmp) != typeid(EthernetPadding))
-                break;
-            packet->setTrailerPopOffset(packet->getTrailerPopOffset() - chunk->getChunkLength());
-        }
-    }
 
     return ethHeader;
 }
