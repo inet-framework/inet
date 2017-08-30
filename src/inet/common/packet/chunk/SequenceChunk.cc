@@ -299,8 +299,9 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
                 doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 doInsertToEnd(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
-            else
-                CHUNK_CHECK_IMPLEMENTATION(false);
+            else {
+                // chunk is out of slice, ignored
+            }
             offset += elementChunk->getChunkLength();
         }
     }

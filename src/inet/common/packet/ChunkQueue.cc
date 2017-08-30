@@ -55,6 +55,7 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
     contents->moveIterator(iterator, length);
     if (iterator.getPosition() > contents->getChunkLength() / 2)
         remove(iterator.getPosition());
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
 const Ptr<const Chunk> ChunkQueue::peek(bit length, int flags) const
