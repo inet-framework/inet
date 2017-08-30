@@ -338,6 +338,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
     const auto& data = std::make_shared<BytesChunk>(mergedBits->getBytes());
+    data->markImmutable();
     Packet *packet = new Packet(nullptr, data);
     bool isReceptionSuccessful = true; // TODO:
     return new ReceptionPacketModel(packet, bps(NaN), 0, isReceptionSuccessful);

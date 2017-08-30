@@ -148,6 +148,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
     for (unsigned int i = 0; i < NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i++)
         signalField->appendBit(serializedPacket->getBit(i));
     const auto& signalChunk = std::make_shared<BytesChunk>(signalField->getBytes());
+    signalChunk->markImmutable();
     return new TransmissionPacketModel(new Packet(nullptr, signalChunk), bps(NaN));
 }
 
@@ -159,6 +160,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataField
     for (unsigned int i = NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i < serializedPacket->getSize(); i++)
         dataField->appendBit(serializedPacket->getBit(i));
     const auto& dataChunk = std::make_shared<BytesChunk>(dataField->getBytes());
+    dataChunk->markImmutable();
     return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN));
 }
 
