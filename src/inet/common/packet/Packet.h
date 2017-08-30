@@ -70,7 +70,7 @@ class INET_API Packet : public cPacket
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
         contents->seekIterator(copy, iterator.getPosition());
-        return iterator.getPosition() == copy.getPosition() && iterator.getIndex() == copy.getIndex();
+        return iterator.getPosition() == copy.getPosition() && (iterator.getIndex() == -1 || iterator.getIndex() == copy.getIndex());
     }
 
   public:
