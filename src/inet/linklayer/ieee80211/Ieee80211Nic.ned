@@ -47,7 +47,7 @@ module Ieee80211Nic like IWirelessNic
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
         string macType = default("Ieee80211CompatibleMac");   // choose from Ieee80211Mac and Ieee80211CompatibleMac, @see IIeee80211Mac
-        string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
+        string opMode @enum("a","b","g(erp)","g(mixed)","n","p") = default("g(mixed)");
         double bitrate @unit("bps") = default(-1bps);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
@@ -69,11 +69,11 @@ module Ieee80211Nic like IWirelessNic
         }
         llc: <llcType> like IIeee8022Llc {
             parameters:
-                @display("p=250,100");
+                @display("p=250,131");
         }
         classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
             parameters:
-                @display("p=400,100");
+                @display("p=400,82");
         }
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
