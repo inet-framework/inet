@@ -96,6 +96,7 @@ const Protocol Protocol::pim("pim");
 const Protocol Protocol::ppp("ppp");
 const Protocol Protocol::rsvp("rsvp");
 const Protocol Protocol::sctp("sctp");
+const Protocol Protocol::stp("stp");
 const Protocol Protocol::tcp("tcp");
 const Protocol Protocol::udp("udp");
 const Protocol Protocol::xtp("xtp");

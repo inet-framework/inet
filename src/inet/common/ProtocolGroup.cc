@@ -101,5 +101,10 @@ const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
 
+const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
+        //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
+        // { 0x00000C, &Protocol::ciscoSnap } //TODO
+});
+
 } // namespace inet
 
