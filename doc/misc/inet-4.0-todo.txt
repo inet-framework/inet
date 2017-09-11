@@ -35,6 +35,9 @@ should be included in INET 4.0.
  - add missing interface NED files for all L2 protocols
  - remove obsolete dataTransferMode and the like
  - rewrite serializers that use structure bit fields, this is undefined behavior
+ - move CRC computation and veryfication from serializers to protocol modules (add missing ones)
+ - add separate reusable application packet generators
+ - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer  
 
  - update all NED and C++ documentation
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
