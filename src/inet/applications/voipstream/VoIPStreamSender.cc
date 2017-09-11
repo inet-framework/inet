@@ -348,12 +348,12 @@ Packet *VoIPStreamSender::generatePacket()
     if (isSilent) {
         pk->setName("SILENCE");
         vp->setType(SILENCE);
-        vp->setChunkLength(byte(voipSilencePacketSize));
+        vp->setChunkLength(B(voipSilencePacketSize));
     }
     else {
         pk->setName("VOICE");
         vp->setType(VOICE);
-        vp->setChunkLength(byte(voipHeaderSize + opacket.size));
+        vp->setChunkLength(B(voipHeaderSize + opacket.size));
     }
 
     vp->setTimeStamp(pktID);

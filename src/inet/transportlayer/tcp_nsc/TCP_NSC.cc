@@ -884,7 +884,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     const auto& tcpHdr = fp->peekHeader<TcpHeader>();
     ASSERT(tcpHdr);
 
-    bit payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
+    b payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
              << " to " << dest << "\n";
 
@@ -901,7 +901,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     }
 
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && payloadLength != bit(0))
+    if (sndNxtVector && payloadLength != b(0))
         sndNxtVector->record(tcpHdr->getSequenceNo());
 
     if (sndAckVector)

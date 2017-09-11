@@ -48,7 +48,7 @@ void TCP_NSC_SendQueue::setConnection(TCP_NSC_Connection *connP)
 void TCP_NSC_SendQueue::enqueueAppData(Packet *msg)
 {
     ASSERT(msg);
-    dataBuffer.push(msg->peekDataAt(byte(0), byte(msg->getByteLength())));
+    dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
     delete msg;
 }
 
@@ -56,24 +56,24 @@ int TCP_NSC_SendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) con
 {
     ASSERT(bufferP);
 
-    unsigned int length = byte(dataBuffer.getLength()).get();
+    unsigned int length = B(dataBuffer.getLength()).get();
     if (bufferLengthP < length)
         length = bufferLengthP;
     if (length == 0)
         return 0;
 
-    const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
+    const auto& bytesChunk = dataBuffer.peek<BytesChunk>(B(length));
     return bytesChunk->copyToBuffer((uint8_t*)bufferP, length);
 }
 
 void TCP_NSC_SendQueue::dequeueTcpLayerMsg(int msgLengthP)
 {
-    dataBuffer.pop(byte(msgLengthP));
+    dataBuffer.pop(B(msgLengthP));
 }
 
 ulong TCP_NSC_SendQueue::getBytesAvailable() const
 {
-    return byte(dataBuffer.getLength()).get();
+    return B(dataBuffer.getLength()).get();
 }
 
 Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
@@ -144,9 +144,9 @@ cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
     ASSERT(connM);
 
     Packet *dataMsg = nullptr;
-    bit queueLength = dataBuffer.getLength();
+    b queueLength = dataBuffer.getLength();
 
-    if (queueLength > bit(0)) {
+    if (queueLength > b(0)) {
         dataMsg = new Packet("DATA");
         dataMsg->setKind(TCP_I_DATA);
         const auto& data = dataBuffer.pop<Chunk>(queueLength);
@@ -158,12 +158,12 @@ cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
 
 uint32 TCP_NSC_ReceiveQueue::getAmountOfBufferedBytes() const
 {
-    return byte(dataBuffer.getLength()).get();
+    return B(dataBuffer.getLength()).get();
 }
 
 uint32 TCP_NSC_ReceiveQueue::getQueueLength() const
 {
-    return byte(dataBuffer.getLength()).get();
+    return B(dataBuffer.getLength()).get();
 }
 
 void TCP_NSC_ReceiveQueue::getQueueStatus() const
