@@ -39,9 +39,7 @@ void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
             Chunk::serialize(stream, chunk, serializeBegin - chunkBegin, chunkEnd - serializeBegin);
         else if (chunkBegin < serializeEnd && serializeEnd < chunkEnd)
             Chunk::serialize(stream, chunk, bit(0), serializeEnd - chunkBegin);
-        else {
-            // chunk is out of slice, ignored
-        }
+        // otherwise the element chunk is out of the slice, therefore it's ignored
         currentOffset += chunkLength;
     }
 }

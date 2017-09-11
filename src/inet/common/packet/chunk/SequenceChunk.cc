@@ -238,8 +238,7 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
                 doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 doInsertToBeginning(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
-            else
-                CHUNK_CHECK_IMPLEMENTATION(false);
+            // otherwise the element chunk is out of the slice, therefore it's ignored
         }
     }
     else
@@ -299,9 +298,7 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
                 doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 doInsertToEnd(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
-            else {
-                // chunk is out of slice, ignored
-            }
+            // otherwise the element chunk is out of the slice, therefore it's ignored
             offset += elementChunk->getChunkLength();
         }
     }
