@@ -47,86 +47,52 @@ enum SAPCode;
 // Packet length includes Etherner header, payload, padding and FCS.
 // Payload length can be accessed as getEncapsulatedPacket()->getByteLength().
 //
-class EtherFrame extends FieldsChunk
+class EthernetHeader extends FieldsChunk
 {
+    chunkLength = B(14);
     MACAddress dest;
     MACAddress src;
+    int typeOrLength;
 }
 
+cplusplus {{
+    inline bool isEth2Type(int typeOrLength)  { return typeOrLength >= 0x600 || typeOrLength == 0; }  // typeOrLength is type
+    inline bool isIeee802_3Length(int typeOrLength)  { return typeOrLength > 0 && typeOrLength < 0x600; }  // typeOrLength is length
+    inline bool isEth2Header(const EthernetHeader& hdr)  { return isEth2Type(hdr.getTypeOrLength()); }  // typeOrLength is type
+    inline bool isIeee802_3Header(const EthernetHeader& hdr)  { return isIeee802_3Length(hdr.getTypeOrLength()); }  // typeOrLength is length
+}}
 
 //
-// Ethernet II headers contain a 16-bit ~EtherType to identify
-// the encapsulated protocol.
+// Ethernet frame with 802.2 LLC header.
+// Ethernet frame with LLC and SNAP headers.
+
+// EtherFrameWithLLC and EtherFrameWithSNAP removed, see Ieee8022LlcHeader
+
 //
-// Header length: src(6)+dest(6)+etherType(2) = 14 bytes
+// Ethernet control frames used by the PAUSE protocol
 //
-class EthernetIIFrame extends EtherFrame
+class EthernetControlFrame extends FieldsChunk
 {
-    chunkLength = B(ETHER_MAC_FRAME_BYTES - ETHER_FCS_BYTES);
-    int etherType @enum(EtherType);
+//    EthernetHeader.etherType = ETHERTYPE_FLOW_CONTROL;
+    int opCode = -1;
 }
-
-
-//
-// The base Ethernet 802.3 header: contains the payload length in type-or-length field
-// Do not create it!
-//
-class EtherFrameWithPayloadLength extends EtherFrame
-{
-    int payloadLength;
-}
-
-
-//
-// Ethernet frame with 802.3 LLC header.
-//
-// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes
-//
-class EtherFrameWithLLC extends EtherFrameWithPayloadLength
-{
-    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - ETHER_FCS_BYTES);
-    int dsap;
-    int ssap;
-    int control;
-}
-
-
-//
-// Ethernet frame with 802.3 LLC and SNAP headers.
-//
-// The ssap, dsap and control LLC fields are set to fixed values in the
-// frame: 0xAA, 0xAA, 0x03.
-//
-// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1)+
-// orgCode(3)+localCode(2) = 22 bytes
-//
-class EtherFrameWithSNAP extends EtherFrameWithLLC
-{
-    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - ETHER_FCS_BYTES);
-    dsap = 0xAA;
-    ssap = 0xAA;
-    control = 0x03;
-    int orgCode;   // organizationally unique identifier (OUI); 0 for protocols that have an EtherType (ARP, IPv4, IPv6, etc.)
-    int localcode; // protocol identifier (PID); stores ~EtherType if orgCode is 0
-}
-
 
 //
 // Ethernet frame used by the PAUSE protocol
 //
-class EtherPauseFrame extends EthernetIIFrame
+class EthernetPauseFrame extends EthernetControlFrame
 {
-    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES);    //FIXME Fcs?
-    etherType = ETHERTYPE_FLOW_CONTROL;
-    int opCode = 1; // PAUSE
+    chunkLength = B(4);
+    opCode = ETHERNET_CONTROL_PAUSE;
     int pauseTime; // in 512 bit-time units
 }
 
 //
 // Ethernet 802.1Q Tag.
 //
-class Ethernet1QTag extends FieldsChunk     //FIXME bad design
+class Ieee802_1QHeader extends FieldsChunk
 {
+//    previous etherType = 0x8100 (C-TAG), or 0x88a8 (S-TAG);
     chunkLength = B(4);
     uint8_t pcp;    // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                     // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
@@ -136,17 +102,9 @@ class Ethernet1QTag extends FieldsChunk     //FIXME bad design
                     // The reserved value 0x000 indicates that the frame does not belong to any VLAN; in this case,
                     // the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges,
                     // VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific.
+    int nextTypeOrLength;
 }
 
-
-//
-// Ethernet 802.1ah header.
-//
-class Ethernet1ahITag extends FieldsChunk     //FIXME bad design
-{
-    chunkLength = B(5);    //FIXME check the length value
-    int ISid=0; // ISID
-}
 
 enum EthernetFcsMode {
     FCS_DECLARED_CORRECT = 1;
@@ -164,3 +122,4 @@ class EthernetFcs extends FieldsChunk
     int32_t fcs;
     int fcsMode @enum(EthernetFcsMode) = FCS_DECLARED_CORRECT;
 }
+
