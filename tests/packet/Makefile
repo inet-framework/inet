@@ -2,11 +2,12 @@
 # OMNeT++/OMNEST Makefile for inet-master
 #
 # This file was generated with the command:
-#  opp_makemake -I../../src -f -L../../out/$(CONFIGNAME)/src -lINET
+#  opp_makemake -I../../src -f -L../../out/$(CONFIGNAME)/src -lINET_dbg
 #
 
 # Name of target to be created (-o option)
-TARGET = inet-master$(EXE_SUFFIX)
+TARGET = inet-master$(D)$(EXE_SUFFIX)
+TARGET_DIR = .
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(QTENV_LIBS) $(CMDENV_LIBS)
@@ -21,11 +22,11 @@ INCLUDE_PATH = -I../../src
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = $(LDFLAG_LIBPATH)../../out/$(CONFIGNAME)/src  -lINET
+LIBS = $(LDFLAG_LIBPATH)../../out/$(CONFIGNAME)/src  -lINET_dbg
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../../out
-PROJECTRELATIVE_PATH = /tests/packet
+PROJECTRELATIVE_PATH = tests/packet
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
@@ -48,7 +49,7 @@ SMFILES =
 
 #------------------------------------------------------------------------------
 
-# Pull in OMNeT++ configuration (Makefile.inc or configuser.vc)
+# Pull in OMNeT++ configuration (Makefile.inc)
 
 ifneq ("$(OMNETPP_CONFIGFILE)","")
 CONFIGFILE = $(OMNETPP_CONFIGFILE)
@@ -80,10 +81,8 @@ SMCOPTS =
 # so we store COPTS into $COPTS_FILE and have object
 # files depend on it (except when "make depend" was called)
 COPTS_FILE = $O/.last-copts
-ifneq ($(MAKECMDGOALS),depend)
 ifneq ("$(COPTS)","$(shell cat $(COPTS_FILE) 2>/dev/null || echo '')")
 $(shell $(MKPATH) "$O" && echo "$(COPTS)" >$(COPTS_FILE))
-endif
 endif
 
 #------------------------------------------------------------------------------
@@ -93,10 +92,13 @@ endif
 #------------------------------------------------------------------------------
 
 # Main target
-all: $O/$(TARGET)
-	$(Q)$(LN) $O/$(TARGET) .
+all: $(TARGET_DIR)/$(TARGET)
 
-$O/$(TARGET): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile
+$(TARGET_DIR)/% :: $O/%
+	@mkdir -p $(TARGET_DIR)
+	$(Q)$(LN) $< $@
+
+$O/$(TARGET): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile $(CONFIGFILE)
 	@$(MKPATH) $O
 	@echo Creating executable: $@
 	$(Q)$(CXX) $(LDFLAGS) -o $O/$(TARGET) $(OBJS) $(EXTRA_OBJS) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS)
@@ -125,8 +127,8 @@ smheaders: $(SMFILES:.sm=_sm.h)
 clean:
 	$(qecho) Cleaning...
 	$(Q)-rm -rf $O
-	$(Q)-rm -f inet-master inet-master.exe libinet-master.so libinet-master.a libinet-master.dll libinet-master.dylib
-	$(Q)-rm -f ./*_m.cc ./*_m.h ./*_sm.cc ./*_sm.h
+	$(Q)-rm -f $(TARGET_DIR)/$(TARGET)
+	$(Q)-rm -f $(call opp_rwildcard, . , *_m.cc *_m.h *_sm.cc *_sm.h)
 
 cleanall: clean
 	$(Q)-rm -rf $(PROJECT_OUTPUT_DIR)
