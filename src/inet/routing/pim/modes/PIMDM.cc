@@ -1521,7 +1521,7 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress& address = group.getPrunedSourceAddress(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
     msg->markImmutable();
     packet->pushHeader(msg);
 
@@ -1550,7 +1550,7 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
     EncodedAddress& address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
     msg->markImmutable();
     packet->pushHeader(msg);
 
@@ -1581,7 +1581,7 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress& address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
     msg->markImmutable();
     packet->pushHeader(msg);
 
@@ -1632,7 +1632,7 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
     msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
     // TODO set metric
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH
+    msg->setChunkLength(B(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
@@ -1657,7 +1657,7 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setChunkLength(byte(PIM_HEADER_LENGTH
+    pkt->setChunkLength(B(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));

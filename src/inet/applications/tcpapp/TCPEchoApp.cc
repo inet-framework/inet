@@ -105,10 +105,10 @@ void TCPEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 
         int64_t len = 0;
         for ( ; len + rcvdBytes <= outByteLen; len += rcvdBytes) {
-            outPkt->append(rcvdPkt->peekDataAt(byte(0), byte(rcvdBytes)));
+            outPkt->append(rcvdPkt->peekDataAt(B(0), B(rcvdBytes)));
         }
         if (len < outByteLen)
-            outPkt->append(rcvdPkt->peekDataAt(byte(0), byte(outByteLen - len)));
+            outPkt->append(rcvdPkt->peekDataAt(B(0), B(outByteLen - len)));
 
         ASSERT(outPkt->getByteLength() == outByteLen);
 

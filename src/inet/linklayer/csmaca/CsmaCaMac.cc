@@ -438,7 +438,7 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = std::make_shared<CsmaCaMacDataHeader>();
-    macHeader->setChunkLength(byte(headerLength));
+    macHeader->setChunkLength(B(headerLength));
     auto transportProtocol = frame->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -564,7 +564,7 @@ void CsmaCaMac::sendAckFrame()
     endSifs->setContextPointer(nullptr);
     auto macHeader = std::make_shared<CsmaCaMacAckHeader>();
     macHeader->setReceiverAddress(frameToAck->peekHeader<CsmaCaMacHeader>()->getTransmitterAddress());
-    macHeader->setChunkLength(byte(ackLength));
+    macHeader->setChunkLength(B(ackLength));
     macHeader->markImmutable();
     auto frame = new Packet("CsmaAck");
     frame->append(macHeader);

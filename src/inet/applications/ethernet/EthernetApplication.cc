@@ -96,7 +96,7 @@ void EthernetApplication::sendPacket()
     const auto& data = std::make_shared<EtherAppReq>();
     data->setRequestId(seqNum);
     long len = reqLength->longValue();
-    data->setChunkLength(byte(len));
+    data->setChunkLength(B(len));
     long respLen = respLength->longValue();
     data->setResponseBytes(respLen);
     data->markImmutable();
@@ -115,7 +115,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
 
     Packet *reqPk = check_and_cast<Packet *>(msg);
     emit(rcvdPkSignal, reqPk);
-    const auto& req = reqPk->peekDataAt<EtherAppReq>(byte(0));
+    const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
 
     if (req != nullptr) {
         MACAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
@@ -134,7 +134,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
             Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
             const auto& outPayload = std::make_shared<EtherAppResp>();
             outPayload->setRequestId(requestId);
-            outPayload->setChunkLength(byte(l));
+            outPayload->setChunkLength(B(l));
             outPayload->markImmutable();
             outPacket->append(outPayload);
 

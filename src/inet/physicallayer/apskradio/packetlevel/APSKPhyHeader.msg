@@ -27,7 +27,7 @@ class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk
 {
-    chunkLength = byte(6);
+    chunkLength = B(6);
     uint16_t lengthField;
     uint16_t crc = 0;
     int crcMode @enum(CrcMode) = -1;

@@ -168,7 +168,7 @@ void Interface::sendHelloPacket(IPv4Address destination, short ttl)
         helloPacket->setNeighbor(k, neighbors[k]);
     }
 
-    helloPacket->setChunkLength(byte(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount * 4));
+    helloPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount * 4));
     helloPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(helloPacket);
@@ -192,7 +192,7 @@ void Interface::sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Addres
     lsAckPacket->setLsaHeadersArraySize(1);
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
-    lsAckPacket->setChunkLength(byte(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
+    lsAckPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
     lsAckPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(lsAckPacket);
@@ -525,7 +525,7 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
                 throw cRuntimeError("Invalid LSA type: %d", lsaType);
         }
 
-        updatePacket->setChunkLength(byte(packetLength));
+        updatePacket->setChunkLength(B(packetLength));
         updatePacket->markImmutable();
         Packet *pk = new Packet();
         pk->pushHeader(updatePacket);
@@ -587,7 +587,7 @@ void Interface::sendDelayedAcknowledgements()
                     packetSize += OSPF_LSA_HEADER_LENGTH;
                 }
 
-                ackPacket->setChunkLength(byte(packetSize - IP_MAX_HEADER_BYTES));
+                ackPacket->setChunkLength(B(packetSize - IP_MAX_HEADER_BYTES));
                 ackPacket->markImmutable();
                 Packet *pk = new Packet();
                 pk->pushHeader(ackPacket);

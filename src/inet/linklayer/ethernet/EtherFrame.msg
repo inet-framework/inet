@@ -62,7 +62,7 @@ class EtherFrame extends FieldsChunk
 //
 class EthernetIIFrame extends EtherFrame
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES - ETHER_FCS_BYTES);
+    chunkLength = B(ETHER_MAC_FRAME_BYTES - ETHER_FCS_BYTES);
     int etherType @enum(EtherType);
 }
 
@@ -84,7 +84,7 @@ class EtherFrameWithPayloadLength extends EtherFrame
 //
 class EtherFrameWithLLC extends EtherFrameWithPayloadLength
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - ETHER_FCS_BYTES);
+    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - ETHER_FCS_BYTES);
     int dsap;
     int ssap;
     int control;
@@ -102,7 +102,7 @@ class EtherFrameWithLLC extends EtherFrameWithPayloadLength
 //
 class EtherFrameWithSNAP extends EtherFrameWithLLC
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - ETHER_FCS_BYTES);
+    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - ETHER_FCS_BYTES);
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;
@@ -116,7 +116,7 @@ class EtherFrameWithSNAP extends EtherFrameWithLLC
 //
 class EtherPauseFrame extends EthernetIIFrame
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES);    //FIXME Fcs?
+    chunkLength = B(ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES);    //FIXME Fcs?
     etherType = ETHERTYPE_FLOW_CONTROL;
     int opCode = 1; // PAUSE
     int pauseTime; // in 512 bit-time units
@@ -127,7 +127,7 @@ class EtherPauseFrame extends EthernetIIFrame
 //
 class Ethernet1QTag extends FieldsChunk     //FIXME bad design
 {
-    chunkLength = byte(4);
+    chunkLength = B(4);
     uint8_t pcp;    // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                     // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
     bool de;        // Drop Eligible (DE): a 1-bit field. May be used separately or in conjunction with PCP to indicate frames eligible to be dropped in the presence of congestion.
@@ -144,7 +144,7 @@ class Ethernet1QTag extends FieldsChunk     //FIXME bad design
 //
 class Ethernet1ahITag extends FieldsChunk     //FIXME bad design
 {
-    chunkLength = byte(5);    //FIXME check the length value
+    chunkLength = B(5);    //FIXME check the length value
     int ISid=0; // ISID
 }
 
@@ -160,7 +160,7 @@ class EthernetPadding extends FieldsChunk
 
 class EthernetFcs extends FieldsChunk
 {
-    chunkLength = byte(ETHER_FCS_BYTES);
+    chunkLength = B(ETHER_FCS_BYTES);
     int32_t fcs;
     int fcsMode @enum(EthernetFcsMode) = FCS_DECLARED_CORRECT;
 }

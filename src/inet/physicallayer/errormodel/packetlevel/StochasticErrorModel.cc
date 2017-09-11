@@ -61,8 +61,8 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
     else {
         const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
         double bitErrorRate = computeBitErrorRate(snir, part);
-        double headerSuccessRate = pow(1.0 - bitErrorRate, bit(flatTransmission->getHeaderLength()).get());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, bit(flatTransmission->getDataLength()).get());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getHeaderLength()).get());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getDataLength()).get());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;

@@ -289,7 +289,7 @@ void DHCPServer::sendNAK(const Ptr<const DHCPMessage>& msg)
     Packet *pk = new Packet("DHCPNAK");
     const auto& nak = std::make_shared<DHCPMessage>();
     nak->setOp(BOOTREPLY);
-    nak->setChunkLength(byte(308));    // DHCPNAK packet size
+    nak->setChunkLength(B(308));    // DHCPNAK packet size
     nak->setHtype(1);    // ethernet
     nak->setHlen(6);    // hardware address length (6 octets)
     nak->setHops(0);
@@ -321,7 +321,7 @@ void DHCPServer::sendACK(DHCPLease *lease, const Ptr<const DHCPMessage>& packet)
     Packet *pk = new Packet("DHCPACK");
     const auto& ack = std::make_shared<DHCPMessage>();
     ack->setOp(BOOTREPLY);
-    ack->setChunkLength(byte(308));    // DHCP ACK packet size
+    ack->setChunkLength(B(308));    // DHCP ACK packet size
     ack->setHtype(1);    // ethernet
     ack->setHlen(6);    // hardware address length (6 octets)
     ack->setHops(0);
@@ -389,7 +389,7 @@ void DHCPServer::sendOffer(DHCPLease *lease, const Ptr<const DHCPMessage>& packe
     Packet *pk = new Packet("DHCPOFFER");
     const auto& offer = std::make_shared<DHCPMessage>();
     offer->setOp(BOOTREPLY);
-    offer->setChunkLength(byte(308));    // DHCP OFFER packet size
+    offer->setChunkLength(B(308));    // DHCP OFFER packet size
     offer->setHtype(1);    // ethernet
     offer->setHlen(6);    // hardware address lenght (6 octets)
     offer->setHops(0);

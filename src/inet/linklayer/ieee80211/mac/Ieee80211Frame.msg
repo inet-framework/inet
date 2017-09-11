@@ -105,7 +105,7 @@ enum FcsMode {
 
 class Ieee80211MacTrailer extends FieldsChunk
 {
-    chunkLength = byte(4);
+    chunkLength = B(4);
     uint32_t fcs = 0;
     int fcsMode @enum(FcsMode) = -1;
 }
@@ -120,7 +120,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 //
 class Ieee80211MacHeader extends FieldsChunk
 {
-    chunkLength = bit(LENGTH_ACK) - byte(4);
+    chunkLength = b(LENGTH_ACK) - B(4);
     short type @enum(Ieee80211FrameType); // type and subtype
     bool toDS;
     bool fromDS;
@@ -145,7 +145,7 @@ class Ieee80211OneAddressHeader extends Ieee80211MacHeader
 //
 class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 {
-    chunkLength = bit(LENGTH_ACK) - byte(4);
+    chunkLength = b(LENGTH_ACK) - B(4);
     type = ST_ACK;
 }
 
@@ -154,7 +154,7 @@ class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 //
 class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
-    chunkLength = bit(LENGTH_RTS) - byte(4);
+    chunkLength = b(LENGTH_RTS) - B(4);
     MACAddress transmitterAddress; // aka address2
 }
 
@@ -163,7 +163,7 @@ class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 //
 class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 {
-    chunkLength = bit(LENGTH_RTS) - byte(4);
+    chunkLength = b(LENGTH_RTS) - B(4);
     type = ST_RTS;
 }
 
@@ -172,7 +172,7 @@ class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 //
 class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 {
-    chunkLength = bit(LENGTH_CTS) - byte(4);
+    chunkLength = b(LENGTH_CTS) - B(4);
     type = ST_CTS;
 }
 
@@ -181,7 +181,7 @@ class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 //
 class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
-    chunkLength = bit(LENGTH_MGMT) - byte(4);
+    chunkLength = b(LENGTH_MGMT) - B(4);
     MACAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
@@ -199,7 +199,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //  For example, with Address 4 and without QoS the correct length is 34 bytes.
 //  Without Address 4 and QoS the correct value is indeed 28.
 //  With Address 4 and QoS the correct value is indeed 36.
-    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH) - byte(4);
+    chunkLength = b(DATAFRAME_HEADER_MINLENGTH) - B(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
     int ackPolicy @enum(AckPolicy);
@@ -211,7 +211,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;
-//    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - byte(4);
+//    chunkLength = b(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - B(4);
 //    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
@@ -235,7 +235,7 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 
 class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
-    chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER);
+    chunkLength = b(LENGTH_A_MSDU_SUBFRAME_HEADER);
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
     int length;
@@ -243,7 +243,7 @@ class Ieee80211MsduSubframeHeader extends FieldsChunk
 
 class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
-    chunkLength = bit(LENGTH_A_MPDU_SUBFRAME_HEADER);
+    chunkLength = b(LENGTH_A_MPDU_SUBFRAME_HEADER);
     int length;
 }
 
@@ -252,7 +252,7 @@ class Ieee80211MpduSubframeHeader extends FieldsChunk
 //
 class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
-    chunkLength = bit(LENGTH_ADDBAREQ) - byte(4);
+    chunkLength = b(LENGTH_ADDBAREQ) - B(4);
     category = 3; // representing Block Ack
     int blockAckAction = 0; // representing ADDBA request
     int dialogToken = 1; // nonzero, arbitrary

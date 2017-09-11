@@ -47,11 +47,11 @@ class INET_API MemoryInputStream {
     /**
      * The length of the bit stream measured in bits.
      */
-    bit length;
+    b length;
     /**
      * The position of the next bit that will be read measured in bits.
      */
-    bit position;
+    b position;
     /**
      * This flag indicates if the stream has been read beyond the end of data.
      */
@@ -59,26 +59,26 @@ class INET_API MemoryInputStream {
 
   protected:
     bool isByteAligned() {
-        return bit(position).get() % 8 == 0;
+        return b(position).get() % 8 == 0;
     }
 
   public:
-    MemoryInputStream(const std::vector<uint8_t>& data, bit length = bit(-1), bit position = bit(0)) :
+    MemoryInputStream(const std::vector<uint8_t>& data, b length = b(-1), b position = b(0)) :
         data(data),
-        length(length == bit(-1) ? bit(data.size() * 8) : length),
+        length(length == b(-1) ? b(data.size() * 8) : length),
         position(position)
     {
-        assert(bit(0) <= this->length);
-        assert(bit(0) <= position && position <= this->length);
+        assert(b(0) <= this->length);
+        assert(b(0) <= position && position <= this->length);
     }
 
-    MemoryInputStream(const uint8_t *buffer, bit length, bit position = bit(0)) :
-        data(buffer, buffer + byte(length).get()),
+    MemoryInputStream(const uint8_t *buffer, b length, b position = b(0)) :
+        data(buffer, buffer + B(length).get()),
         length(length),
         position(position)
     {
-        assert(bit(0) <= this->length);
-        assert(bit(0) <= position && position <= this->length);
+        assert(b(0) <= this->length);
+        assert(b(0) <= position && position <= this->length);
     }
 
     /** @name Stream querying functions */
@@ -91,23 +91,23 @@ class INET_API MemoryInputStream {
     /**
      * Returns the total length of the stream measured in bits.
      */
-    bit getLength() const { return length; }
+    b getLength() const { return length; }
 
     /**
      * Returns the remaining unread length of the stream measured in bits.
      */
-    bit getRemainingLength() const { return length - position; }
+    b getRemainingLength() const { return length - position; }
 
     /**
      * Returns the current read position of the stream measured in bits.
      */
-    bit getPosition() const { return position; }
+    b getPosition() const { return position; }
 
     const std::vector<uint8_t>& getData() const { return data; }
 
-    void copyData(std::vector<bool>& result, bit offset = bit(0), bit length = bit(-1)) const {
-        size_t end = bit(length == bit(-1) ? this->length : offset + length).get();
-        for (size_t i = bit(offset).get(); i < end; i++) {
+    void copyData(std::vector<bool>& result, b offset = b(0), b length = b(-1)) const {
+        size_t end = b(length == b(-1) ? this->length : offset + length).get();
+        for (size_t i = b(offset).get(); i < end; i++) {
             size_t byteIndex = i / 8;
             size_t bitIndex = i % 8;
             uint8_t byte = data.at(byteIndex);
@@ -117,9 +117,9 @@ class INET_API MemoryInputStream {
         }
     }
 
-    void copyData(std::vector<uint8_t>& result, byte offset = byte(0), byte length = byte(-1)) const {
-        auto end = length == byte(-1) ? byte(data.size()) : offset + length;
-        result.insert(result.begin(), data.begin() + byte(offset).get(), data.begin() + byte(end).get());
+    void copyData(std::vector<uint8_t>& result, B offset = B(0), B length = B(-1)) const {
+        auto end = length == B(-1) ? B(data.size()) : offset + length;
+        result.insert(result.begin(), data.begin() + B(offset).get(), data.begin() + B(end).get());
     }
     //@}
 
@@ -128,8 +128,8 @@ class INET_API MemoryInputStream {
     /**
      * Updates the read position of the stream.
      */
-    void seek(bit position) {
-        assert(bit(0) <= position && position <= length);
+    void seek(b position) {
+        assert(b(0) <= position && position <= length);
         this->position = position;
     }
     //@}
@@ -145,10 +145,10 @@ class INET_API MemoryInputStream {
             return false;
         }
         else {
-            size_t i = bit(position).get();
+            size_t i = b(position).get();
             size_t byteIndex = i / 8;
             size_t bitIndex = i % 8;
-            position += bit(1);
+            position += b(1);
             uint8_t byte = data.at(byteIndex);
             uint8_t mask = 1 << (7 - bitIndex);
             return byte & mask;
@@ -169,14 +169,14 @@ class INET_API MemoryInputStream {
      * Reads a sequence of bits at the current position of the stream keeping
      * the original bit order.
      */
-    bit readBits(std::vector<bool>& bits, bit length) {
-        bit i;
-        for (i = bit(0); i < length; i++) {
+    b readBits(std::vector<bool>& bits, b length) {
+        b i;
+        for (i = b(0); i < length; i++) {
             if (isReadBeyondEnd_)
                 break;
             bits.push_back(readBit());
         }
-        return bit(i);
+        return b(i);
     }
     //@}
 
@@ -187,14 +187,14 @@ class INET_API MemoryInputStream {
      */
     uint8_t readByte() {
         assert(isByteAligned());
-        if (position + byte(1) > length) {
+        if (position + B(1) > length) {
             isReadBeyondEnd_ = true;
             position = length;
             return 0;
         }
         else {
-            uint8_t result = data[byte(position).get()];
-            position += byte(1);
+            uint8_t result = data[B(position).get()];
+            position += B(1);
             return result;
         }
     }
@@ -214,13 +214,13 @@ class INET_API MemoryInputStream {
      * Reads a sequence of bytes at the current position of the stream keeping
      * the original byte order in MSB to LSB bit order.
      */
-    byte readBytes(std::vector<uint8_t>& bytes, byte length) {
+    B readBytes(std::vector<uint8_t>& bytes, B length) {
         assert(isByteAligned());
         if (position + length > this->length) {
             length = this->length - position;
             isReadBeyondEnd_ = true;
         }
-        bytes.insert(bytes.end(), data.begin() + byte(position).get(), data.begin() + byte(position + length).get());
+        bytes.insert(bytes.end(), data.begin() + B(position).get(), data.begin() + B(position + length).get());
         position += length;
         return length;
     }
@@ -229,13 +229,13 @@ class INET_API MemoryInputStream {
      * Reads a sequence of bytes at the current position of the stream keeping
      * the original byte order in MSB to LSB bit order.
      */
-    byte readBytes(uint8_t *buffer, byte length) {
+    B readBytes(uint8_t *buffer, B length) {
         assert(isByteAligned());
         if (position + length > this->length) {
             length = this->length - position;
             isReadBeyondEnd_ = true;
         }
-        std::copy(data.begin() + byte(position).get(), data.begin() + byte(position + length).get(), buffer);
+        std::copy(data.begin() + B(position).get(), data.begin() + B(position + length).get(), buffer);
         position += length;
         return length;
     }

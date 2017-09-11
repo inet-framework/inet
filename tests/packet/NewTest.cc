@@ -37,7 +37,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& applicationHeader = std::static_pointer_cast<const ApplicationHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be(applicationHeader->getSomeData());
-    stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -45,7 +45,7 @@ const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& str
     auto applicationHeader = std::make_shared<ApplicationHeader>();
     auto position = stream.getPosition();
     applicationHeader->setSomeData(stream.readUint16Be());
-    stream.readByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
     return applicationHeader;
 }
 
@@ -59,7 +59,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeUint16Be(tcpHeader->getSrcPort());
     stream.writeUint16Be(tcpHeader->getDestPort());
     stream.writeUint16Be(tcpHeader->getCrc());
-    stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, B(tcpHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -67,17 +67,17 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     auto tcpHeader = std::make_shared<TcpHeader>();
     auto position = stream.getPosition();
     auto remainingLength = stream.getRemainingLength();
-    auto lengthField = byte(stream.readUint16Be());
+    auto lengthField = B(stream.readUint16Be());
     if (lengthField > remainingLength)
         tcpHeader->markIncomplete();
-    auto length = lengthField < remainingLength ? lengthField : byte(remainingLength);
-    tcpHeader->setChunkLength(byte(length));
-    tcpHeader->setLengthField(byte(lengthField).get());
+    auto length = lengthField < remainingLength ? lengthField : B(remainingLength);
+    tcpHeader->setChunkLength(B(length));
+    tcpHeader->setLengthField(B(lengthField).get());
     tcpHeader->setSrcPort(stream.readUint16Be());
     tcpHeader->setDestPort(stream.readUint16Be());
     tcpHeader->setCrcMode(CRC_COMPUTED);
     tcpHeader->setCrc(stream.readUint16Be());
-    stream.readByteRepeatedly(0, byte(length - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, B(length - stream.getPosition() + position).get());
     return tcpHeader;
 }
 
@@ -86,7 +86,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const C
     const auto& ipHeader = std::static_pointer_cast<const IpHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be((int16_t)ipHeader->getProtocol());
-    stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -97,7 +97,7 @@ const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) cons
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
         ipHeader->markImproperlyRepresented();
     ipHeader->setProtocol(protocol);
-    stream.readByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getPosition() + position).get());
     return ipHeader;
 }
 
@@ -106,7 +106,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     const auto& ethernetHeader = std::static_pointer_cast<const EthernetHeader>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be((int16_t)ethernetHeader->getProtocol());
-    stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -114,7 +114,7 @@ const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream
     auto ethernetHeader = std::make_shared<EthernetHeader>();
     auto position = stream.getPosition();
     ethernetHeader->setProtocol((Protocol)stream.readUint16Be());
-    stream.readByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
     return ethernetHeader;
 }
 
@@ -123,7 +123,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
     auto position = stream.getLength();
     stream.writeUint16Be(ethernetTrailer->getCrc());
-    stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
+    stream.writeByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
 }
 
 const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
@@ -131,42 +131,42 @@ const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& strea
     auto ethernetTrailer = std::make_shared<EthernetTrailer>();
     auto position = stream.getPosition();
     ethernetTrailer->setCrc(stream.readUint16Be());
-    stream.readByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
+    stream.readByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
     return ethernetTrailer;
 }
 
 std::string ApplicationHeader::str() const
 {
     std::ostringstream os;
-    os << "ApplicationHeader, length = " << byte(getChunkLength()) << ", someData = " << someData;
+    os << "ApplicationHeader, length = " << B(getChunkLength()) << ", someData = " << someData;
     return os.str();
 }
 
 std::string TcpHeader::str() const
 {
     std::ostringstream os;
-    os << "TcpHeader, length = " << byte(getChunkLength()) << ", lengthField = " << getLengthField() << ", srcPort = " << srcPort << ", destPort = " << destPort << ", crc = " << crc;
+    os << "TcpHeader, length = " << B(getChunkLength()) << ", lengthField = " << getLengthField() << ", srcPort = " << srcPort << ", destPort = " << destPort << ", crc = " << crc;
     return os.str();
 }
 
 std::string IpHeader::str() const
 {
     std::ostringstream os;
-    os << "IpHeader, length = " << byte(getChunkLength()) << ", protocol = " << protocol;
+    os << "IpHeader, length = " << B(getChunkLength()) << ", protocol = " << protocol;
     return os.str();
 }
 
 std::string EthernetHeader::str() const
 {
     std::ostringstream os;
-    os << "EthernetHeader, length = " << byte(getChunkLength()) << ", protocol = " << protocol;
+    os << "EthernetHeader, length = " << B(getChunkLength()) << ", protocol = " << protocol;
     return os.str();
 }
 
 std::string EthernetTrailer::str() const
 {
     std::ostringstream os;
-    os << "EthernetTrailer, length = " << byte(getChunkLength()) << ", crc = " << crc;
+    os << "EthernetTrailer, length = " << B(getChunkLength()) << ", crc = " << crc;
     return os.str();
 }
 
@@ -215,7 +215,7 @@ void NewSender::sendIp(Packet *packet)
 const Ptr<TcpHeader> NewSender::createTcpHeader()
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
-    tcpHeader->setChunkLength(byte(20));
+    tcpHeader->setChunkLength(B(20));
     tcpHeader->setLengthField(20);
     tcpHeader->setSrcPort(1000);
     tcpHeader->setDestPort(2000);
@@ -226,10 +226,10 @@ void NewSender::sendTcp(Packet *packet)
 {
     if (tcpSegment == nullptr)
         tcpSegment = new Packet();
-    byte tcpSegmentSizeLimit = byte(15);
+    B tcpSegmentSizeLimit = B(15);
     if (tcpSegment->getTotalLength() + packet->getTotalLength() >= tcpSegmentSizeLimit) {
-        bit length = tcpSegmentSizeLimit - tcpSegment->getTotalLength();
-        tcpSegment->append(packet->peekAt(bit(0), length));
+        b length = tcpSegmentSizeLimit - tcpSegment->getTotalLength();
+        tcpSegment->append(packet->peekAt(b(0), length));
         auto tcpHeader = createTcpHeader();
         auto crcMode = medium.getSerialize() ? CRC_COMPUTED : CRC_DECLARED_CORRECT;
         tcpHeader->setCrcMode(crcMode);
@@ -239,7 +239,7 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case CRC_COMPUTED: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpHeader, tcpSegment->peekAt<BytesChunk>(bit(0), tcpSegment->getTotalLength())));
+                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpHeader, tcpSegment->peekAt<BytesChunk>(b(0), tcpSegment->getTotalLength())));
                 break;
             }
             default:
@@ -248,8 +248,8 @@ void NewSender::sendTcp(Packet *packet)
         tcpHeader->markImmutable();
         tcpSegment->prepend(tcpHeader);
         sendIp(tcpSegment);
-        bit remainingLength = packet->getTotalLength() - length;
-        if (remainingLength == bit(0))
+        b remainingLength = packet->getTotalLength() - length;
+        if (remainingLength == b(0))
             tcpSegment = nullptr;
         else {
             tcpSegment = new Packet();
@@ -257,7 +257,7 @@ void NewSender::sendTcp(Packet *packet)
         }
     }
     else
-        tcpSegment->append(packet->peekAt(bit(0)));
+        tcpSegment->append(packet->peekAt(b(0)));
     delete packet;
 }
 
@@ -280,7 +280,7 @@ void NewSender::sendPackets()
     sendTcp(packet2);
 
     auto byteSizeChunk = std::make_shared<ByteCountChunk>();
-    byteSizeChunk->setLength(byte(10));
+    byteSizeChunk->setLength(B(10));
     byteSizeChunk->markImmutable();
     EV_DEBUG << "Sending application data: " << byteSizeChunk << std::endl;
     auto packet3 = new Packet();
@@ -290,20 +290,20 @@ void NewSender::sendPackets()
 
 void NewReceiver::receiveApplication(Packet *packet)
 {
-    const auto& chunk = packet->peekDataAt(bit(0));
+    const auto& chunk = packet->peekDataAt(b(0));
     EV_DEBUG << "Collecting application data: " << chunk << std::endl;
     applicationData.push(chunk);
     EV_DEBUG << "Buffering application data: " << applicationData << std::endl;
-    if (applicationData.getPoppedLength() == byte(0) && applicationData.has<BytesChunk>(byte(10))) {
-        const auto& chunk = applicationData.pop<BytesChunk>(byte(10));
+    if (applicationData.getPoppedLength() == B(0) && applicationData.has<BytesChunk>(B(10))) {
+        const auto& chunk = applicationData.pop<BytesChunk>(B(10));
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
-    if (applicationData.getPoppedLength() == byte(10) && applicationData.has<ApplicationHeader>()) {
+    if (applicationData.getPoppedLength() == B(10) && applicationData.has<ApplicationHeader>()) {
         const auto& chunk = applicationData.pop<ApplicationHeader>();
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
-    if (applicationData.getPoppedLength() == byte(20) && applicationData.has<ByteCountChunk>(byte(10))) {
-        const auto& chunk = applicationData.pop<ByteCountChunk>(byte(10));
+    if (applicationData.getPoppedLength() == B(20) && applicationData.has<ByteCountChunk>(B(10))) {
+        const auto& chunk = applicationData.pop<ByteCountChunk>(B(10));
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
     delete packet;
@@ -311,7 +311,7 @@ void NewReceiver::receiveApplication(Packet *packet)
 
 void NewReceiver::receiveTcp(Packet *packet)
 {
-    bit tcpHeaderPopOffset = packet->getHeaderPopOffset();
+    b tcpHeaderPopOffset = packet->getHeaderPopOffset();
     auto tcpSegment = packet;
     const auto& tcpHeader = tcpSegment->popHeader<TcpHeader>();
     auto srcPort = tcpHeader->getSrcPort();
@@ -326,7 +326,7 @@ void NewReceiver::receiveTcp(Packet *packet)
         case CRC_DECLARED_CORRECT:
             break;
         case CRC_COMPUTED: {
-            bit length = packet->getTotalLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
+            b length = packet->getTotalLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
             if (crc != computeTcpCrc(BytesChunk(), tcpHeader, packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
                 delete packet;
                 return;

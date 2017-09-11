@@ -89,7 +89,7 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     ethernetHeader->setSrc(packet->getTag<MacAddressInd>()->getSrcAddress());
     ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
     ethernetHeader->setEtherType(ieee8022SnapHeader->getProtocolId());
-    ethernetHeader->setChunkLength(byte(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
+    ethernetHeader->setChunkLength(B(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
     packet->insertHeader(ethernetHeader);
 
     EtherEncap::addPaddingAndFcs(packet);

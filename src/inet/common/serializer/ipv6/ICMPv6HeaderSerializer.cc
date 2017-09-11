@@ -83,7 +83,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
             stream.writeIPv6Address(frame->getTargetAddress());
-            if (frame->getChunkLength() > byte(8 + 16)) {   // has optional sourceLinkLayerAddress    (TLB options)
+            if (frame->getChunkLength() > B(8 + 16)) {   // has optional sourceLinkLayerAddress    (TLB options)
                 stream.writeByte(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION);
                 stream.writeByte(1);         // length = 1 * 8byte
                 stream.writeMACAddress(frame->getSourceLinkLayerAddress());
@@ -142,7 +142,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
 
             stream.readUint32Be(); // reserved
             neighbourSol->setTargetAddress(stream.readIPv6Address());
-            while (stream.getRemainingLength() != byte(0)) {   // has options
+            while (stream.getRemainingLength() != B(0)) {   // has options
                 unsigned char type = stream.readByte();
                 unsigned char length = stream.readByte();
                 if (type == 0 || length == 0) {

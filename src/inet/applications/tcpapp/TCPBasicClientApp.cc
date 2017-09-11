@@ -105,7 +105,7 @@ void TCPBasicClientApp::sendRequest()
 
     const auto& payload = std::make_shared<GenericAppMsg>();
     Packet *packet = new Packet("data");
-    payload->setChunkLength(byte(requestLength));
+    payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(replyLength);
     payload->setServerClose(false);
     payload->markImmutable();

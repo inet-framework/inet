@@ -59,18 +59,18 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     aggregatedFrame->popTrailer<Ieee80211MacTrailer>();
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
-    while (aggregatedFrame->getDataLength() > bit(0))
+    while (aggregatedFrame->getDataLength() > b(0))
     {
-        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + byte(paddingLength == 4 ? 0 : paddingLength));
+        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
         const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframeHeader>();
-        const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength()));
-        paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));
+        paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         auto frame = new Packet("A-MSDU-Subframe");
         frame->append(msdu);
         auto header = std::make_shared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
-        header->setChunkLength(header->getChunkLength() + bit(QOSCONTROL_BITS));
+        header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));
         header->setToDS(amsduHeader->getToDS());
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);

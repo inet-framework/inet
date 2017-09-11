@@ -220,7 +220,7 @@ const Ptr<GPSRBeacon> GPSR::createBeacon()
     const auto& beacon = std::make_shared<GPSRBeacon>();
     beacon->setAddress(getSelfAddress());
     beacon->setPosition(mobility->getCurrentPosition());
-    beacon->setChunkLength(byte(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength));
+    beacon->setChunkLength(B(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength));
     return beacon;
 }
 
@@ -610,7 +610,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         ipv4Header->addOption(gpsrOption);
         int newHlen = ipv4Header->calculateHeaderByteLength();
         ipv4Header->setHeaderLength(newHlen);
-        ipv4Header->setChunkLength(ipv4Header->getChunkLength() + byte(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
+        ipv4Header->setChunkLength(ipv4Header->getChunkLength() + B(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
         ipv4Header->setTotalLengthField(ipv4Header->getTotalLengthField() + newHlen - oldHlen);
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
@@ -630,7 +630,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         hdr->getTlvOptions().add(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
         int newHlen = ipv6Header->calculateHeaderByteLength();
-        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + byte(newHlen - oldHlen));
+        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else
@@ -642,7 +642,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         int oldHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->getTlvOptions().add(gpsrOption);
         int newHlen = gnpHeader->getTlvOptions().getLength();
-        gnpHeader->setChunkLength(gnpHeader->getChunkLength() + byte(newHlen - oldHlen));
+        gnpHeader->setChunkLength(gnpHeader->getChunkLength() + B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::gnp, gnpHeader);
     }
     else

@@ -106,7 +106,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
-    sockdata->queue.push(msg->peekDataAt(byte(0), msg->getDataLength()));
+    sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
 
     while (sockdata->queue.has<HttpRequestMessage>()) {
         auto packet = new Packet(msg->getName(), sockdata->queue.pop<HttpRequestMessage>());

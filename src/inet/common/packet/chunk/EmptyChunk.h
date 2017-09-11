@@ -31,9 +31,9 @@ class INET_API EmptyChunk : public Chunk
     static const Ptr<EmptyChunk> singleton;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -48,7 +48,7 @@ class INET_API EmptyChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_EMPTY; }
-    virtual bit getChunkLength() const override { return bit(0); }
+    virtual b getChunkLength() const override { return b(0); }
 
     virtual std::string str() const override;
     //@}

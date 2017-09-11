@@ -410,7 +410,7 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
     msg->setSerial(0);
-    msg->setChunkLength(byte(requestLength + size));    // Add extra request size if specified
+    msg->setChunkLength(B(requestLength + size));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->markImmutable();
@@ -463,7 +463,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
     msg->setSerial(serial);
-    msg->setChunkLength(byte(requestLength));    // Add extra request size if specified
+    msg->setChunkLength(B(requestLength));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->markImmutable();

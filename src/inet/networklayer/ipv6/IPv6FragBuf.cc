@@ -67,7 +67,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, Ipv6F
         buf = &(i->second);
     }
 
-    int fragmentLength = pk->getByteLength() - byte(ipv6Header->getChunkLength()).get(); //datagram->calculateFragmentLength();
+    int fragmentLength = pk->getByteLength() - B(ipv6Header->getChunkLength()).get(); //datagram->calculateFragmentLength();
     unsigned short offset = fh->getFragmentOffset();
     bool moreFragments = fh->getMoreFragments();
 
@@ -96,10 +96,10 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, Ipv6F
     }
 
     // add fragment to buffer
-    buf->buf.replace(byte(offset), pk->peekDataAt(ipv6Header->getChunkLength(), byte(fragmentLength)));
+    buf->buf.replace(B(offset), pk->peekDataAt(ipv6Header->getChunkLength(), B(fragmentLength)));
 
     if (!moreFragments) {
-        buf->buf.setExpectedLength(byte(offset + fragmentLength));
+        buf->buf.setExpectedLength(B(offset + fragmentLength));
     }
 
     // Store the first fragment. The first fragment contains the whole
@@ -125,7 +125,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, Ipv6F
         auto hdr = Ptr<Ipv6Header>(buf->packet->peekHeader<Ipv6Header>()->dup());
         const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
-        hdr->setChunkLength(byte(hdr->calculateUnfragmentableHeaderByteLength()));
+        hdr->setChunkLength(B(hdr->calculateUnfragmentableHeaderByteLength()));
         hdr->markImmutable();
         pk->pushHeader(hdr);
         pk->append(payload);

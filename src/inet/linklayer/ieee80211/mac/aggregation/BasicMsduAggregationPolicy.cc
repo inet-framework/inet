@@ -46,7 +46,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
 //    The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
 //    A-MSDU cannot be fragmented. Therefore, an A-MSDU of a length that exceeds 4065 octets (
 //    4095 minus the QoS data MPDU overhead) cannot be transported in an A-MPDU.
-    if (aMsduLength + byte(testPacket->getTotalLength() - testHeader->getChunkLength() - testTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
+    if (aMsduLength + B(testPacket->getTotalLength() - testHeader->getChunkLength() - testTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
         return false;
 
 //    The value of TID present in the QoS Control field of the MPDU carrying the A-MSDU indicates the TID for
@@ -70,7 +70,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>
 std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
 {
     ASSERT(!queue->isEmpty());
-    bit aMsduLength = bit(0);
+    b aMsduLength = b(0);
     auto firstPacket = check_and_cast<Packet *>(queue->front());
     Ptr<const Ieee80211DataOrMgmtHeader> firstFrame = nullptr;
     auto frames = new std::vector<Packet *>();
@@ -83,12 +83,12 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue
             break;
         if (!firstFrame)
             firstFrame = dataHeader;
-        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataHeader), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), byte(aMsduLength).get()))
+        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataHeader), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
-    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), byte(aMsduLength).get())) {
+    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), B(aMsduLength).get())) {
         delete frames;
         return nullptr;
     }

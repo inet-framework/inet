@@ -28,7 +28,7 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
 {
   protected:
     simtime_t preambleDuration;
-    bit headerLength;
+    b headerLength;
     bps bitrate;
     W power;
 
@@ -45,8 +45,8 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual bit getHeaderLength() const { return headerLength; }
-    virtual void setHeaderLength(bit headerLength) { this->headerLength = headerLength; }
+    virtual b getHeaderLength() const { return headerLength; }
+    virtual void setHeaderLength(b headerLength) { this->headerLength = headerLength; }
 
     virtual bps getBitrate() const { return bitrate; }
     virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }

@@ -49,7 +49,7 @@ packet Ieee80211OfdmPhyHeader extends Ieee80211PhyHeader
 {
     // The PLCP header is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1),
     // Tail (6) and SERVICE (16) fields.
-    chunkLength = byte(5);
+    chunkLength = B(5);
     uint8_t rate;
     uint16_t lengthField;
 }

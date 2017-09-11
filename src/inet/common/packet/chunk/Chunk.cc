@@ -41,12 +41,12 @@ void Chunk::handleChange()
 
 int Chunk::getBitsArraySize()
 {
-    return (bit(getChunkLength()).get() + 31) / 32;
+    return (b(getChunkLength()).get() + 31) / 32;
 }
 
 int Chunk::getBytesArraySize()
 {
-    return ((bit(getChunkLength()).get() + 7) / 8 + 15) / 16;
+    return ((b(getChunkLength()).get() + 7) / 8 + 15) / 16;
 }
 
 static std::string asStringValue;
@@ -56,9 +56,9 @@ const char *Chunk::getBitsAsString(int index)
     asStringValue = "";
     try {
         int offset = index * 32;
-        int length = std::min(32, (int)bit(getChunkLength()).get() - offset);
+        int length = std::min(32, (int)b(getChunkLength()).get() - offset);
         MemoryOutputStream outputStream;
-        serialize(outputStream, shared_from_this(), bit(offset), bit(length));
+        serialize(outputStream, shared_from_this(), b(offset), b(length));
         std::vector<bool> bits;
         outputStream.copyData(bits);
         for (int i = 0; i < length; i++) {
@@ -78,10 +78,10 @@ const char *Chunk::getBytesAsString(int index)
     asStringValue = "";
     try {
         int offset = index * 8 * 16;
-        int length = std::min(8 * 16, (int)bit(getChunkLength()).get() - offset);
+        int length = std::min(8 * 16, (int)b(getChunkLength()).get() - offset);
         MemoryOutputStream outputStream;
-        serialize(outputStream, shared_from_this(), bit(offset), bit(length));
-        ASSERT(outputStream.getLength() == bit(length));
+        serialize(outputStream, shared_from_this(), b(offset), b(length));
+        ASSERT(outputStream.getLength() == b(length));
         std::vector<uint8_t> bytes;
         outputStream.copyData(bytes);
         char tmp[3] = "  ";
@@ -98,7 +98,7 @@ const char *Chunk::getBytesAsString(int index)
     return asStringValue.c_str();
 }
 
-const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();
     if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
@@ -109,20 +109,20 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     return deserialize(inputStream, typeInfo);
 }
 
-void Chunk::moveIterator(Iterator& iterator, bit length) const
+void Chunk::moveIterator(Iterator& iterator, b length) const
 {
     auto position = iterator.getPosition() + length;
     iterator.setPosition(position);
-    iterator.setIndex(position == bit(0) ? 0 : -1);
+    iterator.setIndex(position == b(0) ? 0 : -1);
 }
 
-void Chunk::seekIterator(Iterator& iterator, bit position) const
+void Chunk::seekIterator(Iterator& iterator, b position) const
 {
     iterator.setPosition(position);
-    iterator.setIndex(position == bit(0) ? 0 : -1);
+    iterator.setIndex(position == b(0) ? 0 : -1);
 }
 
-const Ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> Chunk::peek(const Iterator& iterator, b length, int flags) const
 {
     const auto& chunk = peekUnchecked(nullptr, nullptr, iterator, length, flags);
     return checkPeekResult<Chunk>(chunk, flags);
@@ -135,7 +135,7 @@ std::string Chunk::str() const
     return os.str();
 }
 
-void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length)
+void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length)
 {
     const Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
@@ -145,7 +145,7 @@ void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk,
     serializer->serialize(stream, chunk, offset, length);
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto endPosition = stream.getLength();
-    auto expectedChunkLength = length == bit(-1) ? chunk->getChunkLength() - offset : length;
+    auto expectedChunkLength = length == b(-1) ? chunk->getChunkLength() - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(expectedChunkLength == endPosition - startPosition);
 #endif
 }
@@ -154,11 +154,11 @@ const Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_i
 {
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-    auto startPosition = byte(stream.getPosition());
+    auto startPosition = B(stream.getPosition());
 #endif
     auto chunk = serializer->deserialize(stream, typeInfo);
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-    auto endPosition = byte(stream.getPosition());
+    auto endPosition = B(stream.getPosition());
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkLength() == endPosition - startPosition);
 #endif
     if (stream.isReadBeyondEnd())

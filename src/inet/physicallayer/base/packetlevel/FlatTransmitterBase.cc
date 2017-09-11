@@ -25,7 +25,7 @@ namespace physicallayer {
 FlatTransmitterBase::FlatTransmitterBase() :
     NarrowbandTransmitterBase(),
     preambleDuration(-1),
-    headerLength(bit(-1)),
+    headerLength(b(-1)),
     bitrate(bps(NaN)),
     power(W(NaN))
 {
@@ -36,7 +36,7 @@ void FlatTransmitterBase::initialize(int stage)
     NarrowbandTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
-        headerLength = bit(par("headerBitLength").longValue());
+        headerLength = b(par("headerBitLength").longValue());
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
     }

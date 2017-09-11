@@ -192,7 +192,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
 
-    sockdata->queue.push(msg->peekDataAt(byte(0), msg->getDataLength()));
+    sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
 
     while (sockdata->queue.has<HttpReplyMessage>())
         handleDataMessage(new Packet(msg->getName(), sockdata->queue.pop<HttpReplyMessage>()));

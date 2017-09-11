@@ -17,21 +17,21 @@
 
 namespace inet {
 
-bit ReorderBuffer::getAvailableDataLength() const
+b ReorderBuffer::getAvailableDataLength() const
 {
     if (regions.size() > 0 && regions[0].offset == expectedOffset)
         return regions[0].data->getChunkLength();
     else
-        return bit(0);
+        return b(0);
 }
 
-const Ptr<const Chunk> ReorderBuffer::popAvailableData(bit length)
+const Ptr<const Chunk> ReorderBuffer::popAvailableData(b length)
 {
     if (regions.size() > 0 && regions[0].offset == expectedOffset) {
         auto data = regions[0].data;
-        bit dataLength = data->getChunkLength();
-        if (length != bit(-1)) {
-            data = data->peek(Chunk::ForwardIterator(bit(0)), length);
+        b dataLength = data->getChunkLength();
+        if (length != b(-1)) {
+            data = data->peek(Chunk::ForwardIterator(b(0)), length);
             dataLength = length;
         }
         clear(expectedOffset, dataLength);

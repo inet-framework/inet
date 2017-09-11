@@ -42,8 +42,8 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
 {
     W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
-    const simtime_t headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();
-    const simtime_t dataDuration = bit(packet->getTotalLength()).get() / bps(transmissionBitrate).get();
+    const simtime_t headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
+    const simtime_t dataDuration = b(packet->getTotalLength()).get() / bps(transmissionBitrate).get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();

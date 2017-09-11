@@ -138,7 +138,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
     std::ostringstream out;
     const char *separ = "";
     auto packet = new Packet(pk->getName(), pk->peekData());
-    while (auto chunkref = packet->popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
+    while (auto chunkref = packet->popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
         const auto chunk = chunkref.get();
         std::ostringstream out;
 
@@ -162,7 +162,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
 #ifdef WITH_ETHERNET
         else if (const auto eth = dynamic_cast<const EtherFrame *>(chunk)) {
             out << "ETH: " << eth->getSrc() << " > " << eth->getDest();
-            if (const auto tc = packet->peekTrailer(bit(-1), Chunk::PF_ALLOW_NULLPTR).get())
+            if (const auto tc = packet->peekTrailer(b(-1), Chunk::PF_ALLOW_NULLPTR).get())
                 if (typeid(*tc) == typeid(EthernetFcs)) {
                     const auto& fcs = packet->popTrailer<EthernetFcs>();
                     (void)fcs;    //TODO do we show the FCS?

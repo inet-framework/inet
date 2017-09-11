@@ -111,7 +111,7 @@ Packet *UDPBasicBurst::createPacket()
     long msgByteLength = messageLengthPar->longValue();
     Packet *pk = new Packet(msgName);
     const auto& payload = std::make_shared<ApplicationPacket>();
-    payload->setChunkLength(byte(msgByteLength));
+    payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
     payload->markImmutable();
     pk->append(payload);

@@ -31,32 +31,32 @@ ByteCountChunk::ByteCountChunk(const ByteCountChunk& other) :
 {
 }
 
-ByteCountChunk::ByteCountChunk(byte length, uint8_t data) :
+ByteCountChunk::ByteCountChunk(B length, uint8_t data) :
     Chunk(),
     length(length),
     data(data)
 {
-    CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
+    CHUNK_CHECK_USAGE(length >= B(0), "length is invalid");
 }
 
-const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<ByteCountChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking without conversion returns a ByteCountChunk
     if (converter == nullptr) {
-        auto chunk = std::make_shared<ByteCountChunk>(length == bit(-1) ? chunkLength - iterator.getPosition() : length);
+        auto chunk = std::make_shared<ByteCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
         chunk->markImmutable();
         return chunk;
     }
@@ -64,17 +64,17 @@ const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConv
     return converter(const_cast<ByteCountChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-const Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
-    bit chunkLength = chunk->getChunkLength();
-    bit resultLength = length == bit(-1) ? chunkLength - offset : length;
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
-    return std::make_shared<ByteCountChunk>(byte(resultLength));
+    b chunkLength = chunk->getChunkLength();
+    b resultLength = length == b(-1) ? chunkLength - offset : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
+    return std::make_shared<ByteCountChunk>(B(resultLength));
 }
 
-void ByteCountChunk::setLength(byte length)
+void ByteCountChunk::setLength(B length)
 {
-    CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
+    CHUNK_CHECK_USAGE(length >= B(0), "length is invalid");
     handleChange();
     this->length = length;
 }
@@ -111,24 +111,24 @@ void ByteCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::removeFromBeginning(bit length)
+void ByteCountChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
     handleChange();
-    this->length -= byte(length);
+    this->length -= B(length);
 }
 
-void ByteCountChunk::removeFromEnd(bit length)
+void ByteCountChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
     handleChange();
-    this->length -= byte(length);
+    this->length -= B(length);
 }
 
 std::string ByteCountChunk::str() const
 {
     std::ostringstream os;
-    os << "ByteCountChunk, length = " << byte(getChunkLength());
+    os << "ByteCountChunk, length = " << B(getChunkLength());
     return os.str();
 }
 

@@ -45,7 +45,7 @@ class RtpHeader extends FieldsChunk
 {
     @customize(true);  // see the generated C++ header for more info
 
-    chunkLength = byte(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
+    chunkLength = B(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
 
     // The rtp version of this ~RTPPacket.
     uint8 version = 2;      // 2 bits

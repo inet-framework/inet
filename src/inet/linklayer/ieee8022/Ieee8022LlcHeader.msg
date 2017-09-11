@@ -25,7 +25,7 @@ class FieldsChunk extends cObject;
 
 class Ieee8022LlcHeader extends FieldsChunk
 {
-    chunkLength = byte(3);
+    chunkLength = B(3);
     short dsap = -1;
     short ssap = -1;
     int control = -1;
@@ -33,7 +33,7 @@ class Ieee8022LlcHeader extends FieldsChunk
 
 class Ieee8022SnapHeader extends Ieee8022LlcHeader
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;

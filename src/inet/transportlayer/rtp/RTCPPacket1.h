@@ -41,7 +41,7 @@ class INET_API RTCPPacket : public RTCPPacket_Base
     // rtcpLength is the header field length
     // of an rtcp packet
     // in 32 bit words minus one
-    virtual int getRtcpLength() const override { return (int)(byte(getChunkLength()).get() / 4) - 1; }
+    virtual int getRtcpLength() const override { return (int)(B(getChunkLength()).get() / 4) - 1; }
     virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
 };
 

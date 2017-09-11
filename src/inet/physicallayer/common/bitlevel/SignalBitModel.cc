@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-SignalBitModel::SignalBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits) :
+SignalBitModel::SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
     bits(bits),
     headerLength(headerLength),
     headerBitRate(headerBitRate),
@@ -47,14 +47,14 @@ std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) con
 }
 
 TransmissionBitModel::TransmissionBitModel(const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
-    SignalBitModel(bit(-1), bps(NaN), bit(-1), bps(NaN), bits),
+    SignalBitModel(b(-1), bps(NaN), b(-1), bps(NaN), bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
     interleaving(interleaving)
 {
 }
 
-TransmissionBitModel::TransmissionBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
+TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
     SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
@@ -62,7 +62,7 @@ TransmissionBitModel::TransmissionBitModel(bit headerLength, bps headerBitRate, 
 {
 }
 
-ReceptionBitModel::ReceptionBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits) :
+ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
     SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits)
 {
 }

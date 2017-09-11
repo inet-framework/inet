@@ -54,7 +54,7 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     if (ipv4Header->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize IPv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header->getCrc());
-    stream.writeBytes((uint8_t *)&iphdr, byte(IP_HEADER_BYTES));
+    stream.writeBytes((uint8_t *)&iphdr, B(IP_HEADER_BYTES));
 
     if (headerLength > IP_HEADER_BYTES) {
         unsigned short numOptions = ipv4Header->getOptionArraySize();
@@ -68,7 +68,7 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         }    // if options present
         if (ipv4Header->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
             throw cRuntimeError("Serializing an IPv4 packet with wrong headerLength value: not enough for store options.\n");
-        auto writtenLength = byte(stream.getLength() - startPosition).get();
+        auto writtenLength = B(stream.getLength() - startPosition).get();
         if (writtenLength < headerLength)
             stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);
     }
@@ -150,9 +150,9 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
 const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
-    byte bufsize = stream.getRemainingLength();
+    B bufsize = stream.getRemainingLength();
     uint8_t buffer[IP_HEADER_BYTES];
-    stream.readBytes(buffer, byte(IP_HEADER_BYTES));
+    stream.readBytes(buffer, B(IP_HEADER_BYTES));
     auto ipv4Header = std::make_shared<Ipv4Header>();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
     unsigned int totalLength, headerLength;
@@ -185,12 +185,12 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv4Header->setHeaderLength(headerLength);
 
     if (headerLength > IP_HEADER_BYTES) {    // options present?
-        while (stream.getRemainingLength() > byte(0) && stream.getPosition() - position < byte(headerLength)) {
+        while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < B(headerLength)) {
             TLVOptionBase *option = deserializeOption(stream);
             ipv4Header->addOption(option);
         }
     }
-    if (byte(headerLength) > bufsize) {
+    if (B(headerLength) > bufsize) {
         ipv4Header->markIncomplete();
     }
 

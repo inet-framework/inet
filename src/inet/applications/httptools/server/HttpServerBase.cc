@@ -321,7 +321,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
         size = (int)rdHtmlPageSize->draw();
     }
 
-    replymsg->setChunkLength(byte(size));
+    replymsg->setChunkLength(B(size));
     replymsg->markImmutable();
     replyPk->append(replymsg);
 
@@ -362,7 +362,7 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     replymsg->setSerial(request->serial());
     replymsg->setResult(200);
     replymsg->setContentType(category);    // Emulates the content-type header field
-    replymsg->setChunkLength(byte(size)); // Set the resource size
+    replymsg->setChunkLength(B(size)); // Set the resource size
     replymsg->markImmutable();
     replyPk->append(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
@@ -383,7 +383,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
     replymsg->setSerial(request->serial());
     replymsg->setResult(code);
-    replymsg->setChunkLength(byte((int)rdErrorMsgSize->draw()));
+    replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
     replymsg->markImmutable();
     replyPk->append(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);

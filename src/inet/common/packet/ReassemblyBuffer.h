@@ -33,27 +33,27 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
     /**
      * The total length of the reassembled data chunk.
      */
-    bit expectedLength;
+    b expectedLength;
 
   public:
-    ReassemblyBuffer(bit expectedLength = bit(-1)) : expectedLength(expectedLength) { }
+    ReassemblyBuffer(b expectedLength = b(-1)) : expectedLength(expectedLength) { }
     ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) { }
 
     /**
      * Returns the expected data length.
      */
-    bit getExpectedLength() const { return expectedLength; }
+    b getExpectedLength() const { return expectedLength; }
 
     /**
      * Changes the expected data length.
      */
-    void setExpectedLength(bit expectedLength) { this->expectedLength = expectedLength; }
+    void setExpectedLength(b expectedLength) { this->expectedLength = expectedLength; }
 
     /**
      * Returns true if all data is present for reassembling the data chunk.
      */
     bool isComplete() const {
-        return regions.size() == 1 && regions[0].offset == bit(0) && regions[0].data->getChunkLength() == expectedLength;
+        return regions.size() == 1 && regions[0].offset == b(0) && regions[0].data->getChunkLength() == expectedLength;
     }
 
     /**

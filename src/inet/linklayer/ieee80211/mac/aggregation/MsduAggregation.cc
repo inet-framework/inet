@@ -70,14 +70,14 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         const auto& header = frame->popHeader<Ieee80211DataHeader>();
         frame->popTrailer<Ieee80211MacTrailer>();
         auto msdu = frame->peekData();
-        msduSubframeHeader->setLength(byte(msdu->getChunkLength()).get());
+        msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
         setSubframeAddress(msduSubframeHeader, header);
         msduSubframeHeader->markImmutable();
         aggregatedFrame->append(msduSubframeHeader);
         aggregatedFrame->append(msdu);
-        int paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
-            auto padding = std::make_shared<ByteCountChunk>(byte(paddingLength));
+            auto padding = std::make_shared<ByteCountChunk>(B(paddingLength));
             padding->markImmutable();
             aggregatedFrame->append(padding);
         }
@@ -93,7 +93,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setAMsduPresent(true);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + bit(QOSCONTROL_BITS));
+    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + b(QOSCONTROL_BITS));
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);

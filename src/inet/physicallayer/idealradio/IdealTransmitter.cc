@@ -28,7 +28,7 @@ namespace physicallayer {
 Define_Module(IdealTransmitter);
 
 IdealTransmitter::IdealTransmitter() :
-    headerLength(bit(-1)),
+    headerLength(b(-1)),
     bitrate(NaN),
     communicationRange(NaN),
     interferenceRange(NaN),
@@ -40,7 +40,7 @@ void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
-        headerLength = bit(par("headerBitLength").longValue());
+        headerLength = b(par("headerBitLength").longValue());
         bitrate = bps(par("bitrate"));
         communicationRange = m(par("communicationRange"));
         interferenceRange = m(par("interferenceRange"));
@@ -69,8 +69,8 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
-    auto headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();
-    auto dataDuration = bit(dataLength).get() / bps(transmissionBitrate).get();
+    auto headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
+    auto dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();
     auto duration = preambleDuration + headerDuration + dataDuration;
     auto endTime = startTime + duration;
     auto mobility = transmitter->getAntenna()->getMobility();

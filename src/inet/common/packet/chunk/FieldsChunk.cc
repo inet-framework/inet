@@ -20,7 +20,7 @@ namespace inet {
 
 FieldsChunk::FieldsChunk() :
     Chunk(),
-    chunkLength(bit(-1)),
+    chunkLength(b(-1)),
     serializedBytes(nullptr)
 {
 }
@@ -44,23 +44,23 @@ void FieldsChunk::handleChange()
     serializedBytes = nullptr;
 }
 
-const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<FieldsChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking a part from the beginning without conversion returns an incomplete copy of this chunk
-    if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == bit(0)) {
+    if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == b(0)) {
         auto copy = std::static_pointer_cast<FieldsChunk>(dupShared());
         copy->setChunkLength(length);
         copy->markIncomplete();

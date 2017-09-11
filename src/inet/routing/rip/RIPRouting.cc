@@ -303,7 +303,7 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
     RIPEntry& entry = packet->getEntry(0);
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
-    packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+    packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
     packet->markImmutable();
     pk->append(packet);
     emit(sentRequestSignal, pk);
@@ -704,7 +704,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
 
         // if packet is full, then send it and allocate a new one
         if (k >= maxEntries) {
-            packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+            packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
             packet->markImmutable();
             pk->append(packet);
 
@@ -721,7 +721,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
     // send last packet if it has entries
     if (k > 0) {
         packet->setEntryArraySize(k);
-        packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+        packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
         packet->markImmutable();
         pk->append(packet);
 

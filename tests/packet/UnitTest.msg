@@ -36,13 +36,13 @@ class TlvHeader extends FieldsChunk
 class TlvHeaderBool extends TlvHeader
 {
     type = 1;
-    chunkLength = byte(3);
+    chunkLength = B(3);
     bool boolValue = false;
 }
 
 class TlvHeaderInt extends TlvHeader
 {
     type = 2;
-    chunkLength = byte(4);
+    chunkLength = B(4);
     int16_t int16Value = -1;
 }

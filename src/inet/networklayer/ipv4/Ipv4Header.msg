@@ -180,7 +180,7 @@ class Ipv4Header extends NetworkHeaderBase
 {
     @customize(true);
 
-    chunkLength = byte(IP_HEADER_BYTES);
+    chunkLength = B(IP_HEADER_BYTES);
 
     short version = 4;
     short headerLength = IP_HEADER_BYTES;

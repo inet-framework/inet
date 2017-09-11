@@ -818,7 +818,7 @@ struct K;    // Kelvin
 struct A;    // Ampere
 struct mol;    // mole
 struct cd;    // candela
-struct bit;    // bit
+struct b;    // bit
 
 } // namespace units
 
@@ -829,7 +829,7 @@ UNIT_DISPLAY_NAME(units::K, "K");
 UNIT_DISPLAY_NAME(units::A, "A");
 UNIT_DISPLAY_NAME(units::mol, "mol");
 UNIT_DISPLAY_NAME(units::cd, "cd");
-UNIT_DISPLAY_NAME(units::bit, "bit");
+UNIT_DISPLAY_NAME(units::b, "bit");
 
 namespace units {
 
@@ -1055,8 +1055,8 @@ typedef scale<kPa, 1450377, 10000000> psi;
 typedef scale<kPa, 10> millibar;
 
 // Informatics
-typedef intscale<bit, 1, 8> byte;
-typedef compose<bit, pow<s, -1> > bps;
+typedef intscale<b, 1, 8> B;
+typedef compose<b, pow<s, -1> > bps;
 typedef scale<bps, 1, 1000> kbps;
 typedef scale<bps, 1, 1000000> Mbps;
 
@@ -1105,7 +1105,7 @@ UNIT_DISPLAY_NAME(units::degree_second, "\"");
 UNIT_DISPLAY_NAME(units::kPa, "kPa");
 UNIT_DISPLAY_NAME(units::psi, "PSI");
 UNIT_DISPLAY_NAME(units::millibar, "millibars");
-UNIT_DISPLAY_NAME(units::byte, "byte");
+UNIT_DISPLAY_NAME(units::B, "byte");
 UNIT_DISPLAY_NAME(units::bps, "bps");
 UNIT_DISPLAY_NAME(units::kbps, "kbps");
 UNIT_DISPLAY_NAME(units::Mbps, "Mbps");
@@ -1126,7 +1126,8 @@ typedef value<double, units::K> K;
 typedef value<double, units::A> A;
 typedef value<double, units::mol> mol;
 typedef value<double, units::cd> cd;
-typedef value<double, units::bit> b;
+typedef value<int64_t, units::b> b;
+typedef value<int64_t, units::B> B;
 
 // SI derived
 typedef value<double, units::rad> rad;
@@ -1220,9 +1221,6 @@ typedef value<double, units::kPa> kPa;
 typedef value<double, units::psi> psi;
 typedef value<double, units::millibar> millibar;
 
-typedef value<int64_t, units::bit> bit;
-typedef value<int64_t, units::byte> byte;
-
 typedef value<double, units::bps> bps;
 typedef value<double, units::kbps> kbps;
 typedef value<double, units::Mbps> Mbps;
@@ -1235,13 +1233,13 @@ typedef value<double, units::bakers_dozen> bakers_dozen;
 } // namespace values
 
 template<typename Value>
-std::ostream& operator<<(std::ostream& os, const value<Value, units::bit>& value)
+std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
 {
     if (value.get() % 8 == 0)
-        os << values::byte(value);
+        os << values::B(value);
     else {
         os << value.get() << ' ';
-        output_unit<units::bit>::fn(os);
+        output_unit<units::b>::fn(os);
     }
     return os;
 }

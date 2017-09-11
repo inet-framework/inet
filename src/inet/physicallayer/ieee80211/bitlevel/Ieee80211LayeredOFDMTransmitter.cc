@@ -105,8 +105,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAna
     int headerBitLength = -1;
     int dataBitLength = -1;
     if (levelOfDetail > PACKET_DOMAIN) {
-        headerBitLength = bit(bitModel->getHeaderLength()).get();
-        dataBitLength = bit(bitModel->getDataLength()).get();
+        headerBitLength = b(bitModel->getHeaderLength()).get();
+        dataBitLength = b(bitModel->getDataLength()).get();
     }
     else {
         if (isCompliant) {
@@ -232,16 +232,16 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
         unsigned int dataBitLength = dataFieldBits->getSize();
         for (unsigned int i = 0; i < dataFieldBits->getSize(); i++)
             encodedBits->appendBit(dataFieldBits->getBit(i));
-        const TransmissionBitModel *transmissionBitModel = new TransmissionBitModel(bit(signalBitLength), mode->getSignalMode()->getGrossBitrate(), bit(dataBitLength), mode->getDataMode()->getGrossBitrate(), encodedBits, dataFieldBitModel->getForwardErrorCorrection(), dataFieldBitModel->getScrambling(), dataFieldBitModel->getInterleaving());
+        const TransmissionBitModel *transmissionBitModel = new TransmissionBitModel(b(signalBitLength), mode->getSignalMode()->getGrossBitrate(), b(dataBitLength), mode->getDataMode()->getGrossBitrate(), encodedBits, dataFieldBitModel->getForwardErrorCorrection(), dataFieldBitModel->getScrambling(), dataFieldBitModel->getInterleaving());
         delete signalFieldBitModel;
         delete dataFieldBitModel;
         return transmissionBitModel;
     }
     // TODO
-    return new TransmissionBitModel(bit(-1), mode->getSignalMode()->getGrossBitrate(), bit(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
+    return new TransmissionBitModel(b(-1), mode->getSignalMode()->getGrossBitrate(), b(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
-bit Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) const
+b Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) const
 {
     // 18.3.5.4 Pad bits (PAD), 1597p.
     // TODO: in non-compliant mode: header padding.
@@ -253,11 +253,11 @@ bit Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) cons
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int dataBitsLength = 6 + bit(packet->getTotalLength()).get() + 16;
+    unsigned int dataBitsLength = 6 + b(packet->getTotalLength()).get() + 16;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
-    return bit(numberOfPadBits);
+    return b(numberOfPadBits);
 }
 
 const ITransmissionSampleModel *Ieee80211LayeredOFDMTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const

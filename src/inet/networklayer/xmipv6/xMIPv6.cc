@@ -570,7 +570,7 @@ void xMIPv6::createAndSendBUMessage(const IPv6Address& dest, InterfaceEntry *ie,
     if (bindAuthData != UNDEFINED_BIND_AUTH_DATA)
         bindAuthSize = SIZE_BIND_AUTH_DATA; // (6.2.3 PadN = 16 bit) -> no padding required if nonces provided // TODO check whether nonces valid
 
-    bu->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_BU + SIZE_HOA_OPTION + bindAuthSize + nonceIndicesSize));
+    bu->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BU + SIZE_HOA_OPTION + bindAuthSize + nonceIndicesSize));
 
     /*11.7.1
        When sending a Binding Update to its home agent, the mobile node MUST
@@ -1114,7 +1114,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
     if (bindingAuthorizationData != UNDEFINED_BIND_AUTH_DATA)
         bindAuthSize = SIZE_BIND_AUTH_DATA + 2; // Binding Auth. Data + 6.2.3 PadN = 16 bit
 
-    ba->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_BACK + bindAuthSize));
+    ba->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BACK + bindAuthSize));
     packet->insertHeader(ba);
 
     /*The rules for selecting the Destination IP address (and, if required,
@@ -1700,7 +1700,7 @@ void xMIPv6::createAndSendHoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
     HoTI->setMobilityHeaderType(HOME_TEST_INIT);
     HoTI->setHomeInitCookie(HO_COOKIE);
     // setting message size
-    HoTI->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_HOTI));
+    HoTI->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_HOTI));
 
     createTestInitTimer(HoTI, cnDest, ie);
 }
@@ -1711,7 +1711,7 @@ void xMIPv6::createAndSendCoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
     CoTI->setMobilityHeaderType(CARE_OF_TEST_INIT);
     CoTI->setCareOfInitCookie(CO_COOKIE);
     // setting message size
-    CoTI->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_COTI));
+    CoTI->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_COTI));
 
     createTestInitTimer(CoTI, cnDest, ie);
 }
@@ -1728,7 +1728,7 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
     homeTest->setHomeInitCookie(homeTestInit->getHomeInitCookie());
     homeTest->setHomeKeyGenToken(bc->generateHomeToken(HoA, 0));    // TODO nonce
     // setting message size
-    homeTest->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_HOT));
+    homeTest->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_HOT));
     outPacket->insertHeader(homeTest);
 
     EV_INFO << "\n<<======HoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
@@ -1752,7 +1752,7 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit
     cot->setCareOfInitCookie(coti->getCareOfInitCookie());
     cot->setCareOfKeyGenToken(bc->generateCareOfToken(coa, 0));    // TODO nonce
     // setting message size
-    cot->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_COT));
+    cot->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_COT));
     outPacket->insertHeader(cot);
 
     EV_INFO << "\n<<======CoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
@@ -2169,7 +2169,7 @@ void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beS
     be->setStatus(beStatus);
 
     // setting message size
-    be->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_BE));
+    be->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BE));
     packet->insertHeader(be);
 
     sendMobilityMessageToIPv6Module(packet, dest);
@@ -2449,7 +2449,7 @@ void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie
        Message Data field in the Mobility Header is as follows:*/
     brr->setMobilityHeaderType(BINDING_REFRESH_REQUEST);
 
-    brr->setChunkLength(byte(SIZE_MOBILITY_HEADER + SIZE_BRR));
+    brr->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BRR));
     outPacket->insertHeader(brr);
 
     EV_INFO << "\n<<======BRR MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";

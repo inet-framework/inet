@@ -40,25 +40,25 @@ class INET_API SliceChunk : public Chunk
     /**
      * The offset measured in bits, or -1 if not yet specified.
      */
-    bit offset;
+    b offset;
     /**
      * The length measured in bits, or -1 if not yet specified.
      */
-    bit length;
+    b length;
 
   protected:
     Chunk *_getChunk() const { return chunk.get(); } // only for class descriptor
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     SliceChunk();
     SliceChunk(const SliceChunk& other);
-    SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length);
+    SliceChunk(const Ptr<Chunk>& chunk, b offset, b length);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
@@ -71,11 +71,11 @@ class INET_API SliceChunk : public Chunk
     const Ptr<Chunk>& getChunk() const { return chunk; }
     void setChunk(const Ptr<Chunk>& chunk) { this->chunk = chunk; }
 
-    bit getOffset() const { return offset; }
-    void setOffset(bit offset);
+    b getOffset() const { return offset; }
+    void setOffset(b offset);
 
-    bit getLength() const { return length; }
-    void setLength(bit length);
+    b getLength() const { return length; }
+    void setLength(b length);
     //@}
 
     /** @name Overridden flag functions */
@@ -96,7 +96,7 @@ class INET_API SliceChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_SLICE; }
-    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= bit(0)); return length; }
+    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
     virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
@@ -104,11 +104,11 @@ class INET_API SliceChunk : public Chunk
     virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
     virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) const override { return false; }
-    virtual bool canRemoveFromEnd(bit length) const override { return false; }
+    virtual bool canRemoveFromBeginning(b length) const override { return false; }
+    virtual bool canRemoveFromEnd(b length) const override { return false; }
 
-    virtual void removeFromBeginning(bit length) override;
-    virtual void removeFromEnd(bit length) override;
+    virtual void removeFromBeginning(b length) override;
+    virtual void removeFromEnd(b length) override;
 
     virtual std::string str() const override;
     //@}

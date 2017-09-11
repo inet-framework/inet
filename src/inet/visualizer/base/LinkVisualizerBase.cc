@@ -214,11 +214,11 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isLinkStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
-            mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
+            mapChunkIds(packet->peekAt(b(0)), [&] (int id) { if (getLastModule(id) != nullptr) removeLastModule(id); });
             auto networkNode = getContainingNode(module);
             auto interfaceEntry = getInterfaceEntry(networkNode, module);
             if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { setLastModule(id, module); });
+                mapChunkIds(packet->peekAt(b(0)), [&] (int id) { setLastModule(id, module); });
             }
         }
     }
@@ -229,7 +229,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto networkNode = getContainingNode(module);
             auto interfaceEntry = getInterfaceEntry(networkNode, module);
             if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) {
+                mapChunkIds(packet->peekAt(b(0)), [&] (int id) {
                     auto lastModule = getLastModule(id);
                     if (lastModule != nullptr)
                         updateLinkVisualization(getContainingNode(lastModule), networkNode, packet);

@@ -119,7 +119,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
-    const auto& payload = std::make_shared<ByteCountChunk>(byte(pktLen));
+    const auto& payload = std::make_shared<ByteCountChunk>(B(pktLen));
     payload->markImmutable();
     pkt->append(payload);
 

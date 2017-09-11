@@ -424,7 +424,7 @@ const Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
 
     RREQIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
-    rreqPacket->setChunkLength(byte(24));
+    rreqPacket->setChunkLength(B(24));
     return rreqPacket;
 }
 
@@ -504,7 +504,7 @@ const Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *d
         rrep->setLifeTime(destRouteData->getLifeTime() - simTime());
     }
 
-    rrep->setChunkLength(byte(20));
+    rrep->setChunkLength(B(20));
     return rrep;
 }
 
@@ -538,7 +538,7 @@ const Ptr<AODVRREP> AODVRouting::createGratuitousRREP(const Ptr<AODVRREQ>& rreq,
     grrep->setOriginatorAddr(rreq->getDestAddr());
     grrep->setLifeTime(routeData->getLifeTime());
 
-    grrep->setChunkLength(byte(20));
+    grrep->setChunkLength(B(20));
     return grrep;
 }
 
@@ -1118,7 +1118,7 @@ const Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& 
         rerr->setUnreachableNodes(i, node);
     }
 
-    rerr->setChunkLength(byte(4 + 4 * 2 * destCount));
+    rerr->setChunkLength(B(4 + 4 * 2 * destCount));
     return rerr;
 }
 
@@ -1337,7 +1337,7 @@ const Ptr<AODVRREP> AODVRouting::createHelloMessage()
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
     helloMessage->setLifeTime(allowedHelloLoss * helloInterval);
-    helloMessage->setChunkLength(byte(20));
+    helloMessage->setChunkLength(B(20));
 
     return helloMessage;
 }
@@ -1612,7 +1612,7 @@ const Ptr<AODVRREPACK> AODVRouting::createRREPACK()
 {
     auto rrepACK = std::make_shared<AODVRREPACK>(); // TODO: "AODV-RREPACK");
     rrepACK->setPacketType(RREPACK);
-    rrepACK->setChunkLength(byte(2));
+    rrepACK->setChunkLength(B(2));
     return rrepACK;
 }
 

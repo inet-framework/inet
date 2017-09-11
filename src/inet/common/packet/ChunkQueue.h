@@ -44,8 +44,8 @@ class INET_API ChunkQueue : public cNamedObject
   friend class ChunkQueueDescriptor;
 
   protected:
-    bit pushedLength = bit(0);
-    bit poppedLength = bit(0);
+    b pushedLength = b(0);
+    b poppedLength = b(0);
     /**
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
@@ -62,8 +62,8 @@ class INET_API ChunkQueue : public cNamedObject
         return iterator.getPosition() == copy.getPosition() && (iterator.getIndex() == -1 || iterator.getIndex() == copy.getIndex());
     }
 
-    void remove(bit length);
-    void moveIteratorOrRemove(bit length);
+    void remove(b length);
+    void moveIteratorOrRemove(b length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -79,17 +79,17 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns the total length of data currently available in the queue.
      */
-    bit getLength() const { return contents->getChunkLength() - iterator.getPosition(); }
+    b getLength() const { return contents->getChunkLength() - iterator.getPosition(); }
 
     /**
      * Returns the total length of data pushed into the queue so far.
      */
-    bit getPushedLength() const { return pushedLength; }
+    b getPushedLength() const { return pushedLength; }
 
     /**
      * Returns the total length of data popped from the queue so far.
      */
-    bit getPoppedLength() const { return poppedLength; }
+    b getPoppedLength() const { return poppedLength; }
     //@}
 
     /** @name Querying data related functions */
@@ -99,14 +99,14 @@ class INET_API ChunkQueue : public cNamedObject
      * chunk in its current representation. If the length is unspecified, then
      * the length of the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peek(bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peek(b length = b(-1), int flags = 0) const;
 
     /**
      * Returns the designated data at the given offset as an immutable chunk in
      * its current representation. If the length is unspecified, then the length
      * of the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peekAt(bit offset, bit length, int flags = 0) const;
+    const Ptr<const Chunk> peekAt(b offset, b length, int flags = 0) const;
 
     /**
      * Returns true if the designated data is available at the head of the queue
@@ -114,7 +114,7 @@ class INET_API ChunkQueue : public cNamedObject
      * length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    bool has(bit length = bit(-1)) const {
+    bool has(b length = b(-1)) const {
         return contents->has<T>(iterator, length);
     }
 
@@ -124,7 +124,7 @@ class INET_API ChunkQueue : public cNamedObject
      * the length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peek(bit length = bit(-1), int flags = 0) const {
+    const Ptr<const T> peek(b length = b(-1), int flags = 0) const {
         return contents->peek<T>(iterator, length, flags);
     }
 
@@ -134,9 +134,9 @@ class INET_API ChunkQueue : public cNamedObject
      * length of the result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
+    const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
     }
 
@@ -145,7 +145,7 @@ class INET_API ChunkQueue : public cNamedObject
      * of the returned chunk is the same as the value returned by getLength().
      */
     const Ptr<const Chunk> peekAll(int flags = 0) const {
-        return peekAt(bit(0), getLength(), flags);
+        return peekAt(b(0), getLength(), flags);
     }
 
     /**
@@ -153,7 +153,7 @@ class INET_API ChunkQueue : public cNamedObject
      * of the returned chunk is the same as the value returned by getLength().
      */
     const Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
-        return peekAt<BitsChunk>(bit(0), getLength(), flags);
+        return peekAt<BitsChunk>(b(0), getLength(), flags);
     }
 
     /**
@@ -161,7 +161,7 @@ class INET_API ChunkQueue : public cNamedObject
      * of the returned chunk is the same as the value returned by getLength().
      */
     const Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
-        return peekAt<BytesChunk>(bit(0), getLength(), flags);
+        return peekAt<BytesChunk>(b(0), getLength(), flags);
     }
     //@}
 
@@ -172,7 +172,7 @@ class INET_API ChunkQueue : public cNamedObject
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> pop(bit length = bit(-1), int flags = 0);
+    const Ptr<const Chunk> pop(b length = b(-1), int flags = 0);
 
     /**
      * Pops the designated data from the head of the queue and returns it as
@@ -181,7 +181,7 @@ class INET_API ChunkQueue : public cNamedObject
      * internal representation.
      */
     template <typename T>
-    const Ptr<const T> pop(bit length = bit(-1), int flags = 0) {
+    const Ptr<const T> pop(b length = b(-1), int flags = 0) {
         const auto& chunk = peek<T>(length, flags);
         if (chunk != nullptr)
             moveIteratorOrRemove(chunk->getChunkLength());
@@ -205,7 +205,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return iterator.getPosition() == bit(0) ? contents->str() : contents->peek(iterator)->str(); }
+    virtual std::string str() const override { return iterator.getPosition() == b(0) ? contents->str() : contents->peek(iterator)->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }

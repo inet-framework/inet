@@ -74,7 +74,7 @@ void RTPSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTi
 {
     const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     _packetsSent++;
-    _bytesSent = _bytesSent + packet->getByteLength() - byte(rtpHeader->getChunkLength()).get();
+    _bytesSent = _bytesSent + packet->getByteLength() - B(rtpHeader->getChunkLength()).get();
 
     // call corresponding method of superclass
     // for setting _silentIntervals

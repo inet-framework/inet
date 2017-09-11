@@ -240,7 +240,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     }
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setChunkLength(byte(packetSize));
+    ddPacket->setChunkLength(B(packetSize));
     ddPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(ddPacket);
@@ -371,7 +371,7 @@ void Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setChunkLength(byte(packetSize));
+    requestPacket->setChunkLength(B(packetSize));
     requestPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(requestPacket);
@@ -763,7 +763,7 @@ void Neighbor::retransmitUpdatePacket()
         it++;
     }
 
-    updatePacket->setChunkLength(byte(packetLength - IP_MAX_HEADER_BYTES));
+    updatePacket->setChunkLength(B(packetLength - IP_MAX_HEADER_BYTES));
     updatePacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(updatePacket);

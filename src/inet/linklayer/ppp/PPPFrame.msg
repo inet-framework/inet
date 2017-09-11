@@ -31,8 +31,8 @@ cplusplus {{
 namespace inet;
 
 cplusplus {{
-const byte PPP_HEADER_LENGTH = byte(5);
-const byte PPP_TRAILER_LENGTH = byte(2);
+const B PPP_HEADER_LENGTH = B(5);
+const B PPP_TRAILER_LENGTH = B(2);
 }}
 
 class FieldsChunk extends cObject;

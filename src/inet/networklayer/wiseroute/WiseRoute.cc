@@ -107,7 +107,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         // Send route flood packet and restart the timer
         auto pkt = std::make_shared<WiseRouteHeader>();
         L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
-        pkt->setChunkLength(byte(headerLength));
+        pkt->setChunkLength(B(headerLength));
         pkt->setInitialSrcAddr(myNetwAddr);
         pkt->setFinalDestAddr(broadcastAddress);
         pkt->setSourceAddress(myNetwAddr);
@@ -171,7 +171,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
+                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
@@ -199,7 +199,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
+                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
@@ -223,7 +223,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
+                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
@@ -244,7 +244,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     MACAddress nextHopMacAddr;
     auto pkt = std::make_shared<WiseRouteHeader>();
 
-    pkt->setChunkLength(byte(headerLength));
+    pkt->setChunkLength(B(headerLength));
 
     auto addrTag = packet->getTag<L3AddressReq>();
     if (addrTag == nullptr) {

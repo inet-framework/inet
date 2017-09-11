@@ -56,9 +56,9 @@ std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int l
 const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
-    int signalBitLength = bit(transmissionBitModel->getHeaderLength()).get();
+    int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
     bps signalBitRate = transmissionBitModel->getHeaderBitRate();
-    int dataBitLength = bit(transmissionBitModel->getDataLength()).get();
+    int dataBitLength = b(transmissionBitModel->getDataLength()).get();
     bps dataBitRate = transmissionBitModel->getDataBitRate();
     ASSERT(transmission->getSymbolModel() != nullptr);
     const IModulation *signalModulation = transmission->getSymbolModel()->getHeaderModulation();
@@ -80,7 +80,7 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     }
     else
         throw cRuntimeError("Unknown data modulation");
-    return new ReceptionBitModel(bit(signalBitLength), signalBitRate, bit(dataBitLength), dataBitRate, corruptedBits);
+    return new ReceptionBitModel(b(signalBitLength), signalBitRate, b(dataBitLength), dataBitRate, corruptedBits);
 }
 
 const IReceptionSymbolModel *Ieee80211OFDMErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const

@@ -574,7 +574,7 @@ void IGMPv2::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double 
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespTime(maxRespTime);
-        msg->setChunkLength(byte(8));
+        msg->setChunkLength(B(8));
         msg->markImmutable();
         packet->prepend(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : groupAddr);
@@ -595,7 +595,7 @@ void IGMPv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
     Packet *packet = new Packet("IGMPv2 report");
     const auto& msg = std::make_shared<IGMPv2Report>();
     msg->setGroupAddress(group->groupAddr);
-    msg->setChunkLength(byte(8));
+    msg->setChunkLength(B(8));
     msg->markImmutable();
     packet->prepend(msg);
     sendToIP(packet, ie, group->groupAddr);
@@ -610,7 +610,7 @@ void IGMPv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
     Packet *packet = new Packet("IGMPv2 leave");
     const auto& msg = std::make_shared<IGMPv2Leave>();
     msg->setGroupAddress(group->groupAddr);
-    msg->setChunkLength(byte(8));
+    msg->setChunkLength(B(8));
     msg->markImmutable();
     packet->prepend(msg);
     sendToIP(packet, ie, IPv4Address::ALL_ROUTERS_MCAST);
@@ -718,7 +718,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     IPv4Address sender = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    const auto& igmpQry = packet->peekHeader<IGMPQuery>(bit(packet->getBitLength()));   //peek entire igmp packet
+    const auto& igmpQry = packet->peekHeader<IGMPQuery>(b(packet->getBitLength()));   //peek entire igmp packet
 
     numQueriesRecv++;
 

@@ -25,8 +25,8 @@ namespace inet {
 class INET_API ChunkSerializer : public cObject
 {
   public:
-    static bit totalSerializedLength;
-    static bit totalDeserializedLength;
+    static b totalSerializedLength;
+    static b totalDeserializedLength;
 
   public:
     /**
@@ -34,7 +34,7 @@ class INET_API ChunkSerializer : public cObject
      * chunk at the end of the stream. The offset and length parameters allow
      * to write only a part of the data.
      */
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const = 0;
 
     /**
      * Deserializes a chunk from a stream by reading the bytes at the current

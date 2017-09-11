@@ -37,17 +37,17 @@ cPacketChunk::~cPacketChunk()
     dropAndDelete(packet);
 }
 
-const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<cPacketChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;

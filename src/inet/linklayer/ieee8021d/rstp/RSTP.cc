@@ -596,8 +596,8 @@ void RSTP::sendTCNtoRoot()
                 frame->setHelloTime(helloTime);
                 frame->setForwardDelay(forwardDelay);
 
-                if (frame->getChunkLength() < byte(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
-                    frame->setChunkLength(byte(MIN_ETHERNET_FRAME_BYTES));
+                if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
+                    frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
                 frame->markImmutable();
                 packet->append(frame);
@@ -663,8 +663,8 @@ void RSTP::sendBPDU(int interfaceId)
         frame->setHelloTime(helloTime);
         frame->setForwardDelay(forwardDelay);
 
-        if (frame->getChunkLength() < byte(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
-            frame->setChunkLength(byte(MIN_ETHERNET_FRAME_BYTES));
+        if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
+            frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
         frame->markImmutable();
         packet->append(frame);

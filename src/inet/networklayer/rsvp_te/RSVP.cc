@@ -460,7 +460,7 @@ void RSVP::processHELLO_TIMER(HelloTimerMsg *msg)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    hMsg->setChunkLength(byte(length));
+    hMsg->setChunkLength(B(length));
     hMsg->markImmutable();
     pk->append(hMsg);
 
@@ -579,7 +579,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     int length = 85 + (ERO.size() * 5);
 
-    pm->setChunkLength(byte(length));
+    pm->setChunkLength(B(length));
     pm->markImmutable();
     pk->append(pm);
 
@@ -671,7 +671,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setChunkLength(byte(length));
+    msg->setChunkLength(B(length));
     msg->markImmutable();
     pk->append(msg);
 
@@ -1852,7 +1852,7 @@ void RSVP::sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, 
     msg->setHop(hop);
     msg->setForce(force);
     int length = 44;
-    msg->setChunkLength(byte(length));
+    msg->setChunkLength(B(length));
     msg->markImmutable();
     pk->append(msg);
 
@@ -1879,7 +1879,7 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setChunkLength(byte(length));
+    msg->setChunkLength(B(length));
     msg->markImmutable();
     pk->append(msg);
 

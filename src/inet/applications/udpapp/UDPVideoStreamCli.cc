@@ -79,7 +79,7 @@ void UDPVideoStreamCli::requestStream()
     socket.bind(localPort);
 
     Packet *pk = new Packet("VideoStrmReq");
-    const auto& payload = std::make_shared<ByteCountChunk>(byte(1));    //FIXME set packet length
+    const auto& payload = std::make_shared<ByteCountChunk>(B(1));    //FIXME set packet length
     payload->markImmutable();
     pk->append(payload);
     socket.sendTo(pk, svrAddr, svrPort);

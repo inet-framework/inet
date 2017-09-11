@@ -57,7 +57,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     int ipProtocol = -1;
-    bit ipHeaderLength = bit(-1);
+    b ipHeaderLength = b(-1);
 
 #ifdef WITH_IPv4
     if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {

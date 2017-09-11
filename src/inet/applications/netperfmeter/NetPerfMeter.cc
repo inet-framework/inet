@@ -890,7 +890,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
       Packet* pk = new Packet();
       const auto& tcpMessage = std::make_shared<NetPerfMeterDataMessage>();
       tcpMessage->setCreationTime(simTime());
-      tcpMessage->setChunkLength(byte(frameSize));
+      tcpMessage->setChunkLength(B(frameSize));
       tcpMessage->markImmutable();
       pk->append(tcpMessage);
       pk->setKind(TCP_C_SEND);
@@ -925,7 +925,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
 
             NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
             dataMessage->setCreationTime(simTime());
-            dataMessage->setChunkLength(byte(msgSize));
+            dataMessage->setChunkLength(B(msgSize));
             /*
             dataMessage->setDataArraySize(msgSize);
             for(unsigned long i = 0; i < msgSize; i++)  {
@@ -962,7 +962,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             Packet* packet = new Packet();
             const auto& dataMessage = std::make_shared<NetPerfMeterDataMessage>();
             dataMessage->setCreationTime(simTime());
-            dataMessage->setChunkLength(byte(msgSize));
+            dataMessage->setChunkLength(B(msgSize));
             dataMessage->markImmutable();
             packet->append(dataMessage);
             SocketUDP->send(packet);

@@ -21,7 +21,7 @@ namespace inet {
 ChunkQueue::ChunkQueue(const char *name, const Ptr<const Chunk>& contents) :
     cNamedObject(name),
     contents(contents),
-    iterator(Chunk::ForwardIterator(bit(0), 0))
+    iterator(Chunk::ForwardIterator(b(0), 0))
 {
 }
 
@@ -32,9 +32,9 @@ ChunkQueue::ChunkQueue(const ChunkQueue& other) :
 {
 }
 
-void ChunkQueue::remove(bit length)
+void ChunkQueue::remove(b length)
 {
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= iterator.getPosition());
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= iterator.getPosition());
     if (contents->getChunkLength() == length)
         contents = EmptyChunk::singleton;
     else if (contents->canRemoveFromBeginning(length)) {
@@ -49,7 +49,7 @@ void ChunkQueue::remove(bit length)
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
-void ChunkQueue::moveIteratorOrRemove(bit length)
+void ChunkQueue::moveIteratorOrRemove(b length)
 {
     poppedLength += length;
     contents->moveIterator(iterator, length);
@@ -58,22 +58,22 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
-const Ptr<const Chunk> ChunkQueue::peek(bit length, int flags) const
+const Ptr<const Chunk> ChunkQueue::peek(b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getLength(), "length is invalid");
     return contents->peek(iterator, length, flags);
 }
 
-const Ptr<const Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
+const Ptr<const Chunk> ChunkQueue::peekAt(b offset, b length, int flags) const
 {
-    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
-    CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
+    CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
-const Ptr<const Chunk> ChunkQueue::pop(bit length, int flags)
+const Ptr<const Chunk> ChunkQueue::pop(b length, int flags)
 {
-    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getLength(), "length is invalid");
     const auto& chunk = peek(length, flags);
     if (chunk != nullptr)
         moveIteratorOrRemove(chunk->getChunkLength());
@@ -83,7 +83,7 @@ const Ptr<const Chunk> ChunkQueue::pop(bit length, int flags)
 void ChunkQueue::clear()
 {
     poppedLength += getLength();
-    contents->seekIterator(iterator, bit(0));
+    contents->seekIterator(iterator, b(0));
     contents = EmptyChunk::singleton;
 }
 

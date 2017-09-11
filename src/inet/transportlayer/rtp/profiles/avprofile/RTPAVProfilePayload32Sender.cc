@@ -127,7 +127,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             mpegHeader->setPictureType(pictureType);
 
             // the maximum number of real data bytes
-            int maxDataSize = _mtu - byte(rtpHeader->getChunkLength() + mpegHeader->getChunkLength()).get();
+            int maxDataSize = _mtu - B(rtpHeader->getChunkLength() + mpegHeader->getChunkLength()).get();
 
             if (bytesRemaining > maxDataSize) {
                 // we do not know where slices in the
@@ -137,13 +137,13 @@ bool RTPAVProfilePayload32Sender::sendPacket()
                 int slicedDataSize = (maxDataSize / 64) * 64;
 
                 mpegHeader->setPayloadLength(slicedDataSize);
-                mpegPayload->setLength(byte(slicedDataSize));
+                mpegPayload->setLength(B(slicedDataSize));
 
                 bytesRemaining = bytesRemaining - slicedDataSize;
             }
             else {
                 mpegHeader->setPayloadLength(bytesRemaining);
-                mpegPayload->setLength(byte(bytesRemaining));
+                mpegPayload->setLength(B(bytesRemaining));
                 // set marker because this is
                 // the last packet of the frame
                 rtpHeader->setMarker(1);

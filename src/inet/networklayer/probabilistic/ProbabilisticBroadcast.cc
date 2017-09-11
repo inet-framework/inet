@@ -284,7 +284,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     cObject *controlInfo = packet->removeControlInfo();
     L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 
-    pkt->setChunkLength(byte(headerLength));
+    pkt->setChunkLength(B(headerLength));
     pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(broadcastAddress);
     pkt->setInitialSrcAddr(myNetwAddr);

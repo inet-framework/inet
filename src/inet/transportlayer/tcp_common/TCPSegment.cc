@@ -90,7 +90,7 @@ void TcpHeader::clean()
 {
     dropHeaderOptions();
     setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(byte(TCP_HEADER_OCTETS));
+    setChunkLength(B(TCP_HEADER_OCTETS));
 }
 
 void TcpHeader::parsimPack(cCommBuffer *b) const
@@ -118,7 +118,7 @@ void TcpHeader::addHeaderOption(TCPOption *option)
     handleChange();
     headerOptionList.push_back(option);
     headerLength += option->getLength();
-    setChunkLength(byte(headerLength));
+    setChunkLength(B(headerLength));
 }
 
 void TcpHeader::setHeaderOptionArraySize(unsigned int size)
@@ -147,7 +147,7 @@ void TcpHeader::dropHeaderOptions()
         delete opt;
     headerOptionList.clear();
     setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(byte(TCP_HEADER_OCTETS));
+    setChunkLength(B(TCP_HEADER_OCTETS));
 }
 
 

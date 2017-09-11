@@ -84,7 +84,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
   public:
     virtual ~Ieee80211LayeredOFDMTransmitter();
 
-    virtual bit getPaddingLength(const Packet *packet) const;
+    virtual b getPaddingLength(const Packet *packet) const;
     virtual const Ieee80211OFDMMode *getMode(const Packet* packet) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }

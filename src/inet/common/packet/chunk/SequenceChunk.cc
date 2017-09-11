@@ -40,17 +40,17 @@ void SequenceChunk::forEachChild(cVisitor *v)
         v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
-const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk only if length is also specified
-    if (iterator.getPosition() == bit(0) && length == chunkLength) {
+    if (iterator.getPosition() == b(0) && length == chunkLength) {
         auto result = const_cast<SequenceChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
@@ -59,25 +59,25 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
         // KLUDGE: TODO: std::const_pointer_cast<Chunk>
         const auto& chunk = std::const_pointer_cast<Chunk>(getElementChunk(iterator));
-        if (length == bit(-1) || chunk->getChunkLength() == length) {
+        if (length == b(-1) || chunk->getChunkLength() == length) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
         }
     }
     // 4. peeking a part represented by an element chunk returns that element chunk
-    bit position = bit(0);
+    b position = b(0);
     for (size_t i = 0; i < chunks.size(); i++) {
         // KLUDGE: TODO: std::const_pointer_cast<Chunk>
         const auto& chunk = std::const_pointer_cast<Chunk>(chunks[getElementIndex(iterator.isForward(), i)]);
-        bit chunkLength = chunk->getChunkLength();
+        b chunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
-        if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength())) {
+        if (iterator.getPosition() == position && (length == b(-1) || length == chunk->getChunkLength())) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
         }
         // 4.2 peeking a part of an element chunk returns the part of that element chunk
         if (position <= iterator.getPosition() && iterator.getPosition() < position + chunkLength &&
-            (length == bit(-1) || iterator.getPosition() + length <= position + chunkLength))
+            (length == b(-1) || iterator.getPosition() + length <= position + chunkLength))
             return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() - position, -1), length, flags);
         position += chunkLength;
     }
@@ -88,7 +88,7 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto sequenceChunk = std::make_shared<SequenceChunk>();
     sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
@@ -156,25 +156,25 @@ bool SequenceChunk::isImproperlyRepresented() const
     return false;
 }
 
-bit SequenceChunk::getChunkLength() const
+b SequenceChunk::getChunkLength() const
 {
-    bit length = bit(0);
+    b length = b(0);
     for (const auto& chunk : chunks) {
         auto chunkLength = chunk->getChunkLength();
-        CHUNK_CHECK_IMPLEMENTATION(chunkLength > bit(0));
+        CHUNK_CHECK_IMPLEMENTATION(chunkLength > b(0));
         length += chunkLength;
     }
     return length;
 }
 
-void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
+void SequenceChunk::seekIterator(Iterator& iterator, b offset) const
 {
-    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getChunkLength(), "offset is out of range");
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getChunkLength(), "offset is out of range");
     iterator.setPosition(offset);
-    if (offset == bit(0))
+    if (offset == b(0))
         iterator.setIndex(0);
     else {
-        bit p = bit(0);
+        b p = b(0);
         for (size_t i = 0; i < chunks.size(); i++) {
             const auto& chunk = chunks[getElementIndex(iterator.isForward(), i)];
             p += chunk->getChunkLength();
@@ -191,7 +191,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
     }
 }
 
-void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
+void SequenceChunk::moveIterator(Iterator& iterator, b length) const
 {
     iterator.setPosition(iterator.getPosition() + length);
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getChunkLength() == length)
@@ -202,7 +202,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
 
 void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_front(chunk);
     else {
@@ -222,14 +222,14 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
-        bit offset = sequenceChunk->getChunkLength();
-        bit sliceChunkBegin = sliceChunk->getOffset();
-        bit sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
+        b offset = sequenceChunk->getChunkLength();
+        b sliceChunkBegin = sliceChunk->getOffset();
+        b sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
         for (auto it = sequenceChunk->chunks.rbegin(); it != sequenceChunk->chunks.rend(); it++) {
             const auto& elementChunk = *it;
             offset -= elementChunk->getChunkLength();
-            bit chunkBegin = offset;
-            bit chunkEnd = offset + elementChunk->getChunkLength();
+            b chunkBegin = offset;
+            b chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToBeginning(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
@@ -237,7 +237,7 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
+                doInsertToBeginning(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin));
             // otherwise the element chunk is out of the slice, therefore it's ignored
         }
     }
@@ -264,7 +264,7 @@ void SequenceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_back(chunk);
     else {
@@ -284,12 +284,12 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
-        bit offset = bit(0);
-        bit sliceChunkBegin = sliceChunk->getOffset();
-        bit sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
+        b offset = b(0);
+        b sliceChunkBegin = sliceChunk->getOffset();
+        b sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
         for (const auto& elementChunk : sequenceChunk->chunks) {
-            bit chunkBegin = offset;
-            bit chunkEnd = offset + elementChunk->getChunkLength();
+            b chunkBegin = offset;
+            b chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToEnd(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
@@ -297,7 +297,7 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(elementChunk->peek(bit(0), sliceChunkEnd - chunkBegin));
+                doInsertToEnd(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin));
             // otherwise the element chunk is out of the slice, therefore it's ignored
             offset += elementChunk->getChunkLength();
         }
@@ -323,18 +323,18 @@ void SequenceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
         doInsertToEnd(chunk);
 }
 
-void SequenceChunk::removeFromBeginning(bit length)
+void SequenceChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
-        bit chunkLength = chunk->getChunkLength();
+        b chunkLength = chunk->getChunkLength();
         if (chunkLength <= length) {
             it++;
             length -= chunkLength;
-            if (length == bit(0))
+            if (length == b(0))
                 break;
         }
         else {
@@ -345,22 +345,22 @@ void SequenceChunk::removeFromBeginning(bit length)
     chunks.erase(chunks.begin(), it);
 }
 
-void SequenceChunk::removeFromEnd(bit length)
+void SequenceChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;
-        bit chunkLength = chunk->getChunkLength();
+        b chunkLength = chunk->getChunkLength();
         if (chunkLength <= length) {
             it++;
             length -= chunkLength;
-            if (length == bit(0))
+            if (length == b(0))
                 break;
         }
         else {
-            *it = chunk->peek(bit(0), chunkLength - length);
+            *it = chunk->peek(b(0), chunkLength - length);
             break;
         }
     }

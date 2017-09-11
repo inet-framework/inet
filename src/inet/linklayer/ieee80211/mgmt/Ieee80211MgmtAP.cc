@@ -132,7 +132,7 @@ void Ieee80211MgmtAP::sendBeacon()
     body->setSupportedRates(supportedRates);
     body->setBeaconInterval(beaconInterval);
     body->setChannelNumber(channelNumber);
-    body->setChunkLength(byte(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
     sendManagementFrame("Beacon", body, ST_BEACON, MACAddress::BROADCAST_ADDRESS);
 }
 
@@ -249,7 +249,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(0);    //XXX
     body->setSupportedRates(supportedRates);
-    body->setChunkLength(byte(2 + 2 + 2 + body->getSupportedRates().numRates + 2));
+    body->setChunkLength(B(2 + 2 + 2 + body->getSupportedRates().numRates + 2));
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
 }
 
@@ -283,7 +283,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(0);    //XXX
     body->setSupportedRates(supportedRates);
-    body->setChunkLength(byte(2 + (2 + ssid.length()) + (2 + supportedRates.numRates) + 6));
+    body->setChunkLength(B(2 + (2 + ssid.length()) + (2 + supportedRates.numRates) + 6));
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);
 }
 
@@ -329,7 +329,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     body->setSupportedRates(supportedRates);
     body->setBeaconInterval(beaconInterval);
     body->setChannelNumber(channelNumber);
-    body->setChunkLength(byte(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 

@@ -64,7 +64,7 @@ void APSKRadio::encapsulate(Packet *packet) const
     }
     // KLUDGE:
     else {
-        phyHeader->setChunkLength(byte(1));
+        phyHeader->setChunkLength(B(1));
         ASSERT(modulation != nullptr);  //FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
     }
 
@@ -75,8 +75,8 @@ void APSKRadio::encapsulate(Packet *packet) const
     phyHeader->setLengthField(packet->getByteLength());
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
-    auto paddingBitLength = bit(computePaddingLength(bit(packet->getTotalLength()).get(), nullptr, modulation));
-    if (paddingBitLength != bit(0)) {
+    auto paddingBitLength = b(computePaddingLength(b(packet->getTotalLength()).get(), nullptr, modulation));
+    if (paddingBitLength != b(0)) {
         auto paddingTrailer = std::make_shared<ByteCountChunk>(paddingBitLength);
         paddingTrailer->markImmutable();
         packet->pushTrailer(paddingTrailer);

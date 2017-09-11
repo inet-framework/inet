@@ -58,7 +58,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(bit(dataLength).get());
+    const simtime_t duration = transmissionMode->getDuration(b(dataLength).get());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -66,7 +66,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
-    bit headerLength = bit(transmissionMode->getHeaderMode()->getBitLength());
+    b headerLength = b(transmissionMode->getHeaderMode()->getBitLength());
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;

@@ -397,7 +397,7 @@ void DYMO::sendUDPPacket(cPacket *packet, double delay)
 void DYMO::processUDPPacket(Packet *packet)
 {
     packet->popHeader<UdpHeader>();
-    processDYMOPacket(packet, packet->peekDataAt<DYMOPacket>(bit(0), packet->getDataLength()));
+    processDYMOPacket(packet, packet->peekDataAt<DYMOPacket>(b(0), packet->getDataLength()));
     delete packet;
 }
 
@@ -536,7 +536,7 @@ void DYMO::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     std::const_pointer_cast<RteMsg>(rteMsg)->setHopCount(rteMsg->getHopCount() + 1);
 }
 
-bit DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
+b DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 {
     // TODO: validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
@@ -579,7 +579,7 @@ bit DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
     int packet = packetHeader;
     // there's exactly one message in the packet
     packet += message;
-    return bit(packet);
+    return b(packet);
 }
 
 //
@@ -697,7 +697,7 @@ void DYMO::processRREQ(Packet *packet, const Ptr<const RREQ>& rreqIncoming)
         EV_WARN << "Dropping non-permissible RREQ" << endl;
 }
 
-bit DYMO::computeRREQLength(const Ptr<RREQ>& rreq)
+b DYMO::computeRREQLength(const Ptr<RREQ>& rreq)
 {
     return computeRteMsgLength(rreq);
 }
@@ -815,7 +815,7 @@ void DYMO::processRREP(Packet *packet, const Ptr<const RREP>& rrepIncoming)
         EV_WARN << "Dropping non-permissible RREQ" << endl;
 }
 
-bit DYMO::computeRREPLength(const Ptr<RREP>& rrep)
+b DYMO::computeRREPLength(const Ptr<RREP>& rrep)
 {
     return computeRteMsgLength(rrep);
 }
@@ -1008,7 +1008,7 @@ void DYMO::processRERR(Packet *packet, const Ptr<const RERR>& rerrIncoming)
     }
 }
 
-bit DYMO::computeRERRLength(const Ptr<RERR>& rerr)
+b DYMO::computeRERRLength(const Ptr<RERR>& rerr)
 {
     // TODO: validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
@@ -1052,7 +1052,7 @@ bit DYMO::computeRERRLength(const Ptr<RERR>& rerr)
     int packet = packetHeader;
     // there's exactly one message in the packet
     packet += message;
-    return bit(packet);
+    return b(packet);
 }
 
 //

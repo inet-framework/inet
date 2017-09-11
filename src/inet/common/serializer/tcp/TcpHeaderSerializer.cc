@@ -67,7 +67,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         throw cRuntimeError("invalid TCP header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
     tcp.th_offs = tcpHeader->getHeaderLength() / 4;
 
-    stream.writeBytes((uint8_t *)&tcp, byte(TCP_HEADER_OCTETS));
+    stream.writeBytes((uint8_t *)&tcp, B(TCP_HEADER_OCTETS));
 
     unsigned short numOptions = tcpHeader->getHeaderOptionArraySize();
     unsigned int optionsLength = 0;
@@ -162,7 +162,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 {
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];
-    stream.readBytes(buffer, byte(TCP_HEADER_OCTETS));
+    stream.readBytes(buffer, B(TCP_HEADER_OCTETS));
     auto tcpHeader = std::make_shared<TcpHeader>();
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
@@ -188,7 +188,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     tcpHeader->setUrgentPointer(ntohs(tcp.th_urp));
 
     if (headerLength > TCP_HEADER_OCTETS) {
-        while (stream.getPosition() - position < byte(headerLength)) {
+        while (stream.getPosition() - position < B(headerLength)) {
             TCPOption *option = deserializeOption(stream);
             tcpHeader->addHeaderOption(option);
         }

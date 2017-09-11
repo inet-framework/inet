@@ -34,24 +34,24 @@ BitsChunk::BitsChunk(const std::vector<bool>& bits) :
 {
 }
 
-const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<BitsChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking without conversion returns a BitsChunk
     if (converter == nullptr) {
-        auto result = std::make_shared<BitsChunk>(std::vector<bool>(bits.begin() + bit(iterator.getPosition()).get(), length == bit(-1) ? bits.end() : bits.begin() + bit(iterator.getPosition() + length).get()));
+        auto result = std::make_shared<BitsChunk>(std::vector<bool>(bits.begin() + b(iterator.getPosition()).get(), length == b(-1) ? bits.end() : bits.begin() + b(iterator.getPosition() + length).get()));
         result->markImmutable();
         return result;
     }
@@ -59,14 +59,14 @@ const Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter
     return converter(const_cast<BitsChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-const Ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     MemoryOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
     std::vector<bool> bits;
-    bit chunkLength = chunk->getChunkLength();
-    bit resultLength = length == bit(-1) ? chunkLength - offset : length;
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
+    b chunkLength = chunk->getChunkLength();
+    b resultLength = length == b(-1) ? chunkLength - offset : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
     outputStream.copyData(bits, offset, resultLength);
     return std::make_shared<BitsChunk>(bits);
 }
@@ -109,18 +109,18 @@ void BitsChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::removeFromBeginning(bit length)
+void BitsChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
-    bits.erase(bits.begin(), bits.begin() + bit(length).get());
+    bits.erase(bits.begin(), bits.begin() + b(length).get());
 }
 
-void BitsChunk::removeFromEnd(bit length)
+void BitsChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
-    bits.erase(bits.end() - bit(length).get(), bits.end());
+    bits.erase(bits.end() - b(length).get(), bits.end());
 }
 
 std::string BitsChunk::str() const

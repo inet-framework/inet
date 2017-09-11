@@ -37,7 +37,7 @@ enum RTCPPacketType
 
 class RTCPPacket extends FieldsChunk
 {
-    chunkLength = byte(4);
+    chunkLength = B(4);
     @customize(true);  // see the generated C++ header for more info
     int8 version = 2;
     bool padding = 0;

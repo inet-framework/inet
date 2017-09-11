@@ -344,7 +344,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OSPFLSAHeader& lsaHeader,
         ackPacket->setLsaHeadersArraySize(1);
         ackPacket->setLsaHeaders(0, lsaHeader);
 
-        ackPacket->setChunkLength(byte(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
+        ackPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
         ackPacket->markImmutable();
         Packet *pk = new Packet();
         pk->pushHeader(ackPacket);

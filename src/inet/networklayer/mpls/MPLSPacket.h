@@ -77,7 +77,7 @@ class INET_API MplsHeader : public MplsHeader_Base
      */
     inline MplsLabel getTopLabel() { return labels.back(); }
 
-    virtual bit getChunkLength() const override { return bit(32) * labels.size(); }
+    virtual b getChunkLength() const override { return b(32) * labels.size(); }
 
     virtual void setLabelsArraySize(unsigned int size) override { throw cRuntimeError("do not use it"); }
     virtual unsigned int getLabelsArraySize() const override { return labels.size(); }

@@ -110,7 +110,7 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 const Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<IGMPMessage> packet = nullptr;
-    byte startPos = stream.getPosition();
+    B startPos = stream.getPosition();
     unsigned char type = stream.readByte();
     unsigned char code = stream.readByte();
     uint16_t chksum = stream.readUint16Be();
@@ -122,7 +122,7 @@ const Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 packet = pkt;
                 pkt->setGroupAddress(stream.readIPv4Address());
             }
-            else if (stream.getLength() - startPos == byte(8)) {        // RFC 3376 Section 7.1
+            else if (stream.getLength() - startPos == B(8)) {        // RFC 3376 Section 7.1
                 auto pkt = std::make_shared<IGMPv2Query>();
                 packet = pkt;
                 pkt->setMaxRespTime(SimTime(code, (SimTimeUnit)-1));
@@ -179,7 +179,7 @@ const Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 for (i = 0; i < s && !stream.isReadBeyondEnd(); i++) {
                     GroupRecord gr;
                     gr.recordType = stream.readByte();
-                    byte auxDataLen = byte(4 * stream.readByte());
+                    B auxDataLen = B(4 * stream.readByte());
                     unsigned int gac = stream.readUint16Be();
                     gr.groupAddress = stream.readIPv4Address();
                     for (unsigned int j = 0; j < gac && !stream.isReadBeyondEnd(); j++) {

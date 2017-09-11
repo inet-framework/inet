@@ -257,7 +257,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     if (auto userPriorityReq = packet->getTag<UserPriorityReq>()) {
         // make it a QoS frame, and set TID
         header->setType(ST_DATA_WITH_QOS);
-        header->setChunkLength(header->getChunkLength() + bit(QOSCONTROL_BITS));
+        header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));
         header->setTid(userPriorityReq->getUserPriority());
     }
     packet->insertHeader(header);
@@ -295,7 +295,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
     }
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->popTrailer<Ieee80211MacTrailer>(byte(4));
+    packet->popTrailer<Ieee80211MacTrailer>(B(4));
 }
 
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)

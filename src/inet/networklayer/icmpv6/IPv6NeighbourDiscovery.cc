@@ -975,13 +975,13 @@ void IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
     IPv6Address destAddr = IPv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = std::make_shared<IPv6RouterSolicitation>();
     rs->setType(ICMPv6_ROUTER_SOL);
-    rs->setChunkLength(byte(ICMPv6_HEADER_BYTES));
+    rs->setChunkLength(B(ICMPv6_HEADER_BYTES));
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
     //address, if the IP source address is not the unspecified address.
     if (!myIPv6Address.isUnspecified()) {
         rs->setSourceLinkLayerAddress(ie->getMacAddress());
-        rs->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
+        rs->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
 
     //Construct a Router Solicitation message
@@ -1281,7 +1281,7 @@ void IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv6Address& destAddr, 
             ra->setPrefixInformation(i, prefixInfo);
         }
 
-        ra->setChunkLength(byte(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH));
+        ra->setChunkLength(B(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH));
 
         auto packet = new Packet("RApacket");
         ra->markImmutable();
@@ -1813,7 +1813,7 @@ void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAd
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
-    ns->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // RFC 2461, Section 4.3.
+    ns->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // RFC 2461, Section 4.3.
 
     /*If the solicitation is being sent to a solicited-node multicast
        address, the sender MUST include its link-layer address (if it has
@@ -1821,7 +1821,7 @@ void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAd
     if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
             !dgSrcAddr.isUnspecified()) {
         ns->setSourceLinkLayerAddress(myMacAddr);
-        ns->setChunkLength(ns->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
+        ns->setChunkLength(ns->getChunkLength() + B(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
 
     auto packet = new Packet("NSpacket");
@@ -1991,7 +1991,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, const
 void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     auto na = std::make_shared<IPv6NeighbourAdvertisement>();
-    na->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // FIXME set correct length
+    na->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // FIXME set correct length
 
     //RFC 2461: Section 7.2.4
     /*A node sends a Neighbor Advertisement in response to a valid Neighbor
@@ -2006,7 +2006,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const Ipv6Neighbour
        been received. If the solicitation's IP Destination Address is a multicast
        address, the Target Link-Layer option MUST be included in the advertisement.*/
     na->setTargetLinkLayerAddress(ie->getMacAddress());    //here, we always include the MAC addr.
-    na->setChunkLength(na->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
+    na->setChunkLength(na->getChunkLength() + B(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
 
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
        otherwise it MUST set the flag to zero.*/
@@ -2089,7 +2089,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 #else /* WITH_xMIPv6 */
     auto na = std::make_shared<IPv6NeighbourAdvertisement>();
     IPv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
-    na->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));
+    na->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));
 #endif /* WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
@@ -2098,7 +2098,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 #ifdef WITH_xMIPv6
     na->setTargetAddress(myIPv6Addr);
     na->setTargetLinkLayerAddress(ie->getMacAddress());
-    na->setChunkLength(na->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
+    na->setChunkLength(na->getChunkLength() + B(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
 #endif /* WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
@@ -2384,7 +2384,7 @@ void IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
     //Construct a Redirect message
     auto redirect = std::make_shared<IPv6Redirect>(); // TODO: "redirectMsg");
     redirect->setType(ICMPv6_REDIRECT);
-    redirect->setChunkLength(byte(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
+    redirect->setChunkLength(B(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
 
 //FIXME incomplete code
 #if 0

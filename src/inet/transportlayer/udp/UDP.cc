@@ -387,7 +387,7 @@ void UDP::processPacketFromApp(Packet *packet)
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(byte(udpHeader->getChunkLength() + packet->getTotalLength()).get());
+    udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + packet->getTotalLength()).get());
     if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
         insertCrc(l3Protocol, L3Address(), L3Address(), udpHeader, packet);
     udpHeader->markImmutable();
@@ -410,8 +410,8 @@ void UDP::processUDPPacket(Packet *udpPacket)
     emit(LayeredProtocolBase::packetReceivedFromLowerSignal, udpPacket);
     emit(rcvdPkSignal, udpPacket);
 
-    bit udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    const auto& udpHeader = udpPacket->popHeader<UdpHeader>(bit(-1), Chunk::PF_ALLOW_INCORRECT);
+    b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
+    const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
@@ -421,7 +421,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     auto l3AddressInd = udpPacket->getMandatoryTag<L3AddressInd>();
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
-    auto totalLength = byte(udpHeader->getTotalLengthField());
+    auto totalLength = B(udpHeader->getTotalLengthField());
     auto hasIncorrectLength = totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
     auto networkProtocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
 
@@ -482,7 +482,7 @@ void UDP::processICMPv4Error(Packet *packet)
     code = icmpHeader->getCode();
     const auto& ipv4Header = packet->popHeader<Ipv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8), Chunk::PF_ALLOW_INCOMPLETE);
+        const auto& udpHeader = packet->peekHeader<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv4Header->getSrcAddress();
         remoteAddr = ipv4Header->getDestAddress();
         localPort = udpHeader->getSourcePort();
@@ -531,7 +531,7 @@ void UDP::processICMPv6Error(Packet *packet)
     const auto& ipv6Header = packet->popHeader<Ipv6Header>();
     Ipv6FragmentHeader *fh = dynamic_cast<Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (!fh || fh->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8), Chunk::PF_ALLOW_INCOMPLETE);
+        const auto& udpHeader = packet->peekHeader<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv6Header->getSrcAddress();
         remoteAddr = ipv6Header->getDestAddress();
         localPort = udpHeader->getSourcePort();
@@ -1295,7 +1295,7 @@ bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
         case CRC_DECLARED_CORRECT: {
             // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
             auto totalLength = udpHeader->getTotalLengthField();
-            auto udpDataBytes = packet->peekDataAt(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+            auto udpDataBytes = packet->peekDataAt(B(0), B(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
             return udpHeader->isCorrect() && udpDataBytes->isCorrect();
         }
         case CRC_DECLARED_INCORRECT:
@@ -1310,9 +1310,9 @@ bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
                 auto l3AddressInd = packet->getMandatoryTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
-                auto udpHeaderBytes = udpHeader->Chunk::peek<BytesChunk>(byte(0), udpHeader->getChunkLength())->getBytes();
+                auto udpHeaderBytes = udpHeader->Chunk::peek<BytesChunk>(B(0), udpHeader->getChunkLength())->getBytes();
                 auto totalLength = udpHeader->getTotalLengthField();
-                auto udpData = packet->peekDataAt<BytesChunk>(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+                auto udpData = packet->peekDataAt<BytesChunk>(B(0), B(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto udpDataBytes = udpData->getBytes();
                 auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
                 // TODO: delete these isCorrect calls, rely on CRC only
@@ -1334,13 +1334,13 @@ uint16_t UDP::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     pseudoHeader->setPacketLength(udpHeaderBytes.size() + udpDataBytes.size());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
     if (networkProtocol == &Protocol::ipv4)
-        pseudoHeader->setChunkLength(byte(12));
+        pseudoHeader->setChunkLength(B(12));
     else if (networkProtocol == &Protocol::ipv6)
-        pseudoHeader->setChunkLength(byte(40));
+        pseudoHeader->setChunkLength(B(40));
     else
         throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
     pseudoHeader->markImmutable();
-    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(byte(0), pseudoHeader->getChunkLength())->getBytes();
+    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
     // Excerpt from RFC 768:
     // Checksum is the 16-bit one's complement of the one's complement sum of a
     // pseudo header of information from the IP header, the UDP header, and the

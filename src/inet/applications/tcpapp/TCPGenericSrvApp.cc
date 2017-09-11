@@ -112,14 +112,14 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
         ChunkQueue &queue = socketQueue[connId];
-        auto chunk = packet->peekDataAt(byte(0));
+        auto chunk = packet->peekDataAt(B(0));
         queue.push(chunk);
         emit(rcvdPkSignal, packet);
 
         bool doClose = false;
-        while (const auto& appmsg = queue.pop<GenericAppMsg>(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
+        while (const auto& appmsg = queue.pop<GenericAppMsg>(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
             msgsRcvd++;
-            bytesRcvd += byte(appmsg->getChunkLength()).get();
+            bytesRcvd += B(appmsg->getChunkLength()).get();
             long requestedBytes = appmsg->getExpectedReplyLength();
             simtime_t msgDelay = appmsg->getReplyDelay();
             if (msgDelay > maxMsgDelay)
@@ -130,7 +130,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                 outPacket->ensureTag<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = std::make_shared<GenericAppMsg>();
-                payload->setChunkLength(byte(requestedBytes));
+                payload->setChunkLength(B(requestedBytes));
                 payload->setExpectedReplyLength(0);
                 payload->setReplyDelay(0);
                 payload->markImmutable();

@@ -38,7 +38,7 @@ void TCPReceiveQueue::init(uint32 startSeq)
     rcv_nxt = startSeq;
 
     reorderBuffer.clear();
-    reorderBuffer.setExpectedOffset(byte(startSeq));
+    reorderBuffer.setExpectedOffset(B(startSeq));
 }
 
 std::string TCPReceiveQueue::str() const
@@ -79,7 +79,7 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
         seq = buffSeq;
         tcpPayloadLength -= offs;
     }
-    const auto& payload = packet->peekDataAt(byte(tcpHeaderLength + offs), byte(tcpPayloadLength));
+    const auto& payload = packet->peekDataAt(B(tcpHeaderLength + offs), B(tcpPayloadLength));
     reorderBuffer.replace(seqToOffset(seq), payload);
 
     if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionStartOffset(0))))
@@ -97,7 +97,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 
     auto seqOffs = seqToOffset(seq);
     auto maxLength = seqOffs - reorderBuffer.getExpectedOffset();
-    if (maxLength <= bit(0))
+    if (maxLength <= b(0))
         return nullptr;
     auto chunk = reorderBuffer.popAvailableData(maxLength);
     ASSERT(reorderBuffer.getExpectedOffset() <= seqToOffset(seq));
@@ -116,7 +116,7 @@ uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
     uint32 bytes = 0;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++)
-        bytes += byte(reorderBuffer.getRegionLength(i)).get();
+        bytes += B(reorderBuffer.getRegionLength(i)).get();
 
     return bytes;
 }
@@ -140,7 +140,7 @@ void TCPReceiveQueue::getQueueStatus()
 
 uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
 {
-    byte fs = seqToOffset(fromSeqNum);
+    B fs = seqToOffset(fromSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
         if (reorderBuffer.getRegionStartOffset(i) <= fs && fs < reorderBuffer.getRegionEndOffset(i))
@@ -152,7 +152,7 @@ uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
 
 uint32 TCPReceiveQueue::getRE(uint32 toSeqNum)
 {
-    byte fs = seqToOffset(toSeqNum);
+    B fs = seqToOffset(toSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
         if (reorderBuffer.getRegionStartOffset(i) < fs && fs <= reorderBuffer.getRegionEndOffset(i))

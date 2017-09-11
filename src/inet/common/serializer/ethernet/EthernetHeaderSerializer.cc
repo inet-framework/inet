@@ -103,7 +103,7 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
 
 void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream.writeByteRepeatedly(0, byte(chunk->getChunkLength()).get());
+    stream.writeByteRepeatedly(0, B(chunk->getChunkLength()).get());
 }
 
 const Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const

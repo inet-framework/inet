@@ -528,7 +528,7 @@ void DHCPClient::sendRequest()
     Packet *packet = new Packet("DHCPREQUEST");
     const auto& request = std::make_shared<DHCPMessage>();
     request->setOp(BOOTREQUEST);
-    request->setChunkLength(byte(280));    // DHCP request packet size
+    request->setChunkLength(B(280));    // DHCP request packet size
     request->setHtype(1);    // ethernet
     request->setHlen(6);    // hardware Address length (6 octets)
     request->setHops(0);
@@ -591,7 +591,7 @@ void DHCPClient::sendDiscover()
     Packet *packet = new Packet("DHCPDISCOVER");
     const auto& discover = std::make_shared<DHCPMessage>();
     discover->setOp(BOOTREQUEST);
-    discover->setChunkLength(byte(280));    // DHCP Discover packet size;
+    discover->setChunkLength(B(280));    // DHCP Discover packet size;
     discover->setHtype(1);    // ethernet
     discover->setHlen(6);    // hardware Address lenght (6 octets)
     discover->setHops(0);
@@ -625,7 +625,7 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     Packet *packet = new Packet("DHCPDECLINE");
     const auto& decline = std::make_shared<DHCPMessage>();
     decline->setOp(BOOTREQUEST);
-    decline->setChunkLength(byte(280));    // DHCPDECLINE packet size
+    decline->setChunkLength(B(280));    // DHCPDECLINE packet size
     decline->setHtype(1);    // ethernet
     decline->setHlen(6);    // hardware Address length (6 octets)
     decline->setHops(0);

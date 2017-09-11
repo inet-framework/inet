@@ -25,7 +25,7 @@ namespace physicallayer {
 
 Register_Serializer(APSKPhyHeader, APSKPhyHeaderSerializer);
 
-void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const
+void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     const auto& phyHeader = std::static_pointer_cast<const APSKPhyHeader>(chunk);
     stream.writeUint16Be(0);

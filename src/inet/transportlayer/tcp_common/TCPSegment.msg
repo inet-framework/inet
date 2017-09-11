@@ -187,7 +187,7 @@ class TCPOptionUnknown extends TCPOption
 class TcpHeader extends TransportHeaderBase
 {
     @customize(true);
-    chunkLength = byte(TCP_HEADER_OCTETS);
+    chunkLength = B(TCP_HEADER_OCTETS);
 
     // Source Port
     unsigned short srcPort;

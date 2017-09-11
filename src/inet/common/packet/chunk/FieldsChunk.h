@@ -30,7 +30,7 @@ class FieldsChunk : public Chunk
   friend class FieldsChunkSerializer;
 
   protected:
-    bit chunkLength;
+    b chunkLength;
     /**
     * The serialized representation of this chunk or nullptr if not available.
     * When a chunk is serialized, the result is stored here for fast subsequent
@@ -44,12 +44,12 @@ class FieldsChunk : public Chunk
     /** @name Field accessor functions */
     //@{
     const std::vector<uint8_t> *getSerializedBytes() const { return serializedBytes; }
-    void setSerializedBytes(const std::vector<uint8_t> *bytes) const { CHUNK_CHECK_IMPLEMENTATION(byte(bytes->size()) == chunkLength); this->serializedBytes = bytes; }
+    void setSerializedBytes(const std::vector<uint8_t> *bytes) const { CHUNK_CHECK_IMPLEMENTATION(B(bytes->size()) == chunkLength); this->serializedBytes = bytes; }
     //@}
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags) {
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags) {
         return Chunk::convertChunk(typeInfo, chunk, offset, length, flags);
     }
 
@@ -67,8 +67,8 @@ class FieldsChunk : public Chunk
     //@{
     virtual ChunkType getChunkType() const override { return CT_FIELDS; }
 
-    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(chunkLength >= bit(0)); return chunkLength; }
-    virtual void setChunkLength(bit chunkLength) { handleChange(); this->chunkLength = chunkLength; }
+    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(chunkLength >= b(0)); return chunkLength; }
+    virtual void setChunkLength(b chunkLength) { handleChange(); this->chunkLength = chunkLength; }
     //@}
 };
 

@@ -154,13 +154,13 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     // handling RteMsg packets
     bool permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg);
     void processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg);
-    bit computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
+    b computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
     const Ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
     void sendRREQ(const Ptr<RREQ>& rreq);
     void processRREQ(Packet *packet, const Ptr<const RREQ>& rreq);
-    bit computeRREQLength(const Ptr<RREQ> &rreq);
+    b computeRREQLength(const Ptr<RREQ> &rreq);
 
     // handling RREP packets
     const Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg);
@@ -168,7 +168,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void sendRREP(const Ptr<RREP>& rrep);
     void sendRREP(const Ptr<RREP>& rrep, IRoute *route);
     void processRREP(Packet *packet, const Ptr<const RREP>& rrep);
-    bit computeRREPLength(const Ptr<RREP> &rrep);
+    b computeRREPLength(const Ptr<RREP> &rrep);
 
     // handling RERR packets
     const Ptr<RERR> createRERR(std::vector<L3Address>& addresses);
@@ -176,7 +176,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void sendRERRForUndeliverablePacket(const L3Address& destination);
     void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
     void processRERR(Packet *packet, const Ptr<const RERR>& rerr);
-    bit computeRERRLength(const Ptr<RERR>& rerr);
+    b computeRERRLength(const Ptr<RERR>& rerr);
 
     // handling routes
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);

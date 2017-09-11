@@ -87,13 +87,13 @@ class INET_API Packet : public cPacket
      * Returns the total packet length ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    bit getTotalLength() const { return contents->getChunkLength(); }
+    b getTotalLength() const { return contents->getChunkLength(); }
 
     /**
      * Returns the length in bits between the header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    virtual int64_t getBitLength() const override { return bit(getDataLength()).get(); }
+    virtual int64_t getBitLength() const override { return b(getDataLength()).get(); }
 
     virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
@@ -118,32 +118,32 @@ class INET_API Packet : public cPacket
      * Returns the header pop offset measured from the beginning of the packet.
      * The returned value is in the range [0, getTotalLength()].
      */
-    bit getHeaderPopOffset() const { return headerIterator.getPosition(); }
+    b getHeaderPopOffset() const { return headerIterator.getPosition(); }
 
     /**
      * Changes the header pop offset measured from the beginning of the packet.
      * The value must be in the range [0, getTotalLength()].
      */
-    void setHeaderPopOffset(bit offset);
+    void setHeaderPopOffset(b offset);
 
     /**
      * Returns the total length of popped headers.
      */
-    bit getHeaderPoppedLength() const { return headerIterator.getPosition(); }
+    b getHeaderPoppedLength() const { return headerIterator.getPosition(); }
 
     /**
      * Returns the designated header as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peekHeader(bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peekHeader(b length = b(-1), int flags = 0) const;
 
     /**
      * Pops the designated header and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> popHeader(bit length = bit(-1), int flags = 0);
+    const Ptr<const Chunk> popHeader(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated header and returns it as a mutable chunk in its
@@ -151,7 +151,7 @@ class INET_API Packet : public cPacket
      * the result is chosen according to the internal representation. The popped
      * header length must be zero before calling this function.
      */
-    const Ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
+    const Ptr<Chunk> removeHeader(b length = b(-1), int flags = 0);
 
     /**
      * Pushes the provided header at the beginning of the packet. The header
@@ -173,8 +173,8 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    bool hasHeader(bit length = bit(-1)) const {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+    bool hasHeader(b length = b(-1)) const {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->has<T>(headerIterator, length);
     }
 
@@ -184,9 +184,9 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peekHeader(bit length = bit(-1), int flags = 0) const {
+    const Ptr<const T> peekHeader(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = contents->peek<T>(headerIterator, length, flags);
         if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
             return chunk;
@@ -200,12 +200,12 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> popHeader(bit length = bit(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+    const Ptr<const T> popHeader(b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekHeader<T>(length, flags);
         if (chunk != nullptr) {
             contents->moveIterator(headerIterator, chunk->getChunkLength());
-            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
         }
         return chunk;
     }
@@ -217,9 +217,9 @@ class INET_API Packet : public cPacket
      * popped header length must be zero before calling this function.
      */
     template <typename T>
-    const Ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-        CHUNK_CHECK_USAGE(headerIterator.getPosition() == bit(0), "popped header length is non-zero");
+    const Ptr<T> removeHeader(b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0), "popped header length is non-zero");
         const auto& chunk = popHeader<T>(length, flags);
         removePoppedHeaders();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -232,32 +232,32 @@ class INET_API Packet : public cPacket
      * Returns the trailer pop offset measured from the beginning of the packet.
      * The returned value is in the range [0, getTotalLength()].
      */
-    bit getTrailerPopOffset() const { return getTotalLength() - trailerIterator.getPosition(); }
+    b getTrailerPopOffset() const { return getTotalLength() - trailerIterator.getPosition(); }
 
     /**
      * Changes the trailer pop offset measured from the beginning of the packet.
      * The value must be in the range [0, getTotalLength()].
      */
-    void setTrailerPopOffset(bit offset);
+    void setTrailerPopOffset(b offset);
 
     /**
      * Returns the total length of popped trailers.
      */
-    bit getTrailerPoppedLength() const { return trailerIterator.getPosition(); }
+    b getTrailerPoppedLength() const { return trailerIterator.getPosition(); }
 
     /**
      * Returns the designated trailer as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peekTrailer(bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peekTrailer(b length = b(-1), int flags = 0) const;
 
     /**
      * Pops the designated trailer and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> popTrailer(bit length = bit(-1), int flags = 0);
+    const Ptr<const Chunk> popTrailer(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated trailer and returns it as a mutable chunk in its
@@ -265,7 +265,7 @@ class INET_API Packet : public cPacket
      * the result is chosen according to the internal representation. The popped
      * trailer length must be zero before calling this function.
      */
-    const Ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
+    const Ptr<Chunk> removeTrailer(b length = b(-1), int flags = 0);
 
     /**
      * Pushes the provided trailer at the end of the packet. The trailer must be
@@ -287,8 +287,8 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    bool hasTrailer(bit length = bit(-1)) const {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+    bool hasTrailer(b length = b(-1)) const {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->has<T>(trailerIterator, length);
     }
 
@@ -298,9 +298,9 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peekTrailer(bit length = bit(-1), int flags = 0) const {
+    const Ptr<const T> peekTrailer(b length = b(-1), int flags = 0) const {
         auto dataLength = getDataLength();
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = contents->peek<T>(trailerIterator, length, flags);
         if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
             return chunk;
@@ -314,12 +314,12 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> popTrailer(bit length = bit(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+    const Ptr<const T> popTrailer(b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekTrailer<T>(length, flags);
         if (chunk != nullptr) {
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
-            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
         }
         return chunk;
     }
@@ -331,9 +331,9 @@ class INET_API Packet : public cPacket
      * popped trailer length must be zero before calling this function.
      */
     template <typename T>
-    const Ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-        CHUNK_CHECK_USAGE(trailerIterator.getPosition() == bit(0), "popped trailer length is non-zero");
+    const Ptr<T> removeTrailer(b length = b(-1), int flags = 0) {
+        CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0), "popped trailer length is non-zero");
         const auto& chunk = popTrailer<T>(length, flags);
         removePoppedTrailers();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -347,14 +347,14 @@ class INET_API Packet : public cPacket
      * same as the difference between the header and trailer pop offsets.
      * The returned value is in the range [0, getTotalLength()].
      */
-    bit getDataLength() const { return getTotalLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
+    b getDataLength() const { return getTotalLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
     /**
      * Returns the designated data part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peekDataAt(b offset, b length = b(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated data part is available in the requested
@@ -362,9 +362,9 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    bool hasDataAt(bit offset, bit length = bit(-1)) const {
-        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+    bool hasDataAt(b offset, b length = b(-1)) const {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         return contents->has<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
     }
 
@@ -374,9 +374,9 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+    const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
     }
 
@@ -386,7 +386,7 @@ class INET_API Packet : public cPacket
      * the value returned by getDataLength().
      */
     const Ptr<const Chunk> peekData(int flags = 0) const {
-        return peekDataAt(bit(0), getDataLength(), flags);
+        return peekDataAt(b(0), getDataLength(), flags);
     }
 
     /**
@@ -395,7 +395,7 @@ class INET_API Packet : public cPacket
      * value returned by getDataLength().
      */
     const Ptr<const BitsChunk> peekDataBits(int flags = 0) const {
-        return peekDataAt<BitsChunk>(bit(0), getDataLength(), flags);
+        return peekDataAt<BitsChunk>(b(0), getDataLength(), flags);
     }
 
     /**
@@ -404,7 +404,7 @@ class INET_API Packet : public cPacket
      * value returned by getDataLength().
      */
     const Ptr<const BytesChunk> peekDataBytes(int flags = 0) const {
-        return peekDataAt<BytesChunk>(bit(0), getDataLength(), flags);
+        return peekDataAt<BytesChunk>(b(0), getDataLength(), flags);
     }
 
     /**
@@ -414,7 +414,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<const T> peekData(int flags = 0) const {
-        return peekDataAt<T>(bit(0), getDataLength(), flags);
+        return peekDataAt<T>(b(0), getDataLength(), flags);
     }
     //@}
 
@@ -425,7 +425,7 @@ class INET_API Packet : public cPacket
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    const Ptr<const Chunk> peekAt(bit offset, bit length = bit(-1), int flags = 0) const;
+    const Ptr<const Chunk> peekAt(b offset, b length = b(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated part of the packet is available in the
@@ -433,10 +433,10 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    bool hasAt(bit offset, bit length = bit(-1)) const {
-        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-        return contents->has<T>(Chunk::Iterator(true, bit(offset), -1), length);
+    bool hasAt(b offset, b length = b(-1)) const {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
+        return contents->has<T>(Chunk::Iterator(true, b(offset), -1), length);
     }
 
     /**
@@ -445,10 +445,10 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    const Ptr<const T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
-        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-        return contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
+    const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
+        return contents->peek<T>(Chunk::Iterator(true, b(offset), -1), length, flags);
     }
 
     /**
@@ -457,7 +457,7 @@ class INET_API Packet : public cPacket
      * the value returned by getTotalLength().
      */
     const Ptr<const Chunk> peekAll(int flags = 0) const {
-        return peekAt(bit(0), getTotalLength(), flags);
+        return peekAt(b(0), getTotalLength(), flags);
     }
 
     /**
@@ -466,7 +466,7 @@ class INET_API Packet : public cPacket
      * value returned by getTotalLength().
      */
     const Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
-        return peekAt<BitsChunk>(bit(0), getTotalLength(), flags);
+        return peekAt<BitsChunk>(b(0), getTotalLength(), flags);
     }
 
     /**
@@ -475,7 +475,7 @@ class INET_API Packet : public cPacket
      * value returned by getTotalLength().
      */
     const Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
-        return peekAt<BytesChunk>(bit(0), getTotalLength(), flags);
+        return peekAt<BytesChunk>(b(0), getTotalLength(), flags);
     }
 
     /**
@@ -485,7 +485,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     const Ptr<const T> peekAll(int flags = 0) const {
-        return peekAt<T>(bit(0), getTotalLength(), flags);
+        return peekAt<T>(b(0), getTotalLength(), flags);
     }
     //@}
 
@@ -510,13 +510,13 @@ class INET_API Packet : public cPacket
      * Removes the requested amount from the beginning of the packet. The popped
      * header length must be zero before calling this function.
      */
-    void removeFromBeginning(bit length);
+    void removeFromBeginning(b length);
 
     /**
      * Removes the requested amount from the end of the packet. The popped trailer
      * length must be zero before calling this function.
      */
-    void removeFromEnd(bit length);
+    void removeFromEnd(b length);
 
     /**
      * Removes all popped headers, and sets the header pop length to zero.

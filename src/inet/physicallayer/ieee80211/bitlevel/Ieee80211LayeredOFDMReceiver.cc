@@ -262,7 +262,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createSignalFieldBitMode
         const BitVector *bits = bitModel->getBits();
         for (unsigned int i = 0; i < signalFieldLength; i++)
             signalFieldBits->appendBit(bits->getBit(i));
-        signalFieldBitModel = new ReceptionBitModel(bit(signalFieldLength), bitModel->getHeaderBitRate(), bit(-1), bps(NaN), signalFieldBits);
+        signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderBitRate(), b(-1), bps(NaN), signalFieldBits);
     }
     return signalFieldBitModel;
 }
@@ -304,13 +304,13 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
         const BitVector *bits = bitModel->getBits();
-        unsigned int encodedSignalFieldLength = bit(signalFieldBitModel->getHeaderLength()).get();
+        unsigned int encodedSignalFieldLength = b(signalFieldBitModel->getHeaderLength()).get();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());
         BitVector *dataBits = new BitVector();
         for (unsigned int i = 0; i < encodedDataFieldLengthInBits; i++)
             dataBits->appendBit(bits->getBit(encodedSignalFieldLength + i));
-        dataFieldBitModel = new ReceptionBitModel(bit(-1), bps(NaN), bit(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits);
+        dataFieldBitModel = new ReceptionBitModel(b(-1), bps(NaN), b(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits);
     }
     return dataFieldBitModel;
 }

@@ -39,7 +39,7 @@ class UdpHeader extends TransportHeaderBase
     @customize(true);
     unsigned short srcPort;
     unsigned short destPort;
-    chunkLength = byte(UDP_HEADER_BYTES);
+    chunkLength = B(UDP_HEADER_BYTES);
     int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
     uint16_t crc = 0;
     int crcMode @enum(CrcMode) = -1;

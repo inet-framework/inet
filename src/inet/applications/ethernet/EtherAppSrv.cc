@@ -82,7 +82,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
     Packet *reqPk = check_and_cast<Packet *>(msg);
-    const auto& req = reqPk->peekDataAt<EtherAppReq>(byte(0));
+    const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
     if (req == nullptr)
         throw cRuntimeError("data type error: not an EtherAppReq arrived in packet %s", reqPk->str().c_str());
     packetsReceived++;
@@ -104,7 +104,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
         const auto& outPayload = std::make_shared<EtherAppResp>();
         outPayload->setRequestId(requestId);
-        outPayload->setChunkLength(byte(l));
+        outPayload->setChunkLength(B(l));
         outPayload->markImmutable();
         outPacket->append(outPayload);
 

@@ -31,7 +31,7 @@ void TCPGenericSrvThread::established()
 
 void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
 {
-    const auto& appmsg = msg->peekDataAt<GenericAppMsg>(byte(0), byte(msg->getByteLength()));
+    const auto& appmsg = msg->peekDataAt<GenericAppMsg>(B(0), B(msg->getByteLength()));
 
     if (!appmsg)
         throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
@@ -53,7 +53,7 @@ void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
 
     if (requestedBytes > 0) {
         Packet *outPacket = new Packet(msg->getName());
-        const auto& payload = std::make_shared<ByteCountChunk>(byte(requestedBytes));
+        const auto& payload = std::make_shared<ByteCountChunk>(B(requestedBytes));
         payload->markImmutable();
         outPacket->append(payload);
         getSocket()->send(outPacket);

@@ -577,7 +577,7 @@ void IGMPv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         const auto& msg = std::make_shared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTime(maxRespTime);
-        msg->setChunkLength(byte(12));
+        msg->setChunkLength(B(12));
         msg->markImmutable();
         packet->prepend(msg);
         sendQueryToIP(packet, interfaceData->ie, IPv4Address::ALL_HOSTS_MCAST);
@@ -607,7 +607,7 @@ void IGMPv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSuppressRouterProc(suppressFlag);
-        msg->setChunkLength(byte(12));
+        msg->setChunkLength(B(12));
         msg->markImmutable();
         packet->prepend(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
@@ -633,7 +633,7 @@ void IGMPv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSourceList(sources);
-        msg->setChunkLength(byte(12 + (4 * sources.size())));
+        msg->setChunkLength(B(12 + (4 * sources.size())));
         msg->markImmutable();
         packet->prepend(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
@@ -723,7 +723,7 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
         report->setGroupRecord(counter++, gr);
         byteLength += 8 + gr.sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
     }
-    report->setChunkLength(byte(byteLength));
+    report->setChunkLength(B(byteLength));
 
     if (counter != 0) {    //if no record created, dont need to send report
         EV_INFO << "Sending response to a General Query on interface '" << ie->getName() << "'.\n";
@@ -996,7 +996,7 @@ void IGMPv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
         msg->setGroupRecord(i, records[i]);
         byteLength += 8 + records[i].sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
     }
-    msg->setChunkLength(byte(byteLength));
+    msg->setChunkLength(B(byteLength));
     msg->markImmutable();
     packet->prepend(msg);
     sendReportToIP(packet, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);

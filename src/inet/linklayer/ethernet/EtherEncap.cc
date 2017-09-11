@@ -145,7 +145,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     int64_t paddingLength = requiredMinBytes - ETHER_FCS_BYTES - packet->getByteLength();
     if (paddingLength > 0) {
         const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(byte(paddingLength));
+        ethPadding->setChunkLength(B(paddingLength));
         ethPadding->markImmutable();
         packet->pushTrailer(ethPadding);
     }
@@ -161,11 +161,11 @@ const Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
     // EV_STATICCONTEXT;
 
     auto ethHeader = packet->popHeader<EtherFrame>();
-    packet->popTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));
+    packet->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
 
     // remove Padding if possible
     if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get())) {
-        bit payloadLength = byte(header->getPayloadLength());
+        b payloadLength = B(header->getPayloadLength());
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);

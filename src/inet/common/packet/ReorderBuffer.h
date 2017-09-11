@@ -32,27 +32,27 @@ class INET_API ReorderBuffer : public ChunkBuffer
     /**
      * The offset of the next expected data chunk.
      */
-    bit expectedOffset;
+    b expectedOffset;
 
   public:
-    ReorderBuffer(bit expectedOffset = bit(-1)) : expectedOffset(expectedOffset) { }
+    ReorderBuffer(b expectedOffset = b(-1)) : expectedOffset(expectedOffset) { }
     ReorderBuffer(const ReorderBuffer& other) : ChunkBuffer(other), expectedOffset(other.expectedOffset) { }
 
     /**
      * Returns the offset of the next expected data chunk.
      */
-    bit getExpectedOffset() const { return expectedOffset; }
+    b getExpectedOffset() const { return expectedOffset; }
 
     /**
      * Changes the offset of the next expected data chunk.
      */
-    void setExpectedOffset(bit expectedOffset) { this->expectedOffset = expectedOffset; }
+    void setExpectedOffset(b expectedOffset) { this->expectedOffset = expectedOffset; }
 
     /**
      * Returns the length of the largest next available data chunk starting at
      * the expected offset.
      */
-    bit getAvailableDataLength() const;
+    b getAvailableDataLength() const;
 
     /**
      * Returns the largest next available data chunk starting at the expected
@@ -60,7 +60,7 @@ class INET_API ReorderBuffer : public ChunkBuffer
      * If there's no available data at the expected offset, then it returns a
      * nullptr and the buffer is not modified.
      */
-    const Ptr<const Chunk> popAvailableData(bit length = bit(-1));
+    const Ptr<const Chunk> popAvailableData(b length = b(-1));
 };
 
 } // namespace

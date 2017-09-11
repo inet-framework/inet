@@ -33,16 +33,16 @@ SliceChunk::SliceChunk(const SliceChunk& other) :
 {
 }
 
-SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
+SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     Chunk(),
     chunk(chunk),
     offset(offset),
-    length(length == bit(-1) ? chunk->getChunkLength() - offset : length)
+    length(length == b(-1) ? chunk->getChunkLength() - offset : length)
 {
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-    bit chunkLength = chunk->getChunkLength();
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->offset && this->offset <= chunkLength);
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->length && this->offset + this->length <= chunkLength);
+    b chunkLength = chunk->getChunkLength();
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->offset && this->offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->length && this->offset + this->length <= chunkLength);
 #endif
 }
 
@@ -51,19 +51,19 @@ void SliceChunk::forEachChild(cVisitor *v)
     v->visit(const_cast<Chunk *>(chunk.get()));
 }
 
-const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         // 2.1 peeking the whole part returns the sliced chunk
-        if (offset == bit(0) && chunkLength == chunk->getChunkLength()) {
+        if (offset == b(0) && chunkLength == chunk->getChunkLength()) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
         }
@@ -73,28 +73,28 @@ const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
             return result;
     }
     // 3. peeking anything else returns what peeking the sliced chunk returns
-    return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == bit(-1) ? chunkLength : length, flags);
+    return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == b(-1) ? chunkLength : length, flags);
 }
 
-const Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
-    bit chunkLength = chunk->getChunkLength();
-    bit sliceLength = length == bit(-1) ? chunkLength - offset : length;
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= offset && offset <= chunkLength);
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= sliceLength && sliceLength <= chunkLength);
+    b chunkLength = chunk->getChunkLength();
+    b sliceLength = length == b(-1) ? chunkLength - offset : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= sliceLength && sliceLength <= chunkLength);
     return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
 }
 
-void SliceChunk::setOffset(bit offset)
+void SliceChunk::setOffset(b offset)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= chunk->getChunkLength(), "offset is out of range");
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= chunk->getChunkLength(), "offset is out of range");
     handleChange();
     this->offset = offset;
 }
 
-void SliceChunk::setLength(bit length)
+void SliceChunk::setLength(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= chunk->getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= chunk->getChunkLength(), "length is invalid");
     handleChange();
     this->length = length;
 }
@@ -138,17 +138,17 @@ void SliceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::removeFromBeginning(bit length)
+void SliceChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= this->length, "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= this->length, "length is invalid");
     handleChange();
     this->offset += length;
     this->length -= length;
 }
 
-void SliceChunk::removeFromEnd(bit length)
+void SliceChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= this->length, "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= this->length, "length is invalid");
     handleChange();
     this->length -= length;
 }

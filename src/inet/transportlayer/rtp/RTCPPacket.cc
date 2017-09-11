@@ -17,7 +17,7 @@ RTCPReceiverReportPacket::RTCPReceiverReportPacket()
     receptionReports.setName("ReceptionReports");
     // an empty rtcp receiver report packet is 4 bytes
     // longer, the ssrc identifier is stored in it
-    setChunkLength(getChunkLength() + byte(4));
+    setChunkLength(getChunkLength() + B(4));
 };
 
 void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report)
@@ -25,7 +25,7 @@ void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report)
     receptionReports.add(report);
     count++;
     // an rtcp receiver report is 24 bytes long
-    setChunkLength(getChunkLength() + byte(24));
+    setChunkLength(getChunkLength() + B(24));
 };
 
 Register_Class(RTCPSenderReportPacket);
@@ -34,7 +34,7 @@ RTCPSenderReportPacket::RTCPSenderReportPacket()
     : RTCPSenderReportPacket_Base()
 {
     // a sender report is 20 bytes long
-    setChunkLength(getChunkLength() + byte(20));
+    setChunkLength(getChunkLength() + B(20));
 };
 
 Register_Class(RTCPSDESPacket);
@@ -54,7 +54,7 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk)
     count++;
     // the size of the rtcp packet increases by the
     // size of the sdes chunk (including ssrc)
-    setChunkLength(getChunkLength() + byte(sdesChunk->getLength()));
+    setChunkLength(getChunkLength() + B(sdesChunk->getLength()));
 };
 
 Register_Class(RTCPByePacket);
@@ -63,7 +63,7 @@ RTCPByePacket::RTCPByePacket()
     : RTCPByePacket_Base()
 {
     // space for the ssrc identifier
-    setChunkLength(getChunkLength() + byte(4));
+    setChunkLength(getChunkLength() + B(4));
 };
 
 } // namespace rtp

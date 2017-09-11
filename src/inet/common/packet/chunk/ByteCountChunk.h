@@ -32,20 +32,20 @@ class INET_API ByteCountChunk : public Chunk
     /**
      * The chunk length in bytes, or -1 if not yet specified.
      */
-    byte length;
+    B length;
     uint8_t data;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     ByteCountChunk();
     ByteCountChunk(const ByteCountChunk& other);
-    ByteCountChunk(byte length, uint8_t data = '?');
+    ByteCountChunk(B length, uint8_t data = '?');
 
     virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
@@ -53,8 +53,8 @@ class INET_API ByteCountChunk : public Chunk
 
     /** @name Field accessor functions */
     //@{
-    byte getLength() const { return length; }
-    void setLength(byte length);
+    B getLength() const { return length; }
+    void setLength(B length);
 
     uint8_t getData() const { return data; }
     void setData(uint8_t data);
@@ -63,7 +63,7 @@ class INET_API ByteCountChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_BYTECOUNT; }
-    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= byte(0)); return length; }
+    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= B(0)); return length; }
 
     virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
@@ -71,11 +71,11 @@ class INET_API ByteCountChunk : public Chunk
     virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
     virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) const override { return bit(length).get() % 8 == 0; }
-    virtual bool canRemoveFromEnd(bit length) const override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromBeginning(b length) const override { return b(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(b length) const override { return b(length).get() % 8 == 0; }
 
-    virtual void removeFromBeginning(bit length) override;
-    virtual void removeFromEnd(bit length) override;
+    virtual void removeFromBeginning(b length) override;
+    virtual void removeFromEnd(b length) override;
 
     virtual std::string str() const override;
     //@}

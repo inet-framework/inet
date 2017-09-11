@@ -46,7 +46,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
     EV << "Serialize IPv6 packet\n";
 
-    unsigned int nextHdrCodePos = byte(stream.getLength()).get() + 6;
+    unsigned int nextHdrCodePos = B(stream.getLength()).get() + 6;
     struct ip6_hdr ip6h;
 
     flowinfo = 0x06;
@@ -68,7 +68,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
     ip6h.ip6_plen = htons(ipv6Header->getPayloadLength());
 
-    stream.writeBytes((uint8_t *)&ip6h, byte(IPv6_HEADER_BYTES));
+    stream.writeBytes((uint8_t *)&ip6h, B(IPv6_HEADER_BYTES));
 
     //FIXME serialize extension headers
     for (i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
@@ -119,14 +119,14 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 break;
             }
         }
-        ASSERT(nextHdrCodePos + extHdr->getByteLength() == byte(stream.getLength()).get());
+        ASSERT(nextHdrCodePos + extHdr->getByteLength() == B(stream.getLength()).get());
     }
 }
 
 const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
-    stream.readBytes(buffer, byte(IPv6_HEADER_BYTES));
+    stream.readBytes(buffer, B(IPv6_HEADER_BYTES));
     auto dest = std::make_shared<Ipv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);

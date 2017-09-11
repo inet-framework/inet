@@ -23,7 +23,7 @@ namespace inet {
 class INET_API BitCountChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 

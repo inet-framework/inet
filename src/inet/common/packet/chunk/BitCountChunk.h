@@ -32,20 +32,20 @@ class INET_API BitCountChunk : public Chunk
     /**
      * The chunk length in bits, or -1 if not yet specified.
      */
-    bit length;
+    b length;
     bool data;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     BitCountChunk();
     BitCountChunk(const BitCountChunk& other);
-    BitCountChunk(bit length, bool data = false);
+    BitCountChunk(b length, bool data = false);
 
     virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
     virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
@@ -53,8 +53,8 @@ class INET_API BitCountChunk : public Chunk
 
     /** @name Field accessor functions */
     //@{
-    bit getLength() const { return length; }
-    void setLength(bit length);
+    b getLength() const { return length; }
+    void setLength(b length);
 
     bool getData() const { return data; }
     void setData(bool data);
@@ -63,7 +63,7 @@ class INET_API BitCountChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_BITCOUNT; }
-    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= bit(0)); return length; }
+    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
     virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
@@ -71,11 +71,11 @@ class INET_API BitCountChunk : public Chunk
     virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
     virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) const override { return true; }
-    virtual bool canRemoveFromEnd(bit length) const override { return true; }
+    virtual bool canRemoveFromBeginning(b length) const override { return true; }
+    virtual bool canRemoveFromEnd(b length) const override { return true; }
 
-    virtual void removeFromBeginning(bit length) override;
-    virtual void removeFromEnd(bit length) override;
+    virtual void removeFromBeginning(b length) override;
+    virtual void removeFromEnd(b length) override;
 
     virtual std::string str() const override;
     //@}

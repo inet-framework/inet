@@ -43,7 +43,7 @@ namespace inet::rtp;
 
 class RTPMpegHeader extends FieldsChunk
 {
-    chunkLength = byte(4);
+    chunkLength = B(4);
     int headerLength = 4;
     int payloadLength; // size of the mpeg data
     int pictureType;   // picture type of the frame the data in this packet belongs to.

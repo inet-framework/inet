@@ -344,7 +344,7 @@ void PingApp::sendPingRequest()
     ASSERT(pid != -1);
 
     Packet *outPacket = new Packet(name);
-    auto payload = std::make_shared<ByteCountChunk>(byte(packetSize));
+    auto payload = std::make_shared<ByteCountChunk>(B(packetSize));
     payload->markImmutable();
 
     switch (destAddr.getType()) {
@@ -380,7 +380,7 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
             const auto& request = std::make_shared<EchoPacket>();
-            request->setChunkLength(byte(8));
+            request->setChunkLength(B(8));
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
@@ -415,7 +415,7 @@ void PingApp::sendPingRequest()
 
 void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
 {
-    const auto& pingPayload = packet->peekDataAt(byte(0), packet->getDataLength());
+    const auto& pingPayload = packet->peekDataAt(B(0), packet->getDataLength());
     if (originatorId != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
         return;
@@ -443,7 +443,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     }
 
     // update statistics
-    countPingResponse(byte(pingPayload->getChunkLength()).get(), seqNo, rtt);
+    countPingResponse(B(pingPayload->getChunkLength()).get(), seqNo, rtt);
 }
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)

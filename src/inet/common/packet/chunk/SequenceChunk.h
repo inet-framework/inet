@@ -54,9 +54,9 @@ class INET_API SequenceChunk : public Chunk
 
     std::deque<Ptr<const Chunk>> dupChunks() const;
 
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -94,8 +94,8 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, bit length) const override;
-    virtual void seekIterator(Iterator& iterator, bit offset) const override;
+    virtual void moveIterator(Iterator& iterator, b length) const override;
+    virtual void seekIterator(Iterator& iterator, b offset) const override;
     //@}
 
     /** @name Filling with data related functions */
@@ -109,17 +109,17 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Removing data related functions */
     //@{
-    virtual bool canRemoveFromBeginning(bit length) const override { return true; }
-    virtual bool canRemoveFromEnd(bit length) const override { return true; }
+    virtual bool canRemoveFromBeginning(b length) const override { return true; }
+    virtual bool canRemoveFromEnd(b length) const override { return true; }
 
-    virtual void removeFromBeginning(bit length) override;
-    virtual void removeFromEnd(bit length) override;
+    virtual void removeFromBeginning(b length) override;
+    virtual void removeFromEnd(b length) override;
     //@}
 
     /** @name Querying data related functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_SEQUENCE; }
-    virtual bit getChunkLength() const override;
+    virtual b getChunkLength() const override;
     //@}
 
     virtual std::string str() const override;

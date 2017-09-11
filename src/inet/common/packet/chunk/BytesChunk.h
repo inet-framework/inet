@@ -36,9 +36,9 @@ class INET_API BytesChunk : public Chunk
     std::vector<uint8_t> bytes;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
-    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -70,7 +70,7 @@ class INET_API BytesChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_BYTES; }
-    virtual bit getChunkLength() const override { return byte(bytes.size()); }
+    virtual b getChunkLength() const override { return B(bytes.size()); }
 
     virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
     virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
@@ -78,11 +78,11 @@ class INET_API BytesChunk : public Chunk
     virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) override;
     virtual void insertAtEnd(const Ptr<const Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) const override { return bit(length).get() % 8 == 0; }
-    virtual bool canRemoveFromEnd(bit length) const override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromBeginning(b length) const override { return b(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(b length) const override { return b(length).get() % 8 == 0; }
 
-    virtual void removeFromBeginning(bit length) override;
-    virtual void removeFromEnd(bit length) override;
+    virtual void removeFromBeginning(b length) override;
+    virtual void removeFromEnd(b length) override;
 
     virtual std::string str() const override;
     //@}

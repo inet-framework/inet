@@ -59,7 +59,7 @@ BitVector Ieee80211OFDMDemodulator::demodulateSymbol(const Ieee80211OFDMSymbol *
 
 const IReceptionBitModel *Ieee80211OFDMDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitRate, int dataFieldLength, bps dataFieldBitRate) const
 {
-    return new ReceptionBitModel(bit(signalFieldLength), signalFieldBitRate, bit(dataFieldLength), dataFieldBitRate, bitRepresentation);
+    return new ReceptionBitModel(b(signalFieldLength), signalFieldBitRate, b(dataFieldLength), dataFieldBitRate, bitRepresentation);
 }
 
 bool Ieee80211OFDMDemodulator::isPilotOrDcSubcarrier(int i) const

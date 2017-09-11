@@ -39,7 +39,7 @@ enum CrcMode
 class ApplicationHeader extends FieldsChunk
 {
     @str;
-    chunkLength = byte(10);
+    chunkLength = B(10);
     int16_t someData = -1;
 }
 
@@ -56,21 +56,21 @@ class TcpHeader extends FieldsChunk
 class IpHeader extends FieldsChunk
 {
     @str;
-    chunkLength = byte(20);
+    chunkLength = B(20);
     int16_t protocol @enum(Protocol) = -1;
 }
 
 class EthernetHeader extends FieldsChunk
 {
     @str;
-    chunkLength = byte(14);
+    chunkLength = B(14);
     int16_t protocol @enum(Protocol) = -1;
 }
 
 class EthernetTrailer extends FieldsChunk
 {
     @str;
-    chunkLength = byte(2);
+    chunkLength = B(2);
     int16_t crc = 0;
     int crcMode @enum(CrcMode) = -1;
 }

@@ -27,13 +27,13 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 {
     auto startPosition = stream.getLength();
     const auto& msg = std::static_pointer_cast<const GenericAppMsg>(chunk);
-    stream.writeUint32Be(byte(msg->getChunkLength()).get());
+    stream.writeUint32Be(B(msg->getChunkLength()).get());
     stream.writeUint32Be(msg->getExpectedReplyLength());
     stream.writeUint64Be(SimTime(msg->getReplyDelay()).raw());
     stream.writeByte(msg->getServerClose());
-    int64_t remainders = byte(msg->getChunkLength() - (stream.getLength() - startPosition)).get();
+    int64_t remainders = B(msg->getChunkLength() - (stream.getLength() - startPosition)).get();
     if (remainders < 0)
-        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)byte(msg->getChunkLength()).get(), (int)byte(stream.getLength() - startPosition).get());
+        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)B(msg->getChunkLength()).get(), (int)B(stream.getLength() - startPosition).get());
     stream.writeByteRepeatedly('?', remainders);
 }
 
@@ -41,14 +41,14 @@ const Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream)
 {
     auto startPosition = stream.getPosition();
     auto msg = std::make_shared<GenericAppMsg>();
-    byte dataLength = byte(stream.readUint32Be());
+    B dataLength = B(stream.readUint32Be());
     msg->setExpectedReplyLength(stream.readUint32Be());
     int64_t delayraw = stream.readUint64Be();
     msg->setReplyDelay(SimTime(delayraw).dbl());
     msg->setServerClose(stream.readByte() ? true : false);
-    byte remainders = dataLength - (stream.getPosition() - startPosition);
-    ASSERT(remainders >= byte(0));
-    stream.readByteRepeatedly('?', byte(remainders).get());
+    B remainders = dataLength - (stream.getPosition() - startPosition);
+    ASSERT(remainders >= B(0));
+    stream.readByteRepeatedly('?', B(remainders).get());
     return msg;
 }
 

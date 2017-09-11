@@ -374,7 +374,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     std::string leftAddr = "A";
     std::string rightAddr = "B";
     packet = packet->dup();
-    while(const auto& chunk = packet->popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
+    while(const auto& chunk = packet->popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
 #ifdef WITH_IPv4
         if (const auto& ipv4Hdr = std::dynamic_pointer_cast<const Ipv4Header>(chunk)) {
             leftAddr = ipv4Hdr->getSourceAddress().str();

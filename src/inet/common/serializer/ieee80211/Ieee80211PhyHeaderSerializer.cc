@@ -43,7 +43,7 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     }
     else {
         // TODO:
-        stream.writeByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
+        stream.writeByteRepeatedly('?', B(phyHeader->getChunkLength()).get());
     }
 }
 
@@ -66,8 +66,8 @@ const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& st
     else {
         auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
         // TODO:
-        phyHeader->setChunkLength(bit(192));
-        stream.readByteRepeatedly('?', byte(phyHeader->getChunkLength()).get());
+        phyHeader->setChunkLength(b(192));
+        stream.readByteRepeatedly('?', B(phyHeader->getChunkLength()).get());
         return phyHeader;
     }
 }

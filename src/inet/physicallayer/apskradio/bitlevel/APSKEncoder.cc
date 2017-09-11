@@ -90,11 +90,11 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
         interleaving = interleaver->getInterleaving();
         EV_DEBUG << "Interleaved bits are: " << *encodedBits << endl;
     }
-    bit netHeaderLength = apskPhyHeader->getChunkLength();
+    b netHeaderLength = apskPhyHeader->getChunkLength();
     if (forwardErrorCorrection == nullptr)
         return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), bitLength - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
-        bit grossHeaderLength = bit(forwardErrorCorrection->getEncodedLength(bit(netHeaderLength).get()));
+        b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
         bps grossBitrate = packetModel->getBitrate() / forwardErrorCorrection->getCodeRate();
         return new TransmissionBitModel(grossHeaderLength, grossBitrate, bitLength - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }

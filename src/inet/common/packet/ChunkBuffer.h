@@ -46,7 +46,7 @@ class INET_API ChunkBuffer : public cNamedObject
       friend class ChunkBuffer__RegionDescriptor;
 
       public:
-        bit offset;
+        b offset;
         /**
          * This chunk is always immutable to allow arbitrary peeking. Nevertheless
          * it's reused if possible to allow efficient merging with newly added chunks.
@@ -57,11 +57,11 @@ class INET_API ChunkBuffer : public cNamedObject
         const Chunk *getData() const { return data.get(); } // only for class descriptor
 
       public:
-        Region(bit offset, const Ptr<const Chunk>& data) : offset(offset), data(data) { }
+        Region(b offset, const Ptr<const Chunk>& data) : offset(offset), data(data) { }
         Region(const Region& other) : offset(other.offset), data(other.data) { }
 
-        bit getStartOffset() const { return offset; }
-        bit getEndOffset() const { return offset + data->getChunkLength(); }
+        b getStartOffset() const { return offset; }
+        b getEndOffset() const { return offset + data->getChunkLength(); }
 
         static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
         static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }
@@ -104,17 +104,17 @@ class INET_API ChunkBuffer : public cNamedObject
     /**
      * Returns the length of the given region.
      */
-    bit getRegionLength(int index) const { return regions.at(index).data->getChunkLength(); }
+    b getRegionLength(int index) const { return regions.at(index).data->getChunkLength(); }
 
     /**
      * Returns the start offset of the given region.
      */
-    bit getRegionStartOffset(int index) const { return regions.at(index).offset; }
+    b getRegionStartOffset(int index) const { return regions.at(index).offset; }
 
     /**
      * Returns the end offset of the given region.
      */
-    bit getRegionEndOffset(int index) const { return regions.at(index).getEndOffset(); }
+    b getRegionEndOffset(int index) const { return regions.at(index).getEndOffset(); }
 
     /**
      * Returns the data of the given region in its current representation.
@@ -128,12 +128,12 @@ class INET_API ChunkBuffer : public cNamedObject
      * merged with the provided chunk.
      */
     // TODO: add flag to decide between keeping or overwriting old data when replacing with new data
-    void replace(bit offset, const Ptr<const Chunk>& chunk);
+    void replace(b offset, const Ptr<const Chunk>& chunk);
 
     /**
      * Erases the stored data at the provided offset and length.
      */
-    void clear(bit offset, bit length);
+    void clear(b offset, b length);
 
     /**
      * Erases all of the stored data.

@@ -52,13 +52,13 @@ class INET_API TCPReceiveQueue : public cObject
     ReorderBuffer reorderBuffer;
 
   protected:
-    uint32_t offsetToSeq(byte offs) const { return (uint32_t)offs.get(); }
+    uint32_t offsetToSeq(B offs) const { return (uint32_t)offs.get(); }
 
-    byte seqToOffset(uint32_t seq) const
+    B seqToOffset(uint32_t seq) const
     {
-        byte expOffs = reorderBuffer.getExpectedOffset();
+        B expOffs = reorderBuffer.getExpectedOffset();
         uint32_t expSeq = offsetToSeq(expOffs);
-        return byte((seqGE(seq, expSeq)) ? byte(expOffs).get() + (seq - expSeq) : byte(expOffs).get() - (expSeq - seq));
+        return B((seqGE(seq, expSeq)) ? B(expOffs).get() + (seq - expSeq) : B(expOffs).get() - (expSeq - seq));
     }
 
   public:

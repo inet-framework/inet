@@ -30,19 +30,19 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
 {
   protected:
     const BitVector *bits;
-    const bit headerLength;
+    const b headerLength;
     const bps headerBitRate;
-    const bit dataLength;
+    const b dataLength;
     const bps dataBitRate;
 
   public:
-    SignalBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits);
+    SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits);
     virtual ~SignalBitModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual bit getHeaderLength() const override { return headerLength; }
+    virtual b getHeaderLength() const override { return headerLength; }
     virtual bps getHeaderBitRate() const override { return headerBitRate; }
-    virtual bit getDataLength() const override { return dataLength; }
+    virtual b getDataLength() const override { return dataLength; }
     virtual bps getDataBitRate() const override { return dataBitRate; }
     virtual const BitVector *getBits() const override { return bits; }
 };
@@ -56,7 +56,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
 
   public:
     TransmissionBitModel(const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
-    TransmissionBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
+    TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving);
 
     virtual const IForwardErrorCorrection *getForwardErrorCorrection() const override { return forwardErrorCorrection; }
     virtual const IScrambling *getScrambling() const override { return scrambling; }
@@ -66,7 +66,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
 class INET_API ReceptionBitModel : public SignalBitModel, public virtual IReceptionBitModel
 {
   public:
-    ReceptionBitModel(bit headerLength, bps headerBitRate, bit dataLength, bps dataBitRate, const BitVector *bits);
+    ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits);
 };
 
 } // namespace physicallayer

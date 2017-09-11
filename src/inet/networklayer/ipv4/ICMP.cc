@@ -93,7 +93,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // do not reply with error message to error message
     if (ipv4Header->getProtocolId() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<IcmpHeader>(byte(ipv4Header->getHeaderLength()));
+        const auto& recICMPMsg = packet->peekDataAt<IcmpHeader>(B(ipv4Header->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -112,14 +112,14 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpHeader = std::make_shared<IcmpHeader>();
-    icmpHeader->setChunkLength(byte(8));      //FIXME second 4 byte in icmp header not represented yet
+    icmpHeader->setChunkLength(B(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
     icmpHeader->markImmutable();
     errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->append(packet->peekDataAt(byte(0), byte(ipv4Header->getHeaderLength() + 8)));
+    errorPacket->append(packet->peekDataAt(B(0), B(ipv4Header->getHeaderLength() + 8)));
     errorPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
 
     // if srcAddr is not filled in, we're still in the src node, so we just

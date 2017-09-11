@@ -64,7 +64,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
             Chunk::serialize(tcpHeaderStream, tcpHeader);
             auto tcpHeaderBytes = tcpHeaderStream.getData();
             const std::vector<uint8_t> emptyData;
-            auto tcpDataBytes = (packet->getDataLength() > bit(0)) ? packet->peekDataBytes()->getBytes() : emptyData;
+            auto tcpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataBytes()->getBytes() : emptyData;
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, tcpHeaderBytes, tcpDataBytes);
             tcpHeader->setCrc(crc);
             break;
@@ -84,13 +84,13 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     pseudoHeader->setPacketLength(tcpHeaderBytes.size() + tcpDataBytes.size());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
     if (networkProtocol == &Protocol::ipv4)
-        pseudoHeader->setChunkLength(byte(12));
+        pseudoHeader->setChunkLength(B(12));
     else if (networkProtocol == &Protocol::ipv6)
-        pseudoHeader->setChunkLength(byte(40));
+        pseudoHeader->setChunkLength(B(40));
     else
         throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
     pseudoHeader->markImmutable();
-    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(byte(0), pseudoHeader->getChunkLength())->getBytes();
+    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
     // Excerpt from RFC 768:
     // Checksum is the 16-bit one's complement of the one's complement sum of a
     // pseudo header of information from the IP header, the UDP header, and the

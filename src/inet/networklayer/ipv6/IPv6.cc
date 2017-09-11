@@ -721,7 +721,7 @@ void IPv6::decapsulate(Packet *packet)
         ASSERT(payloadLength <= packet->getByteLength());
         // drop padding behind the payload:
         if (payloadLength < packet->getByteLength())
-            packet->setTrailerPopOffset(packet->getHeaderPopOffset() + byte(payloadLength));
+            packet->setTrailerPopOffset(packet->getHeaderPopOffset() + B(payloadLength));
     }
 
     // create and fill in control info
@@ -794,7 +794,7 @@ void IPv6::encapsulate(Packet *transportPacket)
         delete extHeadersTag;
     }
 
-    ipv6Header->setChunkLength(byte(ipv6Header->calculateHeaderByteLength()));
+    ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
     transportPacket->removePoppedHeaders();
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
     // setting IP options is currently not supported
@@ -844,7 +844,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
     int mtu = ie->getMTU();
 
     // check if datagram does not require fragmentation
-    if (packet->getTotalLength() <= byte(mtu)) {
+    if (packet->getTotalLength() <= B(mtu)) {
         sendDatagramToOutput(packet, ie, nextHopAddr);
         return;
     }
@@ -885,10 +885,10 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         fh->setFragmentOffset(offset);
         fh->setMoreFragments(!lastFragment);
         fragHdr->addExtensionHeader(fh);
-        fragHdr->setChunkLength(byte(headerLength + fh->getByteLength()));      //FIXME KLUDGE
+        fragHdr->setChunkLength(B(headerLength + fh->getByteLength()));      //FIXME KLUDGE
         fragHdr->markImmutable();
         fragPk->pushHeader(fragHdr);
-        fragPk->append(packet->peekDataAt(byte(offset), byte(thisFragmentLength)));
+        fragPk->append(packet->peekDataAt(B(offset), B(thisFragmentLength)));
 
         ASSERT(fragPk->getByteLength() == headerLength + fh->getByteLength() + thisFragmentLength);
 

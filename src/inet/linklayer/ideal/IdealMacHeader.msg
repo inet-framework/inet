@@ -35,7 +35,7 @@ class FieldsChunk extends cObject;
 //
 class IdealMacHeader extends FieldsChunk
 {
-    chunkLength = byte(16);
+    chunkLength = B(16);
     MACAddress src;     // source address
     MACAddress dest;    // destination address
     int srcModuleId;    // technical data, uses instead of sending back an ACK packet

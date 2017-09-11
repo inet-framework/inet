@@ -232,7 +232,7 @@ void LDP::sendMappingRequest(IPv4Address dest, IPv4Address addr, int length)
 {
     Packet *pk = new Packet("Lb-Req");
     const auto& requestMsg = std::make_shared<LDPLabelRequest>();
-    requestMsg->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
+    requestMsg->setChunkLength(B(LDP_HEADER_BYTES));    // FIXME find out actual length
     requestMsg->setType(LABEL_REQUEST);
 
     FEC_TLV fec;
@@ -427,7 +427,7 @@ void LDP::sendHelloTo(IPv4Address dest)
 {
     Packet *pk = new Packet("LDP-Hello");
     const auto& hello = std::make_shared<LDPHello>();
-    hello->setChunkLength(byte(LDP_HEADER_BYTES));
+    hello->setChunkLength(B(LDP_HEADER_BYTES));
     hello->setType(HELLO);
     hello->setSenderAddress(rt->getRouterId());
     //hello->setReceiverAddress(...);
@@ -840,7 +840,7 @@ void LDP::sendNotify(int status, IPv4Address dest, IPv4Address addr, int length)
     // Send NOTIFY message
     Packet *packet = new Packet("Lb-Notify");
     const auto& lnMessage = std::make_shared<LDPNotify>();
-    lnMessage->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
+    lnMessage->setChunkLength(B(LDP_HEADER_BYTES));    // FIXME find out actual length
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
     lnMessage->setReceiverAddress(dest);
@@ -862,7 +862,7 @@ void LDP::sendMapping(int type, IPv4Address dest, int label, IPv4Address addr, i
     // Send LABEL MAPPING downstream
     Packet *packet = new Packet("Lb-Mapping");
     const auto& lmMessage = std::make_shared<LDPLabelMapping>();
-    lmMessage->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
+    lmMessage->setChunkLength(B(LDP_HEADER_BYTES));    // FIXME find out actual length
     lmMessage->setType(type);
     lmMessage->setReceiverAddress(dest);
     lmMessage->setSenderAddress(rt->getRouterId());

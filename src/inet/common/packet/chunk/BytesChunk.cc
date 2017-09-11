@@ -34,24 +34,24 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<BytesChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking without conversion returns a BytesChunk
     if (converter == nullptr) {
-        auto chunk = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + byte(iterator.getPosition()).get(), length == bit(-1) ? bytes.end() : bytes.begin() + byte(iterator.getPosition() + length).get()));
+        auto chunk = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
         chunk->markImmutable();
         return chunk;
     }
@@ -59,7 +59,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     MemoryOutputStream outputStream(chunk->getChunkLength());
     Chunk::serialize(outputStream, chunk, offset, length);
@@ -120,24 +120,24 @@ void BytesChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::removeFromBeginning(bit length)
+void BytesChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
-    bytes.erase(bytes.begin(), bytes.begin() + byte(length).get());
+    bytes.erase(bytes.begin(), bytes.begin() + B(length).get());
 }
 
-void BytesChunk::removeFromEnd(bit length)
+void BytesChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
-    bytes.erase(bytes.end() - byte(length).get(), bytes.end());
+    bytes.erase(bytes.end() - B(length).get(), bytes.end());
 }
 
 std::string BytesChunk::str() const
 {
     std::ostringstream os;
-    os << "BytesChunk, length = " << byte(getChunkLength()) << ", bytes = {";
+    os << "BytesChunk, length = " << B(getChunkLength()) << ", bytes = {";
     bool first = true;
     for (auto byte : bytes) {
         if (!first)

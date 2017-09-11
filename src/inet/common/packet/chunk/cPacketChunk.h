@@ -32,7 +32,7 @@ class INET_API cPacketChunk : public Chunk
     cPacket *packet;
 
   protected:
-    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -54,7 +54,7 @@ class INET_API cPacketChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_CPACKET; }
-    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(packet->getBitLength() >= 0); return bit(packet->getBitLength()); }
+    virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(packet->getBitLength() >= 0); return b(packet->getBitLength()); }
 
     virtual std::string str() const override;
     //@}

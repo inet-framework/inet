@@ -98,7 +98,7 @@ void PcapDump::writeFrame(simtime_t stime, const Packet *packet)
     for (size_t i = 0; i < bytes.size(); i++)
         buf[i] = bytes[i];
 
-    ph.orig_len = byte(data->getChunkLength()).get();
+    ph.orig_len = B(data->getChunkLength()).get();
 
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
     fwrite(&ph, sizeof(ph), 1, dumpfile);

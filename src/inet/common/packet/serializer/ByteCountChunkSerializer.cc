@@ -21,19 +21,19 @@ namespace inet {
 
 Register_Serializer(ByteCountChunk, ByteCountChunkSerializer);
 
-void ByteCountChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, bit offset, bit length) const
+void ByteCountChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
     const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
-    bit serializedLength = length == bit(-1) ? byteCountChunk->getChunkLength() - offset : length;
-    stream.writeByteRepeatedly(byteCountChunk->getData(), byte(serializedLength).get());
+    b serializedLength = length == b(-1) ? byteCountChunk->getChunkLength() - offset : length;
+    stream.writeByteRepeatedly(byteCountChunk->getData(), B(serializedLength).get());
     ChunkSerializer::totalSerializedLength += serializedLength;
 }
 
 const Ptr<Chunk> ByteCountChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto byteCountChunk = std::make_shared<ByteCountChunk>();
-    byte length = stream.getRemainingLength();
-    stream.readByteRepeatedly(byteCountChunk->getData(), byte(length).get());
+    B length = stream.getRemainingLength();
+    stream.readByteRepeatedly(byteCountChunk->getData(), B(length).get());
     byteCountChunk->setLength(length);
     ChunkSerializer::totalDeserializedLength += length;
     return byteCountChunk;

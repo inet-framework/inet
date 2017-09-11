@@ -30,7 +30,7 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     const auto& transportPseudoHeader = std::static_pointer_cast<const TransportPseudoHeader>(chunk);
     auto nwProtId = transportPseudoHeader->getNetworkProtocolId();
     if (nwProtId == Protocol::ipv4.getId()) {
-        ASSERT(transportPseudoHeader->getChunkLength() == byte(12));
+        ASSERT(transportPseudoHeader->getChunkLength() == B(12));
         stream.writeIPv4Address(transportPseudoHeader->getSrcAddress().toIPv4());
         stream.writeIPv4Address(transportPseudoHeader->getDestAddress().toIPv4());
         stream.writeByte(0);
@@ -39,7 +39,7 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     }
     else
     if (nwProtId == Protocol::ipv6.getId()) {
-        ASSERT(transportPseudoHeader->getChunkLength() == byte(40));
+        ASSERT(transportPseudoHeader->getChunkLength() == B(40));
         stream.writeIPv6Address(transportPseudoHeader->getSrcAddress().toIPv6());
         stream.writeIPv6Address(transportPseudoHeader->getDestAddress().toIPv6());
         stream.writeUint32Be(transportPseudoHeader->getPacketLength());

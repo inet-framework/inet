@@ -421,7 +421,7 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
     EV_STATICCONTEXT;
 
     auto ethHeader = packet->peekHeader<EtherFrame>();          //FIXME can I use any flags?
-    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));          //FIXME can I use any flags?
+    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));          //FIXME can I use any flags?
 
     switch(ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
@@ -432,8 +432,8 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
         case FCS_COMPUTED: {
             bool isFcsBad = false;
             // check the FCS
-            auto ethBytes = packet->peekDataAt<BytesChunk>(byte(0), packet->getDataLength() - ethTrailer->getChunkLength());
-            auto bufferLength = byte(ethBytes->getChunkLength()).get();
+            auto ethBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - ethTrailer->getChunkLength());
+            auto bufferLength = B(ethBytes->getChunkLength()).get();
             auto buffer = new uint8_t[bufferLength];
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
@@ -448,11 +448,11 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
         default:
             throw cRuntimeError("invalid FCS mode in ethernet frame");
     }
-    bit payloadLength = bit(-1);
+    b payloadLength = b(-1);
     if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get()))
-        payloadLength = byte(header->getPayloadLength());
+        payloadLength = B(header->getPayloadLength());
 
-    return (payloadLength == bit(-1) || payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+    return (payloadLength == b(-1) || payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
 }
 
 void EtherMACBase::flushQueue()

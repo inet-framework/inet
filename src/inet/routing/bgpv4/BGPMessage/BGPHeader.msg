@@ -71,7 +71,7 @@ enum BGPType
 //
 class BGPHeader extends FieldsChunk
 {
-    chunkLength = byte(BGP_HEADER_OCTETS);
+    chunkLength = B(BGP_HEADER_OCTETS);
     char type @enum(BGPType);
 }
 
@@ -121,7 +121,7 @@ class BGPOpenMessage extends BGPHeader
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
     type = BGP_OPEN;
-    chunkLength = byte(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS);
+    chunkLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS);
 
     char version = 4;
     unsigned short myAS;
@@ -239,7 +239,7 @@ class BGPUpdateMessage extends BGPHeader
 {
     @customize(true);
     type = BGP_UPDATE;
-    chunkLength = byte(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS);
+    chunkLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS);
 
     BGPUpdateWithdrawnRoutes withdrawnRoutes[];
     BGPUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)

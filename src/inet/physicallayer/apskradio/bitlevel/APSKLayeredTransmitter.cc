@@ -103,16 +103,16 @@ const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITrans
         return encoder->encode(packetModel);
     else {
         auto packet = packetModel->getPacket();
-        bit netHeaderLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength();
-        bit netDataLength = packet->getTotalLength() - netHeaderLength;
+        b netHeaderLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength();
+        b netDataLength = packet->getTotalLength() - netHeaderLength;
         if (encoder) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
             const ConvolutionalCode *forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
             if (forwardErrorCorrection == nullptr)
                 return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             else {
-                bit grossHeaderLength = bit(forwardErrorCorrection->getEncodedLength(bit(netHeaderLength).get()));
-                bit grossDataLength = bit(forwardErrorCorrection->getEncodedLength(bit(netDataLength).get()));
+                b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
+                b grossDataLength = b(forwardErrorCorrection->getEncodedLength(b(netDataLength).get()));
                 bps grossBitrate = bitrate / forwardErrorCorrection->getCodeRate();
                 return new TransmissionBitModel(grossHeaderLength, grossBitrate, grossDataLength, grossBitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             }

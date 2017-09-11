@@ -207,8 +207,8 @@ bool IPv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
         case CRC_COMPUTED: {
             if (ipv4Header->isCorrect()) {
                 // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
-                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(byte(0), ipv4Header->getChunkLength());
-                auto bufferLength = byte(ipv4HeaderBytes->getChunkLength()).get();
+                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(B(0), ipv4Header->getChunkLength());
+                auto bufferLength = B(ipv4HeaderBytes->getChunkLength()).get();
                 auto buffer = new uint8_t[bufferLength];
                 // 1. fill in the data
                 ipv4HeaderBytes->copyToBuffer(buffer, bufferLength);
@@ -259,14 +259,14 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
 
     // remove lower layer paddings:
     if (ipv4Header->getTotalLengthField() < packet->getByteLength()) {
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + byte(ipv4Header->getTotalLengthField()));
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + B(ipv4Header->getTotalLengthField()));
     }
 
     // check for header biterror
     if (packet->hasBitError()) {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = ipv4Header->getHeaderLength() / (double)byte(ipv4Header->getChunkLength()).get();
+        double relativeHeaderLength = ipv4Header->getHeaderLength() / (double)B(ipv4Header->getChunkLength()).get();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             sendIcmpError(packet, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
@@ -793,7 +793,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
-    int payloadLength = byte(packet->getDataLength()).get() - headerLength;
+    int payloadLength = B(packet->getDataLength()).get() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8;    // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)
@@ -826,8 +826,8 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
         ASSERT(fragment->getByteLength() == 0);
         const auto& fraghdr = std::make_shared<Ipv4Header>(*ipv4Header.get()->dup());
-        const auto& fragData = packet->peekDataAt(byte(headerLength + offset), byte(thisFragmentLength));
-        ASSERT(byte(fragData->getChunkLength()).get() == thisFragmentLength);
+        const auto& fragData = packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength));
+        ASSERT(B(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->append(fragData);
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true
@@ -907,7 +907,7 @@ void IPv4::encapsulate(Packet *transportPacket)
     else
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
-    ipv4Header->setTotalLengthField(byte(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
+    ipv4Header->setTotalLengthField(B(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
     ipv4Header->setCrcMode(crcMode);
     ipv4Header->setCrc(0);
     switch (crcMode) {

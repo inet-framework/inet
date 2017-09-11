@@ -31,32 +31,32 @@ BitCountChunk::BitCountChunk(const BitCountChunk& other) :
 {
 }
 
-BitCountChunk::BitCountChunk(bit length, bool data) :
+BitCountChunk::BitCountChunk(b length, bool data) :
     Chunk(),
     length(length),
     data(data)
 {
-    CHUNK_CHECK_USAGE(length >= bit(0), "length is invalid");
+    CHUNK_CHECK_USAGE(length >= b(0), "length is invalid");
 }
 
-const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
+    b chunkLength = getChunkLength();
+    CHUNK_CHECK_USAGE(b(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+    if (length == b(0) || (iterator.getPosition() == chunkLength && length == b(-1))) {
         if (predicate == nullptr || predicate(nullptr))
             return nullptr;
     }
     // 2. peeking the whole part returns this chunk
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+    if (iterator.getPosition() == b(0) && (length == b(-1) || length == chunkLength)) {
         auto result = const_cast<BitCountChunk *>(this)->shared_from_this();
         if (predicate == nullptr || predicate(result))
             return result;
     }
     // 3. peeking without conversion returns a BitCountChunk
     if (converter == nullptr) {
-        auto result = std::make_shared<BitCountChunk>(length == bit(-1) ? chunkLength - iterator.getPosition() : length);
+        auto result = std::make_shared<BitCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
         result->markImmutable();
         return result;
     }
@@ -64,17 +64,17 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     return converter(const_cast<BitCountChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-const Ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
+const Ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
-    bit chunkLength = chunk->getChunkLength();
-    bit resultLength = length == bit(-1) ? chunkLength - offset : length;
-    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
+    b chunkLength = chunk->getChunkLength();
+    b resultLength = length == b(-1) ? chunkLength - offset : length;
+    CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
     return std::make_shared<BitCountChunk>(resultLength);
 }
 
-void BitCountChunk::setLength(bit length)
+void BitCountChunk::setLength(b length)
 {
-    CHUNK_CHECK_USAGE(length >= bit(0), "length is invalid");
+    CHUNK_CHECK_USAGE(length >= b(0), "length is invalid");
     handleChange();
     this->length = length;
 }
@@ -111,16 +111,16 @@ void BitCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::removeFromBeginning(bit length)
+void BitCountChunk::removeFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     this->length -= length;
 }
 
-void BitCountChunk::removeFromEnd(bit length)
+void BitCountChunk::removeFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     this->length -= length;
 }

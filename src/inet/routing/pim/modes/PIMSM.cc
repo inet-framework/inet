@@ -1406,7 +1406,7 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH
+    msg->setChunkLength(B(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 4
             + ENCODED_GROUP_ADDRESS_LENGTH
@@ -1442,7 +1442,7 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH
+    msg->setChunkLength(B(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 4
             + ENCODED_GROUP_ADDRESS_LENGTH
@@ -1470,7 +1470,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         msg->setType(Register);
         msg->setN(true);
         msg->setB(false);
-        msg->setChunkLength(byte(PIM_HEADER_LENGTH + 4));
+        msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
         msg->markImmutable();
         pk->pushHeader(msg);
 
@@ -1503,10 +1503,10 @@ void PIMSM::sendPIMRegister(Packet *ipv4Packet, IPv4Address dest, int outInterfa
     msg->setN(false);
     msg->setB(false);
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 4));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
     msg->markImmutable();
 
-    pk->append(ipv4Packet->peekDataAt(bit(0), ipv4Packet->getDataLength()));
+    pk->append(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
     pk->pushHeader(msg);
 
     emit(sentRegisterPkSignal, pk);
@@ -1527,7 +1527,7 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     msg->setSourceAddress(multSource);
     msg->setGroupAddress(multGroup);
 
-    msg->setChunkLength(byte(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
+    msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
     msg->markImmutable();
     pk->pushHeader(msg);
 
@@ -1550,7 +1550,7 @@ void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric me
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setChunkLength(byte(PIM_HEADER_LENGTH
+    pkt->setChunkLength(B(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));

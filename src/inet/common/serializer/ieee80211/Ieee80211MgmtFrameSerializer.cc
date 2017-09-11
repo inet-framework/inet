@@ -66,7 +66,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         unsigned int length = strlen(SSID);
         stream.writeByte(0);    //FIXME dummy, what is it?
         stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, byte(length));
+        stream.writeBytes((uint8_t *)SSID, B(length));
         // 2    Supported rates
         const Ieee80211SupportedRatesElement& supportedRates = probeRequestFrame->getSupportedRates();
         stream.writeByte(1);
@@ -93,7 +93,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         unsigned int length = strlen(SSID);
         stream.writeByte(0);    //FIXME dummy, what is it?
         stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, byte(length));
+        stream.writeBytes((uint8_t *)SSID, B(length));
         // 4    Supported rates
         const Ieee80211SupportedRatesElement& supportedRates = associationRequestFrame->getSupportedRates();
         stream.writeByte(1);
@@ -125,7 +125,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         //FIXME buffer.writeByte(buf + packetLength, ???);
         stream.writeByte(0);    //FIXME
         stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, byte(length));
+        stream.writeBytes((uint8_t *)SSID, B(length));
         // 5    Supported rates
         const Ieee80211SupportedRatesElement& supportedRates = reassociationRequestFrame->getSupportedRates();
         stream.writeByte(1);
@@ -201,7 +201,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         unsigned int length = strlen(SSID);
         stream.writeByte(0);    //FIXME
         stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, byte(length));
+        stream.writeBytes((uint8_t *)SSID, B(length));
         // 5    Supported rates
         stream.writeByte(1);
         stream.writeByte(beaconFrame->getSupportedRates().numRates);
@@ -246,7 +246,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         unsigned int length = strlen(SSID);
         stream.writeByte(0);    //FIXME
         stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, byte(length));
+        stream.writeBytes((uint8_t *)SSID, B(length));
         // 5      Supported rates
         stream.writeByte(1);
         stream.writeByte(probeResponseFrame->getSupportedRates().numRates);
@@ -314,7 +314,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
-            stream.readBytes((uint8_t *)SSID, byte(length));
+            stream.readBytes((uint8_t *)SSID, B(length));
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
@@ -334,7 +334,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
-            stream.readBytes((uint8_t *)SSID, byte(length));
+            stream.readBytes((uint8_t *)SSID, B(length));
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
@@ -358,7 +358,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
-            stream.readBytes((uint8_t *)SSID, byte(length));
+            stream.readBytes((uint8_t *)SSID, B(length));
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
@@ -416,7 +416,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
-            stream.readBytes((uint8_t *)SSID, byte(length));
+            stream.readBytes((uint8_t *)SSID, B(length));
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
@@ -442,7 +442,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
-            stream.readBytes((uint8_t *)SSID, byte(length));
+            stream.readBytes((uint8_t *)SSID, B(length));
             SSID[length] = '\0';
             frame->setSSID(SSID);
 

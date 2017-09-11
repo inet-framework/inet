@@ -59,32 +59,32 @@ class IGMPQuery extends IGMPMessage
 
 class IGMPv1Query extends IGMPQuery
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
 }
 
 class IGMPv1Report extends IGMPMessage
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
     type = IGMPV1_MEMBERSHIP_REPORT;
     IPv4Address groupAddress;
 }
 
 class IGMPv2Query extends IGMPQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
     simtime_t maxRespTime;      // stored in `code` in units of 1/10 second, 0.1-25.5s
 }
 
 class IGMPv2Report extends IGMPMessage
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
     type = IGMPV2_MEMBERSHIP_REPORT;
     IPv4Address groupAddress;
 }
 
 class IGMPv2Leave extends IGMPMessage
 {
-    chunkLength = byte(8);
+    chunkLength = B(8);
     type = IGMPV2_LEAVE_GROUP;
     IPv4Address groupAddress;
 }

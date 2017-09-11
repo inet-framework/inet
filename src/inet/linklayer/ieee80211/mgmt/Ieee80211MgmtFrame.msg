@@ -156,7 +156,7 @@ class Ieee80211MgmtFrame extends FieldsChunk
 //
 class Ieee80211AuthenticationFrame extends Ieee80211MgmtFrame
 {
-    chunkLength = byte(6); // add 2+len bytes for challenge text if present
+    chunkLength = B(6); // add 2+len bytes for challenge text if present
     unsigned short sequenceNumber;
     int statusCode @enum(Ieee80211StatusCode);
     bool isLast; // not part of the standard; see above
@@ -167,7 +167,7 @@ class Ieee80211AuthenticationFrame extends Ieee80211MgmtFrame
 //
 class Ieee80211DeauthenticationFrame extends Ieee80211MgmtFrame
 {
-    chunkLength = byte(2);
+    chunkLength = B(2);
     int reasonCode @enum(Ieee80211ReasonCode);
 }
 
@@ -176,7 +176,7 @@ class Ieee80211DeauthenticationFrame extends Ieee80211MgmtFrame
 //
 class Ieee80211DisassociationFrame extends Ieee80211MgmtFrame
 {
-    chunkLength = byte(2);
+    chunkLength = B(2);
     int reasonCode @enum(Ieee80211ReasonCode);
 }
 
