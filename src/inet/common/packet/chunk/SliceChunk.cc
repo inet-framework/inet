@@ -46,6 +46,11 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
 #endif
 }
 
+void SliceChunk::forEachChild(cVisitor *v)
+{
+    v->visit(const_cast<Chunk *>(chunk.get()));
+}
+
 const Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();

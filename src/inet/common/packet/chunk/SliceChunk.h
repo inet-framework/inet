@@ -64,6 +64,8 @@ class INET_API SliceChunk : public Chunk
     virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
     //@}
 
+    virtual void forEachChild(cVisitor *v) override;
+
     /** @name Field accessor functions */
     //@{
     const Ptr<Chunk>& getChunk() const { return chunk; }
