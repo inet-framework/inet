@@ -63,27 +63,32 @@ void EtherEncap::initialize(int stage)
 
 void EtherEncap::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("lowerLayerIn")) {
+    if (msg->arrivedOn("upperLayerIn")) {
+        EV_INFO << "Received " << msg << " from upper layer." << endl;
+        // from higher layer
+        if (msg->isPacket())
+            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
+        else
+            processCommandFromHigherLayer(msg);
+    }
+    else if (msg->arrivedOn("lowerLayerIn")) {
         EV_INFO << "Received " << msg << " from lower layer." << endl;
         processFrameFromMAC(check_and_cast<Packet *>(msg));
     }
-    else {
-        EV_INFO << "Received " << msg << " from upper layer." << endl;
-        // from higher layer
-        switch (msg->getKind()) {
-            case IEEE802CTRL_DATA:
-            case 0:    // default message kind (0) is also accepted
-                processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
-                break;
+    else
+        throw cRuntimeError("Unknown message");
+}
 
-            case IEEE802CTRL_SENDPAUSE:
-                // higher layer want MAC to send PAUSE frame
-                handleSendPause(msg);
-                break;
+void EtherEncap::processCommandFromHigherLayer(cMessage *msg)
+{
+    switch (msg->getKind()) {
+        case IEEE802CTRL_SENDPAUSE:
+            // higher layer want MAC to send PAUSE frame
+            handleSendPause(msg);
+            break;
 
-            default:
-                throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
-        }
+        default:
+            throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
     }
 }
 
@@ -108,7 +113,6 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV_DETAIL << "Encapsulating higher layer packet `" << packet->getName() << "' for MAC\n";
 
-    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     auto protocolTag = packet->getTag<PacketProtocolTag>();
     const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     int typeOrLength = 0;
@@ -155,6 +159,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
         packet->insertHeader(llcHeader);
         typeOrLength = packet->getByteLength();
     }
+    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     const auto& ethHeader = makeShared<EthernetMacHeader>();
     ethHeader->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
     ethHeader->setDest(macAddressReq->getDestAddress());
