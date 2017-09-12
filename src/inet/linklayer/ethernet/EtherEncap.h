@@ -21,13 +21,14 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
 namespace inet {
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EtherEncap : public cSimpleModule
+class INET_API EtherEncap : public Ieee8022Llc
 {
   protected:
     EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
@@ -54,11 +55,12 @@ class INET_API EtherEncap : public cSimpleModule
 
     virtual void refreshDisplay() const override;
 
+    virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
+
   public:
     static void addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
 
     static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
-    static const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
 };
 
 } // namespace inet

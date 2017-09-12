@@ -113,50 +113,20 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV_DETAIL << "Encapsulating higher layer packet `" << packet->getName() << "' for MAC\n";
 
-    auto protocolTag = packet->getTag<PacketProtocolTag>();
-    const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
-    int typeOrLength = 0;
-    int ethType = -1;
-    int snapType = -1;
-    if (protocol) {
-        ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
-        if (ethType == -1) {
-            snapType = ProtocolGroup::snapOui.findProtocolNumber(protocol);
+    int typeOrLength = -1;
+    if (!useSNAP) {
+        auto protocolTag = packet->getTag<PacketProtocolTag>();
+        if (protocolTag) {
+            const Protocol *protocol = protocolTag->getProtocol();
+            if (protocol) {
+                int ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
+                if (ethType != -1)
+                    typeOrLength = ethType;
+            }
         }
     }
-
-    if ((ethType != -1 && useSNAP) || snapType != -1) {
-        const auto& snapHeader = makeShared<Ieee8022LlcSnapHeader>();
-        if (ethType != -1) {
-            snapHeader->setOui(0);
-            snapHeader->setProtocolId(ethType);
-        }
-        else {
-            snapHeader->setOui(snapType);
-            snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
-        }
-        packet->insertHeader(snapHeader);
-
-        typeOrLength = packet->getByteLength();
-    }
-    else if (ethType != -1) {
-        typeOrLength = ethType;
-    }
-    else {
-        const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-        int llctype = ProtocolGroup::ieee8022llcprotocol.findProtocolNumber(protocol);
-        if (llctype != -1) {
-            llcHeader->setSsap((llctype >> 16) & 0xFF);
-            llcHeader->setDsap((llctype >> 8) & 0xFF);
-            llcHeader->setControl((llctype) & 0xFF);
-        }
-        else {
-            auto sapTag = packet->getMandatoryTag<Ieee802SapReq>();
-            llcHeader->setSsap(sapTag->getSsap());
-            llcHeader->setDsap(sapTag->getDsap());
-            llcHeader->setControl(3);       //TODO get from sapTag
-        }
-        packet->insertHeader(llcHeader);
+    if (typeOrLength == -1) {
+        Ieee8022Llc::encapsulate(packet);
         typeOrLength = packet->getByteLength();
     }
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
@@ -219,35 +189,13 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
 
     // remove llc header if possible
     if (isIeee802_3Header(*ethHeader)) {
-        const auto& llcHeader = packet->popHeader<Ieee8022LlcHeader>();
-
-        auto sapInd = packet->ensureTag<Ieee802SapInd>();
-        sapInd->setSsap(llcHeader->getSsap());
-        sapInd->setDsap(llcHeader->getDsap());
-        //TODO control?
-
-        int32_t ssapDsapCtrl = (llcHeader->getSsap() << 16) | (llcHeader->getDsap() << 8) | (llcHeader->getControl() & 0xFF);
-        if (ssapDsapCtrl == 0xAAAA03) {
-            // snap header
-            const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
-            if (snapHeader == nullptr)
-                throw cRuntimeError("llc/snap error: llc header suggested snap header, but snap header is missing");
-            if (snapHeader->getOui() == 0) {
-                payloadProtocol = ProtocolGroup::ethertype.getProtocol(snapHeader->getProtocolId());
-            }
-            else {
-                payloadProtocol = ProtocolGroup::snapOui.getProtocol(snapHeader->getOui());
-            }
-        }
-        else {
-            payloadProtocol = ProtocolGroup::ieee8022llcprotocol.findProtocol(ssapDsapCtrl);    // do not use getProtocol
-        }
+        this->Ieee8022Llc::decapsulate(packet);
     }
     else if (isEth2Header(*ethHeader)) {
         payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
     }
 
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
     return ethHeader;
 }
 

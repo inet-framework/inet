@@ -130,6 +130,18 @@ void Ieee8021dRelay::broadcast(Packet *packet)
     delete packet;
 }
 
+namespace {
+    bool isBpdu(Packet *packet, const Ptr<const EthernetMacHeader>& hdr)
+    {
+        if (isIeee802_3Header(*hdr)) {
+            const auto& llc = packet->peekDataAt<Ieee8022LlcHeader>(hdr->getChunkLength());
+            return (llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
+        }
+        else
+            return false;
+    }
+}
+
 void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 {
     const auto& frame = packet->peekHeader<EthernetMacHeader>();
@@ -141,7 +153,10 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
     learn(frame->getSrc(), arrivalInterfaceId);
 
     // BPDU Handling
-    if (isStpAware && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED) {
+    if (isStpAware
+            && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress)
+            && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED
+            && isBpdu(packet, frame)) {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(packet);    // deliver to the STP/RSTP module
     }
@@ -232,9 +247,12 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    const auto& eth = EtherEncap::decapsulateMacLlcSnap(packet);
+    auto eth = EtherEncap::decapsulateMacHeader(packet);
+    ASSERT(isIeee802_3Header(*eth));
 
-    ASSERT(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::stp);
+    const auto& llc = packet->popHeader<Ieee8022LlcHeader>();
+    ASSERT(llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
     const auto& bpdu = packet->peekHeader<BPDU>();
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
