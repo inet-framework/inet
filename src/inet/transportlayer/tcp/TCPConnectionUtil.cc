@@ -511,7 +511,7 @@ void TCPConnection::sendSyn()
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
     updateRcvWnd();
@@ -530,7 +530,7 @@ void TCPConnection::sendSyn()
 void TCPConnection::sendSynAck()
 {
     // create segment
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
@@ -559,7 +559,7 @@ void TCPConnection::sendRst(uint32 seqNo)
 
 void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -575,7 +575,7 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
 
 void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -597,7 +597,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
 
 void TCPConnection::sendAck()
 {
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(state->snd_nxt);
@@ -617,7 +617,7 @@ void TCPConnection::sendAck()
 
 void TCPConnection::sendFin()
 {
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
 
     // Note: ACK bit *must* be set for both FIN and FIN+ACK. What makes
     // the difference for FIN+ACK is that its ackNo acks the remote TCP's FIN.
@@ -657,7 +657,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
-    const auto& tcpseg_temp = std::make_shared<TcpHeader>();
+    const auto& tcpseg_temp = makeShared<TcpHeader>();
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tcpseg_temp);
     uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
@@ -671,7 +671,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     Packet *packet = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(state->snd_nxt);
     ASSERT(tcpseg != nullptr);
 

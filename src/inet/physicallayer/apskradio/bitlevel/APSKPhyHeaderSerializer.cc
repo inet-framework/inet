@@ -27,7 +27,7 @@ Register_Serializer(APSKPhyHeader, APSKPhyHeaderSerializer);
 
 void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
-    const auto& phyHeader = std::static_pointer_cast<const APSKPhyHeader>(chunk);
+    const auto& phyHeader = staticPtrCast<const APSKPhyHeader>(chunk);
     stream.writeUint16Be(0);
     stream.writeUint16Be(phyHeader->getLengthField());
     auto crcMode = phyHeader->getCrcMode();
@@ -38,7 +38,7 @@ void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 
 const Ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto phyHeader = std::make_shared<APSKPhyHeader>();
+    auto phyHeader = makeShared<APSKPhyHeader>();
     stream.readUint16Be();
     phyHeader->setLengthField(stream.readUint16Be());
     auto crc = stream.readUint16Be();

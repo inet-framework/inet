@@ -102,7 +102,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         s << msg->getName() << "-resp-" << k;
 
         Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
-        const auto& outPayload = std::make_shared<EtherAppResp>();
+        const auto& outPayload = makeShared<EtherAppResp>();
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
         outPayload->markImmutable();

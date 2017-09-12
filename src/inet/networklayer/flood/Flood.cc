@@ -189,7 +189,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 decapsulate(packet);
                 auto packetCopy = new Packet();
                 packetCopy->append(packet->peekDataAt(b(0), packet->getDataLength()));
-                auto floodHeaderCopy = std::static_pointer_cast<FloodHeader>(floodHeader->dupShared());
+                auto floodHeaderCopy = staticPtrCast<FloodHeader>(floodHeader->dupShared());
                 floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
                 floodHeaderCopy->markImmutable();
                 packetCopy->pushHeader(floodHeaderCopy);
@@ -279,7 +279,7 @@ void Flood::encapsulate(Packet *appPkt)
     EV << "in encaps...\n";
 
     auto cInfo = appPkt->removeControlInfo();
-    auto pkt = std::make_shared<FloodHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
+    auto pkt = makeShared<FloodHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
     auto hopLimitReq = appPkt->removeTag<HopLimitReq>();

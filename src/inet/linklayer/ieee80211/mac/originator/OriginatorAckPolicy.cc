@@ -33,7 +33,7 @@ void OriginatorAckPolicy::initialize(int stage)
 
 bool OriginatorAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header)) {
+    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
         return !dataOrMgmtHeader->getReceiverAddress().isMulticast(); // TODO: + mgmt with NoAck check
     }
     return false;

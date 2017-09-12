@@ -112,7 +112,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
     auto etherTypeTag = msg->getTag<EtherTypeReq>();
 
     if (useSNAP) {
-        const auto& snapFrame = std::make_shared<EtherFrameWithSNAP>();
+        const auto& snapFrame = makeShared<EtherFrameWithSNAP>();
 
         snapFrame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
         snapFrame->setDest(macAddressReq->getDestAddress());
@@ -124,7 +124,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
         msg->pushHeader(snapFrame);
     }
     else {
-        const auto& eth2Frame = std::make_shared<EthernetIIFrame>();
+        const auto& eth2Frame = makeShared<EthernetIIFrame>();
 
         eth2Frame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
         eth2Frame->setDest(macAddressReq->getDestAddress());
@@ -144,12 +144,12 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
 {
     int64_t paddingLength = requiredMinBytes - ETHER_FCS_BYTES - packet->getByteLength();
     if (paddingLength > 0) {
-        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        const auto& ethPadding = makeShared<EthernetPadding>();
         ethPadding->setChunkLength(B(paddingLength));
         ethPadding->markImmutable();
         packet->pushTrailer(ethPadding);
     }
-    const auto& ethFcs = std::make_shared<EthernetFcs>();
+    const auto& ethFcs = makeShared<EthernetFcs>();
     ethFcs->setFcsMode(fcsMode);
     //FIXME calculate Fcs if needed
     ethFcs->markImmutable();
@@ -221,7 +221,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     char framename[40];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     auto packet = new Packet(framename);
-    const auto& frame = std::make_shared<EtherPauseFrame>();
+    const auto& frame = makeShared<EtherPauseFrame>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;

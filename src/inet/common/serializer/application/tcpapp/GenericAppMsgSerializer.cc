@@ -26,7 +26,7 @@ Register_Serializer(GenericAppMsg, GenericAppMsgSerializer);
 void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
-    const auto& msg = std::static_pointer_cast<const GenericAppMsg>(chunk);
+    const auto& msg = staticPtrCast<const GenericAppMsg>(chunk);
     stream.writeUint32Be(B(msg->getChunkLength()).get());
     stream.writeUint32Be(msg->getExpectedReplyLength());
     stream.writeUint64Be(SimTime(msg->getReplyDelay()).raw());
@@ -40,7 +40,7 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 const Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
-    auto msg = std::make_shared<GenericAppMsg>();
+    auto msg = makeShared<GenericAppMsg>();
     B dataLength = B(stream.readUint32Be());
     msg->setExpectedReplyLength(stream.readUint32Be());
     int64_t delayraw = stream.readUint64Be();

@@ -574,7 +574,7 @@ void IGMPv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
 {
     if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("IGMPv3 query");
-        const auto& msg = std::make_shared<IGMPv3Query>();
+        const auto& msg = makeShared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTime(maxRespTime);
         msg->setChunkLength(B(12));
@@ -602,7 +602,7 @@ void IGMPv3::sendGroupSpecificQuery(RouterGroupData *groupData)
 
     if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("IGMPv3 query");
-        const auto& msg = std::make_shared<IGMPv3Query>();
+        const auto& msg = makeShared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTime(lastMemberQueryInterval);
@@ -628,7 +628,7 @@ void IGMPv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
 
     if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("IGMPv3 query");
-        const auto& msg = std::make_shared<IGMPv3Query>();
+        const auto& msg = makeShared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTime(lastMemberQueryInterval);
@@ -698,7 +698,7 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
 
     //HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     Packet *outPacket = new Packet("IGMPv3 report");
-    const auto& report = std::make_shared<IGMPv3Report>();
+    const auto& report = makeShared<IGMPv3Report>();
     unsigned int byteLength = 8;   // IGMPv3Report header size
     report->setType(IGMPV3_MEMBERSHIP_REPORT);
     int counter = 0;
@@ -986,7 +986,7 @@ void IGMPv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
 {
     EV << "IGMPv3: sending Membership Report on iface=" << ie->getName() << "\n";
     Packet *packet = new Packet("IGMPv3 report");
-    const auto& msg = std::make_shared<IGMPv3Report>();
+    const auto& msg = makeShared<IGMPv3Report>();
     unsigned int byteLength = 8;   // IGMPv3Report header size
     msg->setType(IGMPV3_MEMBERSHIP_REPORT);
     msg->setGroupRecordArraySize(records.size());

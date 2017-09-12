@@ -79,11 +79,11 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue
         auto dataPacket = check_and_cast<Packet *>(*it);
         const auto& dataHeader = dataPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
         const auto& dataTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
-        if (!std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataHeader))
+        if (!dynamicPtrCast<const Ieee80211DataHeader>(dataHeader))
             break;
         if (!firstFrame)
             firstFrame = dataHeader;
-        if (!isEligible(std::static_pointer_cast<const Ieee80211DataHeader>(dataHeader), firstPacket, std::static_pointer_cast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get()))
+        if (!isEligible(staticPtrCast<const Ieee80211DataHeader>(dataHeader), firstPacket, staticPtrCast<const Ieee80211DataHeader>(firstFrame), B(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
         aMsduLength += dataPacket->getTotalLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header

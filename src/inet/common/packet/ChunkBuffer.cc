@@ -108,7 +108,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         }
         else {
             // merge as a sequence
-            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            auto sequenceChunk = makeShared<SequenceChunk>();
             sequenceChunk->insertAtEnd(previousRegion.data);
             sequenceChunk->insertAtEnd(nextRegion.data);
             sequenceChunk->markImmutable();
@@ -162,7 +162,7 @@ void ChunkBuffer::clear(b offset, b length)
             return;
         }
     }
-    auto data = std::make_shared<ByteCountChunk>(length);
+    auto data = makeShared<ByteCountChunk>(length);
     Region clearedRegion(offset, data);
     sliceRegions(clearedRegion);
 }

@@ -66,11 +66,11 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
     // which an acknowledgment is expected.
     int startingSequenceNumber = -1;
     Tid tid = -1;
-    if (auto basicReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         tid = basicReq->getTidInfo();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
     }
-    else if (auto compressedReq = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
+    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
         tid = compressedReq->getTidInfo();
         startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }

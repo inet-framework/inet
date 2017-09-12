@@ -570,7 +570,7 @@ void IGMPv2::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double 
             EV_INFO << "IGMPv2: sending Membership Query for group=" << groupAddr << " on iface=" << ie->getName() << "\n";
 
         Packet *packet = new Packet("IGMPv2 query");
-        const auto& msg = std::make_shared<IGMPv2Query>();
+        const auto& msg = makeShared<IGMPv2Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespTime(maxRespTime);
@@ -593,7 +593,7 @@ void IGMPv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
 
     EV_INFO << "IGMPv2: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     Packet *packet = new Packet("IGMPv2 report");
-    const auto& msg = std::make_shared<IGMPv2Report>();
+    const auto& msg = makeShared<IGMPv2Report>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
     msg->markImmutable();
@@ -608,7 +608,7 @@ void IGMPv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
 
     EV_INFO << "IGMPv2: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     Packet *packet = new Packet("IGMPv2 leave");
-    const auto& msg = std::make_shared<IGMPv2Leave>();
+    const auto& msg = makeShared<IGMPv2Leave>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
     msg->markImmutable();
@@ -723,7 +723,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, Packet *packet)
     numQueriesRecv++;
 
     const IPv4Address& groupAddr = igmpQry->getGroupAddress();
-    const Ptr<const IGMPv2Query>& v2Query = std::dynamic_pointer_cast<const IGMPv2Query>(igmpQry);
+    const Ptr<const IGMPv2Query>& v2Query = dynamicPtrCast<const IGMPv2Query>(igmpQry);
     simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
 
     if (groupAddr.isUnspecified()) {

@@ -209,34 +209,34 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
 
     EV_INFO << "Processing of MIPv6 related mobility message" << endl;
 
-    if (const auto& bu = std::dynamic_pointer_cast<const BindingUpdate>(mipv6Msg)) {
+    if (const auto& bu = dynamicPtrCast<const BindingUpdate>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING UPDATE (BU)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBUMessage()>>>>>>>\n";
         processBUMessage(inPacket, bu);
     }
-    else if (const auto& ba = std::dynamic_pointer_cast<const BindingAcknowledgement>(mipv6Msg)) {
+    else if (const auto& ba = dynamicPtrCast<const BindingAcknowledgement>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING ACKNOWLEDGEMENT (BA)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBAMessage()>>>>>>>\n";
         processBAMessage(inPacket, ba);
     }
     // 28.08.07 - CB
-    else if (const auto& hoti = std::dynamic_pointer_cast<const HomeTestInit>(mipv6Msg)) {
+    else if (const auto& hoti = dynamicPtrCast<const HomeTestInit>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST INIT (HoTI)" << endl;
         processHoTIMessage(inPacket, hoti);
     }
-    else if (const auto& coti = std::dynamic_pointer_cast<const CareOfTestInit>(mipv6Msg)) {
+    else if (const auto& coti = dynamicPtrCast<const CareOfTestInit>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST INIT (CoTI)" << endl;
         processCoTIMessage(inPacket, coti);
     }
-    else if (const auto& ht = std::dynamic_pointer_cast<const HomeTest>(mipv6Msg)) {
+    else if (const auto& ht = dynamicPtrCast<const HomeTest>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST (HoT)" << endl;
         processHoTMessage(inPacket, ht);
     }
-    else if (const auto& cot = std::dynamic_pointer_cast<const CareOfTest>(mipv6Msg)) {
+    else if (const auto& cot = dynamicPtrCast<const CareOfTest>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST (CoT)" << endl;
         processCoTMessage(inPacket, cot);
     }
-    else if (const auto& brr = std::dynamic_pointer_cast<const BindingRefreshRequest>(mipv6Msg)) {
+    else if (const auto& brr = dynamicPtrCast<const BindingRefreshRequest>(mipv6Msg)) {
         EV_INFO << "Message recognised as Binding Refresh Request" << endl;
         processBRRMessage(inPacket, brr);
     }
@@ -486,7 +486,7 @@ void xMIPv6::createAndSendBUMessage(const IPv6Address& dest, InterfaceEntry *ie,
         CoA = ie->ipv6Data()->getPreferredAddress(); // in case a CoA is not availabile (e.g. returning home)
 
     auto packet = new Packet("Binding Update");
-    const auto& bu = std::make_shared<BindingUpdate>();
+    const auto& bu = makeShared<BindingUpdate>();
 
     /*11.7.1
        To register a care-of address or to extend the lifetime of an
@@ -1085,7 +1085,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
     // dest from the ctrlInfo as it is provided in the first two arguments
 
     auto packet = new Packet("Binding Acknowledgement");
-    const auto& ba = std::make_shared<BindingAcknowledgement>();
+    const auto& ba = makeShared<BindingAcknowledgement>();
     ba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
     ba->setStatus(baStatus);
     ba->setSequenceNumber(baSeq);    //this sequence number will correspond to the ACKed BU
@@ -1485,7 +1485,7 @@ void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const IPv6A
     // check if there already exists a testInitTimer entry for this key
     int msgType;
 
-    if (std::dynamic_pointer_cast<HomeTestInit>(testInit))
+    if (dynamicPtrCast<HomeTestInit>(testInit))
         msgType = KEY_HI;
     else
         msgType = KEY_CI;
@@ -1538,7 +1538,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
        entries.*/
 
     // retrieve the cookie from the Test Init message
-    if (auto homeTestInit = std::dynamic_pointer_cast<HomeTestInit>(tiIfEntry->testInitMsg)) {
+    if (auto homeTestInit = dynamicPtrCast<HomeTestInit>(tiIfEntry->testInitMsg)) {
         // moved the following two lines to here
         IPv6Address HoA = ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::HoA);
         ASSERT(!HoA.isUnspecified());
@@ -1558,7 +1558,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     }
     else {
         // must be of type CareOfTestInit
-        auto careOfTestInit = CHK(std::dynamic_pointer_cast<CareOfTestInit>(tiIfEntry->testInitMsg));
+        auto careOfTestInit = CHK(dynamicPtrCast<CareOfTestInit>(tiIfEntry->testInitMsg));
               // moved the following two lines to here
         IPv6Address CoA = ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA);
         ASSERT(!CoA.isUnspecified());
@@ -1696,7 +1696,7 @@ void xMIPv6::resetBUIfEntry(const IPv6Address& dest, int interfaceID, simtime_t 
 
 void xMIPv6::createAndSendHoTIMessage(const IPv6Address& cnDest, InterfaceEntry *ie)
 {
-    const auto& HoTI = std::make_shared<HomeTestInit>();
+    const auto& HoTI = makeShared<HomeTestInit>();
     HoTI->setMobilityHeaderType(HOME_TEST_INIT);
     HoTI->setHomeInitCookie(HO_COOKIE);
     // setting message size
@@ -1707,7 +1707,7 @@ void xMIPv6::createAndSendHoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
 
 void xMIPv6::createAndSendCoTIMessage(const IPv6Address& cnDest, InterfaceEntry *ie)
 {
-    const auto& CoTI = std::make_shared<CareOfTestInit>();
+    const auto& CoTI = makeShared<CareOfTestInit>();
     CoTI->setMobilityHeaderType(CARE_OF_TEST_INIT);
     CoTI->setCareOfInitCookie(CO_COOKIE);
     // setting message size
@@ -1723,7 +1723,7 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
     IPv6Address HoA = inPacket->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6();
 
     auto outPacket = new Packet("HoT");
-    const auto& homeTest = std::make_shared<HomeTest>();
+    const auto& homeTest = makeShared<HomeTest>();
     homeTest->setMobilityHeaderType(HOME_TEST);
     homeTest->setHomeInitCookie(homeTestInit->getHomeInitCookie());
     homeTest->setHomeKeyGenToken(bc->generateHomeToken(HoA, 0));    // TODO nonce
@@ -1747,7 +1747,7 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit
     IPv6Address coa = inPacket->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6();
 
     auto outPacket = new Packet("CoT");
-    const auto& cot = std::make_shared<CareOfTest>();
+    const auto& cot = makeShared<CareOfTest>();
     cot->setMobilityHeaderType(CARE_OF_TEST);
     cot->setCareOfInitCookie(coti->getCareOfInitCookie());
     cot->setCareOfKeyGenToken(bc->generateCareOfToken(coa, 0));    // TODO nonce
@@ -2164,7 +2164,7 @@ void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beS
     EV_TRACE << "\n<<<<<<<<< Entered createAndSendBEMessage() Function>>>>>>>\n";
 
     auto packet = new Packet("BError");
-    const auto& be = std::make_shared<BindingError>();
+    const auto& be = makeShared<BindingError>();
     be->setMobilityHeaderType(BINDING_ERROR);
     be->setStatus(beStatus);
 
@@ -2441,7 +2441,7 @@ void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie
 {
     EV_TRACE << "\n<<======THIS IS THE ROUTINE FOR CREATING AND SENDING BRR MESSAGE =====>>\n";
     auto outPacket = new Packet("Binding Refresh Request");
-    const auto& brr = std::make_shared<BindingRefreshRequest>();
+    const auto& brr = makeShared<BindingRefreshRequest>();
 
     /*6.1.2
        The Binding Refresh Request message uses the MH Type value 0.  When

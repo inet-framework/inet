@@ -701,7 +701,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 void IPv6::handleReceivedICMP(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<Icmpv6Header>();
-    if (std::dynamic_pointer_cast<const IPv6NDMessage>(icmpHeader) != nullptr) {
+    if (dynamicPtrCast<const IPv6NDMessage>(icmpHeader) != nullptr) {
         EV_INFO << "Neighbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");
     }
@@ -740,7 +740,7 @@ void IPv6::decapsulate(Packet *packet)
 
 void IPv6::encapsulate(Packet *transportPacket)
 {
-    auto ipv6Header = std::make_shared<Ipv6Header>(); // TODO: transportPacket->getName());
+    auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
     L3AddressReq *addresses = transportPacket->removeMandatoryTag<L3AddressReq>();
     IPv6Address src = addresses->getSrcAddress().toIPv6();
@@ -821,7 +821,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
 
         // TODO: factor out
         packet->removeFromBeginning(ipv6Header->getChunkLength());
-        auto ipv6HeaderCopy = std::static_pointer_cast<Ipv6Header>(ipv6Header->dupShared());
+        auto ipv6HeaderCopy = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
         // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
         ipv6HeaderCopy->setSrcAddress(srcAddr);
         ipv6HeaderCopy->markImmutable();
@@ -879,7 +879,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         if (lastFragment)
             curFragName += "-last";
         Packet *fragPk = new Packet(curFragName.c_str());
-        const auto& fragHdr = std::static_pointer_cast<Ipv6Header>(ipv6Header->dupShared());
+        const auto& fragHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
         auto *fh = new Ipv6FragmentHeader();
         fh->setIdentification(identification);
         fh->setFragmentOffset(offset);

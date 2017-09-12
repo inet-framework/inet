@@ -825,7 +825,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         }
 
         ASSERT(fragment->getByteLength() == 0);
-        const auto& fraghdr = std::make_shared<Ipv4Header>(*ipv4Header.get()->dup());
+        const auto& fraghdr = makeShared<Ipv4Header>(*ipv4Header.get()->dup());
         const auto& fragData = packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength));
         ASSERT(B(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->append(fragData);
@@ -850,7 +850,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
 void IPv4::encapsulate(Packet *transportPacket)
 {
-    const auto& ipv4Header = std::make_shared<Ipv4Header>();
+    const auto& ipv4Header = makeShared<Ipv4Header>();
 
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
     IPv4Address src = l3AddressReq->getSrcAddress().toIPv4();

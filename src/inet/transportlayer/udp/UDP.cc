@@ -383,7 +383,7 @@ void UDP::processPacketFromApp(Packet *packet)
         l3Protocol = &Protocol::gnp;
     }
 
-    auto udpHeader = std::make_shared<UdpHeader>();
+    auto udpHeader = makeShared<UdpHeader>();
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
@@ -1326,7 +1326,7 @@ bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
 
 uint16_t UDP::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes)
 {
-    auto pseudoHeader = std::make_shared<TransportPseudoHeader>();
+    auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());

@@ -49,7 +49,7 @@ simtime_t RecipientQoSAckPolicy::computeAckDuration(Packet *packet, const Ptr<co
 bool RecipientQoSAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
     // TODO: add mgmt frame NoAck check
-    if (auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header))
+    if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
         if (dataHeader->getAckPolicy() != NORMAL_ACK)
             return false;
     return !header->getReceiverAddress().isMulticast();
@@ -70,7 +70,7 @@ bool RecipientQoSAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 //
 bool RecipientQoSAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
-    if (std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         return agreement != nullptr;
         // TODO: The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.

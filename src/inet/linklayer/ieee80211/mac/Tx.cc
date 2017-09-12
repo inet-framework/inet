@@ -61,7 +61,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     take(packet);
     const auto& h = packet->removeHeader<Ieee80211MacHeader>();
-    if (auto twoAddressHeader = std::dynamic_pointer_cast<Ieee80211TwoAddressHeader>(h))
+    if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(h))
         twoAddressHeader->setTransmitterAddress(mac->getAddress());
     packet->insertHeader(h);
     this->frame = packet->dup();

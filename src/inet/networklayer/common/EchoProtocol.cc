@@ -62,7 +62,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     // turn request into a reply
     const auto& echoReq = request->popHeader<EchoPacket>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
-    const auto& echoReply = std::make_shared<EchoPacket>();
+    const auto& echoReply = makeShared<EchoPacket>();
     echoReply->setChunkLength(echoReq->getChunkLength());
     echoReply->setType(ECHO_PROTOCOL_REPLY);
     echoReply->setIdentifier(echoReq->getIdentifier());

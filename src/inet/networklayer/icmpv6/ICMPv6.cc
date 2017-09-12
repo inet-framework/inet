@@ -87,31 +87,31 @@ void ICMPv6::processICMPv6Message(Packet *packet)
     }
     else {
         auto icmpv6msg = packet->popHeader<Icmpv6Header>();
-        if (std::dynamic_pointer_cast<const Icmpv6DestUnreachableMsg>(icmpv6msg)) {
+        if (dynamicPtrCast<const Icmpv6DestUnreachableMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const Icmpv6PacketTooBigMsg>(icmpv6msg)) {
+        else if (dynamicPtrCast<const Icmpv6PacketTooBigMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const Icmpv6TimeExceededMsg>(icmpv6msg)) {
+        else if (dynamicPtrCast<const Icmpv6TimeExceededMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (std::dynamic_pointer_cast<const Icmpv6ParamProblemMsg>(icmpv6msg)) {
+        else if (dynamicPtrCast<const Icmpv6ParamProblemMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
             errorOut(icmpv6msg);
             delete packet;
         }
-        else if (auto echoRequest = std::dynamic_pointer_cast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
+        else if (auto echoRequest = dynamicPtrCast<const Icmpv6EchoRequestMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
             processEchoRequest(packet, echoRequest);
         }
-        else if (auto echoReply = std::dynamic_pointer_cast<const Icmpv6EchoReplyMsg>(icmpv6msg)) {
+        else if (auto echoReply = dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpv6msg)) {
             EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
             processEchoReply(packet, echoReply);
         }
@@ -146,7 +146,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
     replyPacket->setName((std::string(requestPacket->getName()) + "-reply").c_str());
-    auto replyHeader = std::make_shared<Icmpv6EchoReplyMsg>();
+    auto replyHeader = makeShared<Icmpv6EchoReplyMsg>();
     replyHeader->setIdentifier(requestHeader->getIdentifier());
     replyHeader->setSeqNumber(requestHeader->getSeqNumber());
     replyHeader->markImmutable();
@@ -249,7 +249,7 @@ void ICMPv6::sendToIP(Packet *msg)
 
 Packet *ICMPv6::createDestUnreachableMsg(int code)
 {
-    auto errorMsg = std::make_shared<Icmpv6DestUnreachableMsg>();
+    auto errorMsg = makeShared<Icmpv6DestUnreachableMsg>();
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
     errorMsg->setCode(code);
     auto packet = new Packet("Dest Unreachable");
@@ -260,7 +260,7 @@ Packet *ICMPv6::createDestUnreachableMsg(int code)
 
 Packet *ICMPv6::createPacketTooBigMsg(int mtu)
 {
-    auto errorMsg = std::make_shared<Icmpv6PacketTooBigMsg>();
+    auto errorMsg = makeShared<Icmpv6PacketTooBigMsg>();
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
     errorMsg->setCode(0);    //Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
@@ -272,7 +272,7 @@ Packet *ICMPv6::createPacketTooBigMsg(int mtu)
 
 Packet *ICMPv6::createTimeExceededMsg(int code)
 {
-    auto errorMsg = std::make_shared<Icmpv6TimeExceededMsg>();
+    auto errorMsg = makeShared<Icmpv6TimeExceededMsg>();
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
     errorMsg->setCode(code);
     auto packet = new Packet("Time Exceeded");
@@ -283,7 +283,7 @@ Packet *ICMPv6::createTimeExceededMsg(int code)
 
 Packet *ICMPv6::createParamProblemMsg(int code)
 {
-    auto errorMsg = std::make_shared<Icmpv6ParamProblemMsg>();
+    auto errorMsg = makeShared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
     //TODO: What Pointer? section 3.4

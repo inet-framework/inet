@@ -262,14 +262,14 @@ void RTCP::createPacket()
     // if this rtcp end system is a sender (see SenderInformation::isSender() for
     // details) insert a sender report
     if (_senderInfo->isSender()) {
-        const auto& senderReportPacket = std::make_shared<RTCPSenderReportPacket>();
+        const auto& senderReportPacket = makeShared<RTCPSenderReportPacket>();
         SenderReport *senderReport = _senderInfo->senderReport(simTime());
         senderReportPacket->setSenderReport(*senderReport);
         delete senderReport;
         reportPacket = senderReportPacket;
     }
     else {
-        reportPacket = std::make_shared<RTCPReceiverReportPacket>();
+        reportPacket = makeShared<RTCPReceiverReportPacket>();
     }
     reportPacket->setSsrc(_senderInfo->getSsrc());
 
@@ -294,7 +294,7 @@ void RTCP::createPacket()
     }
 
     // insert source description items (at least common name)
-    const auto& sdesPacket = std::make_shared<RTCPSDESPacket>();
+    const auto& sdesPacket = makeShared<RTCPSDESPacket>();
 
     SDESChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
@@ -306,7 +306,7 @@ void RTCP::createPacket()
 
     // create rtcp app/bye packets if needed
     if (_leaveSession) {
-        const auto& byePacket = std::make_shared<RTCPByePacket>();
+        const auto& byePacket = makeShared<RTCPByePacket>();
         byePacket->setSsrc(_senderInfo->getSsrc());
         compoundPacket->insertTrailer(byePacket);
     }
@@ -372,19 +372,19 @@ void RTCP::processIncomingRTCPPacket(Packet *packet, IPv4Address address, int po
         if (rtcpPacket) {
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:
-                    processIncomingRTCPSenderReportPacket(CHK(std::dynamic_pointer_cast<const RTCPSenderReportPacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPSenderReportPacket(CHK(dynamicPtrCast<const RTCPSenderReportPacket>(rtcpPacket)), address, port);
                     break;
 
                 case RTCP_PT_RR:
-                    processIncomingRTCPReceiverReportPacket(CHK(std::dynamic_pointer_cast<const RTCPReceiverReportPacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPReceiverReportPacket(CHK(dynamicPtrCast<const RTCPReceiverReportPacket>(rtcpPacket)), address, port);
                     break;
 
                 case RTCP_PT_SDES:
-                    processIncomingRTCPSDESPacket(CHK(std::dynamic_pointer_cast<const RTCPSDESPacket>(rtcpPacket)), address, port, arrivalTime);
+                    processIncomingRTCPSDESPacket(CHK(dynamicPtrCast<const RTCPSDESPacket>(rtcpPacket)), address, port, arrivalTime);
                     break;
 
                 case RTCP_PT_BYE:
-                    processIncomingRTCPByePacket(CHK(std::dynamic_pointer_cast<const RTCPByePacket>(rtcpPacket)), address, port);
+                    processIncomingRTCPByePacket(CHK(dynamicPtrCast<const RTCPByePacket>(rtcpPacket)), address, port);
                     break;
 
                 default:

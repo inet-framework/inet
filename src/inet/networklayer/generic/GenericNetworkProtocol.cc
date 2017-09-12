@@ -447,7 +447,7 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
 
 void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
 {
-    auto header = std::make_shared<GenericDatagramHeader>();
+    auto header = makeShared<GenericDatagramHeader>();
     header->setChunkLength(B(par("headerLength").longValue()));
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
     L3Address src = l3AddressReq->getSrcAddress();

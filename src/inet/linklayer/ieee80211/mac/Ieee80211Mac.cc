@@ -147,13 +147,13 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 
 void Ieee80211Mac::handleMgmtPacket(Packet *packet)
 {
-    const auto& header = std::make_shared<Ieee80211MgmtHeader>();
+    const auto& header = makeShared<Ieee80211MgmtHeader>();
     header->setType(packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
     header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
     packet->insertHeader(header);
-    const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
+    const auto& trailer = makeShared<Ieee80211MacTrailer>();
     trailer->setFcsMode(fcsMode);
     packet->insertTrailer(trailer);
     processUpperFrame(packet, header);
@@ -235,7 +235,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
 {
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     auto destAddress = macAddressReq->getDestAddress();
-    const auto& header = std::make_shared<Ieee80211DataHeader>();
+    const auto& header = makeShared<Ieee80211DataHeader>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         header->setReceiverAddress(destAddress);
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
@@ -261,7 +261,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
         header->setTid(userPriorityReq->getUserPriority());
     }
     packet->insertHeader(header);
-    const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
+    const auto& trailer = makeShared<Ieee80211MacTrailer>();
     trailer->setFcsMode(fcsMode);
     packet->insertTrailer(trailer);
 }
@@ -289,7 +289,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
     else
         throw cRuntimeError("Unknown mode");
     if (header->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         int tid = dataHeader->getTid();
         if (tid < 8)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
@@ -346,7 +346,7 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
     if (!(header->getType() & 0x30))
         send(frame, "mgmtOut");
     else
-        ds->processDataFrame(frame, std::dynamic_pointer_cast<const Ieee80211DataHeader>(header));
+        ds->processDataFrame(frame, dynamicPtrCast<const Ieee80211DataHeader>(header));
 }
 
 void Ieee80211Mac::sendDownFrame(Packet *frame)

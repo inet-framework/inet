@@ -44,14 +44,14 @@ Register_Serializer(Ieee80211MacTrailer, Ieee80211MacTrailerSerializer);
 
 void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    if (auto ackFrame = std::dynamic_pointer_cast<const Ieee80211AckFrame>(chunk))
+    if (auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(chunk))
     {
         stream.writeByte(0xD4);
         stream.writeByte(0);
         stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ackFrame->getReceiverAddress());
     }
-    else if (auto rtsFrame = std::dynamic_pointer_cast<const Ieee80211RtsFrame>(chunk))
+    else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
@@ -59,14 +59,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeMACAddress(rtsFrame->getReceiverAddress());
         stream.writeMACAddress(rtsFrame->getTransmitterAddress());
     }
-    else if (auto ctsFrame = std::dynamic_pointer_cast<const Ieee80211CtsFrame>(chunk))
+    else if (auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(chunk))
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
         stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ctsFrame->getReceiverAddress());
     }
-    else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(chunk))
+    else if (auto dataOrMgmtFrame = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(chunk))
     {
         uint8_t type = dataOrMgmtFrame->getType();
         stream.writeByte(((type & 0x0F) << 4) | ((type & 0x30) >> 2));  //without Qos=0x08, with Qos=0x88
@@ -84,7 +84,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
-        if (auto dataFrame = std::dynamic_pointer_cast<const Ieee80211DataHeader>(chunk)) {
+        if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(chunk)) {
             if (dataFrame->getFromDS() && dataFrame->getToDS())
                 stream.writeMACAddress(dataFrame->getAddress4());
 
@@ -97,20 +97,20 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             }
         }
 
-        if (std::dynamic_pointer_cast<const Ieee80211ActionFrame>(chunk))
+        if (dynamicPtrCast<const Ieee80211ActionFrame>(chunk))
         {
             //type = ST_ACTION;
             // 1    Action
             // Last One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
     }
-    else if (auto msduSubframe = std::dynamic_pointer_cast<const Ieee80211MsduSubframeHeader>(chunk))
+    else if (auto msduSubframe = dynamicPtrCast<const Ieee80211MsduSubframeHeader>(chunk))
     {
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());
         stream.writeUint16Be(msduSubframe->getLength());
     }
-    else if (auto mpduSubframe = std::dynamic_pointer_cast<const Ieee80211MpduSubframeHeader>(chunk))
+    else if (auto mpduSubframe = dynamicPtrCast<const Ieee80211MpduSubframeHeader>(chunk))
     {
         stream.writeUint4(0);
         stream.writeUint4(mpduSubframe->getLength() >> 8);
@@ -138,9 +138,9 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setFragmentNumber(seq & 0x0F);
 
     if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
-        std::dynamic_pointer_cast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMACAddress());
+        dynamicPtrCast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMACAddress());
     if (type == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataHeader>(frame);
+        auto dataHeader = dynamicPtrCast<Ieee80211DataHeader>(frame);
         uint16_t qos = stream.readUint16Le();
         dataHeader->setTid(qos & 0xF);
         dataHeader->setAckPolicy((qos >> 5) & 0x03);
@@ -153,7 +153,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
     uint8_t type = stream.readByte();
     uint8_t fc_1 = stream.readByte();  (void)fc_1; // fc_1
     if (!(type & 0x30)) {
-        auto managementHeader = std::make_shared<Ieee80211MgmtHeader>();
+        auto managementHeader = makeShared<Ieee80211MgmtHeader>();
         parseDataOrMgmtFrame(stream, managementHeader, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
         return managementHeader;
     }
@@ -161,7 +161,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
     {
         case 0xD4: // ST_ACK    //TODO ((ST_ACK & 0x0F) << 4) | ((ST_ACK & 0x30) >> 2)
         {
-            auto ackFrame = std::make_shared<Ieee80211AckFrame>();
+            auto ackFrame = makeShared<Ieee80211AckFrame>();
             ackFrame->setType(ST_ACK);
             ackFrame->setToDS(false);
             ackFrame->setFromDS(false);
@@ -173,7 +173,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
         }
         case 0xB4: // ST_RTS
         {
-            auto rtsFrame = std::make_shared<Ieee80211RtsFrame>();
+            auto rtsFrame = makeShared<Ieee80211RtsFrame>();
             rtsFrame->setType(ST_RTS);
             rtsFrame->setToDS(false);
             rtsFrame->setFromDS(false);
@@ -186,7 +186,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
         }
         case 0xC4: // ST_CTS
         {
-            auto ctsFrame = std::make_shared<Ieee80211CtsFrame>();
+            auto ctsFrame = makeShared<Ieee80211CtsFrame>();
             ctsFrame->setType(ST_CTS);
             ctsFrame->setToDS(false);
             ctsFrame->setFromDS(false);
@@ -199,7 +199,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
         case 0x08: // ST_DATA
         case 0x88: // ST_DATA_WITH_QOS
         {
-            auto dataHeader = std::make_shared<Ieee80211DataHeader>();
+            auto dataHeader = makeShared<Ieee80211DataHeader>();
             parseDataOrMgmtFrame(stream, dataHeader, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
             return dataHeader;
         }
@@ -217,7 +217,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
 
 void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& macTrailer = std::dynamic_pointer_cast<const Ieee80211MacTrailer>(chunk);
+    const auto& macTrailer = dynamicPtrCast<const Ieee80211MacTrailer>(chunk);
     // TODO: re-enable this when FCS is properly computed in the MAC in all code paths
 //    auto fcsMode = macTrailer->getFcsMode();
 //    if (fcsMode != FCS_COMPUTED)
@@ -227,7 +227,7 @@ void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const 
 
 const Ptr<Chunk> Ieee80211MacTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto macTrailer = std::make_shared<Ieee80211MacTrailer>();
+    auto macTrailer = makeShared<Ieee80211MacTrailer>();
     auto fcs = stream.readUint32Be();
     macTrailer->setFcs(fcs);
     macTrailer->setFcsMode(FCS_COMPUTED);

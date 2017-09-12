@@ -1391,7 +1391,7 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     EV_INFO << "Sending Join(S=" << (routeType == G ? "*" : source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
     Packet *pk = new Packet("PIMJoin");
-    const auto& msg = std::make_shared<PIMJoinPrune>();
+    const auto& msg = makeShared<PIMJoinPrune>();
     msg->setType(JoinPrune);
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
@@ -1427,7 +1427,7 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     EV_INFO << "Sending Prune(S=" << (routeType == G ? "*" : source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
     Packet *pk = new Packet("PIMPrune");
-    const auto& msg = std::make_shared<PIMJoinPrune>();
+    const auto& msg = makeShared<PIMJoinPrune>();
     msg->setType(JoinPrune);
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
@@ -1466,7 +1466,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
     //if (getRouteFor(multDest,multSource))
     if (findRouteG(multGroup)) {
         Packet *pk = new Packet("PIMRegister(Null)");
-        const auto& msg = std::make_shared<PIMRegister>();
+        const auto& msg = makeShared<PIMRegister>();
         msg->setType(Register);
         msg->setN(true);
         msg->setB(false);
@@ -1475,7 +1475,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         pk->pushHeader(msg);
 
         // set encapsulated packet (IPv4 header only)
-        const auto& ipv4Header = std::make_shared<Ipv4Header>();
+        const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(multGroup);
         ipv4Header->setSrcAddress(multOrigin);
         ipv4Header->setProtocolId(IP_PROT_PIM);
@@ -1498,7 +1498,7 @@ void PIMSM::sendPIMRegister(Packet *ipv4Packet, IPv4Address dest, int outInterfa
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
     Packet *pk = new Packet("PIMRegister");
-    const auto& msg = std::make_shared<PIMRegister>();
+    const auto& msg = makeShared<PIMRegister>();
     msg->setType(Register);
     msg->setN(false);
     msg->setB(false);
@@ -1520,7 +1520,7 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
 
     // create PIM Register datagram
     Packet *pk = new Packet("PIMRegisterStop");
-    const auto& msg = std::make_shared<PIMRegisterStop>();
+    const auto& msg = makeShared<PIMRegisterStop>();
 
     // set PIM packet
     msg->setType(RegisterStop);
@@ -1543,7 +1543,7 @@ void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric me
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
 
     Packet *pk = new Packet("PIMAssert");
-    const auto& pkt = std::make_shared<PIMAssert>();
+    const auto& pkt = makeShared<PIMAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);
     pkt->setR(rptBit);

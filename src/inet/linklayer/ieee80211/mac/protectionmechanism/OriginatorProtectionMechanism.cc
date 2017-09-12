@@ -101,11 +101,11 @@ simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *m
 
 simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    if (auto rtsFrame = std::dynamic_pointer_cast<const Ieee80211RtsFrame>(header))
+    if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingHeader);
-    else if (auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header))
+    else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
         return computeDataFrameDurationField(packet, dataHeader, pendingPacket, pendingHeader);
-    else if (auto mgmtHeader = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header))
+    else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         return computeMgmtFrameDurationField(packet, mgmtHeader, pendingPacket, pendingHeader);
     else
         throw cRuntimeError("Unknown frame");

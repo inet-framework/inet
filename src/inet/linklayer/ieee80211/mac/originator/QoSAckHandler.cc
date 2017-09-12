@@ -66,7 +66,7 @@ QoSAckHandler::Status QoSAckHandler::getQoSDataAckStatus(const Ptr<const Ieee802
 void QoSAckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)
 {
     if (ackedHeader->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(ackedHeader);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(ackedHeader);
         auto id = std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(), SequenceControlField(dataHeader->getSequenceNumber(), dataHeader->getFragmentNumber())));
         Status &status = getQoSDataAckStatus(id);
         if (status == Status::FRAME_NOT_YET_TRANSMITTED)
@@ -84,7 +84,7 @@ void QoSAckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, 
 void QoSAckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dataOrMgmtHeader->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataOrMgmtHeader);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader);
         ASSERT(getQoSDataAckStatus(dataHeader) == Status::WAITING_FOR_NORMAL_ACK);
         auto id = std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(), SequenceControlField(dataHeader->getSequenceNumber(), dataHeader->getFragmentNumber())));
         Status &status = getQoSDataAckStatus(id);
@@ -103,7 +103,7 @@ std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> QoSAckHand
     MACAddress receiverAddr = blockAck->getTransmitterAddress();
     std::set<QoSKey> ackedFrames;
     // Table 8-16—BlockAckReq frame variant encoding
-    if (auto basicBlockAck = std::dynamic_pointer_cast<const Ieee80211BasicBlockAck>(blockAck)) {
+    if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {
         int startingSeqNum = basicBlockAck->getStartingSequenceNumber();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
             BitVector bitmap = basicBlockAck->getBlockAckBitmap(seqNum);
@@ -119,7 +119,7 @@ std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> QoSAckHand
             }
         }
     }
-    else if (auto compressedBlockAck = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAck>(blockAck)) {
+    else if (auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck)) {
         int startingSeqNum = compressedBlockAck->getStartingSequenceNumber();
         BitVector bitmap = compressedBlockAck->getBlockAckBitmap();
         for (int seqNum = 0; seqNum < 64; seqNum++) {
@@ -143,7 +143,7 @@ std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> QoSAckHand
 void QoSAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (header->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         auto id = std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(), SequenceControlField(dataHeader->getSequenceNumber(), dataHeader->getFragmentNumber())));
         switch (dataHeader->getAckPolicy()) {
             case NORMAL_ACK : ackStatuses[id] = Status::WAITING_FOR_NORMAL_ACK; break;
@@ -164,14 +164,14 @@ void QoSAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
         auto &status = ackStatus.second;
-        if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+        if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
             if (basicBlockAckReq->getTidInfo() == tid) {
                 int startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
                 if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && seqCtrlField.getSequenceNumber() >= startingSeqNum)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
-        else if (auto compressedBlockAckReq = std::dynamic_pointer_cast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (compressedBlockAckReq->getTidInfo() == tid) {
                 int startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
                 if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && seqCtrlField.getSequenceNumber() >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO: ASSERT(seqCtrlField.second == 0)?
@@ -188,7 +188,7 @@ bool QoSAckHandler::isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHead
 {
     QoSAckHandler::Status status;
     if (header->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         status = getQoSDataAckStatus(dataHeader);
     }
     else
@@ -199,7 +199,7 @@ bool QoSAckHandler::isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHead
 bool QoSAckHandler::isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     if (header->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         auto status = getQoSDataAckStatus(dataHeader);
         return status == QoSAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED;
     }
@@ -210,7 +210,7 @@ bool QoSAckHandler::isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader
 void QoSAckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dataOrMgmtHeader->getType() == ST_DATA_WITH_QOS) {
-        auto dataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataOrMgmtHeader);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader);
         auto id = std::make_pair(dataHeader->getReceiverAddress(), std::make_pair(dataHeader->getTid(), SequenceControlField(dataHeader->getSequenceNumber(), dataHeader->getFragmentNumber())));
         Status& status = getQoSDataAckStatus(id);
         ASSERT(status != Status::WAITING_FOR_NORMAL_ACK && status != Status::BLOCK_ACK_NOT_YET_REQUESTED && status != Status::WAITING_FOR_BLOCK_ACK);

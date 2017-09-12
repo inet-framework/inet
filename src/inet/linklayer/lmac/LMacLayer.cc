@@ -473,7 +473,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == LMAC_SEND_CONTROL) {
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
-                auto control = std::make_shared<LMacHeader>();
+                auto control = makeShared<LMacHeader>();
                 if ((macQueue.size() > 0) && !SETUP_PHASE)
                     control->setDestAddr(macQueue.front()->peekHeader<LMacHeader>()->getDestAddr());
                 else
@@ -506,7 +506,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 Packet *data = new Packet();
                 data->append(macQueue.front()->peekAt(b(headerLength)));
                 data->setKind(LMAC_DATA);
-                const auto& lmacHeader = std::static_pointer_cast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
@@ -679,7 +679,7 @@ void LMacLayer::decapsulate(Packet *packet)
 
 void LMacLayer::encapsulate(Packet *netwPkt)
 {
-    auto pkt = std::make_shared<LMacHeader>();
+    auto pkt = makeShared<LMacHeader>();
     pkt->setChunkLength(b(headerLength));
 
     // copy dest address from the Control Info attached to the network

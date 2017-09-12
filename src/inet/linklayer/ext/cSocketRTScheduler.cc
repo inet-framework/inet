@@ -205,7 +205,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // put the IP packet from wire into Packet
     uint32_t pklen = hdr->caplen - headerLength;
     Packet *notificationMsg = new Packet("rtEvent");
-    const auto& bytesChunk = std::make_shared<BytesChunk>(bytes + headerLength, pklen);
+    const auto& bytesChunk = makeShared<BytesChunk>(bytes + headerLength, pklen);
     bytesChunk->markImmutable();
     notificationMsg->append(bytesChunk);
 

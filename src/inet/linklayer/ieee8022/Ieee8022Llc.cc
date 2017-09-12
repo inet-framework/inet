@@ -51,13 +51,13 @@ void Ieee8022Llc::encapsulate(Packet *frame)
 {
     if (true) {
         auto ethTypeTag = frame->getTag<EtherTypeReq>();
-        const auto& snapHeader = std::make_shared<Ieee8022SnapHeader>();
+        const auto& snapHeader = makeShared<Ieee8022SnapHeader>();
         snapHeader->setOui(0);
         snapHeader->setProtocolId(ethTypeTag ? ethTypeTag->getEtherType() : -1);
         frame->insertHeader(snapHeader);
     }
     else {
-        const auto& llcHeader = std::make_shared<Ieee8022LlcHeader>();
+        const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
         // TODO: ssap, dsap
         frame->insertHeader(llcHeader);
     }
@@ -66,7 +66,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
 void Ieee8022Llc::decapsulate(Packet *frame)
 {
     const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
-    if (auto snapHeader = std::dynamic_pointer_cast<const Ieee8022SnapHeader>(llcHeader)) {
+    if (auto snapHeader = dynamicPtrCast<const Ieee8022SnapHeader>(llcHeader)) {
         int etherType = snapHeader->getProtocolId();
         if (etherType != -1) {
             frame->ensureTag<EtherTypeInd>()->setEtherType(etherType);

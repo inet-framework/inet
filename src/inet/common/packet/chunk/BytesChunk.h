@@ -49,7 +49,7 @@ class INET_API BytesChunk : public Chunk
     BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) { }
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<BytesChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

@@ -122,9 +122,9 @@ const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
 {
     if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
         return multicastFrameMode;
-    if (std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
+    if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
     if (dataOrMgmtRateControl)
         return dataOrMgmtRateControl->getRate();
@@ -146,7 +146,7 @@ const IIeee80211Mode* RateSelection::computeControlFrameMode(const Ptr<const Iee
 
 const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header))
+    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
         return computeControlFrameMode(header);

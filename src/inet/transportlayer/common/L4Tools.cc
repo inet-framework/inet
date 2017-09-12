@@ -47,7 +47,7 @@ const Protocol& getProtocolId(Packet *packet)
 const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet)
 {
     auto transportProtocolInd = packet->getTag<TransportProtocolInd>();
-    return transportProtocolInd == nullptr ? nullptr : std::dynamic_pointer_cast<const TransportHeaderBase>(transportProtocolInd->getTransportProtocolHeader());
+    return transportProtocolInd == nullptr ? nullptr : dynamicPtrCast<const TransportHeaderBase>(transportProtocolInd->getTransportProtocolHeader());
 }
 
 const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)

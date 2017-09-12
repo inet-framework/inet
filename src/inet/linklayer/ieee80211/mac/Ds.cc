@@ -92,7 +92,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
 void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211DataOrMgmtHeader>& incomingHeader)
 {
     incomingFrame->removePoppedChunks();
-    const auto& outgoingHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(incomingHeader->dupShared());
+    const auto& outgoingHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(incomingHeader->dupShared());
 
     // adjust toDS/fromDS bits, and shuffle addresses
     outgoingHeader->setToDS(false);
@@ -106,7 +106,7 @@ void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211Dat
 
     auto outgoingFrame = new Packet(incomingFrame->getName(), incomingFrame->peekData());
     outgoingFrame->insertHeader(outgoingHeader);
-    const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
+    const auto& trailer = makeShared<Ieee80211MacTrailer>();
     // TODO: add module parameter, implement fcs computing
     // TODO: trailer->setFcsMode(FCS_COMPUTED);
     outgoingFrame->insertTrailer(trailer);

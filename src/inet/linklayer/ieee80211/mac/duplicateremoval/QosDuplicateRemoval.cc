@@ -24,7 +24,7 @@ namespace ieee80211 {
 bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     SequenceControlField seqVal(header);
-    bool isManagementFrame = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header) != nullptr;
+    bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
@@ -44,7 +44,7 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
     }
     else
     {
-        const Ptr<const Ieee80211DataHeader>& qosDataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header);
+        const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         Key key(header->getTransmitterAddress(), qosDataHeader->getTid());
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end()) {

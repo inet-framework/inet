@@ -313,7 +313,7 @@ Packet *VoIPStreamSender::generatePacket()
     int inBytes = samples * bytesPerInSample;
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
     Packet *pk = new Packet();
-    const auto& vp = std::make_shared<VoIPStreamPacket>();
+    const auto& vp = makeShared<VoIPStreamPacket>();
 
     AVPacket opacket;
     av_init_packet(&opacket);

@@ -202,7 +202,7 @@ void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStat
     EV_INFO << "sending LINK_STATE message to " << peer << endl;
 
     Packet *pk = new Packet("link state");
-    const auto& out = std::make_shared<LinkStateMsg>();
+    const auto& out = makeShared<LinkStateMsg>();
 
     out->setLinkInfoArraySize(list.size());
     for (unsigned int j = 0; j < list.size(); j++)

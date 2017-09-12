@@ -65,7 +65,7 @@ void MpduGen::sendPackets()
         std::ostringstream str;
         str << packetName << "-" << i;
         Packet *packet = new Packet(str.str().c_str());
-        auto payload = std::make_shared<ByteCountChunk>();
+        auto payload = makeShared<ByteCountChunk>();
         if (packets[i] == 'L') {
             payload->setLength(byte(par("longPacketSize").longValue()));
         }

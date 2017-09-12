@@ -23,7 +23,7 @@ Register_Serializer(SliceChunk, SliceChunkSerializer);
 
 void SliceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
-    const auto& sliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
+    const auto& sliceChunk = staticPtrCast<const SliceChunk>(chunk);
     Chunk::serialize(stream, sliceChunk->getChunk(), sliceChunk->getOffset() + offset, length == b(-1) ? sliceChunk->getLength() - offset : length);
 }
 

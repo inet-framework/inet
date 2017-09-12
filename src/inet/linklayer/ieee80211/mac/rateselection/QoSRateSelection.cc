@@ -60,9 +60,9 @@ const IIeee80211Mode* QoSRateSelection::getMode(Packet *packet, const Ptr<const 
 
 bool QoSRateSelection::isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
 {
-    bool nonSelfCts = std::dynamic_pointer_cast<const Ieee80211CtsFrame>(header) && !txopProcedure->isTxopInitiator(header);
-    bool blockAck = std::dynamic_pointer_cast<const Ieee80211BlockAck>(header) != nullptr;
-    bool ack = std::dynamic_pointer_cast<const Ieee80211AckFrame>(header) != nullptr;
+    bool nonSelfCts = dynamicPtrCast<const Ieee80211CtsFrame>(header) && !txopProcedure->isTxopInitiator(header);
+    bool blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header) != nullptr;
+    bool ack = dynamicPtrCast<const Ieee80211AckFrame>(header) != nullptr;
     return ack || blockAck || nonSelfCts;
 }
 
@@ -118,7 +118,7 @@ const IIeee80211Mode* QoSRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode* QoSRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq))
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
         return responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
@@ -126,9 +126,9 @@ const IIeee80211Mode* QoSRateSelection::computeResponseBlockAckFrameMode(Packet 
 
 const IIeee80211Mode* QoSRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    if (std::dynamic_pointer_cast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
+    if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
     // This subclause describes the rate selection rules for group addressed data and management frames, excluding
     // the following:
@@ -183,7 +183,7 @@ const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<const 
         // If a control frame other than a Basic BlockAckReq or Basic BlockAck is carried in a non-HT PPDU, the
         // transmitting STA shall transmit the frame using one of the rates in the BSSBasicRateSet parameter or a rate
         // from the mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
-        if (!std::dynamic_pointer_cast<const Ieee80211BasicBlockAck>(header) && !std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(header)) {
+        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
             // TODO: BSSBasicRateSet
             return fastestMandatoryMode;
         }
@@ -209,7 +209,7 @@ const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<const 
         // the rate or non-HT reference rate (see 9.7.9) of the previously transmitted frame that was directed to the same
         // receiving STA.
         // TODO: BSSBasicRateSet
-        if (!std::dynamic_pointer_cast<const Ieee80211BasicBlockAck>(header) && !std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(header)) {
+        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
             // TODO: frame sequence context
             auto it = lastTransmittedFrameMode.find(header->getReceiverAddress());
             if (it != lastTransmittedFrameMode.end()) {
@@ -235,7 +235,7 @@ const IIeee80211Mode* QoSRateSelection::computeControlFrameMode(const Ptr<const 
 
 const IIeee80211Mode* QoSRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
 {
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header))
+    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
         return computeControlFrameMode(header, txopProcedure);

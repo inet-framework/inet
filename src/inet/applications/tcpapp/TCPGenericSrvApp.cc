@@ -129,7 +129,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                 Packet *outPacket = new Packet(msg->getName());
                 outPacket->ensureTag<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
-                const auto& payload = std::make_shared<GenericAppMsg>();
+                const auto& payload = makeShared<GenericAppMsg>();
                 payload->setChunkLength(B(requestedBytes));
                 payload->setExpectedReplyLength(0);
                 payload->setReplyDelay(0);

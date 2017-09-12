@@ -973,7 +973,7 @@ void IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
         myIPv6Address = IPv6Address::UNSPECIFIED_ADDRESS; //set my IPv6 address to unspecified.
 
     IPv6Address destAddr = IPv6Address::ALL_ROUTERS_2;    //all_routers multicast
-    auto rs = std::make_shared<IPv6RouterSolicitation>();
+    auto rs = makeShared<IPv6RouterSolicitation>();
     rs->setType(ICMPv6_ROUTER_SOL);
     rs->setChunkLength(B(ICMPv6_HEADER_BYTES));
 
@@ -1192,7 +1192,7 @@ void IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv6Address& destAddr, 
     //This operation includes all options, regardless whether it is solicited or unsolicited.
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {    //if this is an advertising interface
         //Construct a Router Advertisment message
-        auto ra = std::make_shared<IPv6RouterAdvertisement>();
+        auto ra = makeShared<IPv6RouterAdvertisement>();
         ra->setType(ICMPv6_ROUTER_AD);
 
         //RFC 2461: Section 6.2.3 Router Advertisment Message Content
@@ -1808,7 +1808,7 @@ void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAd
     MACAddress myMacAddr = ie->getMacAddress();
 
     //Construct a Neighbour Solicitation message
-    auto ns = std::make_shared<Ipv6NeighbourSolicitation>();
+    auto ns = makeShared<Ipv6NeighbourSolicitation>();
     ns->setType(ICMPv6_NEIGHBOUR_SOL);
 
     //Neighbour Solicitation Specific Information
@@ -1990,7 +1990,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, const
 
 void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
-    auto na = std::make_shared<IPv6NeighbourAdvertisement>();
+    auto na = makeShared<IPv6NeighbourAdvertisement>();
     na->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // FIXME set correct length
 
     //RFC 2461: Section 7.2.4
@@ -2087,7 +2087,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
     // multicast address.  These advertisements MUST be separated by at
     // least RetransTimer seconds.
 #else /* WITH_xMIPv6 */
-    auto na = std::make_shared<IPv6NeighbourAdvertisement>();
+    auto na = makeShared<IPv6NeighbourAdvertisement>();
     IPv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
     na->setChunkLength(B(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));
 #endif /* WITH_xMIPv6 */
@@ -2382,7 +2382,7 @@ void IPv6NeighbourDiscovery::processNAForOtherNCEStates(const IPv6NeighbourAdver
 void IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
-    auto redirect = std::make_shared<IPv6Redirect>(); // TODO: "redirectMsg");
+    auto redirect = makeShared<IPv6Redirect>(); // TODO: "redirectMsg");
     redirect->setType(ICMPv6_REDIRECT);
     redirect->setChunkLength(B(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
 

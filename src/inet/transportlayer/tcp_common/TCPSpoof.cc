@@ -44,7 +44,7 @@ void TCPSpoof::handleMessage(cMessage *msg)
 void TCPSpoof::sendSpoofPacket()
 {
     Packet *packet = new Packet("spoof");
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
 
     L3Address srcAddr = L3AddressResolver().resolve(par("srcAddress"));
     L3Address destAddr = L3AddressResolver().resolve(par("destAddress"));

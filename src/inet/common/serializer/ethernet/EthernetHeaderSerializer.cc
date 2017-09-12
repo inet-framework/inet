@@ -32,19 +32,19 @@ Register_Serializer(EtherPhyFrame, EthernetPhyHeaderSerializer);
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ethernetHeader = std::static_pointer_cast<const EtherFrame>(chunk);
+    const auto& ethernetHeader = staticPtrCast<const EtherFrame>(chunk);
     stream.writeMACAddress(ethernetHeader->getDest());
     stream.writeMACAddress(ethernetHeader->getSrc());
-    if (auto ethernetIIHeader = std::dynamic_pointer_cast<const EthernetIIFrame>(ethernetHeader)) {
+    if (auto ethernetIIHeader = dynamicPtrCast<const EthernetIIFrame>(ethernetHeader)) {
         uint16_t ethType = ethernetIIHeader->getEtherType();
         stream.writeUint16Be(ethType);
     }
-    else if (auto ethernetHeaderWithLLC = std::dynamic_pointer_cast<const EtherFrameWithLLC>(ethernetHeader)) {
+    else if (auto ethernetHeaderWithLLC = dynamicPtrCast<const EtherFrameWithLLC>(ethernetHeader)) {
         stream.writeUint16Be(ethernetHeaderWithLLC->getPayloadLength());
         stream.writeByte(ethernetHeaderWithLLC->getSsap());
         stream.writeByte(ethernetHeaderWithLLC->getDsap());
         stream.writeByte(ethernetHeaderWithLLC->getControl());
-        if (auto frame = std::dynamic_pointer_cast<const EtherFrameWithSNAP>(ethernetHeader)) {
+        if (auto frame = dynamicPtrCast<const EtherFrameWithSNAP>(ethernetHeader)) {
             stream.writeByte(frame->getOrgCode() >> 16);
             stream.writeByte(frame->getOrgCode() >> 8);
             stream.writeByte(frame->getOrgCode());
@@ -56,7 +56,7 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
                 throw cRuntimeError("Cannot serializer '%s'", ethernetHeader->getClassName());
         }
     }
-    else if (auto pauseFrame = std::dynamic_pointer_cast<const EtherPauseFrame>(ethernetHeader)) {
+    else if (auto pauseFrame = dynamicPtrCast<const EtherPauseFrame>(ethernetHeader)) {
         stream.writeUint16Be(0x8808);
         stream.writeUint16Be(0x0001);
         stream.writeUint16Be(pauseFrame->getPauseTime());
@@ -73,7 +73,7 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     uint16_t typeOrLength = stream.readUint16Be();
     // detect and create the real type
     if (typeOrLength >= 0x0600 || typeOrLength == 0) {
-        auto ethernetIIHeader = std::make_shared<EthernetIIFrame>();
+        auto ethernetIIHeader = makeShared<EthernetIIFrame>();
         ethernetIIHeader->setEtherType(typeOrLength);
         ethernetMacHeader = ethernetIIHeader;
     }
@@ -83,13 +83,13 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
         uint8_t dsap = stream.readByte();
         uint8_t ctrl = stream.readByte();
         if (dsap == 0xAA && ssap == 0xAA) { // snap frame
-            auto ethSnap = std::make_shared<EtherFrameWithSNAP>();
+            auto ethSnap = makeShared<EtherFrameWithSNAP>();
             ethSnap->setOrgCode(((uint32_t)stream.readByte() << 16) + stream.readUint16Be());
             ethSnap->setLocalcode(stream.readUint16Be());
             ethernetHeaderWithLLC = ethSnap;
         }
         else
-            ethernetHeaderWithLLC = std::make_shared<EtherFrameWithLLC>();
+            ethernetHeaderWithLLC = makeShared<EtherFrameWithLLC>();
         ethernetHeaderWithLLC->setPayloadLength(typeOrLength);
         ethernetHeaderWithLLC->setDsap(dsap);
         ethernetHeaderWithLLC->setSsap(ssap);
@@ -113,7 +113,7 @@ const Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& strea
 
 void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ethernetFcs = std::static_pointer_cast<const EthernetFcs>(chunk);
+    const auto& ethernetFcs = staticPtrCast<const EthernetFcs>(chunk);
     if (ethernetFcs->getFcsMode() != FCS_COMPUTED)
         throw cRuntimeError("Cannot serialize Ethernet FCS without a properly computed FCS");
     stream.writeUint32Be(ethernetFcs->getFcs());
@@ -121,7 +121,7 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 
 const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetFcs = std::make_shared<EthernetFcs>();
+    auto ethernetFcs = makeShared<EthernetFcs>();
     ethernetFcs->setFcs(stream.readUint32Be());
     ethernetFcs->setFcsMode(FCS_COMPUTED);
     return ethernetFcs;
@@ -135,7 +135,7 @@ void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 
 const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetPhyHeader = std::make_shared<EtherPhyFrame>();
+    auto ethernetPhyHeader = makeShared<EtherPhyFrame>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
     uint8_t sfd = stream.readByte();
     if (!preambleReadSuccessfully || sfd != 0xD5) {

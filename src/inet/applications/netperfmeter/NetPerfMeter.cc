@@ -888,7 +888,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
    if(TransportProtocol == TCP) {
       // TCP is stream-oriented: just pass the amount of frame data.
       Packet* pk = new Packet();
-      const auto& tcpMessage = std::make_shared<NetPerfMeterDataMessage>();
+      const auto& tcpMessage = makeShared<NetPerfMeterDataMessage>();
       tcpMessage->setCreationTime(simTime());
       tcpMessage->setChunkLength(B(frameSize));
       tcpMessage->markImmutable();
@@ -960,7 +960,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
          // ====== UDP ===================================================
          else if(TransportProtocol == UDP) {
             Packet* packet = new Packet();
-            const auto& dataMessage = std::make_shared<NetPerfMeterDataMessage>();
+            const auto& dataMessage = makeShared<NetPerfMeterDataMessage>();
             dataMessage->setCreationTime(simTime());
             dataMessage->setChunkLength(B(msgSize));
             dataMessage->markImmutable();

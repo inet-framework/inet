@@ -150,13 +150,13 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
     Packet *packet = new Packet("data1");
     switch (socket.getDataTransferMode()) {
         case TCP_TRANSFER_BYTECOUNT: {
-            const auto& payload = std::make_shared<ByteCountChunk>(B(sendBytes));
+            const auto& payload = makeShared<ByteCountChunk>(B(sendBytes));
             payload->markImmutable();
             packet->append(payload);
             break;
         }
         case TCP_TRANSFER_OBJECT: {
-            const auto& payload = std::make_shared<ApplicationPacket>();
+            const auto& payload = makeShared<ApplicationPacket>();
             payload->setChunkLength(B(sendBytes));
             payload->markImmutable();
             packet->append(payload);
@@ -164,7 +164,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
         }
 
         case TCP_TRANSFER_BYTESTREAM: {
-            const auto& payload = std::make_shared<BytesChunk>();
+            const auto& payload = makeShared<BytesChunk>();
 
             std::vector<uint8_t> vec;
             vec.resize(sendBytes);
@@ -198,7 +198,7 @@ void TCPSessionApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool u
 #if 0
     // TODO: delete this temp
     Packet *packet = check_and_cast<Packet *>(msg);
-    auto chunk = std::dynamic_pointer_cast<BytesChunk>(packet->peekDataAt(0, packet->getDataLength()));
+    auto chunk = dynamicPtrCast<BytesChunk>(packet->peekDataAt(0, packet->getDataLength()));
     if (chunk) {
         auto bytes = chunk->getBytes();
         for (int i = 0; i < bytes.size(); i++)

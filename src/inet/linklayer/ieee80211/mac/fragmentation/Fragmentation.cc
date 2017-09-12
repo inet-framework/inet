@@ -40,12 +40,12 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
         B length = B(fragmentSizes.at(i));
         fragment->append(frame->peekDataAt(offset, length));
         offset += length;
-        const auto& fragmentHeader = std::static_pointer_cast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
+        const auto& fragmentHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);
         fragment->insertHeader(fragmentHeader);
-        fragment->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+        fragment->insertTrailer(makeShared<Ieee80211MacTrailer>());
         fragments->push_back(fragment);
     }
     delete frame;

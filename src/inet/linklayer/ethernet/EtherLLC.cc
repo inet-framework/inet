@@ -132,7 +132,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
 
     auto ieee802SapReq = packet->getMandatoryTag<Ieee802SapReq>();
 
-    const auto& frame = std::make_shared<EtherFrameWithLLC>();
+    const auto& frame = makeShared<EtherFrameWithLLC>();
 
     frame->setPayloadLength(packet->getByteLength());
     frame->setControl(0);
@@ -247,7 +247,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     char framename[40];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     Packet *packet = new Packet(framename);
-    const auto& frame = std::make_shared<EtherPauseFrame>();
+    const auto& frame = makeShared<EtherPauseFrame>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;

@@ -105,7 +105,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 {
     if (msg->getKind() == SEND_ROUTE_FLOOD_TIMER) {
         // Send route flood packet and restart the timer
-        auto pkt = std::make_shared<WiseRouteHeader>();
+        auto pkt = makeShared<WiseRouteHeader>();
         L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
         pkt->setChunkLength(B(headerLength));
         pkt->setInitialSrcAddr(myNetwAddr);
@@ -134,7 +134,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 
 void WiseRoute::handleLowerPacket(Packet *packet)
 {
-    auto wiseRouteHeader = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
+    auto wiseRouteHeader = staticPtrCast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
     const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
@@ -242,7 +242,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     L3Address finalDestAddr;
     L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
-    auto pkt = std::make_shared<WiseRouteHeader>();
+    auto pkt = makeShared<WiseRouteHeader>();
 
     pkt->setChunkLength(B(headerLength));
 

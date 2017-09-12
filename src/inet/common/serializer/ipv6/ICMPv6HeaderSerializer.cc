@@ -39,7 +39,7 @@ Register_Serializer(Ipv6NeighbourSolicitation, ICMPv6HeaderSerializer);
 
 void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& pkt = std::static_pointer_cast<const Icmpv6Header>(chunk);
+    const auto& pkt = staticPtrCast<const Icmpv6Header>(chunk);
 
     switch (pkt->getType()) {
         case ICMPv6_ECHO_REQUEST: {
@@ -99,28 +99,28 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
 
 const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto icmpv6Header = std::make_shared<Icmpv6Header>();
+    auto icmpv6Header = makeShared<Icmpv6Header>();
     uint8_t type = stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
     uint16_t chksum = stream.readUint16Be();
 
     switch (type) {
         case ICMPv6_ECHO_REQUEST: {
-            auto echoRequest = std::make_shared<Icmpv6EchoRequestMsg>(); icmpv6Header = echoRequest;
+            auto echoRequest = makeShared<Icmpv6EchoRequestMsg>(); icmpv6Header = echoRequest;
             echoRequest->setType(type);
             echoRequest->setCode(subcode);
             break;
         }
 
         case ICMPv6_ECHO_REPLY: {
-            auto echoReply = std::make_shared<Icmpv6EchoReplyMsg>(); icmpv6Header = echoReply;
+            auto echoReply = makeShared<Icmpv6EchoReplyMsg>(); icmpv6Header = echoReply;
             echoReply->setType(type);
             echoReply->setCode(subcode);
             break;
         }
 
         case ICMPv6_DESTINATION_UNREACHABLE: {
-            auto destUnreach = std::make_shared<Icmpv6DestUnreachableMsg>(); icmpv6Header = destUnreach;
+            auto destUnreach = makeShared<Icmpv6DestUnreachableMsg>(); icmpv6Header = destUnreach;
             destUnreach->setType(type);
             destUnreach->setCode(subcode);
             stream.readUint32Be();        // unused
@@ -128,7 +128,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         }
 
         case ICMPv6_TIME_EXCEEDED: {
-            auto timeExceeded = std::make_shared<Icmpv6TimeExceededMsg>(); icmpv6Header = timeExceeded;
+            auto timeExceeded = makeShared<Icmpv6TimeExceededMsg>(); icmpv6Header = timeExceeded;
             timeExceeded->setType(type);
             timeExceeded->setCode(subcode);
             stream.readUint32Be();        // unused
@@ -136,7 +136,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         }
 
         case ICMPv6_NEIGHBOUR_SOL: {    // RFC 4861 Section 4.3
-            auto neighbourSol = std::make_shared<Ipv6NeighbourSolicitation>(); icmpv6Header = neighbourSol;
+            auto neighbourSol = makeShared<Ipv6NeighbourSolicitation>(); icmpv6Header = neighbourSol;
             neighbourSol->setType(type);
             neighbourSol->setCode(subcode);
 

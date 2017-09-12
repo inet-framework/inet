@@ -65,7 +65,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
 
 const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
 {
-    auto addbaRequest = std::make_shared<Ieee80211AddbaRequest>();
+    auto addbaRequest = makeShared<Ieee80211AddbaRequest>();
     addbaRequest->setReceiverAddress(receiverAddr);
     addbaRequest->setTid(tid);
     addbaRequest->setAMsduSupported(blockAckAgreementPolicy->isMsduSupported());
@@ -83,7 +83,7 @@ const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaR
 //
 void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback)
 {
-    if (auto basicBlockAck = std::dynamic_pointer_cast<const Ieee80211BasicBlockAck>(blockAck)) {
+    if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {
         auto agreement = getAgreement(basicBlockAck->getTransmitterAddress(), basicBlockAck->getTidInfo());
         if (agreement) {
             agreement->calculateExpirationTime();
@@ -110,7 +110,7 @@ OriginatorBlockAckAgreement* OriginatorBlockAckAgreementHandler::getAgreement(MA
 
 const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
 {
-    auto delba = std::make_shared<Ieee80211Delba>();
+    auto delba = makeShared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);
     delba->setTid(tid);
     delba->setReasonCode(reasonCode);

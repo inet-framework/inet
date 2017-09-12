@@ -127,7 +127,7 @@ void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211M
 void Ieee80211MgmtAP::sendBeacon()
 {
     EV << "Sending beacon\n";
-    const auto& body = std::make_shared<Ieee80211BeaconFrame>();
+    const auto& body = makeShared<Ieee80211BeaconFrame>();
     body->setSSID(ssid.c_str());
     body->setSupportedRates(supportedRates);
     body->setBeaconInterval(beaconInterval);
@@ -170,7 +170,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     if (frameAuthSeq != sta->authSeqExpected) {
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
-        const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
+        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
         delete packet;
@@ -184,7 +184,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     // send OK response (we don't model the cryptography part, just assume
     // successful authentication every time)
     EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
-    const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
+    const auto& body = makeShared<Ieee80211AuthenticationFrame>();
     body->setSequenceNumber(frameAuthSeq + 1);
     body->setStatusCode(SC_SUCCESSFUL);
     body->setIsLast(isLast);
@@ -230,7 +230,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     STAInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
+        const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, header->getTransmitterAddress());
         delete packet;
@@ -245,7 +245,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    const auto& body = std::make_shared<Ieee80211AssociationResponseFrame>();
+    const auto& body = makeShared<Ieee80211AssociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(0);    //XXX
     body->setSupportedRates(supportedRates);
@@ -266,7 +266,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     STAInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
+        const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, header->getTransmitterAddress());
         delete packet;
@@ -279,7 +279,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    const auto& body = std::make_shared<Ieee80211ReassociationResponseFrame>();
+    const auto& body = makeShared<Ieee80211ReassociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(0);    //XXX
     body->setSupportedRates(supportedRates);
@@ -324,7 +324,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
-    const auto& body = std::make_shared<Ieee80211ProbeResponseFrame>();
+    const auto& body = makeShared<Ieee80211ProbeResponseFrame>();
     body->setSSID(ssid.c_str());
     body->setSupportedRates(supportedRates);
     body->setBeaconInterval(beaconInterval);

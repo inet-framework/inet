@@ -29,19 +29,19 @@ Register_Serializer(ICMPEchoReply, ICMPHeaderSerializer);
 
 void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& icmpHeader = std::static_pointer_cast<const IcmpHeader>(chunk);
+    const auto& icmpHeader = staticPtrCast<const IcmpHeader>(chunk);
     stream.writeByte(icmpHeader->getType());
     stream.writeByte(icmpHeader->getCode());
     stream.writeUint16Be(icmpHeader->getChksum());
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {
-            const auto& icmpEchoRq = CHK(std::dynamic_pointer_cast<const ICMPEchoRequest>(chunk));
+            const auto& icmpEchoRq = CHK(dynamicPtrCast<const ICMPEchoRequest>(chunk));
             stream.writeUint16Be(icmpEchoRq->getIdentifier());
             stream.writeUint16Be(icmpEchoRq->getSeqNumber());
             break;
         }
         case ICMP_ECHO_REPLY: {
-            const auto& icmpEchoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(chunk));
+            const auto& icmpEchoReply = CHK(dynamicPtrCast<const ICMPEchoReply>(chunk));
             stream.writeUint16Be(icmpEchoReply->getIdentifier());
             stream.writeUint16Be(icmpEchoReply->getSeqNumber());
             break;
@@ -60,14 +60,14 @@ void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 const Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto icmpHeader = std::make_shared<IcmpHeader>();
+    auto icmpHeader = makeShared<IcmpHeader>();
     uint8_t type = stream.readByte();
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());
     icmpHeader->setChksum(stream.readUint16Be());
     switch (type) {
         case ICMP_ECHO_REQUEST: {
-            auto echoRq = std::make_shared<ICMPEchoRequest>();
+            auto echoRq = makeShared<ICMPEchoRequest>();
             echoRq->setType(type);
             echoRq->setCode(icmpHeader->getCode());
             echoRq->setChksum(icmpHeader->getChksum());
@@ -77,7 +77,7 @@ const Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) co
             break;
         }
         case ICMP_ECHO_REPLY: {
-            auto echoReply = std::make_shared<ICMPEchoReply>();
+            auto echoReply = makeShared<ICMPEchoReply>();
             echoReply->setType(type);
             echoReply->setCode(icmpHeader->getCode());
             echoReply->setChksum(icmpHeader->getChksum());

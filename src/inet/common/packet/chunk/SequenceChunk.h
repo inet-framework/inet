@@ -66,7 +66,7 @@ class INET_API SequenceChunk : public Chunk
     SequenceChunk(const std::deque<Ptr<const Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<SequenceChunk>(*this); }
     //@}
 
     virtual void forEachChild(cVisitor *v) override;

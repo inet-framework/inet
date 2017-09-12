@@ -526,7 +526,7 @@ void DHCPClient::sendRequest()
     xid = intuniform(0, RAND_MAX);    // generating a new xid for each transmission
 
     Packet *packet = new Packet("DHCPREQUEST");
-    const auto& request = std::make_shared<DHCPMessage>();
+    const auto& request = makeShared<DHCPMessage>();
     request->setOp(BOOTREQUEST);
     request->setChunkLength(B(280));    // DHCP request packet size
     request->setHtype(1);    // ethernet
@@ -589,7 +589,7 @@ void DHCPClient::sendDiscover()
     xid = intuniform(0, RAND_MAX);
     //std::cout << xid << endl;
     Packet *packet = new Packet("DHCPDISCOVER");
-    const auto& discover = std::make_shared<DHCPMessage>();
+    const auto& discover = makeShared<DHCPMessage>();
     discover->setOp(BOOTREQUEST);
     discover->setChunkLength(B(280));    // DHCP Discover packet size;
     discover->setHtype(1);    // ethernet
@@ -623,7 +623,7 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
 {
     xid = intuniform(0, RAND_MAX);
     Packet *packet = new Packet("DHCPDECLINE");
-    const auto& decline = std::make_shared<DHCPMessage>();
+    const auto& decline = makeShared<DHCPMessage>();
     decline->setOp(BOOTREQUEST);
     decline->setChunkLength(B(280));    // DHCPDECLINE packet size
     decline->setHtype(1);    // ethernet

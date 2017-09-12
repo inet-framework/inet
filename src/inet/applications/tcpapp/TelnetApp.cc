@@ -140,7 +140,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
     EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
 
-    const auto& payload = std::make_shared<GenericAppMsg>();
+    const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
     payload->setChunkLength(B(numBytes));
     payload->setExpectedReplyLength(expectedReplyBytes);

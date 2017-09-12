@@ -44,7 +44,7 @@ IPv4Address ARPPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsi
 
 void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& arpPacket = std::static_pointer_cast<const ARPPacket>(chunk);
+    const auto& arpPacket = staticPtrCast<const ARPPacket>(chunk);
     stream.writeUint16Be(1); //ethernet
     stream.writeUint16Be(ETHERTYPE_IPv4);
     stream.writeByte(ETHER_ADDR_LEN);
@@ -58,7 +58,7 @@ void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 const Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto arpPacket = std::make_shared<ARPPacket>();
+    auto arpPacket = makeShared<ARPPacket>();
     if (stream.readUint16Be() != 1)
         arpPacket->markIncorrect();
     if (stream.readUint16Be() != ETHERTYPE_IPv4)

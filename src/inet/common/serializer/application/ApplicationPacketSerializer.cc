@@ -26,7 +26,7 @@ Register_Serializer(ApplicationPacket, ApplicationPacketSerializer);
 void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
-    const auto& applicationPacket = std::static_pointer_cast<const ApplicationPacket>(chunk);
+    const auto& applicationPacket = staticPtrCast<const ApplicationPacket>(chunk);
     stream.writeUint32Be(B(applicationPacket->getChunkLength()).get());
     stream.writeUint32Be(applicationPacket->getSequenceNumber());
     int64_t remainders = B(applicationPacket->getChunkLength() - (stream.getLength() - startPosition)).get();
@@ -38,7 +38,7 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
 const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
-    auto applicationPacket = std::make_shared<ApplicationPacket>();
+    auto applicationPacket = makeShared<ApplicationPacket>();
     B dataLength = B(stream.readUint32Be());
     applicationPacket->setSequenceNumber(stream.readUint32Be());
     B remainders = dataLength - (stream.getPosition() - startPosition);

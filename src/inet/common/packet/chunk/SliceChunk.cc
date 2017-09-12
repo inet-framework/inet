@@ -82,7 +82,7 @@ const Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const 
     b sliceLength = length == b(-1) ? chunkLength - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= offset && offset <= chunkLength);
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= sliceLength && sliceLength <= chunkLength);
-    return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
+    return makeShared<SliceChunk>(chunk, offset, sliceLength);
 }
 
 void SliceChunk::setOffset(b offset)
@@ -102,7 +102,7 @@ void SliceChunk::setLength(b length)
 bool SliceChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
-        const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
+        const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length;
     }
     else
@@ -112,7 +112,7 @@ bool SliceChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
 bool SliceChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
-        const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
+        const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset;
     }
     else
@@ -123,7 +123,7 @@ void SliceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
-    const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
+    const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
     offset -= otherSliceChunk->length;
     length += otherSliceChunk->length;
@@ -133,7 +133,7 @@ void SliceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
-    const auto& otherSliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
+    const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
     length += otherSliceChunk->length;
 }

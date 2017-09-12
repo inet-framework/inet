@@ -76,7 +76,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
 
 uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& tcpHeaderBytes, const std::vector<uint8_t>& tcpDataBytes)
 {
-    auto pseudoHeader = std::make_shared<TransportPseudoHeader>();
+    auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());

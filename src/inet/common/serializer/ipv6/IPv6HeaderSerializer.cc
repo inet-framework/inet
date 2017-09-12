@@ -40,7 +40,7 @@ Register_Serializer(Ipv6Header, IPv6HeaderSerializer);
 
 void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ipv6Header = std::static_pointer_cast<const Ipv6Header>(chunk);
+    const auto& ipv6Header = staticPtrCast<const Ipv6Header>(chunk);
     unsigned int i;
     uint32_t flowinfo;
 
@@ -127,7 +127,7 @@ const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
     stream.readBytes(buffer, B(IPv6_HEADER_BYTES));
-    auto dest = std::make_shared<Ipv6Header>();
+    auto dest = makeShared<Ipv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);
     dest->setFlowLabel(flowinfo & 0xFFFFF);

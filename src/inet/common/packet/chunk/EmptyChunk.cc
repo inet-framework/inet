@@ -17,7 +17,7 @@
 
 namespace inet {
 
-const Ptr<EmptyChunk> EmptyChunk::singleton = std::make_shared<EmptyChunk>();
+const Ptr<EmptyChunk> EmptyChunk::singleton = makeShared<EmptyChunk>();
 
 EmptyChunk::EmptyChunk() :
     Chunk()
@@ -49,7 +49,7 @@ const Ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
 const Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     CHUNK_CHECK_IMPLEMENTATION(length == b(0));
-    return std::make_shared<EmptyChunk>();
+    return makeShared<EmptyChunk>();
 }
 
 std::string EmptyChunk::str() const

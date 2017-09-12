@@ -230,7 +230,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         parseIPv4AddressVector(sourcesStr, sources);
 
         Packet *packet = new Packet("IGMPv3 query");
-        const auto& msg = std::make_shared<IGMPv3Query>();
+        const auto& msg = makeShared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(group);
         msg->setMaxRespTime(0.1 * maxRespCode);
@@ -252,7 +252,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
     {
         cXMLElementList records = node.getElementsByTagName("record");
         Packet *packet = new Packet("IGMPv3 report");
-        const auto& msg = std::make_shared<IGMPv3Report>();
+        const auto& msg = makeShared<IGMPv3Report>();
         unsigned int byteLength = 8;   // IGMPv3Report header size
 
         msg->setGroupRecordArraySize(records.size());

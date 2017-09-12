@@ -434,7 +434,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
             {
                 Packet *pk = new Packet("BGPUpdate");
-                const auto& updateMsg = std::make_shared<BGPUpdateMessage>();
+                const auto& updateMsg = makeShared<BGPUpdateMessage>();
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);

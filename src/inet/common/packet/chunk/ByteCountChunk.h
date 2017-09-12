@@ -48,7 +48,7 @@ class INET_API ByteCountChunk : public Chunk
     ByteCountChunk(B length, uint8_t data = '?');
 
     virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<ByteCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

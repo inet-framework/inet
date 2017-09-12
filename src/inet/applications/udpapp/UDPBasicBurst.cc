@@ -110,7 +110,7 @@ Packet *UDPBasicBurst::createPacket()
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
     long msgByteLength = messageLengthPar->longValue();
     Packet *pk = new Packet(msgName);
-    const auto& payload = std::make_shared<ApplicationPacket>();
+    const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
     payload->markImmutable();

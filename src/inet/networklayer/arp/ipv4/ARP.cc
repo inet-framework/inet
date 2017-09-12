@@ -232,7 +232,7 @@ void ARP::sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress)
 
     // fill out everything in ARP Request packet except dest MAC address
     Packet *packet = new Packet("arpREQ");
-    const auto& arp = std::make_shared<ARPPacket>();
+    const auto& arp = makeShared<ARPPacket>();
     arp->setOpcode(ARP_REQUEST);
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
@@ -387,7 +387,7 @@ void ARP::processARPPacket(Packet *packet)
 
                 // "Swap hardware and protocol fields", etc.
                 Packet *outPk = new Packet("arpREPLY");
-                const auto& arpReply = std::make_shared<ARPPacket>();
+                const auto& arpReply = makeShared<ARPPacket>();
                 IPv4Address origDestAddress = arp->getDestIPAddress();
                 arpReply->setDestIPAddress(srcIPAddress);
                 arpReply->setDestMACAddress(srcMACAddress);

@@ -29,7 +29,7 @@ namespace ieee80211 {
 void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacketReq, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
 {
     numReceivedBlockAckReq++;
-    if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto agreement = blockAckAgreementHandler->getAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
@@ -56,9 +56,9 @@ void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<const Ieee
 //
 const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
-    if (auto basicBlockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         ASSERT(agreement != nullptr);
-        auto blockAck = std::make_shared<Ieee80211BasicBlockAck>();
+        auto blockAck = makeShared<Ieee80211BasicBlockAck>();
         int startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
         for (SequenceNumber seqNum = startingSequenceNumber; seqNum < startingSequenceNumber + 64; seqNum++) {
             BitVector &bitmap = blockAck->getBlockAckBitmap(seqNum - startingSequenceNumber);

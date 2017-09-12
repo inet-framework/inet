@@ -156,19 +156,19 @@ void AODVRouting::handleMessage(cMessage *msg)
 
             switch (ctrlPacket->getPacketType()) {
                 case RREQ:
-                    handleRREQ(std::dynamic_pointer_cast<AODVRREQ>(ctrlPacket->dupShared()), sourceAddr, arrivalPacketTTL);
+                    handleRREQ(dynamicPtrCast<AODVRREQ>(ctrlPacket->dupShared()), sourceAddr, arrivalPacketTTL);
                     break;
 
                 case RREP:
-                    handleRREP(std::dynamic_pointer_cast<AODVRREP>(ctrlPacket->dupShared()), sourceAddr);
+                    handleRREP(dynamicPtrCast<AODVRREP>(ctrlPacket->dupShared()), sourceAddr);
                     break;
 
                 case RERR:
-                    handleRERR(std::dynamic_pointer_cast<const AODVRERR>(ctrlPacket), sourceAddr);
+                    handleRERR(dynamicPtrCast<const AODVRERR>(ctrlPacket), sourceAddr);
                     break;
 
                 case RREPACK:
-                    handleRREPACK(std::dynamic_pointer_cast<const AODVRREPACK>(ctrlPacket), sourceAddr);
+                    handleRREPACK(dynamicPtrCast<const AODVRREPACK>(ctrlPacket), sourceAddr);
                     break;
 
                 default:
@@ -375,7 +375,7 @@ void AODVRouting::sendRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr,
 
 const Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
 {
-    auto rreqPacket = std::make_shared<AODVRREQ>(); // TODO: "AODV-RREQ");
+    auto rreqPacket = makeShared<AODVRREQ>(); // TODO: "AODV-RREQ");
 
     rreqPacket->setGratuitousRREPFlag(askGratuitousRREP);
     IRoute *lastKnownRoute = routingTable->findBestMatchingRoute(destAddr);
@@ -430,7 +430,7 @@ const Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
 
 const Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
 {
-    auto rrep = std::make_shared<AODVRREP>(); // TODO: "AODV-RREP");
+    auto rrep = makeShared<AODVRREP>(); // TODO: "AODV-RREP");
     rrep->setPacketType(RREP);
 
     // When generating a RREP message, a node copies the Destination IP
@@ -511,7 +511,7 @@ const Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *d
 const Ptr<AODVRREP> AODVRouting::createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute)
 {
     ASSERT(originatorRoute != nullptr);
-    auto grrep = std::make_shared<AODVRREP>(); // TODO: "AODV-GRREP");
+    auto grrep = makeShared<AODVRREP>(); // TODO: "AODV-GRREP");
     AODVRouteData *routeData = check_and_cast<AODVRouteData *>(originatorRoute->getProtocolData());
 
     // Hop Count                        The Hop Count as indicated in the
@@ -684,7 +684,7 @@ void AODVRouting::handleRREP(const Ptr<AODVRREP>& rrep, const L3Address& sourceA
                     AODVRouteData *nextHopToDestRouteData = check_and_cast<AODVRouteData *>(nextHopToDestRoute->getProtocolData());
                     nextHopToDestRouteData->addPrecursor(originatorRoute->getNextHopAsGeneric());
                 }
-                auto outgoingRREP = std::dynamic_pointer_cast<AODVRREP>(rrep->dupShared());
+                auto outgoingRREP = dynamicPtrCast<AODVRREP>(rrep->dupShared());
                 forwardRREP(outgoingRREP, originatorRoute->getNextHopAsGeneric(), 100);
             }
         }
@@ -730,7 +730,7 @@ void AODVRouting::sendAODVPacket(const Ptr<AODVControlPacket>& packet, const L3A
     Packet *udpPacket = new Packet(packet->getClassName());
     packet->markImmutable();
     udpPacket->append(packet);
-    auto udpHeader = std::make_shared<UdpHeader>();
+    auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
     udpHeader->markImmutable();
@@ -944,7 +944,7 @@ void AODVRouting::handleRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& sourceA
             rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
         rreq->setUnknownSeqNumFlag(false);
 
-        auto outgoingRREQ = std::dynamic_pointer_cast<AODVRREQ>(rreq->dupShared());
+        auto outgoingRREQ = dynamicPtrCast<AODVRREQ>(rreq->dupShared());
         forwardRREQ(outgoingRREQ, timeToLive);
     }
     else
@@ -1104,7 +1104,7 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 
 const Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
 {
-    auto rerr = std::make_shared<AODVRERR>(); // TODO: "AODV-RERR");
+    auto rerr = makeShared<AODVRERR>(); // TODO: "AODV-RERR");
     unsigned int destCount = unreachableNodes.size();
 
     rerr->setPacketType(RERR);
@@ -1331,7 +1331,7 @@ const Ptr<AODVRREP> AODVRouting::createHelloMessage()
     //
     //    Lifetime                       ALLOWED_HELLO_LOSS *HELLO_INTERVAL
 
-    auto helloMessage = std::make_shared<AODVRREP>(); // TODO: "AODV-HelloMsg");
+    auto helloMessage = makeShared<AODVRREP>(); // TODO: "AODV-HelloMsg");
     helloMessage->setPacketType(RREP);
     helloMessage->setDestAddr(getSelfIPAddress());
     helloMessage->setDestSeqNum(sequenceNum);
@@ -1610,7 +1610,7 @@ bool AODVRouting::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t 
 
 const Ptr<AODVRREPACK> AODVRouting::createRREPACK()
 {
-    auto rrepACK = std::make_shared<AODVRREPACK>(); // TODO: "AODV-RREPACK");
+    auto rrepACK = makeShared<AODVRREPACK>(); // TODO: "AODV-RREPACK");
     rrepACK->setPacketType(RREPACK);
     rrepACK->setChunkLength(B(2));
     return rrepACK;

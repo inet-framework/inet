@@ -119,9 +119,9 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     if (!_inputFileStream.eof()) {
         while (bytesRemaining > 0) {
             Packet *packet = new Packet("RTPPacket");
-            const auto& rtpHeader = std::make_shared<RtpHeader>();
-            const auto& mpegHeader = std::make_shared<RTPMpegHeader>();
-            const auto& mpegPayload = std::make_shared<ByteCountChunk>();
+            const auto& rtpHeader = makeShared<RtpHeader>();
+            const auto& mpegHeader = makeShared<RTPMpegHeader>();
+            const auto& mpegPayload = makeShared<ByteCountChunk>();
 
             // the only mpeg information we know is the picture type
             mpegHeader->setPictureType(pictureType);

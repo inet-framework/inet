@@ -405,7 +405,7 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
     Packet *outPk = new Packet(szReq);
-    const auto& msg = std::make_shared<HttpRequestMessage>();
+    const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
@@ -458,7 +458,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
 
     Packet *outPk = new Packet(szReq);
-    const auto& msg = std::make_shared<HttpRequestMessage>();
+    const auto& msg = makeShared<HttpRequestMessage>();
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);

@@ -35,14 +35,14 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
         return packet;
     // FIXME: temporary fix for mgmt frames
-    if (std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header))
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         return packet;
     // find entry for this frame
     Key key;
     key.macAddress = header->getTransmitterAddress();
     key.tid = -1;
     if (header->getType() == ST_DATA_WITH_QOS)
-        if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = std::dynamic_pointer_cast<const Ieee80211DataHeader>(header))
+        if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
             key.tid = qosDataHeader->getTid();
     key.seqNum = header->getSequenceNumber();
     short fragNum = header->getFragmentNumber();

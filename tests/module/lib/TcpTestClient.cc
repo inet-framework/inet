@@ -193,7 +193,7 @@ void TcpTestClient::scheduleNextSend()
     Command cmd = commands.front();
     commands.pop_front();
     Packet *msg = new Packet(makeMsgName().c_str(),TEST_SEND);
-    const auto& bytes = std::make_shared<ByteCountChunk>(byte(cmd.numBytes));
+    const auto& bytes = makeShared<ByteCountChunk>(byte(cmd.numBytes));
     bytes->markImmutable();
     msg->append(bytes);
     scheduleAt(cmd.tSend, msg);

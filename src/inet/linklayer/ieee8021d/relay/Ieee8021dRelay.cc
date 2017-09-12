@@ -209,7 +209,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
     // TODO: use LLCFrame
-    const auto& frame = std::make_shared<EthernetIIFrame>();
+    const auto& frame = makeShared<EthernetIIFrame>();
     packet->setKind(packet->getKind());
     frame->setSrc(bridgeAddress);
     frame->setDest(address);

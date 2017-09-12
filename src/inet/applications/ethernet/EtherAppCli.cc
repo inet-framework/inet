@@ -193,7 +193,7 @@ void EtherAppCli::sendPacket()
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    const auto& data = std::make_shared<EtherAppReq>();
+    const auto& data = makeShared<EtherAppReq>();
 
     data->setRequestId(seqNum);
 

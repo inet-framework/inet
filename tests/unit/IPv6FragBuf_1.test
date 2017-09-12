@@ -29,7 +29,7 @@ typedef std::vector<Frag> FragVector;
 bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
 {
     Packet *pk = new Packet("IPv6");
-    const auto& frag = std::make_shared<Ipv6Header>();
+    const auto& frag = makeShared<Ipv6Header>();
     frag->setSrcAddress(IPv6Address(0,0,0,f.src));
     frag->setDestAddress(IPv6Address(0,0,0,f.dest));
     Ipv6FragmentHeader *fh = new Ipv6FragmentHeader();
@@ -40,7 +40,7 @@ bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
 //    frag->setHeaderLength(40 + 8);
     frag->setChunkLength(byte(40 + 8));
     frag->setPayloadLength(8 + f.bytes);
-    const auto& payload = std::make_shared<ByteCountChunk>(byte(f.bytes));
+    const auto& payload = makeShared<ByteCountChunk>(byte(f.bytes));
     pk->insertHeader(payload);
     pk->insertHeader(frag);
     ASSERT(pk->getByteLength() == 40+8+f.bytes);

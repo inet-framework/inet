@@ -33,7 +33,7 @@ Register_Serializer(TcpHeader, TcpHeaderSerializer);
 
 void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
+    const auto& tcpHeader = staticPtrCast<const TcpHeader>(chunk);
     struct tcphdr tcp;
 
     // fill TCP header structure
@@ -163,7 +163,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];
     stream.readBytes(buffer, B(TCP_HEADER_OCTETS));
-    auto tcpHeader = std::make_shared<TcpHeader>();
+    auto tcpHeader = makeShared<TcpHeader>();
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
 

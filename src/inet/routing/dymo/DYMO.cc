@@ -410,7 +410,7 @@ void DYMO::sendDYMOPacket(const Ptr<DYMOPacket>& packet, const InterfaceEntry *i
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
     Packet *udpPacket = new Packet(packet->getClassName());
-    auto udpHeader = std::make_shared<UdpHeader>();
+    auto udpHeader = makeShared<UdpHeader>();
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
     udpHeader->setSourcePort(DYMO_UDP_PORT);
@@ -433,11 +433,11 @@ void DYMO::sendDYMOPacket(const Ptr<DYMOPacket>& packet, const InterfaceEntry *i
 void DYMO::processDYMOPacket(Packet *packet, const Ptr<const DYMOPacket>& dymoPacket)
 {
     auto dymoPacketCopy = dymoPacket->dupShared();
-    if (auto rreq = std::dynamic_pointer_cast<const RREQ>(dymoPacketCopy))
+    if (auto rreq = dynamicPtrCast<const RREQ>(dymoPacketCopy))
         processRREQ(packet, rreq);
-    else if (auto rrep = std::dynamic_pointer_cast<const RREP>(dymoPacketCopy))
+    else if (auto rrep = dynamicPtrCast<const RREP>(dymoPacketCopy))
         processRREP(packet, rrep);
-    else if (auto rerr = std::dynamic_pointer_cast<const RERR>(dymoPacketCopy))
+    else if (auto rerr = dynamicPtrCast<const RERR>(dymoPacketCopy))
         processRERR(packet, rerr);
     else
         throw cRuntimeError("Unknown DYMO packet");
@@ -471,9 +471,9 @@ bool DYMO::permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     //    required information: TargNode.Addr, OrigNode.Addr,
     //    RteMsg_Gen.Metric and RteMsg_Gen.SeqNum.  If the required
     //    information does not exist, the message is disregarded.
-    if (std::dynamic_pointer_cast<const RREQ>(rteMsg) && (!originatorNode.getHasMetric() || !originatorNode.getHasSequenceNumber()))
+    if (dynamicPtrCast<const RREQ>(rteMsg) && (!originatorNode.getHasMetric() || !originatorNode.getHasSequenceNumber()))
         return false;
-    else if (std::dynamic_pointer_cast<const RREP>(rteMsg) && (!targetNode.getHasMetric() || !targetNode.getHasSequenceNumber()))
+    else if (dynamicPtrCast<const RREP>(rteMsg) && (!targetNode.getHasMetric() || !targetNode.getHasSequenceNumber()))
         return false;
     // 5. HandlingRtr checks that OrigNode.Addr and TargNode.Addr are valid
     //    routable unicast addresses.  If not, the message is disregarded.
@@ -501,9 +501,9 @@ void DYMO::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     // 7.5. Handling a Received RteMsg
     // 1. HandlingRtr MUST process the routing information contained in the
     //    RteMsg as speciied in Section 6.1.
-    if (std::dynamic_pointer_cast<const RREQ>(rteMsg))
+    if (dynamicPtrCast<const RREQ>(rteMsg))
         updateRoutes(packet, rteMsg, rteMsg->getOriginatorNode());
-    else if (std::dynamic_pointer_cast<const RREP>(rteMsg))
+    else if (dynamicPtrCast<const RREP>(rteMsg))
         updateRoutes(packet, rteMsg, rteMsg->getTargetNode());
     // 2. HandlingRtr MAY process AddedNode routing information (if
     //    present) as specified in Section 13.7.1 Otherwise, if AddedNode
@@ -530,10 +530,10 @@ void DYMO::processRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     // TODO: why is this here and how could we halt here?
     // 4. HandlingRtr MUST decrement RteMsg.<msg-hop-limit>.  If
     //    RteMsg.<msg-hop-limit> is then zero (0), no further action is taken.
-    // KLUDGE: TODO: std::const_pointer_cast<RteMsg>(rteMsg)
-    std::const_pointer_cast<RteMsg>(rteMsg)->setHopLimit(rteMsg->getHopLimit() - 1);
+    // KLUDGE: TODO: constPtrCast<RteMsg>(rteMsg)
+    constPtrCast<RteMsg>(rteMsg)->setHopLimit(rteMsg->getHopLimit() - 1);
     // 5. HandlingRtr MUST increment RteMsg.<msg-hop-count>.
-    std::const_pointer_cast<RteMsg>(rteMsg)->setHopCount(rteMsg->getHopCount() + 1);
+    constPtrCast<RteMsg>(rteMsg)->setHopCount(rteMsg->getHopCount() + 1);
 }
 
 b DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
@@ -588,7 +588,7 @@ b DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 
 const Ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
 {
-    auto rreq = std::make_shared<RREQ>(); // TODO: "RREQ");
+    auto rreq = makeShared<RREQ>(); // TODO: "RREQ");
     AddressBlock& originatorNode = rreq->getOriginatorNode();
     AddressBlock& targetNode = rreq->getTargetNode();
     // 7.3. RREQ Generation
@@ -687,7 +687,7 @@ void DYMO::processRREQ(Packet *packet, const Ptr<const RREQ>& rreqIncoming)
             //   multicast address LL-MANET-Routers [RFC5498].  If the RREQ is
             //   unicast, the IP.DestinationAddress is set to the NextHopAddress.
             EV_DETAIL << "Forwarding RREQ: originator = " << originator << ", target = " << target << endl;
-            auto rreqOutgoing = std::dynamic_pointer_cast<RREQ>(rreqIncoming->dupShared());
+            auto rreqOutgoing = dynamicPtrCast<RREQ>(rreqIncoming->dupShared());
             if (appendInformation)
                 addSelfNode(rreqOutgoing);
             sendRREQ(rreqOutgoing);
@@ -714,7 +714,7 @@ const Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg)
 const Ptr<RREP> DYMO::createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
-    auto rrep = std::make_shared<RREP>(); // TODO: "RREP");
+    auto rrep = makeShared<RREP>(); // TODO: "RREP");
     AddressBlock& originatorNode = rrep->getOriginatorNode();
     AddressBlock& targetNode = rrep->getTargetNode();
     // 1. RREP_Gen first uses the routing information to update its route
@@ -797,7 +797,7 @@ void DYMO::processRREP(Packet *packet, const Ptr<const RREP>& rrepIncoming)
             //   the context of OrigRtr, that is, the router originating the RREQ
             //   to which the RREP is responding.
             EV_DETAIL << "Forwarding RREP: originator = " << originator << ", target = " << target << endl;
-            auto rrepOutgoing = std::static_pointer_cast<RREP>(rrepIncoming->dupShared());
+            auto rrepOutgoing = staticPtrCast<RREP>(rrepIncoming->dupShared());
             if (appendInformation)
                 addSelfNode(rrepOutgoing);
             if (useMulticastRREP)
@@ -826,7 +826,7 @@ b DYMO::computeRREPLength(const Ptr<RREP>& rrep)
 
 const Ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
 {
-    auto rerr = std::make_shared<RERR>(); // TODO: "RERR");
+    auto rerr = makeShared<RERR>(); // TODO: "RERR");
     for (auto & unreachableAddresse : unreachableAddresses) {
         const L3Address& unreachableAddress = unreachableAddresse;
         AddressBlock *addressBlock = new AddressBlock();

@@ -64,7 +64,7 @@ void ProbabilisticBroadcast::handleUpperPacket(Packet *packet)
 void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 {
     MACAddress macSrcAddr;
-    auto macHeader = std::dynamic_pointer_cast<ProbabilisticBroadcastHeader>(packet->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
+    auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(packet->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     packet->removePoppedChunks();
     auto macAddressInd = packet->getMandatoryTag<MacAddressInd>();
     macHeader->setNbHops(macHeader->getNbHops() + 1);
@@ -238,7 +238,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
 
     EV << "PBr: " << simTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
     // update TTL field of the message to the value it will have when taken out of the list
-    auto macHeader = std::dynamic_pointer_cast<ProbabilisticBroadcastHeader>(msgDesc->pkt->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
+    auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(msgDesc->pkt->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     msgDesc->pkt->removePoppedChunks();
     macHeader->setAppTtl(macHeader->getAppTtl() - bcastDelay);
     macHeader->markImmutable();
@@ -280,7 +280,7 @@ ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQ
 
 void ProbabilisticBroadcast::encapsulate(Packet *packet)
 {
-    auto pkt = std::make_shared<ProbabilisticBroadcastHeader>(); // TODO: msg->getName());
+    auto pkt = makeShared<ProbabilisticBroadcastHeader>(); // TODO: msg->getName());
     cObject *controlInfo = packet->removeControlInfo();
     L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 

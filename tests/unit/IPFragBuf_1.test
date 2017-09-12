@@ -36,7 +36,7 @@ bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
        << "\n";
 */
     Packet *pk = new Packet("IPv4");
-    const auto& frag = std::make_shared<Ipv4Header>();
+    const auto& frag = makeShared<Ipv4Header>();
     frag->setIdentification(f.id);
     frag->setSrcAddress(IPv4Address(f.src));
     frag->setDestAddress(IPv4Address(f.dest));
@@ -45,7 +45,7 @@ bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
     frag->setHeaderLength(24);
     frag->setChunkLength(byte(24));
     frag->setTotalLengthField(24 + f.bytes);
-    const auto& payload = std::make_shared<ByteCountChunk>(byte(f.bytes));
+    const auto& payload = makeShared<ByteCountChunk>(byte(f.bytes));
     pk->insertHeader(payload);
     pk->insertHeader(frag);
     ASSERT(pk->getByteLength() == 24+f.bytes);

@@ -111,7 +111,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
-    const auto& icmpHeader = std::make_shared<IcmpHeader>();
+    const auto& icmpHeader = makeShared<IcmpHeader>();
     icmpHeader->setChunkLength(B(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
@@ -229,7 +229,7 @@ void ICMP::processEchoRequest(Packet *request)
     // turn request into a reply
     const auto& icmpReq = request->popHeader<ICMPEchoRequest>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
-    const auto& icmpReply = std::make_shared<ICMPEchoReply>();
+    const auto& icmpReply = makeShared<ICMPEchoReply>();
     icmpReply->setIdentifier(icmpReq->getIdentifier());
     icmpReply->setSeqNumber(icmpReq->getSeqNumber());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();

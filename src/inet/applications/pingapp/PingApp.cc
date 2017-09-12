@@ -215,7 +215,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
             const auto& icmpHeader = packet->popHeader<IcmpHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
-                const auto& echoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(icmpHeader));
+                const auto& echoReply = CHK(dynamicPtrCast<const ICMPEchoReply>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
@@ -229,7 +229,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
             const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
-                const auto& echoReply = CHK(std::dynamic_pointer_cast<const Icmpv6EchoReplyMsg>(icmpHeader));
+                const auto& echoReply = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
@@ -344,13 +344,13 @@ void PingApp::sendPingRequest()
     ASSERT(pid != -1);
 
     Packet *outPacket = new Packet(name);
-    auto payload = std::make_shared<ByteCountChunk>(B(packetSize));
+    auto payload = makeShared<ByteCountChunk>(B(packetSize));
     payload->markImmutable();
 
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            const auto& request = std::make_shared<ICMPEchoRequest>();
+            const auto& request = makeShared<ICMPEchoRequest>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             request->markImmutable();
@@ -364,7 +364,7 @@ void PingApp::sendPingRequest()
         }
         case L3Address::IPv6: {
 #ifdef WITH_IPv6
-            const auto& request = std::make_shared<Icmpv6EchoRequestMsg>();
+            const auto& request = makeShared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             request->markImmutable();
@@ -379,7 +379,7 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
-            const auto& request = std::make_shared<EchoPacket>();
+            const auto& request = makeShared<EchoPacket>();
             request->setChunkLength(B(8));
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->setIdentifier(pid);

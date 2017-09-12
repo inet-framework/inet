@@ -103,7 +103,7 @@ RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::addAgreement(cons
 //
 const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
 {
-    auto delba = std::make_shared<Ieee80211Delba>();
+    auto delba = makeShared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);
     delba->setInitiator(false);
     delba->setTid(tid);
@@ -113,7 +113,7 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddre
 
 const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
-    auto addbaResponse = std::make_shared<Ieee80211AddbaResponse>();
+    auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
     addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
     // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
     Tid tid = addbaRequest->getTid();

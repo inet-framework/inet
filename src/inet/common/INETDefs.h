@@ -84,8 +84,48 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
     return p;
 }
 
-template<typename T>
+// The following macro and template definitions allow the user to replace the
+// standard shared pointer implementation in the Packet API with another one.
+// The standard shared pointer implementation is thread safe if the threading
+// library is used. Thread safety requires additional synchronization primitives
+// which results in unnecessary performance penalty. In general, thread safety
+// is not a requirement for OMNeT++/INET simulations
+#define INET_STD_SHARED_PTR 1
+#define INET_PTR_IMPLEMENTATION INET_STD_SHARED_PTR
+#if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
+
+template<class T>
 using Ptr = std::shared_ptr<T>;
+
+template<class T, typename... Args>
+Ptr<T> makeShared(Args&&... args)
+{
+    return std::make_shared<T>(std::forward<Args>(args)...);
+}
+
+template<class T, class U>
+Ptr<T> staticPtrCast(const Ptr<U>& r)
+{
+    return std::static_pointer_cast<T>(r);
+}
+
+template<class T, class U>
+Ptr<T> dynamicPtrCast(const Ptr<U>& r)
+{
+    return std::dynamic_pointer_cast<T>(r);
+}
+
+template<class T, class U>
+Ptr<T> constPtrCast(const Ptr<U>& r)
+{
+    return std::const_pointer_cast<T>(r);
+}
+
+#else
+#error "Unknown Ptr implementation"
+#endif
+
+//@}
 
 template<class T>
 Ptr<T> __checknull(const Ptr<T>& p, const char *expr, const char *file, int line)

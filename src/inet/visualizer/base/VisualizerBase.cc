@@ -82,11 +82,11 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
 void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
-        for (const auto& elementChunk : std::static_pointer_cast<const SequenceChunk>(chunk)->getChunks())
+        for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks())
             mapChunkIds(elementChunk, thunk);
     }
     else if (chunk->getChunkType() == Chunk::CT_SLICE)
-        thunk(std::static_pointer_cast<const SliceChunk>(chunk)->getChunk()->getChunkId());
+        thunk(staticPtrCast<const SliceChunk>(chunk)->getChunk()->getChunkId());
     else
         thunk(chunk->getChunkId());
 }

@@ -56,7 +56,7 @@ const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConv
     }
     // 3. peeking without conversion returns a ByteCountChunk
     if (converter == nullptr) {
-        auto chunk = std::make_shared<ByteCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
+        auto chunk = makeShared<ByteCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
         chunk->markImmutable();
         return chunk;
     }
@@ -69,7 +69,7 @@ const Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, co
     b chunkLength = chunk->getChunkLength();
     b resultLength = length == b(-1) ? chunkLength - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
-    return std::make_shared<ByteCountChunk>(B(resultLength));
+    return makeShared<ByteCountChunk>(B(resultLength));
 }
 
 void ByteCountChunk::setLength(B length)
@@ -99,7 +99,7 @@ void ByteCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
-    const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
+    const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 
@@ -107,7 +107,7 @@ void ByteCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
-    const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
+    const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 

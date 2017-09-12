@@ -93,7 +93,7 @@ void EthernetApplication::sendPacket()
     EV << "Generating packet `" << msgname << "'\n";
 
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-    const auto& data = std::make_shared<EtherAppReq>();
+    const auto& data = makeShared<EtherAppReq>();
     data->setRequestId(seqNum);
     long len = reqLength->longValue();
     data->setChunkLength(B(len));
@@ -132,7 +132,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
 
             EV << "Generating packet `" << s.str() << "'\n";
             Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
-            const auto& outPayload = std::make_shared<EtherAppResp>();
+            const auto& outPayload = makeShared<EtherAppResp>();
             outPayload->setRequestId(requestId);
             outPayload->setChunkLength(B(l));
             outPayload->markImmutable();

@@ -116,7 +116,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
 
     ASSERT(outLabel.size() > 0);
 
-    const auto& mplsHeader = std::make_shared<MplsHeader>();
+    const auto& mplsHeader = makeShared<MplsHeader>();
     doStackOps(mplsHeader.get(), outLabel);
 
     EV_INFO << "forwarding packet to " << outInterface << endl;
@@ -216,7 +216,7 @@ void MPLS::processMPLSPacketFromL2(Packet *packet)
     int incomingInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getName();
-    const auto& mplsHeader = std::dynamic_pointer_cast<MplsHeader>(packet->popHeader<MplsHeader>()->dupShared());
+    const auto& mplsHeader = dynamicPtrCast<MplsHeader>(packet->popHeader<MplsHeader>()->dupShared());
     ASSERT(mplsHeader->hasLabel());
     MplsLabel oldLabel = mplsHeader->getTopLabel();
 

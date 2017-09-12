@@ -330,7 +330,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OSPFLSAHeader& lsaHeader,
     }
 
     if (sendDirectAcknowledgment) {
-        const auto& ackPacket = std::make_shared<OSPFLinkStateAcknowledgementPacket>();
+        const auto& ackPacket = makeShared<OSPFLinkStateAcknowledgementPacket>();
 
         ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
         ackPacket->setRouterID(IPv4Address(router->getRouterID()));

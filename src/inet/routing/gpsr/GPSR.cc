@@ -217,7 +217,7 @@ void GPSR::processUDPPacket(Packet *packet)
 
 const Ptr<GPSRBeacon> GPSR::createBeacon()
 {
-    const auto& beacon = std::make_shared<GPSRBeacon>();
+    const auto& beacon = makeShared<GPSRBeacon>();
     beacon->setAddress(getSelfAddress());
     beacon->setPosition(mobility->getCurrentPosition());
     beacon->setChunkLength(B(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength));
@@ -230,7 +230,7 @@ void GPSR::sendBeacon(const Ptr<GPSRBeacon>& beacon, double delay)
     Packet *udpPacket = new Packet("GPRSBeacon");
     beacon->markImmutable();
     udpPacket->append(beacon);
-    auto udpHeader = std::make_shared<UdpHeader>();
+    auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
     udpHeader->markImmutable();
@@ -602,7 +602,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     packet->removePoppedHeaders();
     GPSROption *gpsrOption = createGpsrOption(nwHeader->getDestinationAddress());
 #ifdef WITH_IPv4
-    if (std::dynamic_pointer_cast<const Ipv4Header>(nwHeader)) {
+    if (dynamicPtrCast<const Ipv4Header>(nwHeader)) {
         auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
         gpsrOption->setType(IPOPTION_TLV_GPSR);
         int oldHlen = ipv4Header->calculateHeaderByteLength();
@@ -617,7 +617,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     else
 #endif
 #ifdef WITH_IPv6
-    if (std::dynamic_pointer_cast<const Ipv6Header>(nwHeader)) {
+    if (dynamicPtrCast<const Ipv6Header>(nwHeader)) {
         auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
         int oldHlen = ipv6Header->calculateHeaderByteLength();
@@ -636,7 +636,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     else
 #endif
 #ifdef WITH_GENERIC
-    if (std::dynamic_pointer_cast<const GenericDatagramHeader>(nwHeader)) {
+    if (dynamicPtrCast<const GenericDatagramHeader>(nwHeader)) {
         auto gnpHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         int oldHlen = gnpHeader->getTlvOptions().getLength();
@@ -656,13 +656,13 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     const GPSROption *gpsrOption = nullptr;
 
 #ifdef WITH_IPv4
-    if (auto ipv4Header = std::dynamic_pointer_cast<const Ipv4Header>(networkHeader)) {
+    if (auto ipv4Header = dynamicPtrCast<const Ipv4Header>(networkHeader)) {
         gpsrOption = check_and_cast_nullable<const GPSROption *>(ipv4Header->findOptionByType(IPOPTION_TLV_GPSR));
     }
     else
 #endif
 #ifdef WITH_IPv6
-    if (auto ipv6Header = std::dynamic_pointer_cast<const Ipv6Header>(networkHeader)) {
+    if (auto ipv6Header = dynamicPtrCast<const Ipv6Header>(networkHeader)) {
         Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
@@ -673,7 +673,7 @@ const GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_GENERIC
-    if (auto gnpHeader = std::dynamic_pointer_cast<const GenericDatagramHeader>(networkHeader)) {
+    if (auto gnpHeader = dynamicPtrCast<const GenericDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
             gpsrOption = check_and_cast_nullable<const GPSROption *>(&(gnpHeader->getTlvOptions().at(i)));

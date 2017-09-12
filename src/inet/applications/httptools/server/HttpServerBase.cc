@@ -298,7 +298,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
     Packet *replyPk = new Packet(szReply);
-    const auto& replymsg = std::make_shared<HttpReplyMessage>();
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -354,7 +354,7 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
     Packet *replyPk = new Packet(szReply);
-    const auto& replymsg = std::make_shared<HttpReplyMessage>();
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -376,7 +376,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
     Packet *replyPk = new Packet(szErrStr);
-    const auto& replymsg = std::make_shared<HttpReplyMessage>();
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());

@@ -115,7 +115,7 @@ std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet
     if (basicReassembly) { // FIXME: defragmentation
         mgmtPacket = defragment(mgmtPacket);
     }
-    if (auto delba = std::dynamic_pointer_cast<const Ieee80211Delba>(mgmtHeader))
+    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
         blockAckReordering->processReceivedDelba(delba);
     // TODO: Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
     return std::vector<Packet *>({mgmtPacket});
@@ -123,7 +123,7 @@ std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet
 
 std::vector<Packet *> RecipientQoSMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
-    if (auto blockAckReq = std::dynamic_pointer_cast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
+    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
         BlockAckReordering::ReorderBuffer frames;
         if (blockAckReordering) {
             Tid tid = blockAckReq->getTidInfo();

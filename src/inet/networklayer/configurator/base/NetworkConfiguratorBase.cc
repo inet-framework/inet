@@ -394,7 +394,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
             Packet *transmittedFrame = new Packet();
-            auto byteCountChunk = std::make_shared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMTU()));
+            auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMTU()));
             byteCountChunk->markImmutable();
             transmittedFrame->append(byteCountChunk);
             // TODO: KLUDGE: review

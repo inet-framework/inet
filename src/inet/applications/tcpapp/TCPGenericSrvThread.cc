@@ -53,7 +53,7 @@ void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
 
     if (requestedBytes > 0) {
         Packet *outPacket = new Packet(msg->getName());
-        const auto& payload = std::make_shared<ByteCountChunk>(B(requestedBytes));
+        const auto& payload = makeShared<ByteCountChunk>(B(requestedBytes));
         payload->markImmutable();
         outPacket->append(payload);
         getSocket()->send(outPacket);

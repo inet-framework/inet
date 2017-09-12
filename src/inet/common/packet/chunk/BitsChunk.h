@@ -48,7 +48,7 @@ class INET_API BitsChunk : public Chunk
     BitsChunk(const std::vector<bool>& bits);
 
     virtual BitsChunk *dup() const override { return new BitsChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<BitsChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<BitsChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

@@ -26,7 +26,7 @@ Register_Serializer(PppTrailer, PppTrailerSerializer);
 
 void PppHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& pppHeader = std::static_pointer_cast<const PppHeader>(chunk);
+    const auto& pppHeader = staticPtrCast<const PppHeader>(chunk);
     stream.writeUint8(pppHeader->getFlag());
     stream.writeUint8(pppHeader->getAddress());
     stream.writeUint8(pppHeader->getControl());
@@ -35,7 +35,7 @@ void PppHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 const Ptr<Chunk> PppHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto pppHeader = std::make_shared<PppHeader>();
+    auto pppHeader = makeShared<PppHeader>();
     pppHeader->setFlag(stream.readUint8());
     pppHeader->setAddress(stream.readUint8());
     pppHeader->setControl(stream.readUint8());
@@ -45,14 +45,14 @@ const Ptr<Chunk> PppHeaderSerializer::deserialize(MemoryInputStream& stream) con
 
 void PppTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& pppTrailer = std::static_pointer_cast<const PppTrailer>(chunk);
+    const auto& pppTrailer = staticPtrCast<const PppTrailer>(chunk);
     stream.writeUint16Be(pppTrailer->getFcs());
 //    stream.writeUint8(pppTrailer->getFlag()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
 }
 
 const Ptr<Chunk> PppTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto pppTrailer = std::make_shared<PppTrailer>();
+    auto pppTrailer = makeShared<PppTrailer>();
     pppTrailer->setFcs(stream.readUint16Be());
 //    pppTrailer->setFlag(stream.readUint8()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
     return pppTrailer;

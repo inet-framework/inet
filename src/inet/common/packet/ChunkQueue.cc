@@ -102,7 +102,7 @@ void ChunkQueue::push(const Ptr<const Chunk>& chunk)
             contents = newContents->simplify();
         }
         else {
-            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            auto sequenceChunk = makeShared<SequenceChunk>();
             sequenceChunk->insertAtEnd(contents);
             sequenceChunk->insertAtEnd(chunk);
             sequenceChunk->markImmutable();

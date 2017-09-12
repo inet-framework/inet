@@ -48,7 +48,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv4-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<Ipv4Header>();
+      const auto& header = makeShared<Ipv4Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
@@ -60,7 +60,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv6-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<Ipv6Header>();
+      const auto& header = makeShared<Ipv6Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
@@ -78,11 +78,11 @@ void TestApp::handleMessage(cMessage *msg)
     Packet *packet = check_and_cast<Packet*>(msg);
     const auto& chunk = packet->peekHeader<Chunk>();
 
-    if (const auto& hdr = std::dynamic_pointer_cast<const Ipv4Header>(chunk))
+    if (const auto& hdr = dynamicPtrCast<const Ipv4Header>(chunk))
     {
         out << packet->getName() << ": " << hdr->getDiffServCodePoint() << "\n";
     }
-    else if (const auto& hdr = std::dynamic_pointer_cast<const Ipv6Header>(chunk))
+    else if (const auto& hdr = dynamicPtrCast<const Ipv6Header>(chunk))
     {
         out << packet->getName() << ": " << hdr->getDiffServCodePoint() << "\n";
     }

@@ -103,7 +103,7 @@ void TCPBasicClientApp::sendRequest()
     if (replyLength < 1)
         replyLength = 1;
 
-    const auto& payload = std::make_shared<GenericAppMsg>();
+    const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(replyLength);

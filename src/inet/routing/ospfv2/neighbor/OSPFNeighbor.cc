@@ -179,7 +179,7 @@ const char *Neighbor::getStateString(Neighbor::NeighborStateType stateType)
 
 void Neighbor::sendDatabaseDescriptionPacket(bool init)
 {
-    const auto& ddPacket = std::make_shared<OSPFDatabaseDescriptionPacket>();
+    const auto& ddPacket = makeShared<OSPFDatabaseDescriptionPacket>();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -332,7 +332,7 @@ void Neighbor::createDatabaseSummary()
 
 void Neighbor::sendLinkStateRequestPacket()
 {
-    const auto& requestPacket = std::make_shared<OSPFLinkStateRequestPacket>();
+    const auto& requestPacket = makeShared<OSPFLinkStateRequestPacket>();
 
     requestPacket->setType(LINKSTATE_REQUEST_PACKET);
     requestPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -615,7 +615,7 @@ void Neighbor::ageTransmittedLSAList()
 
 void Neighbor::retransmitUpdatePacket()
 {
-    const auto& updatePacket = std::make_shared<OSPFLinkStateUpdatePacket>();
+    const auto& updatePacket = makeShared<OSPFLinkStateUpdatePacket>();
 
     updatePacket->setType(LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));

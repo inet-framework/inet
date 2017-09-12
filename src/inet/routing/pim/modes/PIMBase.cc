@@ -156,7 +156,7 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getName() << "'\n";
 
     Packet *pk = new Packet("PIMHello");
-    const auto& msg = std::make_shared<PIMHello>();
+    const auto& msg = makeShared<PIMHello>();
 
     int byteLength = PIM_HEADER_LENGTH + 6 + 8;    // HoldTime + GenerationID option
 

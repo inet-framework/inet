@@ -56,7 +56,7 @@ bool FrameSequenceContext::isSentByUs(const Ptr<const Ieee80211MacHeader>& heade
     // FIXME:
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
-    if (auto dataOrMgmtHeader = std::dynamic_pointer_cast<const Ieee80211DataOrMgmtHeader>(header))
+    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         return dataOrMgmtHeader->getAddress3() == address;
     else
         return false;

@@ -11,7 +11,7 @@ void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
     Packet *msg = new Packet(msgname);
-    const auto & bytes = std::make_shared<ByteCountChunk>(byte(numBytes));
+    const auto & bytes = makeShared<ByteCountChunk>(byte(numBytes));
     msg->insertTrailer(bytes);
     ASSERT(msg->getByteLength() == numBytes);
     sq->enqueueAppData(msg);
@@ -24,7 +24,7 @@ void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
     Packet *msg = new Packet(msgname);
-    const auto & bytes = std::make_shared<ByteCountChunk>(byte(numBytes));
+    const auto & bytes = makeShared<ByteCountChunk>(byte(numBytes));
     msg->insertTrailer(bytes);
     ASSERT(msg->getByteLength() == numBytes);
     try {
@@ -58,7 +58,7 @@ Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq)
         delete tcpseg;
     }
 
-    const auto& tcpHdr = std::make_shared<TcpHeader>();
+    const auto& tcpHdr = makeShared<TcpHeader>();
     tcpHdr->setSequenceNo(fromSeq);
     pk->insertHeader(tcpHdr);
 
@@ -122,9 +122,9 @@ void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
 
     Packet *msg = new Packet();
     unsigned int numBytes = end - beg;
-    const auto& bytes = std::make_shared<ByteCountChunk>(byte(numBytes));
+    const auto& bytes = makeShared<ByteCountChunk>(byte(numBytes));
     msg->insertTrailer(bytes);
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(beg);
     msg->insertHeader(tcpseg);
 
@@ -140,9 +140,9 @@ void tryinsertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
 
     Packet *msg = new Packet();
     unsigned int numBytes = end - beg;
-    const auto& bytes = std::make_shared<ByteCountChunk>(byte(numBytes));
+    const auto& bytes = makeShared<ByteCountChunk>(byte(numBytes));
     msg->insertTrailer(bytes);
-    const auto& tcpseg = std::make_shared<TcpHeader>();
+    const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(beg);
     msg->insertHeader(tcpseg);
 

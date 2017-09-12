@@ -23,7 +23,7 @@ namespace ieee80211 {
 const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
     throw cRuntimeError("Unsupported feature");
-    auto blockAckReq = std::make_shared<Ieee80211CompressedBlockAckReq>();
+    auto blockAckReq = makeShared<Ieee80211CompressedBlockAckReq>();
     blockAckReq->setReceiverAddress(receiverAddress);
     blockAckReq->setStartingSequenceNumber(startingSequenceNumber);
     blockAckReq->setTidInfo(tid);
@@ -32,7 +32,7 @@ const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBloc
 
 const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildBasicBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
-    auto blockAckReq = std::make_shared<Ieee80211BasicBlockAckReq>();
+    auto blockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
     blockAckReq->setReceiverAddress(receiverAddress);
     blockAckReq->setStartingSequenceNumber(startingSequenceNumber);
     blockAckReq->setTidInfo(tid);

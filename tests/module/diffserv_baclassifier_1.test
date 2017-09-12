@@ -48,7 +48,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv4-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<Ipv4Header>();
+      const auto& header = makeShared<Ipv4Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
@@ -60,7 +60,7 @@ void TestApp::initialize()
     {
       sprintf(buf, "ipv6-%d", i);
       auto packet = new Packet(buf);
-      const auto& header = std::make_shared<Ipv6Header>();
+      const auto& header = makeShared<Ipv6Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
       packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);

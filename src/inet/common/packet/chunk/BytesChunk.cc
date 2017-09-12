@@ -51,7 +51,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     }
     // 3. peeking without conversion returns a BytesChunk
     if (converter == nullptr) {
-        auto chunk = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
+        auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
         chunk->markImmutable();
         return chunk;
     }
@@ -63,7 +63,7 @@ const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const 
 {
     MemoryOutputStream outputStream(chunk->getChunkLength());
     Chunk::serialize(outputStream, chunk, offset, length);
-    return std::make_shared<BytesChunk>(outputStream.getData());
+    return makeShared<BytesChunk>(outputStream.getData());
 }
 
 void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
@@ -108,7 +108,7 @@ void BytesChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
-    const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
+    const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
@@ -116,7 +116,7 @@ void BytesChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
-    const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
+    const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 

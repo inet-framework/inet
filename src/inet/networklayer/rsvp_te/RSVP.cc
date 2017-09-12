@@ -447,7 +447,7 @@ void RSVP::processHELLO_TIMER(HelloTimerMsg *msg)
     ASSERT(h);
 
     Packet *pk = new Packet("hello message");
-    const auto& hMsg = std::make_shared<RSVPHelloMsg>();
+    const auto& hMsg = makeShared<RSVPHelloMsg>();
 
     hMsg->setSrcInstance(h->srcInstance);
     hMsg->setDstInstance(h->dstInstance);
@@ -563,7 +563,7 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
     ASSERT(tedmod->isLocalAddress(OI));
 
     Packet *pk = new Packet("Path");
-    const auto& pm = std::make_shared<RSVPPathMsg>();
+    const auto& pm = makeShared<RSVPPathMsg>();
 
     pm->setSession(psbEle->Session_Object);
     pm->setSenderTemplate(psbEle->Sender_Template_Object);
@@ -621,7 +621,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     EV_INFO << "refresh reservation (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
 
     Packet *pk = new Packet("    Resv");
-    const auto& msg = std::make_shared<RSVPResvMsg>();
+    const auto& msg = makeShared<RSVPResvMsg>();
 
     FlowDescriptorVector flows;
 
@@ -1497,7 +1497,7 @@ void RSVP::processPathTearMsg(Packet *pk)
 void RSVP::processPathMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_MESSAGE" << endl;
-    auto msg = std::dynamic_pointer_cast<RSVPPathMsg>(pk->peekHeader<RSVPPathMsg>()->dupShared());
+    auto msg = dynamicPtrCast<RSVPPathMsg>(pk->peekHeader<RSVPPathMsg>()->dupShared());
     print(msg.get());
 
     // process ERO *************************************************************
@@ -1843,7 +1843,7 @@ void RSVP::processCommand(const cXMLElement& node)
 void RSVP::sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPv4Address LIH, IPv4Address NHOP, bool force)
 {
     Packet *pk = new Packet("PathTear");
-    const auto& msg = std::make_shared<RSVPPathTear>();
+    const auto& msg = makeShared<RSVPPathTear>();
     msg->setSenderTemplate(sender);
     msg->setSession(session);
     RsvpHopObj_t hop;
@@ -1867,7 +1867,7 @@ void RSVP::sendPathErrorMessage(PathStateBlock_t *psb, int errCode)
 void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPv4Address nextHop, int errCode)
 {
     Packet *pk = new Packet("PathErr");
-    const auto& msg = std::make_shared<RSVPPathError>();
+    const auto& msg = makeShared<RSVPPathError>();
     msg->setErrorCode(errCode);
     msg->setErrorNode(routerId);
     msg->setSession(session);

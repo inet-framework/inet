@@ -30,8 +30,8 @@ Register_Serializer(Ieee80211OfdmPhyHeader, Ieee80211PhyHeaderSerializer);
 
 void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& phyHeader = std::static_pointer_cast<const Ieee80211PhyHeader>(chunk);
-    if (auto ofdmPhyHeader = std::dynamic_pointer_cast<const Ieee80211OfdmPhyHeader>(chunk)) {
+    const auto& phyHeader = staticPtrCast<const Ieee80211PhyHeader>(chunk);
+    if (auto ofdmPhyHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(chunk)) {
         stream.writeUint4(ofdmPhyHeader->getRate());
         stream.writeBit(false);
         stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 8));
@@ -50,7 +50,7 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
 const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     if (true) {
-        auto ofdmPhyHeader = std::make_shared<Ieee80211OfdmPhyHeader>();
+        auto ofdmPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
         ofdmPhyHeader->setRate(stream.readUint4());
         stream.readBit();
         uint16_t lengthField = 0;
@@ -64,7 +64,7 @@ const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& st
         return ofdmPhyHeader;
     }
     else {
-        auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
+        auto phyHeader = makeShared<Ieee80211PhyHeader>();
         // TODO:
         phyHeader->setChunkLength(b(192));
         stream.readByteRepeatedly('?', B(phyHeader->getChunkLength()).get());

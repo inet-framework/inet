@@ -120,7 +120,7 @@ void BGPSession::restartsConnectRetryTimer(bool start)
 void BGPSession::sendOpenMessage()
 {
     Packet *pk = new Packet("BGPOpen");
-    const auto& openMsg = std::make_shared<BGPOpenMessage>();
+    const auto& openMsg = makeShared<BGPOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIPv4());
@@ -133,7 +133,7 @@ void BGPSession::sendOpenMessage()
 void BGPSession::sendKeepAliveMessage()
 {
     Packet *pk = new Packet("BGPKeepAlive");
-    const auto &keepAliveMsg = std::make_shared<BGPKeepAliveMessage>();
+    const auto &keepAliveMsg = makeShared<BGPKeepAliveMessage>();
     keepAliveMsg->markImmutable();
     pk->pushHeader(keepAliveMsg);
     _info.socket->send(pk);

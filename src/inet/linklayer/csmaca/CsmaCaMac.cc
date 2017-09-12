@@ -437,7 +437,7 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 
 void CsmaCaMac::encapsulate(Packet *frame)
 {
-    auto macHeader = std::make_shared<CsmaCaMacDataHeader>();
+    auto macHeader = makeShared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(B(headerLength));
     auto transportProtocol = frame->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
@@ -562,7 +562,7 @@ void CsmaCaMac::sendAckFrame()
     EV << "sending Ack frame\n";
     auto frameToAck = static_cast<Packet *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
-    auto macHeader = std::make_shared<CsmaCaMacAckHeader>();
+    auto macHeader = makeShared<CsmaCaMacAckHeader>();
     macHeader->setReceiverAddress(frameToAck->peekHeader<CsmaCaMacHeader>()->getTransmitterAddress());
     macHeader->setChunkLength(B(ackLength));
     macHeader->markImmutable();
@@ -643,7 +643,7 @@ bool CsmaCaMac::isReceiving()
 bool CsmaCaMac::isAck(Packet *frame)
 {
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
-    return std::dynamic_pointer_cast<const CsmaCaMacAckHeader>(macHeader) != nullptr;
+    return dynamicPtrCast<const CsmaCaMacAckHeader>(macHeader) != nullptr;
 }
 
 bool CsmaCaMac::isBroadcast(Packet *frame)

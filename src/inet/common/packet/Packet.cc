@@ -100,7 +100,7 @@ void Packet::pushHeader(const Ptr<const Chunk>& chunk)
 void Packet::insertHeader(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    std::const_pointer_cast<Chunk>(chunk)->markImmutable();
+    constPtrCast<Chunk>(chunk)->markImmutable();
     prepend(chunk);
 }
 
@@ -151,7 +151,7 @@ void Packet::pushTrailer(const Ptr<const Chunk>& chunk)
 void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    std::const_pointer_cast<Chunk>(chunk)->markImmutable();
+    constPtrCast<Chunk>(chunk)->markImmutable();
     append(chunk);
 }
 
@@ -187,7 +187,7 @@ void Packet::prepend(const Ptr<const Chunk>& chunk)
             contents = newContents->simplify();
         }
         else {
-            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            auto sequenceChunk = makeShared<SequenceChunk>();
             sequenceChunk->insertAtBeginning(contents);
             sequenceChunk->insertAtBeginning(chunk);
             sequenceChunk->markImmutable();
@@ -213,7 +213,7 @@ void Packet::append(const Ptr<const Chunk>& chunk)
             contents = newContents->simplify();
         }
         else {
-            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            auto sequenceChunk = makeShared<SequenceChunk>();
             sequenceChunk->insertAtEnd(contents);
             sequenceChunk->insertAtEnd(chunk);
             sequenceChunk->markImmutable();

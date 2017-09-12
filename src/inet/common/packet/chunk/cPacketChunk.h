@@ -42,7 +42,7 @@ class INET_API cPacketChunk : public Chunk
     ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<cPacketChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

@@ -65,8 +65,8 @@ void Ieee80211SymbolDomainTest::parseInput(const char* fileName)
 
 void Ieee80211SymbolDomainTest::test() const
 {
-    const auto& signalField = std::make_shared<BytesChunk>(std::vector<uint8_t>(3));
-    const auto& dataField = std::make_shared<BytesChunk>(std::vector<uint8_t>(input.getNumberOfBytes() - 3));
+    const auto& signalField = makeShared<BytesChunk>(std::vector<uint8_t>(3));
+    const auto& dataField = makeShared<BytesChunk>(std::vector<uint8_t>(input.getNumberOfBytes() - 3));
     for (unsigned int i = 0; i < 3; i++)
         signalField->setByte(i, input.getBytes()[i]);
     signalField->markImmutable();

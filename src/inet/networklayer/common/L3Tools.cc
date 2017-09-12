@@ -47,7 +47,7 @@ const Protocol& getNetworkProtocol(Packet *packet)
 const Ptr<const NetworkHeaderBase> findNetworkProtocolHeader(Packet *packet)
 {
     auto networkProtocolInd = packet->getTag<NetworkProtocolInd>();
-    return networkProtocolInd == nullptr ? nullptr : std::dynamic_pointer_cast<const NetworkHeaderBase>(networkProtocolInd->getNetworkProtocolHeader());
+    return networkProtocolInd == nullptr ? nullptr : dynamicPtrCast<const NetworkHeaderBase>(networkProtocolInd->getNetworkProtocolHeader());
 }
 
 const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet)

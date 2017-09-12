@@ -208,7 +208,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
 void CSMA::handleUpperPacket(Packet *packet)
 {
     //MacPkt*macPkt = encapsMsg(msg);
-    auto macPkt = std::make_shared<CSMAHeader>();
+    auto macPkt = makeShared<CSMAHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
     MACAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
@@ -888,7 +888,7 @@ void CSMA::handleLowerPacket(Packet *packet)
 
                 if (ackMessage != nullptr)
                     delete ackMessage;
-                auto csmaHeader = std::make_shared<CSMAHeader>();
+                auto csmaHeader = makeShared<CSMAHeader>();
                 csmaHeader->setSrcAddr(address);
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));

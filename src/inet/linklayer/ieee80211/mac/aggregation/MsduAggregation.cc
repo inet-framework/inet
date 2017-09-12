@@ -65,7 +65,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     auto aggregatedFrame = new Packet("A-MSDU");
     for (int i = 0; i < (int)frames->size(); i++)
     {
-        auto msduSubframeHeader = std::make_shared<Ieee80211MsduSubframeHeader>();
+        auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popHeader<Ieee80211DataHeader>();
         frame->popTrailer<Ieee80211MacTrailer>();
@@ -77,7 +77,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         aggregatedFrame->append(msdu);
         int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
-            auto padding = std::make_shared<ByteCountChunk>(B(paddingLength));
+            auto padding = makeShared<ByteCountChunk>(B(paddingLength));
             padding->markImmutable();
             aggregatedFrame->append(padding);
         }
@@ -86,7 +86,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     // The MPDU containing the A-MSDU is carried in any of the following data frame subtypes: QoS Data,
     // QoS Data + CF-Ack, QoS Data + CF-Poll, QoS Data + CF-Ack + CF-Poll. The A-MSDU structure is
     // contained in the frame body of a single MPDU.
-    auto amsduHeader = std::make_shared<Ieee80211DataHeader>();
+    auto amsduHeader = makeShared<Ieee80211DataHeader>();
     amsduHeader->setType(ST_DATA_WITH_QOS);
     amsduHeader->setToDS(toDS);
     amsduHeader->setFromDS(fromDS);
@@ -97,7 +97,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);
-    aggregatedFrame->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+    aggregatedFrame->insertTrailer(makeShared<Ieee80211MacTrailer>());
     return aggregatedFrame;
 }
 

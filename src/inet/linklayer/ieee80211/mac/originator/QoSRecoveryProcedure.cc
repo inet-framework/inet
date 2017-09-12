@@ -225,7 +225,7 @@ int QoSRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHea
 
 bool QoSRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    if (auto oneAddressHeader = std::dynamic_pointer_cast<const Ieee80211OneAddressHeader>(header))
+    if (auto oneAddressHeader = dynamicPtrCast<const Ieee80211OneAddressHeader>(header))
         return oneAddressHeader->getReceiverAddress().isMulticast();
     return false;
 }

@@ -582,7 +582,7 @@ void RSTP::sendTCNtoRoot()
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
                 Packet *packet = new Packet("BPDU");
-                const auto& frame = std::make_shared<BPDU>();
+                const auto& frame = makeShared<BPDU>();
                 frame->setRootPriority(rootPort->getRootPriority());
                 frame->setRootAddress(rootPort->getRootAddress());
                 frame->setMessageAge(rootPort->getAge());
@@ -638,7 +638,7 @@ void RSTP::sendBPDU(int interfaceId)
         rootPort = getPortInterfaceData(r);
     if (iport->getRole() != Ieee8021dInterfaceData::DISABLED) {
         Packet *packet = new Packet("BPDU");
-        const auto& frame = std::make_shared<BPDU>();
+        const auto& frame = makeShared<BPDU>();
         if (r != -1) {
             frame->setRootPriority(rootPort->getRootPriority());
             frame->setRootAddress(rootPort->getRootAddress());

@@ -25,7 +25,7 @@ Register_Serializer(UdpHeader, UdpHeaderSerializer);
 
 void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& udpHeader = std::static_pointer_cast<const UdpHeader>(chunk);
+    const auto& udpHeader = staticPtrCast<const UdpHeader>(chunk);
     stream.writeUint16Be(udpHeader->getSourcePort());
     stream.writeUint16Be(udpHeader->getDestinationPort());
     stream.writeUint16Be(udpHeader->getTotalLengthField());
@@ -37,7 +37,7 @@ void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 const Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto udpHeader = std::make_shared<UdpHeader>();
+    auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(stream.readUint16Be());
     udpHeader->setDestinationPort(stream.readUint16Be());
     udpHeader->setTotalLengthField(stream.readUint16Be());

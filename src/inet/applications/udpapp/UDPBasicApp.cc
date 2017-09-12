@@ -110,7 +110,7 @@ void UDPBasicApp::sendPacket()
     std::ostringstream str;
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
-    const auto& payload = std::make_shared<ApplicationPacket>();
+    const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(par("messageLength").longValue()));
     payload->setSequenceNumber(numSent);
     payload->markImmutable();

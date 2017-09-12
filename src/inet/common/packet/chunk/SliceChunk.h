@@ -61,7 +61,7 @@ class INET_API SliceChunk : public Chunk
     SliceChunk(const Ptr<Chunk>& chunk, b offset, b length);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<SliceChunk>(*this); }
     //@}
 
     virtual void forEachChild(cVisitor *v) override;

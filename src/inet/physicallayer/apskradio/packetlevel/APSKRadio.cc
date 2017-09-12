@@ -46,7 +46,7 @@ void APSKRadio::encapsulate(Packet *packet) const
 {
     const APSKModulationBase *modulation = nullptr;
     // TODO: const ConvolutionalCode *forwardErrorCorrection = nullptr;
-    auto phyHeader = std::make_shared<APSKPhyHeader>();
+    auto phyHeader = makeShared<APSKPhyHeader>();
 
     // KLUDGE:
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
@@ -77,7 +77,7 @@ void APSKRadio::encapsulate(Packet *packet) const
     packet->pushHeader(phyHeader);
     auto paddingBitLength = b(computePaddingLength(b(packet->getTotalLength()).get(), nullptr, modulation));
     if (paddingBitLength != b(0)) {
-        auto paddingTrailer = std::make_shared<ByteCountChunk>(paddingBitLength);
+        auto paddingTrailer = makeShared<ByteCountChunk>(paddingBitLength);
         paddingTrailer->markImmutable();
         packet->pushTrailer(paddingTrailer);
     }

@@ -129,7 +129,7 @@ void Interface::reset()
 void Interface::sendHelloPacket(IPv4Address destination, short ttl)
 {
     OSPFOptions options;
-    const auto& helloPacket = std::make_shared<OSPFHelloPacket>();
+    const auto& helloPacket = makeShared<OSPFHelloPacket>();
     std::vector<IPv4Address> neighbors;
 
     helloPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
@@ -179,7 +179,7 @@ void Interface::sendHelloPacket(IPv4Address destination, short ttl)
 void Interface::sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Address destination)
 {
     OSPFOptions options;
-    const auto& lsAckPacket = std::make_shared<OSPFLinkStateAcknowledgementPacket>();
+    const auto& lsAckPacket = makeShared<OSPFLinkStateAcknowledgementPacket>();
 
     lsAckPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
     lsAckPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
@@ -450,7 +450,7 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
         (((lsaType == SUMMARYLSA_NETWORKS_TYPE) || (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) && (summaryLSA != nullptr)) ||
         ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != nullptr)))
     {
-        const auto& updatePacket = std::make_shared<OSPFLinkStateUpdatePacket>();
+        const auto& updatePacket = makeShared<OSPFLinkStateUpdatePacket>();
         long packetLength = OSPF_HEADER_LENGTH + sizeof(uint32_t);    // OSPF header + place for number of advertisements
 
         updatePacket->setType(LINKSTATE_UPDATE_PACKET);
@@ -568,7 +568,7 @@ void Interface::sendDelayedAcknowledgements()
         int ackCount = elem.second.size();
         if (ackCount > 0) {
             while (!(elem.second.empty())) {
-                const auto& ackPacket = std::make_shared<OSPFLinkStateAcknowledgementPacket>();
+                const auto& ackPacket = makeShared<OSPFLinkStateAcknowledgementPacket>();
                 long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);

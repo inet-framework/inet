@@ -57,8 +57,8 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     }
     // 3. peeking a part represented by an element chunk with its index returns that element chunk
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
-        // KLUDGE: TODO: std::const_pointer_cast<Chunk>
-        const auto& chunk = std::const_pointer_cast<Chunk>(getElementChunk(iterator));
+        // KLUDGE: TODO: constPtrCast<Chunk>
+        const auto& chunk = constPtrCast<Chunk>(getElementChunk(iterator));
         if (length == b(-1) || chunk->getChunkLength() == length) {
             if (predicate == nullptr || predicate(chunk))
                 return chunk;
@@ -67,8 +67,8 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     // 4. peeking a part represented by an element chunk returns that element chunk
     b position = b(0);
     for (size_t i = 0; i < chunks.size(); i++) {
-        // KLUDGE: TODO: std::const_pointer_cast<Chunk>
-        const auto& chunk = std::const_pointer_cast<Chunk>(chunks[getElementIndex(iterator.isForward(), i)]);
+        // KLUDGE: TODO: constPtrCast<Chunk>
+        const auto& chunk = constPtrCast<Chunk>(chunks[getElementIndex(iterator.isForward(), i)]);
         b chunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
         if (iterator.getPosition() == position && (length == b(-1) || length == chunk->getChunkLength())) {
@@ -90,8 +90,8 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
 
 const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
-    auto sequenceChunk = std::make_shared<SequenceChunk>();
-    sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
+    auto sequenceChunk = makeShared<SequenceChunk>();
+    sequenceChunk->insertAtEnd(makeShared<SliceChunk>(chunk, offset, length));
     return sequenceChunk;
 }
 
@@ -123,7 +123,7 @@ void SequenceChunk::markImmutable()
 {
     Chunk::markImmutable();
     for (const auto& chunk : chunks)
-        std::const_pointer_cast<Chunk>(chunk)->markImmutable();
+        constPtrCast<Chunk>(chunk)->markImmutable();
 }
 
 bool SequenceChunk::isIncomplete() const
@@ -221,7 +221,7 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
 void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
-        auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
+        auto sequenceChunk = staticPtrCast<SequenceChunk>(sliceChunk->getChunk());
         b offset = sequenceChunk->getChunkLength();
         b sliceChunkBegin = sliceChunk->getOffset();
         b sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
@@ -242,7 +242,7 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
         }
     }
     else
-        doInsertToBeginning(std::static_pointer_cast<const Chunk>(sliceChunk));
+        doInsertToBeginning(staticPtrCast<const Chunk>(sliceChunk));
 }
 
 void SequenceChunk::doInsertToBeginning(const Ptr<const SequenceChunk>& chunk)
@@ -255,9 +255,9 @@ void SequenceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToBeginning(std::static_pointer_cast<const SliceChunk>(chunk));
+        doInsertToBeginning(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToBeginning(std::static_pointer_cast<const SequenceChunk>(chunk));
+        doInsertToBeginning(staticPtrCast<const SequenceChunk>(chunk));
     else
         doInsertToBeginning(chunk);
 }
@@ -283,7 +283,7 @@ void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
 void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
-        auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
+        auto sequenceChunk = staticPtrCast<SequenceChunk>(sliceChunk->getChunk());
         b offset = b(0);
         b sliceChunkBegin = sliceChunk->getOffset();
         b sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
@@ -303,7 +303,7 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
         }
     }
     else
-        doInsertToEnd(std::static_pointer_cast<const Chunk>(sliceChunk));
+        doInsertToEnd(staticPtrCast<const Chunk>(sliceChunk));
 }
 
 void SequenceChunk::doInsertToEnd(const Ptr<const SequenceChunk>& chunk)
@@ -316,9 +316,9 @@ void SequenceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToEnd(std::static_pointer_cast<const SliceChunk>(chunk));
+        doInsertToEnd(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToEnd(std::static_pointer_cast<const SequenceChunk>(chunk));
+        doInsertToEnd(staticPtrCast<const SequenceChunk>(chunk));
     else
         doInsertToEnd(chunk);
 }

@@ -41,7 +41,7 @@ void RecipientAckProcedure::processTransmittedAck(const Ptr<const Ieee80211AckFr
 
 const Ptr<Ieee80211AckFrame> RecipientAckProcedure::buildAck(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    auto ack = std::make_shared<Ieee80211AckFrame>();
+    auto ack = makeShared<Ieee80211AckFrame>();
     ack->setReceiverAddress(dataOrMgmtHeader->getTransmitterAddress());
     return ack;
 }

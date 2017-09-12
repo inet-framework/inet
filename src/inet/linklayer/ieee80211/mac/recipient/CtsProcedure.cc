@@ -40,7 +40,7 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
 
 const Ptr<Ieee80211CtsFrame> CtsProcedure::buildCts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-    const Ptr<Ieee80211CtsFrame>& cts = std::make_shared<Ieee80211CtsFrame>();
+    const Ptr<Ieee80211CtsFrame>& cts = makeShared<Ieee80211CtsFrame>();
     // The RA field of the CTS frame shall be the value
     // obtained from the TA field of the to which this
     // CTS frame is a response.

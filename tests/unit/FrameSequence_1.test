@@ -44,7 +44,7 @@ class DataFs : public IFrameSequence
             if (context == originatorContext) {
                 switch (step) {
                     case 0: {
-                        const auto& header = std::make_shared<Ieee80211MacHeader>();
+                        const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("DATA");
                         header->setType(ST_DATA);
                         return new TransmitStep(packet, 0);
@@ -121,7 +121,7 @@ class INET_API AckFs : public IFrameSequence
             else {
                 switch (step) {
                     case 0: {
-                        const auto& header = std::make_shared<Ieee80211MacHeader>();
+                        const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("ACK");
                         header->setType(ST_ACK);
                         packet->insertHeader(header);
@@ -181,7 +181,7 @@ class RtsCtsFs : public IFrameSequence
             if (context == originatorContext) {
                 switch (step) {
                     case 0: {
-                        const auto& header = std::make_shared<Ieee80211MacHeader>();
+                        const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("RTS");
                         header->setType(ST_RTS);
                         packet->insertHeader(header);
@@ -200,7 +200,7 @@ class RtsCtsFs : public IFrameSequence
                     case 0:
                         return new ReceiveStep();
                     case 1: {
-                        const auto& header = std::make_shared<Ieee80211MacHeader>();
+                        const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("CTS");
                         header->setType(ST_CTS);
                         packet->insertHeader(header);

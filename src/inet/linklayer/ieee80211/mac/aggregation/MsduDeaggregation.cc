@@ -68,7 +68,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         auto frame = new Packet("A-MSDU-Subframe");
         frame->append(msdu);
-        auto header = std::make_shared<Ieee80211DataHeader>();
+        auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));
         header->setToDS(amsduHeader->getToDS());
@@ -76,7 +76,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         header->setTid(tid);
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
         frame->insertHeader(header);
-        frame->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+        frame->insertTrailer(makeShared<Ieee80211MacTrailer>());
         frames->push_back(frame);
     }
     delete aggregatedFrame;

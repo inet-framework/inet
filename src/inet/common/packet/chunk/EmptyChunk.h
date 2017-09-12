@@ -42,7 +42,7 @@ class INET_API EmptyChunk : public Chunk
     EmptyChunk(const EmptyChunk& other);
 
     virtual EmptyChunk *dup() const override { return new EmptyChunk(*this); }
-    virtual const Ptr<Chunk> dupShared() const override { return std::make_shared<EmptyChunk>(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<EmptyChunk>(*this); }
     //@}
 
     /** @name Overridden chunk functions */

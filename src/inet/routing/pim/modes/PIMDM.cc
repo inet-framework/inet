@@ -1509,7 +1509,7 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EV_INFO << "Sending Prune(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
     Packet *packet = new Packet("PIMPrune");
-    const auto& msg = std::make_shared<PIMJoinPrune>();
+    const auto& msg = makeShared<PIMJoinPrune>();
     msg->setUpstreamNeighborAddress(nextHop);
     msg->setHoldTime(holdTime);
 
@@ -1538,7 +1538,7 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
     EV_INFO << "Sending Join(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
     Packet *packet = new Packet("PIMJoin");
-    const auto& msg = std::make_shared<PIMJoinPrune>();
+    const auto& msg = makeShared<PIMJoinPrune>();
     msg->setUpstreamNeighborAddress(nextHop);
     msg->setHoldTime(0);    // ignored by the receiver
 
@@ -1570,7 +1570,7 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EV_INFO << "Sending Graft(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
     Packet *packet = new Packet("PIMGraft");
-    const auto& msg = std::make_shared<PIMGraft>();
+    const auto& msg = makeShared<PIMGraft>();
     msg->setHoldTime(0);
     msg->setUpstreamNeighborAddress(nextHop);
 
@@ -1607,7 +1607,7 @@ void PIMDM::sendGraftAckPacket(Packet *pk, const Ptr<const PIMGraft>& graftPacke
     int outInterfaceId = ifTag->getInterfaceId();
 
     Packet *packet = new Packet("PIMGraftAck");
-    auto msg = std::dynamic_pointer_cast<PIMGraft>(graftPacket->dupShared());
+    auto msg = dynamicPtrCast<PIMGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
     msg->markImmutable();
     packet->pushHeader(msg);
@@ -1623,7 +1623,7 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
             << ") message on interface '" << downstream->ie->getName() << "'\n";
 
     Packet *packet = new Packet("PIMStateRefresh");
-    const auto& msg = std::make_shared<PIMStateRefresh>();
+    const auto& msg = makeShared<PIMStateRefresh>();
     msg->setGroupAddress(route->group);
     msg->setSourceAddress(route->source);
     msg->setOriginatorAddress(originator);
@@ -1650,7 +1650,7 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
 
     Packet *packet = new Packet("PIMAssert");
-    const auto& pkt = std::make_shared<PIMAssert>();
+    const auto& pkt = makeShared<PIMAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);
     pkt->setR(false);

@@ -339,7 +339,7 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
         unsigned short numOptions = tcpHdr->getHeaderOptionArraySize();
         for (unsigned short i = 0; i < numOptions; i++) {
             if (tcpHdr->getHeaderOption(i)->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
-                auto newTcpHdr = std::static_pointer_cast<TcpHeader>(tcpHdr->dupShared());
+                auto newTcpHdr = staticPtrCast<TcpHeader>(tcpHdr->dupShared());
                 TCPOption* option = newTcpHdr->getHeaderOption(i);
                 TCPOptionMaxSegmentSize *mssOption = check_and_cast<TCPOptionMaxSegmentSize *>(option);
                 unsigned int value = mssOption->getMaxSegmentSize();
@@ -869,7 +869,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
     else {
-        const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
+        const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
         bytes->markImmutable();
         fp = new Packet(nullptr, bytes);
         const auto& tcpHdr = fp->popHeader<TcpHeader>();

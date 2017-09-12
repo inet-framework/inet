@@ -146,7 +146,7 @@ void SimpleVoIPSender::sendVoIPPacket()
         destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
 
     Packet *packet = new Packet("VoIP");
-    const auto& voice = std::make_shared<SimpleVoIPPacket>();
+    const auto& voice = makeShared<SimpleVoIPPacket>();
     voice->setTalkspurtID(talkspurtID - 1);
     voice->setTalkspurtNumPackets(talkspurtNumPackets);
     voice->setPacketID(packetID);

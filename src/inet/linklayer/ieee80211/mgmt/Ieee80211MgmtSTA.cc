@@ -257,7 +257,7 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
     EV << "Sending initial Authentication frame with seqNum=1\n";
 
     // create and send first authentication frame
-    const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
+    const auto& body = makeShared<Ieee80211AuthenticationFrame>();
     body->setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame("Auth", body, ST_AUTHENTICATION, ap->address);
@@ -282,7 +282,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     changeChannel(ap->channel);
 
     // create and send association request
-    const auto& body = std::make_shared<Ieee80211AssociationRequestFrame>();
+    const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
 
     //XXX set the following too?
     // string SSID
@@ -324,7 +324,7 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, c
         const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
         if (header->getType() != ST_BEACON)
             return;
-        const Ptr<const Ieee80211MgmtHeader>& beacon = std::dynamic_pointer_cast<const Ieee80211MgmtHeader>(header);
+        const Ptr<const Ieee80211MgmtHeader>& beacon = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
         APInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
             ap->rxPower = packet->getMandatoryTag<SignalPowerInd>()->getPower().get();
@@ -409,7 +409,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
 void Ieee80211MgmtSTA::sendProbeRequest()
 {
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
-    const auto& body = std::make_shared<Ieee80211ProbeRequestFrame>();
+    const auto& body = makeShared<Ieee80211ProbeRequestFrame>();
     body->setSSID(scanning.ssid.c_str());
     body->setChunkLength(B((2 + scanning.ssid.length()) + (2 + body->getSupportedRates().numRates)));
     sendManagementFrame("ProbeReq", body, ST_PROBEREQUEST, scanning.bssid);
@@ -467,7 +467,7 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     }
 
     // create and send deauthentication request
-    const auto& body = std::make_shared<Ieee80211DeauthenticationFrame>();
+    const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
     body->setReasonCode(ctrl->getReasonCode());
     sendManagementFrame("Deauth", body, ST_DEAUTHENTICATION, address);
 }
@@ -502,7 +502,7 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     }
 
     // create and send disassociation request
-    const auto& body = std::make_shared<Ieee80211DisassociationFrame>();
+    const auto& body = makeShared<Ieee80211DisassociationFrame>();
     body->setReasonCode(ctrl->getReasonCode());
     sendManagementFrame("Disass", body, ST_DISASSOCIATION, address);
 }
@@ -574,7 +574,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<const
     if (frameAuthSeq != ap->authSeqExpected) {
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
-        const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
+        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame("Auth-ERROR", body, ST_AUTHENTICATION, header->getTransmitterAddress());
         delete packet;
@@ -593,7 +593,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<const
         EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
-        const auto& body = std::make_shared<Ieee80211AuthenticationFrame>();
+        const auto& body = makeShared<Ieee80211AuthenticationFrame>();
         body->setSequenceNumber(frameAuthSeq + 1);
         body->setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.

@@ -35,12 +35,12 @@ void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
 {
     auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
     auto paddingLength = ofdmTransmitter->getPaddingLength(packet);
-    const auto& phyHeader = std::make_shared<Ieee80211OfdmPhyHeader>();
+    const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
     phyHeader->setRate(ofdmTransmitter->getMode(packet)->getSignalMode()->getRate());
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
     packet->insertHeader(phyHeader);
     if (paddingLength != b(0)) {
-        const auto& phyTrailer = std::make_shared<BitCountChunk>(paddingLength);
+        const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength);
         packet->insertTrailer(phyTrailer);
     }
 }

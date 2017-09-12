@@ -238,7 +238,7 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         //FIXME frame is immutable
         packet->removeFromBeginning(frame->getChunkLength());
-        const auto& newFrame = std::dynamic_pointer_cast<EtherFrame>(frame->dupShared());
+        const auto& newFrame = dynamicPtrCast<EtherFrame>(frame->dupShared());
         newFrame->setSrc(address);
         newFrame->markImmutable();
         packet->pushHeader(newFrame);

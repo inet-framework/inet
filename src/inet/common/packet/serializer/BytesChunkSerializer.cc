@@ -23,7 +23,7 @@ Register_Serializer(BytesChunk, BytesChunkSerializer);
 
 void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
-    const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
+    const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     b serializedLength = length == b(-1) ? bytesChunk->getChunkLength() - offset: length;
     stream.writeBytes(bytesChunk->getBytes(), offset, serializedLength);
     ChunkSerializer::totalSerializedLength += serializedLength;
@@ -31,7 +31,7 @@ void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 const Ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto bytesChunk = std::make_shared<BytesChunk>();
+    auto bytesChunk = makeShared<BytesChunk>();
     B length = stream.getRemainingLength();
     std::vector<uint8_t> chunkBytes;
     stream.readBytes(chunkBytes, length);

@@ -297,7 +297,7 @@ RIPRoute *RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
 void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
 {
     Packet *pk = new Packet("RIP request");
-    const  auto& packet = std::make_shared<RIPPacket>();
+    const  auto& packet = makeShared<RIPPacket>();
     packet->setCommand(RIP_REQUEST);
     packet->setEntryArraySize(1);
     RIPEntry& entry = packet->getEntry(0);
@@ -601,7 +601,7 @@ void RIPRouting::processUpdate(bool triggered)
  */
 void RIPRouting::processRequest(Packet *packet)
 {
-    const auto& ripPacket = std::dynamic_pointer_cast<RIPPacket>(packet->peekHeader<RIPPacket>()->dupShared());
+    const auto& ripPacket = dynamicPtrCast<RIPPacket>(packet->peekHeader<RIPPacket>()->dupShared());
 
     int numEntries = ripPacket->getEntryArraySize();
     if (numEntries == 0) {
@@ -663,7 +663,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
     int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMTU() - 40    /*IPv6_HEADER_BYTES*/ - 8    /*UDP_HEADER_BYTES*/ - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
 
     Packet *pk = new Packet("RIP response");
-    auto packet = std::make_shared<RIPPacket>();
+    auto packet = makeShared<RIPPacket>();
     packet->setCommand(RIP_RESPONSE);
     packet->setEntryArraySize(maxEntries);
     int k = 0;    // index into RIP entries
@@ -711,7 +711,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
             emit(sentUpdateSignal, pk);
             sendPacket(pk, address, port, ripInterface.ie);
             pk = new Packet("RIP response");
-            packet = std::make_shared<RIPPacket>();
+            packet = makeShared<RIPPacket>();
             packet->setCommand(RIP_RESPONSE);
             packet->setEntryArraySize(maxEntries);
             k = 0;

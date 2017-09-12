@@ -158,7 +158,7 @@ void STP::handleTCN(Packet *packet, const Ptr<const BPDU>& tcn)
 void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
     Packet *packet = new Packet("BPDU");
-    const auto& bpdu = std::make_shared<BPDU>();
+    const auto& bpdu = makeShared<BPDU>();
     packet->ensureTag<MacAddressReq>()->setDestAddress(address);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
@@ -202,7 +202,7 @@ void STP::generateTCN()
             // exist root port to notifying
             topologyChangeNotification = false;
             Packet *packet = new Packet("BPDU");
-            const auto& tcn = std::make_shared<BPDU>();
+            const auto& tcn = makeShared<BPDU>();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
 

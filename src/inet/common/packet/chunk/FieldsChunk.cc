@@ -61,7 +61,7 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     }
     // 3. peeking a part from the beginning without conversion returns an incomplete copy of this chunk
     if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == b(0)) {
-        auto copy = std::static_pointer_cast<FieldsChunk>(dupShared());
+        auto copy = staticPtrCast<FieldsChunk>(dupShared());
         copy->setChunkLength(length);
         copy->markIncomplete();
         return copy;

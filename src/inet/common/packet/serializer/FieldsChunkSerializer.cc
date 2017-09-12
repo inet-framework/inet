@@ -21,7 +21,7 @@ namespace inet {
 
 void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
-    auto fieldsChunk = std::static_pointer_cast<const FieldsChunk>(chunk);
+    auto fieldsChunk = staticPtrCast<const FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
         stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == b(-1) ? chunk->getChunkLength() - offset : length);
     else if (offset == b(0) && (length == b(-1) || length == chunk->getChunkLength())) {
@@ -48,7 +48,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto startPosition = stream.getPosition();
-    auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));
+    auto fieldsChunk = staticPtrCast<FieldsChunk>(deserialize(stream));
     auto endPosition = stream.getPosition();
     auto chunkLength = endPosition - startPosition;
     ChunkSerializer::totalDeserializedLength += chunkLength;

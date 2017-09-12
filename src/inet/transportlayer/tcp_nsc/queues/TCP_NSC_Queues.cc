@@ -80,7 +80,7 @@ Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpL
 {
     ASSERT(tcpDataP);
 
-    const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
+    const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
     bytes->markImmutable();
     auto packet = new Packet(nullptr, bytes);
     const auto& tcpHdr = packet->popHeader<TcpHeader>();
@@ -88,7 +88,7 @@ Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpL
     int64_t numBytes = packet->getByteLength();
     packet->pushHeader(tcpHdr);
 
-//    auto payload = std::make_shared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
+//    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
 //    const auto& tcpHdr = (payload->Chunk::peek<TcpHeader>(byte(0)));
 //    payload->removeFromBeginning(tcpHdr->getChunkLength());
 
@@ -134,7 +134,7 @@ void TCP_NSC_ReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
 
 void TCP_NSC_ReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
-    const auto& bytes = std::make_shared<BytesChunk>((uint8_t *)dataP, dataLengthP);
+    const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
     bytes->markImmutable();
     dataBuffer.push(bytes);
 }

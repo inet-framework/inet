@@ -261,7 +261,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
   public:
     /**
-     * This enum is used to avoid std::dynamic_cast and std::dynamic_pointer_cast.
+     * This enum is used to avoid std::dynamic_cast and dynamicPtrCast.
      */
     enum ChunkType {
         CT_EMPTY,
@@ -381,7 +381,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
         chunk->markImmutable();
-        return std::static_pointer_cast<T>(chunk);
+        return staticPtrCast<T>(chunk);
     }
 
     template <typename T>
@@ -511,7 +511,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /**
      * Returns the type of this chunk as an enum member. This can be used to
-     * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
+     * avoid expensive std::dynamic_cast and dynamicPtrCast operators.
      */
     virtual ChunkType getChunkType() const = 0;
 
@@ -560,10 +560,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     const Ptr<T> peek(const Iterator& iterator, b length = b(-1), int flags = 0) const {
-        const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
+        const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || dynamicPtrCast<T>(chunk); };
         const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, b length, int flags) -> const Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
-        return checkPeekResult<T>(std::static_pointer_cast<T>(chunk), flags);
+        return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
     }
 
     /**
@@ -597,10 +597,10 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
 {
     if (chunk.use_count() == 1) {
         const_cast<T *>(chunk.get())->markMutableIfExclusivelyOwned();
-        return std::const_pointer_cast<T>(chunk);
+        return constPtrCast<T>(chunk);
     }
     else
-        return std::static_pointer_cast<T>(chunk->dupShared());
+        return staticPtrCast<T>(chunk->dupShared());
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { return os << chunk->str(); }

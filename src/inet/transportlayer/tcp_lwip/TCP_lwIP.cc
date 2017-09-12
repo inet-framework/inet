@@ -585,7 +585,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
         packet = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)dataP, lenP);
+        const auto& bytes = makeShared<BytesChunk>((const uint8_t*)dataP, lenP);
         bytes->markImmutable();
         packet = new Packet(nullptr, bytes);
         const auto& tcpHdr = packet->popHeader<TcpHeader>();

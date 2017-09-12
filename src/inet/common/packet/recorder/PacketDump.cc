@@ -376,35 +376,35 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     packet = packet->dup();
     while(const auto& chunk = packet->popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
 #ifdef WITH_IPv4
-        if (const auto& ipv4Hdr = std::dynamic_pointer_cast<const Ipv4Header>(chunk)) {
+        if (const auto& ipv4Hdr = dynamicPtrCast<const Ipv4Header>(chunk)) {
             leftAddr = ipv4Hdr->getSourceAddress().str();
             rightAddr = ipv4Hdr->getDestinationAddress().str();
             dumpIPv4(l2r, "", ipv4Hdr, "");
         }
         else
-        if (const auto& arpPacket = std::dynamic_pointer_cast<const ARPPacket>(chunk)) {
+        if (const auto& arpPacket = dynamicPtrCast<const ARPPacket>(chunk)) {
             dumpARP(l2r, "", arpPacket, "");
         }
         else
-        if (const auto& icmpHeader = std::dynamic_pointer_cast<const IcmpHeader>(chunk)) {
+        if (const auto& icmpHeader = dynamicPtrCast<const IcmpHeader>(chunk)) {
             out << "ICMPMessage " << packet->getName() << (packet->hasBitError() ? " (BitError)" : "") << endl;
         }
         else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (const auto& ipv6Hdr = std::dynamic_pointer_cast<const Ipv6Header>(chunk)) {
+        if (const auto& ipv6Hdr = dynamicPtrCast<const Ipv6Header>(chunk)) {
             dumpIPv6(l2r, "", ipv6Hdr);
         }
         else
 #endif // ifdef WITH_IPv6
 #ifdef WITH_SCTP
-        if (const auto& sctpMessage = std::dynamic_pointer_cast<const sctp::SCTPMessage>(chunk)) {
+        if (const auto& sctpMessage = dynamicPtrCast<const sctp::SCTPMessage>(chunk)) {
             sctpDump("", packet, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
         }
         else
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
-        if (const auto& tcpHdr = std::dynamic_pointer_cast<const tcp::TcpHeader>(chunk)) {
+        if (const auto& tcpHdr = dynamicPtrCast<const tcp::TcpHeader>(chunk)) {
             tcpDump(l2r, "", tcpHdr, msg->getByteLength(), (l2r ? leftAddr : rightAddr), (l2r ? rightAddr : leftAddr));
         }
         else

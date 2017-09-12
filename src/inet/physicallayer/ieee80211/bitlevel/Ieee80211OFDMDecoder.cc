@@ -83,7 +83,7 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVe
 {
     double per = -1;
     bool packetErrorless = true; // TODO: compute packet error rate, packetErrorLess
-    const auto& decodedData = std::make_shared<BytesChunk>(decodedBits->getBytes());
+    const auto& decodedData = makeShared<BytesChunk>(decodedBits->getBytes());
     decodedData->markImmutable();
     return new ReceptionPacketModel(new Packet(nullptr, decodedData), bps(NaN), per, packetErrorless);
 }
