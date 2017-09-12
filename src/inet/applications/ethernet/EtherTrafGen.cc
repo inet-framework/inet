@@ -22,11 +22,13 @@
 #include "inet/applications/ethernet/EtherTrafGen.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
@@ -58,7 +60,8 @@ void EtherTrafGen::initialize(int stage)
         sendInterval = &par("sendInterval");
         numPacketsPerBurst = &par("numPacketsPerBurst");
         packetLength = &par("packetLength");
-        etherType = par("etherType");
+        ssap = par("ssap");
+        dsap = par("dsap");
 
         seqNum = 0;
         WATCH(seqNum);
@@ -186,10 +189,14 @@ void EtherTrafGen::sendBurstPackets()
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         payload->markImmutable();
         datapacket->append(payload);
-        datapacket->ensureTag<EtherTypeReq>()->setEtherType(etherType);
+        datapacket->removeTag<PacketProtocolTag>();
+//        datapacket->ensureTag<PacketProtocolTag>()->setProtocol(nullptr);
         datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
+        auto sapTag = datapacket->ensureTag<Ieee802SapReq>();
+        sapTag->setSsap(ssap);
+        sapTag->setDsap(dsap);
 
-        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";
+        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(sentPkSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;

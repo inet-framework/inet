@@ -18,6 +18,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
 namespace inet {
@@ -49,34 +50,78 @@ void Ieee8022Llc::handleMessage(cMessage *message)
 
 void Ieee8022Llc::encapsulate(Packet *frame)
 {
-    if (true) {
-        auto ethTypeTag = frame->getTag<EtherTypeReq>();
+    auto protocolTag = frame->getTag<PacketProtocolTag>();
+    const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
+    int ethType = -1;
+    int snapType = -1;
+    if (protocol) {
+        ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
+        if (ethType == -1) {
+            snapType = ProtocolGroup::snapOui.findProtocolNumber(protocol);
+        }
+    }
+    if (ethType != -1 || snapType != -1) {
         const auto& snapHeader = makeShared<Ieee8022LlcSnapHeader>();
-        snapHeader->setOui(0);
-        snapHeader->setProtocolId(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+        if (ethType != -1) {
+            snapHeader->setOui(0);
+            snapHeader->setProtocolId(ethType);
+        }
+        else {
+            snapHeader->setOui(snapType);
+            snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
+        }
         frame->insertHeader(snapHeader);
     }
     else {
         const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-        // TODO: ssap, dsap
+        int llctype = ProtocolGroup::ieee8022llcprotocol.findProtocolNumber(protocol);
+        if (llctype != -1) {
+            llcHeader->setSsap((llctype >> 16) & 0xFF);
+            llcHeader->setDsap((llctype >> 8) & 0xFF);
+            llcHeader->setControl((llctype) & 0xFF);
+        }
+        else {
+            auto sapTag = frame->getMandatoryTag<Ieee802SapReq>();
+            llcHeader->setSsap(sapTag->getSsap());
+            llcHeader->setDsap(sapTag->getDsap());
+            llcHeader->setControl(3);       //TODO get from sapTag
+        }
         frame->insertHeader(llcHeader);
     }
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)
 {
+    const Protocol *payloadProtocol = nullptr;
     const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
-    if (auto snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader)) {
-        int etherType = snapHeader->getProtocolId();
-        if (etherType != -1) {
-            frame->ensureTag<EtherTypeInd>()->setEtherType(etherType);
-            frame->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
-            frame->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+
+    auto sapInd = frame->ensureTag<Ieee802SapInd>();
+    sapInd->setSsap(llcHeader->getSsap());
+    sapInd->setDsap(llcHeader->getDsap());
+    //TODO control?
+
+    int32_t ssapDsapCtrl = (llcHeader->getSsap() << 16) | (llcHeader->getDsap() << 8) | (llcHeader->getControl() & 0xFF);
+    if (ssapDsapCtrl == 0xAAAA03) {
+        // snap header
+        const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
+        if (snapHeader == nullptr)
+            throw cRuntimeError("llc/snap error: llc header suggested snap header, but snap header is missing");
+        if (snapHeader->getOui() == 0) {
+            payloadProtocol = ProtocolGroup::ethertype.getProtocol(snapHeader->getProtocolId());
         }
+        else {
+            payloadProtocol = ProtocolGroup::snapOui.getProtocol(snapHeader->getOui());
+        }
+
     }
     else {
-        // TODO: ssap, dsap
+        payloadProtocol = ProtocolGroup::ieee8022llcprotocol.findProtocol(ssapDsapCtrl);    // do not use getProtocol
     }
+    if (payloadProtocol != nullptr) {
+        frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    }
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
 } // namespace inet

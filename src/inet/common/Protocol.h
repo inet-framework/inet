@@ -67,6 +67,7 @@ class INET_API Protocol
     static const Protocol icmpv4;
     static const Protocol icmpv6;
     static const Protocol ieee80211;
+    static const Protocol ieee8022llc;
     static const Protocol igmp;
     static const Protocol igp;
     static const Protocol ipv4;

@@ -325,8 +325,8 @@ void Flood::encapsulate(Packet *appPkt)
  */
 void Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
+    pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
     pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
 }
 

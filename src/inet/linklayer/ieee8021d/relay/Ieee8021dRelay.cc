@@ -25,6 +25,7 @@
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -208,12 +209,17 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     if (ifTable->getInterfaceById(portNum) == nullptr)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
-    // TODO: use LLCFrame
+    // use LLCFrame
+    const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
+    llcHeader->setSsap(0x42);
+    llcHeader->setDsap(0x42);
+    llcHeader->setControl(3);
+    packet->insertHeader(llcHeader);
     const auto& header = makeShared<EthernetMacHeader>();
     packet->setKind(packet->getKind());
     header->setSrc(bridgeAddress);
     header->setDest(address);
-    header->setTypeOrLength(-1);
+    header->setTypeOrLength(packet->getByteLength());
     packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet);
@@ -226,14 +232,10 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    int ethType;
-    const auto& eth = EtherEncap::decapsulate(packet, ethType);
+    const auto& eth = EtherEncap::decapsulateMacLlcSnap(packet);
 
+    ASSERT(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::stp);
     const auto& bpdu = packet->peekHeader<BPDU>();
-
-    auto macAddressTag = packet->ensureTag<MacAddressInd>();
-    macAddressTag->setSrcAddress(eth->getSrc());
-    macAddressTag->setDestAddress(eth->getDest());
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
     numDeliveredBDPUsToSTP++;

@@ -539,7 +539,6 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
 
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
-        datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
         //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
         delete datagram->removeTag<DispatchProtocolReq>();
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
@@ -562,7 +561,6 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
     }
     else {
         // add control info with MAC address
-        datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->ensureTag<MacAddressReq>()->setDestAddress(nextHopMAC);
         delete datagram->removeTag<DispatchProtocolReq>();
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

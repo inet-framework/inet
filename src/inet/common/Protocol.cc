@@ -84,6 +84,7 @@ const Protocol Protocol::gpsr("gpsr");
 const Protocol Protocol::icmpv4("icmpv4");
 const Protocol Protocol::icmpv6("icmpv6");
 const Protocol Protocol::ieee80211("ieee80211");
+const Protocol Protocol::ieee8022llc("ieee8022llc");
 const Protocol Protocol::igmp("igmp");
 const Protocol Protocol::igp("igp");
 const Protocol Protocol::ipv4("ipv4");

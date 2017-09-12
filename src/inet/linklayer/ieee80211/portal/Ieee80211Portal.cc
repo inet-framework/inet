@@ -89,13 +89,24 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
     packet->removePoppedChunks();
-    const auto& ieee8022SnapHeader = packet->removeHeader<Ieee8022LlcSnapHeader>();
+    int typeOrLength = packet->getByteLength();
+    const auto& llcHeader = packet->peekHeader<Ieee8022LlcHeader>();
+    if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
+        //snap header
+        const auto& snapHeader = std::dynamic_pointer_cast<const Ieee8022LlcSnapHeader>(llcHeader);
+        if (snapHeader == nullptr)
+            throw cRuntimeError("llc/snap error: llc header suggested snap header, but snap header is missing");
+        if (snapHeader->getOui() == 0) {
+            // snap header with ethertype
+            typeOrLength = snapHeader->getProtocolId();
+            packet->removeFromBeginning(snapHeader->getChunkLength());
+        }
+    }
 
     const auto& ethernetHeader = makeShared<EthernetMacHeader>();    //TODO option to use EtherFrameWithSNAP instead
-    ethernetHeader->setSrc(packet->getTag<MacAddressInd>()->getSrcAddress());
-    ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
-    ethernetHeader->setTypeOrLength(ieee8022SnapHeader->getProtocolId());
-    ethernetHeader->setChunkLength(B(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
+    ethernetHeader->setSrc(packet->getMandatoryTag<MacAddressInd>()->getSrcAddress());
+    ethernetHeader->setDest(packet->getMandatoryTag<MacAddressInd>()->getDestAddress());
+    ethernetHeader->setTypeOrLength(typeOrLength);
     packet->insertHeader(ethernetHeader);
 
     EtherEncap::addPaddingAndFcs(packet);

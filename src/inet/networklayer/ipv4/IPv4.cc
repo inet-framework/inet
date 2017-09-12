@@ -1031,7 +1031,6 @@ void IPv4::sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, cons
     delete packet->removeControlInfo();
 
     // add control info with MAC address
-    packet->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddress);
     delete packet->removeTag<DispatchProtocolReq>();
 

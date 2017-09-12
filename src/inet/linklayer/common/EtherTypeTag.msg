@@ -34,15 +34,3 @@ enum EthernetControlOpCode
     ETHERNET_CONTROL_PAUSE = 1;
 }
 
-class EtherTypeTagBase extends TagBase
-{
-    int etherType @enum(EtherType) = -1;
-}
-
-class EtherTypeReq extends EtherTypeTagBase
-{
-}
-
-class EtherTypeInd extends EtherTypeTagBase
-{
-}

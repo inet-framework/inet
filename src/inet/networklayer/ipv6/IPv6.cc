@@ -900,7 +900,6 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
 
 void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
-    packet->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_IPv6);
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddr);
     delete packet->removeTag<DispatchProtocolReq>();
     packet->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());

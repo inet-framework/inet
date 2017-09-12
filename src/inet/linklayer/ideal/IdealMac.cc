@@ -268,8 +268,7 @@ void IdealMac::encapsulate(Packet *packet)
         idealMacHeader->setSrcModuleId(-1);
     else
         idealMacHeader->setSrcModuleId(getId());
-    auto ethTypeTag = packet->getTag<EtherTypeReq>();
-    idealMacHeader->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+    idealMacHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     idealMacHeader->markImmutable();
     packet->pushHeader(idealMacHeader);
 }
@@ -308,7 +307,6 @@ void IdealMac::decapsulate(Packet *packet)
     macAddressInd->setSrcAddress(idealMacHeader->getSrc());
     macAddressInd->setDestAddress(idealMacHeader->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<EtherTypeInd>()->setEtherType(idealMacHeader->getNetworkProtocol());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
 }

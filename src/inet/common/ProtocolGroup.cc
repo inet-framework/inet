@@ -106,5 +106,9 @@ const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
         // { 0x00000C, &Protocol::ciscoSnap } //TODO
 });
 
+const ProtocolGroup ProtocolGroup::ieee8022llcprotocol("llcprotocol", {
+        { 0x424203, &Protocol::stp },
+});
+
 } // namespace inet
 
