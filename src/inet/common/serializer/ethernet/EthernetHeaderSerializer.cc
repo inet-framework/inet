@@ -22,83 +22,62 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(EtherFrame, EthernetMacHeaderSerializer);
-Register_Serializer(EthernetIIFrame, EthernetMacHeaderSerializer);
-Register_Serializer(EtherFrameWithLLC, EthernetMacHeaderSerializer);
-Register_Serializer(EtherFrameWithSNAP, EthernetMacHeaderSerializer);
+Register_Serializer(EthernetMacHeader, EthernetMacHeaderSerializer);
+Register_Serializer(EthernetControlFrame, EthernetControlFrameSerializer);
+Register_Serializer(EthernetPauseFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EtherPhyFrame, EthernetPhyHeaderSerializer);
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& ethernetHeader = staticPtrCast<const EtherFrame>(chunk);
-    stream.writeMACAddress(ethernetHeader->getDest());
-    stream.writeMACAddress(ethernetHeader->getSrc());
-    if (auto ethernetIIHeader = dynamicPtrCast<const EthernetIIFrame>(ethernetHeader)) {
-        uint16_t ethType = ethernetIIHeader->getEtherType();
-        stream.writeUint16Be(ethType);
-    }
-    else if (auto ethernetHeaderWithLLC = dynamicPtrCast<const EtherFrameWithLLC>(ethernetHeader)) {
-        stream.writeUint16Be(ethernetHeaderWithLLC->getPayloadLength());
-        stream.writeByte(ethernetHeaderWithLLC->getSsap());
-        stream.writeByte(ethernetHeaderWithLLC->getDsap());
-        stream.writeByte(ethernetHeaderWithLLC->getControl());
-        if (auto frame = dynamicPtrCast<const EtherFrameWithSNAP>(ethernetHeader)) {
-            stream.writeByte(frame->getOrgCode() >> 16);
-            stream.writeByte(frame->getOrgCode() >> 8);
-            stream.writeByte(frame->getOrgCode());
-            stream.writeUint16Be(frame->getLocalcode());
-        }
-        else {
-            auto x = ethernetHeaderWithLLC.get();
-            if (typeid(*x) != typeid(EtherFrameWithLLC))
-                throw cRuntimeError("Cannot serializer '%s'", ethernetHeader->getClassName());
-        }
-    }
-    else if (auto pauseFrame = dynamicPtrCast<const EtherPauseFrame>(ethernetHeader)) {
-        stream.writeUint16Be(0x8808);
-        stream.writeUint16Be(0x0001);
-        stream.writeUint16Be(pauseFrame->getPauseTime());
-    }
-    else
-        throw cRuntimeError("Cannot serialize '%s'", ethernetHeader->getClassName());
+    const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
+    stream.writeMACAddress(ethernetMacHeader->getDest());
+    stream.writeMACAddress(ethernetMacHeader->getSrc());
+    stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
 const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    Ptr<EtherFrame> ethernetMacHeader = nullptr;
+    Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
     MACAddress destAddr = stream.readMACAddress();
     MACAddress srcAddr = stream.readMACAddress();
     uint16_t typeOrLength = stream.readUint16Be();
-    // detect and create the real type
-    if (typeOrLength >= 0x0600 || typeOrLength == 0) {
-        auto ethernetIIHeader = makeShared<EthernetIIFrame>();
-        ethernetIIHeader->setEtherType(typeOrLength);
-        ethernetMacHeader = ethernetIIHeader;
-    }
-    else {
-        Ptr<EtherFrameWithLLC> ethernetHeaderWithLLC = nullptr;
-        uint8_t ssap = stream.readByte();
-        uint8_t dsap = stream.readByte();
-        uint8_t ctrl = stream.readByte();
-        if (dsap == 0xAA && ssap == 0xAA) { // snap frame
-            auto ethSnap = makeShared<EtherFrameWithSNAP>();
-            ethSnap->setOrgCode(((uint32_t)stream.readByte() << 16) + stream.readUint16Be());
-            ethSnap->setLocalcode(stream.readUint16Be());
-            ethernetHeaderWithLLC = ethSnap;
-        }
-        else
-            ethernetHeaderWithLLC = makeShared<EtherFrameWithLLC>();
-        ethernetHeaderWithLLC->setPayloadLength(typeOrLength);
-        ethernetHeaderWithLLC->setDsap(dsap);
-        ethernetHeaderWithLLC->setSsap(ssap);
-        ethernetHeaderWithLLC->setControl(ctrl);
-        ethernetMacHeader = ethernetHeaderWithLLC;
-    }
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);
+    ethernetMacHeader->setTypeOrLength(typeOrLength);
     return ethernetMacHeader;
+}
+
+void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& frame = staticPtrCast<const EthernetControlFrame>(chunk);
+    stream.writeUint16Be(frame->getOpCode());
+    if (frame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+        auto pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(frame);
+        ASSERT(pauseFrame != nullptr);
+        stream.writeUint16Be(pauseFrame->getPauseTime());
+    }
+    else
+        throw cRuntimeError("Cannot serialize '%s' (EthernetControlFrame with opCode = %d)", frame->getClassName(), frame->getOpCode());
+}
+
+const Ptr<Chunk> EthernetControlFrameSerializer::deserialize(MemoryInputStream& stream) const
+{
+    Ptr<EthernetControlFrame> controlFrame = nullptr;
+    uint16_t opCode = stream.readUint16Be();
+    if (opCode == ETHERNET_CONTROL_PAUSE) {
+        auto pauseFrame = makeShared<EthernetPauseFrame>();
+        pauseFrame->setOpCode(opCode);
+        pauseFrame->setPauseTime(stream.readUint16Be());
+        controlFrame = pauseFrame;
+    }
+    else {
+        controlFrame = makeShared<EthernetControlFrame>();
+        controlFrame->setOpCode(opCode);
+        controlFrame->markIncorrect();
+    }
+    return controlFrame;
 }
 
 void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const

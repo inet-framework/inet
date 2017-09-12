@@ -29,6 +29,11 @@ enum EtherType
     ETHERTYPE_MPLS_MULTICAST = 0x8848;
 }
 
+enum EthernetControlOpCode
+{
+    ETHERNET_CONTROL_PAUSE = 1;
+}
+
 class EtherTypeTagBase extends TagBase
 {
     int etherType @enum(EtherType) = -1;

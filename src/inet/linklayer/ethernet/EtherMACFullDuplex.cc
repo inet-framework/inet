@@ -106,7 +106,7 @@ void EtherMACFullDuplex::startFrameTransmission()
     EV_DETAIL << "Transmitting a copy of frame " << curTxFrame << endl;
 
     Packet *frame = curTxFrame->dup();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
-    const auto& hdr = frame->peekHeader<EtherFrame>();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
+    const auto& hdr = frame->peekHeader<EthernetMacHeader>();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
@@ -135,7 +135,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
 
     emit(packetReceivedFromUpperSignal, packet);
 
-    auto frame = packet->peekHeader<EtherFrame>();
+    auto frame = packet->peekHeader<EthernetMacHeader>();
     if (frame->getDest().equals(address)) {
         throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
@@ -162,14 +162,14 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         //FIXME frame is immutable
         packet->removeFromBeginning(frame->getChunkLength());
-        const auto& newFrame = dynamicPtrCast<EtherFrame>(frame->dupShared());
+        const auto& newFrame = dynamicPtrCast<EthernetMacHeader>(frame->dupShared());
         newFrame->setSrc(address);
         newFrame->markImmutable();
         packet->pushHeader(newFrame);
         frame = newFrame;
     }
 
-    bool isPauseFrame = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isPauseFrame = (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL);           //FIXME let more specific test
 
     if (!isPauseFrame) {
         numFramesFromHL++;
@@ -243,11 +243,11 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
         return;
     }
 
-    const auto& frame = packet->peekHeader<EtherFrame>();
+    const auto& frame = packet->peekHeader<EthernetMacHeader>();
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (auto pauseFrame = dynamic_cast<const EtherPauseFrame *>(frame.get())) {
+    if (auto pauseFrame = dynamic_cast<const EthernetPauseFrame *>(frame.get())) {      //FIXME KLUDGE
         int pauseUnits = pauseFrame->getPauseTime();
         delete packet;
         numPauseFramesRcvd++;
@@ -284,9 +284,9 @@ void EtherMACFullDuplex::handleEndTxPeriod()
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    if (dynamic_cast<EtherPauseFrame *>(curTxFrame) != nullptr) {
+    if (dynamic_cast<EthernetPauseFrame *>(curTxFrame) != nullptr) {    //FIXME KLUDGE
         numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, ((EtherPauseFrame *)curTxFrame)->getPauseTime());
+        emit(txPausePkUnitsSignal, ((EthernetPauseFrame *)curTxFrame)->getPauseTime()); //FIXME KLUDGE
     }
     else {
         unsigned long curBytes = curTxFrame->getByteLength();
@@ -335,7 +335,7 @@ void EtherMACFullDuplex::handleEndPausePeriod()
     beginSendFrames();
 }
 
-void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<const EtherFrame>& frame)
+void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();

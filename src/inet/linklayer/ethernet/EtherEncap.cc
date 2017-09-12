@@ -20,15 +20,14 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
-
-#include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -110,29 +109,25 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
 
     auto macAddressReq = msg->getMandatoryTag<MacAddressReq>();
     auto etherTypeTag = msg->getTag<EtherTypeReq>();
+    int typeOrLength = 0;
+    int etherType = (etherTypeTag) ? etherTypeTag->getEtherType() : 0;
 
     if (useSNAP) {
-        const auto& snapFrame = makeShared<EtherFrameWithSNAP>();
+        const auto& snapHeader = makeShared<Ieee8022LlcSnapHeader>();
 
-        snapFrame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
-        snapFrame->setDest(macAddressReq->getDestAddress());
-        snapFrame->setPayloadLength(msg->getByteLength());
-        snapFrame->setOrgCode(0);
-        if (etherTypeTag)
-            snapFrame->setLocalcode(etherTypeTag->getEtherType());
-        snapFrame->markImmutable();
-        msg->pushHeader(snapFrame);
+        snapHeader->setOui(0);
+        snapHeader->setProtocolId(etherType);
+        msg->insertHeader(snapHeader);
+        typeOrLength = msg->getByteLength();
     }
     else {
-        const auto& eth2Frame = makeShared<EthernetIIFrame>();
-
-        eth2Frame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
-        eth2Frame->setDest(macAddressReq->getDestAddress());
-        if (etherTypeTag)
-            eth2Frame->setEtherType(etherTypeTag->getEtherType());
-        eth2Frame->markImmutable();
-        msg->pushHeader(eth2Frame);
+        typeOrLength = etherType;
     }
+    const auto& ethHeader = makeShared<EthernetMacHeader>();
+    ethHeader->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
+    ethHeader->setDest(macAddressReq->getDestAddress());
+    ethHeader->setTypeOrLength(typeOrLength);
+    msg->insertHeader(ethHeader);
 
     EtherEncap::addPaddingAndFcs(msg, fcsMode);
 
@@ -156,39 +151,54 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     packet->pushTrailer(ethFcs);
 }
 
-const Ptr<const EtherFrame> EtherEncap::decapsulate(Packet *packet)
+const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
 {
-    // EV_STATICCONTEXT;
-
-    auto ethHeader = packet->popHeader<EtherFrame>();
+    auto ethHeader = packet->popHeader<EthernetMacHeader>();
     packet->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
-
     // remove Padding if possible
-    if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get())) {
-        b payloadLength = B(header->getPayloadLength());
+    if (isIeee802_3Header(*ethHeader)) {
+        b payloadLength = B(ethHeader->getTypeOrLength());
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     }
+    return ethHeader;
+}
+
+const Ptr<const EthernetMacHeader> EtherEncap::decapsulate(Packet *packet, int& outEtherType)
+{
+    outEtherType = -1;
+    auto ethHeader = decapsulateMacHeader(packet);
+
+    // remove llc header if possible
+    if (isIeee802_3Header(*ethHeader)) {
+        const auto& llcHeader = packet->popHeader<Ieee8022LlcHeader>();
+        if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
+            const auto& snapHeader = dynamicPointerCast<const Ieee8022LlcSnapHeader>(llcHeader);
+            if (snapHeader == nullptr)
+                throw cRuntimeError("llc/snap error: llc header suggested snap header, but snap header is missing");
+            if (snapHeader->getOui() == 0)
+                outEtherType = snapHeader->getProtocolId();
+        }
+        else if (llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 0x03) {
+            outEtherType = 0;
+        }
+    }
+    else if (isEth2Header(*ethHeader))
+        outEtherType = ethHeader->getTypeOrLength();
 
     return ethHeader;
 }
 
 void EtherEncap::processFrameFromMAC(Packet *packet)
 {
+    int etherType = -1;
     // decapsulate and attach control info
-    const auto& ethHeader = decapsulate(packet);
+    const auto& ethHeader = decapsulate(packet, etherType);
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(ethHeader->getSrc());
     macAddressInd->setDestAddress(ethHeader->getDest());
-    int etherType = -1;
-    if (auto eth2frame = dynamic_cast<const EthernetIIFrame *>(ethHeader.get())) {
-        etherType = eth2frame->getEtherType();
-    }
-    else if (auto snapframe = dynamic_cast<const EtherFrameWithSNAP *>(ethHeader.get())) {
-        etherType = snapframe->getLocalcode();
-    }
     if (etherType != -1) {
         packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
@@ -221,13 +231,15 @@ void EtherEncap::handleSendPause(cMessage *msg)
     char framename[40];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     auto packet = new Packet(framename);
-    const auto& frame = makeShared<EtherPauseFrame>();
+    const auto& frame = makeShared<EthernetPauseFrame>();
+    const auto& hdr = makeShared<EthernetMacHeader>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
-    frame->setDest(dest);
-    packet->pushHeader(frame);
-
+    hdr->setDest(dest);
+    packet->insertHeader(frame);
+    hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
+    packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
    EV_INFO << "Sending " << frame << " to lower layer.\n";

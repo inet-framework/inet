@@ -29,11 +29,11 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACBase.h"
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace inet {
 
 // Forward declarations:
-class EtherFrame;
 class EtherPhyFrame;
 class EtherTraffic;
 class InterfaceEntry;
@@ -101,7 +101,7 @@ class INET_API EtherMACBase : public MACBase
 
       public:
         InnerQueue(const char *name = nullptr, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
-        void insertFrame(cObject *obj) { queue.insert(obj); }
+        void insertFrame(Packet *obj) { queue.insert(obj); }
         cObject *pop() { return queue.pop(); }
         bool isEmpty() const { return queue.isEmpty(); }
         int getQueueLimit() const { return queueLimit; }
@@ -215,7 +215,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void finish() override;
 
     /** Checks destination address and drops the frame when frame is not for us; returns true if frame is dropped */
-    virtual bool dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>& frame);
+    virtual bool dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame);
 
     /**
      * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,

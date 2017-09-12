@@ -131,7 +131,7 @@ void Ieee8021dRelay::broadcast(Packet *packet)
 
 void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 {
-    const auto& frame = packet->peekHeader<EtherFrame>();
+    const auto& frame = packet->peekHeader<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
     Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->ieee8021dData();
@@ -181,7 +181,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 
 void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
 {
-    const auto& frame = packet->peekHeader<EtherFrame>();
+    const auto& frame = packet->peekHeader<EthernetMacHeader>();
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
@@ -209,17 +209,16 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
     // TODO: use LLCFrame
-    const auto& frame = makeShared<EthernetIIFrame>();
+    const auto& header = makeShared<EthernetMacHeader>();
     packet->setKind(packet->getKind());
-    frame->setSrc(bridgeAddress);
-    frame->setDest(address);
-    frame->setEtherType(-1);
-    frame->markImmutable();
-    packet->pushHeader(frame);
+    header->setSrc(bridgeAddress);
+    header->setDest(address);
+    header->setTypeOrLength(-1);
+    packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet);
 
-    EV_INFO << "Sending BPDU frame " << packet << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
+    EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
     emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
     send(packet, "ifOut");
@@ -227,7 +226,8 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    const auto& eth = EtherEncap::decapsulate(packet);
+    int ethType;
+    const auto& eth = EtherEncap::decapsulate(packet, ethType);
 
     const auto& bpdu = packet->peekHeader<BPDU>();
 

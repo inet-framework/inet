@@ -56,14 +56,14 @@ void MACRelayUnit::handleMessage(cMessage *msg)
         return;
     }
     Packet *packet = check_and_cast<Packet *>(msg);
-    const auto& frame = packet->peekHeader<EtherFrame>();
+    const auto& frame = packet->peekHeader<EthernetMacHeader>();
     delete packet->removeTag<DispatchProtocolReq>();
     // Frame received from MAC unit
     emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
     handleAndDispatchFrame(packet, frame);
 }
 
-void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const EtherFrame>& frame)
+void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     //FIXME : should handle multicast mac addresses correctly
 

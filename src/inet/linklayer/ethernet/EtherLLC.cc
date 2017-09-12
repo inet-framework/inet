@@ -23,6 +23,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
@@ -132,15 +133,16 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
 
     auto ieee802SapReq = packet->getMandatoryTag<Ieee802SapReq>();
 
-    const auto& frame = makeShared<EtherFrameWithLLC>();
+    const auto& llc = makeShared<Ieee8022LlcHeader>();
+    const auto& eth = makeShared<EthernetMacHeader>();
 
-    frame->setPayloadLength(packet->getByteLength());
-    frame->setControl(0);
-    frame->setSsap(ieee802SapReq->getSsap());
-    frame->setDsap(ieee802SapReq->getDsap());
-    frame->setDest(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());    // src address is filled in by MAC
-    frame->markImmutable();
-    packet->pushHeader(frame);
+    llc->setControl(0);
+    llc->setSsap(ieee802SapReq->getSsap());
+    llc->setDsap(ieee802SapReq->getDsap());
+    packet->insertHeader(llc);
+    eth->setDest(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());    // src address will be filled by MAC
+    eth->setTypeOrLength(packet->getByteLength());
+    packet->insertHeader(eth);
 
     EtherEncap::addPaddingAndFcs(packet);
 
@@ -150,32 +152,37 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
 void EtherLLC::processFrameFromMAC(Packet *packet)
 {
     // decapsulate it and pass up to higher layer
-    const auto& ethHeader = EtherEncap::decapsulate(packet);
 
+    auto headerPopOffset = packet->getHeaderPopOffset();
+    Ptr<const Ieee8022LlcHeader> llc = nullptr;
+    auto ethHeader = EtherEncap::decapsulateMacHeader(packet);
 
-    auto frame = dynamic_cast<const EtherFrameWithLLC *>(ethHeader.get());
-    if (frame == nullptr) {
+    if (isIeee802_3Header(*ethHeader)) {
+        llc = packet->popHeader<Ieee8022LlcHeader>();
+    }
+    else {
         EV << "Incoming packet does not have an LLC ethernet header, dropped. Header is " << (ethHeader ? ethHeader->getClassName() : "nullptr") << "\n";
         delete packet;
         return;
     }
     // check SAP
-    int sap = frame->getDsap();
-    int port = findPortForSAP(sap);
+    int dsap = llc->getDsap();
+    int port = findPortForSAP(dsap);
     if (port < 0) {
-        EV << "No higher layer registered for DSAP=" << sap << ", discarding frame `" << packet->getName() << "'\n";
+        EV << "No higher layer registered for DSAP=" << dsap << ", discarding frame `" << packet->getName() << "'\n";
         droppedUnknownDSAP++;
+        packet->setHeaderPopOffset(headerPopOffset);    // restore original packet
         emit(droppedPkUnknownDSAPSignal, packet);
         delete packet;
         return;
     }
 
     auto macaddressInd = packet->ensureTag<MacAddressInd>();
-    macaddressInd->setSrcAddress(frame->getSrc());
-    macaddressInd->setDestAddress(frame->getDest());
+    macaddressInd->setSrcAddress(ethHeader->getSrc());
+    macaddressInd->setDestAddress(ethHeader->getDest());
     auto ieee802SapInd = packet->ensureTag<Ieee802SapInd>();
-    ieee802SapInd->setSsap(frame->getSsap());
-    ieee802SapInd->setDsap(frame->getDsap());
+    ieee802SapInd->setSsap(llc->getSsap());
+    ieee802SapInd->setDsap(llc->getDsap());
 
     EV << "Decapsulating frame `" << packet->getName() << "', "
             "passing up contained packet `" << packet->getName() << "' to higher layer " << port << "\n";       //FIXME packet name printed twice
@@ -237,29 +244,32 @@ void EtherLLC::handleSendPause(cMessage *msg)
 {
     Ieee802PauseCommand *etherctrl = dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo());
     if (!etherctrl)
-        throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
-
+        throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802PauseCommand controlinfo", msg->getName());
     MACAddress dest = etherctrl->getDestinationAddress();
     int pauseUnits = etherctrl->getPauseUnits();
-    EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";
+    delete msg;
+
+    EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";
 
     // create Ethernet frame
     char framename[40];
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
-    Packet *packet = new Packet(framename);
-    const auto& frame = makeShared<EtherPauseFrame>();
+    auto packet = new Packet(framename);
+    const auto& frame = makeShared<EthernetPauseFrame>();
+    const auto& hdr = makeShared<EthernetMacHeader>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
-    frame->setDest(dest);
-    packet->pushHeader(frame);
+    hdr->setDest(dest);
+    packet->insertHeader(frame);
+    hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
+    packet->insertHeader(hdr);
+    EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
 
-    EtherEncap::addPaddingAndFcs(packet);
-
+    EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
-    emit(pauseSentSignal, pauseUnits);
 
-    delete msg;
+    emit(pauseSentSignal, pauseUnits);
 }
 
 bool EtherLLC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

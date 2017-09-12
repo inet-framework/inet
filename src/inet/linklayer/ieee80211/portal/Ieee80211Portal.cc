@@ -61,19 +61,25 @@ void Ieee80211Portal::handleMessage(cMessage *message)
 void Ieee80211Portal::encapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    auto ethernetHeader = EtherEncap::decapsulate(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
+    auto ethernetHeader = EtherEncap::decapsulateMacHeader(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
     packet->removePoppedChunks();
     packet->ensureTag<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->ensureTag<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
-    const auto& ieee8022SnapHeader = makeShared<Ieee8022SnapHeader>();
-    ieee8022SnapHeader->setOui(0);
-    if (const auto& eth2frame = dynamicPtrCast<const EthernetIIFrame>(ethernetHeader))
-        ieee8022SnapHeader->setProtocolId(eth2frame->getEtherType());
-    else if (const auto& snapframe = dynamicPtrCast<const EtherFrameWithSNAP>(ethernetHeader))
-        ieee8022SnapHeader->setProtocolId(snapframe->getLocalcode());
+    if (isIeee802_3Header(*ethernetHeader)) {
+        // do nothing, already has an LLC/SNAP header
+        const auto& chunk = packet->peekHeader<Ieee8022LlcSnapHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+        if (chunk == nullptr)
+            throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", chunk->getClassName());
+    }
+    else if (isEth2Header(*ethernetHeader)){
+        // add snap header
+        const auto& ieee8022SnapHeader = makeShared<Ieee8022LlcSnapHeader>();
+        ieee8022SnapHeader->setOui(0);
+        ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());
+        packet->insertHeader(ieee8022SnapHeader);
+    }
     else
         throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethernetHeader->getClassName());
-    packet->insertHeader(ieee8022SnapHeader);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
@@ -83,12 +89,12 @@ void Ieee80211Portal::decapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
     packet->removePoppedChunks();
-    const auto& ieee8022SnapHeader = packet->removeHeader<Ieee8022SnapHeader>();
+    const auto& ieee8022SnapHeader = packet->removeHeader<Ieee8022LlcSnapHeader>();
 
-    const auto& ethernetHeader = makeShared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
+    const auto& ethernetHeader = makeShared<EthernetMacHeader>();    //TODO option to use EtherFrameWithSNAP instead
     ethernetHeader->setSrc(packet->getTag<MacAddressInd>()->getSrcAddress());
     ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
-    ethernetHeader->setEtherType(ieee8022SnapHeader->getProtocolId());
+    ethernetHeader->setTypeOrLength(ieee8022SnapHeader->getProtocolId());
     ethernetHeader->setChunkLength(B(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
     packet->insertHeader(ethernetHeader);
 

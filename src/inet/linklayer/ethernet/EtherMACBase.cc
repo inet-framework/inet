@@ -420,7 +420,7 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
-    auto ethHeader = packet->peekHeader<EtherFrame>();          //FIXME can I use any flags?
+    auto ethHeader = packet->peekHeader<EthernetMacHeader>();          //FIXME can I use any flags?
     const auto& ethTrailer = packet->peekTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));          //FIXME can I use any flags?
 
     switch(ethTrailer->getFcsMode()) {
@@ -448,11 +448,12 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
         default:
             throw cRuntimeError("invalid FCS mode in ethernet frame");
     }
-    b payloadLength = b(-1);
-    if (auto header = dynamic_cast<const EtherFrameWithPayloadLength *>(ethHeader.get()))
-        payloadLength = B(header->getPayloadLength());
+    if (isIeee802_3Header(*ethHeader)) {
+        b payloadLength = B(ethHeader->getTypeOrLength());
 
-    return (payloadLength == b(-1) || payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+        return (payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+    }
+    return true;
 }
 
 void EtherMACBase::flushQueue()
@@ -498,7 +499,7 @@ void EtherMACBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>& frame)
+bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were
@@ -520,7 +521,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EtherFrame>
     if (frame->getDest().isBroadcast())
         return false;
 
-    bool isPause = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isPause = (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL);
 
     if (!isPause && (promiscuous || frame->getDest().isMulticast()))
         return false;
@@ -748,9 +749,13 @@ void EtherMACBase::refreshDisplay() const
 
 int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)
 {
-    int ap = (dynamic_cast<EtherPauseFrame *>(a) == nullptr) ? 1 : 0;
-    int bp = (dynamic_cast<EtherPauseFrame *>(b) == nullptr) ? 1 : 0;
-    return ap - bp;
+    Packet *ap = static_cast<Packet *>(a);
+    Packet *bp = static_cast<Packet *>(b);
+    const auto& ah = ap->peekHeader<EthernetMacHeader>();
+    const auto& bh = bp->peekHeader<EthernetMacHeader>();
+    int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
+    int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
+    return ac - bc;
 }
 
 } // namespace inet

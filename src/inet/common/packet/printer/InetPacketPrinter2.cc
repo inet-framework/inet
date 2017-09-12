@@ -160,13 +160,14 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
                 out << chunk->getClassName() << ": " << srcAddr << " > " << destAddr;
         }
 #ifdef WITH_ETHERNET
-        else if (const auto eth = dynamic_cast<const EtherFrame *>(chunk)) {
+        else if (const auto eth = dynamic_cast<const EthernetMacHeader *>(chunk)) {
             out << "ETH: " << eth->getSrc() << " > " << eth->getDest();
             if (const auto tc = packet->peekTrailer(b(-1), Chunk::PF_ALLOW_NULLPTR).get())
                 if (typeid(*tc) == typeid(EthernetFcs)) {
                     const auto& fcs = packet->popTrailer<EthernetFcs>();
                     (void)fcs;    //TODO do we show the FCS?
                 }
+            //FIXME llc/qtag/snap/...
         }
 #endif // ifdef WITH_ETHERNET
 #ifdef WITH_TCP_COMMON

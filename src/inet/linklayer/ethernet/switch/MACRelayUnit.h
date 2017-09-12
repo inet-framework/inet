@@ -20,12 +20,11 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
-
-class EtherFrame;
 
 class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
 {
@@ -50,7 +49,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
      *
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void handleAndDispatchFrame(Packet *packet, const Ptr<const EtherFrame>& frame);
+    virtual void handleAndDispatchFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame);
 
     /**
      * Utility function: sends the frame on all ports except inputport.

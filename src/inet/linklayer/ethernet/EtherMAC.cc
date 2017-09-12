@@ -211,7 +211,7 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
 
     emit(packetReceivedFromUpperSignal, packet);
 
-    auto frame = packet->peekHeader<EtherFrame>();
+    auto frame = packet->peekHeader<EthernetMacHeader>();
     if (frame->getDest().equals(address)) {
         throw cRuntimeError("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
@@ -236,18 +236,17 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
 
     // fill in src address if not set
     if (frame->getSrc().isUnspecified()) {
-        //FIXME frame is immutable
-        packet->removeFromBeginning(frame->getChunkLength());
-        const auto& newFrame = dynamicPtrCast<EtherFrame>(frame->dupShared());
+        //frame is immutable
+        frame = nullptr;
+        auto newFrame = packet->removeHeader<EthernetMacHeader>();
         newFrame->setSrc(address);
-        newFrame->markImmutable();
-        packet->pushHeader(newFrame);
+        packet->insertHeader(newFrame);
         frame = newFrame;
     }
 
-    bool isPauseFrame = (dynamic_cast<const EtherPauseFrame *>(frame.get()) != nullptr);
+    bool isControlFrame = frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL;
 
-    if (!isPauseFrame) {
+    if (!isControlFrame) {
         numFramesFromHL++;
         emit(rxPkFromHLSignal, packet);
     }
@@ -488,7 +487,7 @@ void EtherMAC::startFrameTransmission()
 
     Packet *frame = curTxFrame->dup();
 
-    const auto& hdr = frame->peekHeader<EtherFrame>();
+    const auto& hdr = frame->peekHeader<EthernetMacHeader>();
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
@@ -557,11 +556,16 @@ void EtherMAC::handleEndTxPeriod()
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    if (EtherPauseFrame *pauseFrame = dynamic_cast<EtherPauseFrame *>(curTxFrame)) {
+    bool isPauseFrame = false;
+    const auto& header = curTxFrame->peekHeader<EthernetMacHeader>();
+    if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
+        const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
+        isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
+        const auto& pauseFrame = std::dynamic_pointer_cast<const EthernetPauseFrame>(controlFrame);
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
     }
-    else {
+    if (!isPauseFrame) {
         unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
@@ -793,12 +797,12 @@ void EtherMAC::frameReceptionComplete()
         return;
     }
 
-    const auto& frame = packet->peekHeader<EtherFrame>();
+    const auto& frame = packet->peekHeader<EthernetMacHeader>();
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (auto pauseFrame = dynamic_cast<const EtherPauseFrame *>(frame.get())) {
-        processReceivedPauseFrame(packet, pauseFrame);
+    if (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
+        processReceivedControlFrame(packet);
     }
     else {
         EV_INFO << "Reception of " << frame << " successfully completed.\n";
@@ -825,33 +829,39 @@ void EtherMAC::processReceivedDataFrame(Packet *packet)
     send(packet, "upperLayerOut");
 }
 
-void EtherMAC::processReceivedPauseFrame(Packet *packet, const EtherPauseFrame *frame)
+void EtherMAC::processReceivedControlFrame(Packet *packet)
 {
-    int pauseUnits = frame->getPauseTime();
+    const auto& header = packet->popHeader<EthernetMacHeader>();
+    const auto& controlFrame = packet->peekHeader<EthernetControlFrame>();
+
+    if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+        const auto& pauseFrame = packet->peekHeader<EthernetPauseFrame>();
+        int pauseUnits = pauseFrame->getPauseTime();
+
+        numPauseFramesRcvd++;
+        emit(rxPausePkUnitsSignal, pauseUnits);
+
+        if (transmitState == TX_IDLE_STATE) {
+            EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
+            if (pauseUnits > 0)
+                scheduleEndPausePeriod(pauseUnits);
+        }
+        else if (transmitState == PAUSE_STATE) {
+            EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
+                      << " more time units from now\n";
+            cancelEvent(endPauseMsg);
+
+            if (pauseUnits > 0)
+                scheduleEndPausePeriod(pauseUnits);
+        }
+        else {
+            // transmitter busy -- wait until it finishes with current frame (endTx)
+            // and then it'll go to PAUSE state
+            EV_DETAIL << "PAUSE frame received, storing pause request\n";
+            pauseUnitsRequested = pauseUnits;
+        }
+    }
     delete packet;
-
-    numPauseFramesRcvd++;
-    emit(rxPausePkUnitsSignal, pauseUnits);
-
-    if (transmitState == TX_IDLE_STATE) {
-        EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
-        if (pauseUnits > 0)
-            scheduleEndPausePeriod(pauseUnits);
-    }
-    else if (transmitState == PAUSE_STATE) {
-        EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
-                  << " more time units from now\n";
-        cancelEvent(endPauseMsg);
-
-        if (pauseUnits > 0)
-            scheduleEndPausePeriod(pauseUnits);
-    }
-    else {
-        // transmitter busy -- wait until it finishes with current frame (endTx)
-        // and then it'll go to PAUSE state
-        EV_DETAIL << "PAUSE frame received, storing pause request\n";
-        pauseUnitsRequested = pauseUnits;
-    }
 }
 
 void EtherMAC::scheduleEndIFGPeriod()
