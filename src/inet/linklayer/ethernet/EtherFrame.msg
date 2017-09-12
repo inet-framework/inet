@@ -37,17 +37,9 @@ enum EtherType;
 enum SAPCode;
 
 //
-// Common base class for classes representing Ethernet II and 802.3 frame types,
-// containing their common header fields.
+// Ethernet MAC header
 //
-// This class should never be instantiated by the models, only specific
-// subclasses: ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP.
-//
-// Source and destination MAC address are stored in data members.
-// Packet length includes Etherner header, payload, padding and FCS.
-// Payload length can be accessed as getEncapsulatedPacket()->getByteLength().
-//
-class EthernetHeader extends FieldsChunk
+class EthernetMacHeader extends FieldsChunk
 {
     chunkLength = B(14);
     MACAddress dest;
@@ -58,16 +50,11 @@ class EthernetHeader extends FieldsChunk
 cplusplus {{
     inline bool isEth2Type(int typeOrLength)  { return typeOrLength >= 0x600 || typeOrLength == 0; }  // typeOrLength is type
     inline bool isIeee802_3Length(int typeOrLength)  { return typeOrLength > 0 && typeOrLength < 0x600; }  // typeOrLength is length
-    inline bool isEth2Header(const EthernetHeader& hdr)  { return isEth2Type(hdr.getTypeOrLength()); }  // typeOrLength is type
-    inline bool isIeee802_3Header(const EthernetHeader& hdr)  { return isIeee802_3Length(hdr.getTypeOrLength()); }  // typeOrLength is length
+    inline bool isEth2Header(const EthernetMacHeader& hdr)  { return isEth2Type(hdr.getTypeOrLength()); }  // typeOrLength is type
+    inline bool isIeee802_3Header(const EthernetMacHeader& hdr)  { return isIeee802_3Length(hdr.getTypeOrLength()); }  // typeOrLength is length
 }}
 
 //
-// Ethernet frame with 802.2 LLC header.
-// Ethernet frame with LLC and SNAP headers.
-
-// EtherFrameWithLLC and EtherFrameWithSNAP removed, see Ieee8022LlcHeader
-
 //
 // Ethernet control frames used by the PAUSE protocol
 //

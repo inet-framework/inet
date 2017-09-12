@@ -23,20 +23,23 @@ namespace inet;
 
 class FieldsChunk extends cObject;
 
+// ieee 802.2 LLC header
 class Ieee8022LlcHeader extends FieldsChunk
 {
     chunkLength = B(3);
-    short dsap = -1;
-    short ssap = -1;
-    int control = -1;
+    short dsap = -1;    // 1 byte
+    short ssap = -1;    // 1 byte
+    int control = -1;    // 1 or 2 byte, control = byte[0]+256*byte[1], two bytes, when (byte[0] & 3) != 3
 }
 
-class Ieee8022SnapHeader extends Ieee8022LlcHeader
+// ieee 802.2 LLC header with SNAP extension
+//TODO rename to LlcWithSnap, or let separated Llc and Snap headers
+class Ieee8022LlcSnapHeader extends Ieee8022LlcHeader
 {
     chunkLength = B(8);
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;
-    int oui = -1;   // organizationally unique identifier (OUI); 0 for protocols that have an EtherType (ARP, IPv4, IPv6, etc.)
-    int protocolId = -1; // protocol identifier (PID); stores ~EtherType if orgCode is 0
+    int oui = -1;   // organizationally unique identifier (OUI); 0 for protocols that have an EtherType (ARP, IPv4, IPv6, etc.), 3 bytes
+    int protocolId = -1; // protocol identifier (PID); stores ~EtherType if orgCode is 0, 2 bytes
 }
