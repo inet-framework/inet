@@ -31,7 +31,11 @@ void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& llcHeader = CHK(dynamicPtrCast<const Ieee8022LlcHeader>(chunk));
     stream.writeByte(llcHeader->getSsap());
     stream.writeByte(llcHeader->getDsap());
-    stream.writeByte(llcHeader->getControl());
+    auto control = llcHeader->getControl();
+    stream.writeByte(control);
+    if ((control & 3) != 3) {
+        stream.writeByte(control>>8);
+    }
     if (auto snapHeader = dynamicPtrCast<const Ieee8022SnapHeader>(chunk)) {
         stream.writeByte(snapHeader->getOui() >> 16);
         stream.writeByte(snapHeader->getOui() >> 8);
@@ -45,7 +49,9 @@ const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& str
     Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();
     uint8_t dsap = stream.readByte();
-    uint8_t ctrl = stream.readByte();
+    uint16_t ctrl = stream.readByte();
+    if ((ctrl & 3) != 3)
+        ctrl |= ((uint16_t)stream.readByte()) << 8;
     if (dsap == 0xAA && ssap == 0xAA) { // snap frame
         auto snapHeader = makeShared<Ieee8022SnapHeader>();
         snapHeader->setOui(((uint32_t)stream.readByte() << 16) + stream.readUint16Be());
