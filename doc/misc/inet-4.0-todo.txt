@@ -1,6 +1,16 @@
 INET 4.0 TODOs
 ==============
 
+The new INET 4.0 release SHOULD include changes in the following categories:
+ - API breaking changes (e.g. renames, public API changes, etc.)
+
+The new INET 4.0 release NEED NOT include changes in the following categories:
+ - additive changes (new APIs)
+ - behavior improvements
+ - documentation
+ - code style
+ - performance optimizations
+
 The new INET 4.0 release contains changes related to three main topics:
  
  - Network Node Architecture
@@ -10,42 +20,48 @@ The new INET 4.0 release contains changes related to three main topics:
 Additionally, all other changes that are backward incompatible but easy to do
 should be included in INET 4.0.
 
- - port *all* protocols to the new packet API (e.g. 802.11)
- - eliminate all KLUDGES introduces by the 3 main infrastructure changes
+SHOULD:
+ - port *all* protocols to the new packet API, PacketDrill and SCTP are not finished yet
  - eliminate all control infos attached to packets
- + removing ethernet padding should be done in upper protocols if length is not present
-
- - extract LLC from ethernet and 802.11
- - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
- - revise and merge signals, add details parameter (e.g. packetDropped)
- - revise physical layer error models wrt. how errors are represented
-
- - revise all network node module base class hierarchy (e.g. mpls nodes)
- - implement all necessary message compiler changes to avoid clutter in msg files
+ - replace std::make_shared<T>, std::dynamic_pointer_cast, std::static_pointer_cast, std::const_pointer_cast with makeShared<T>(), dynamicPtrCast<T>, dynamic_ptr_cast<T>, ...?
+ - simplify INetfilter interface by removing parameters other than the datagram
+ - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
+ - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac?
+ - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
- - simplify INetfilter interface by removing parameters other than the datagram
+ - extract LLC from ethernet and 802.11
+ - move CRC computation and verification from serializers to protocol modules (add missing ones)
+ - remove obsolete dataTransferMode from protocols (not applications)
+ - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
+ - compare performance with INET 3.x branch and optimize if a lot of worse
+
+NEED NOT:
+ - eliminate all KLUDGES introduced by the 3 main infrastructure changes
+ - implement all necessary omnetpp message compiler changes to avoid clutter in msg files
+ - revise physical layer error models wrt. how errors are represented
+ - factor out physical layer analog domain representation into a separate parameter of transmissions
+ - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
+ - review all examples and check if they still do what is intended
+ - add ChunkStack (lifo) similarly to how ChunkQueue (fifo) is implemented
+ - add separate reusable application packet generators
+ - rewrite serializers that use structure bit fields, this is undefined C++ behavior
+ - revise all network node module base class hierarchy (e.g. mpls nodes)
  - use InterfaceEntry class instead of cCompoundModule for the corresponding network interface (merge the two)
- - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
    providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
    but we should avoid having these classes for a random collections of utility functions!
  - add separate classes/functions for iterating over the network nodes in a network or
    finding a network node based on its mac address/ip address or finding the position of a network node, etc.
- - add missing interface NED files for all L2 protocols
- - remove obsolete dataTransferMode and the like
- - rewrite serializers that use structure bit fields, this is undefined behavior
- - move CRC computation and veryfication from serializers to protocol modules (add missing ones)
- - add separate reusable application packet generators
- - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer  
-
+ - add missing interface NED files for all L2 protocols, BMacInterface
+ - add missing node NED files for existing protocols (e.g. sensor nodes, IoT devices) 
  - update all NED and C++ documentation
- - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
- - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac?
  - nicely position submodules in compound modules, prepare for 2 info lines
  - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
  - avoid specifying module icon sizes by default, override icon size in submodules
  - sort includes alphabetically
  - pretty print white spaces
 
- - review all examples and check if they still do what is intended
+DONE:
+ + removing ethernet padding should be done in upper protocols if length is not present
+ + revise and merge packetDrop signals, add details parameter (e.g. packetDropped)
