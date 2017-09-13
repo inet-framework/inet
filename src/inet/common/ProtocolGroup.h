@@ -44,7 +44,7 @@ class INET_API ProtocolGroup
     static const ProtocolGroup ethertype;
     static const ProtocolGroup pppprotocol;
     static const ProtocolGroup ipprotocol;
-    static const ProtocolGroup ieee8022llcprotocol;
+    static const ProtocolGroup ieee8022protocol;
     static const ProtocolGroup snapOui;
 };
 

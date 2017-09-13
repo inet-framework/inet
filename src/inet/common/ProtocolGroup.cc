@@ -102,12 +102,12 @@ const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
 });
 
 const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
-        //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
-        // { 0x00000C, &Protocol::ciscoSnap } //TODO
+    //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
+    // { 0x00000C, &Protocol::ciscoSnap } //TODO
 });
 
-const ProtocolGroup ProtocolGroup::ieee8022llcprotocol("llcprotocol", {
-        { 0x424203, &Protocol::stp },
+const ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
+    { 0x424203, &Protocol::stp },
 });
 
 } // namespace inet

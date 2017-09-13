@@ -74,7 +74,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
     }
     else {
         const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-        int llctype = ProtocolGroup::ieee8022llcprotocol.findProtocolNumber(protocol);
+        int llctype = ProtocolGroup::ieee8022protocol.findProtocolNumber(protocol);
         if (llctype != -1) {
             llcHeader->setSsap((llctype >> 16) & 0xFF);
             llcHeader->setDsap((llctype >> 8) & 0xFF);
@@ -88,7 +88,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
         }
         frame->insertHeader(llcHeader);
     }
-    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)
@@ -116,7 +116,7 @@ void Ieee8022Llc::decapsulate(Packet *frame)
 
     }
     else {
-        payloadProtocol = ProtocolGroup::ieee8022llcprotocol.findProtocol(ssapDsapCtrl);    // do not use getProtocol
+        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(ssapDsapCtrl);    // do not use getProtocol
     }
     if (payloadProtocol != nullptr) {
         frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);

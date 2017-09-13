@@ -174,7 +174,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else if (isEth2Header(*ethHeader)) {
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength()));
