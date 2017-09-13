@@ -65,7 +65,7 @@ void Ieee80211Portal::encapsulate(Packet *packet)
     packet->removePoppedChunks();
     packet->ensureTag<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->ensureTag<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
-    if (isIeee802_3Header(*ethernetHeader)) {
+    if (isIeee8023Header(*ethernetHeader))
         // do nothing, already has an LLC/SNAP header
         const auto& chunk = packet->peekHeader<Ieee8022LlcSnapHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR);
         if (chunk == nullptr)

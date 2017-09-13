@@ -133,7 +133,7 @@ void Ieee8021dRelay::broadcast(Packet *packet)
 namespace {
     bool isBpdu(Packet *packet, const Ptr<const EthernetMacHeader>& hdr)
     {
-        if (isIeee802_3Header(*hdr)) {
+        if (isIeee8023Header(*hdr)) {
             const auto& llc = packet->peekDataAt<Ieee8022LlcHeader>(hdr->getChunkLength());
             return (llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
         }
@@ -248,7 +248,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
     auto eth = EtherEncap::decapsulateMacHeader(packet);
-    ASSERT(isIeee802_3Header(*eth));
+    ASSERT(isIeee8023Header(*eth));
 
     const auto& llc = packet->popHeader<Ieee8022LlcHeader>();
     ASSERT(llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);

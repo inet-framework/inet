@@ -448,7 +448,7 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
         default:
             throw cRuntimeError("invalid FCS mode in ethernet frame");
     }
-    if (isIeee802_3Header(*ethHeader)) {
+    if (isIeee8023Header(*ethHeader)) {
         b payloadLength = B(ethHeader->getTypeOrLength());
 
         return (payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));

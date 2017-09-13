@@ -68,9 +68,9 @@ class EthernetMacHeader extends FieldsChunk
 
 cplusplus {{
     inline bool isEth2Type(int typeOrLength)  { return typeOrLength >= 0x600 || typeOrLength == 0; }  // typeOrLength is type
-    inline bool isIeee802_3Length(int typeOrLength)  { return typeOrLength > 0 && typeOrLength < 0x600; }  // typeOrLength is length
+    inline bool isIeee8023Length(int typeOrLength)  { return typeOrLength > 0 && typeOrLength < 0x600; }  // typeOrLength is length
     inline bool isEth2Header(const EthernetMacHeader& hdr)  { return isEth2Type(hdr.getTypeOrLength()); }  // typeOrLength is type
-    inline bool isIeee802_3Header(const EthernetMacHeader& hdr)  { return isIeee802_3Length(hdr.getTypeOrLength()); }  // typeOrLength is length
+    inline bool isIeee8023Header(const EthernetMacHeader& hdr)  { return isIeee8023Length(hdr.getTypeOrLength()); }  // typeOrLength is length
 }}
 
 //

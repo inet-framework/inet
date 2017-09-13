@@ -157,7 +157,7 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
     Ptr<const Ieee8022LlcHeader> llc = nullptr;
     auto ethHeader = EtherEncap::decapsulateMacHeader(packet);
 
-    if (isIeee802_3Header(*ethHeader)) {
+    if (isIeee8023Header(*ethHeader)) {
         llc = packet->popHeader<Ieee8022LlcHeader>();
     }
     else {

@@ -169,7 +169,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
     macAddressInd->setDestAddress(ethHeader->getDest());
 
     // remove Padding if possible
-    if (isIeee802_3Header(*ethHeader)) {
+    if (isIeee8023Header(*ethHeader)) {
         b payloadLength = B(ethHeader->getTypeOrLength());
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
@@ -188,7 +188,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
     auto ethHeader = decapsulateMacHeader(packet);
 
     // remove llc header if possible
-    if (isIeee802_3Header(*ethHeader)) {
+    if (isIeee8023Header(*ethHeader)) {
         this->Ieee8022Llc::decapsulate(packet);
     }
     else if (isEth2Header(*ethHeader)) {
