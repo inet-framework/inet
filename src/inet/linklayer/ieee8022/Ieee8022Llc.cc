@@ -53,32 +53,31 @@ void Ieee8022Llc::encapsulate(Packet *frame)
     auto protocolTag = frame->getTag<PacketProtocolTag>();
     const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     int ethType = -1;
-    int snapType = -1;
+    int snapOui = -1;
     if (protocol) {
         ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
-        if (ethType == -1) {
-            snapType = ProtocolGroup::snapOui.findProtocolNumber(protocol);
-        }
+        if (ethType == -1)
+            snapOui = ProtocolGroup::snapOui.findProtocolNumber(protocol);
     }
-    if (ethType != -1 || snapType != -1) {
+    if (ethType != -1 || snapOui != -1) {
         const auto& snapHeader = makeShared<Ieee8022LlcSnapHeader>();
         if (ethType != -1) {
             snapHeader->setOui(0);
             snapHeader->setProtocolId(ethType);
         }
         else {
-            snapHeader->setOui(snapType);
+            snapHeader->setOui(snapOui);
             snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
         }
         frame->insertHeader(snapHeader);
     }
     else {
         const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-        int llctype = ProtocolGroup::ieee8022protocol.findProtocolNumber(protocol);
-        if (llctype != -1) {
-            llcHeader->setSsap((llctype >> 16) & 0xFF);
-            llcHeader->setDsap((llctype >> 8) & 0xFF);
-            llcHeader->setControl((llctype) & 0xFF);
+        int sapData = ProtocolGroup::ieee8022protocol.findProtocolNumber(protocol);
+        if (sapData != -1) {
+            llcHeader->setSsap((sapData >> 8) & 0xFF);
+            llcHeader->setDsap(sapData & 0xFF);
+            llcHeader->setControl(3);
         }
         else {
             auto sapTag = frame->getMandatoryTag<Ieee802SapReq>();
@@ -101,26 +100,21 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     sapInd->setDsap(llcHeader->getDsap());
     //TODO control?
 
-    int32_t ssapDsapCtrl = (llcHeader->getSsap() << 16) | (llcHeader->getDsap() << 8) | (llcHeader->getControl() & 0xFF);
-    if (ssapDsapCtrl == 0xAAAA03) {
-        // snap header
+    if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
         const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
         if (snapHeader == nullptr)
-            throw cRuntimeError("llc/snap error: llc header suggested snap header, but snap header is missing");
-        if (snapHeader->getOui() == 0) {
+            throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
+        if (snapHeader->getOui() == 0)
             payloadProtocol = ProtocolGroup::ethertype.getProtocol(snapHeader->getProtocolId());
-        }
-        else {
+        else
             payloadProtocol = ProtocolGroup::snapOui.getProtocol(snapHeader->getOui());
-        }
-
     }
     else {
-        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(ssapDsapCtrl);    // do not use getProtocol
+        int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
+        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
     }
-    if (payloadProtocol != nullptr) {
+    if (payloadProtocol != nullptr)
         frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    }
     frame->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 

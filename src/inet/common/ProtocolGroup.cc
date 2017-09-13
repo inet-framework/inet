@@ -107,7 +107,7 @@ const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
 });
 
 const ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
-    { 0x424203, &Protocol::stp },
+    { 0x4242, &Protocol::stp },
 });
 
 } // namespace inet
