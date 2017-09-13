@@ -206,7 +206,6 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
 void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddress& macAddress)
 {
     // add control info with MAC address
-//    msg->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     msg->ensureTag<MacAddressReq>()->setDestAddress(macAddress);
     delete msg->removeTag<DispatchProtocolReq>();
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
