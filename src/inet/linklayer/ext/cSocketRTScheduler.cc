@@ -196,9 +196,10 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     module = cSocketRTScheduler::modules.at(i);
 
     // skip ethernet frames not encapsulating an IP packet.
+    // TODO: how about ipv6 and other protocols?
     if (datalink == DLT_EN10MB) {
         ethernet_hdr = (struct serializer::ether_header *)bytes;
-        if (ntohs(ethernet_hdr->ether_type) != ETHERTYPE_IPv4)
+        if (ntohs(ethernet_hdr->ether_type) != 0x0800) // ipv4
             return;
     }
 
