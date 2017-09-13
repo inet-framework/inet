@@ -29,7 +29,7 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -388,14 +388,16 @@ void EtherMAC::processJamSignalFromNetwork(EthernetSignal *msg)
     }
 }
 
-void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
+void EtherMAC::processMsgFromNetwork(EthernetSignal *signal)
 {
-    EV_DETAIL << "Received " << msg << " from network.\n";
+    EV_DETAIL << "Received " << signal << " from network.\n";
 
     if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
-        if (EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(msg)) {    // do not count JAM and IFG packets
-            Packet *packet = decapsulate(phyFrame);
+        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << signal << endl;
+        if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
+            auto packet = check_and_cast<Packet *>(signal->decapsulate());
+            delete signal;
+            decapsulate(packet);
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
             emit(packetDropSignal, packet, &details);
@@ -403,14 +405,14 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
             numDroppedIfaceDown++;
         }
         else
-            delete msg;
+            delete signal;
 
         return;
     }
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode) {
-        simtime_t propagationTime = simTime() - msg->getSendingTime();
+        simtime_t propagationTime = simTime() - signal->getSendingTime();
         if (propagationTime >= curEtherDescr->maxPropagationDelay) {
             throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
                                 "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
@@ -419,12 +421,12 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
         }
     }
 
-    simtime_t endRxTime = simTime() + msg->getDuration();
+    simtime_t endRxTime = simTime() + signal->getDuration();
 
     if (!duplexMode && receiveState == RX_RECONNECT_STATE) {
-        long treeId = msg->getTreeId();
+        long treeId = signal->getTreeId();
         addReceptionInReconnectState(treeId, endRxTime);
-        delete msg;
+        delete signal;
     }
     else if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE)) {
         // since we're half-duplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
@@ -433,7 +435,7 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
         emit(receiveStateSignal, RX_COLLISION_STATE);
 
         addReception(endRxTime);
-        delete msg;
+        delete signal;
 
         EV_DETAIL << "Transmission interrupted by incoming frame, handling collision\n";
         cancelEvent((transmitState == TRANSMITTING_STATE) ? endTxMsg : endIFGMsg);
@@ -446,8 +448,8 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
     }
     else if (receiveState == RX_IDLE_STATE) {
         channelBusySince = simTime();
-        EV_INFO << "Reception of " << msg << " started.\n";
-        scheduleEndRxPeriod(msg);
+        EV_INFO << "Reception of " << signal << " started.\n";
+        scheduleEndRxPeriod(signal);
     }
     else if (receiveState == RECEIVING_STATE && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
@@ -467,7 +469,7 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
         channelBusySince = simTime();
 
         // start receiving next frame
-        scheduleEndRxPeriod(msg);
+        scheduleEndRxPeriod(signal);
     }
     else {    // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
               // handle overlapping receptions
@@ -475,7 +477,7 @@ void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
         EV_DETAIL << "Overlapping receptions -- setting collision state\n";
         addReception(endRxTime);
         // delete collided frames: arrived frame as well as the one we're currently receiving
-        delete msg;
+        delete signal;
         processDetectedCollision();
     }
 }
@@ -535,12 +537,19 @@ void EtherMAC::startFrameTransmission()
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    EtherPhyFrame *phyFrame = encapsulate(frame);
+    encapsulate(frame);
 
-    currentSendPkTreeID = phyFrame->getTreeId();
-    int64_t sentFrameByteLength = phyFrame->getByteLength();
-    phyFrame->clearTags();
-    send(phyFrame, physOutGate);
+    currentSendPkTreeID = frame->getTreeId();
+    int64_t sentFrameByteLength = frame->getByteLength();
+    frame->clearTags();
+    auto signal = new EthernetSignal(frame->getName());
+    if (sendRawBytes) {
+        signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
+        delete frame;
+    }
+    else
+        signal->encapsulate(frame);
+    send(signal, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
     if (!duplexMode && receiveState != RX_IDLE_STATE) {
@@ -810,17 +819,17 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete()
 {
-    EthernetSignal *msg = frameBeingReceived;
+    EthernetSignal *signal = frameBeingReceived;
     frameBeingReceived = nullptr;
 
-    if (dynamic_cast<EthernetFilledIfgSignal *>(msg) != nullptr) {
-        delete msg;
+    if (dynamic_cast<EthernetFilledIfgSignal *>(signal) != nullptr) {
+        delete signal;
         return;
     }
-
-    bool hasBitError = msg->hasBitError();
-
-    Packet *packet = decapsulate(check_and_cast<EtherPhyFrame *>(msg));
+    bool hasBitError = signal->hasBitError();
+    auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    delete signal;
+    decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
     if (hasBitError || !verifyCrcAndLength(packet)) {

@@ -23,7 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -115,12 +115,19 @@ void EtherMACFullDuplex::startFrameTransmission()
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    EtherPhyFrame *phyFrame = encapsulate(frame);
+    encapsulate(frame);
 
     // send
-    EV_INFO << "Transmission of " << phyFrame << " started.\n";
-    phyFrame->clearTags();
-    send(phyFrame, physOutGate);
+    EV_INFO << "Transmission of " << frame << " started.\n";
+    frame->clearTags();
+    auto signal = new EthernetSignal(frame->getName());
+    if (sendRawBytes) {
+        signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
+        delete frame;
+    }
+    else
+        signal->encapsulate(frame);
+    send(signal, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
     transmitState = TRANSMITTING_STATE;
@@ -199,14 +206,16 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
         startFrameTransmission();
 }
 
-void EtherMACFullDuplex::processMsgFromNetwork(EthernetSignal *traffic)
+void EtherMACFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
 {
-    EV_INFO << traffic << " received." << endl;
+    EV_INFO << signal << " received." << endl;
 
     if (!connected || disabled) {
-        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << traffic << endl;
-        if (EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(traffic)) {    // do not count JAM and IFG packets
-            Packet *packet = decapsulate(phyFrame);
+        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << signal << endl;
+        if (typeid(*signal) == typeid(EthernetSignal)) {    // do not count JAM and IFG packets
+            auto packet = check_and_cast<Packet *>(signal->decapsulate());
+            delete signal;
+            decapsulate(packet);
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
             emit(packetDropSignal, packet, &details);
@@ -214,24 +223,18 @@ void EtherMACFullDuplex::processMsgFromNetwork(EthernetSignal *traffic)
             numDroppedIfaceDown++;
         }
         else
-            delete traffic;
+            delete signal;
 
         return;
     }
 
-    EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(traffic);
-    if (!phyFrame) {
-        if (dynamic_cast<EthernetFilledIfgSignal *>(traffic))
-            throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIFG is unexpected");
-        else
-            throw cRuntimeError("Unexpected ethernet traffic: %s", traffic->getClassName());
-    }
-
-    totalSuccessfulRxTime += phyFrame->getDuration();
-
-    bool hasBitError = traffic->hasBitError();
-
-    Packet *packet = decapsulate(phyFrame);
+    if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
+        throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIFG is unexpected");
+    bool hasBitError = signal->hasBitError();
+    auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    delete signal;
+    totalSuccessfulRxTime += packet->getDuration();
+    decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
     if (hasBitError || !verifyCrcAndLength(packet)) {

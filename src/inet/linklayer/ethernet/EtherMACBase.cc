@@ -23,7 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/serializer/EthernetCRC.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/ModuleAccess.h"
@@ -388,31 +388,19 @@ void EtherMACBase::processConnectDisconnect()
     }
 }
 
-EtherPhyFrame *EtherMACBase::encapsulate(Packet* frame)
+void EtherMACBase::encapsulate(Packet *frame)
 {
-    EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
-    if (sendRawBytes) {
-        auto rawFrame = new Packet(frame->getName(), frame->peekAllBytes());
-        phyFrame->encapsulate(rawFrame);
-        delete frame;
-    }
-    else
-        phyFrame->encapsulate(frame);
-    phyFrame->setSrcMacFullDuplex(duplexMode);
-    return phyFrame;
+    auto phyHeader = makeShared<EthernetPhyHeader>();
+    phyHeader->setSrcMacFullDuplex(duplexMode);
+    frame->insertHeader(phyHeader);
 }
 
-Packet *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
+void EtherMACBase::decapsulate(Packet *packet)
 {
-    if (phyFrame->getSrcMacFullDuplex() != duplexMode)
+    auto phyHeader = packet->popHeader<EthernetPhyHeader>();
+    if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
-
-    cPacket *frame = phyFrame->decapsulate();
-    delete phyFrame;
-
-    auto packet = check_and_cast<Packet *>(frame);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
-    return packet;
 }
 
 //FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.

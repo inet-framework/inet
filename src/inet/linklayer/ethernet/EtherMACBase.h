@@ -34,7 +34,6 @@
 namespace inet {
 
 // Forward declarations:
-class EtherPhyFrame;
 class EthernetSignal;
 class InterfaceEntry;
 
@@ -228,8 +227,8 @@ class INET_API EtherMACBase : public MACBase
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
-    virtual EtherPhyFrame *encapsulate(Packet* frame);
-    virtual Packet *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
+    virtual void encapsulate(Packet *packet);
+    virtual void decapsulate(Packet *packet);
 
     /// Verify ethernet packet: check FCS and payload length
     bool verifyCrcAndLength(Packet *packet);
