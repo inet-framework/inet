@@ -18,7 +18,6 @@
 
 cplusplus {{
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -30,9 +29,29 @@ class FieldsChunk extends cObject;
 
 class noncobject MACAddress;
 
-class noncobject MessageId;
+//
+// Some EtherType values (Ethernet II).
+//
+enum EtherType
+{
+    ETHERTYPE_IPv4 = 0x0800;
+    ETHERTYPE_ARP = 0x0806;
+    ETHERTYPE_TRILL = 0x22F3;
+    ETHERTYPE_L2_ISIS = 0x22F4;
+    ETHERTYPE_RARP = 0x8035;
+    ETHERTYPE_8021Q_TAG = 0x8100;
+    ETHERTYPE_IPv6 = 0x86DD;
+    ETHERTYPE_INET_GENERIC = 0x86FF;    // not in standard, INET spceific value for @GenericNetworkProtocol
+    ETHERTYPE_FLOW_CONTROL = 0x8808;
+    ETHERTYPE_8021ad_S_TAG = 0x88A8;
+    ETHERTYPE_MPLS_UNICAST = 0x8847;
+    ETHERTYPE_MPLS_MULTICAST = 0x8848;
+}
 
-enum EtherType;
+enum EthernetControlOpCode
+{
+    ETHERNET_CONTROL_PAUSE = 1;
+}
 
 enum SAPCode;
 
