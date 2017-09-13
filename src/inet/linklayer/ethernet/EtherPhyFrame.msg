@@ -33,14 +33,14 @@ enum SAPCode;
 // Abstract base class for various Ethernet traffic types:
 // EtherJam, EtherFilledIFG and EtherPhyFrame.
 //
-packet EtherTraffic
+packet EthernetSignal
 {
 }
 
 //
 // Represents jam on the Ethernet.
 //
-packet EtherJam extends EtherTraffic
+packet EtherJam extends EthernetSignal
 {
     long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
 }
@@ -49,7 +49,7 @@ packet EtherJam extends EtherTraffic
 // Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //
-packet EtherFilledIFG extends EtherTraffic
+packet EtherFilledIFG extends EthernetSignal
 {
     bitLength = INTERFRAME_GAP_BITS;
 }
@@ -62,7 +62,7 @@ packet EtherFilledIFG extends EtherTraffic
 //  - SFD: not stored (only contributes to length)
 //  - encapsulated EtherFrame with padding and FCS
 //
-packet EtherPhyFrame extends EtherTraffic
+packet EtherPhyFrame extends EthernetSignal
 {
     @customize(true);
     byteLength = PREAMBLE_BYTES + SFD_BYTES;

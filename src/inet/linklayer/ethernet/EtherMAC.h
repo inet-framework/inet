@@ -57,7 +57,7 @@ class INET_API EtherMAC : public EtherMACBase
     long currentSendPkTreeID = -1;
 
     // other variables
-    cPacket *frameBeingReceived = nullptr;
+    EthernetSignal *frameBeingReceived = nullptr;
     cMessage *endRxMsg = nullptr;
     cMessage *endBackoffMsg = nullptr;
     cMessage *endJammingMsg = nullptr;
@@ -99,11 +99,12 @@ class INET_API EtherMAC : public EtherMACBase
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
     virtual void processFrameFromUpperLayer(Packet *msg);
-    virtual void processMsgFromNetwork(cPacket *msg);
+    virtual void processJamSignalFromNetwork(EthernetSignal *msg);
+    virtual void processMsgFromNetwork(EthernetSignal *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
     virtual void scheduleEndTxPeriod(int64_t sentFrameByteLength);
-    virtual void scheduleEndRxPeriod(cPacket *);
+    virtual void scheduleEndRxPeriod(EthernetSignal *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
     virtual void sendJamSignal();

@@ -195,8 +195,12 @@ void EtherMAC::handleMessage(cMessage *msg)
         handleSelfMessage(msg);
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<Packet *>(msg));
-    else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<cPacket *>(msg));
+    else if (msg->getArrivalGate() == physInGate) {
+        if (auto jamSignal = dynamic_cast<EtherJam *>(msg))
+            processJamSignalFromNetwork(jamSignal);
+        else
+            processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
+    }
     else
         throw cRuntimeError("Message received from unknown gate");
 
@@ -337,7 +341,54 @@ void EtherMAC::processReceivedJam(EtherJam *jam)
     processDetectedCollision();
 }
 
-void EtherMAC::processMsgFromNetwork(cPacket *msg)
+void EtherMAC::processJamSignalFromNetwork(EthernetSignal *msg)
+{
+    EV_DETAIL << "Received " << msg << " from network.\n";
+
+    if (!connected || disabled) {
+        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
+        delete msg;
+        return;
+    }
+
+    // detect cable length violation in half-duplex mode
+    if (!duplexMode) {
+        simtime_t propagationTime = simTime() - msg->getSendingTime();
+        if (propagationTime >= curEtherDescr->maxPropagationDelay) {
+            throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
+                                "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
+                    SIMTIME_STR(propagationTime),
+                    SIMTIME_STR(propagationTime * SPEED_OF_LIGHT_IN_CABLE));
+        }
+    }
+
+    simtime_t endRxTime = simTime() + msg->getDuration();
+    EtherJam *jamMsg = dynamic_cast<EtherJam *>(msg);
+
+    if (duplexMode && jamMsg) {
+        throw cRuntimeError("Stray jam signal arrived in full-duplex mode");
+    }
+    else if (!duplexMode && receiveState == RX_RECONNECT_STATE) {
+        long treeId = jamMsg->getAbortedPkTreeID();
+        addReceptionInReconnectState(treeId, endRxTime);
+        delete msg;
+    }
+    else if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE)) {
+        // since we're half-duplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
+        if (jamMsg)
+            throw cRuntimeError("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
+    }
+    else if (receiveState == RX_IDLE_STATE) {
+        if (jamMsg)
+            throw cRuntimeError("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
+    }
+    else {    // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
+              // handle overlapping receptions
+        processReceivedJam(jamMsg);
+    }
+}
+
+void EtherMAC::processMsgFromNetwork(EthernetSignal *msg)
 {
     EV_DETAIL << "Received " << msg << " from network.\n";
 
@@ -369,21 +420,14 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
 
     simtime_t endRxTime = simTime() + msg->getDuration();
-    EtherJam *jamMsg = dynamic_cast<EtherJam *>(msg);
 
-    if (duplexMode && jamMsg) {
-        throw cRuntimeError("Stray jam signal arrived in full-duplex mode");
-    }
-    else if (!duplexMode && receiveState == RX_RECONNECT_STATE) {
-        long treeId = jamMsg ? jamMsg->getAbortedPkTreeID() : msg->getTreeId();
+    if (!duplexMode && receiveState == RX_RECONNECT_STATE) {
+        long treeId = msg->getTreeId();
         addReceptionInReconnectState(treeId, endRxTime);
         delete msg;
     }
     else if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE)) {
         // since we're half-duplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
-        if (jamMsg)
-            throw cRuntimeError("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
-
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
         emit(receiveStateSignal, RX_COLLISION_STATE);
@@ -401,16 +445,11 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         emit(collisionSignal, 1L);
     }
     else if (receiveState == RX_IDLE_STATE) {
-        if (jamMsg)
-            throw cRuntimeError("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
-
         channelBusySince = simTime();
         EV_INFO << "Reception of " << msg << " started.\n";
         scheduleEndRxPeriod(msg);
     }
-    else if (receiveState == RECEIVING_STATE
-             && !jamMsg
-             && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
+    else if (receiveState == RECEIVING_STATE && endRxMsg->getArrivalTime() - simTime() < curEtherDescr->halfBitTime)
     {
         // With the above condition we filter out "false" collisions that may occur with
         // back-to-back frames. That is: when "beginning of frame" message (this one) occurs
@@ -432,16 +471,12 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
     }
     else {    // (receiveState==RECEIVING_STATE || receiveState==RX_COLLISION_STATE)
               // handle overlapping receptions
-        if (jamMsg) {
-            processReceivedJam(jamMsg);
-        }
-        else {    // EtherFrame or EtherPauseFrame
-            EV_DETAIL << "Overlapping receptions -- setting collision state\n";
-            addReception(endRxTime);
-            // delete collided frames: arrived frame as well as the one we're currently receiving
-            delete msg;
-            processDetectedCollision();
-        }
+        // EtherFrame or EtherPauseFrame
+        EV_DETAIL << "Overlapping receptions -- setting collision state\n";
+        addReception(endRxTime);
+        // delete collided frames: arrived frame as well as the one we're currently receiving
+        delete msg;
+        processDetectedCollision();
     }
 }
 
@@ -601,7 +636,7 @@ void EtherMAC::handleEndTxPeriod()
     }
 }
 
-void EtherMAC::scheduleEndRxPeriod(cPacket *frame)
+void EtherMAC::scheduleEndRxPeriod(EthernetSignal *frame)
 {
     ASSERT(frameBeingReceived == nullptr);
     ASSERT(!endRxMsg->isScheduled());
@@ -775,7 +810,7 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete()
 {
-    EtherTraffic *msg = check_and_cast<EtherTraffic *>(frameBeingReceived);
+    EthernetSignal *msg = frameBeingReceived;
     frameBeingReceived = nullptr;
 
     if (dynamic_cast<EtherFilledIFG *>(msg) != nullptr) {

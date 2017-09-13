@@ -35,7 +35,7 @@ namespace inet {
 
 // Forward declarations:
 class EtherPhyFrame;
-class EtherTraffic;
+class EthernetSignal;
 class InterfaceEntry;
 
 /**

@@ -81,7 +81,7 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate)
-        processMsgFromNetwork(check_and_cast<EtherTraffic *>(msg));
+        processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
 }
@@ -199,7 +199,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
         startFrameTransmission();
 }
 
-void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
+void EtherMACFullDuplex::processMsgFromNetwork(EthernetSignal *traffic)
 {
     EV_INFO << traffic << " received." << endl;
 
