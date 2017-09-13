@@ -40,7 +40,7 @@ packet EthernetSignal
 //
 // Represents jam on the Ethernet.
 //
-packet EtherJam extends EthernetSignal
+packet EthernetJamSignal extends EthernetSignal
 {
     long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
 }
@@ -49,7 +49,7 @@ packet EtherJam extends EthernetSignal
 // Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //
-packet EtherFilledIFG extends EthernetSignal
+packet EthernetFilledIfgSignal extends EthernetSignal
 {
     bitLength = INTERFRAME_GAP_BITS;
 }

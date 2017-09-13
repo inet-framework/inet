@@ -196,7 +196,7 @@ void EtherMAC::handleMessage(cMessage *msg)
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate) {
-        if (auto jamSignal = dynamic_cast<EtherJam *>(msg))
+        if (auto jamSignal = dynamic_cast<EthernetJamSignal *>(msg))
             processJamSignalFromNetwork(jamSignal);
         else
             processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
@@ -324,7 +324,7 @@ void EtherMAC::addReception(simtime_t endRxTime)
     }
 }
 
-void EtherMAC::processReceivedJam(EtherJam *jam)
+void EtherMAC::processReceivedJam(EthernetJamSignal *jam)
 {
     simtime_t endRxTime = simTime() + jam->getDuration();
     delete jam;
@@ -363,7 +363,7 @@ void EtherMAC::processJamSignalFromNetwork(EthernetSignal *msg)
     }
 
     simtime_t endRxTime = simTime() + msg->getDuration();
-    EtherJam *jamMsg = dynamic_cast<EtherJam *>(msg);
+    EthernetJamSignal *jamMsg = dynamic_cast<EthernetJamSignal *>(msg);
 
     if (duplexMode && jamMsg) {
         throw cRuntimeError("Stray jam signal arrived in full-duplex mode");
@@ -703,7 +703,7 @@ void EtherMAC::sendJamSignal()
     if (currentSendPkTreeID == 0)
         throw cRuntimeError("Model error: sending JAM while not transmitting");
 
-    EtherJam *jam = new EtherJam("JAM_SIGNAL");
+    EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
     jam->setByteLength(JAM_SIGNAL_BYTES);
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
@@ -813,7 +813,7 @@ void EtherMAC::frameReceptionComplete()
     EthernetSignal *msg = frameBeingReceived;
     frameBeingReceived = nullptr;
 
-    if (dynamic_cast<EtherFilledIFG *>(msg) != nullptr) {
+    if (dynamic_cast<EthernetFilledIfgSignal *>(msg) != nullptr) {
         delete msg;
         return;
     }
@@ -925,7 +925,7 @@ void EtherMAC::fillIFGIfInBurst()
             <= curEtherDescr->maxBytesInBurst)
         )
     {
-        EtherFilledIFG *gap = new EtherFilledIFG("FilledIFG");
+        EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
         bytesSentInBurst += gap->getByteLength();
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);

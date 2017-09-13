@@ -221,7 +221,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EthernetSignal *traffic)
 
     EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(traffic);
     if (!phyFrame) {
-        if (dynamic_cast<EtherFilledIFG *>(traffic))
+        if (dynamic_cast<EthernetFilledIfgSignal *>(traffic))
             throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIFG is unexpected");
         else
             throw cRuntimeError("Unexpected ethernet traffic: %s", traffic->getClassName());

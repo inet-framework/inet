@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class EtherJam;
+class EthernetJamSignal;
 class EtherPauseFrame;
 class IPassiveQueue;
 
@@ -111,7 +111,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(Packet *frame);
-    virtual void processReceivedJam(EtherJam *jam);
+    virtual void processReceivedJam(EthernetJamSignal *jam);
     virtual void processReceivedControlFrame(Packet *packet);
     virtual void processConnectDisconnect() override;
     virtual void addReception(simtime_t endRxTime);
