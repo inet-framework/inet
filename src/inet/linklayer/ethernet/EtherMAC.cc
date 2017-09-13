@@ -539,10 +539,10 @@ void EtherMAC::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
 
-    currentSendPkTreeID = frame->getTreeId();
     int64_t sentFrameByteLength = frame->getByteLength();
     frame->clearTags();
     auto signal = new EthernetSignal(frame->getName());
+    currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
         signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
         delete frame;
