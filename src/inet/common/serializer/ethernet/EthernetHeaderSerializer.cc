@@ -75,7 +75,7 @@ const Ptr<Chunk> EthernetControlFrameSerializer::deserialize(MemoryInputStream& 
     else {
         controlFrame = makeShared<EthernetControlFrame>();
         controlFrame->setOpCode(opCode);
-        controlFrame->markIncorrect();
+        controlFrame->markImproperlyRepresented();
     }
     return controlFrame;
 }
