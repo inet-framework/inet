@@ -17,8 +17,6 @@
 
 
 cplusplus {{
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}

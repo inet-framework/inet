@@ -20,7 +20,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherFrame_m.h"

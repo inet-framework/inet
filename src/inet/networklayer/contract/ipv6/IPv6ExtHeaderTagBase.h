@@ -19,7 +19,6 @@
 #define __INET_IPV6EXTHEADERTAGBASE_H
 
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 

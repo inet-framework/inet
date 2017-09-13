@@ -35,8 +35,6 @@
 #include "inet/networklayer/ipv6/IPv6.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

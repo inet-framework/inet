@@ -18,12 +18,10 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
-#include "inet/linklayer/ieee8021d/stp/STP.h"
-
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ieee8021d/stp/STP.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

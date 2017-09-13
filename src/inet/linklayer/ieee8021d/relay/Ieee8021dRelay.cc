@@ -15,11 +15,10 @@
 //
 // Author: Benjamin Martin Seregi
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"

@@ -20,7 +20,6 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"

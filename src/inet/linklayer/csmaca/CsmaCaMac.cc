@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"

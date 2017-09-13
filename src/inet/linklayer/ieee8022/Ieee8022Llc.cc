@@ -17,7 +17,6 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 

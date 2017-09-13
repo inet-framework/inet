@@ -10,8 +10,6 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"

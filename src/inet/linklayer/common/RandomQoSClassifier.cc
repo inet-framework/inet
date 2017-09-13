@@ -15,9 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/RandomQoSClassifier.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "RandomQoSClassifier.h"
-#include "Ieee802Ctrl.h"
 
 namespace inet {
 

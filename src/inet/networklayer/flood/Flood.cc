@@ -26,8 +26,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {

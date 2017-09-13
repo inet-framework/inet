@@ -26,7 +26,6 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"

@@ -19,7 +19,6 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/linklayer/tun/TunInterface.h"

@@ -14,10 +14,9 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/common/serializer/arp/ARPPacketSerializer.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/common/serializer/headers/ethernethdr.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 
 namespace inet {

@@ -21,10 +21,9 @@
 #include <string.h>
 #include "inet/common/INETUtils.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ideal/IdealMac.h"

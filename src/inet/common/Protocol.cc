@@ -16,8 +16,6 @@
 //
 
 #include "inet/common/Protocol.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
 
 namespace inet {
 

@@ -16,8 +16,6 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"

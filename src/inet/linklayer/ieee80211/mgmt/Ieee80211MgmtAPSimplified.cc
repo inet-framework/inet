@@ -16,7 +16,6 @@
 //
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPSimplified.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherFrame_m.h"

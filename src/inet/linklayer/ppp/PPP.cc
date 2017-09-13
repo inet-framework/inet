@@ -18,17 +18,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/linklayer/ppp/PPP.h"
-
 #include "inet/common/INETUtils.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ppp/PPP.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

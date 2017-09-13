@@ -19,7 +19,6 @@
 #define __INET_EXAMPLEQOSCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
-#include "Ieee802Ctrl.h"
 
 namespace inet {
 

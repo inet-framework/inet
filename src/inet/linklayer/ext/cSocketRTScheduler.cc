@@ -21,13 +21,11 @@
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
 
-#include "inet/linklayer/ext/cSocketRTScheduler.h"
-
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
+#include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/linklayer/ext/cSocketRTScheduler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>

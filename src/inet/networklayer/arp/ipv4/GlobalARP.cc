@@ -17,16 +17,14 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/networklayer/arp/ipv4/GlobalARP.h"
-
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/networklayer/arp/ipv4/GlobalARP.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 

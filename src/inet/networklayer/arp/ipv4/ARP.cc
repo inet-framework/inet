@@ -17,17 +17,14 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/networklayer/arp/ipv4/ARP.h"
-
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/networklayer/arp/ipv4/ARP.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
