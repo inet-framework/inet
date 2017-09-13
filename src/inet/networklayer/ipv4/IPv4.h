@@ -213,7 +213,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 
     virtual MACAddress resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE);
 
-    virtual void sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
+    virtual void sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress);
 
     virtual void sendPacketToNIC(Packet *packet, const InterfaceEntry *ie);
 

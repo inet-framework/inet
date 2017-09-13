@@ -965,7 +965,7 @@ void IPv4::sendDatagramToOutput(Packet *packet, const InterfaceEntry *ie, IPv4Ad
             }
             else {
                 ASSERT2(pendingPackets.find(nextHopAddr) == pendingPackets.end(), "IPv4-ARP error: nextHopAddr found in ARP table, but IPv4 queue for nextHopAddr not empty");
-                sendPacketToIeee802NIC(packet, ie, nextHopMacAddr, ETHERTYPE_IPv4);
+                sendPacketToIeee802NIC(packet, ie, nextHopMacAddr);
             }
         }
     }
@@ -984,7 +984,7 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
         while (!packetQueue.isEmpty()) {
             Packet *packet = check_and_cast<Packet *>(packetQueue.pop());
             EV << "Sending out queued packet " << packet << "\n";
-            sendPacketToIeee802NIC(packet, entry->ie, entry->macAddress, ETHERTYPE_IPv4);
+            sendPacketToIeee802NIC(packet, entry->ie, entry->macAddress);
         }
         pendingPackets.erase(it);
     }
@@ -1025,7 +1025,7 @@ MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAd
     return arp->resolveL3Address(nextHopAddr, destIE);
 }
 
-void IPv4::sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
+void IPv4::sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress)
 {
     // remove old control info
     delete packet->removeControlInfo();
