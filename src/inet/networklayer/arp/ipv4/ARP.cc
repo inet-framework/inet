@@ -206,7 +206,7 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     emit(initiatedARPResolutionSignal, &signal);
 }
 
-void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
+void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddress& macAddress)
 {
     // add control info with MAC address
 //    msg->ensureTag<EtherTypeReq>()->setEtherType(etherType);
@@ -240,7 +240,7 @@ void ARP::sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress)
     arp->markImmutable();
     packet->pushHeader(arp);
 
-    sendPacketToNIC(packet, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_ARP);
+    sendPacketToNIC(packet, ie, MACAddress::BROADCAST_ADDRESS);
     numRequestsSent++;
     emit(sentReqSignal, 1L);
 }
@@ -396,7 +396,7 @@ void ARP::processARPPacket(Packet *packet)
                 arpReply->setOpcode(ARP_REPLY);
                 arpReply->markImmutable();
                 outPk->pushHeader(arpReply);
-                sendPacketToNIC(outPk, ie, srcMACAddress, ETHERTYPE_ARP);
+                sendPacketToNIC(outPk, ie, srcMACAddress);
                 numRepliesSent++;
                 emit(sentReplySignal, 1L);
                 break;
