@@ -17,6 +17,7 @@
 
 
 cplusplus {{
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
@@ -24,8 +25,8 @@ cplusplus {{
 namespace inet;
 
 class noncobject MACAddress;
-
 class noncobject MessageId;
+class FieldsChunk extends cObject;
 
 enum SAPCode;
 
@@ -62,10 +63,8 @@ packet EthernetFilledIfgSignal extends EthernetSignal
 //  - SFD: not stored (only contributes to length)
 //  - encapsulated EtherFrame with padding and FCS
 //
-packet EtherPhyFrame extends EthernetSignal
+class EthernetPhyHeader extends FieldsChunk
 {
-    @customize(true);
-    byteLength = PREAMBLE_BYTES + SFD_BYTES;
+    chunkLength = B(PREAMBLE_BYTES + SFD_BYTES);
     bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
 }
-
