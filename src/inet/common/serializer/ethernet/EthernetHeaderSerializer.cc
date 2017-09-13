@@ -16,7 +16,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ethernet/EthernetHeaderSerializer.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 
 namespace inet {
 
@@ -27,7 +27,7 @@ Register_Serializer(EthernetControlFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPauseFrame, EthernetControlFrameSerializer);
 Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
-Register_Serializer(EtherPhyFrame, EthernetPhyHeaderSerializer);
+Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -114,14 +114,12 @@ void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 
 const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetPhyHeader = makeShared<EtherPhyFrame>();
+    auto ethernetPhyHeader = makeShared<EthernetPhyHeader>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
     uint8_t sfd = stream.readByte();
-    if (!preambleReadSuccessfully || sfd != 0xD5) {
-//        ethernetPhyHeader->markIncorrect();
-    }
-//    return ethernetPhyHeader;
-    return nullptr;
+    if (!preambleReadSuccessfully || sfd != 0xD5)
+        ethernetPhyHeader->markIncorrect();
+    return ethernetPhyHeader;
 }
 
 } // namespace serializer
