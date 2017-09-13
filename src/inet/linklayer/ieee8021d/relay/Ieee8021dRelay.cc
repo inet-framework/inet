@@ -200,7 +200,9 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
+    packet->clearTags();
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->removePoppedChunks();
     emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
     send(packet, "ifOut");
 }

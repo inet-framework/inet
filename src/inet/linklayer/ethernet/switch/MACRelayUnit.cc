@@ -57,7 +57,6 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     }
     Packet *packet = check_and_cast<Packet *>(msg);
     const auto& frame = packet->peekHeader<EthernetMacHeader>();
-    delete packet->removeTag<DispatchProtocolReq>();
     // Frame received from MAC unit
     emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
     handleAndDispatchFrame(packet, frame);
@@ -96,7 +95,9 @@ void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
+        packet->clearTags();
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        packet->removePoppedChunks();
         emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
         send(packet, "ifOut");
     }
@@ -108,6 +109,8 @@ void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
 void MACRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
 {
+    packet->clearTags();
+    packet->removePoppedChunks();
     int numPorts = ift->getNumInterfaces();
     for (int i = 0; i < numPorts; ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
