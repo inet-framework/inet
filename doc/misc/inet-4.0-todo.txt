@@ -31,7 +31,6 @@ SHOULD:
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - move CRC computation and verification from serializers to protocol modules (add missing ones)
- - remove obsolete dataTransferMode from protocols (not applications)
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
  - compare performance with INET 3.x branch and optimize if a lot of worse
 
@@ -66,3 +65,4 @@ DONE:
  + revise and merge packetDrop signals, add details parameter (e.g. packetDropped)
  + replace std::make_shared<T>, std::dynamic_pointer_cast, std::static_pointer_cast, std::const_pointer_cast with makeShared<T>(), dynamicPtrCast<T>, dynamic_ptr_cast<T>, ...?
  + extract LLC from ethernet and 802.11
+ + remove obsolete dataTransferMode from protocols (not applications)
