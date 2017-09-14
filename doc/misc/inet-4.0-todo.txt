@@ -23,14 +23,13 @@ should be included in INET 4.0.
 SHOULD:
  - port *all* protocols to the new packet API, PacketDrill and SCTP are not finished yet
  - eliminate all control infos attached to packets
- - replace std::make_shared<T>, std::dynamic_pointer_cast, std::static_pointer_cast, std::const_pointer_cast with makeShared<T>(), dynamicPtrCast<T>, dynamic_ptr_cast<T>, ...?
  - simplify INetfilter interface by removing parameters other than the datagram
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
- - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac?
+ - rename all cc/h files to reflect the name of the class they are defining
+ - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac, BMacLayer to BerkleyMac, LMacLayer to LightweightMac, CSMA to Ieee802154Mac, etc.
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
- - extract LLC from ethernet and 802.11
  - move CRC computation and verification from serializers to protocol modules (add missing ones)
  - remove obsolete dataTransferMode from protocols (not applications)
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
@@ -65,3 +64,5 @@ NEED NOT:
 DONE:
  + removing ethernet padding should be done in upper protocols if length is not present
  + revise and merge packetDrop signals, add details parameter (e.g. packetDropped)
+ + replace std::make_shared<T>, std::dynamic_pointer_cast, std::static_pointer_cast, std::const_pointer_cast with makeShared<T>(), dynamicPtrCast<T>, dynamic_ptr_cast<T>, ...?
+ + extract LLC from ethernet and 802.11
