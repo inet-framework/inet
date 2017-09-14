@@ -164,7 +164,6 @@ class INET_API TCPSocket
 
     cGate *gateToTcp;
 
-    TCPDataTransferMode dataTransferMode;
     std::string tcpAlgorithmClass;
 
   protected:
@@ -242,35 +241,9 @@ class INET_API TCPSocket
     void bind(L3Address localAddr, int localPort);
 
     /**
-     * Returns the current dataTransferMode parameter.
-     * @see TCPCommand
-     */
-    TCPDataTransferMode getDataTransferMode() const { return dataTransferMode; }
-
-    /**
      * Returns the current tcpAlgorithmClass parameter.
      */
     const char *getTCPAlgorithmClass() const { return tcpAlgorithmClass.c_str(); }
-
-    /**
-     * Convert a string to TCPDataTransferMode enum.
-     * Returns TCP_TRANSFER_UNDEFINED when string has an invalid value
-     * Generate runtime error, when string is nullptr;
-     */
-    static TCPDataTransferMode convertStringToDataTransferMode(const char *transferMode);
-
-    /**
-     * Sets the dataTransferMode parameter of the subsequent connect() or listen() calls.
-     * @see TCPCommand
-     */
-    void setDataTransferMode(TCPDataTransferMode transferMode) { dataTransferMode = transferMode; }
-
-    /**
-     * Read "dataTransferMode" parameter from ini/ned, and set dataTransferMode member value
-     *
-     * Generate runtime error when parameter is missing or value is invalid.
-     */
-    void readDataTransferModePar(cComponent& component);
 
     /**
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.

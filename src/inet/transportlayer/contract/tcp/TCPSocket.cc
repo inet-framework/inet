@@ -33,7 +33,6 @@ TCPSocket::TCPSocket()
     yourPtr = nullptr;
 
     gateToTcp = nullptr;
-    dataTransferMode = TCP_TRANSFER_UNDEFINED;
 }
 
 TCPSocket::TCPSocket(cMessage *msg)
@@ -49,7 +48,6 @@ TCPSocket::TCPSocket(cMessage *msg)
     localPrt = remotePrt = -1;
     cb = nullptr;
     yourPtr = nullptr;
-    dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
     gateToTcp = nullptr;
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
@@ -147,7 +145,6 @@ void TCPSocket::listen(bool fork)
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setFork(fork);
-    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
@@ -181,7 +178,6 @@ void TCPSocket::connect(L3Address remoteAddress, int remotePort)
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
     openCmd->setRemotePort(remotePrt);
-    openCmd->setDataTransferMode(dataTransferMode);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
@@ -355,40 +351,6 @@ void TCPSocket::processMessage(cMessage *msg)
             throw cRuntimeError("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
                 msg->getKind());
     }
-}
-
-TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char *transferMode)
-{
-    if (nullptr == transferMode || 0 == transferMode[0])
-        return TCP_TRANSFER_UNDEFINED;
-
-    if (0 == strcmp(transferMode, "bytecount"))
-        return TCP_TRANSFER_BYTECOUNT;
-
-    if (0 == strcmp(transferMode, "object"))
-        return TCP_TRANSFER_OBJECT;
-
-    if (0 == strcmp(transferMode, "bytestream"))
-        return TCP_TRANSFER_BYTESTREAM;
-
-    return TCP_TRANSFER_UNDEFINED;
-}
-
-void TCPSocket::readDataTransferModePar(cComponent& component)
-{
-    const char *transferMode = component.par("dataTransferMode");
-
-    if (nullptr == transferMode)
-        throw cRuntimeError("Missing dataTransferMode parameter at %s.",
-                component.getFullPath().c_str());
-
-    TCPDataTransferMode x = convertStringToDataTransferMode(transferMode);
-
-    if (x == TCP_TRANSFER_UNDEFINED)
-        throw cRuntimeError("Invalid '%s' dataTransferMode parameter at %s.",
-                transferMode, component.getFullPath().c_str());
-
-    dataTransferMode = x;
 }
 
 } // namespace inet

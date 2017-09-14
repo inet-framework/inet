@@ -138,12 +138,12 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCP_NSC_SendQueue *createSendQueue(TCPDataTransferMode transferModeP);
+    virtual TCP_NSC_SendQueue *createSendQueue();
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCP_NSC_ReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
+    virtual TCP_NSC_ReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

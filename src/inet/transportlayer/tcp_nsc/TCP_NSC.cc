@@ -603,12 +603,12 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
     }
 }
 
-TCP_NSC_SendQueue *TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
+TCP_NSC_SendQueue *TCP_NSC::createSendQueue()
 {
     return new TCP_NSC_SendQueue();
 }
 
-TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
+TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue()
 {
     return new TCP_NSC_ReceiveQueue();
 }
@@ -620,21 +620,18 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
     TCP_NSC_Connection *conn = findAppConn(connId);
 
     if (!conn) {
-        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(msgP->getControlInfo());
-
         // add into appConnMap
         conn = &tcpAppConnMapM[connId];
         conn->tcpNscM = this;
         conn->connIdM = connId;
         conn->pNscSocketM = nullptr;    // will be filled in within processAppCommand()
 
-        TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
-        conn->sendQueueM = createSendQueue(transferMode);
+        conn->sendQueueM = createSendQueue();
         conn->sendQueueM->setConnection(conn);
 
         // create receive queue
-        conn->receiveQueueM = createReceiveQueue(transferMode);
+        conn->receiveQueueM = createReceiveQueue();
         conn->receiveQueueM->setConnection(conn);
 
         EV_INFO << this << ": TCP connection created for " << msgP << "\n";

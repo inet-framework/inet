@@ -47,7 +47,6 @@ void TCPSinkApp::initialize(int stage)
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.setOutputGate(gate("socketOut"));
-        socket.readDataTransferModePar(*this);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
     }

@@ -306,7 +306,6 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
 
     // Create and initialize the socket
     TCPSocket *socket = new TCPSocket();
-    socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
     socket->setOutputGate(gate("socketOut"));
     sockCollection.addSocket(socket);
 

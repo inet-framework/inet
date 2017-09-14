@@ -44,7 +44,6 @@ void TCPAppBase::initialize(int stage)
         // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
-        socket.readDataTransferModePar(*this);
         socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
         socket.setCallbackObject(this);

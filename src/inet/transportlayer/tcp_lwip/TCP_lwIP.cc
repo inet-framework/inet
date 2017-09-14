@@ -395,11 +395,8 @@ void TCP_lwIP::handleAppMessage(cMessage *msgP)
     TcpLwipConnection *conn = findAppConn(connId);
 
     if (!conn) {
-        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(msgP->getControlInfo());
-        TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
-
         // add into appConnMap
-        conn = new TcpLwipConnection(*this, connId, dataTransferMode);
+        conn = new TcpLwipConnection(*this, connId);
         tcpAppConnMapM[connId] = conn;
 
         EV_INFO << this << ": TCP connection created for " << msgP << "\n";
@@ -769,12 +766,12 @@ void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     send(msgP, "appOut");
 }
 
-TcpLwipSendQueue *TCP_lwIP::createSendQueue(TCPDataTransferMode transferModeP)
+TcpLwipSendQueue *TCP_lwIP::createSendQueue()
 {
     return new TcpLwipSendQueue();
 }
 
-TcpLwipReceiveQueue *TCP_lwIP::createReceiveQueue(TCPDataTransferMode transferModeP)
+TcpLwipReceiveQueue *TCP_lwIP::createReceiveQueue()
 {
     return new TcpLwipReceiveQueue();
 }

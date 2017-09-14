@@ -50,8 +50,6 @@ void TCPSessionApp::initialize(int stage)
         sendBytes = par("sendBytes");
         commandIndex = 0;
 
-        socket.readDataTransferModePar(*this);
-
         const char *script = par("sendScript");
         parseScript(script);
 
@@ -148,38 +146,32 @@ void TCPSessionApp::sendData()
 cPacket *TCPSessionApp::createDataPacket(long sendBytes)
 {
     Packet *packet = new Packet("data1");
-    switch (socket.getDataTransferMode()) {
-        case TCP_TRANSFER_BYTECOUNT: {
-            const auto& payload = makeShared<ByteCountChunk>(B(sendBytes));
-            payload->markImmutable();
-            packet->append(payload);
-            break;
-        }
-        case TCP_TRANSFER_OBJECT: {
-            const auto& payload = makeShared<ApplicationPacket>();
-            payload->setChunkLength(B(sendBytes));
-            payload->markImmutable();
-            packet->append(payload);
-            break;
-        }
-
-        case TCP_TRANSFER_BYTESTREAM: {
-            const auto& payload = makeShared<BytesChunk>();
-
-            std::vector<uint8_t> vec;
-            vec.resize(sendBytes);
-            for (int i = 0; i < sendBytes; i++)
-                vec[i] = (bytesSent + i) & 0xFF;
-            payload->setBytes(vec);
-
-            payload->markImmutable();
-            packet->append(payload);
-            break;
-        }
-
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d", socket.getDataTransferMode());
+    const char *dataTransferMode = par("dataTransferMode");
+    if (!strcmp(dataTransferMode, "bytecount")) {
+        const auto& payload = makeShared<ByteCountChunk>(B(sendBytes));
+        payload->markImmutable();
+        packet->append(payload);
     }
+    else if (!strcmp(dataTransferMode, "object")) {
+        const auto& payload = makeShared<ApplicationPacket>();
+        payload->setChunkLength(B(sendBytes));
+        payload->markImmutable();
+        packet->append(payload);
+    }
+    else if (!strcmp(dataTransferMode, "bytestream")) {
+        const auto& payload = makeShared<BytesChunk>();
+
+        std::vector<uint8_t> vec;
+        vec.resize(sendBytes);
+        for (int i = 0; i < sendBytes; i++)
+            vec[i] = (bytesSent + i) & 0xFF;
+        payload->setBytes(vec);
+
+        payload->markImmutable();
+        packet->append(payload);
+    }
+    else
+        throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
     return packet;
 }
 

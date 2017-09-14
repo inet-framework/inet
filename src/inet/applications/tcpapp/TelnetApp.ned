@@ -32,8 +32,7 @@ import inet.applications.contract.IApp;
 //
 // <b>Configuring App</b>
 //
-// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
-// Currently you have three choices:
+// Currently you have three dataTransferMode choices:
 //
 //   -# set them to "bytecount".
 //      This mode manages "virtual bytes", that is, only byte counts are

@@ -148,7 +148,6 @@ void LDP::initialize(int stage)
         // start listening for incoming TCP conns
         EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
         serverSocket.setOutputGate(gate("tcpOut"));
-        serverSocket.readDataTransferModePar(*this);
         serverSocket.bind(LDP_PORT);
         serverSocket.listen();
 
@@ -577,7 +576,6 @@ void LDP::openTCPConnectionToPeer(int peerIndex)
     TCPSocket *socket = new TCPSocket();
     socket->setOutputGate(gate("tcpOut"));
     socket->setCallbackObject(this, (void *)((intptr_t)peerIndex));
-    socket->readDataTransferModePar(*this);
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
@@ -593,7 +591,6 @@ void LDP::processMessageFromTCP(cMessage *msg)
         // find which peer it is and register connection
         socket = new TCPSocket(msg);
         socket->setOutputGate(gate("tcpOut"));
-        socket->readDataTransferModePar(*this);
 
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses

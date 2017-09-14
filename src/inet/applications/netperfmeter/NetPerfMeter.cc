@@ -579,7 +579,6 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          }
          IncomingSocketTCP = new TCPSocket(msg);
          IncomingSocketTCP->setOutputGate(gate("tcpOut"));
-         IncomingSocketTCP->readDataTransferModePar(*this);
       }
 
       ConnectionID = msg->getMandatoryTag<SocketInd>()->getSocketId();
@@ -704,7 +703,6 @@ void NetPerfMeter::createAndBindSocket()
       assert(SocketTCP == nullptr);
       SocketTCP = new TCPSocket;
       SocketTCP->setOutputGate(gate("tcpOut"));
-      SocketTCP->readDataTransferModePar(*this);
       SocketTCP->bind(localAddr, localPort);
       if(ActiveMode == false) {
          SocketTCP->listen();

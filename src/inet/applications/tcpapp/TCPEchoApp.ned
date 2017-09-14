@@ -26,17 +26,7 @@ import inet.applications.contract.IApp;
 // result in sending back the same message unmodified.) The reply can also be
 // delayed by a constant time (echoDelay parameter).
 //
-// When ~TCPEchoApp receives data packets from ~TCP (and such, when they can be
-// echoed) depends on the dataTransferMode setting.
-// With "bytecount" and "bytestream", ~TCP passes up data to us
-// as soon as a segment arrives, so it can be echoed immediately.
-// With "object" mode, our local ~TCP reproduces the same
-// messages that the sender app passed down to its ~TCP -- so if the sender
-// app sent a single 100 MB message, it will be echoed only when all
-// 100 megabytes have arrived.
-//
-// The module parameter dataTransferMode should be set the transfer mode in TCP layer.
-// Currently you have three choices:
+// Currently you have three dataTransferMode choices:
 //
 //   -# set them to "bytecount".
 //      This mode manages "virtual bytes", that is, only byte counts are

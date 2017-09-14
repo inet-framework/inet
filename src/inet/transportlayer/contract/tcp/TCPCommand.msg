@@ -106,27 +106,6 @@ class TCPErrorInfo extends TCPCommand
 }
 
 //
-// Defines what to transmit as payload in TCP segments
-//
-// Currently you have the following choices:
-//   - TCP_TRANSFER_BYTECOUNT:
-//      TCP layer will transmit byte counts only.
-//   - TCP_TRANSFER_OBJECT:
-//      TCP layer will transmit the copy of application packet C++ objects
-//   - TCP_TRANSFER_BYTESTREAM:
-//      TCP layer will transmit bytes of the application packet.
-//
-// See ~ITCP (the TCP layer interface) for details.
-//
-enum TCPDataTransferMode
-{
-    TCP_TRANSFER_UNDEFINED = 0;         // Invalid value
-    TCP_TRANSFER_BYTECOUNT = 1;         // Transmit byte counts only
-    TCP_TRANSFER_OBJECT = 2;            // Transmit the application packet C++ objects
-    TCP_TRANSFER_BYTESTREAM = 3;        // Transmit raw bytes
-}
-
-//
 // Control info to be used for active or passive TCP open.
 //
 // localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
@@ -143,9 +122,7 @@ enum TCPDataTransferMode
 // is accepted (with the original connId), and further incoming connections
 // will be refused by TCP by sending an RST segment.
 //
-// The dataTransferMode and tcpAlgorithmClass fields
-// allow per-connection TCP configuration.
-// The dataTransferMode field set the
+// The tcpAlgorithmClass field allows per-connection TCP configuration.
 // The tcpAlgorithmClass field may contain name of class subclassed from
 // TCPAlgorithm, respectively.
 // If not set, module parameters with similar names are used.
@@ -159,7 +136,6 @@ class TCPOpenCommand extends TCPCommand
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
-    int dataTransferMode @enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts. See ~TCPDataTransferMode.
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 

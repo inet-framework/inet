@@ -91,9 +91,6 @@ import inet.transportlayer.contract.ITCP;
 //
 // <b>Configuring TCP</b>
 //
-// The obsoleted sendQueueClass and receiveQueueClass parameters are removed!
-// You must set the dataTransferMode in ~TCPOpenCommand message.
-//
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled
 //      Limited Transmit algorithm (RFC 3042) integrated to TCPBaseAlg
 //      (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not

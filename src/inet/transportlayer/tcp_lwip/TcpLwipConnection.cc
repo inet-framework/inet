@@ -68,12 +68,12 @@ void TcpLwipConnection::Stats::recordReceive(const TcpHeader& tcpsegP)
         rcvAckVector.record(tcpsegP.getAckNo());
 }
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, TCPDataTransferMode dataTransferModeP)
+TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP)
     :
     connIdM(connIdP),
     pcbM(nullptr),
-    sendQueueM(tcpLwipP.createSendQueue(dataTransferModeP)),
-    receiveQueueM(tcpLwipP.createReceiveQueue(dataTransferModeP)),
+    sendQueueM(tcpLwipP.createSendQueue()),
+    receiveQueueM(tcpLwipP.createReceiveQueue()),
     tcpLwipM(tcpLwipP),
     totalSentM(0),
     isListenerM(false),

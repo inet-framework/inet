@@ -124,7 +124,6 @@ void TcpTestClient::initialize()
     if (cmd.numBytes > 0 && commands.size() > 1)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
-    socket.readDataTransferModePar(*this);
     socket.setOutputGate(gate("socketOut"));
 
     ctr = 0;

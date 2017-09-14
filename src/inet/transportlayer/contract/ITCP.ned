@@ -35,34 +35,11 @@ package inet.transportlayer.contract;
 // message kind.) With passive open, there's a possibility to cause the connection
 // "fork" on an incoming connection, leaving the original connection LISTENing
 // on the port (see the fork field in ~TCPOpenCommand).
-// In the ~TCPOpenCommand you must choose a data transfer mode
-// (see the dataTransferMode field in ~TCPOpenCommand).
-// Note: Not implemented all ~TCPDataTransferMode in all TCP implementations.
 //
 // The app can send data by assigning the TCP_C_SEND message kind
 // and attaching a ~TCPSendCommand control info object to the data packet,
 // and sending it to TCP. The app will receive data as messages
 // with the TCP_I_DATA message kind and ~TCPSendCommand control info.
-// The data transmission mode is based on selected ~TCPDataTransferMode:
-//   - TCP_TRANSFER_BYTECOUNT:
-//      This mode manages "virtual bytes", that is, only byte counts are
-//      transmitted over the TCP connection and no actual data. cPacket
-//      contents, and even message boundaries are not preserved with these
-//      classes: for example, if the client sends a single cPacket with
-//      length = 1 megabyte over TCP, the receiver-side client will see a
-//      sequence of MSS-sized packets.
-//   - TCP_TRANSFER_OBJECT:
-//      transmit cPacket objects (and subclasses) over a TCP connection. The
-//      same message object sequence that was sent by the client to the
-//      sender-side TCP entity will be reproduced on the receiver side.
-//      If a client sends a cMessage with length = 1 megabyte, the
-//      receiver-side client will receive the same message object (or a clone)
-//      after the TCP entities have completed simulating the transmission
-//      of 1 megabyte over the connection. This is a different behaviour
-//      from TCPVirtualDataSendQueue/RcvQueue.
-//   - TCP_TRANSFER_BYTESTREAM:
-//      This mode manages "raw bytes", that is, bytes are
-//      transmitted over the TCP connection.
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
 // and ~TCPCommand control info.

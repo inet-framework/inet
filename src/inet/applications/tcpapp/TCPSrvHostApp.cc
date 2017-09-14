@@ -43,7 +43,6 @@ void TCPSrvHostApp::start()
     int localPort = par("localPort");
 
     serverSocket.setOutputGate(gate("socketOut"));
-    serverSocket.readDataTransferModePar(*this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
     serverSocket.listen();
 }

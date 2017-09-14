@@ -40,7 +40,6 @@ void HttpServer::initialize(int stage)
         int port = par("port");
 
         listensocket.setOutputGate(gate("socketOut"));
-        listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
         listensocket.bind(port);
         listensocket.setCallbackObject(this);
         listensocket.listen();
@@ -74,7 +73,6 @@ void HttpServer::handleMessage(cMessage *msg)
             // new connection -- create new socket object and server process
             socket = new TCPSocket(msg);
             socket->setOutputGate(gate("socketOut"));
-            socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
             sockCollection.addSocket(socket);
 
             // Initialize the associated data structure
