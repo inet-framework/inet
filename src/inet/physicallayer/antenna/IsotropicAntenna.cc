@@ -24,7 +24,7 @@ namespace physicallayer {
 Define_Module(IsotropicAntenna);
 
 IsotropicAntenna::IsotropicAntenna() :
-    AntennaBase()
+    AntennaBase(), gain(makeShared<AntennaGain>())
 {
 }
 

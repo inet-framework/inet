@@ -18,6 +18,7 @@
 #ifndef __INET_CONSTANTGAINANTENNA_H
 #define __INET_CONSTANTGAINANTENNA_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 namespace inet {
@@ -27,17 +28,26 @@ namespace physicallayer {
 class INET_API ConstantGainAntenna : public AntennaBase
 {
   protected:
-    double gain;
-
-  protected:
     virtual void initialize(int stage) override;
+
+    class AntennaGain : public IAntennaGain
+    {
+      public:
+        AntennaGain(double gain) : gain(gain) {}
+        virtual double getMaxGain() const override { return gain; }
+        virtual double computeGain(const EulerAngles direction) const override { return gain; }
+
+      protected:
+        double gain;
+    };
+
+    Ptr<AntennaGain> gain;
 
   public:
     ConstantGainAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getMaxGain() const override { return gain; }
-    virtual double computeGain(const EulerAngles direction) const override { return gain; }
+    virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 
 } // namespace physicallayer

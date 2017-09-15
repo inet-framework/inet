@@ -20,6 +20,7 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include <memory>
 
 namespace inet {
 
@@ -33,6 +34,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const int id;
     const IRadioMedium *radioMedium;
     const int transmitterId;
+    std::shared_ptr<const IAntennaGain> transmitterGain;
     const Packet *packet;
     const simtime_t startTime;
     const simtime_t endTime;
@@ -53,6 +55,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
 
     virtual const IRadio *getTransmitter() const override;
     virtual int getTransmitterId() const override { return transmitterId; }
+    virtual const IAntennaGain *getTransmitterAntennaGain() const override { return transmitterGain.get(); }
     virtual const Packet *getPacket() const override { return packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }

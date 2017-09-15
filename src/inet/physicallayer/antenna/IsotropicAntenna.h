@@ -18,6 +18,7 @@
 #ifndef __INET_ISOTROPICANTENNA_H
 #define __INET_ISOTROPICANTENNA_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 namespace inet {
@@ -26,12 +27,21 @@ namespace physicallayer {
 
 class INET_API IsotropicAntenna : public AntennaBase
 {
+  protected:
+    class AntennaGain : public IAntennaGain
+    {
+      public:
+        virtual double getMaxGain() const override { return 1; }
+        virtual double computeGain(const EulerAngles direction) const override { return 1; }
+    };
+
+    Ptr<AntennaGain> gain;
+
   public:
     IsotropicAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getMaxGain() const override { return 1; }
-    virtual double computeGain(const EulerAngles direction) const override { return 1; }
+    virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 
 } // namespace physicallayer
