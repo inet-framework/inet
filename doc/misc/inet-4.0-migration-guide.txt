@@ -74,6 +74,20 @@ the simplest case this can be done by simply replacing the application vector
 names. If the example uses more than one kind of application in a single network
 node then the submodule vector indexes must be also updated.
 
+For example, the existing configuration:
+
+*.host1.numPingApps = 1
+*.host1.pingApp[0].destAddr = "host7"
+*.host1.numUdpApps = 1
+*.host1.udpApp[0].typename = "UDPSink"
+
+The updated configuration:
+
+*.host1.numApps = 2
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host7"
+*.host1.app[1].typename = "UDPSink"
+
 1.5 Configuring Protocols
 
 Transport layer and network layer protocols can be enabled/disabled with separate
