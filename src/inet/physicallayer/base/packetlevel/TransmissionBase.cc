@@ -26,6 +26,7 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *pack
     id(nextId++),
     radioMedium(transmitter->getMedium()),
     transmitterId(transmitter->getId()),
+    transmitterGain(transmitter->getAntenna()->getGain()),
     packet(packet),
     startTime(startTime),
     endTime(endTime),

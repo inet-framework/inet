@@ -24,10 +24,7 @@ namespace physicallayer {
 Define_Module(ParabolicAntenna);
 
 ParabolicAntenna::ParabolicAntenna() :
-    AntennaBase(),
-    maxGain(NaN),
-    minGain(NaN),
-    beamWidth(degree(NaN))
+    AntennaBase()
 {
 }
 
@@ -35,9 +32,10 @@ void ParabolicAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        maxGain = math::dB2fraction(par("maxGain"));
-        minGain = math::dB2fraction(par("minGain"));
-        beamWidth = degree(par("beamWidth"));
+        double maxGain = math::dB2fraction(par("maxGain"));
+        double minGain = math::dB2fraction(par("minGain"));
+        degree beamWidth = degree(par("beamWidth"));
+        gain = makeShared<AntennaGain>(maxGain, minGain, beamWidth);
     }
 }
 
@@ -45,13 +43,18 @@ std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) c
 {
     stream << "ParabolicAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << maxGain
-               << ", minGain = " << minGain
-               << ", beamWidth = " << beamWidth;
+        stream << ", maxGain = " << gain->getMaxGain()
+               << ", minGain = " << gain->getMinGain()
+               << ", beamWidth = " << gain->getBeamWidth();
     return AntennaBase::printToStream(stream, level);
 }
 
-double ParabolicAntenna::computeGain(const EulerAngles direction) const
+ParabolicAntenna::AntennaGain::AntennaGain(double maxGain, double minGain, degree beamWidth) :
+    maxGain(maxGain), minGain(minGain), beamWidth(beamWidth)
+{
+}
+
+double ParabolicAntenna::AntennaGain::computeGain(const EulerAngles direction) const
 {
     return std::max(minGain, maxGain * math::dB2fraction(-12 * pow(direction.alpha / math::deg2rad(beamWidth.get()), 2)));
 }
