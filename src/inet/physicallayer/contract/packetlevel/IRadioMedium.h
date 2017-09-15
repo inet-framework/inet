@@ -125,6 +125,12 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual void removeRadio(const IRadio *radio) = 0;
 
     /**
+     * Get radio instance from radio medium by id.
+     * May return a nullptr if no matching radio is registered.
+     */
+    virtual const IRadio* getRadio(int id) const = 0;
+
+    /**
      * Returns a new signal containing the radio signal transmission that
      * represents the provided packet. A copy of this signal is sent to
      * all affected radios.
