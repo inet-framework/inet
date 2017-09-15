@@ -24,7 +24,7 @@ namespace physicallayer {
 
 double PathLossBase::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto radioMedium = transmission->getTransmitter()->getMedium();
+    auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz carrierFrequency = Hz(narrowbandSignalAnalogModel->getCarrierFrequency());

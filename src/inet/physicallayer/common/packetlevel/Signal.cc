@@ -48,7 +48,7 @@ const IArrival *Signal::getArrival() const
 {
     if (arrival == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        arrival = transmission->getTransmitter()->getMedium()->getArrival(receiver, transmission);
+        arrival = transmission->getMedium()->getArrival(receiver, transmission);
     }
     return arrival;
 }
@@ -57,7 +57,7 @@ const IListening *Signal::getListening() const
 {
     if (listening == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        listening = transmission->getTransmitter()->getMedium()->getListening(receiver, transmission);
+        listening = transmission->getMedium()->getListening(receiver, transmission);
     }
     return listening;
 }
@@ -66,7 +66,7 @@ const IReception *Signal::getReception() const
 {
     if (reception == nullptr) {
         auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        reception = transmission->getTransmitter()->getMedium()->getReception(receiver, transmission);
+        reception = transmission->getMedium()->getReception(receiver, transmission);
     }
     return reception;
 }
