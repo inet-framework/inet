@@ -56,6 +56,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const IRadio *getTransmitter() const override;
     virtual int getTransmitterId() const override { return transmitterId; }
     virtual const IAntennaGain *getTransmitterAntennaGain() const override { return transmitterGain.get(); }
+    virtual const IRadioMedium *getMedium() const override { return radioMedium; }
     virtual const Packet *getPacket() const override { return packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }

@@ -43,7 +43,7 @@ std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int le
 
 double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto radioMedium = transmission->getTransmitter()->getMedium();
+    auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     auto transmitterPosition = transmission->getStartPosition();
     auto recepiverPosition = arrival->getStartPosition();

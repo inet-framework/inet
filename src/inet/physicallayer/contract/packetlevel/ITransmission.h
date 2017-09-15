@@ -32,6 +32,7 @@ namespace inet {
 namespace physicallayer {
 
 class IRadio;
+class IRadioMedium;
 
 /**
  * This interface represents the transmission of a radio signal. There's one
@@ -68,6 +69,12 @@ class INET_API ITransmission : public IPrintableObject
      * Returns the gain of the transmitting antenna.
      */
     virtual const IAntennaGain *getTransmitterAntennaGain() const = 0;
+
+    /**
+     * Returns the radio medium used for this transmission. This function
+     * never return nullptr.
+     */
+    virtual const IRadioMedium *getMedium() const = 0;
 
     /**
      * Returns the packet corresponding to this transmission. This function
