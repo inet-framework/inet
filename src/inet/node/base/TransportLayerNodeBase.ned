@@ -31,8 +31,8 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
-        @figure[transportLayer](type=rectangle; pos=250,200; size=680,200; fillColor=#ff0000; cornerRadius=12; fillOpacity=0.1);
-        @figure[transportLayer.title](type=text; pos=800,210; text="transport layer");
+        @figure[transportLayer](type=rectangle; pos=250,210; size=670,180; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[transportLayer.title](type=text; pos=910,220; anchor=ne; text="transport layer");
 
     submodules:
         udp: <udpType> like IUDP if hasUdp {
@@ -49,7 +49,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         }
         tn: MessageDispatcher {
             parameters:
-                @display("p=590,400;b=660,5,,,,1");
+                @display("p=585,400;b=670,5,,,,1");
         }
 
     connections allowunconnected:

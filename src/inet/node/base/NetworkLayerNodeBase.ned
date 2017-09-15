@@ -34,8 +34,8 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
         *.multicastForwarding = multicastForwarding;
-        @figure[networkLayer](type=rectangle; pos=250,400; size=680,200; fillColor=#00ff00; cornerRadius=12; fillOpacity=0.1);
-        @figure[networkLayer.title](type=text; pos=800,410; text="network layer");
+        @figure[networkLayer](type=rectangle; pos=250,410; size=670,180; fillColor=#00ff00; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[networkLayer.title](type=text; pos=910,420; anchor=ne; text="network layer");
 
     submodules:
         ipv4: IPv4NetworkLayer if hasIpv4 {
@@ -52,7 +52,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=590,600;b=660,5,,,,1");
+                @display("p=585,600;b=670,5,,,,1");
         }
 
     connections allowunconnected:

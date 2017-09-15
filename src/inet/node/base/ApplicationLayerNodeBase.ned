@@ -24,8 +24,8 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
 {
     parameters:
         int numApps = default(0);
-        @figure[applicationLayer](type=rectangle; pos=250,0; size=680,200; fillColor=#ffff00; cornerRadius=12; fillOpacity=0.1);
-        @figure[applicationLayer.title](type=text; pos=800,10; text="application layer");
+        @figure[applicationLayer](type=rectangle; pos=250,10; size=670,180; lineColor=#808080; cornerRadius=5; fillColor=#ffff00; fillOpacity=0.1);
+        @figure[applicationLayer.title](type=text; pos=910,20; anchor=ne; text="application layer");
 
     submodules:
         app[numApps]: <> like IApp {
@@ -34,7 +34,7 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
         }
         at: MessageDispatcher {
             parameters:
-                @display("p=590,200;b=660,5,,,,1");
+                @display("p=585,200;b=670,5,,,,1");
         }
 
     connections allowunconnected:
