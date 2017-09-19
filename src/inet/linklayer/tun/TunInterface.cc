@@ -57,6 +57,7 @@ void TunInterface::handleMessage(cMessage *message)
             if (socketReq != nullptr && contains(socketIds, sId)) {
                 ASSERT(message->getControlInfo() == nullptr);
                 // TODO: should we determine the network protocol by looking at the packet?!
+                message->clearTags();
                 message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 message->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
                 message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
@@ -68,6 +69,7 @@ void TunInterface::handleMessage(cMessage *message)
                 ASSERT(message->getControlInfo() == nullptr);
                 for (int socketId : socketIds) {
                     cMessage *copy = message->dup();
+                    copy->clearTags();
                     copy->ensureTag<SocketInd>()->setSocketId(socketId);
                     copy->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
                     send(copy, "upperLayerOut");
