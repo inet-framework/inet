@@ -30,7 +30,6 @@ SHOULD:
  - rename all cc/h files to reflect the name of the class they are defining
  - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac, BMacLayer to BerkeleyMac, LMacLayer to LightweightMac, CSMA to Ieee802154Mac, etc.
 
- - simplify INetfilter interface by removing parameters other than the datagram
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
@@ -70,3 +69,4 @@ DONE:
  + replace std::make_shared<T>, std::dynamic_pointer_cast, std::static_pointer_cast, std::const_pointer_cast with makeShared<T>(), dynamicPtrCast<T>, dynamic_ptr_cast<T>, ...?
  + extract LLC from ethernet and 802.11
  + remove obsolete dataTransferMode from protocols (not applications)
+ + simplify INetfilter interface by removing parameters other than the datagram
