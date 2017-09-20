@@ -27,6 +27,7 @@ import sys
 import threading
 import time
 import unittest
+from distutils import spawn
 from StringIO import StringIO
 
 
@@ -34,11 +35,17 @@ inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials" + sep + inetRoot + "/tests/networks"
 inetLib = inetRoot + "/src/INET"
-opp_run = "opp_run"
 cpuTimeLimit = "30000s"
 logFile = "test.out"
 extraOppRunArgs = ""
 exitCode = 0
+
+if spawn.find_executable("opp_run_dbg"):
+	executable = "opp_run_dbg"
+elif spawn.find_executable("opp_run"):
+	executable = "opp_run"
+elif spawn.find_executable("opp_run_release"):
+	executable = "opp_run_release"
 
 class FingerprintTestCaseGenerator():
     fileToSimulationsMap = {}
@@ -296,7 +303,7 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global inetRoot, opp_run, nedPath, cpuTimeLimit, extraOppRunArgs
+        global inetRoot, executable, nedPath, cpuTimeLimit, extraOppRunArgs
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
@@ -309,7 +316,7 @@ class FingerprintTestCase(SimulationTestCase):
                 os.makedirs(resultdir)
             except OSError:
                 pass
-        command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
+        command = executable + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
@@ -586,6 +593,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--threads', type=int, default=defaultNumThreads, help='number of parallel threads (default: number of CPUs, currently '+str(defaultNumThreads)+')')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs='*', help='extra opp_run arguments without leading "--", you can terminate list with " -- " ')
+    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
     args = parser.parse_args()
 
     if os.path.isfile(logFile):
@@ -599,6 +607,9 @@ if __name__ == "__main__":
         for oppArgList in args.oppargs:
             for oppArg in oppArgList:
                 extraOppRunArgs += " --" + oppArg
+
+    if args.executable:
+        executable = args.executable
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
