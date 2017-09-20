@@ -51,14 +51,11 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     class QueuedDatagramForHook
     {
       public:
-        QueuedDatagramForHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv4Address& nextHopAddr, IHook::Type hookType) :
-            packet(packet), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
+        QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
+            packet(packet), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
-        const InterfaceEntry *inIE = nullptr;
-        const InterfaceEntry *outIE = nullptr;
-        IPv4Address nextHopAddr;
         const IHook::Type hookType = (IHook::Type)-1;
     };
     typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
@@ -112,6 +109,8 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
   protected:
     // utility: look up interface from getArrivalGate()
     virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
+    virtual const InterfaceEntry *getDestInterfaceFrom(cPacket *packet);
+    virtual IPv4Address getNextHopFrom(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
     virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
@@ -139,10 +138,10 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Handle Ipv4Header messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
-    virtual void handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void handleIncomingDatagram(Packet *packet);
 
     // called after PREROUTING Hook (used for reinject, too)
-    virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
+    virtual void preroutingFinish(Packet *packet);
 
     /**
      * Handle messages (typically packets to be send in IPv4) from transport or ICMP.
@@ -154,16 +153,16 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Routes and sends datagram received from higher layers.
      * Invokes datagramLocalOutHook(), then routePacket().
      */
-    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
+    virtual void datagramLocalOut(Packet *packet);
 
     /**
      * Performs unicast routing. Based on the routing decision, it sends the
      * datagram through the outgoing interface.
      */
-    virtual void routeUnicastPacket(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress);
+    virtual void routeUnicastPacket(Packet *packet);
 
     // called after FORWARD Hook (used for reinject, too)
-    void routeUnicastPacketFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
+    void routeUnicastPacketFinish(Packet *packet);
 
     /**
      * Broadcasts the datagram on the specified interface.
@@ -185,10 +184,10 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void reassembleAndDeliver(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void reassembleAndDeliver(Packet *packet);
 
     // called after LOCAL_IN Hook (used for reinject, too)
-    virtual void reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void reassembleAndDeliverFinish(Packet *packet);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
@@ -198,13 +197,13 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Call PostRouting Hook and continue with fragmentAndSend() if accepted
      */
-    virtual void fragmentPostRouting(Packet *datagram, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
+    virtual void fragmentPostRouting(Packet *datagram);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
+    virtual void fragmentAndSend(Packet *packet);
 
     /**
      * Send datagram on the given interface.
@@ -244,27 +243,27 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(Packet *datagram);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramForwardHook(Packet *datagram);
 
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(Packet *datagram);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE);
+    IHook::Result datagramLocalInHook(Packet *datagram);
 
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(Packet *datagram);
 
   public:
     /**

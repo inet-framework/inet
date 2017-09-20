@@ -188,11 +188,11 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
 
     /* Netfilter hooks */
     Result ensureRouteForDatagram(Packet *datagram);
-    virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
-    virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
-    virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramForwardHook(Packet *datagram) override;
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */

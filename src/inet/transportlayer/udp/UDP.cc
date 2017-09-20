@@ -1236,7 +1236,7 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
     delete membership;
 }
 
-INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);

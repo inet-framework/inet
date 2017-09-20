@@ -26,6 +26,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
@@ -165,15 +166,19 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
 
-    L3Address nextHop;
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
 
     EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getName() << "\n";
 
-    if (datagramPreRoutingHook(packet, inIE, destIE, nextHop) != IHook::ACCEPT)
+    if (datagramPreRoutingHook(packet) != IHook::ACCEPT)
         return;
 
+    inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    auto destIeTag = packet->getTag<InterfaceReq>();
+    destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
+    auto nextHopTag = packet->getTag<NextHopAddressReq>();
+    L3Address nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
     datagramPreRouting(packet, inIE, destIE, nextHop);
 }
 
@@ -191,8 +196,13 @@ void GenericNetworkProtocol::handlePacketFromHL(Packet *packet)
     encapsulate(packet, destIE);
 
     L3Address nextHop;
-    if (datagramLocalOutHook(packet, destIE, nextHop) != IHook::ACCEPT)
+    if (datagramLocalOutHook(packet) != IHook::ACCEPT)
         return;
+
+    auto destIeTag = packet->getTag<InterfaceReq>();
+    destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
+    auto nextHopTag = packet->getTag<NextHopAddressReq>();
+    nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
 
     datagramLocalOut(packet, destIE, nextHop);
 }
@@ -218,7 +228,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         }
         numLocalDeliver++;
 
-        if (datagramLocalInHook(datagram, getSourceInterfaceFrom(datagram)) != INetfilter::IHook::ACCEPT)
+        if (datagramLocalInHook(datagram) != INetfilter::IHook::ACCEPT)
             return;
 
         sendDatagramToHL(datagram);
@@ -652,10 +662,10 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const Packet *datagram)
     }
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet *datagram)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(datagram, inIE, outIE, nextHop);
+        IHook::Result r = elem.second->datagramPreRoutingHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -667,7 +677,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet 
             case IHook::QUEUE:
                 if (datagram->getOwner() != this)
                     throw cRuntimeError("Model error: netfilter hook changed the owner of queued datagram '%s'", datagram->getFullName());
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, nullptr, nextHop, INetfilter::IHook::PREROUTING));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));
                 return r;
 
             case IHook::STOLEN:
@@ -680,10 +690,10 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet 
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(Packet *datagram)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(datagram, inIE, outIE, nextHop);
+        IHook::Result r = elem.second->datagramForwardHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -693,7 +703,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(Packet *da
                 return r;
 
             case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::FORWARD));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::FORWARD));
                 return r;
 
             case IHook::STOLEN:
@@ -706,10 +716,10 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(Packet *da
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(Packet *datagram)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPostRoutingHook(datagram, inIE, outIE, nextHop);
+        IHook::Result r = elem.second->datagramPostRoutingHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -719,7 +729,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(Packet
                 return r;
 
             case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::POSTROUTING));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::POSTROUTING));
                 return r;
 
             case IHook::STOLEN:
@@ -732,11 +742,11 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(Packet
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(Packet *datagram)
 {
     L3Address address;
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalInHook(datagram, inIE);
+        IHook::Result r = elem.second->datagramLocalInHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -746,7 +756,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(Packet *da
                 return r;
 
             case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, nullptr, address, INetfilter::IHook::LOCALIN));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::LOCALIN));
                 return r;
 
             case IHook::STOLEN:
@@ -759,10 +769,10 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(Packet *da
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(Packet *datagram)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(datagram, outIE, nextHop);
+        IHook::Result r = elem.second->datagramLocalOutHook(datagram);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -772,7 +782,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(Packet *d
                 return r;
 
             case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, nullptr, outIE, nextHop, INetfilter::IHook::LOCALOUT));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::LOCALOUT));
                 return r;
 
             case IHook::STOLEN:

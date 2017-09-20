@@ -12,13 +12,12 @@
 // Copyright 2004 Andras Varga
 //
 
-#include <vector>
-#include <string>
-
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/INetfilter.h"
 
 namespace inet {
@@ -38,27 +37,27 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::H
     /**
      * called before a packet arriving from the network is routed
      */
-    virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramForwardHook(Packet *datagram) override;
 
     /**
      * called before a packet is delivered via the network
      */
-    virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramPostRoutingHook(Packet *datagram) override;
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE) override;
+    virtual Result datagramLocalInHook(Packet *datagram) override;
 
     /**
      * called before a packet arriving locally is delivered
      */
-    virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramLocalOutHook(Packet *datagram) override;
 };
 
 Define_Module(NetfilterInfoHook);
@@ -78,46 +77,47 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not receive messages");
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *datagram)
 {
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << datagram->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
+            // TODO: find out interface name
+            << " inIE=" << std::to_string(datagram->getMandatoryTag<InterfaceInd>()->getInterfaceId())
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagram)
 {
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << datagram->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
-            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
-            << " nextHop=" << nextHopAddr
+            << " inIE=" << std::to_string(datagram->getMandatoryTag<InterfaceInd>()->getInterfaceId())
+            << " outIE=" << std::to_string(datagram->getMandatoryTag<InterfaceReq>()->getInterfaceId())
+            << " nextHop=" << datagram->getMandatoryTag<NextHopAddressReq>()->getNextHopAddress()
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(Packet *datagram)
 {
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << datagram->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
-            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
-            << " nextHop=" << nextHopAddr
+            << " inIE=" << std::to_string(datagram->getMandatoryTag<InterfaceInd>()->getInterfaceId())
+            << " outIE=" << std::to_string(datagram->getMandatoryTag<InterfaceReq>()->getInterfaceId())
+            << " nextHop=" << datagram->getMandatoryTag<NextHopAddressReq>()->getNextHopAddress()
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagram)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL IN: packet=" << datagram->getName()
-            << " inIE=" << (inIE ? inIE->getName() : "nullptr")
+            << " inIE=" << datagram->getMandatoryTag<InterfaceInd>()->getInterfaceId()
             << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << datagram->getName()
-            << " outIE=" << (outIE ? outIE->getName() : "nullptr")
+            << " outIE=" << std::to_string(datagram->getMandatoryTag<InterfaceReq>()->getInterfaceId())
             << endl;
     return INetfilter::IHook::ACCEPT;
 }

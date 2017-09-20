@@ -17,8 +17,8 @@
 // @author Zoltan Bojthe
 //
 
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/internetcloud/CloudDelayerBase.h"
-
 #include "inet/networklayer/ipv4/IPv4.h"
 
 namespace inet {
@@ -69,17 +69,18 @@ void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int
     outDelay = SIMTIME_ZERO;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(Packet *datagram)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram)
 {
     Enter_Method_Silent();
 
-    int srcID = inputInterfaceEntry ? inputInterfaceEntry->getInterfaceId() : -1;
-    int destID = outputInterfaceEntry->getInterfaceId();
+    auto ifInd = datagram->getMandatoryTag<InterfaceInd>();
+    int srcID = ifInd ? ifInd->getInterfaceId() : -1;
+    int destID = datagram->getMandatoryTag<InterfaceReq>()->getInterfaceId();
 
     simtime_t propDelay;
     bool isDrop;
@@ -101,17 +102,17 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(Packet *datagram)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(Packet *datagram)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(Packet *datagram)
 {
     return INetfilter::IHook::ACCEPT;
 }

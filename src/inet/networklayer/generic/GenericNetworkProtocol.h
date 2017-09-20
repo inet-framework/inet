@@ -52,9 +52,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     struct QueuedDatagramForHook
     {
       public:
-        QueuedDatagramForHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *outIE,
-                L3Address& nextHop, INetfilter::IHook::Type hookType)
-            : datagram(datagram), inIE(inIE), outIE(outIE), nextHop(nextHop), hookType(hookType) {}
+        QueuedDatagramForHook(Packet *datagram, INetfilter::IHook::Type hookType)
+            : datagram(datagram), hookType(hookType) {}
 
         virtual ~QueuedDatagramForHook() {}
 
@@ -152,11 +151,11 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual void datagramLocalIn(Packet *datagram, const InterfaceEntry *inIE);
     virtual void datagramLocalOut(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop);
 
-    virtual IHook::Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop);
-    virtual IHook::Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop);
-    virtual IHook::Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop);
-    virtual IHook::Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE);
-    virtual IHook::Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHop);
+    virtual IHook::Result datagramPreRoutingHook(Packet *datagram);
+    virtual IHook::Result datagramForwardHook(Packet *datagram);
+    virtual IHook::Result datagramPostRoutingHook(Packet *datagram);
+    virtual IHook::Result datagramLocalInHook(Packet *datagram);
+    virtual IHook::Result datagramLocalOutHook(Packet *datagram);
 
   public:
     GenericNetworkProtocol();

@@ -56,11 +56,11 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         UDP *udp = nullptr;
 
       public:
-        virtual Result datagramPreRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-        virtual Result datagramForwardHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-        virtual Result datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
-        virtual Result datagramLocalInHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-        virtual Result datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+        virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
+        virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
+        virtual Result datagramPostRoutingHook(Packet *packet) override;
+        virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+        virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
     };
 
     enum PortRange {

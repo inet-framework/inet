@@ -242,11 +242,11 @@ void IPv6::endService(cPacket *msg)
         if (fromHL) {
             // remove control info
             delete packet->removeControlInfo();
-            if (datagramLocalOutHook(packet, destIE, nextHop) == INetfilter::IHook::ACCEPT)
+            if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
                 datagramLocalOut(packet, destIE, nextHop.toIPv6());
         }
         else {
-            if (datagramPreRoutingHook(packet, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
+            if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
                 preroutingFinish(packet, fromIE, destIE, nextHop.toIPv6());
         }
     }
@@ -321,7 +321,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
         ASSERT(destIE);
     }
     L3Address nextHopAddr(IPv6Address::UNSPECIFIED_ADDRESS);
-    if (datagramLocalOutHook(packet, destIE, nextHopAddr) == INetfilter::IHook::ACCEPT)
+    if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, destIE, nextHopAddr.toIPv6());
 }
 
@@ -1070,10 +1070,10 @@ void IPv6::reinjectQueuedDatagram(const Packet *packet)
     }
 }
 
-INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(packet, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramPreRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1083,7 +1083,7 @@ INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet, const Int
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, inIE, outIE, nextHopAddr.toIPv6(), INetfilter::IHook::PREROUTING));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::PREROUTING));
                 return r;
 
             case INetfilter::IHook::STOLEN:
@@ -1096,10 +1096,10 @@ INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet, const Int
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(packet, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramForwardHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1109,7 +1109,7 @@ INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet, const Interf
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, inIE, outIE, nextHopAddr.toIPv6(), INetfilter::IHook::FORWARD));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::FORWARD));
                 return r;
 
             case INetfilter::IHook::STOLEN:
@@ -1125,7 +1125,7 @@ INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet, const Interf
 INetfilter::IHook::Result IPv6::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPostRoutingHook(packet, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramPostRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1135,7 +1135,7 @@ INetfilter::IHook::Result IPv6::datagramPostRoutingHook(Packet *packet, const In
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, inIE, outIE, nextHopAddr.toIPv6(), INetfilter::IHook::POSTROUTING));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::POSTROUTING));
                 return r;
 
             case INetfilter::IHook::STOLEN:
@@ -1151,7 +1151,7 @@ INetfilter::IHook::Result IPv6::datagramPostRoutingHook(Packet *packet, const In
 INetfilter::IHook::Result IPv6::datagramLocalInHook(Packet *packet, const InterfaceEntry *inIE)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalInHook(packet, inIE);
+        IHook::Result r = elem.second->datagramLocalInHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1161,7 +1161,7 @@ INetfilter::IHook::Result IPv6::datagramLocalInHook(Packet *packet, const Interf
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, inIE, nullptr, IPv6Address::UNSPECIFIED_ADDRESS, INetfilter::IHook::LOCALIN));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::LOCALIN));
                 return r;
 
             case INetfilter::IHook::STOLEN:
@@ -1174,10 +1174,10 @@ INetfilter::IHook::Result IPv6::datagramLocalInHook(Packet *packet, const Interf
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(packet, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramLocalOutHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1187,7 +1187,7 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet, const Inter
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, nullptr, outIE, nextHopAddr.toIPv6(), INetfilter::IHook::LOCALOUT));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::LOCALOUT));
                 return r;
 
             case INetfilter::IHook::STOLEN:

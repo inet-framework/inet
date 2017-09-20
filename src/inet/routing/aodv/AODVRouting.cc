@@ -1477,7 +1477,7 @@ void AODVRouting::scheduleExpungeRoutes()
     }
 }
 
-INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram)
 {
     // TODO: Implement: Actions After Reboot
     // If the node receives a data packet for some other destination, it SHOULD

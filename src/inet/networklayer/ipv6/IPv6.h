@@ -49,8 +49,9 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     class QueuedDatagramForHook
     {
       public:
-        QueuedDatagramForHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv6Address& nextHopAddr, IHook::Type hookType) :
-            packet(packet), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
+        QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
+            packet(packet), inIE(nullptr), outIE(nullptr),
+            hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
@@ -190,12 +191,12 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(Packet *packet);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramForwardHook(Packet *packet);
 
     /**
      * called before a packet is delivered via the network
@@ -210,7 +211,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(Packet *packet);
 
   public:
     IPv6();

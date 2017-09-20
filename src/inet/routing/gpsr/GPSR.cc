@@ -17,17 +17,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/routing/gpsr/GPSR.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/common/INETUtils.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/routing/gpsr/GPSR.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header.h"
@@ -575,13 +577,14 @@ L3Address GPSR::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
 // routing
 //
 
-INetfilter::IHook::Result GPSR::routeDatagram(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::routeDatagram(Packet *datagram)
 {
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& source = networkHeader->getSourceAddress();
     const L3Address& destination = networkHeader->getDestinationAddress();
     EV_INFO << "Finding next hop: source = " << source << ", destination = " << destination << endl;
-    nextHop = findNextHop(networkHeader, destination);
+    auto nextHop = findNextHop(networkHeader, destination);
+    datagram->ensureTag<NextHopAddressReq>()->setNextHopAddress(nextHop);
     if (nextHop.isUnspecified()) {
         EV_WARN << "No next hop found, dropping packet: source = " << source << ", destination = " << destination << endl;
         return DROP;
@@ -591,8 +594,9 @@ INetfilter::IHook::Result GPSR::routeDatagram(Packet *datagram, const InterfaceE
         const GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(networkHeader);
         // KLUDGE: TODO: const_cast<GPSROption *>(gpsrOption)
         const_cast<GPSROption *>(gpsrOption)->setSenderAddress(getSelfAddress());
-        outputInterfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
-        ASSERT(outputInterfaceEntry);
+        auto interfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
+        ASSERT(interfaceEntry);
+        datagram->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
         return ACCEPT;
     }
 }
@@ -697,7 +701,7 @@ const GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(const Ptr<const Network
 // netfilter
 //
 
-INetfilter::IHook::Result GPSR::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramPreRoutingHook(Packet *datagram)
 {
     Enter_Method("datagramPreRoutingHook");
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
@@ -705,10 +709,10 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(Packet *datagram, const I
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else
-        return routeDatagram(datagram, outputInterfaceEntry, nextHop);
+        return routeDatagram(datagram);
 }
 
-INetfilter::IHook::Result GPSR::datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramLocalOutHook(Packet *packet)
 {
     Enter_Method("datagramLocalOutHook");
     const auto& networkHeader = getNetworkProtocolHeader(packet);
@@ -717,7 +721,7 @@ INetfilter::IHook::Result GPSR::datagramLocalOutHook(Packet *packet, const Inter
         return ACCEPT;
     else {
         setGpsrOptionOnNetworkDatagram(packet, networkHeader);
-        return routeDatagram(packet, outputInterfaceEntry, nextHop);
+        return routeDatagram(packet);
     }
 }
 

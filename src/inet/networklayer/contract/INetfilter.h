@@ -61,34 +61,34 @@ class INET_API INetfilter
          * a datagram that was received from the lower layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is nullptr.
          */
-        virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramPreRoutingHook(Packet *datagram) = 0;
 
         /**
          * This is the second hook called by the network protocol before it sends
          * a datagram to the lower layer. This is done after the datagramPreRoutingHook
          * or the datagramLocalInHook is called and the datagram is routed.
          */
-        virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramForwardHook(Packet *datagram) = 0;
 
         /**
          * This is the last hook called by the network protocol before it sends
          * a datagram to the lower layer.
          */
-        virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramPostRoutingHook(Packet *datagram) = 0;
 
         /**
          * This is the last hook called by the network protocol before it sends
          * a datagram to the upper layer. This is done after the datagramPreRoutingHook
          * is called and the datagram is routed.
          */
-        virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) = 0;
+        virtual Result datagramLocalInHook(Packet *datagram) = 0;
 
         /**
          * This is the first hook called by the network protocol before it routes
          * a datagram that was received from the upper layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is a nullptr. After this is done
          */
-        virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramLocalOutHook(Packet *datagram) = 0;
     };
 
     virtual ~INetfilter() {}
