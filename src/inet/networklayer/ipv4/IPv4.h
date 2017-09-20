@@ -108,9 +108,9 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
-    virtual const InterfaceEntry *getDestInterfaceFrom(cPacket *packet);
-    virtual IPv4Address getNextHopFrom(cPacket *packet);
+    virtual const InterfaceEntry *getSourceInterface(cPacket *packet);
+    virtual const InterfaceEntry *getDestInterface(cPacket *packet);
+    virtual IPv4Address getNextHop(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
     virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
@@ -168,7 +168,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Broadcasts the datagram on the specified interface.
      * When destIE is nullptr, the datagram is broadcasted on each interface.
      */
-    virtual void routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destIE);
+    virtual void routeLocalBroadcastPacket(Packet *packet);
 
     /**
      * Determines the output interface for the given multicast datagram.
@@ -178,7 +178,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void forwardMulticastPacket(Packet *packet);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -208,13 +208,11 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(Packet *packet, const InterfaceEntry *ie, IPv4Address nextHopAddr);
+    virtual void sendDatagramToOutput(Packet *packet);
 
     virtual MACAddress resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE);
 
-    virtual void sendPacketToIeee802NIC(Packet *packet, const InterfaceEntry *ie, const MACAddress& macAddress);
-
-    virtual void sendPacketToNIC(Packet *packet, const InterfaceEntry *ie);
+    virtual void sendPacketToNIC(Packet *packet);
 
     virtual void sendIcmpError(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
 
