@@ -172,6 +172,9 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual void finish() override;
 
   public:
+    virtual int getNumConnections() const { return tcpConnMap.size(); }
+    virtual TCPConnection *getConnection(int i) const { auto it = tcpConnMap.begin(); std::advance(it, i); return it->second; }
+
     /**
      * To be called from TCPConnection when a new connection gets created,
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
