@@ -28,6 +28,8 @@ SHOULD:
 
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
  - rename all cc/h files to reflect the name of the class they are defining
+ - revise and rename signals to have a consistent naming scheme (e.g. NF_*)
+ - revise and rename statistics to have a consistent naming scheme
  - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac, BMacLayer to BerkeleyMac, LMacLayer to LightweightMac, CSMA to Ieee802154Mac, etc.
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
