@@ -30,7 +30,7 @@ Define_Module(PIMInterfaceTable);
 // for WATCH_VECTOR
 std::ostream& operator<<(std::ostream& os, const PIMInterface *e)
 {
-    os << "name = " << e->getInterfacePtr()->getName() << "; mode = ";
+    os << "name = " << e->getInterfacePtr()->getInterfaceName() << "; mode = ";
     if (e->getMode() == PIMInterface::DenseMode)
         os << "Dense";
     else if (e->getMode() == PIMInterface::SparseMode)
@@ -105,7 +105,7 @@ PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement
     else if (strcmp(modeAttr, "sparse") == 0)
         mode = PIMInterface::SparseMode;
     else
-        throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
+        throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getInterfaceName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     bool stateRefreshFlag = stateRefreshAttr && !strcmp(stateRefreshAttr, "true");

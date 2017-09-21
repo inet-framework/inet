@@ -701,7 +701,7 @@ void PIMDM::processAssertPacket(Packet *pk)
     ASSERT(incomingInterface);
 
     EV_INFO << "Received Assert(S=" << source << ", G=" << group
-            << ") packet on interface '" << incomingInterface->ie->getName() << "'.\n";
+            << ") packet on interface '" << incomingInterface->ie->getInterfaceName() << "'.\n";
 
     emit(rcvdAssertPkSignal, pk);
 
@@ -1024,7 +1024,7 @@ void PIMDM::processAssertTimer(cMessage *timer)
 
     Route *route = check_and_cast<Route *>(interfaceData->owner);
     UpstreamInterface *upstream = route->upstreamInterface;
-    EV_DETAIL << "AssertTimer" << route << " interface=" << interfaceData->ie->getName() << " has expired.\n";
+    EV_DETAIL << "AssertTimer" << route << " interface=" << interfaceData->ie->getInterfaceName() << " has expired.\n";
 
     //
     // Assert State Machine; event: AT(S,G,I) expires
@@ -1396,7 +1396,7 @@ void PIMDM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
  */
 void PIMDM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
-    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
+    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getInterfaceName() << "'.\n";
 
     // delete pimInt from outgoing interfaces of multicast routes for group
     int numRoutes = rt->getNumMulticastRoutes();
@@ -1411,7 +1411,7 @@ void PIMDM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
                 bool wasInOlist = downstream->isInOlist();
                 downstream->setHasConnectedReceivers(false);
                 if (wasInOlist && !downstream->isInOlist()) {
-                    EV_DEBUG << "Removed interface '" << ie->getName() << "' from the outgoing interface list of route " << route << ".\n";
+                    EV_DEBUG << "Removed interface '" << ie->getInterfaceName() << "' from the outgoing interface list of route " << route << ".\n";
 
                     // fire upstream state machine event
                     if (route->isOilistNull())
@@ -1437,7 +1437,7 @@ void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *ipv4Route, IPv4Route *rou
     IPv4Address group = ipv4Route->getMulticastGroup();
     int rpfId = newRpf->getInterfaceId();
 
-    EV_DETAIL << "New RPF interface for group=" << group << " source=" << source << " is " << newRpf->getName() << endl;
+    EV_DETAIL << "New RPF interface for group=" << group << " source=" << source << " is " << newRpf->getInterfaceName() << endl;
 
     Route *route = findRoute(source, group);
     ASSERT(route);
@@ -1620,7 +1620,7 @@ void PIMDM::sendGraftAckPacket(Packet *pk, const Ptr<const PIMGraft>& graftPacke
 void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl)
 {
     EV_INFO << "Sending StateRefresh(S=" << route->source << ", G=" << route->group
-            << ") message on interface '" << downstream->ie->getName() << "'\n";
+            << ") message on interface '" << downstream->ie->getInterfaceName() << "'\n";
 
     Packet *packet = new Packet("PIMStateRefresh");
     const auto& msg = makeShared<PIMStateRefresh>();
@@ -1647,7 +1647,7 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
 
 void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie)
 {
-    EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
+    EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getInterfaceName() << "'\n";
 
     Packet *packet = new Packet("PIMAssert");
     const auto& pkt = makeShared<PIMAssert>();

@@ -258,7 +258,7 @@ bool NetworkConfiguratorBase::isBridgeNode(Node *node)
 
 bool NetworkConfiguratorBase::isWirelessInterface(InterfaceEntry *interfaceEntry)
 {
-    return !strncmp(interfaceEntry->getName(), "wlan", 4);
+    return !strncmp(interfaceEntry->getInterfaceName(), "wlan", 4);
 }
 
 Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
@@ -367,8 +367,8 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             // compute the delay between the two interfaces using a dummy transmission
             const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
             const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry;
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry;
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const Packet *macFrame = new Packet();
@@ -378,7 +378,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             return arrival->getStartPropagationTime().dbl();
         }
         else if (!strcmp(metric, "dataRate")) {
-            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry;
             IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
             double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
@@ -388,8 +388,8 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             // compute the packet error rate between the two interfaces using a dummy transmission
             const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
             const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry;
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry;
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
@@ -459,7 +459,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 
             // Note: "hosts", "interfaces" must ALL match on the interface for the rule to apply
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
-                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
+                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getInterfaceName())))
             {
                 const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
@@ -469,7 +469,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-    cModule *interfaceModule = interfaceEntry->getInterfaceModule();
+    cModule *interfaceModule = interfaceEntry;
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
     if (mgmtModule != nullptr) {
         if (mgmtModule->hasPar("ssid") && *mgmtModule->par("ssid").stringValue())
@@ -597,7 +597,7 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
     if (matchesany)
         return true;
 
-    const char *interfaceName = interfaceInfo->interfaceEntry->getName();
+    const char *interfaceName = interfaceInfo->interfaceEntry->getInterfaceName();
     for (auto & nameMatcher : nameMatchers)
         if (nameMatcher->matches(interfaceName))
             return true;

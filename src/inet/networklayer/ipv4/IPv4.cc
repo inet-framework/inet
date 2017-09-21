@@ -481,24 +481,24 @@ const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const
     const InterfaceEntry *ie = nullptr;
     if (multicastIFOption) {
         ie = multicastIFOption;
-        EV_DETAIL << "multicast packet routed by socket option via output interface " << ie->getName() << "\n";
+        EV_DETAIL << "multicast packet routed by socket option via output interface " << ie->getInterfaceName() << "\n";
     }
     if (!ie) {
         IPv4Route *route = rt->findBestMatchingRoute(ipv4Header->getDestAddress());
         if (route)
             ie = route->getInterface();
         if (ie)
-            EV_DETAIL << "multicast packet routed by routing table via output interface " << ie->getName() << "\n";
+            EV_DETAIL << "multicast packet routed by routing table via output interface " << ie->getInterfaceName() << "\n";
     }
     if (!ie) {
         ie = rt->getInterfaceByAddress(ipv4Header->getSrcAddress());
         if (ie)
-            EV_DETAIL << "multicast packet routed by source address via output interface " << ie->getName() << "\n";
+            EV_DETAIL << "multicast packet routed by source address via output interface " << ie->getInterfaceName() << "\n";
     }
     if (!ie) {
         ie = ift->getFirstMulticastInterface();
         if (ie)
-            EV_DETAIL << "multicast packet routed via the first multicast interface " << ie->getName() << "\n";
+            EV_DETAIL << "multicast packet routed via the first multicast interface " << ie->getInterfaceName() << "\n";
     }
     return ie;
 }
@@ -515,7 +515,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
 
     // if output port was explicitly requested, use that, otherwise use IPv4 routing
     if (destIE) {
-        EV_DETAIL << "using manually specified output interface " << destIE->getName() << "\n";
+        EV_DETAIL << "using manually specified output interface " << destIE->getInterfaceName() << "\n";
         // and nextHopAddr remains unspecified
         if (!nextHopAddress.isUnspecified()) {
             // do nothing, next hop address already specified
@@ -559,7 +559,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
 
 void IPv4::routeUnicastPacketFinish(Packet *packet)
 {
-    EV_INFO << "output interface = " << getDestInterface(packet)->getName() << ", next hop address = " << getNextHop(packet) << "\n";
+    EV_INFO << "output interface = " << getDestInterface(packet)->getInterfaceName() << ", next hop address = " << getNextHop(packet) << "\n";
     numForwarded++;
     fragmentPostRouting(packet);
 }
@@ -662,11 +662,11 @@ void IPv4::forwardMulticastPacket(Packet *packet)
             if (destIE != fromIE && outInterface->isEnabled()) {
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
                 if (ipv4Header->getTimeToLive() <= ttlThreshold)
-                    EV_WARN << "Not forwarding to " << destIE->getName() << " (ttl treshold reached)\n";
+                    EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (ttl treshold reached)\n";
                 else if (outInterface->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
-                    EV_WARN << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
+                    EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (no listeners)\n";
                 else {
-                    EV_DETAIL << "Forwarding to " << destIE->getName() << "\n";
+                    EV_DETAIL << "Forwarding to " << destIE->getInterfaceName() << "\n";
                     auto packetCopy = packet->dup();
                     packetCopy->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
                     packetCopy->ensureTag<NextHopAddressReq>()->setNextHopAddress(destAddr);
@@ -1068,7 +1068,7 @@ MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAd
 
 void IPv4::sendPacketToNIC(Packet *packet)
 {
-    EV_INFO << "Sending " << packet << " to output interface = " << ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId())->getName() << ".\n";
+    EV_INFO << "Sending " << packet << " to output interface = " << ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId())->getInterfaceName() << ".\n";
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     delete packet->removeTag<DispatchProtocolReq>();

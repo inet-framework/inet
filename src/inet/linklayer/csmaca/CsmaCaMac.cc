@@ -169,7 +169,7 @@ void CsmaCaMac::finish()
 
 InterfaceEntry *CsmaCaMac::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
     e->setDatarate(bitrate);

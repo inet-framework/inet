@@ -106,7 +106,7 @@ void PPP::initialize(int stage)
 
 InterfaceEntry *PPP::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
     bool connected = datarateChannel != nullptr;

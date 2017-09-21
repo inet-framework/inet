@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -42,7 +43,7 @@ void TunInterface::initialize(int stage)
 
 InterfaceEntry *TunInterface::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
     e->setMtu(par("mtu").longValue());
     return e;
 }

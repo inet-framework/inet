@@ -846,7 +846,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         //bool ER = psb->OutInterface.isUnspecified();
         if (!IR) {
             IPv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
-            inInterface = rt->getInterfaceByAddress(localInf)->getName();
+            inInterface = rt->getInterfaceByAddress(localInf)->getInterfaceName();
         }
         else
             inInterface = "any";
@@ -862,7 +862,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             lop.label = rsb->FlowDescriptor[i].label;
             outLabel.push_back(lop);
 
-            outInterface = rt->getInterfaceByAddress(psb->OutInterface)->getName();
+            outInterface = rt->getInterfaceByAddress(psb->OutInterface)->getInterfaceName();
         }
         else {
             // egress router
@@ -876,7 +876,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
             if (!tedmod->isLocalAddress(psb->Session_Object.DestAddress)) {
                 InterfaceEntry *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
                 if (ie)
-                    outInterface = ie->getName(); // FIXME why use name to identify an interface?
+                    outInterface = ie->getInterfaceName(); // FIXME why use name to identify an interface?
             }
         }
 

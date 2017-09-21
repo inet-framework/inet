@@ -71,7 +71,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
 
       public:
         InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry);
-        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
+        virtual std::string getFullPath() const override { return interfaceEntry->getInterfaceFullPath(); }
     };
 
     class Matcher

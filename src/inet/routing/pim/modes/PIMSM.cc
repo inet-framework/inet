@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& out, const PIMSM::Route& route)
 
     out << "Incoming interface: ";
     if (route.upstreamInterface) {
-        out << route.upstreamInterface->ie->getName() << ", ";
+        out << route.upstreamInterface->ie->getInterfaceName() << ", ";
         out << "RPF neighbor: " << route.upstreamInterface->rpfNeighbor() << ", ";
     }
     else
@@ -66,7 +66,7 @@ std::ostream& operator<<(std::ostream& out, const PIMSM::Route& route)
     for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i) {
         if (i > 0)
             out << ", ";
-        out << route.downstreamInterfaces[i]->ie->getName() << " ";
+        out << route.downstreamInterfaces[i]->ie->getInterfaceName() << " ";
         switch (route.downstreamInterfaces[i]->joinPruneState) {
             case PIMSM::DownstreamInterface::NO_INFO:
                 out << "(NI)";
@@ -391,7 +391,7 @@ void PIMSM::processJoinPrunePacket(Packet *pk)
 
 void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface)
 {
-    EV_DETAIL << "Processing Join(*," << group << ") received on interface '" << inInterface->getName() << "'.\n";
+    EV_DETAIL << "Processing Join(*," << group << ") received on interface '" << inInterface->getInterfaceName() << "'.\n";
 
     // TODO RP check
 
@@ -454,7 +454,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
 
 void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface)
 {
-    EV_DETAIL << "Processing Join(" << source << ", " << group << ") received on interface '" << inInterface->getName() << "'.'n";
+    EV_DETAIL << "Processing Join(" << source << ", " << group << ") received on interface '" << inInterface->getInterfaceName() << "'.'n";
 
     //
     // Downstream per-interface (S,G) state machine; event = Receive Join(S,G)
@@ -513,7 +513,7 @@ void PIMSM::processJoinSGrpt(IPv4Address source, IPv4Address group, IPv4Address 
 
 void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface)
 {
-    EV_DETAIL << "Processing Prune(*," << group << ") received on interface '" << inInterface->getName() << "'.\n";
+    EV_DETAIL << "Processing Prune(*," << group << ") received on interface '" << inInterface->getInterfaceName() << "'.\n";
 
     //
     // Downstream per-interface (*,G) state machine; event = Receive Prune(*,G)
@@ -547,7 +547,7 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
 
 void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface)
 {
-    EV_DETAIL << "Processing Prune(" << source << ", " << group << ") received on interface '" << inInterface->getName() << "'.'n";
+    EV_DETAIL << "Processing Prune(" << source << ", " << group << ") received on interface '" << inInterface->getInterfaceName() << "'.'n";
 
     //
     // Downstream per-interface (S,G) state machine; event = Receive Prune(S,G)
@@ -689,7 +689,7 @@ void PIMSM::processAssertPacket(Packet *pk)
     AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
-            << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getName() << "'.\n";
+            << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << "'.\n";
 
     emit(rcvdAssertPkSignal, pk);
 
@@ -1086,7 +1086,7 @@ void PIMSM::processAssertTimer(cMessage *timer)
         // (*,G) Assert State Machine; event: AT(*,G,I) expires
         //
         EV_DETAIL << "AssertTimer(" << (route->type == G ? "*" : route->source.str()) << ", "
-                  << route->group << ", " << interfaceData->ie->getName() << ") has expired.\n";
+                  << route->group << ", " << interfaceData->ie->getInterfaceName() << ") has expired.\n";
 
         if (interfaceData->assertState == Interface::I_WON_ASSERT) {
             // The (S,G) or (*,G) Assert Timer expires.  As we're in the Winner state,
@@ -1131,7 +1131,7 @@ void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int hol
         for (unsigned i = 0; i < route->downstreamInterfaces.size(); i++) {    // if exist ET and for given interface
             DownstreamInterface *downstream = route->downstreamInterfaces[i];
             if (downstream->expiryTimer && (downstream->getInterfaceId() == originIntf->getInterfaceId())) {
-                EV <<    /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getName() << endl;
+                EV <<    /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getInterfaceName() << endl;
                 restartTimer(downstream->expiryTimer, holdTime);
                 break;
             }
@@ -1171,7 +1171,7 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
 
 void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
-    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
+    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getInterfaceName() << "'.\n";
 
     Route *routeG = findRouteG(group);
     if (routeG) {
@@ -1183,7 +1183,7 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 
 void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
 {
-    EV_DETAIL << "Multicast receiver added for group " << group << " on interface '" << ie->getName() << "'.\n";
+    EV_DETAIL << "Multicast receiver added for group " << group << " on interface '" << ie->getInterfaceName() << "'.\n";
 
     Route *routeG = findRouteG(group);
     if (!routeG)
@@ -1540,7 +1540,7 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
 
 void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit)
 {
-    EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
+    EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getInterfaceName() << "'\n";
 
     Packet *pk = new Packet("PIMAssert");
     const auto& pkt = makeShared<PIMAssert>();

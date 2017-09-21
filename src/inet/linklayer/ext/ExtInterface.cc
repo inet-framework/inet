@@ -26,6 +26,7 @@
 #include <platdep/sockets.h>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 
@@ -72,7 +73,7 @@ void ExtInterface::initialize(int stage)
 
 InterfaceEntry *ExtInterface::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     e->setMtu(par("mtu"));
     e->setMulticast(true);

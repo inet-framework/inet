@@ -24,7 +24,7 @@ namespace inet;
 class noncobject MACAddress;
 class noncobject IPv4Address;
 
-class InterfaceEntry extends cNamedObject
+class InterfaceEntry extends cModule
 {
     @existingClass(true);
     @descriptor(readonly);

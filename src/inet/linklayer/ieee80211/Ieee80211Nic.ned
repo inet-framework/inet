@@ -39,7 +39,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
-        @nic;
+        @class(::inet::InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule = default("");
         string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID
@@ -56,7 +56,6 @@ module Ieee80211Nic like IWirelessNic
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @nic;
         @display("i=block/ifcard");
     gates:
         input upperLayerIn; // to upper layers

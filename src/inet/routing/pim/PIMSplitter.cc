@@ -85,11 +85,11 @@ void PIMSplitter::processPIMPacket(Packet *pkt)
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 
-    EV_INFO << "Received packet on interface '" << ie->getName() << "'" << endl;
+    EV_INFO << "Received packet on interface '" << ie->getInterfaceName() << "'" << endl;
 
     PIMInterface *pimInt = pimIft->getInterfaceById(ie->getInterfaceId());
     if (!pimInt) {
-        EV_WARN << "PIM is not enabled on interface '" << ie->getName() << "', dropping packet." << endl;
+        EV_WARN << "PIM is not enabled on interface '" << ie->getInterfaceName() << "', dropping packet." << endl;
         delete pkt;
         return;
     }
@@ -106,7 +106,7 @@ void PIMSplitter::processPIMPacket(Packet *pkt)
             break;
 
         default:
-            throw cRuntimeError("PIMSplitter: PIM mode of interface '%s' is invalid.", ie->getName());
+            throw cRuntimeError("PIMSplitter: PIM mode of interface '%s' is invalid.", ie->getInterfaceName());
     }
 }
 }    // namespace inet

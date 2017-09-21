@@ -40,7 +40,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module IdealWirelessNic like IWirelessNic
 {
     parameters:
-        @nic;
+        @class(InterfaceEntry);
         @display("i=block/ifcard;bgb=214,335;bgl=53");
         string interfaceTableModule;
         string energySourceModule = default("");

@@ -95,7 +95,7 @@ class INET_API InterfaceEntryChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API InterfaceEntry : public cNamedObject
+class INET_API InterfaceEntry : public cModule
 {
     friend class InterfaceProtocolData;    // to call protocolDataChanged()
 
@@ -104,8 +104,8 @@ class INET_API InterfaceEntry : public cNamedObject
 
   protected:
     IInterfaceTable *ownerp = nullptr;    ///< IInterfaceTable that contains this interface, or nullptr
-    cModule *interfaceModule = nullptr;    ///< interface module, or nullptr
     int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
+    std::string interfaceName;
     int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId = -1;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
     int mtu = 0;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
@@ -148,18 +148,25 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void stateChanged(int fieldId) { changed(NF_INTERFACE_STATE_CHANGED, fieldId); }
     virtual void changed(simsignal_t signalID, int fieldId);
 
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+
   public:
     // internal: to be invoked from InterfaceTable only!
     virtual void setInterfaceTable(IInterfaceTable *t) { ownerp = t; }
     virtual void setInterfaceId(int id) { interfaceId = id; }
     virtual void resetInterface();
 
+  protected:
+    virtual std::string getFullPath() const override { return cModule::getFullPath(); }
+    virtual const char *getName() const override { return cModule::getName(); }
+
   public:
-    InterfaceEntry(cModule *module);
+    InterfaceEntry();
     virtual ~InterfaceEntry();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
-    virtual std::string getFullPath() const override;
+    virtual std::string getInterfaceFullPath() const;
 
     /**
      * Returns the IInterfaceTable this interface is in, or nullptr
@@ -175,14 +182,14 @@ class INET_API InterfaceEntry : public cNamedObject
      */
     bool isUp() const { return getState() == UP && hasCarrier(); }
 
-    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getInterfaceModule()->getId()); }
-    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getInterfaceModule()->getId()); }
+    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getId()); }
+    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getId()); }
     const L3Address getNetworkAddress() const;
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const { return interfaceId; }
-    cModule *getInterfaceModule() const { return interfaceModule; }
+    const char *getInterfaceName() const { return interfaceName.c_str(); }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }
     int getMTU() const { return mtu; }
@@ -198,7 +205,7 @@ class INET_API InterfaceEntry : public cNamedObject
 
     /** @name Field setters */
     //@{
-    virtual void setName(const char *s) override { cNamedObject::setName(s); configChanged(F_NAME); }
+    virtual void setInterfaceName(const char *s) { interfaceName = s; configChanged(F_NAME); }
     virtual void setNodeOutputGateId(int i) { if (nodeOutputGateId != i) { nodeOutputGateId = i; configChanged(F_NODE_OUT_GATEID); } }
     virtual void setNodeInputGateId(int i) { if (nodeInputGateId != i) { nodeInputGateId = i; configChanged(F_NODE_IN_GATEID); } }
     virtual void setMtu(int m) { if (mtu != m) { mtu = m; configChanged(F_MTU); } }

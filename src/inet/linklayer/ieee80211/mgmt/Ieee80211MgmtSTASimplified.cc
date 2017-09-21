@@ -43,7 +43,7 @@ void Ieee80211MgmtSTASimplified::initialize(int stage)
         auto host = addressResolver.findHostWithAddress(mib->bssData.bssid);
         auto interfaceTable = addressResolver.findInterfaceTableOf(host);
         auto interfaceEntry = interfaceTable->findInterfaceByAddress(mib->bssData.bssid);
-        auto apMib = dynamic_cast<Ieee80211Mib *>(interfaceEntry->getInterfaceModule()->getSubmodule("mib"));
+        auto apMib = dynamic_cast<Ieee80211Mib *>(interfaceEntry->getSubmodule("mib"));
         apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
     }
 }

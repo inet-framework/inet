@@ -54,7 +54,7 @@ const cModule *PacketDrop::getNetworkNode() const
 const InterfaceEntry *PacketDrop::getInterfaceEntry() const
 {
     auto module = getModule();
-    return module != nullptr ? inet::visualizer::getInterfaceEntry(const_cast<cModule *>(getNetworkNode()), const_cast<cModule *>(getContainingNicModule(module))) : nullptr;
+    return module != nullptr ? inet::visualizer::getInterfaceEntry(const_cast<cModule *>(getNetworkNode()), const_cast<InterfaceEntry *>(getContainingNicModule(module))) : nullptr;
 }
 
 PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(const PacketDrop* packetDrop) :

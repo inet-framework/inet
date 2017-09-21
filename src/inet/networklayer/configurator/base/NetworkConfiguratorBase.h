@@ -91,7 +91,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
 
-        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
+        virtual std::string getFullPath() const override { return interfaceEntry->getInterfaceFullPath(); }
     };
 
     /**

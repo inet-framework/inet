@@ -2488,7 +2488,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(const IPv6NDPref
         IPv6Address CoA;
         //TODO: for now we leave the newly formed address as not tentative,
         //according to Greg, we have to always perform DAD for a newly formed address.
-        EV_INFO << "Assigning new address to: " << ie->getName() << endl;
+        EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
 
         // we are for sure either in the home network or in a new foreign network
         // -> remove CoA
@@ -2608,7 +2608,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
 bool IPv6NeighbourDiscovery::isWirelessInterface(const InterfaceEntry *ie)
 {
     // TODO should be a flag in the InterfaceEntry
-    return strncmp("wlan", ie->getName(), 4) == 0;
+    return strncmp("wlan", ie->getInterfaceName(), 4) == 0;
 }
 
 bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)

@@ -63,7 +63,7 @@ std::string IPv4Route::info() const
     if (!interfacePtr)
         out << "*";
     else
-        out << interfacePtr->getName();
+        out << interfacePtr->getInterfaceName();
     if (interfacePtr && interfacePtr->ipv4Data())
         out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
     out << "  ";
@@ -92,7 +92,7 @@ bool IPv4Route::equals(const IPv4Route& route) const
 
 const char *IPv4Route::getInterfaceName() const
 {
-    return interfacePtr ? interfacePtr->getName() : "";
+    return interfacePtr ? interfacePtr->getInterfaceName() : "";
 }
 
 void IPv4Route::changed(int fieldCode)
@@ -138,14 +138,14 @@ std::string IPv4MulticastRoute::info() const
     if (!inInterface)
         out << "*  ";
     else
-        out << inInterface->getInterface()->getName() << "  ";
+        out << inInterface->getInterface()->getInterfaceName() << "  ";
     out << "out:";
     bool first = true;
     for (auto & elem : outInterfaces) {
         if (!first)
             out << ",";
         if (elem->isEnabled()) {
-            out << elem->getInterface()->getName();
+            out << elem->getInterface()->getInterfaceName();
             first = false;
         }
     }

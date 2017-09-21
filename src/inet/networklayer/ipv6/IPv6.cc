@@ -445,7 +445,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
     ASSERT(ie != nullptr);
     ASSERT(!nextHop.isUnspecified());
     IPv6Address destAddress = ipv6Header->getDestAddress();
-    EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
+    EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getInterfaceName() << "\n";
 
 #ifdef WITH_xMIPv6
     if (rt->isMobileNode()) {

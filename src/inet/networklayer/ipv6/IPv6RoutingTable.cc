@@ -897,7 +897,7 @@ bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
 void IPv6RoutingTable::printRoutingTable() const
 {
     for (const auto & elem : routeList)
-        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
+        EV_INFO << (elem)->getInterface()->getInterfaceFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
 }
 
 } // namespace inet

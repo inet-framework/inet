@@ -20,7 +20,6 @@ package inet.linklayer.contract;
 moduleinterface INic
 {
     parameters:
-        @nic;
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;    // from upper layers

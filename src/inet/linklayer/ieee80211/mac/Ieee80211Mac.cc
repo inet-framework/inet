@@ -116,7 +116,7 @@ const MACAddress& Ieee80211Mac::isInterfaceRegistered()
 
 InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
     // address
     e->setMACAddress(mib->address);
     e->setInterfaceToken(mib->address.formInterfaceIdentifier());

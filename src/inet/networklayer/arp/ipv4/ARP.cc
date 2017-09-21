@@ -439,7 +439,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
 
 MACAddress ARP::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
 {
-    Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getName());
+    Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getInterfaceName());
 
     IPv4Address addr = address.toIPv4();
     ARPCache::const_iterator it = arpCache.find(addr);

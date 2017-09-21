@@ -186,7 +186,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
             EV_INFO << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
-            EV_INFO << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
+            EV_INFO << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getInterfaceName() << endl;
 
             // add route
             IIPv4RoutingTable *rt = nodeInfo[j].rt;

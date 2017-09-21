@@ -112,7 +112,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
                         L3Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                         if (nextHopAddress != destinationAddress)
                             route->setNextHop(nextHopAddress);
-                        EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->info() << endl;
+                        EV_DEBUG << "Adding route " << sourceInterfaceEntry->getInterfaceFullPath() << " -> " << destinationInterfaceEntry->getInterfaceFullPath() << " as " << route->info() << endl;
                         sourceRoutingTable->addRoute(route);
                     }
                 }

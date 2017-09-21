@@ -255,7 +255,7 @@ void IPv4RoutingTable::printRoutingTable() const
                 route->getDestination().isUnspecified() ? "*" : route->getDestination().str().c_str(),
                 route->getNetmask().isUnspecified() ? "*" : route->getNetmask().str().c_str(),
                 route->getGateway().isUnspecified() ? "*" : route->getGateway().str().c_str(),
-                !interfacePtr ? "*" : interfacePtr->getName(),
+                !interfacePtr ? "*" : interfacePtr->getInterfaceName(),
                 !interfacePtr ? "*  " : interfacePtr->ipv4Data()->getIPAddress().str().c_str(),
                 route->getMetric());
     }
@@ -275,11 +275,11 @@ void IPv4RoutingTable::printMulticastRoutingTable() const
                 route->getOriginNetmask().isUnspecified() ? "*" : route->getOriginNetmask().str().c_str(),
                 route->getMulticastGroup().isUnspecified() ? "*" : route->getMulticastGroup().str().c_str(),
                 route->getMetric(),
-                !route->getInInterface() ? "*" : route->getInInterface()->getInterface()->getName());
+                !route->getInInterface() ? "*" : route->getInInterface()->getInterface()->getInterfaceName());
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
             if (i != 0)
                 EV << ",";
-            EV << route->getOutInterface(i)->getInterface()->getName();
+            EV << route->getOutInterface(i)->getInterface()->getInterfaceName();
         }
         EV << "\n";
     }

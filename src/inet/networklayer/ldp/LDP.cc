@@ -552,7 +552,7 @@ void LDP::processLDPHello(Packet *msg)
     // not in table, add it
     peer_info info;
     info.peerIP = peerAddr;
-    info.linkInterface = ift->getInterfaceById(interfaceId)->getName();
+    info.linkInterface = ift->getInterfaceById(interfaceId)->getInterfaceName();
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
@@ -744,7 +744,7 @@ IPv4Address LDP::locateNextHop(IPv4Address dest)
     if (!ie)
         return IPv4Address(); // no route
 
-    std::string iName = ie->getName();    // FIXME why use name for lookup?
+    std::string iName = ie->getInterfaceName();    // FIXME why use name for lookup?
     return findPeerAddrFromInterface(iName);
 }
 
@@ -804,7 +804,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPv4Address peerIP)
     InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
-    return ie->getName();
+    return ie->getInterfaceName();
 }
 
 //bool LDP::matches(const FEC_TLV& a, const FEC_TLV& b)

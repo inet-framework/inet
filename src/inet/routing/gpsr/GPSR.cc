@@ -296,7 +296,7 @@ void GPSR::configureInterfaces()
     cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
+        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getInterfaceName()))
             interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
     }
 }

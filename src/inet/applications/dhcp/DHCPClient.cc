@@ -115,7 +115,7 @@ InterfaceEntry *DHCPClient::chooseInterface()
     }
 
     if (!ie->ipv4Data()->getIPAddress().isUnspecified())
-        throw cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getName());
+        throw cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getInterfaceName());
     return ie;
 }
 
@@ -336,7 +336,7 @@ void DHCPClient::bindLease()
     IPv4Route *iroute = nullptr;
     for (int i = 0; i < irt->getNumRoutes(); i++) {
         IPv4Route *e = irt->getRoute(i);
-        if (routeMatches(e, IPv4Address(), IPv4Address(), lease->gateway, 0, ie->getName())) {
+        if (routeMatches(e, IPv4Address(), IPv4Address(), lease->gateway, 0, ie->getInterfaceName())) {
             iroute = e;
             break;
         }
@@ -359,7 +359,7 @@ void DHCPClient::bindLease()
 
 void DHCPClient::unbindLease()
 {
-    EV_INFO << "Unbinding lease on " << ie->getName() << "." << endl;
+    EV_INFO << "Unbinding lease on " << ie->getInterfaceName() << "." << endl;
 
     cancelEvent(timerT1);
     cancelEvent(timerT2);

@@ -42,7 +42,7 @@ std::string GenericRoute::info() const
     if (!interface)
         out << "*";
     else
-        out << interface->getName();
+        out << interface->getInterfaceName();
     if (interface && interface->getGenericNetworkProtocolData())
         out << "(" << interface->getGenericNetworkProtocolData()->getAddress() << ")";
     out << "  ";

@@ -61,8 +61,6 @@ InterfaceTable::InterfaceTable()
 
 InterfaceTable::~InterfaceTable()
 {
-    for (auto & elem : idToInterface)
-        delete elem;
     delete[] tmpInterfaceList;
 }
 
@@ -269,8 +267,8 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
     if (!host)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
-    if (getInterfaceByName(entry->getName()) != nullptr)
-        throw cRuntimeError("addInterface(): interface '%s' already registered", entry->getName());
+    if (getInterfaceByName(entry->getInterfaceName()) != nullptr)
+        throw cRuntimeError("addInterface(): interface '%s' already registered", entry->getInterfaceName());
 
     // insert
     entry->setInterfaceId(INTERFACEIDS_START + idToInterface.size());
@@ -286,7 +284,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
 
 void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
 {
-    cModule *ifmod = entry->getInterfaceModule();
+    cModule *ifmod = entry;
     if (!ifmod)
         return; // virtual interface
 
@@ -295,7 +293,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getInterfaceModule()->getFullPath().c_str(), this->getFullPath().c_str());
+        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getInterfaceFullPath().c_str(), this->getFullPath().c_str());
 
     // ASSUMPTIONS:
     // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. IPv4NetworkLayer or MPLS)
@@ -349,7 +347,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
 {
     int id = entry->getInterfaceId();
     if (entry != getInterfaceById(id))
-        throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getName());
+        throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getInterfaceName());
 
     emit(NF_INTERFACE_DELETED, entry);    // actually, only going to be deleted
 
@@ -461,7 +459,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name) const
         return nullptr;
     int n = idToInterface.size();
     for (int i = 0; i < n; i++)
-        if (idToInterface[i] && !strcmp(name, idToInterface[i]->getName()))
+        if (idToInterface[i] && !strcmp(name, idToInterface[i]->getInterfaceName()))
             return idToInterface[i];
 
     return nullptr;

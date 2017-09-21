@@ -75,7 +75,7 @@ std::string RIPRoute::info() const
     if (!ie)
         out << "*  ";
     else
-        out << ie->getName() << "  ";
+        out << ie->getInterfaceName() << "  ";
     out << "tag:" << tag << " ";
     out << "upd:" << lastUpdateTime << "s  ";
     switch (type) {
@@ -140,7 +140,7 @@ void RIPInterfaceEntry::configure(cXMLElement *config)
 
 std::ostream& operator<<(std::ostream& os, const RIPInterfaceEntry& e)
 {
-    os << "if:" << e.ie->getName() << "  ";
+    os << "if:" << e.ie->getInterfaceName() << "  ";
     os << "metric:" << e.metric << "  ";
     os << "mode: ";
     switch (e.mode) {

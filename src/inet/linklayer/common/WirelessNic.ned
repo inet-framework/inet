@@ -24,7 +24,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module WirelessNic like IWirelessNic
 {
     parameters:
-        @nic;
+        @class(InterfaceEntry);
         string classifierType = default("");
         string macType;
         string radioType;

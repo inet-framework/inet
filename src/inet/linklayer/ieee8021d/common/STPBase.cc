@@ -118,7 +118,7 @@ void STPBase::refreshDisplay() const
             colorLink(ie, isOperational && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
 
             // label ethernet interface with port status and role
-            cModule *nicModule = ie->getInterfaceModule();
+            cModule *nicModule = ie;
             if (nicModule != nullptr) {
                 char buf[32];
                 sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());

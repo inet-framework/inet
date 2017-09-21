@@ -45,7 +45,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
     result = "";
     switch (directive) {
         case 'N':
-            result = interfaceEntry->getName();
+            result = interfaceEntry->getInterfaceName();
             break;
         case 'm':
             result = interfaceEntry->getMacAddress().str();

@@ -145,7 +145,7 @@ void TED::initializeTED()
         if (ie2 != ie)
             throw cRuntimeError("MPLS models assume interfaces to have unique addresses, "
                                 "but address of '%s' (%s) is not unique",
-                    ie->getName(), ie->ipv4Data()->getIPAddress().str().c_str());
+                    ie->getInterfaceName(), ie->ipv4Data()->getIPAddress().str().c_str());
         if (!ie->isLoopback())
             interfaceAddrs.push_back(ie->ipv4Data()->getIPAddress());
     }

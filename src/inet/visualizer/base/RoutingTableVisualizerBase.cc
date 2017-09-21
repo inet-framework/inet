@@ -45,7 +45,7 @@ const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
             result = route->getDestination().isUnspecified() ? "*" : route->getDestination().str();
             break;
         case 'n':
-            result = route->getInterface()->getName();
+            result = route->getInterface()->getInterfaceName();
             break;
         case 'i':
             result = route->info();

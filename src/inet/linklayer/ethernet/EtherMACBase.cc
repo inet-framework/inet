@@ -278,7 +278,7 @@ void EtherMACBase::initializeStatistics()
 
 InterfaceEntry *EtherMACBase::createInterfaceEntry()
 {
-    InterfaceEntry *interfaceEntry = new InterfaceEntry(this);
+    InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);

@@ -20,6 +20,5 @@ package inet.linklayer.contract;
 moduleinterface ITunNic extends INic
 {
     parameters:
-        @nic;
         @display("i=block/ifcard");
 }

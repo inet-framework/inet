@@ -184,7 +184,7 @@ void CSMA::initializeMACAddress()
 
 InterfaceEntry *CSMA::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
     e->setDatarate(bitrate);

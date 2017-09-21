@@ -18,7 +18,6 @@ package inet.linklayer.contract;
 moduleinterface IWirelessNic extends INic
 {
     parameters:
-        @nic;
         @display("i=block/ifcard");
     gates:
         input radioIn @labels(ISignal); // to receive signals

@@ -153,7 +153,7 @@ void PIMBase::sendHelloPackets()
 
 void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 {
-    EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getName() << "'\n";
+    EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getInterfaceName() << "'\n";
 
     Packet *pk = new Packet("PIMHello");
     const auto& msg = makeShared<PIMHello>();
@@ -217,7 +217,7 @@ void PIMBase::processHelloPacket(Packet *packet)
 
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
 
-    EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getName() << " address=" << address << "\n";
+    EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getInterfaceName() << " address=" << address << "\n";
 
     PIMNeighbor *neighbor = pimNbt->findNeighbor(interfaceId, address);
     if (neighbor)

@@ -180,7 +180,7 @@ void OSPFConfigReader::joinMulticastGroups(int interfaceId)
         return;
     IPv4InterfaceData *ipv4Data = ie->ipv4Data();
     if (!ipv4Data)
-        throw cRuntimeError("Interface %s (id=%d) does not have IPv4 data", ie->getName(), interfaceId);
+        throw cRuntimeError("Interface %s (id=%d) does not have IPv4 data", ie->getInterfaceName(), interfaceId);
     ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
     ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
@@ -221,7 +221,7 @@ void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 
     std::string interfaceType = ifConfig.getTagName();
 
-    EV_DEBUG << "        loading " << interfaceType << " " << ie->getName() << " (ifIndex=" << ifIndex << ")\n";
+    EV_DEBUG << "        loading " << interfaceType << " " << ie->getInterfaceName() << " (ifIndex=" << ifIndex << ")\n";
 
     intf->setIfIndex(ift, ifIndex);
     if (interfaceType == "PointToPointInterface") {
@@ -239,7 +239,7 @@ void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     else {
         delete intf;
         throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
-                interfaceType.c_str(), ie->getName(), ifIndex, ifConfig.getSourceLocation());
+                interfaceType.c_str(), ie->getInterfaceName(), ifIndex, ifConfig.getSourceLocation());
     }
 
     joinMulticastGroups(ifIndex);
@@ -314,7 +314,7 @@ void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
     //RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
     IPv4AddressRange networkAddress;
 
-    EV_DEBUG << "        loading ExternalInterface " << ie->getName() << " ifIndex[" << ifIndex << "]\n";
+    EV_DEBUG << "        loading ExternalInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
     joinMulticastGroups(ifIndex);
 
@@ -338,7 +338,7 @@ void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         //externalRoutingEntry.setPathType(RoutingTableEntry::TYPE1_EXTERNAL);
     }
     else {
-        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getName(), externalRouteConfig.getSourceLocation());
+        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
     }
 
     asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "forwardingAddress")));
@@ -367,7 +367,7 @@ void OSPFConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 
     hostParameters.ifIndex = ifIndex;
 
-    EV_DEBUG << "        loading HostInterface " << ie->getName() << " ifIndex[" << ifIndex << "]\n";
+    EV_DEBUG << "        loading HostInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
     joinMulticastGroups(hostParameters.ifIndex);
 
@@ -381,7 +381,7 @@ void OSPFConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
         area->addHostRoute(hostParameters);
     }
     else {
-        throw cRuntimeError("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getName(), hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
+        throw cRuntimeError("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
     }
 }
 

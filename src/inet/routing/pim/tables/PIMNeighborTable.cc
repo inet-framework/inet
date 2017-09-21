@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVe
     for (unsigned int i = 0; i < v.size(); i++) {
         PIMNeighbor *e = v[i];
         os << "[" << i << "]: "
-           << "{ If = " << e->getInterfacePtr()->getName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion()
+           << "{ If = " << e->getInterfacePtr()->getInterfaceName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion()
            << "; GenID = " << e->getGenerationId() << "; Pr = " << e->getDRPriority() << "}; ";
     }
     return os;
@@ -57,7 +57,7 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVe
 std::string PIMNeighbor::info() const
 {
     std::stringstream out;
-    out << "PIMNeighbor addr=" << address << ", iface=" << ie->getName() << ", v=" << version << ", priority=" << this->drPriority << "}";
+    out << "PIMNeighbor addr=" << address << ", iface=" << ie->getInterfaceName() << ", v=" << version << ", priority=" << this->drPriority << "}";
     return out.str();
 }
 

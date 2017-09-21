@@ -171,15 +171,15 @@ void GenericRoutingTable::configureRouterId()
 void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
 {
     int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
-    int interfaceModuleId = ie->getInterfaceModule() ? ie->getInterfaceModule()->getId() : -1;
+    int interfaceModuleId = ie ? ie->getId() : -1;
     // mac
     GenericNetworkProtocolInterfaceData *d = new GenericNetworkProtocolInterfaceData();
     d->setMetric(metric);
     if (addressType == L3Address::MAC)
         d->setAddress(ie->getMacAddress());
-    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEPATH)
+    else if (ie && addressType == L3Address::MODULEPATH)
         d->setAddress(ModulePathAddress(interfaceModuleId));
-    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEID)
+    else if (ie && addressType == L3Address::MODULEID)
         d->setAddress(ModuleIdAddress(interfaceModuleId));
     ie->setGenericNetworkProtocolData(d);
 }
@@ -416,7 +416,7 @@ IRoute *GenericRoutingTable::createRoute()
 void GenericRoutingTable::printRoutingTable() const
 {
     for (const auto & elem : routes)
-        EV_INFO << (elem)->getInterface()->getFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
+        EV_INFO << (elem)->getInterface()->getInterfaceFullPath() << " -> " << (elem)->getDestinationAsGeneric().str() << " as " << (elem)->info() << endl;
 }
 
 } // namespace inet

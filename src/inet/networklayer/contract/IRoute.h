@@ -121,8 +121,8 @@ inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
     out << ", prefixLength = " << route->getPrefixLength();
     out << ", nextHop = " << route->getNextHopAsGeneric();
     out << ", metric = " << route->getMetric();
-    if (route->getInterface())
-        out << ", interface = " << route->getInterface()->getName();
+    if (auto ie = route->getInterface())
+        out << ", interface = " << ie->getInterfaceName();
     return out;
 };
 

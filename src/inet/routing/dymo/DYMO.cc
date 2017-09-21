@@ -1289,7 +1289,7 @@ void DYMO::configureInterfaces()
     cPatternMatcher interfaceMatcher(interfaces, false, true, false);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
+        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getInterfaceName()))
             // Most AODVv2 messages are sent with the IP destination address set to the link-local
             // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
             // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.

@@ -169,7 +169,7 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
 
-    EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getName() << "\n";
+    EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getInterfaceName() << "\n";
 
     if (datagramPreRoutingHook(packet) != IHook::ACCEPT)
         return;
@@ -251,7 +251,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     // TODO: see IPv4, using destIE here leaves nextHope unspecified
     L3Address nextHop;
     if (destIE && !requestedNextHop.isUnspecified()) {
-        EV_DETAIL << "using manually specified output interface " << destIE->getName() << "\n";
+        EV_DETAIL << "using manually specified output interface " << destIE->getInterfaceName() << "\n";
         nextHop = requestedNextHop;
     }
     else {
@@ -290,7 +290,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     // default: send datagram to fragmentation
-    EV_INFO << "output interface is " << destIE->getName() << ", next-hop address: " << nextHop << "\n";
+    EV_INFO << "output interface is " << destIE->getInterfaceName() << ", next-hop address: " << nextHop << "\n";
     numForwarded++;
 
     sendDatagramToOutput(datagram, destIE, nextHop);
@@ -546,7 +546,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
     }
 
     if (!ie->isBroadcast()) {
-        EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
+        EV_DETAIL << "output interface " << ie->getInterfaceName() << " is not broadcast, skipping ARP\n";
         //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
         delete datagram->removeTag<DispatchProtocolReq>();
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

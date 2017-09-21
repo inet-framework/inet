@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/Simsignals.h"
@@ -58,7 +59,7 @@ void Loopback::initialize(int stage)
 
 InterfaceEntry *Loopback::createInterfaceEntry()
 {
-    InterfaceEntry *ie = new InterfaceEntry(this);
+    InterfaceEntry *ie = getContainingNicModule(this);
 
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);

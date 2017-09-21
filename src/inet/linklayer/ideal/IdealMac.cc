@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -116,7 +117,7 @@ void IdealMac::initializeMACAddress()
 
 InterfaceEntry *IdealMac::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
     e->setDatarate(bitrate);

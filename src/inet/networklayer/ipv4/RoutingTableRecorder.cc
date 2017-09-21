@@ -297,7 +297,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
             host->getId(),
-            ie->getName(),
+            ie->getInterfaceName(),
             (ie->ipv4Data() != nullptr ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
             );
     fflush(routingLogFile);

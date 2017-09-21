@@ -494,7 +494,7 @@ void IGMPv3::configureInterface(InterfaceEntry *ie)
 {
     if (enabled && rt->isMulticastForwardingEnabled()) {
         // start querier on this interface
-        EV_INFO << "Sending General Query on interface '" << ie->getName() << "', and scheduling next Query to '"
+        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
                 << (simTime() + startupQueryInterval) << "'.\n";
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->state = IGMPV3_RS_QUERIER;
@@ -648,10 +648,10 @@ void IGMPv3::processRouterGeneralQueryTimer(cMessage *msg)
     RouterInterfaceData *interfaceData = (RouterInterfaceData *)msg->getContextPointer();
     InterfaceEntry *ie = interfaceData->ie;
     ASSERT(ie);
-    EV_INFO << "General Query timer expired on interface='" << ie->getName() << "'.\n";
+    EV_INFO << "General Query timer expired on interface='" << ie->getInterfaceName() << "'.\n";
     RouterState state = interfaceData->state;
     if (state == IGMPV3_RS_QUERIER || state == IGMPV3_RS_NON_QUERIER) {
-        EV_INFO << "Sending General Query on interface '" << ie->getName() << "', and scheduling next Query to '"
+        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
                 << (simTime() + queryInterval) << "'.\n";
         interfaceData->state = IGMPV3_RS_QUERIER;
         sendGeneralQuery(interfaceData, queryResponseInterval);
@@ -694,7 +694,7 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
     InterfaceEntry *ie = interfaceData->ie;
     ASSERT(ie);
 
-    EV_INFO << "Response timer to a General Query on interface '" << ie->getName() << "' has expired.\n";
+    EV_INFO << "Response timer to a General Query on interface '" << ie->getInterfaceName() << "' has expired.\n";
 
     //HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     Packet *outPacket = new Packet("IGMPv3 report");
@@ -726,14 +726,14 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
     report->setChunkLength(B(byteLength));
 
     if (counter != 0) {    //if no record created, dont need to send report
-        EV_INFO << "Sending response to a General Query on interface '" << ie->getName() << "'.\n";
+        EV_INFO << "Sending response to a General Query on interface '" << ie->getInterfaceName() << "'.\n";
         report->markImmutable();
         outPacket->prepend(report);
         sendReportToIP(outPacket, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
     }
     else {
-        EV_INFO << "There are no multicast listeners, no response is sent to a General Query on interface '" << ie->getName() << "'.\n";
+        EV_INFO << "There are no multicast listeners, no response is sent to a General Query on interface '" << ie->getInterfaceName() << "'.\n";
         delete outPacket;
     }
 }
@@ -749,7 +749,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     //checking if query is group or group-and-source specific
     if (group->queriedSources.empty()) {
         // Send report for a Group-Specific Query
-        EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getName() << "'\n";
+        EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
         records[0].groupAddress = group->groupAddr;
         records[0].recordType = group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX;
@@ -758,7 +758,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     }
     else {
         // Send report for a Group-and-Source-Specific Query
-        EV_INFO << "Response timer for a Group-and-Source-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getName() << "'\n";
+        EV_INFO << "Response timer for a Group-and-Source-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
         records[0].groupAddress = group->groupAddr;
         records[0].recordType = IGMPV3_RT_IS_IN;
@@ -792,7 +792,7 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, c
 
     FilterMode filter = sourceList.filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
 
-    EV_DETAIL_C("test") << "State of group '" << group << "' on interface '" << ie->getName() << "' has changed:\n";
+    EV_DETAIL_C("test") << "State of group '" << group << "' on interface '" << ie->getInterfaceName() << "' has changed:\n";
     EV_DETAIL_C("test") << "    Old state: " << groupData->getStateInfo() << ".\n";
     EV_DETAIL_C("test") << "    New state: " << (filter == IGMPV3_FM_INCLUDE ? "INCLUDE" : "EXCLUDE") << sourceList.sources << ".\n";
 
@@ -871,7 +871,7 @@ void IGMPv3::processQuery(Packet *packet)
 
     ASSERT(ie->isMulticast());
 
-    EV_INFO << "Received IGMPv3 query on interface '" << ie->getName() << "' for group '" << groupAddr << "'.\n";
+    EV_INFO << "Received IGMPv3 query on interface '" << ie->getInterfaceName() << "' for group '" << groupAddr << "'.\n";
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
@@ -984,7 +984,7 @@ double IGMPv3::decodeTime(unsigned char code)
 
 void IGMPv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& records)
 {
-    EV << "IGMPv3: sending Membership Report on iface=" << ie->getName() << "\n";
+    EV << "IGMPv3: sending Membership Report on iface=" << ie->getInterfaceName() << "\n";
     Packet *packet = new Packet("IGMPv3 report");
     const auto& msg = makeShared<IGMPv3Report>();
     unsigned int byteLength = 8;   // IGMPv3Report header size
@@ -1011,7 +1011,7 @@ void IGMPv3::processReport(Packet *packet)
 
     ASSERT(ie->isMulticast());
 
-    EV_INFO << "Received IGMPv3 Membership Report on interface '" << ie->getName() << "'.\n";
+    EV_INFO << "Received IGMPv3 Membership Report on interface '" << ie->getInterfaceName() << "'.\n";
 
     numReportsRecv++;
 
@@ -1098,7 +1098,7 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector aIntersectB = set_intersection(sourcesA, receivedSources);
                     if (!aIntersectB.empty()) {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, aIntersectB);
                     }
                 }
@@ -1122,7 +1122,7 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector aMinusY = set_complement(receivedSources, ySources);
                     if (!aMinusY.empty()) {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, aMinusY);
                     }
                 }
@@ -1144,7 +1144,7 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector aMinusB = set_complement(sourcesA, receivedSources);
                     if (!aMinusB.empty()) {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, aMinusB);
                     }
                 }
@@ -1167,13 +1167,13 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector xMinusA = set_complement(sourcesX, receivedSources);
                     if (!xMinusA.empty()) {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, xMinusA);
                     }
 
                     // Send Q(G)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
+                            << "' on interface '" << ie->getInterfaceName() << "'.\n";
                     sendGroupSpecificQuery(groupData);
                 }
             }
@@ -1213,7 +1213,7 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector aIntersectB = set_intersection(sourcesA, receivedSources);
                     if (!aIntersectB.empty()) {
                         EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, aIntersectB);
                     }
                 }
@@ -1252,7 +1252,7 @@ void IGMPv3::processReport(Packet *packet)
                     IPv4AddressVector aMinusY = set_complement(receivedSources, sourcesY);
                     if (!aMinusY.empty()) {
                         EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
-                                << "' on interface '" << ie->getName() << "'.\n";
+                                << "' on interface '" << ie->getInterfaceName() << "'.\n";
                         sendGroupAndSourceSpecificQuery(groupData, aMinusY);
                     }
                 }
@@ -1283,7 +1283,7 @@ void IGMPv3::processRouterGroupTimer(cMessage *msg)
     RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
     InterfaceEntry *ie = groupData->parent->ie;
 
-    EV_INFO << "Group Timer for group '" << groupData->groupAddr << "' on interface '" << ie->getName() << "' has expired.\n";
+    EV_INFO << "Group Timer for group '" << groupData->groupAddr << "' on interface '" << ie->getInterfaceName() << "' has expired.\n";
     EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
     if (groupData->filter == IGMPV3_FM_EXCLUDE) {
@@ -1321,7 +1321,7 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
     InterfaceEntry *ie = groupData->parent->ie;
 
     EV_INFO << "Source timer for group '" << groupData->groupAddr << "' and source '" << sourceRecord->sourceAddr
-            << "' on interface '" << ie->getName() << "' has expired.\n";
+            << "' on interface '" << ie->getInterfaceName() << "' has expired.\n";
 
     bool last = true;
     if (groupData->filter == IGMPV3_FM_INCLUDE) {

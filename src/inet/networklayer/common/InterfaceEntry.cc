@@ -46,7 +46,7 @@
 namespace inet {
 
 Register_Abstract_Class(InterfaceEntryChangeDetails);
-Register_Abstract_Class(InterfaceEntry);
+Define_Module(InterfaceEntry);
 
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
@@ -67,12 +67,8 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
     return out.str();
 }
 
-InterfaceEntry::InterfaceEntry(cModule *module)
+InterfaceEntry::InterfaceEntry()
 {
-    interfaceModule = findModuleUnderContainingNode(module);
-    if (!interfaceModule)
-        throw cRuntimeError("NIC module not found in the host");
-    setName(utils::stripnonalnum(interfaceModule->getFullName()).c_str());
     state = UP;
     carrier = true;
     datarate = 0;
@@ -83,10 +79,16 @@ InterfaceEntry::~InterfaceEntry()
     resetInterface();
 }
 
+void InterfaceEntry::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
+}
+
 std::string InterfaceEntry::info() const
 {
     std::stringstream out;
-    out << (getName()[0] ? getName() : "*");
+    out << getInterfaceName();
     out << "  ID:" << getInterfaceId();
     out << "  MTU:" << getMTU();
     if (!isUp())
@@ -125,7 +127,7 @@ std::string InterfaceEntry::info() const
 std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
-    out << "name:" << (getName()[0] ? getName() : "*");
+    out << "name:" << getInterfaceName();
     out << "  ID:" << getInterfaceId();
     out << "  MTU: " << getMTU() << " \t";
     if (!isUp())
@@ -166,9 +168,9 @@ std::string InterfaceEntry::detailedInfo() const
     return out.str();
 }
 
-std::string InterfaceEntry::getFullPath() const
+std::string InterfaceEntry::getInterfaceFullPath() const
 {
-    return ownerp == nullptr ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
+    return ownerp == nullptr ? getInterfaceName() : ownerp->getHostModule()->getFullPath() + "." + getInterfaceName();
 }
 
 void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
