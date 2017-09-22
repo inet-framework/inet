@@ -63,6 +63,7 @@ class INET_API Packet : public cPacket
     Ptr<const Chunk> contents;
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;
+    b totalLength;
 
   protected:
     const Chunk *getContents() const { return contents.get(); } // only for class descriptor
@@ -87,7 +88,7 @@ class INET_API Packet : public cPacket
      * Returns the total packet length ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    b getTotalLength() const { return contents->getChunkLength(); }
+    b getTotalLength() const { return totalLength; }
 
     /**
      * Returns the length in bits between the header and trailer iterators.

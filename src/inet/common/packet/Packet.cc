@@ -25,7 +25,8 @@ Packet::Packet(const char *name, short kind) :
     cPacket(name, kind),
     contents(EmptyChunk::singleton),
     headerIterator(Chunk::ForwardIterator(b(0), 0)),
-    trailerIterator(Chunk::BackwardIterator(b(0), 0))
+    trailerIterator(Chunk::BackwardIterator(b(0), 0)),
+    totalLength(b(0))
 {
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
@@ -34,7 +35,8 @@ Packet::Packet(const char *name, const Ptr<const Chunk>& contents) :
     cPacket(name),
     contents(contents),
     headerIterator(Chunk::ForwardIterator(b(0), 0)),
-    trailerIterator(Chunk::BackwardIterator(b(0), 0))
+    trailerIterator(Chunk::BackwardIterator(b(0), 0)),
+    totalLength(contents->getChunkLength())
 {
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
@@ -43,7 +45,8 @@ Packet::Packet(const Packet& other) :
     cPacket(other),
     contents(other.contents),
     headerIterator(other.headerIterator),
-    trailerIterator(other.trailerIterator)
+    trailerIterator(other.trailerIterator),
+    totalLength(other.totalLength)
 {
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
@@ -177,8 +180,10 @@ void Packet::prepend(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
-    if (contents == EmptyChunk::singleton)
+    if (contents == EmptyChunk::singleton) {
         contents = chunk;
+        totalLength = contents->getChunkLength();
+    }
     else {
         if (contents->canInsertAtBeginning(chunk)) {
             const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
@@ -193,6 +198,7 @@ void Packet::prepend(const Ptr<const Chunk>& chunk)
             sequenceChunk->markImmutable();
             contents = sequenceChunk;
         }
+        totalLength += chunk->getChunkLength();
     }
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
@@ -203,8 +209,10 @@ void Packet::append(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0) && (trailerIterator.getIndex() == 0 || trailerIterator.getIndex() == -1), "popped trailer length is non-zero");
-    if (contents == EmptyChunk::singleton)
+    if (contents == EmptyChunk::singleton) {
         contents = chunk;
+        totalLength = contents->getChunkLength();
+    }
     else {
         if (contents->canInsertAtEnd(chunk)) {
             const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
@@ -219,6 +227,7 @@ void Packet::append(const Ptr<const Chunk>& chunk)
             sequenceChunk->markImmutable();
             contents = sequenceChunk;
         }
+        totalLength += chunk->getChunkLength();
     }
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
@@ -238,6 +247,7 @@ void Packet::removeFromBeginning(b length)
     }
     else
         contents = contents->peek(length, contents->getChunkLength() - length);
+    totalLength -= length;
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
 }
@@ -256,6 +266,7 @@ void Packet::removeFromEnd(b length)
     }
     else
         contents = contents->peek(b(0), contents->getChunkLength() - length);
+    totalLength -= length;
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
 }
@@ -285,6 +296,7 @@ void Packet::removeAll()
     contents = EmptyChunk::singleton;
     headerIterator = Chunk::ForwardIterator(b(0), 0);
     trailerIterator = Chunk::BackwardIterator(b(0), 0);
+    totalLength = b(0);
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
