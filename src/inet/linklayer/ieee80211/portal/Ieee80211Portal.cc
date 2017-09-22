@@ -36,6 +36,7 @@ void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
+        fcsMode = EtherEncap::parseFcsMode(par("fcsMode").stringValue());
     }
 }
 
@@ -102,7 +103,7 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     ethernetHeader->setDest(packet->getMandatoryTag<MacAddressInd>()->getDestAddress());
     ethernetHeader->setTypeOrLength(typeOrLength);
     packet->insertHeader(ethernetHeader);
-    EtherEncap::addPaddingAndFcs(packet);
+    EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 #else // ifdef WITH_ETHERNET

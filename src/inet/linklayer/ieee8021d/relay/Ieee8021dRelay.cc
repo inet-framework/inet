@@ -41,6 +41,7 @@ void Ieee8021dRelay::initialize(int stage)
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
+        fcsMode = EtherEncap::parseFcsMode(par("fcsMode").stringValue());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::ethernet, gate("ifOut"));
@@ -238,7 +239,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     header->setTypeOrLength(packet->getByteLength());
     packet->insertHeader(header);
 
-    EtherEncap::addPaddingAndFcs(packet);
+    EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;

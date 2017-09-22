@@ -246,6 +246,8 @@ void EtherMAC::processFrameFromUpperLayer(Packet *packet)
         newFrame->setSrc(address);
         packet->insertHeader(newFrame);
         frame = newFrame;
+        auto oldFcs = packet->removeTrailer<EthernetFcs>();
+        EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
     }
 
     bool isControlFrame = frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL;
@@ -532,8 +534,8 @@ void EtherMAC::startFrameTransmission()
     int64 minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     if (frame->getByteLength() < minFrameLength) {
-        frame->removeFromEnd(B(ETHER_FCS_BYTES));  // remove old FCS
-        EtherEncap::addPaddingAndFcs(frame, FCS_DECLARED_CORRECT, minFrameLength);
+        auto oldFcs = frame->removeTrailer<EthernetFcs>();
+        EtherEncap::addPaddingAndFcs(frame, (EthernetFcsMode)oldFcs->getFcsMode(), minFrameLength);
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out

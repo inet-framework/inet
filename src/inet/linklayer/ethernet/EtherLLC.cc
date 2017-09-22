@@ -43,6 +43,7 @@ void EtherLLC::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        fcsMode = EtherEncap::parseFcsMode(par("fcsMode").stringValue());
         seqNum = 0;
         WATCH(seqNum);
 
@@ -144,7 +145,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
     eth->setTypeOrLength(packet->getByteLength());
     packet->insertHeader(eth);
 
-    EtherEncap::addPaddingAndFcs(packet);
+    EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
     send(packet, "lowerLayerOut");
 }

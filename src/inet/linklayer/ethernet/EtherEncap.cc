@@ -20,6 +20,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -37,19 +38,22 @@ simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
+EthernetFcsMode EtherEncap::parseFcsMode(const char *fcsModeString)
+{
+    if (!strcmp(fcsModeString, "declaredCorrect"))
+        return FCS_DECLARED_CORRECT;
+    else if (!strcmp(fcsModeString, "declaredIncorrect"))
+        return FCS_DECLARED_INCORRECT;
+    else if (!strcmp(fcsModeString, "computed"))
+        return FCS_COMPUTED;
+    else
+        throw cRuntimeError("Unknown crc mode: '%s'", fcsModeString);
+}
+
 void EtherEncap::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        const char *fcsModeString = par("fcsMode");
-        if (!strcmp(fcsModeString, "declaredCorrect"))
-            fcsMode = FCS_DECLARED_CORRECT;
-        else if (!strcmp(fcsModeString, "declaredIncorrect"))
-            fcsMode = FCS_DECLARED_INCORRECT;
-        else if (!strcmp(fcsModeString, "computed"))
-            fcsMode = FCS_COMPUTED;
-        else
-            throw cRuntimeError("Unknown crc mode: '%s'", fcsModeString);
-
+        fcsMode = parseFcsMode(par("fcsMode").stringValue());
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
@@ -147,14 +151,30 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     if (paddingLength > 0) {
         const auto& ethPadding = makeShared<EthernetPadding>();
         ethPadding->setChunkLength(B(paddingLength));
-        ethPadding->markImmutable();
-        packet->pushTrailer(ethPadding);
+        packet->insertTrailer(ethPadding);
     }
+    addFcs(packet, fcsMode);
+}
+
+void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
+{
     const auto& ethFcs = makeShared<EthernetFcs>();
     ethFcs->setFcsMode(fcsMode);
-    //FIXME calculate Fcs if needed
-    ethFcs->markImmutable();
-    packet->pushTrailer(ethFcs);
+
+    // calculate Fcs if needed
+    if (fcsMode ==FCS_COMPUTED) {
+        auto ethBytes = packet->peekDataBytes();
+        auto bufferLength = B(ethBytes->getChunkLength()).get();
+        auto buffer = new uint8_t[bufferLength];
+        // 1. fill in the data
+        ethBytes->copyToBuffer(buffer, bufferLength);
+        // 2. compute the FCS
+        auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+        delete [] buffer;
+        ethFcs->setFcs(computedFcs);
+    }
+
+    packet->insertTrailer(ethFcs);
 }
 
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)

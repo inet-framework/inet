@@ -54,6 +54,7 @@ simple EtherLLC
 {
     parameters:
         @display("i=block/fork");
+        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
 
         @signal[dsap](type=long);
         @signal[encapPk](type=cPacket);

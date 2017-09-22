@@ -24,11 +24,9 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace inet {
-
-// Forward declarations:
-class EtherFrameWithLLC;
 
 /**
  * Implements the LLC sub-layer of the Datalink Layer in Ethernet networks
@@ -39,6 +37,7 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     int seqNum;
     typedef std::map<int, int> DsapToPortMap;    // DSAP registration table
     DsapToPortMap dsapToPort;    // DSAP registration table
+    EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
 
     // lifecycle
     bool isUp;

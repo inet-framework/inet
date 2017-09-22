@@ -22,6 +22,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -167,13 +168,13 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(Packet *packet)
 
     // fill in src address if not set
     if (frame->getSrc().isUnspecified()) {
-        //FIXME frame is immutable
-        packet->removeFromBeginning(frame->getChunkLength());
-        const auto& newFrame = dynamicPtrCast<EthernetMacHeader>(frame->dupShared());
+        frame = nullptr; // drop shared ptr
+        auto newFrame = packet->removeHeader<EthernetMacHeader>();
         newFrame->setSrc(address);
-        newFrame->markImmutable();
-        packet->pushHeader(newFrame);
+        packet->insertHeader(newFrame);
         frame = newFrame;
+        auto oldFcs = packet->removeTrailer<EthernetFcs>();
+        EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
     }
 
     bool isPauseFrame = (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL);           //FIXME let more specific test

@@ -39,10 +39,12 @@ module EtherHost
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
+        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
         *.interfaceTableModule = default("");
+        *.fcsMode = fcsMode;
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
