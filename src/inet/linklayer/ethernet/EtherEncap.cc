@@ -162,7 +162,7 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
     ethFcs->setFcsMode(fcsMode);
 
     // calculate Fcs if needed
-    if (fcsMode ==FCS_COMPUTED) {
+    if (fcsMode == FCS_COMPUTED) {
         auto ethBytes = packet->peekDataBytes();
         auto bufferLength = B(ethBytes->getChunkLength()).get();
         auto buffer = new uint8_t[bufferLength];
@@ -264,7 +264,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
-   EV_INFO << "Sending " << frame << " to lower layer.\n";
+    EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 
     emit(pauseSentSignal, pauseUnits);
