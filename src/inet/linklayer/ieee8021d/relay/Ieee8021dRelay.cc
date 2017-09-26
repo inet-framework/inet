@@ -240,6 +240,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;

@@ -17,15 +17,16 @@
 
 #include "inet/linklayer/ethernet/EtherLLC.h"
 
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 
@@ -146,6 +147,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
     packet->insertHeader(eth);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     send(packet, "lowerLayerOut");
 }
@@ -266,6 +268,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
