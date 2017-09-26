@@ -427,7 +427,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod) co
     while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", _ifmod->getFullPath().c_str(), this->getFullPath().c_str());
+        throw cRuntimeError("Specified module (%s) is not in this host/router '%s'", _ifmod->getFullPath().c_str(), this->getFullPath().c_str());
 
     int nodeInputGateId = -1, nodeOutputGateId = -1;
     for (GateIterator i(ifmod); !i.end(); i++) {
