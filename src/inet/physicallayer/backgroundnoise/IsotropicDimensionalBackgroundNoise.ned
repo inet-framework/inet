@@ -28,7 +28,7 @@ module IsotropicDimensionalBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
         double power @unit(dBm); // noise power
-        string dimensions = default("time"); // dimensions of noise power: time and/or frequency
+        string dimensions = default("time frequency"); // dimensions of noise power: time and/or frequency
         string interpolationMode @enum("linear", "sample-hold") = default("sample-hold");
         @class(IsotropicDimensionalBackgroundNoise);
         @display("i=block/mac");
