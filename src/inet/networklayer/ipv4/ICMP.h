@@ -22,11 +22,11 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/transportlayer/common/CRC_m.h"
 
 namespace inet {
 
@@ -39,6 +39,7 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols;    // where to send up packets
+    CrcMode crcMode = (CrcMode)-1;
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);
@@ -56,6 +57,9 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
      * Kludge: if inputInterfaceId cannot be determined, pass in -1.
      */
     virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
+    static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
+    void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
+    bool verifyCrc(const Packet *packet);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

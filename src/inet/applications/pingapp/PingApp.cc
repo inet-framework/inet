@@ -37,11 +37,13 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
+#include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
@@ -96,6 +98,14 @@ void PingApp::initialize(int stage)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         printPing = par("printPing").boolValue();
         continuous = par("continuous").boolValue();
+
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
 
         // state
         pid = -1;
@@ -353,9 +363,9 @@ void PingApp::sendPingRequest()
             const auto& request = makeShared<ICMPEchoRequest>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            request->markImmutable();
-            outPacket->pushHeader(request);
             outPacket->append(payload);
+            ICMP::insertCrc(crcMode, request, outPacket);
+            outPacket->insertHeader(request);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -367,9 +377,9 @@ void PingApp::sendPingRequest()
             const auto& request = makeShared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            request->markImmutable();
-            outPacket->pushHeader(request);
             outPacket->append(payload);
+            ICMPv6::insertCrc(crcMode, request, outPacket);
+            outPacket->insertHeader(request);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
@@ -384,9 +394,9 @@ void PingApp::sendPingRequest()
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            request->markImmutable();
-            outPacket->prepend(request);
             outPacket->append(payload);
+            // insertCrc(crcMode, request, outPacket);
+            outPacket->insertHeader(request);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else

@@ -473,6 +473,13 @@ void UDP::processICMPv4Error(Packet *packet)
 #ifdef WITH_IPv4
     // extract details from the error message, then try to notify socket that sent bogus packet
 
+    if (!icmp)
+        icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
+    if (!icmp->verifyCrc(packet)) {
+        EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        delete packet;
+        return;
+    }
     int type, code;
     L3Address localAddr, remoteAddr;
     int localPort = -1, remotePort = -1;
@@ -517,8 +524,15 @@ void UDP::processICMPv4Error(Packet *packet)
 void UDP::processICMPv6Error(Packet *packet)
 {
 #ifdef WITH_IPv6
-    // extract details from the error message, then try to notify socket that sent bogus packet
+    if (!icmpv6)
+        icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
+    if (!icmpv6->verifyCrc(packet)) {
+        EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
+        delete packet;
+        return;
+    }
 
+    // extract details from the error message, then try to notify socket that sent bogus packet
     int type, code;
     L3Address localAddr, remoteAddr;
     ushort localPort, remotePort;

@@ -72,6 +72,7 @@ simple PingApp like IApp
         volatile double sleepDuration @unit(s) = default(0s); // time spent in sleep between switching destinations
         bool continuous = default(false);  // whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // log to stdout
+        string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/app");
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);

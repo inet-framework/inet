@@ -20,12 +20,15 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
+
 #define ICMPv6_HEADER_BYTES  8
 }}
 
 namespace inet;
 
 class FieldsChunk extends cObject;
+enum CrcMode;
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg
@@ -110,6 +113,7 @@ class Icmpv6Header extends FieldsChunk
     int type @enum(ICMPv6Type);     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
+    int crcMode @enum(CrcMode) = -1;
     // 4 bytes 'type' specific values
 }
 

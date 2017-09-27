@@ -33,6 +33,7 @@ simple ICMPv6
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/control");
     gates:
         input transportIn;
@@ -40,5 +41,4 @@ simple ICMPv6
         input ipv6In;
         output ipv6Out;
 }
-
 

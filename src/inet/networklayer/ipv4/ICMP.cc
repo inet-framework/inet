@@ -26,11 +26,12 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -39,7 +40,16 @@ Define_Module(ICMP);
 void ICMP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_LOCAL) {
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerProtocol(Protocol::icmpv4, gate("ipOut"));
         registerProtocol(Protocol::icmpv4, gate("transportOut"));
     }
@@ -115,11 +125,12 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     icmpHeader->setChunkLength(B(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
-    icmpHeader->markImmutable();
-    errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
     errorPacket->append(packet->peekDataAt(B(0), B(ipv4Header->getHeaderLength() + 8)));
+    insertCrc(icmpHeader,errorPacket);
+    errorPacket->insertHeader(icmpHeader);
+
     errorPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
@@ -166,6 +177,13 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
 
 void ICMP::processICMPMessage(Packet *packet)
 {
+    if (!verifyCrc(packet)) {
+        EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
+        // drop packet
+        delete packet;
+        return;
+    }
+
     const auto& icmpmsg = packet->peekHeader<IcmpHeader>();
     switch (icmpmsg->getType()) {
         case ICMP_REDIRECT:
@@ -235,10 +253,9 @@ void ICMP::processEchoRequest(Packet *request)
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv4Address src = addressInd->getSrcAddress().toIPv4();
     IPv4Address dest = addressInd->getDestAddress().toIPv4();
-    //FIXME calculate CRC if needed
-    icmpReply->markImmutable();
-    reply->append(icmpReply);
     reply->append(request->peekData());
+    insertCrc(icmpReply, reply);
+    reply->insertHeader(icmpReply);
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
@@ -271,6 +288,67 @@ void ICMP::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", gate->getBaseName())) {
         transportProtocols.insert(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol));
+    }
+}
+
+void ICMP::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
+{
+    icmpHeader->setCrcMode(crcMode);
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            icmpHeader->setChksum(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            icmpHeader->setChksum(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            // if the CRC mode is computed, then compute the CRC and set it
+            icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
+            MemoryOutputStream icmpHeaderStream;
+            Chunk::serialize(icmpHeaderStream, icmpHeader);
+            const auto& icmpHeaderBytes = icmpHeaderStream.getData();
+            auto icmpDataBytes = packet->peekDataBytes()->getBytes();
+            auto icmpHeaderLength = icmpHeaderBytes.size();
+            auto icmpDataLength =  icmpDataBytes.size();
+            auto bufferLength = icmpHeaderLength + icmpDataLength;
+            auto buffer = new uint8_t[bufferLength];
+            std::copy(icmpHeaderBytes.begin(), icmpHeaderBytes.end(), buffer);
+            std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
+            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            delete [] buffer;
+            icmpHeader->setChksum(crc);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
+}
+
+bool ICMP::verifyCrc(const Packet *packet)
+{
+    const auto& icmpHeader = packet->peekHeader<IcmpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    switch (icmpHeader->getCrcMode()) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
+            return icmpHeader->isCorrect();
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then the check fails
+            return false;
+        case CRC_COMPUTED: {
+            // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
+            auto dataBytes = packet->peekDataBytes(Chunk::PF_ALLOW_INCORRECT);
+            size_t bufferLength = B(dataBytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            dataBytes->copyToBuffer(buffer, bufferLength);
+            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            delete [] buffer;
+            // TODO: delete these isCorrect calls, rely on CRC only
+            return crc == 0 && icmpHeader->isCorrect();
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
     }
 }
 

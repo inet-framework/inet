@@ -24,6 +24,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
+#include "inet/transportlayer/common/CRC_m.h"
 
 namespace inet {
 
@@ -52,6 +53,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtoco
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
     virtual void sendErrorMessage(Packet *datagram, ICMPv6Type type, int code);
+    bool verifyCrc(const Packet *packet);
 
   protected:
     // internal helper functions
@@ -98,7 +100,12 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtoco
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
+  public:
+    static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
+    void insertCrc(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertCrc(crcMode, icmpHeader, packet); }
+
   protected:
+    CrcMode crcMode = (CrcMode)-1;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
     std::set<int> transportProtocols;    // where to send up packets

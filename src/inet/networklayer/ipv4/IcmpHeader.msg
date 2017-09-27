@@ -20,11 +20,14 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
 
 class FieldsChunk extends cObject;
+enum CrcMode;
+
 //
 // The real ICMP codes
 //
@@ -123,10 +126,11 @@ inline bool isIcmpInfoType(int type)
 // TODO: add originator id and sequence number and create an ICMPControlInfo
 class IcmpHeader extends FieldsChunk
 {
+    chunkLength = B(8);
     int type = -1 @enum(ICMPType);   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    chunkLength = B(8);
+    int crcMode @enum(CrcMode) = -1;
 }
 
 class ICMPEchoRequest extends IcmpHeader
