@@ -28,7 +28,7 @@ import inet.networklayer.common.InterfaceTable;
 module LinkLayerNodeBase extends NodeBase
 {
     parameters:
-        bool hasPcapRecorder = default(false);
+        int numPcapRecorders = default(0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
         int numExtInterfaces = default(0);
@@ -48,7 +48,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=100,600;is=s");
         }
-        pcapRecorder: PcapRecorder if hasPcapRecorder {
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
                 @display("p=100,700;is=s");
         }
