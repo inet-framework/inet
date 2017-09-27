@@ -140,16 +140,6 @@ void UDP::initialize(int stage)
         else if (!strcmp(crcModeString, "computed")) {
             crcMode = CRC_COMPUTED;
             crcInsertion.udp = this;
-#ifdef WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-            if (ipv4 != nullptr)
-                ipv4->registerHook(0, &crcInsertion);
-#endif
-#ifdef WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
-            if (ipv6 != nullptr)
-                ipv6->registerHook(0, &crcInsertion);
-#endif
         }
         else
             throw cRuntimeError("Unknown CRC mode: '%s'", crcModeString);
@@ -171,6 +161,18 @@ void UDP::initialize(int stage)
         isOperational = false;
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+        if (crcMode == CRC_COMPUTED) {
+#ifdef WITH_IPv4
+            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            if (ipv4 != nullptr)
+                ipv4->registerHook(0, &crcInsertion);
+#endif
+#ifdef WITH_IPv6
+            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
+            if (ipv6 != nullptr)
+                ipv6->registerHook(0, &crcInsertion);
+#endif
+        }
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerProtocol(Protocol::udp, gate("ipOut"));
