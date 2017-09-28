@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMRadio.h"
@@ -48,6 +49,7 @@ void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
 void Ieee80211OFDMRadio::decapsulate(Packet *packet) const
 {
     packet->popHeader<Ieee80211OfdmPhyHeader>();
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
 }
 
 } // namespace physicallayer
