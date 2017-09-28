@@ -37,11 +37,6 @@ TCPSocket::TCPSocket()
 
 TCPSocket::TCPSocket(cMessage *msg)
 {
-    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
-
-    if (!ind)
-        throw cRuntimeError("TCPSocket::TCPSocket(cMessage *): no TCPCommand control info in message (not from TCP?)");
-
     connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
 
