@@ -1,6 +1,15 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.2 (Sept, 2017) - stable
+--------------------------------
+
+ - Various fixes to eliminate warnings on clang 4 and gcc 7.x.
+ - Tcp: Fixed incorrect connection pointer in rexmitQueue.
+ - Edcaf: Fixed aifs calculation for customised aifsn.
+ - inet_featuretool: Removed warning when treating a missing feature in the state files as default.
+ - Updated showcases and tutorials.
+
 INET 3.6.1 (July, 2017) - stable
 --------------------------------
 
