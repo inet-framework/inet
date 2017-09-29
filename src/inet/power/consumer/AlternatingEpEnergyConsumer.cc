@@ -38,10 +38,11 @@ void AlternatingEpEnergyConsumer::initialize(int stage)
         timer = new cMessage("timer");
         updatePowerConsumption();
         scheduleIntervalTimer();
-        energySource->addEnergyConsumer(this);
         WATCH(isSleeping);
         WATCH(powerConsumption);
     }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
+        energySource->addEnergyConsumer(this);
 }
 
 void AlternatingEpEnergyConsumer::handleMessage(cMessage *message)
