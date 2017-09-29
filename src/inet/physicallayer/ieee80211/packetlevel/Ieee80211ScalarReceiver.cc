@@ -38,8 +38,14 @@ std::ostream& Ieee80211ScalarReceiver::printToStream(std::ostream& stream, int l
 
 bool Ieee80211ScalarReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    const Ieee80211ScalarTransmission *ieee80211Transmission = check_and_cast<const Ieee80211ScalarTransmission *>(transmission);
-    return NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission) && modeSet->containsMode(ieee80211Transmission->getMode());
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211ScalarTransmission *>(transmission);
+    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool Ieee80211ScalarReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto ieee80211Transmission = dynamic_cast<const Ieee80211ScalarTransmission *>(reception->getTransmission());
+    return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && FlatReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
 } // namespace physicallayer
