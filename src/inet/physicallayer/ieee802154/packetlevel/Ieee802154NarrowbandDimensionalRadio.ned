@@ -20,12 +20,12 @@ package inet.physicallayer.ieee802154.packetlevel;
 
 import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
-module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
+module Ieee802154NarrowbandDimensionalRadio extends FlatRadioBase
 {
     parameters:
         antennaType = default("IsotropicAntenna");
-        transmitterType = default("Ieee802154NarrowbandScalarTransmitter");
-        receiverType = default("Ieee802154NarrowbandScalarReceiver");
+        transmitterType = default("Ieee802154NarrowbandDimensionalTransmitter");
+        receiverType = default("Ieee802154NarrowbandDimensionalReceiver");
 
         carrierFrequency = default(2450 MHz);
 

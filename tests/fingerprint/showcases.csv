@@ -111,8 +111,8 @@
 /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="" && $distance==225',                      100s,            6410-b884/tplx
 /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="" && $distance==125',                   100s,            ab77-12dd/tplx
 /showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            f544-8b68/tplx
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            84e3-ddab/tplx
-/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AARFRateControl"',            25s,            839f-46a3/tplx
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            87ae-6193/tplx
+/showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AARFRateControl"',            25s,            d5d5-eb1d/tplx
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c PingBase -r 0,                                           500s,            0000-0000/tplx   # PingBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c UDPBase -r 0,                                            500s,            0000-0000/tplx   # UDPBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioMediumBase -r 0,                               500s,            0000-0000/tplx   # IdealRadioMediumBase extended

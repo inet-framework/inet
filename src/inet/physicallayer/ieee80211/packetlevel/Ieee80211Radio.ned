@@ -40,7 +40,7 @@ module Ieee80211Radio extends FlatRadioBase
         string bandName @enum("2.4 GHz", "5 GHz") = default("2.4 GHz"); // band name
         int channelNumber = default(0);                                 // initial channel number within the band (TODO: this is offset by 1)
         carrierFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
-        bandwidth @unit(Hz) = default(2MHz);
+        bandwidth @unit(Hz) = default(20MHz);
         antennaType = default("IsotropicAntenna");
         transmitter.preambleDuration = default(0s/0);
         transmitter.bitrate = default(11Mbps);

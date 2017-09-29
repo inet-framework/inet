@@ -16,37 +16,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
-#define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
+#ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H
+#define __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
+class INET_API Ieee802154NarrowbandDimensionalTransmitter : public FlatTransmitterBase, public DimensionalTransmitterBase
 {
   protected:
-    W minInterferencePower;
-
-  protected:
-    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual void initialize(int stage) override;
 
   public:
-    Ieee802154NarrowbandScalarReceiver();
-
-    void initialize(int stage) override;
+    Ieee802154NarrowbandDimensionalTransmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-
-    virtual W getMinInterferencePower() const override { return minInterferencePower; }
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154SCALARRECEIVER_H
-
+#endif // ifndef __INET_IEEE802154NARROWBANDDIMENSIONALTRANSMITTER_H

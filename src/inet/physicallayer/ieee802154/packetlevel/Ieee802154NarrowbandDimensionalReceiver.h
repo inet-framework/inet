@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
-#define __INET_IEEE802154NARROWBANDSCALARRECEIVER_H
+#ifndef __INET_IEEE802154NARROWBANDDIMENSIONALRECEIVER_H
+#define __INET_IEEE802154NARROWBANDDIMENSIONALRECEIVER_H
 
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 
@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
+class INET_API Ieee802154NarrowbandDimensionalReceiver : public FlatReceiverBase
 {
   protected:
     W minInterferencePower;
@@ -35,7 +35,7 @@ class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
-    Ieee802154NarrowbandScalarReceiver();
+    Ieee802154NarrowbandDimensionalReceiver();
 
     void initialize(int stage) override;
 
@@ -48,5 +48,4 @@ class INET_API Ieee802154NarrowbandScalarReceiver : public FlatReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802154SCALARRECEIVER_H
-
+#endif // ifndef __INET_IEEE802154DIMENSIONALRECEIVER_H
