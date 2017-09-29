@@ -15,24 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKSCALARRECEIVER_H
-#define __INET_APSKSCALARRECEIVER_H
+#ifndef __INET_APSKSCALARTRANSMISSION_H
+#define __INET_APSKSCALARTRANSMISSION_H
 
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKScalarReceiver : public FlatReceiverBase
+class INET_API APSKScalarTransmission : public ScalarTransmission
 {
-  protected:
-    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
-
   public:
-    APSKScalarReceiver();
+    APSKScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
@@ -41,5 +36,5 @@ class INET_API APSKScalarReceiver : public FlatReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKSCALARRECEIVER_H
+#endif // ifndef __INET_APSKSCALARTRANSMISSION_H
 

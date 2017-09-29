@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKScalarReceiver.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
@@ -36,6 +37,18 @@ std::ostream& APSKScalarReceiver::printToStream(std::ostream& stream, int level)
 {
     stream << "APSKScalarReceiver";
     return FlatReceiverBase::printToStream(stream, level);
+}
+
+bool APSKScalarReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto apskTransmission = dynamic_cast<const APSKScalarTransmission *>(transmission);
+    return apskTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool APSKScalarReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto apksTransmission = dynamic_cast<const APSKScalarTransmission *>(reception->getTransmission());
+    return apksTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
 } // namespace physicallayer
