@@ -33,6 +33,7 @@ package inet.visualizer.base;
 //  - %4 IPv4 address
 //  - %6 IPv6 address
 //  - %a IPv4 or IPv6 address
+//  - %l IPv4 or IPv6 netmask length
 //  - %g generic address
 //  - %n network address
 //  - %i InterfaceEntry::info()
@@ -54,7 +55,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
-        string format = default("%N %\\%a"); // determines what interface data is displayed
+        string format = default("%N %\\%a/%l"); // determines what interface data is displayed
         string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double displacementPriority = default(0); // determines the order of annotation positioning
 
