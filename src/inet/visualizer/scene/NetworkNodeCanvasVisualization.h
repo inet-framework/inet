@@ -19,7 +19,7 @@
 #define __INET_NETWORKNODECANVASVISUALIZATION_H
 
 #include "inet/common/figures/cPanelFigure.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 
@@ -32,19 +32,19 @@ class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
       public:
         cFigure *figure;
         cFigure::Rectangle bounds;
-        Displacement displacementHint;
-        double displacementPriority;
+        Placement placementHint;
+        double placementPriority;
 
       public:
-        Annotation(cFigure *figure, const cFigure::Point& size, Displacement displacement, double displacementPriority);
+        Annotation(cFigure *figure, const cFigure::Point& size, Placement placement, double placementPriority);
 
-        static bool compareDisplacementPriority(const Annotation& a1, const Annotation& a2);
+        static bool comparePlacementPriority(const Annotation& a1, const Annotation& a2);
     };
 
   protected:
     cModule *networkNode = nullptr;
     double annotationSpacing = NaN;
-    double displacementPenalty = NaN;
+    double placementPenalty = NaN;
 
     bool isLayoutInvalid = false;
     cFigure::Rectangle submoduleBounds;
@@ -55,11 +55,11 @@ class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
     virtual void layout();
 
   public:
-    NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double displacementPenalty);
+    NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double placementPenalty);
 
     virtual void refreshDisplay() override;
 
-    virtual void addAnnotation(cFigure *figure, cFigure::Point size, Displacement displacement = DISPLACEMENT_ANY, double displacementPriority = 0);
+    virtual void addAnnotation(cFigure *figure, cFigure::Point size, Placement placement = PLACEMENT_ANY, double placementPriority = 0);
     virtual void removeAnnotation(cFigure *figure);
     virtual void setAnnotationSize(cFigure *figure, cFigure::Point size);
     virtual void setAnnotationVisible(cFigure *figure, bool visible);

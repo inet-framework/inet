@@ -121,7 +121,7 @@ void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVi
         displayString.setTagArg("t", 1, "l");
     }
     else
-        interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
+        interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize(), placementHint, placementPriority);
 }
 
 void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)

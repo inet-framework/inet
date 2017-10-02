@@ -20,7 +20,7 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
 
 namespace inet {
@@ -55,8 +55,8 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     ModuleFilter radioFilter;
     double width;
     double height;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     //@}
 
     std::map<int, const RadioVisualization *> radioVisualizations;

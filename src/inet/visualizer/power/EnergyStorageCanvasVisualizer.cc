@@ -68,7 +68,7 @@ void EnergyStorageCanvasVisualizer::addEnergyStorageVisualization(const EnergySt
     EnergyStorageVisualizerBase::addEnergyStorageVisualization(energyStorageVisualization);
     auto energyStorageCanvasVisualization = static_cast<const EnergyStorageCanvasVisualization *>(energyStorageVisualization);
     auto figure = energyStorageCanvasVisualization->figure;
-    energyStorageCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), displacementHint, displacementPriority);
+    energyStorageCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), placementHint, placementPriority);
 }
 
 void EnergyStorageCanvasVisualizer::removeEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization)

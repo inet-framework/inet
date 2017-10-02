@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/StringFormat.h"
@@ -63,8 +63,8 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     StringFormat format;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;

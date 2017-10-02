@@ -47,8 +47,8 @@ simple InfoVisualizerBase extends VisualizerBase
         string textColor = default("black"); // info text font color, black by default
         string backgroundColor = default("white"); // info text background color, white by default
         double opacity = default(1.0); // opacity of the visualization
-        string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double displacementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(InfoVisualizerBase);
 }

@@ -20,7 +20,7 @@
 
 #include "inet/power/contract/IEnergyStorage.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
 
 namespace inet {
@@ -51,8 +51,8 @@ class INET_API EnergyStorageVisualizerBase : public VisualizerBase
     double width;
     double height;
     double spacing;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     //@}
 
     std::vector<const EnergyStorageVisualization *> energyStorageVisualizations;

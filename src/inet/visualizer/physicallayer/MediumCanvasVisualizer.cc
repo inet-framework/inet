@@ -364,7 +364,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = transmissionFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(transmissionFigure, transmissionFigure->getBounds().getSize(), transmissionDisplacementHint, transmissionDisplacementPriority);
+                networkNodeVisualization->addAnnotation(transmissionFigure, transmissionFigure->getBounds().getSize(), transmissionPlacementHint, transmissionPlacementPriority);
                 setTransmissionFigure(radio, transmissionFigure);
             }
             if (displayReceptions) {
@@ -378,7 +378,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = receptionFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(receptionFigure, receptionFigure->getBounds().getSize(), receptionDisplacementHint, receptionDisplacementPriority);
+                networkNodeVisualization->addAnnotation(receptionFigure, receptionFigure->getBounds().getSize(), receptionPlacementHint, receptionPlacementPriority);
                 setReceptionFigure(radio, receptionFigure);
             }
         }

@@ -20,7 +20,7 @@
 
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PortFilter.h"
 
@@ -60,8 +60,8 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     //@}
 
     std::vector<const TransportConnectionVisualization *> connectionVisualizations;

@@ -122,8 +122,8 @@ void InterfaceTableVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         format.parseFormat(par("format"));
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::parseColor(par("textColor"));
         backgroundColor = cFigure::parseColor(par("backgroundColor"));
