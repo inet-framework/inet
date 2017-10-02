@@ -1,3 +1,7 @@
+2017-09-29  Levente Mészáros
+
+	Radio: Moved self message construction to local stage.
+
 ====== inet-3.x ======
 
 2017-07-06  ------ inet-3.6.1 released ------

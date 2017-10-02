@@ -1,3 +1,11 @@
+2017-10-02  Andras Varga
+
+	visualization: rename "displacement" parameters to "placement"
+
+2017-09-29  Rudolf Hornig
+
+	build: made it compile with omnet 5.2
+
 ====== inet-3.x ======
 
 2017-07-06  ------ inet-3.6.1 released ------
