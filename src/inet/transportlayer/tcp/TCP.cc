@@ -24,8 +24,10 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"
@@ -134,6 +136,50 @@ TCP::~TCP()
     }
 }
 
+bool TCP::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
+{
+    switch (tcpHeader->getCrcMode()) {
+        case CRC_COMPUTED: {
+            //check CRC:
+            const Protocol *networkProtocol = nullptr;
+            const std::vector<uint8_t> tcpBytes = packet->peekDataBytes()->getBytes();
+            auto pseudoHeader = makeShared<TransportPseudoHeader>();
+            L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            pseudoHeader->setSrcAddress(srcAddr);
+            pseudoHeader->setDestAddress(destAddr);
+            pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
+            pseudoHeader->setProtocolId(IP_PROT_TCP);
+            pseudoHeader->setPacketLength(tcpBytes.size());
+            // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
+            if (networkProtocol == &Protocol::ipv4)
+                pseudoHeader->setChunkLength(B(12));
+            else if (networkProtocol == &Protocol::ipv6)
+                pseudoHeader->setChunkLength(B(40));
+            else
+                throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
+            pseudoHeader->markImmutable();
+            auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
+            auto pseudoHeaderLength = pseudoHeaderBytes.size();
+            auto tcpDataLength =  tcpBytes.size();
+            auto bufferLength = pseudoHeaderLength + tcpDataLength;
+            auto buffer = new uint8_t[bufferLength];
+            // 1. fill in the data
+            std::copy(pseudoHeaderBytes.begin(), pseudoHeaderBytes.end(), (uint8_t *)buffer);
+            std::copy(tcpBytes.begin(), tcpBytes.end(), (uint8_t *)buffer + pseudoHeaderLength);
+            // 2. compute the CRC
+            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            delete [] buffer;
+            return (crc == 0);
+        }
+        case CRC_DECLARED_CORRECT:
+            return true;
+        case CRC_DECLARED_INCORRECT:
+            return false;
+    }
+    throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
+}
+
 void TCP::handleMessage(cMessage *msg)
 {
     if (!isOperational) {
@@ -155,7 +201,7 @@ void TCP::handleMessage(cMessage *msg)
             EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msg;
         }
-        else {
+        else if (protocol == &Protocol::tcp) {
             // must be a TCPSegment
             auto tcpHeader = packet->peekHeader<TcpHeader>();
 
@@ -165,6 +211,12 @@ void TCP::handleMessage(cMessage *msg)
             srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
             destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
+
+            if (!checkCrc(tcpHeader, packet)) {
+                EV_WARN << "TCP segment has wrong CRC, dropped\n";
+                delete packet;
+                return;
+            }
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
@@ -177,6 +229,8 @@ void TCP::handleMessage(cMessage *msg)
                 segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
             }
         }
+        else
+            throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
     }
     else {    // must be from app
         int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();

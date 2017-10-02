@@ -210,6 +210,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
     // called at shutdown/crash
     virtual void reset();
+
+    bool checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *pk);
 };
 
 } // namespace tcp
