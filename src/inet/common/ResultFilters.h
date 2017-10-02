@@ -47,6 +47,15 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects an IReception and outputs its minimum signal power.
+ */
+class INET_API ReceptionMinSignalPowerFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects an ApplicationPacket, and outputs its sequence number.
  */
 class INET_API ApplicationPacketSequenceNumberFilter : public cObjectResultFilter
