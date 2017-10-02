@@ -1,8 +1,10 @@
+====== inet-3.x ======
+
+2017-10-02  ------ inet-3.6.2 released ------
+
 2017-10-02  Andras Varga
 
 	visualization: rename "displacement" parameters to "placement"
-
-====== inet-3.x ======
 
 2017-07-06  ------ inet-3.6.1 released ------
 
