@@ -26,6 +26,8 @@
 #include <cmath>
 #include <iostream>
 
+#define INET_ALWAYS_INLINE __attribute__((always_inline)) inline
+
 namespace inet {
 
 namespace units {
@@ -77,155 +79,155 @@ class value
     typedef Value value_type;
     typedef Units unit;
 
-    value() : m_rep()
+    INET_ALWAYS_INLINE value() : m_rep()
     {
     }
 
-    explicit value(const value_type& v) : m_rep(v)
+    INET_ALWAYS_INLINE explicit value(const value_type& v) : m_rep(v)
     {
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value(const value<OtherValue, OtherUnits>& v) :
+    INET_ALWAYS_INLINE value(const value<OtherValue, OtherUnits>& v) :
         m_rep(internal::convert<OtherUnits, Units>::fn(v.get()))
     {
     }
 
-    const value_type& get() const
+    INET_ALWAYS_INLINE const value_type& get() const
     {
         return m_rep;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value& operator=(const value<OtherValue, OtherUnits>& other)
+    INET_ALWAYS_INLINE value& operator=(const value<OtherValue, OtherUnits>& other)
     {
         m_rep = value(other).get();
         return *this;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value operator+(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE value operator+(const value<OtherValue, OtherUnits>& other) const
     {
         return value(get() + value(other).get());
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value& operator+=(const value<OtherValue, OtherUnits>& other)
+    INET_ALWAYS_INLINE value& operator+=(const value<OtherValue, OtherUnits>& other)
     {
         m_rep += value(other).get();
         return *this;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value& operator-=(const value<OtherValue, OtherUnits>& other)
+    INET_ALWAYS_INLINE value& operator-=(const value<OtherValue, OtherUnits>& other)
     {
         m_rep -= value(other).get();
         return *this;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value operator-(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE value operator-(const value<OtherValue, OtherUnits>& other) const
     {
         return value(get() - value(other).get());
     }
 
-    value operator-() const
+    INET_ALWAYS_INLINE value operator-() const
     {
         return value(-get());
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value<Value, compose<Units, OtherUnits> >
+    INET_ALWAYS_INLINE value<Value, compose<Units, OtherUnits> >
     operator*(const value<OtherValue, OtherUnits>& other) const
     {
         return value<Value, compose<Units, OtherUnits> >(get() * other.get());
     }
 
-    value operator*(const value_type& v) const
+    INET_ALWAYS_INLINE value operator*(const value_type& v) const
     {
         return value(get() * v);
     }
 
-    value& operator*=(const value_type& v)
+    INET_ALWAYS_INLINE value& operator*=(const value_type& v)
     {
         m_rep *= v;
         return *this;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    value<Value, compose<Units, pow<OtherUnits, -1> > >
+    INET_ALWAYS_INLINE value<Value, compose<Units, pow<OtherUnits, -1> > >
     operator/(const value<OtherValue, OtherUnits>& other) const
     {
         return value<Value, compose<Units, pow<OtherUnits, -1> > >(get() / other.get());
     }
 
-    value operator/(const value_type& v) const
+    INET_ALWAYS_INLINE value operator/(const value_type& v) const
     {
         return value(get() / v);
     }
 
-    value& operator/=(const value_type& v)
+    INET_ALWAYS_INLINE value& operator/=(const value_type& v)
     {
         m_rep /= v;
         return *this;
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator==(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator==(const value<OtherValue, OtherUnits>& other) const
     {
         return get() == value(other).get();
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator!=(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator!=(const value<OtherValue, OtherUnits>& other) const
     {
         return get() != value(other).get();
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator<(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator<(const value<OtherValue, OtherUnits>& other) const
     {
         return get() < value(other).get();
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator<=(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator<=(const value<OtherValue, OtherUnits>& other) const
     {
         return get() <= value(other).get();
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator>(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator>(const value<OtherValue, OtherUnits>& other) const
     {
         return get() > value(other).get();
     }
 
     template<typename OtherValue, typename OtherUnits>
-    bool operator>=(const value<OtherValue, OtherUnits>& other) const
+    INET_ALWAYS_INLINE bool operator>=(const value<OtherValue, OtherUnits>& other) const
     {
         return get() >= value(other).get();
     }
 
-    value& operator++()
+    INET_ALWAYS_INLINE value& operator++()
     {
         ++m_rep;
         return *this;
     }
 
-    value operator++(int)
+    INET_ALWAYS_INLINE value operator++(int)
     {
         value v = *this;
         ++m_rep;
         return v;
     }
 
-    value& operator--()
+    INET_ALWAYS_INLINE value& operator--()
     {
         --m_rep;
         return *this;
     }
 
-    value operator--(int)
+    INET_ALWAYS_INLINE value operator--(int)
     {
         value v = *this;
         --m_rep;
@@ -237,25 +239,25 @@ class value
 };
 
 template<typename Value, typename Unit>
-value<Value, pow<Unit, -1> > operator/(const Value& a, const value<Value, Unit>& b)
+INET_ALWAYS_INLINE value<Value, pow<Unit, -1> > operator/(const Value& a, const value<Value, Unit>& b)
 {
     return value<Value, pow<Unit, -1> >(a / b.get());
 }
 
 template<typename Value, typename Unit>
-value<Value, Unit> operator*(const Value& a, const value<Value, Unit>& b)
+INET_ALWAYS_INLINE value<Value, Unit> operator*(const Value& a, const value<Value, Unit>& b)
 {
     return value<Value, Unit>(a * b.get());
 }
 
 template<typename Value, typename Unit>
-value<Value, pow<Unit, 1, 2> > sqrt(const value<Value, Unit>& a)
+INET_ALWAYS_INLINE value<Value, pow<Unit, 1, 2> > sqrt(const value<Value, Unit>& a)
 {
     return value<Value, pow<Unit, 1, 2> >(std::sqrt(a.get()));
 }
 
 template<int Num, int Den, typename Value, typename Unit>
-value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
+INET_ALWAYS_INLINE value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
 {
     return value<Value, pow<Unit, Num, Den> >(internal::fixed_power<Num, Den>::pow(a.get()));
 }
@@ -291,7 +293,7 @@ struct convert3
     // The default implementation assumes that the two quantities are in compatible
     // units up to some scaling factor.  Find the scaling factor and apply it.
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return v * scaling_factor<T2>::template fn<V>() / scaling_factor<T1>::template fn<V>();
     }
@@ -304,7 +306,7 @@ template<typename T1, typename T2>
 struct convert2
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return convert3<T1, T2>::fn(v);
     }
@@ -321,7 +323,7 @@ struct convert
     legacy_static_assert<convertible<T1, T2>::value> check_convertible;
 
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return convert2<T1, T2>::fn(v);
     }
@@ -333,7 +335,7 @@ template<typename T>
 struct convert<T, T>
 {
     template<typename U>
-    static const U& fn(const U& u) { return u; }
+    static INET_ALWAYS_INLINE const U& fn(const U& u) { return u; }
 };
 
 // Convert to same type.
@@ -341,7 +343,7 @@ template<typename T>
 struct convert3<T, T>
 {
     template<typename U>
-    static const U& fn(const U& u) { return u; }
+    static INET_ALWAYS_INLINE const U& fn(const U& u) { return u; }
 };
 
 // Convert from a scaled unit
@@ -349,7 +351,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert2<scale<T, Num, Den>, U>
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return convert<T, U>::fn((v * Den) / Num);
     }
@@ -360,7 +362,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert3<T, scale<U, Num, Den> >
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return (convert<T, U>::fn(v) * Num) / Den;
     }
@@ -371,7 +373,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert2<intscale<T, Num, Den>, U>
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         auto t = v * Den;
         assert(t % Num == 0);
@@ -384,7 +386,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert3<T, intscale<U, Num, Den> >
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         auto t = convert<T, U>::fn(v) * Num;
         assert(t % Den == 0);
@@ -397,7 +399,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert2<translate<T, Num, Den>, U>
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return convert<T, U>::fn(v - static_cast<V>(Num) / static_cast<V>(Den));
     }
@@ -408,7 +410,7 @@ template<typename T, typename U, int Num, int Den>
 struct convert3<T, translate<U, Num, Den> >
 {
     template<typename V>
-    static V fn(const V& v)
+    static INET_ALWAYS_INLINE V fn(const V& v)
     {
         return convert<T, U>::fn(v) + static_cast<V>(Num) / static_cast<V>(Den);
     }
@@ -542,7 +544,7 @@ struct convertible
 template<int Num, int Den, int Div, int Mod>
 struct fixed_power
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return std::pow(t, static_cast<T>(Num) / static_cast<T>(Den));
     }
@@ -551,7 +553,7 @@ struct fixed_power
 template<int N, int D>
 struct fixed_power<N, D, 1, 0>
 {
-    template<typename T> static const T& pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE const T& pow(const T& t)
     {
         return t;
     }
@@ -560,7 +562,7 @@ struct fixed_power<N, D, 1, 0>
 template<int N, int D>
 struct fixed_power<N, D, 2, 0>
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return t * t;
     }
@@ -569,7 +571,7 @@ struct fixed_power<N, D, 2, 0>
 template<int N, int D>
 struct fixed_power<N, D, 3, 0>
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return t * t * t;
     }
@@ -578,7 +580,7 @@ struct fixed_power<N, D, 3, 0>
 template<int N, int D>
 struct fixed_power<N, D, 4, 0>
 {
-    template<typename T> static const T& pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE const T& pow(const T& t)
     {
         T u = t * t;
         return u * u;
@@ -588,7 +590,7 @@ struct fixed_power<N, D, 4, 0>
 template<int N, int D>
 struct fixed_power<N, D, -1, 0>
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return 1 / t;
     }
@@ -597,7 +599,7 @@ struct fixed_power<N, D, -1, 0>
 template<int N, int D>
 struct fixed_power<N, D, -2, 0>
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return 1 / (t * t);
     }
@@ -606,7 +608,7 @@ struct fixed_power<N, D, -2, 0>
 template<int N, int D>
 struct fixed_power<N, D, 0, 0>
 {
-    template<typename T> static T pow(const T& t)
+    template<typename T> static INET_ALWAYS_INLINE T pow(const T& t)
     {
         return 1;
     }
@@ -618,14 +620,14 @@ template<typename U>
 struct scaling_factor
 {
     template<typename T>
-    static T fn() { return 1; }
+    static INET_ALWAYS_INLINE T fn() { return 1; }
 };
 
 template<typename U1, typename U2>
 struct scaling_factor<compose<U1, U2> >
 {
     template<typename T>
-    static T fn()
+    static INET_ALWAYS_INLINE T fn()
     {
         return scaling_factor<U1>::template fn<T>()
                * scaling_factor<U2>::template fn<T>();
@@ -636,7 +638,7 @@ template<typename U, int N, int D>
 struct scaling_factor<scale<U, N, D> >
 {
     template<typename T>
-    static T fn()
+    static INET_ALWAYS_INLINE T fn()
     {
         return scaling_factor<U>::template fn<T>()
                * static_cast<T>(N) / static_cast<T>(D);
@@ -647,7 +649,7 @@ template<typename U, int N, int D>
 struct scaling_factor<intscale<U, N, D> >
 {
     template<typename T>
-    static T fn()
+    static INET_ALWAYS_INLINE T fn()
     {
         auto t = scaling_factor<U>::template fn<T>() * static_cast<T>(N);
         assert(t % static_cast<T>(D) == 0);
@@ -659,7 +661,7 @@ template<typename U, int N, int D>
 struct scaling_factor<pow<U, N, D> >
 {
     template<typename T>
-    static T fn()
+    static INET_ALWAYS_INLINE T fn()
     {
         return fixed_power<N, D>::pow(scaling_factor<U>::template fn<T>());
     }
@@ -669,7 +671,7 @@ template<typename U, int N, int D>
 struct scaling_factor<translate<U, N, D> >
 {
     template<typename T>
-    static T fn()
+    static INET_ALWAYS_INLINE T fn()
     {
         return scaling_factor<U>::template fn<T>();
     }
@@ -684,7 +686,7 @@ struct scaling_factor<translate<U, N, D> >
 
 #define UNIT_DISPLAY_NAME(unit, string) \
     template<> struct output_unit<unit> { \
-        template<typename Stream> static void fn(Stream & os) { os << string; } \
+        template<typename Stream> static INET_ALWAYS_INLINE void fn(Stream & os) { os << string; } \
     };
 
 #define UNITS_DISPLAY_NAME(unit, string) \
@@ -699,7 +701,7 @@ template<typename Unit>
 struct output_unit2
 {
     template<typename Stream>
-    static void fn(Stream& os) { os << "units"; }
+    static INET_ALWAYS_INLINE void fn(Stream& os) { os << "units"; }
 };
 
 } // namespace internal
@@ -709,7 +711,7 @@ template<typename Unit>
 struct output_unit
 {
     template<typename Stream>
-    static void fn(Stream& os) { internal::output_unit2<Unit>::fn(os); }
+    static INET_ALWAYS_INLINE void fn(Stream& os) { internal::output_unit2<Unit>::fn(os); }
 };
 
 UNIT_DISPLAY_NAME(unit, "1");
@@ -720,7 +722,7 @@ template<typename U1, typename U2>
 struct output_unit2<compose<U1, U2> >
 {
     template<typename Stream>
-    static void fn(Stream& os)
+    static INET_ALWAYS_INLINE void fn(Stream& os)
     {
         output_unit<U1>::fn(os);
         os << '.';
@@ -732,7 +734,7 @@ template<typename Unit, int Num, int Den>
 struct output_unit2<pow<Unit, Num, Den> >
 {
     template<typename Stream>
-    static void fn(Stream& os)
+    static INET_ALWAYS_INLINE void fn(Stream& os)
     {
         if (Num != Den) os << '(';
         output_unit<Unit>::fn(os);
@@ -750,7 +752,7 @@ template<typename Unit, int Num, int Den>
 struct output_unit2<translate<Unit, Num, Den> >
 {
     template<typename Stream>
-    static void fn(Stream& os)
+    static INET_ALWAYS_INLINE void fn(Stream& os)
     {
         os << '(';
         output_unit<Unit>::fn(os);
@@ -764,7 +766,7 @@ template<typename Unit, int Num, int Den>
 struct output_unit2<scale<Unit, Num, Den> >
 {
     template<typename Stream>
-    static void fn(Stream& os)
+    static INET_ALWAYS_INLINE void fn(Stream& os)
     {
         os << Den;
         if (Num != 1)
@@ -778,7 +780,7 @@ template<typename Unit, int Num, int Den>
 struct output_unit2<intscale<Unit, Num, Den> >
 {
     template<typename Stream>
-    static void fn(Stream& os)
+    static INET_ALWAYS_INLINE void fn(Stream& os)
     {
         os << Den;
         if (Num != 1)
@@ -1280,19 +1282,19 @@ const value<double, compose<units::m, pow<units::s, -2> > > g(9.80665);
 // Trigonometry
 
 template<typename Value, typename Unit>
-Value sin(const value<Value, Unit>& angle)
+INET_ALWAYS_INLINE Value sin(const value<Value, Unit>& angle)
 {
     return std::sin(value<Value, units::rad>(angle).get());
 }
 
 template<typename Value, typename Unit>
-Value cos(const value<Value, Unit>& angle)
+INET_ALWAYS_INLINE Value cos(const value<Value, Unit>& angle)
 {
     return std::cos(value<Value, units::rad>(angle).get());
 }
 
 template<typename Value, typename Unit>
-Value tan(const value<Value, Unit>& angle)
+INET_ALWAYS_INLINE Value tan(const value<Value, Unit>& angle)
 {
     return std::tan(value<Value, units::rad>(angle).get());
 }
