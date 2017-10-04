@@ -281,12 +281,12 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
         double phi = transmission->getId();
         labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
         const Coord transmissionStart = transmission->getStartPosition();
-        // KLUDGE: to workaround overflow bugs in drawing
+        // KLUDGE: to workaround overflow bugs in drawing, Tkenv?
         double offset = std::fmod(startRadius, signalFigure->getWaveLength());
-        if (startRadius > 10000)
-            startRadius = 10000;
-        if (endRadius > 10000)
-            endRadius = 10000;
+//        if (startRadius > 10000)
+//            startRadius = 10000;
+//        if (endRadius > 10000)
+//            endRadius = 10000;
         switch (signalShape) {
             case SIGNAL_SHAPE_RING: {
                 // determine the rotated 2D canvas points by computing the 2D affine transformation from the 3D transformation of the environment
