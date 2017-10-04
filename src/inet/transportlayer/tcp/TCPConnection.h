@@ -590,7 +590,7 @@ class INET_API TCPConnection : public cObject
      * Note: this default ctor is NOT used to create live connections, only
      * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
      */
-    TCPConnection();
+    TCPConnection(TCP *mod);
 
     /**
      * Destructor.

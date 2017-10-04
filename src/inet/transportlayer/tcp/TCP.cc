@@ -101,8 +101,19 @@ void TCP::initialize(int stage)
         const char *crcModeString = par("crcMode");
         if (!strcmp(crcModeString, "declared"))
             crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed")) {
+        else if (!strcmp(crcModeString, "computed"))
             crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcInsertion.setCrcMode(crcMode);
+    }
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+        cModule *host = findContainingNode(this);
+        NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        registerProtocol(Protocol::tcp, gate("ipOut"));
+        registerProtocol(Protocol::tcp, gate("appOut"));
+        if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
@@ -114,16 +125,6 @@ void TCP::initialize(int stage)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
         }
-        else
-            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-        crcInsertion.setCrcMode(crcMode);
-    }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        cModule *host = findContainingNode(this);
-        NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerProtocol(Protocol::tcp, gate("ipOut"));
-        registerProtocol(Protocol::tcp, gate("appOut"));
     }
 }
 
@@ -141,13 +142,14 @@ bool TCP::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
-            const Protocol *networkProtocol = nullptr;
+            auto networkProtocol = packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
             const std::vector<uint8_t> tcpBytes = packet->peekDataBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
             L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
             L3Address destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
             pseudoHeader->setSrcAddress(srcAddr);
             pseudoHeader->setDestAddress(destAddr);
+            ASSERT(networkProtocol);
             pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
             pseudoHeader->setProtocolId(IP_PROT_TCP);
             pseudoHeader->setPacketLength(tcpBytes.size());
@@ -261,7 +263,7 @@ TCPConnection *TCP::createConnection(int socketId)
 
 void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
-    TCPConnection *tmp = new TCPConnection();
+    TCPConnection *tmp = new TCPConnection(this);
     tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
     delete tmp;
     delete packet;

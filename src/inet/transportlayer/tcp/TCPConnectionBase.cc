@@ -169,7 +169,8 @@ std::string TCPStateVariables::detailedInfo() const
     return out.str();
 }
 
-TCPConnection::TCPConnection()
+TCPConnection::TCPConnection(TCP *mod) :
+        tcpMain(mod)
 {
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on

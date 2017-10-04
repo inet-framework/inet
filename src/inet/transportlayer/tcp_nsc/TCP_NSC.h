@@ -28,7 +28,9 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
 
 namespace inet {
@@ -171,6 +173,9 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     int curAddrCounterM;    // incr, when set curLocalAddr, decr when "felhasznaltam"
     TCP_NSC_Connection *curConnM;    // store current connection in connect/listen command
+
+    TcpCrcInsertion crcInsertion;
+    CrcMode crcMode = (CrcMode)-1;
 
     static const L3Address localInnerIpS;    // local NSC IP addr
     static const L3Address localInnerGwS;    // local NSC gateway IP addr

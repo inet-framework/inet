@@ -96,6 +96,15 @@ void TCP_lwIP::initialize(int stage)
         if (*q != '\0')
             throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcInsertion.setCrcMode(crcMode);
+
         WATCH_MAP(tcpAppConnMapM);
 
         recordStatisticsM = par("recordStats");
@@ -112,6 +121,19 @@ void TCP_lwIP::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerProtocol(Protocol::tcp, gate("ipOut"));
         registerProtocol(Protocol::tcp, gate("appOut"));
+
+        if (crcMode == CRC_COMPUTED) {
+#ifdef WITH_IPv4
+            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            if (ipv4 != nullptr)
+                ipv4->registerHook(0, &crcInsertion);
+#endif
+#ifdef WITH_IPv6
+            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
+            if (ipv6 != nullptr)
+                ipv6->registerHook(0, &crcInsertion);
+#endif
+        }
     }
     else if (stage == INITSTAGE_LAST) {
         isAliveM = true;
@@ -592,9 +614,12 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
         packet->pushHeader(tcpHdr);
     }
 
-    const auto& tcpHdr = packet->peekHeader<TcpHeader>();
-    ASSERT(tcpHdr);
     ASSERT(packet);
+
+    auto tcpHdr = packet->removeHeader<TcpHeader>();
+    tcpHdr->setCrc(0);
+    tcpHdr->setCrcMode(crcMode);
+    packet->insertHeader(tcpHdr);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
              << " from " << srcP << " to " << destP << "\n";

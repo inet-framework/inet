@@ -84,10 +84,9 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
     const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
     bytes->markImmutable();
     auto packet = new Packet(nullptr, bytes);
-    const auto& tcpHdr = packet->popHeader<TcpHeader>();
-    packet->removePoppedHeaders();
+    auto tcpHdr = packet->removeHeader<TcpHeader>();
     int64_t numBytes = packet->getByteLength();
-    packet->pushHeader(tcpHdr);
+    packet->insertHeader(tcpHdr);
 
 //    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
 //    const auto& tcpHdr = payload->Chunk::peek<TcpHeader>(byte(0));

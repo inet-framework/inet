@@ -288,10 +288,7 @@ void TCPConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     auto addresses = pkt->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
-    tcpseg->setCrc(0);
-    // TODO: tcpseg->setCrcMode(tcpMain->crcMode);
-    tcpseg->markImmutable();
-    pkt->pushHeader(tcpseg);
+    pkt->insertHeader(tcpseg);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 
@@ -566,6 +563,8 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
 
     tcpseg->setRstBit(true);
     tcpseg->setSequenceNo(seq);
+    tcpseg->setCrcMode(tcpMain->crcMode);
+    tcpseg->setCrc(0);
 
     Packet *fp = new Packet("RST");
 
@@ -584,6 +583,8 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(seq);
     tcpseg->setAckNo(ack);
+    tcpseg->setCrcMode(tcpMain->crcMode);
+    tcpseg->setCrc(0);
 
     Packet *fp = new Packet("RST+ACK");
 

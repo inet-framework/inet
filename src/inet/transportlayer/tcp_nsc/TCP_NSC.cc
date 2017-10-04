@@ -222,6 +222,15 @@ void TCP_NSC::initialize(int stage)
         if (*q != '\0')
             throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcInsertion.setCrcMode(crcMode);
+
         WATCH_MAP(tcpAppConnMapM);
 
         // load the stack
@@ -239,6 +248,19 @@ void TCP_NSC::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerProtocol(Protocol::tcp, gate("ipOut"));
         registerProtocol(Protocol::tcp, gate("appOut"));
+
+        if (crcMode == CRC_COMPUTED) {
+#ifdef WITH_IPv4
+            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            if (ipv4 != nullptr)
+                ipv4->registerHook(0, &crcInsertion);
+#endif
+#ifdef WITH_IPv6
+            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
+            if (ipv6 != nullptr)
+                ipv6->registerHook(0, &crcInsertion);
+#endif
+        }
     }
     else if (stage == INITSTAGE_LAST) {
         isAliveM = true;
@@ -878,8 +900,12 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 
-    const auto& tcpHdr = fp->peekHeader<TcpHeader>();
-    ASSERT(tcpHdr);
+    auto tcpHdr = fp->removeHeader<TcpHeader>();
+    tcpHdr->setCrc(0);
+    ASSERT(crcMode == CRC_COMPUTED || crcMode == CRC_DECLARED_CORRECT);
+    tcpHdr->setCrcMode(crcMode);
+    fp->insertHeader(tcpHdr);
+
 
     b payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src

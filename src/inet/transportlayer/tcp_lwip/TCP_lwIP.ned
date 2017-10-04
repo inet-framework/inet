@@ -32,6 +32,7 @@ simple TCP_lwIP like ITCP
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
+        string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/wheelbarrow");
 
     gates:
