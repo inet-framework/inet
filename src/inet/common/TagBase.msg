@@ -4,6 +4,7 @@
 
 cplusplus {{
 #include "INETDefs.h"
+#define Register_Tag(TAG_NAME)  template<> inline int getTagIndex<TAG_NAME>() { static int index = -1; if (index == -1) index = getNextTagIndex(); return index; }
 }}
 
 namespace inet;

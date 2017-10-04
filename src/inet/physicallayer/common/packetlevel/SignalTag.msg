@@ -118,3 +118,14 @@ class ErrorRateInd extends SignalTagBase
     double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
     double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
 }
+
+cplusplus{{
+Register_Tag(SignalPowerReq);
+Register_Tag(SignalPowerInd);
+Register_Tag(SignalBandReq);
+Register_Tag(SignalBandInd);
+Register_Tag(SignalBitrateReq);
+Register_Tag(SignalBitrateInd);
+Register_Tag(SnirInd);
+Register_Tag(ErrorRateInd);
+}}

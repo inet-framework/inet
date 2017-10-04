@@ -28,3 +28,8 @@ class InterfaceReq extends InterfaceTagBase
 class InterfaceInd extends InterfaceTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(InterfaceReq);
+Register_Tag(InterfaceInd);
+}}

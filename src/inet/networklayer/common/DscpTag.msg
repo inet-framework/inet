@@ -33,3 +33,8 @@ class DscpReq extends DscpTagBase
 class DscpInd extends DscpTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(DscpReq);
+Register_Tag(DscpInd);
+}}

@@ -31,3 +31,9 @@ class L3AddressReq extends L3AddressTagBase
 class L3AddressInd extends L3AddressTagBase
 {
 }
+
+
+cplusplus{{
+Register_Tag(L3AddressReq);
+Register_Tag(L3AddressInd);
+}}

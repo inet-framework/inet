@@ -16,3 +16,7 @@ class NextHopAddressReq extends TagBase
 {
     L3Address nextHopAddress;      // may be unspecified
 }
+
+cplusplus{{
+Register_Tag(NextHopAddressReq);
+}}

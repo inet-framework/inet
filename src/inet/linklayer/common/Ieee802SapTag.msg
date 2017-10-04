@@ -39,3 +39,8 @@ class Ieee802SapReq extends Ieee802SapTagBase
 class Ieee802SapInd extends Ieee802SapTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(Ieee802SapReq);
+Register_Tag(Ieee802SapInd);
+}}

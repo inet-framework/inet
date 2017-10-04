@@ -28,3 +28,8 @@ class Ieee80211SubtypeReq extends Ieee80211SubtypeTagBase
 class Ieee80211SubtypeInd extends Ieee80211SubtypeTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(Ieee80211SubtypeReq);
+Register_Tag(Ieee80211SubtypeInd);
+}}

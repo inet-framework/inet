@@ -28,3 +28,8 @@ class HopLimitReq extends HopLimitTagBase
 class HopLimitInd extends HopLimitTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(HopLimitReq);
+Register_Tag(HopLimitInd);
+}}

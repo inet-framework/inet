@@ -32,3 +32,8 @@ class IPv6ExtHeaderReq extends IPv6ExtHeaderTagBase
 class IPv6ExtHeaderInd extends IPv6ExtHeaderTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(IPv6ExtHeaderReq);
+Register_Tag(IPv6ExtHeaderInd);
+}}

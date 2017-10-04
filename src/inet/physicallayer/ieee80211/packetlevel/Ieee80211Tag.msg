@@ -82,3 +82,10 @@ class Ieee80211ChannelReq extends Ieee80211ChannelTagBase
 class Ieee80211ChannelInd extends Ieee80211ChannelTagBase
 {
 }
+
+cplusplus {{
+Register_Tag(Ieee80211ModeReq);
+Register_Tag(Ieee80211ModeInd);
+Register_Tag(Ieee80211ChannelReq);
+Register_Tag(Ieee80211ChannelInd);
+}}

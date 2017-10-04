@@ -18,3 +18,6 @@ class FragmentationReq extends TagBase
     bool dontFragment = false;   // "don't fragment" bit
 }
 
+cplusplus{{
+Register_Tag(FragmentationReq);
+}}

@@ -29,3 +29,8 @@ class L4PortReq extends L4PortTagBase
 class L4PortInd extends L4PortTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(L4PortReq);
+Register_Tag(L4PortInd);
+}}

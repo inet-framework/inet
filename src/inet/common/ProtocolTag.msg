@@ -107,3 +107,15 @@ class MacProtocolInd extends ProtocolTagBase
 {
     ChunkPtr macProtocolHeader = nullptr;
 }
+
+cplusplus{{
+Register_Tag(DispatchProtocolReq);
+Register_Tag(DispatchProtocolInd);
+Register_Tag(PacketProtocolTag);
+Register_Tag(TransportProtocolReq);
+Register_Tag(TransportProtocolInd);
+Register_Tag(NetworkProtocolReq);
+Register_Tag(NetworkProtocolInd);
+Register_Tag(MacProtocolReq);
+Register_Tag(MacProtocolInd);
+}}

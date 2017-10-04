@@ -157,10 +157,6 @@ class INET_API InterfaceEntry : public cModule
     virtual void setInterfaceId(int id) { interfaceId = id; }
     virtual void resetInterface();
 
-  protected:
-    virtual std::string getFullPath() const override { return cModule::getFullPath(); }
-    virtual const char *getName() const override { return cModule::getName(); }
-
   public:
     InterfaceEntry();
     virtual ~InterfaceEntry();

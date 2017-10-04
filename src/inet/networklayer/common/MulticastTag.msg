@@ -18,3 +18,6 @@ class MulticastReq extends TagBase
     bool multicastLoop = false;   // if true, sent multicast datagrams will be looped back
 }
 
+cplusplus{{
+Register_Tag(MulticastReq);
+}}

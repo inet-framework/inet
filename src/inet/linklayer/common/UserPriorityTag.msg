@@ -33,3 +33,8 @@ class UserPriorityReq extends UserPriorityTagBase
 class UserPriorityInd extends UserPriorityTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(UserPriorityReq);
+Register_Tag(UserPriorityInd);
+}}

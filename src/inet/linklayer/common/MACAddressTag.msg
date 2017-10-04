@@ -31,3 +31,8 @@ class MacAddressReq extends MacAddressTagBase
 class MacAddressInd extends MacAddressTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(MacAddressReq);
+Register_Tag(MacAddressInd);
+}}

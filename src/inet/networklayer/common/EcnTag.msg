@@ -31,3 +31,8 @@ class EcnReq extends EcnTagBase
 class EcnInd extends EcnTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(EcnReq);
+Register_Tag(EcnInd);
+}}

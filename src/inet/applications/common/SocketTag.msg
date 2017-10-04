@@ -28,3 +28,8 @@ class SocketReq extends SocketTagBase
 class SocketInd extends SocketTagBase
 {
 }
+
+cplusplus{{
+Register_Tag(SocketReq);
+Register_Tag(SocketInd);
+}}
