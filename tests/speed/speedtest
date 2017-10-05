@@ -41,11 +41,11 @@ extraOppRunArgs = ""
 exitCode = 0
 
 if spawn.find_executable("opp_run_release"):
-	executable = "opp_run_release"
+	executable = spawn.find_executable("opp_run_release")
 elif spawn.find_executable("opp_run"):
-	executable = "opp_run"
+	executable = spawn.find_executable("opp_run")
 elif spawn.find_executable("opp_run_dbg"):
-	executable = "opp_run_dbg"
+	executable = spawn.find_executable("opp_run_dbg")
 
 class runtimeTestCaseGenerator():
     fileToSimulationsMap = {}
@@ -259,7 +259,7 @@ class SimulationTestCase(unittest.TestCase):
         return result
 
     def runProgram(self, command, workingdir):
-        process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen("sudo chrt -f 1 " + command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         out = process.communicate()[0]
         out = re.sub("\r", "", out)
         return (process.returncode, out)
