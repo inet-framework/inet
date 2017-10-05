@@ -562,14 +562,11 @@ def ensure_dir(f):
         os.makedirs(f)
 
 if __name__ == "__main__":
-    defaultNumThreads = multiprocessing.cpu_count();
-    if defaultNumThreads >= 6:
-        defaultNumThreads = defaultNumThreads - 1
     parser = argparse.ArgumentParser(description='Run the tests specified in the input files.')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, runtime')
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
-    parser.add_argument('-t', '--threads', type=int, default=defaultNumThreads, help='number of parallel threads (default: number of CPUs, currently '+str(defaultNumThreads)+')')
+    parser.add_argument('-t', '--threads', type=int, default=1, help='number of parallel threads (default: number of CPUs to use)')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs='*', help='extra opp_run arguments without leading "--", you can terminate list with " -- " ')
     parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
@@ -604,7 +601,15 @@ if __name__ == "__main__":
     testSuite.repeat = args.repeat
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
+
+    disabledCPUs = range(args.threads, multiprocessing.cpu_count())
+    for cpu in disabledCPUs:
+        os.system("echo 0 | sudo tee /sys/devices/system/cpu/cpu%d/online > /dev/null" % (cpu))
+
     testRunner.run(testSuite)
+
+    for cpu in disabledCPUs:
+        os.system("echo 1 | sudo tee /sys/devices/system/cpu/cpu%d/online > /dev/null" % (cpu))
 
     print
     generator.writeUpdatedCSVFiles()
