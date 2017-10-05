@@ -28,8 +28,6 @@
 
 namespace inet {
 
-using namespace inet::physicallayer;
-
 class INET_API CsmaCaMac : public MACProtocolBase
 {
   protected:
@@ -69,8 +67,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
         WAITSIFS,
     };
 
-    IRadio *radio = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    physicallayer::IRadio *radio = nullptr;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     cFSM fsm;
 

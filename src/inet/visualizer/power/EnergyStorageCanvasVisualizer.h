@@ -35,7 +35,7 @@ class INET_API EnergyStorageCanvasVisualizer : public EnergyStorageVisualizerBas
         BarFigure *figure = nullptr;
 
       public:
-        EnergyStorageCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BarFigure *figure, const IEnergyStorage *energyStorage);
+        EnergyStorageCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BarFigure *figure, const power::IEnergyStorage *energyStorage);
         virtual ~EnergyStorageCanvasVisualization();
     };
 
@@ -47,7 +47,7 @@ class INET_API EnergyStorageCanvasVisualizer : public EnergyStorageVisualizerBas
   protected:
     virtual void initialize(int stage) override;
 
-    virtual EnergyStorageVisualization *createEnergyStorageVisualization(const IEnergyStorage *energyStorage) const override;
+    virtual EnergyStorageVisualization *createEnergyStorageVisualization(const power::IEnergyStorage *energyStorage) const override;
     virtual void addEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) override;
     virtual void removeEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) override;
     virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override;

@@ -75,11 +75,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The physical environment model or nullptr if unused.
      */
-    const IPhysicalEnvironment *physicalEnvironment;
+    const physicalenvironment::IPhysicalEnvironment *physicalEnvironment;
     /**
      * The physical material of the medium is never nullptr.
      */
-    const IMaterial *material;
+    const physicalenvironment::IMaterial *material;
     /**
      * The radio medium doesn't send signals to a radio if it's outside
      * the range provided by the selected range filter.
@@ -318,13 +318,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
 
-    virtual const IMaterial *getMaterial() const override { return material; }
+    virtual const physicalenvironment::IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }
     virtual const IPathLoss *getPathLoss() const override { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const override { return obstacleLoss; }
     virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
-    virtual const IPhysicalEnvironment *getPhysicalEnvironment() const override { return physicalEnvironment; }
+    virtual const physicalenvironment::IPhysicalEnvironment *getPhysicalEnvironment() const override { return physicalEnvironment; }
     virtual const IMediumLimitCache *getMediumLimitCache() const override { return mediumLimitCache; }
     virtual const INeighborCache *getNeighborCache() const override { return neighborCache; }
     virtual const ICommunicationCache *getCommunicationCache() const override { return communicationCache; }

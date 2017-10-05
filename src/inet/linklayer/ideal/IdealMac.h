@@ -27,8 +27,6 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 class IdealMacHeader;
 class InterfaceEntry;
 class IPassiveQueue;
@@ -49,8 +47,8 @@ class INET_API IdealMac : public MACProtocolBase
     bool fullDuplex = false;
     bool useAck = true;
 
-    IRadio *radio = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    physicallayer::IRadio *radio = nullptr;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
     IPassiveQueue *queueModule = nullptr;
 
     int outStandingRequests = 0;

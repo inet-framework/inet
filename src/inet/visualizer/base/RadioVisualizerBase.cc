@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 RadioVisualizerBase::RadioVisualization::RadioVisualization(const int radioModuleId) :
     radioModuleId(radioModuleId)
 {

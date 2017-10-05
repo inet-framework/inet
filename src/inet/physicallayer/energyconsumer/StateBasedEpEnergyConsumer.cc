@@ -22,6 +22,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::power;
+
 Define_Module(StateBasedEpEnergyConsumer);
 
 void StateBasedEpEnergyConsumer::initialize(int stage)

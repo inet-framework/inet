@@ -29,6 +29,8 @@ namespace inet {
 
 namespace serializer {
 
+using namespace inet::tcp;
+
 Register_Serializer(TcpHeader, TcpHeaderSerializer);
 
 void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const

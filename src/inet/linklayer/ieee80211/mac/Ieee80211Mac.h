@@ -34,8 +34,6 @@
 namespace inet {
 namespace ieee80211 {
 
-using namespace physicallayer;
-
 class IContention;
 class IRx;
 class Ieee80211MacHeader;
@@ -55,9 +53,9 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     IRx *rx = nullptr;
     ITx *tx = nullptr;
-    IRadio *radio = nullptr;
-    const Ieee80211ModeSet *modeSet = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TransmissionState::TRANSMISSION_STATE_UNDEFINED;
+    physicallayer::IRadio *radio = nullptr;
+    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TransmissionState::TRANSMISSION_STATE_UNDEFINED;
 
     Dcf *dcf = nullptr;
     Pcf *pcf = nullptr;
@@ -75,7 +73,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void initialize(int) override;
 
     void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
-    void configureRadioMode(IRadio::RadioMode radioMode);
+    void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual const MACAddress& isInterfaceRegistered();
 

@@ -23,8 +23,6 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 /**
  * @brief Implementation of B-MAC (called also Berkeley MAC, Low Power
  * Listening or LPL).
@@ -99,8 +97,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     MacQueue macQueue;
 
     /** @brief The radio. */
-    IRadio *radio = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    physicallayer::IRadio *radio = nullptr;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     /** @name Different tracked statistics.*/
     /*@{*/

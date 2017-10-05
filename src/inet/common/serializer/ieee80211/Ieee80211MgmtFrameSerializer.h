@@ -25,8 +25,6 @@ namespace inet {
 
 namespace serializer {
 
-using namespace ieee80211;
-
 /**
  * Converts between Ieee80211MgmtFrame and binary network byte order IEEE 802.11 mgmt frame.
  */

@@ -25,15 +25,13 @@ namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::physicalenvironment;
-
 class INET_API ITracingObstacleLoss : public IObstacleLoss
 {
   public:
     class ObstaclePenetratedEvent : public cObject
     {
       public:
-        const IPhysicalObject *object;
+        const physicalenvironment::IPhysicalObject *object;
         const Coord intersection1;
         const Coord intersection2;
         const Coord normal1;
@@ -41,7 +39,7 @@ class INET_API ITracingObstacleLoss : public IObstacleLoss
         const double loss;
 
       public:
-        ObstaclePenetratedEvent(const IPhysicalObject *object, Coord intersection1, Coord intersection2, Coord normal1, Coord normal2, double loss);
+        ObstaclePenetratedEvent(const physicalenvironment::IPhysicalObject *object, Coord intersection1, Coord intersection2, Coord normal1, Coord normal2, double loss);
     };
 
   public:

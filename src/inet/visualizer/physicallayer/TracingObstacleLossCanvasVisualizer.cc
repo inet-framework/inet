@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 Define_Module(TracingObstacleLossCanvasVisualizer);
 
 TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2) :

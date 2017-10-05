@@ -40,9 +40,9 @@ class INET_API Rx : public cSimpleModule, public IRx
 
         MACAddress address;
         cMessage *endNavTimer = nullptr;
-        IRadio::ReceptionState receptionState = IRadio::RECEPTION_STATE_UNDEFINED;
-        IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-        IRadioSignal::SignalPart receivedPart = IRadioSignal::SIGNAL_PART_NONE;
+        physicallayer::IRadio::ReceptionState receptionState = physicallayer::IRadio::RECEPTION_STATE_UNDEFINED;
+        physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
+        physicallayer::IRadioSignal::SignalPart receivedPart = physicallayer::IRadioSignal::SIGNAL_PART_NONE;
         bool mediumFree = true;  // cached state
 
     protected:
@@ -60,9 +60,9 @@ class INET_API Rx : public cSimpleModule, public IRx
 
         virtual bool isReceptionInProgress() const override;
         virtual bool isMediumFree() const override { return mediumFree; }
-        virtual void receptionStateChanged(IRadio::ReceptionState newReceptionState) override;
-        virtual void transmissionStateChanged(IRadio::TransmissionState transmissionState) override;
-        virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) override;
+        virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState newReceptionState) override;
+        virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
+        virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
         virtual bool lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
         virtual void frameTransmitted(simtime_t durationField) override;
         virtual void registerContention(IContention *contention) override;

@@ -43,29 +43,29 @@ class INET_API QoSRateSelection : public IQoSRateSelection, public ModeSetListen
     protected:
         IRateControl *dataOrMgmtRateControl = nullptr;
 
-        const Ieee80211ModeSet *modeSet = nullptr;
-        std::map<MACAddress, const IIeee80211Mode *> lastTransmittedFrameMode;
+        const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+        std::map<MACAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
         // originator frame modes
-        const IIeee80211Mode *multicastFrameMode = nullptr;
-        const IIeee80211Mode *fastestMandatoryMode = nullptr;
+        const physicallayer::IIeee80211Mode *multicastFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
 
-        const IIeee80211Mode *dataFrameMode = nullptr;
-        const IIeee80211Mode *mgmtFrameMode = nullptr;
-        const IIeee80211Mode *controlFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *dataFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *mgmtFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *controlFrameMode = nullptr;
 
-        const IIeee80211Mode *responseAckFrameMode = nullptr;
-        const IIeee80211Mode *responseCtsFrameMode = nullptr;
-        const IIeee80211Mode *responseBlockAckFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *responseAckFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *responseCtsFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *responseBlockAckFrameMode = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
         virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;
 
-        virtual const IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
-        virtual const IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
-        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+        virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+        virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
+        virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
         virtual bool isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
 
@@ -75,11 +75,11 @@ class INET_API QoSRateSelection : public IQoSRateSelection, public ModeSetListen
         // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
         // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
         // is used to initiate a TXOP.
-        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
-        virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) override;
+        virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
+        virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
+        virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) override;
 
-        virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override;
+        virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override;
 
         virtual void frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 };

@@ -22,6 +22,8 @@ namespace inet {
 
 namespace serializer {
 
+using namespace ieee80211;
+
 Register_Serializer(Ieee80211MacHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataOrMgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataHeader, Ieee80211MacHeaderSerializer);

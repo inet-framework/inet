@@ -26,8 +26,6 @@
 namespace inet {
 namespace ieee80211 {
 
-using namespace inet::physicallayer;  //TODO Khmm
-
 /**
  * Abstract interface for Rx processes. The Rx process checks received frames for
  * errors, manages the NAV, and notifies Tx processes about the channel state
@@ -53,9 +51,9 @@ class INET_API IRx
         virtual void registerContention(IContention *contention) = 0;
 
         // events
-        virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;
-        virtual void transmissionStateChanged(IRadio::TransmissionState state) = 0;
-        virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) = 0;
+        virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
+        virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
+        virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
         virtual bool lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
 };
 

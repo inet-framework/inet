@@ -23,6 +23,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(TwoRayGroundReflection);
 
 void TwoRayGroundReflection::initialize(int stage)

@@ -40,8 +40,6 @@ namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::physicalenvironment;
-
 /**
  * This interface represents the whole radio medium. It keeps track of all radio
  * signal sources, all radio signal transmissions, and all radio signal receptions.
@@ -68,7 +66,7 @@ class INET_API IRadioMedium : public IPrintableObject
     /**
      * Returns the material of the radio medium. This function never returns nullptr.
      */
-    virtual const IMaterial *getMaterial() const = 0;
+    virtual const physicalenvironment::IMaterial *getMaterial() const = 0;
 
     /**
      * Returns the radio signal propagation model of this radio medium. This
@@ -104,7 +102,7 @@ class INET_API IRadioMedium : public IPrintableObject
      * Returns the physical environment model of this radio medium. This function
      * may return nullptr if there's no physical environment model.
      */
-    virtual const IPhysicalEnvironment *getPhysicalEnvironment() const = 0;
+    virtual const physicalenvironment::IPhysicalEnvironment *getPhysicalEnvironment() const = 0;
 
     virtual const IMediumLimitCache *getMediumLimitCache() const = 0;
     virtual const INeighborCache *getNeighborCache() const = 0;

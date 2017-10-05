@@ -23,6 +23,8 @@ namespace inet {
 
 namespace serializer {
 
+using namespace ieee80211;
+
 Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211MgmtFrameSerializer);

@@ -30,8 +30,6 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicallayer;
-
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
@@ -45,7 +43,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
   protected:
     /** @name Parameters */
     //@{
-    IRadioMedium *radioMedium = nullptr;
+    physicallayer::IRadioMedium *radioMedium = nullptr;
     NetworkNodeFilter networkNodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
@@ -83,21 +81,21 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
 
-    virtual bool isSignalPropagationInProgress(const ITransmission *transmission) const;
-    virtual bool isSignalTransmissionInProgress(const ITransmission *transmission) const;
+    virtual bool isSignalPropagationInProgress(const physicallayer::ITransmission *transmission) const;
+    virtual bool isSignalTransmissionInProgress(const physicallayer::ITransmission *transmission) const;
 
-    virtual bool matchesTransmission(const ITransmission *transmission) const;
+    virtual bool matchesTransmission(const physicallayer::ITransmission *transmission) const;
 
-    virtual void radioAdded(const IRadio *radio) = 0;
-    virtual void radioRemoved(const IRadio *radio) = 0;
+    virtual void radioAdded(const physicallayer::IRadio *radio) = 0;
+    virtual void radioRemoved(const physicallayer::IRadio *radio) = 0;
 
-    virtual void transmissionAdded(const ITransmission *transmission) = 0;
-    virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+    virtual void transmissionAdded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void transmissionRemoved(const physicallayer::ITransmission *transmission) = 0;
 
-    virtual void transmissionStarted(const ITransmission *transmission) = 0;
-    virtual void transmissionEnded(const ITransmission *transmission) = 0;
-    virtual void receptionStarted(const IReception *reception) = 0;
-    virtual void receptionEnded(const IReception *reception) = 0;
+    virtual void transmissionStarted(const physicallayer::ITransmission *transmission) = 0;
+    virtual void transmissionEnded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void receptionStarted(const physicallayer::IReception *reception) = 0;
+    virtual void receptionEnded(const physicallayer::IReception *reception) = 0;
 
   public:
     virtual ~MediumVisualizerBase();

@@ -36,6 +36,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(PhysicalEnvironmentOsgVisualizer);
 
 #ifdef WITH_OSG

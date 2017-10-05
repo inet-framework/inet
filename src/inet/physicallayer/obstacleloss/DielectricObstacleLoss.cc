@@ -25,6 +25,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(DielectricObstacleLoss);
 
 DielectricObstacleLoss::DielectricObstacleLoss() :

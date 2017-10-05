@@ -50,7 +50,7 @@ class INET_API OnoeRateControl : public RateControlBase
         virtual void updateDisplayString();
 
     public:
-        virtual const IIeee80211Mode *getRate() override;
+        virtual const physicallayer::IIeee80211Mode *getRate() override;
         virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
         virtual void frameReceived(Packet *frame) override;
 };

@@ -34,8 +34,6 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 /**
  * @brief Generic CSMA Mac-Layer.
  *
@@ -65,7 +63,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
         , macState(IDLE_1)
         , status(STATUS_OK)
         , radio(nullptr)
-        , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
+        , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , sifs()
         , macAckWaitDuration()
         , headerLength(0)
@@ -214,8 +212,8 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     MACAddress address;
 
     /** @brief The radio. */
-    IRadio *radio;
-    IRadio::TransmissionState transmissionState;
+    physicallayer::IRadio *radio;
+    physicallayer::IRadio::TransmissionState transmissionState;
 
     /** @brief Maximum time between a packet and its ACK
      *

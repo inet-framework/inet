@@ -49,7 +49,7 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual RadioVisualization *createRadioVisualization(const IRadio *radio) const override;
+    virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const override;
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override;

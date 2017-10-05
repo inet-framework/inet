@@ -27,8 +27,6 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicallayer;
-
 class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
@@ -69,7 +67,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual RadioVisualization *createRadioVisualization(const IRadio *radio) const = 0;
+    virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const = 0;
     virtual const RadioVisualization *getRadioVisualization(int radioModuleId);
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization);
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization);

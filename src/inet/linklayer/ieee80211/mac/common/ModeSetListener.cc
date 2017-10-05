@@ -32,7 +32,7 @@ void ModeSetListener::receiveSignal(cComponent* source, simsignal_t signalID, cO
 {
     Enter_Method("receiveModeSetChangeNotification");
     if (signalID == NF_MODESET_CHANGED)
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet*>(obj);
 }
 
 } /* namespace ieee80211 */

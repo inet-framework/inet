@@ -23,6 +23,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(Dcaf);
 
 void Dcaf::initialize(int stage)

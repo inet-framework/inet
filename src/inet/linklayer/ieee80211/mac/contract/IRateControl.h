@@ -26,8 +26,6 @@
 namespace inet {
 namespace ieee80211 {
 
-using namespace physicallayer;
-
 /**
  * Abstract interface for auto rate control algorithms. Examples of rate
  * control algorithms are ARF, AARF, Onoe and Minstrel.
@@ -37,7 +35,7 @@ class INET_API IRateControl
     public:
         virtual ~IRateControl() { }
 
-        virtual const IIeee80211Mode *getRate() = 0;
+        virtual const physicallayer::IIeee80211Mode *getRate() = 0;
         virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
         virtual void frameReceived(Packet *frame) = 0;
 };

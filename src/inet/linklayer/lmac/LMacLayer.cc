@@ -24,6 +24,8 @@
 
 namespace inet {
 
+using namespace physicallayer;
+
 Define_Module(LMacLayer)
 
 #define myId    (getParentModule()->getParentModule()->getIndex())

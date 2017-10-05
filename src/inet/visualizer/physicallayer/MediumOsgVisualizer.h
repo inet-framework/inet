@@ -69,46 +69,46 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 
     virtual void setAnimationSpeed() const;
 
-    virtual osg::Node *getRadioOsgNode(const IRadio *radio) const;
-    virtual void setRadioOsgNode(const IRadio *radio, osg::Node *node);
-    virtual osg::Node *removeRadioOsgNode(const IRadio *radio);
+    virtual osg::Node *getRadioOsgNode(const physicallayer::IRadio *radio) const;
+    virtual void setRadioOsgNode(const physicallayer::IRadio *radio, osg::Node *node);
+    virtual osg::Node *removeRadioOsgNode(const physicallayer::IRadio *radio);
 
-    virtual osg::Node *getSignalOsgNode(const ITransmission *transmission) const;
-    virtual void setSignalOsgNode(const ITransmission *transmission, osg::Node *node);
-    virtual osg::Node *removeSignalOsgNode(const ITransmission *transmission);
+    virtual osg::Node *getSignalOsgNode(const physicallayer::ITransmission *transmission) const;
+    virtual void setSignalOsgNode(const physicallayer::ITransmission *transmission, osg::Node *node);
+    virtual osg::Node *removeSignalOsgNode(const physicallayer::ITransmission *transmission);
 
-    virtual osg::Node *createSignalNode(const ITransmission *transmission) const;
-    virtual osg::Node *createSphereSignalNode(const ITransmission *transmission) const;
-    virtual osg::Node *createRingSignalNode(const ITransmission *transmission) const;
-    virtual void refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const;
-    virtual void refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const;
+    virtual osg::Node *createSignalNode(const physicallayer::ITransmission *transmission) const;
+    virtual osg::Node *createSphereSignalNode(const physicallayer::ITransmission *transmission) const;
+    virtual osg::Node *createRingSignalNode(const physicallayer::ITransmission *transmission) const;
+    virtual void refreshSphereTransmissionNode(const physicallayer::ITransmission *transmission, osg::Node *node) const;
+    virtual void refreshRingTransmissionNode(const physicallayer::ITransmission *transmission, osg::Node *node) const;
 
-    virtual void radioAdded(const IRadio *radio) override;
-    virtual void radioRemoved(const IRadio *radio) override;
+    virtual void radioAdded(const physicallayer::IRadio *radio) override;
+    virtual void radioRemoved(const physicallayer::IRadio *radio) override;
 
-    virtual void transmissionAdded(const ITransmission *transmission) override;
-    virtual void transmissionRemoved(const ITransmission *transmission) override;
+    virtual void transmissionAdded(const physicallayer::ITransmission *transmission) override;
+    virtual void transmissionRemoved(const physicallayer::ITransmission *transmission) override;
 
-    virtual void transmissionStarted(const ITransmission *transmission) override;
-    virtual void transmissionEnded(const ITransmission *transmission) override;
-    virtual void receptionStarted(const IReception *reception) override;
-    virtual void receptionEnded(const IReception *reception) override;
+    virtual void transmissionStarted(const physicallayer::ITransmission *transmission) override;
+    virtual void transmissionEnded(const physicallayer::ITransmission *transmission) override;
+    virtual void receptionStarted(const physicallayer::IReception *reception) override;
+    virtual void receptionEnded(const physicallayer::IReception *reception) override;
 
 #else // ifdef WITH_OSG
 
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual void radioAdded(const IRadio *radio) override {}
-    virtual void radioRemoved(const IRadio *radio) override {}
+    virtual void radioAdded(const physicallayer::IRadio *radio) override {}
+    virtual void radioRemoved(const physicallayer::IRadio *radio) override {}
 
-    virtual void transmissionAdded(const ITransmission *transmission) override {}
-    virtual void transmissionRemoved(const ITransmission *transmission) override {}
+    virtual void transmissionAdded(const physicallayer::ITransmission *transmission) override {}
+    virtual void transmissionRemoved(const physicallayer::ITransmission *transmission) override {}
 
-    virtual void transmissionStarted(const ITransmission *transmission) override {}
-    virtual void transmissionEnded(const ITransmission *transmission) override {}
-    virtual void receptionStarted(const IReception *reception) override {}
-    virtual void receptionEnded(const IReception *reception) override {}
+    virtual void transmissionStarted(const physicallayer::ITransmission *transmission) override {}
+    virtual void transmissionEnded(const physicallayer::ITransmission *transmission) override {}
+    virtual void receptionStarted(const physicallayer::IReception *reception) override {}
+    virtual void receptionEnded(const physicallayer::IReception *reception) override {}
 
 #endif // ifdef WITH_OSG
 };

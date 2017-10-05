@@ -33,6 +33,8 @@
 
 namespace inet {
 
+using namespace inet::physicallayer;
+
 Define_Module(IdealMac);
 
 IdealMac::IdealMac()

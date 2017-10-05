@@ -25,15 +25,13 @@ namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::physicalenvironment;
-
 /**
  * This class implements the two ray ground radio path loss model.
  */
 class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 {
   protected:
-    const IPhysicalEnvironment *physicalEnvironment = nullptr;
+    const physicalenvironment::IPhysicalEnvironment *physicalEnvironment = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

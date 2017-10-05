@@ -25,8 +25,6 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicalenvironment;
-
 class INET_API PhysicalEnvironmentOsgVisualizer : public PhysicalEnvironmentVisualizerBase
 {
 #ifdef WITH_OSG

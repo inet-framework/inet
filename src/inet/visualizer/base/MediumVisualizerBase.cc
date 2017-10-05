@@ -23,6 +23,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 MediumVisualizerBase::~MediumVisualizerBase()
 {
     // NOTE: lookup the medium module again because it may have been deleted first

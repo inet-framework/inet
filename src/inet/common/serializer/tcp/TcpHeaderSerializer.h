@@ -23,16 +23,14 @@ namespace inet {
 
 namespace serializer {
 
-using namespace inet::tcp;
-
 /**
  * Converts between TcpHeader and binary (network byte order) Tcp header.
  */
 class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeOption(MemoryOutputStream& stream, const TCPOption *option) const;
-    virtual TCPOption *deserializeOption(MemoryInputStream& stream) const;
+    virtual void serializeOption(MemoryOutputStream& stream, const inet::tcp::TCPOption *option) const;
+    virtual inet::tcp::TCPOption *deserializeOption(MemoryInputStream& stream) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;

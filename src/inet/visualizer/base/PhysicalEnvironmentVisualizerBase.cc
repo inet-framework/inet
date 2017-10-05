@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicalenvironment;
+
 void PhysicalEnvironmentVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);

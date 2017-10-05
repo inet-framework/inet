@@ -20,6 +20,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(AARFRateControl);
 
 void AARFRateControl::initialize(int stage)

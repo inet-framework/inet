@@ -23,6 +23,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(Edcaf);
 
 inline double fallback(double a, double b) {return a!=-1 ? a : b;}

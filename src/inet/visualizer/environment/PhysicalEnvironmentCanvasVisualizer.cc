@@ -27,6 +27,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(PhysicalEnvironmentCanvasVisualizer);
 
 void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)

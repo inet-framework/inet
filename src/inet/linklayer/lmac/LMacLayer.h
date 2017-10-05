@@ -20,8 +20,6 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 /**
  * @brief Implementation of L-MAC (Lightweight Medium Access Protocol for
  * Wireless Sensor Networks [van Hoesel 04] ).
@@ -85,7 +83,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
         , reservedMobileSlots(0)
         , macQueue()
         , radio(nullptr)
-        , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
+        , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , queueLength(0)
         , wakeup(nullptr)
         , timeout(nullptr)
@@ -195,8 +193,8 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     MacQueue macQueue;
 
     /** @brief The radio. */
-    IRadio *radio;
-    IRadio::TransmissionState transmissionState;
+    physicallayer::IRadio *radio;
+    physicallayer::IRadio::TransmissionState transmissionState;
 
     /** @brief length of the queue*/
     unsigned queueLength;

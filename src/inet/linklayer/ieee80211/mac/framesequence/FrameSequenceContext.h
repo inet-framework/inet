@@ -64,7 +64,7 @@ class INET_API FrameSequenceContext
 {
     protected:
         MACAddress address = MACAddress::UNSPECIFIED_ADDRESS;
-        Ieee80211ModeSet *modeSet = nullptr;
+        physicallayer::Ieee80211ModeSet *modeSet = nullptr;
         InProgressFrames *inProgressFrames = nullptr;
         std::vector<IFrameSequenceStep *> steps;
 
@@ -75,7 +75,7 @@ class INET_API FrameSequenceContext
         QoSContext *qosContext = nullptr;
 
     public:
-        FrameSequenceContext(MACAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
+        FrameSequenceContext(MACAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
         virtual ~FrameSequenceContext();
 
         virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }

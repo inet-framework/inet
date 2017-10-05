@@ -26,6 +26,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(RateSelection);
 
 void RateSelection::initialize(int stage)

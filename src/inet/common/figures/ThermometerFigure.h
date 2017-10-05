@@ -22,8 +22,7 @@
 #include "inet/common/INETMath.h"
 #include "IIndicatorFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-//namespace inet {
+namespace inet {
 
 class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
@@ -91,7 +90,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
 
 };
 
-// } // namespace inet
+} // namespace inet
 
 #endif // ifndef __INET_ThermoMeterFigure_H
 

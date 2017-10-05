@@ -22,6 +22,8 @@
 
 namespace inet {
 
+using namespace physicalenvironment;
+
 bool BVHTree::isLeaf() const
 {
     return objects.size() != 0;

@@ -19,8 +19,7 @@
 #include "CounterFigure.h"
 #include "inet/common/INETUtils.h"
 
-//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
-using namespace inet;
+namespace inet {
 
 Register_Figure("counter", CounterFigure);
 
@@ -455,5 +454,5 @@ void CounterFigure::refresh()
     }
 }
 
-// } // namespace inet
+} // namespace inet
 

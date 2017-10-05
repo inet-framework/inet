@@ -26,6 +26,8 @@
 
 namespace inet {
 
+using namespace inet::physicallayer;
+
 Define_Module(CsmaCaMac);
 
 static int getUPBasedFramePriority(cObject *obj)

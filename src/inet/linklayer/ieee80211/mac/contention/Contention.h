@@ -26,8 +26,6 @@
 namespace inet {
 namespace ieee80211 {
 
-using namespace inet::physicallayer;
-
 /**
  * The default implementation of IContention.
  */

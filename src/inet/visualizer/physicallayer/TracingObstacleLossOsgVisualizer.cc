@@ -30,6 +30,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 Define_Module(TracingObstacleLossOsgVisualizer);
 
 #ifdef WITH_OSG

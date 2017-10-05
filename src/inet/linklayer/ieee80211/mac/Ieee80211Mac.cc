@@ -35,6 +35,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(Ieee80211Mac);
 
 simsignal_t Ieee80211Mac::stateSignal = SIMSIGNAL_NULL;

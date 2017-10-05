@@ -18,9 +18,7 @@
 #include "PlotFigure.h"
 #include "InstrumentUtil.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-using namespace inet;
-// namespace inet {
+namespace inet {
 
 Register_Figure("plot", PlotFigure);
 
@@ -471,4 +469,5 @@ void PlotFigure::refresh()
         values.erase(++it, values.end());
 }
 
-// } // namespace inet
+} // namespace inet
+

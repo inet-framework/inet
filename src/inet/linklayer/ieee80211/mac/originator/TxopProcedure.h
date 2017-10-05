@@ -45,7 +45,7 @@ class INET_API TxopProcedure : public ModeSetListener
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual s getTxopLimit(const IIeee80211Mode *mode, AccessCategory ac);
+        virtual s getTxopLimit(const physicallayer::IIeee80211Mode *mode, AccessCategory ac);
         virtual ProtectionMechanism selectProtectionMechanism(AccessCategory ac) const;
 
     public:

@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 Define_Module(RadioOsgVisualizer);
 
 #ifdef WITH_OSG

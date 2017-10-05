@@ -41,6 +41,8 @@
 
 namespace inet {
 
+using namespace physicallayer;
+
 Define_Module(CSMA);
 
 void CSMA::initialize(int stage)

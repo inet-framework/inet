@@ -24,6 +24,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::power;
+
 EnergyStorageVisualizerBase::EnergyStorageVisualization::EnergyStorageVisualization(const IEnergyStorage *energyStorage) :
     energyStorage(energyStorage)
 {

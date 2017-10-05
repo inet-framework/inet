@@ -26,8 +26,6 @@ namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::power;
-
 /**
  * This is a simple radio energy consumer model. The current consumption is
  * determined by the radio mode, the transmitter state and the receiver state
@@ -35,7 +33,7 @@ using namespace inet::power;
  *
  * @author Levente Meszaros
  */
-class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual ICcEnergyConsumer, public cListener
+class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual power::ICcEnergyConsumer, public cListener
 {
   protected:
     // parameters
@@ -58,7 +56,7 @@ class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual
 
     // environment
     IRadio *radio = nullptr;
-    ICcEnergySource *energySource = nullptr;
+    power::ICcEnergySource *energySource = nullptr;
 
     // state
     A currentConsumption = A(NaN);
@@ -69,7 +67,7 @@ class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual
     virtual A computeCurrentConsumption() const;
 
   public:
-    virtual IEnergySource *getEnergySource() const override { return energySource; }
+    virtual power::IEnergySource *getEnergySource() const override { return energySource; }
     virtual A getCurrentConsumption() const override { return currentConsumption; }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;

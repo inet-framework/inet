@@ -21,6 +21,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 simsignal_t RateControlBase::datarateSignal = cComponent::registerSignal("datarate");
 
 void RateControlBase::initialize(int stage)

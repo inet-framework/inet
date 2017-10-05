@@ -26,6 +26,8 @@
 
 namespace inet {
 
+using namespace physicallayer;
+
 Define_Module(BMacLayer);
 
 void BMacLayer::initialize(int stage)
