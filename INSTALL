@@ -7,6 +7,10 @@ PREREQUISITES
 
 You should have a working OMNeT++ installation.
 
+NOTE TO GIT USERS: If you are wondering why the showcases/ and tutorials/
+directories are empty, jump forward to the 'Note to Git users' section
+of this file.
+
 General
 -------
 1. Make sure your OMNeT++ installation works OK (e.g. try running the samples)
@@ -81,7 +85,7 @@ change tracking.
 
 To further ease the merging/rebasing operation the .cproject .nedfolders .oppbuildspec .project
 files are configured to be resolved using the 'ours' merge strategy.  Depending on your 
-GIT version you may need to enable the 'ours' merge driver for the project:
+GIT version, you may need to enable the 'ours' merge driver for the project:
 
     $ git config merge.ours.driver true
 
@@ -89,7 +93,7 @@ VoIPTool feature
 ================
 
 VoIPTool has only been tested on Linux. This does not mean it won't work on other
-systems, but your milage may vary on getting it up and running.
+systems, but your mileage may vary on getting it up and running.
 
 
 PREREQUISITES.

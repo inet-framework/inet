@@ -264,13 +264,7 @@ const char *Contention::getEventName(EventType event)
 
 void Contention::updateDisplayString(simtime_t expectedChannelAccess)
 {
-    std::string displayString(fsm.getStateName());
-    if (expectedChannelAccess != -1) {
-        std::ostringstream strs;
-        strs << expectedChannelAccess;
-        displayString += ("\nExp. access: " + strs.str());
-    }
-    getDisplayString().setTagArg("t", 0, displayString.c_str());
+    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 } // namespace ieee80211

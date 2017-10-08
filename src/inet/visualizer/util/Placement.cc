@@ -15,48 +15,48 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 
 namespace visualizer {
 
-Displacement parseDisplacement(const char *s)
+Placement parsePlacement(const char *s)
 {
-    int displacement = DISPLACEMENT_NONE;
+    int placement = PLACEMENT_NONE;
     cStringTokenizer tokenizer(s);
     while (tokenizer.hasMoreTokens()) {
         auto token = tokenizer.nextToken();
         if (!strcmp("left", token))
-            displacement |= DISPLACEMENT_TOP_LEFT | DISPLACEMENT_CENTER_LEFT | DISPLACEMENT_BOTTOM_LEFT;
+            placement |= PLACEMENT_TOP_LEFT | PLACEMENT_CENTER_LEFT | PLACEMENT_BOTTOM_LEFT;
         else if (!strcmp("right", token))
-            displacement |= DISPLACEMENT_TOP_RIGHT | DISPLACEMENT_CENTER_RIGHT | DISPLACEMENT_BOTTOM_RIGHT;
+            placement |= PLACEMENT_TOP_RIGHT | PLACEMENT_CENTER_RIGHT | PLACEMENT_BOTTOM_RIGHT;
         else if (!strcmp("top", token))
-            displacement |= DISPLACEMENT_TOP_LEFT | DISPLACEMENT_TOP_CENTER | DISPLACEMENT_TOP_RIGHT;
+            placement |= PLACEMENT_TOP_LEFT | PLACEMENT_TOP_CENTER | PLACEMENT_TOP_RIGHT;
         else if (!strcmp("bottom", token))
-            displacement |= DISPLACEMENT_BOTTOM_LEFT | DISPLACEMENT_BOTTOM_CENTER | DISPLACEMENT_BOTTOM_RIGHT;
+            placement |= PLACEMENT_BOTTOM_LEFT | PLACEMENT_BOTTOM_CENTER | PLACEMENT_BOTTOM_RIGHT;
         else if (!strcmp("topLeft", token))
-            displacement |= DISPLACEMENT_TOP_LEFT;
+            placement |= PLACEMENT_TOP_LEFT;
         else if (!strcmp("topCenter", token))
-            displacement |= DISPLACEMENT_TOP_CENTER;
+            placement |= PLACEMENT_TOP_CENTER;
         else if (!strcmp("topRight", token))
-            displacement |= DISPLACEMENT_TOP_RIGHT;
+            placement |= PLACEMENT_TOP_RIGHT;
         else if (!strcmp("centerLeft", token))
-            displacement |= DISPLACEMENT_CENTER_LEFT;
+            placement |= PLACEMENT_CENTER_LEFT;
         else if (!strcmp("centerRight", token))
-            displacement |= DISPLACEMENT_CENTER_RIGHT;
+            placement |= PLACEMENT_CENTER_RIGHT;
         else if (!strcmp("bottomLeft", token))
-            displacement |= DISPLACEMENT_BOTTOM_LEFT;
+            placement |= PLACEMENT_BOTTOM_LEFT;
         else if (!strcmp("bottomCenter", token))
-            displacement |= DISPLACEMENT_BOTTOM_CENTER;
+            placement |= PLACEMENT_BOTTOM_CENTER;
         else if (!strcmp("bottomRight", token))
-            displacement |= DISPLACEMENT_BOTTOM_RIGHT;
+            placement |= PLACEMENT_BOTTOM_RIGHT;
         else if (!strcmp("any", token))
-            displacement |= DISPLACEMENT_ANY;
+            placement |= PLACEMENT_ANY;
         else
-            throw cRuntimeError("Unknown displacement: %s", displacement);
+            throw cRuntimeError("Unknown placement: %s", placement);
     }
-    return (Displacement)displacement;
+    return (Placement)placement;
 }
 
 } // namespace visualizer

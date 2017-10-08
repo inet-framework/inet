@@ -27,6 +27,10 @@ namespace physicallayer {
 
 class INET_API APSKScalarReceiver : public FlatReceiverBase
 {
+  protected:
+    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+
   public:
     APSKScalarReceiver();
 

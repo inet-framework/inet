@@ -1,8 +1,31 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.6.0 (June, 2017) - stable
---------------------------------
+INET 3.6.2 (October 2017) - stable
+----------------------------------
+
+This release contains minor bug fixes and compatibility fixes for the final
+OMNeT++ 5.2 release. It requires OMNeT++ 5.1 or later.
+
+ - Tcp: Fixed incorrect connection pointer in rexmitQueue.
+ - Edcaf: Fixed aifs calculation for customised aifsn.
+ - Visualization: parameter rename
+ - inet_featuretool: Removed warning when treating a missing feature in the state files as default.
+ - Updated showcases and tutorials.
+ - Various fixes to eliminate warnings on clang 4 and gcc 7.x.
+
+
+INET 3.6.1 (July 2017) - stable
+-------------------------------
+
+This release contains minor compatibility fixes. It requires OMNeT++ 5.1 or later.
+
+ - Minor compatibility fix to work with OMNeT++ 5.2 Preview 1
+ - Turned on the parallel build option in the IDE project file.
+
+
+INET-3.6.0 (June 2017) - stable
+-------------------------------
 
 This release contains some important new features, several bug fixes, and a few
 minor enhancements. It requires OMNeT++ 5.1 or later.
@@ -73,23 +96,23 @@ Highlights in this release:
  - Added new features for various tutorials and showcases.
 
 
-INET-3.5.0 (Feb, 2017) - stable
--------------------------------
+INET-3.5.0 (February 2017) - stable
+-----------------------------------
 
-This release contains mostly bug fixes and compatibility changes. It requires 
+This release contains mostly bug fixes and compatibility changes. It requires
 OMNeT++ 5.1. Earlier versions of OMNeT++ are *not* compatible.
 
 Highlights in this release:
 
 Build:
 
-  - The build process is now using precompiled headers. This can speed up the 
+  - The build process is now using precompiled headers. This can speed up the
     build process considerably.
 
-  - Feature macros (WITH_*) that show the enablement of features are now placed 
-    into a header file (src/inet/features.h) instead of passed on the command line. 
-    The build process adds the WITH_OSG and WITH_OSGEARTH macro to the opp_defines.h 
-    file when WITH_OSG/WITH_OSGEARTH is set to yes. This allows the IDE to properly 
+  - Feature macros (WITH_*) that show the enablement of features are now placed
+    into a header file (src/inet/features.h) instead of passed on the command line.
+    The build process adds the WITH_OSG and WITH_OSGEARTH macro to the opp_defines.h
+    file when WITH_OSG/WITH_OSGEARTH is set to yes. This allows the IDE to properly
     highlight/disable the appropriate code fragments.
 
   - 64-bit build is now supported on Windows.
@@ -129,7 +152,7 @@ Fixes:
   - Radio: Fixed FreeSpacePathLoss bug in the loss formula for alpha != 2 case,
     reported by Benjamin Sliwa.
 
-  - SimpleVoIPServer now resolves destAddress at startTime (instead 
+  - SimpleVoIPServer now resolves destAddress at startTime (instead
     of initialization)
 
   - Ieee8021dRelay: fixed a null pointer crash
@@ -143,7 +166,7 @@ Fixes:
   - AODV: no longer causes assertion failure when RREP-ACK arrived after a timeout
 
 
-INET-3.4.0 (Jun, 2016) - stable
+INET-3.4.0 (June 2016) - stable
 -------------------------------
 
 This INET release requires OMNeT++ 5.0. This is due to the new visualization
@@ -262,7 +285,7 @@ Build:
   - Added project feature tests (tests/features)
 
 
-INET-3.3.0 (Jun, 2016) - stable
+INET-3.3.0 (June 2016) - stable
 -------------------------------
 
 This release requires OMNeT++ 4.6 or 5.0.
@@ -349,8 +372,8 @@ Ethernet:
     instead of size of payload)
 
 
-INET-3.2.4 (April, 2016) - stable
----------------------------------
+INET-3.2.4 (April 2016) - stable
+--------------------------------
 
 This is a minor maintenance release that requires either OMNeT++ 4.6,
 or 5.0. (Earlier test versions of OMNeT++ will not work.)
@@ -361,8 +384,8 @@ Changes:
   - minor fixes to make it build under both OMNeT++ 4.6 and 5.0
 
 
-INET-3.2.3 (March, 2016) - Stable
----------------------------------
+INET-3.2.3 (March 2016) - Stable
+--------------------------------
 
 This is a minor maintenance release that requires either OMNeT++ 4.6,
 or 5.0rc or later. (Earlier test versions of OMNeT++ will not work.)
@@ -372,10 +395,11 @@ Changes:
   - build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0 rc)
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
   - smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0
-  - some varaiable renames and fixes in ieee802.11
+  - some variable renames and fixes in ieee802.11
 
-INET-3.2.1 (Jan, 2016) - Stable
--------------------------------
+
+INET-3.2.1 (January 2016) - Stable
+----------------------------------
 
 Changes:
 
@@ -385,8 +409,8 @@ Changes:
   - Physical layer: Fixed memory issues detected by valgrind
 
 
-INET-3.2 (Dec, 2015) - Stable
------------------------------
+INET-3.2 (December 2015) - Stable
+---------------------------------
 
 This release requires either OMNeT++ 4.6, or 5.0b3 or later. (Earlier test
 versions of OMNeT++ will not work.)
@@ -445,16 +469,16 @@ Fixes:
  - QoSClassifier example no longer needs the 802.11 project feature.
 
 
-INET-3.1.1 (Oct, 2015) - Stable
--------------------------------
+INET-3.1.1 (October 2015) - Stable
+----------------------------------
 
 Changes:
 
   - Fixed build problem on Windows
 
 
-INET-3.1.0 (Oct, 2015) - Stable
--------------------------------
+INET-3.1.0 (October 2015) - Stable
+----------------------------------
 
 This release requires OMNeT++ 4.6 or later. In addition to several bug fixes,
 it features the following additions compared to INET-3.0:
@@ -529,7 +553,7 @@ it features the following additions compared to INET-3.0:
      no longer serves as a passive queue for the MAC.
 
 
-INET-3.0.0 (Jun, 2015) - Stable
+INET-3.0.0 (June 2015) - Stable
 -------------------------------
 
 This release requires OMNeT++ 4.6 or later. There are numerous breaking changes
@@ -549,8 +573,8 @@ Network Layer:
  - Refactored IPv4/IPv6 options to use TLVOptions structure.
 
 
-INET-2.99.1 (May, 2015) - Development
--------------------------------------
+INET-2.99.1 (May 2015) - Development
+------------------------------------
 
 This release is the last development snapshot of the upcoming INET-3.0 version.
 
@@ -1035,8 +1059,8 @@ This release requires OMNeT++ 4.4 or later. It contains the following changes:
    - added INET_VERSION macro (in hexadecimal form e.g.: 0x0206)
 
 
-INET 2.5.1 (Nov 7, 2014)
-------------------------
+INET 2.5.1 (November 7, 2014)
+-----------------------------
 
 This release requires OMNeT++ 4.4.
 
@@ -1046,8 +1070,8 @@ Changes:
    - now builds with all features turned off
 
 
-INET 2.5.0 (Oct 29, 2014)
--------------------------
+INET 2.5.0 (October 29, 2014)
+-----------------------------
 
 This release requires OMNeT++ 4.4.
 
@@ -1434,8 +1458,8 @@ Other changes:
   - Several TCP related fixes.
 
 
-INET-2.0.0 (Aug 7, 2012)
-------------------------
+INET-2.0.0 (August 7, 2012)
+---------------------------
 
 If you are upgrading from an earlier INET version (i.e. INET 20111118),
 expect to have to revise your existing omnetpp.ini files and possibly

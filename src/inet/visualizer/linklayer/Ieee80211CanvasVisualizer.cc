@@ -68,7 +68,7 @@ void Ieee80211CanvasVisualizer::addIeee80211Visualization(const Ieee80211Visuali
 {
     Ieee80211VisualizerBase::addIeee80211Visualization(ieee80211Visualization);
     auto ieee80211CanvasVisualization = static_cast<const Ieee80211CanvasVisualization *>(ieee80211Visualization);
-    ieee80211CanvasVisualization->networkNodeVisualization->addAnnotation(ieee80211CanvasVisualization->figure, ieee80211CanvasVisualization->figure->getBounds().getSize(), displacementHint, displacementPriority);
+    ieee80211CanvasVisualization->networkNodeVisualization->addAnnotation(ieee80211CanvasVisualization->figure, ieee80211CanvasVisualization->figure->getBounds().getSize(), placementHint, placementPriority);
 }
 
 void Ieee80211CanvasVisualizer::removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization)

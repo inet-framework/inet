@@ -77,9 +77,9 @@ void RadioCanvasVisualizer::addRadioVisualization(const RadioVisualization *radi
 {
     RadioVisualizerBase::addRadioVisualization(radioVisualization);
     auto radioCanvasVisualization = static_cast<const RadioCanvasVisualization *>(radioVisualization);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getSize(), displacementHint, displacementPriority);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getSize(), displacementHint, displacementPriority);
-    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), displacementHint, displacementPriority);
+    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->radioModeFigure, radioCanvasVisualization->radioModeFigure->getSize(), placementHint, placementPriority);
+    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->receptionStateFigure, radioCanvasVisualization->receptionStateFigure->getSize(), placementHint, placementPriority);
+    radioCanvasVisualization->networkNodeVisualization->addAnnotation(radioCanvasVisualization->transmissionStateFigure, radioCanvasVisualization->transmissionStateFigure->getSize(), placementHint, placementPriority);
 }
 
 void RadioCanvasVisualizer::removeRadioVisualization(const RadioVisualization *radioVisualization)

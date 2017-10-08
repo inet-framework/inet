@@ -35,8 +35,8 @@ simple EnergyStorageVisualizerBase extends VisualizerBase
         double width = default(8);
         double height = default(24);
         double spacing = default(2);
-        string displacementHint = default("right"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double displacementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("right"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(EnergyStorageVisualizerBase);
 }

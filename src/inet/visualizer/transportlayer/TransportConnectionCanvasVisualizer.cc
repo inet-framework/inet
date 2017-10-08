@@ -85,10 +85,10 @@ void TransportConnectionCanvasVisualizer::addConnectionVisualization(const Trans
     auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
     auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
     auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->addAnnotation(connectionCanvasVisualization->sourceFigure, connectionCanvasVisualization->sourceFigure->getBounds().getSize(), displacementHint, displacementPriority);
+    sourceVisualization->addAnnotation(connectionCanvasVisualization->sourceFigure, connectionCanvasVisualization->sourceFigure->getBounds().getSize(), placementHint, placementPriority);
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize(), displacementHint, displacementPriority);
+    destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize(), placementHint, placementPriority);
     setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
 }
 

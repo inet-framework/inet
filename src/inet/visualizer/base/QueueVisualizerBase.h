@@ -20,7 +20,7 @@
 
 #include "inet/common/queue/PacketQueue.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/QueueFilter.h"
 
 namespace inet {
@@ -59,8 +59,8 @@ class INET_API QueueVisualizerBase : public VisualizerBase
     double width;
     double height;
     double spacing;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     //@}
 
     std::vector<const QueueVisualization *> queueVisualizations;

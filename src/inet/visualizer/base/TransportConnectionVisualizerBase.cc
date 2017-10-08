@@ -54,8 +54,8 @@ void TransportConnectionVisualizerBase::initialize(int stage)
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
         if (displayTransportConnections)
             subscribe();
     }

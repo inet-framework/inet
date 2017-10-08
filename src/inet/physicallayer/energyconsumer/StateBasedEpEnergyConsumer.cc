@@ -51,9 +51,10 @@ void StateBasedEpEnergyConsumer::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
         powerConsumption = W(0);
         energySource = getModuleFromPar<IEpEnergySource>(par("energySourceModule"), this);
-        energySource->addEnergyConsumer(this);
         WATCH(powerConsumption);
     }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
+        energySource->addEnergyConsumer(this);
 }
 
 void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)

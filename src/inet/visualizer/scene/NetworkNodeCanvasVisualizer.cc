@@ -57,7 +57,7 @@ void NetworkNodeCanvasVisualizer::refreshDisplay() const
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::createNetworkNodeVisualization(cModule *networkNode) const
 {
-    return new NetworkNodeCanvasVisualization(networkNode, annotationSpacing, displacementPenalty);
+    return new NetworkNodeCanvasVisualization(networkNode, annotationSpacing, placementPenalty);
 }
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const

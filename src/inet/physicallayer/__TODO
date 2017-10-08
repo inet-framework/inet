@@ -11,6 +11,10 @@
    should we separate transmission begin and end? or should it be an approximation only?
  - using random numbers during computing the radio signal reception decisision is fundamentally wrong because the computation is not purely functional anymore and thus prevents deterministic concurrent parallel computing (because the order of random number generation matters)
    to solve this issue we might use multiple random number generators (one for each worker) and/or request receivers to provide an upper limit for the count of random numbers needed to be able to deterministically provide them   
+ - TwoRayGroundReflection: when not using any ground model the simulation crashes without any explanation
+ - TwoRayInterference: should use ground model. if not using, it should assume ground elevation to be 0
+ - revise adding separate transmission/reception started/ended signals to Radio similarly to how RadioMedium emits them right now
+ - cleanup terminology related to reception started: is it the arrival of the first bit of the signal, or is the start of the attempted reception process 
 
 Scratchpad
 ==========

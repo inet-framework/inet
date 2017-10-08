@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DISPLACEMENT_H
-#define __INET_DISPLACEMENT_H
+#ifndef __INET_PLACEMENT_H
+#define __INET_PLACEMENT_H
 
 #include "inet/common/INETDefs.h"
 
@@ -24,25 +24,25 @@ namespace inet {
 
 namespace visualizer {
 
-enum INET_API Displacement
+enum Placement
 {
-    DISPLACEMENT_NONE          = 0x00,
-    DISPLACEMENT_TOP_LEFT      = 0x01,
-    DISPLACEMENT_TOP_CENTER    = 0x02,
-    DISPLACEMENT_TOP_RIGHT     = 0x04,
-    DISPLACEMENT_CENTER_LEFT   = 0x08,
-    DISPLACEMENT_CENTER_RIGHT  = 0x10,
-    DISPLACEMENT_BOTTOM_LEFT   = 0x20,
-    DISPLACEMENT_BOTTOM_CENTER = 0x40,
-    DISPLACEMENT_BOTTOM_RIGHT  = 0x80,
-    DISPLACEMENT_ANY           = 0xFF
+    PLACEMENT_NONE          = 0x00,
+    PLACEMENT_TOP_LEFT      = 0x01,
+    PLACEMENT_TOP_CENTER    = 0x02,
+    PLACEMENT_TOP_RIGHT     = 0x04,
+    PLACEMENT_CENTER_LEFT   = 0x08,
+    PLACEMENT_CENTER_RIGHT  = 0x10,
+    PLACEMENT_BOTTOM_LEFT   = 0x20,
+    PLACEMENT_BOTTOM_CENTER = 0x40,
+    PLACEMENT_BOTTOM_RIGHT  = 0x80,
+    PLACEMENT_ANY           = 0xFF
 };
 
-Displacement parseDisplacement(const char *s);
+Placement parsePlacement(const char *s);
 
 } // namespace visualizer
 
 } // namespace inet
 
-#endif // ifndef __INET_DISPLACEMENT_H
+#endif // ifndef __INET_PLACEMENT_H
 

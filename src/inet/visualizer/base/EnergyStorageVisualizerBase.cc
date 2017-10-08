@@ -40,8 +40,8 @@ void EnergyStorageVisualizerBase::initialize(int stage)
         width = par("width");
         height = par("height");
         spacing = par("spacing");
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayEnergyStorages)

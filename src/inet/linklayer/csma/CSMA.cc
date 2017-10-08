@@ -838,7 +838,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
         delete msg;
         return;
     }
-    CSMAFrame *macPkt = static_cast<CSMAFrame *>(msg);
+    CSMAFrame *macPkt = check_and_cast<CSMAFrame *>(msg);
     const MACAddress& src = macPkt->getSrcAddr();
     const MACAddress& dest = macPkt->getDestAddr();
     long ExpectedNr = 0;

@@ -54,8 +54,8 @@ void RadioVisualizerBase::initialize(int stage)
         radioFilter.setPattern(par("radioFilter"));
         width = par("width");
         height = par("height");
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
         if (displayRadios)
             subscribe();
     }

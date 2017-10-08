@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <omnetpp/osgutil.h>
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"

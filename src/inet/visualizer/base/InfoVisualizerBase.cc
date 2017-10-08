@@ -39,9 +39,6 @@ const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
         case 'd':
             result = module->getDisplayString().getTagArg("t", 0);
             break;
-        case 'i':
-            result = module->info();
-            break;
         case 's':
             result = module->str();
             break;
@@ -63,8 +60,8 @@ void InfoVisualizerBase::initialize(int stage)
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
         opacity = par("opacity");
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayInfos)

@@ -45,6 +45,7 @@ simple StatisticVisualizerBase extends VisualizerBase
 
         string signalName = default(""); // signal name to subscribe, no signal name by default
         string statisticName = default(signalName); // statistic name to get the value, signal name by default
+        string statisticUnit = default(""); // statistic unit, undefined by default
         string sourceFilter = default("**"); // pattern that must match the signal source, no source filter by default
 
 		string format = default("%n: %v %u"); // determines what is displayed, info by default
@@ -54,8 +55,8 @@ simple StatisticVisualizerBase extends VisualizerBase
         string textColor = default("black"); // statistic value font color, black by default
         string backgroundColor = default("white"); // statistic value background color, white by default
         double opacity = default(1.0); // opacity of the visualization
-        string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double displacementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(StatisticVisualizerBase);
 }

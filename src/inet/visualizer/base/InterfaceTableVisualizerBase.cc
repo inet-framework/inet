@@ -50,6 +50,10 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'm':
             result = interfaceEntry->getMacAddress().str();
             break;
+        case 'l': // TODO: IPv4 or IPv6
+            if (interfaceEntry->ipv4Data() != nullptr)
+                result = std::to_string(interfaceEntry->ipv4Data()->getNetmask().getNetmaskLength());
+            break;
         case '4':
 #ifdef WITH_IPv4
             if (interfaceEntry->ipv4Data() != nullptr)
@@ -118,8 +122,8 @@ void InterfaceTableVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         format.parseFormat(par("format"));
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::parseColor(par("textColor"));
         backgroundColor = cFigure::parseColor(par("backgroundColor"));
@@ -256,7 +260,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             auto fieldId = interfaceEntryDetails->getFieldId();
             if (fieldId == InterfaceEntry::F_IPV4_DATA
 #ifdef WITH_IPv4
-                    || fieldId == IPv4InterfaceData::F_IP_ADDRESS
+                    || fieldId == IPv4InterfaceData::F_IP_ADDRESS || fieldId == IPv4InterfaceData::F_NETMASK
 #endif // WITH_IPv4
                     ) {
                 if (interfaceFilter.matches(interfaceEntry)) {

@@ -19,7 +19,7 @@
 #define __INET_STATISTICVISUALIZERBASE_H
 
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
 #include "inet/visualizer/util/StringFormat.h"
 
@@ -75,14 +75,15 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     ModuleFilter sourceFilter;
     const char *signalName = nullptr;
     const char *statisticName = nullptr;
+    const char *statisticUnit = nullptr;
     StringFormat format;
     std::vector<std::string> units;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
     double opacity = NaN;
-    Displacement displacementHint;
-    double displacementPriority;
+    Placement placementHint;
+    double placementPriority;
     //@}
 
     std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;

@@ -50,6 +50,7 @@ void Radio::initialize(int stage)
 {
     PhysicalLayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        switchTimer = new cMessage("switchTimer");
         transmissionTimer = new cMessage("transmissionTimer");
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
@@ -70,7 +71,6 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
-        switchTimer = new cMessage("switchTimer");
         parseRadioModeSwitchingTimes();
     }
     else if (stage == INITSTAGE_LAST) {
