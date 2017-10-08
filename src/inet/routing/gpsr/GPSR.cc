@@ -544,9 +544,19 @@ L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3
             if (nextNeighborAddress.isUnspecified())
                 break;
             EV_DEBUG << "Intersecting towards next hop: nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
+
             Coord nextNeighborPosition = getNeighborPosition(nextNeighborAddress);
-            Coord intersection = intersectSections(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
-            hasIntersection = !std::isnan(intersection.x);
+            Coord intersection(NaN, NaN, NaN);
+
+            // Don't intersect if our selfPosition is equal to the perimeter start position (the first check could be done earlier)
+            if (perimeterRoutingStartPosition != selfPosition       // Only occurs on start... No need to find intersection (if so, we should not have switched to perimeter routing)
+                && destinationPosition != nextNeighborPosition) {   // If next neighbor is destination go for it and break loop
+                intersection = intersectSections(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
+                hasIntersection = !std::isnan(intersection.x);
+            } else {
+                hasIntersection = false;
+            }
+
             if (hasIntersection) {
                 EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
                 gpsrOption->setCurrentFaceFirstSenderAddress(selfAddress);
