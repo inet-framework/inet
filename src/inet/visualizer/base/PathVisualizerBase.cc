@@ -283,7 +283,9 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 mapChunkIds(packet->peekAt(b(0)), [&] (int id) {
-                    updatePathVisualization(*getIncompletePath(id), packet);
+                    auto path = *getIncompletePath(id);
+                    if (path.size() > 1)
+                        updatePathVisualization(path, packet);
                     removeIncompletePath(id);
                 });
 #else  // MASTER
