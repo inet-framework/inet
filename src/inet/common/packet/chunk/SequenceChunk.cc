@@ -99,7 +99,7 @@ std::deque<Ptr<const Chunk>> SequenceChunk::dupChunks() const
 {
     std::deque<Ptr<const Chunk>> copies;
     for (const auto& chunk : chunks)
-        copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
+        copies.push_back(chunk->isImmutable() ? chunk : staticPtrCast<const Chunk>(chunk->dupShared()));
     return copies;
 }
 
@@ -233,11 +233,11 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToBeginning(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin));
+                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin));
+                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
         }
     }
@@ -293,11 +293,11 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToEnd(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin));
+                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin));
+                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
             offset += elementChunk->getChunkLength();
         }

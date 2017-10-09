@@ -19,6 +19,8 @@
 #define __INET_IANTENNAGAIN_H
 
 #include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/Ptr.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 
@@ -27,7 +29,10 @@ namespace physicallayer {
 /**
  * This interface represents the directional selectivity of an antenna.
  */
-class INET_API IAntennaGain
+class INET_API IAntennaGain : public IPrintableObject
+#if INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
+    , public IntrusivePtrCounter<IAntennaGain>
+#endif
 {
   public:
     /**

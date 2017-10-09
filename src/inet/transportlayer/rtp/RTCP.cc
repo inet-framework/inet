@@ -257,7 +257,7 @@ void RTCP::createPacket()
 {
     // first packet in an rtcp compound packet must
     // be a sender or receiver report
-    std::shared_ptr<RTCPReceiverReportPacket> reportPacket = nullptr;
+    Ptr<RTCPReceiverReportPacket> reportPacket = nullptr;
 
     // if this rtcp end system is a sender (see SenderInformation::isSender() for
     // details) insert a sender report

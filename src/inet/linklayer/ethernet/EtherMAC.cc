@@ -607,7 +607,7 @@ void EtherMAC::handleEndTxPeriod()
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
         const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
         isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
-        const auto& pauseFrame = std::dynamic_pointer_cast<const EthernetPauseFrame>(controlFrame);
+        const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
     }

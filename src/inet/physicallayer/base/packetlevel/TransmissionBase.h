@@ -34,7 +34,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const int id;
     const IRadioMedium *radioMedium;
     const int transmitterId;
-    std::shared_ptr<const IAntennaGain> transmitterGain;
+    Ptr<const IAntennaGain> transmitterGain;
     const Packet *packet;
     const simtime_t startTime;
     const simtime_t endTime;
