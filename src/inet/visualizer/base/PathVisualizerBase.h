@@ -114,9 +114,9 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void removeAllPathVisualizations();
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const = 0;
 
-    virtual const std::vector<int> *getIncompletePath(int treeId);
-    virtual void addToIncompletePath(int treeId, cModule *module);
-    virtual void removeIncompletePath(int treeId);
+    virtual const std::vector<int> *getIncompletePath(int chunkId);
+    virtual void addToIncompletePath(int chunkId, cModule *module);
+    virtual void removeIncompletePath(int chunkId);
 
     virtual std::string getPathVisualizationText(cPacket *packet) const;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);

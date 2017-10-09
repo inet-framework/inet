@@ -189,26 +189,26 @@ void PathVisualizerBase::removeAllPathVisualizations()
     }
 }
 
-const std::vector<int> *PathVisualizerBase::getIncompletePath(int treeId)
+const std::vector<int> *PathVisualizerBase::getIncompletePath(int chunkId)
 {
-    auto it = incompletePaths.find(treeId);
+    auto it = incompletePaths.find(chunkId);
     if (it == incompletePaths.end())
         return nullptr;
     else
         return &it->second;
 }
 
-void PathVisualizerBase::addToIncompletePath(int treeId, cModule *module)
+void PathVisualizerBase::addToIncompletePath(int chunkId, cModule *module)
 {
-    auto& moduleIds = incompletePaths[treeId];
+    auto& moduleIds = incompletePaths[chunkId];
     auto moduleId = module->getId();
     if (moduleIds.size() == 0 || moduleIds[moduleIds.size() - 1] != moduleId)
         moduleIds.push_back(moduleId);
 }
 
-void PathVisualizerBase::removeIncompletePath(int treeId)
+void PathVisualizerBase::removeIncompletePath(int chunkId)
 {
-    incompletePaths.erase(incompletePaths.find(treeId));
+    incompletePaths.erase(incompletePaths.find(chunkId));
 }
 
 void PathVisualizerBase::updatePathVisualization(const std::vector<int>& moduleIds, cPacket *packet)
