@@ -46,6 +46,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
@@ -619,15 +620,13 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
     auto tcpHdr = packet->removeHeader<TcpHeader>();
     tcpHdr->setCrc(0);
     tcpHdr->setCrcMode(crcMode);
-    packet->insertHeader(tcpHdr);
+    insertTransportProtocolHeader(packet, Protocol::tcp, tcpHdr);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
              << " from " << srcP << " to " << destP << "\n";
 
     IL3AddressType *addressType = destP.getAddressType();
 
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(srcP);

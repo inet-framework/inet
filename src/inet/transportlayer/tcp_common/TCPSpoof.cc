@@ -17,6 +17,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
 namespace inet {
 
@@ -61,7 +62,7 @@ void TCPSpoof::sendSpoofPacket()
     //tcpseg->setAckNo(...);
     tcpseg->setSynBit(isSYN);
     tcpseg->setWindow(16384);
-    packet->pushHeader(tcpseg);
+    insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
 
     sendToIP(packet, srcAddr, destAddr);
 }

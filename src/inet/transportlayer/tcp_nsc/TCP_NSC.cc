@@ -35,11 +35,12 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
+#include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
-#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
+#include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 
 #include <assert.h>
 #include <dlfcn.h>
@@ -904,7 +905,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     tcpHdr->setCrc(0);
     ASSERT(crcMode == CRC_COMPUTED || crcMode == CRC_DECLARED_CORRECT);
     tcpHdr->setCrcMode(crcMode);
-    fp->insertHeader(tcpHdr);
+    insertTransportProtocolHeader(fp, Protocol::tcp, tcpHdr);
 
 
     b payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
@@ -912,8 +913,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    fp->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    fp->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     fp->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = fp->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);

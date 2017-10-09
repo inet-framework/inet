@@ -26,6 +26,7 @@
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -261,16 +262,13 @@ void TCPConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
     tcpseg->setCrc(0);
     tcpseg->setCrcMode(tcpMain->crcMode);
-    tcpseg->markImmutable();
-    packet->pushHeader(tcpseg);
+    insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
     tcpMain->send(packet, "ipOut");
 }
 
@@ -282,13 +280,11 @@ void TCPConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(B(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
-    pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = pkt->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
-    pkt->insertHeader(tcpseg);
+    insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 

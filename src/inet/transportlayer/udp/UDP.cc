@@ -41,6 +41,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 
 #ifdef WITH_IPv4
@@ -392,11 +393,7 @@ void UDP::processPacketFromApp(Packet *packet)
     udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + packet->getTotalLength()).get());
     if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
         insertCrc(l3Protocol, L3Address(), L3Address(), udpHeader, packet);
-    udpHeader->markImmutable();
-    packet->pushHeader(udpHeader);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-
+    insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";

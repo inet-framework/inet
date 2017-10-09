@@ -87,7 +87,7 @@ const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet,
 void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<TransportHeaderBase>& header)
 {
     auto transportProtocolInd = packet->ensureTag<TransportProtocolInd>();
-    transportProtocolInd->setProtocol(&Protocol::ipv4);
+    transportProtocolInd->setProtocol(&protocol);
     transportProtocolInd->setTransportProtocolHeader(header);
     insertProtocolHeader(packet, protocol, header);
 }
