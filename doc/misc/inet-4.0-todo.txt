@@ -22,8 +22,6 @@ should be included in INET 4.0.
 
 SHOULD:
  - port *all* protocols to the new packet API, PacketDrill and SCTP are not finished yet
- - eliminate all control infos attached to packets
- - move CRC computation and verification from serializers to protocol modules (add missing ones)
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
 
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
@@ -72,3 +70,5 @@ DONE:
  + extract LLC from ethernet and 802.11
  + remove obsolete dataTransferMode from protocols (not applications)
  + simplify INetfilter interface by removing parameters other than the datagram
+ + eliminate all control infos attached to packets
+ + move CRC computation and verification from serializers to protocol modules (add missing ones)
