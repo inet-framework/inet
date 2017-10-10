@@ -5,6 +5,25 @@ import inet.networklayer.ipv4.IIGMP;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.common.scenario.ScenarioManager;
 
+module IgmpTesterNic
+{
+    parameters:
+        string interfaceTableModule;
+        string routingTableModule;
+        *.interfaceTableModule = absPath(interfaceTableModule);
+        *.routingTableModule = absPath(routingTableModule);
+        @class(InterfaceEntry);
+    gates:
+        input igmpIn;
+        output igmpOut;
+    submodules:
+        mac: IGMPTester {
+            @display("p=70,153");
+        }
+    connections:
+        igmpIn --> mac.igmpIn;
+        igmpOut <-- mac.igmpOut;
+}
 
 network TestIGMPNetwork
 {
@@ -23,7 +42,7 @@ network TestIGMPNetwork
                 routingTable: IPv4RoutingTable {
                     @display("p=168,31");
                 }
-                tester: IGMPTester {
+                tester: IgmpTesterNic {
                     @display("p=70,153");
                 }
                 igmp: <igmpType> like IIGMP {

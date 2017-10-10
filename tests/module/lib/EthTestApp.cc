@@ -59,12 +59,12 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
     char name[100];
     sprintf(name, "PK at %s: %i Bytes", SIMTIME_STR(t), bytes);
     Packet *packet = new Packet(name);
-    const auto& hdr = makeShared<EtherFrame>();
+    const auto& hdr = makeShared<EthernetMacHeader>();
     hdr->setDest(destAddr);
-    hdr->setChunkLength(byte(14));
+    hdr->setChunkLength(B(14));
     hdr->markImmutable();
     packet->prepend(hdr);
-    const auto& payload = makeShared<ByteCountChunk>(byte(bytes-14-4));
+    const auto& payload = makeShared<ByteCountChunk>(B(bytes-14-4));
     payload->markImmutable();
     packet->append(payload);
     const auto& fcs = makeShared<EthernetFcs>();

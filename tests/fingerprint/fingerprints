@@ -229,7 +229,7 @@ class SimulationTestCase(unittest.TestCase):
         # run the program and log the output
         t0 = time.time()
 
-        (exitcode, out) = self.runProgram(command, workingdir)
+        (exitcode, out) = self.runProgram(command, workingdir, resultdir)
 
         elapsedTime = time.time() - t0
         FILE = open(logFile, "a")
@@ -281,8 +281,11 @@ class SimulationTestCase(unittest.TestCase):
         result.errormsg = errorMsg.strip()
         return result
 
-    def runProgram(self, command, workingdir):
-        process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    def runProgram(self, command, workingdir, resultdir):
+        env = os.environ
+#        env['CPUPROFILE'] = resultdir+"/cpuprofile"
+#        env['CPUPROFILE_FREQUENCY'] = "1000"
+        process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         out = process.communicate()[0]
         out = re.sub("\r", "", out)
         return (process.returncode, out)

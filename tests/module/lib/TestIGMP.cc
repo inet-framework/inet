@@ -104,16 +104,16 @@ void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& 
     switch (igmp->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
-            group = CHK(packet->peekHeader<IGMPQuery>())->getGroupAddress();
+            group = packet->peekHeader<IGMPQuery>()->getGroupAddress();
             break;
         case IGMPV1_MEMBERSHIP_REPORT:
-            group = CHK(packet->peekHeader<IGMPv1Report>())->getGroupAddress();
+            group = packet->peekHeader<IGMPv1Report>()->getGroupAddress();
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
-            group = CHK(packet->peekHeader<IGMPv2Report>())->getGroupAddress();
+            group = packet->peekHeader<IGMPv2Report>()->getGroupAddress();
             break;
         case IGMPV2_LEAVE_GROUP:
-            group = CHK(packet->peekHeader<IGMPv2Leave>())->getGroupAddress();
+            group = packet->peekHeader<IGMPv2Leave>()->getGroupAddress();
             break;
     }
     int stateMask = 0;
@@ -270,7 +270,7 @@ void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie,
 {
     if (out.is_open())
     {
-        out << "t=" << simTime() << " " << node->getFullName() << "/" << ie->getName();
+        out << "t=" << simTime() << " " << node->getFullName() << "/" << ie->getInterfaceName();
         if (group)
             out << "/" << *group;
         out << ":";

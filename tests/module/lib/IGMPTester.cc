@@ -24,6 +24,7 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
 {
   private:
     IInterfaceTable *ift;
+    InterfaceEntry *interfaceEntry;
     map<IPv4Address, IPv4MulticastSourceList> socketState;
 
   protected:
@@ -119,8 +120,8 @@ void IGMPTester::initialize(int stage)
     {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-        InterfaceEntry *interfaceEntry = new InterfaceEntry(this);
-        interfaceEntry->setName("eth0");
+        interfaceEntry = getContainingNicModule(this);
+        interfaceEntry->setInterfaceName("eth0");
         MACAddress address("AA:00:00:00:00:01");
         interfaceEntry->setMACAddress(address);
         interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
@@ -132,9 +133,8 @@ void IGMPTester::initialize(int stage)
     }
     else if (stage == 2)
     {
-        InterfaceEntry *ie = ift->getInterface(0);
-        ie->ipv4Data()->setIPAddress(IPv4Address("192.168.1.1"));
-        ie->ipv4Data()->setNetmask(IPv4Address("255.255.0.0"));
+        interfaceEntry->ipv4Data()->setIPAddress(IPv4Address("192.168.1.1"));
+        interfaceEntry->ipv4Data()->setNetmask(IPv4Address("255.255.0.0"));
     }
 }
 
@@ -235,9 +235,8 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         msg->setGroupAddress(group);
         msg->setMaxRespTime(0.1 * maxRespCode);
         msg->setSourceList(sources);
-        msg->setChunkLength(byte(12 + (4 * sources.size())));
-        msg->markImmutable();
-        packet->prepend(msg);
+        msg->setChunkLength(B(12 + (4 * sources.size())));
+        packet->insertHeader(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : group);
     }
     else if (type == "IGMPv2Report")
@@ -277,9 +276,8 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             ASSERT(record.recordType);
             byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
         }
-        msg->setChunkLength(byte(byteLength));
-        msg->markImmutable();
-        packet->prepend(msg);
+        msg->setChunkLength(B(byteLength));
+        packet->insertHeader(msg);
 
         sendIGMP(packet, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     }
@@ -366,7 +364,7 @@ void IGMPTester::processSetFilterCommand(IPv4Address group, McastSourceFilterMod
 
 void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
 {
-    EV << "IGMPTester: " << ie->getName() << ": " << what << " = ";
+    EV << "IGMPTester: " << ie->getInterfaceName() << ": " << what << " = ";
 
     if (what == "groups")
     {
@@ -374,7 +372,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
-            EV << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0 ? "" : ", ") << group << " " << sourceList.info();
         }
     }
     else if (what == "listeners")
@@ -383,7 +381,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
-            EV << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0 ? "" : ", ") << group << " " << sourceList.info();
         }
     }
 

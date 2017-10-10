@@ -152,7 +152,7 @@ void RoutingTableLogger::dumpRoutes(cModule *node, IRoutingTable *rt, DestFilter
         {
             out << route->getDestinationAsGeneric() << "/" << route->getPrefixLength()
                 << " " << route->getNextHopAsGeneric()
-                << " " << (route->getInterface() ? route->getInterface()->getName() : "*")
+                << " " << (route->getInterface() ? route->getInterface()->getInterfaceName() : "*")
                 << " " << IRoute::sourceTypeName(route->getSourceType()) << " " << route->getMetric()
                 << endl;
         }
