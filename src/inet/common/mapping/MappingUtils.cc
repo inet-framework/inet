@@ -351,8 +351,8 @@ Mapping::argument_value_t MappingUtils::findMin(const ConstMapping& m, const Arg
     const DimensionSet& rDimSet = m.getDimensionSet();
     //the passed interval should define a value for every dimension
     //of the mapping.
-    assert(pRangeFrom.getDimensions().isSubSet(rDimSet));
-    assert(pRangeTo.getDimensions().isSubSet(rDimSet));
+    ASSERT(pRangeFrom.getDimensions().isSubSet(rDimSet));
+    ASSERT(pRangeTo.getDimensions().isSubSet(rDimSet));
 
     Mapping::argument_value_t res;
     bool bIsFirst = true;
