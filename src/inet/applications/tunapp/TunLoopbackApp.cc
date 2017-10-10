@@ -73,10 +73,12 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         const auto& transportProtocol = *networkHeader->getProtocol();
         const auto& transportHeader = removeTransportProtocolHeader(packet, transportProtocol);
 
+        unsigned int destPort = transportHeader->getDestinationPort();
         transportHeader->setDestinationPort(transportHeader->getSourcePort());
-        transportHeader->setSourcePort(transportHeader->getDestinationPort());
-        networkHeader->setSourceAddress(networkHeader->getDestinationAddress());
+        transportHeader->setSourcePort(destPort);
+        L3Address destAddr = networkHeader->getDestinationAddress();
         networkHeader->setDestinationAddress(networkHeader->getSourceAddress());
+        networkHeader->setSourceAddress(destAddr);
 
         insertTransportProtocolHeader(packet, transportProtocol, transportHeader);
         insertNetworkProtocolHeader(packet, networkProtocol, networkHeader);
