@@ -416,7 +416,7 @@ void MediumOsgVisualizer::radioRemoved(const IRadio *radio)
     }
 }
 
-void MediumOsgVisualizer::transmissionAdded(const ITransmission *transmission)
+void MediumOsgVisualizer::handleSignalAdded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals) {
@@ -429,7 +429,7 @@ void MediumOsgVisualizer::transmissionAdded(const ITransmission *transmission)
     }
 }
 
-void MediumOsgVisualizer::transmissionRemoved(const ITransmission *transmission)
+void MediumOsgVisualizer::handleSignalRemoved(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals) {
@@ -441,7 +441,7 @@ void MediumOsgVisualizer::transmissionRemoved(const ITransmission *transmission)
     }
 }
 
-void MediumOsgVisualizer::transmissionStarted(const ITransmission *transmission)
+void MediumOsgVisualizer::handleSignalDepartureStarted(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals)
@@ -453,7 +453,7 @@ void MediumOsgVisualizer::transmissionStarted(const ITransmission *transmission)
     }
 }
 
-void MediumOsgVisualizer::transmissionEnded(const ITransmission *transmission)
+void MediumOsgVisualizer::handleSignalDepartureEnded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals)
@@ -466,7 +466,7 @@ void MediumOsgVisualizer::transmissionEnded(const ITransmission *transmission)
     }
 }
 
-void MediumOsgVisualizer::receptionStarted(const IReception *reception)
+void MediumOsgVisualizer::handleSignalArrivalStarted(const IReception *reception)
 {
     Enter_Method_Silent();
     if (displaySignals)
@@ -478,7 +478,7 @@ void MediumOsgVisualizer::receptionStarted(const IReception *reception)
     }
 }
 
-void MediumOsgVisualizer::receptionEnded(const IReception *reception)
+void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
 {
     Enter_Method_Silent();
     if (displaySignals)

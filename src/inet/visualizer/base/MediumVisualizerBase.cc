@@ -32,12 +32,12 @@ MediumVisualizerBase::~MediumVisualizerBase()
     if (radioMediumModule != nullptr) {
         radioMediumModule->unsubscribe(IRadioMedium::radioAddedSignal, this);
         radioMediumModule->unsubscribe(IRadioMedium::radioRemovedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionAddedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionRemovedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionStartedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionEndedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::receptionStartedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::receptionEndedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalAddedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalRemovedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalDepartureStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalDepartureEndedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalArrivalStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalArrivalEndedSignal, this);
     }
 }
 
@@ -57,12 +57,12 @@ void MediumVisualizerBase::initialize(int stage)
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         signalTransmissionAnimationTime = par("signalTransmissionAnimationTime");
         signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
-        displayTransmissions = par("displayTransmissions");
-        displayReceptions = par("displayReceptions");
-        transmissionDisplacementHint = parseDisplacement(par("transmissionDisplacementHint"));
-        receptionDisplacementHint = parseDisplacement(par("receptionDisplacementHint"));
-        transmissionDisplacementPriority = par("transmissionDisplacementPriority");
-        receptionDisplacementPriority = par("receptionDisplacementPriority");
+        displaySignalDepartures = par("displaySignalDepartures");
+        displaySignalArrivals = par("displaySignalArrivals");
+        signalDepartureDisplacementHint = parseDisplacement(par("signalDepartureDisplacementHint"));
+        signalArrivalDisplacementHint = parseDisplacement(par("signalArrivalDisplacementHint"));
+        signalDepartureDisplacementPriority = par("signalDepartureDisplacementPriority");
+        signalArrivalDisplacementPriority = par("signalArrivalDisplacementPriority");
         displayInterferenceRanges = par("displayInterferenceRanges");
         interferenceRangeLineColor = cFigure::Color(par("interferenceRangeLineColor"));
         interferenceRangeLineStyle = cFigure::parseLineStyle(par("interferenceRangeLineStyle"));
@@ -78,12 +78,12 @@ void MediumVisualizerBase::initialize(int stage)
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
             radioMediumModule->subscribe(IRadioMedium::radioAddedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::radioRemovedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionAddedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionRemovedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionStartedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionEndedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::receptionStartedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::receptionEndedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalAddedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalRemovedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalDepartureStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalDepartureEndedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
         }
     }
     else if (stage == INITSTAGE_LAST) {
@@ -115,21 +115,21 @@ void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal,
 {
     Enter_Method_Silent();
     if (signal == IRadioMedium::radioAddedSignal)
-        radioAdded(check_and_cast<IRadio *>(object));
+        handleRadioAdded(check_and_cast<IRadio *>(object));
     else if (signal == IRadioMedium::radioRemovedSignal)
-        radioRemoved(check_and_cast<IRadio *>(object));
-    else if (signal == IRadioMedium::transmissionAddedSignal)
-        transmissionAdded(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionRemovedSignal)
-        transmissionRemoved(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionStartedSignal)
-        transmissionStarted(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionEndedSignal)
-        transmissionEnded(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::receptionStartedSignal)
-        receptionStarted(check_and_cast<IReception *>(object));
-    else if (signal == IRadioMedium::receptionEndedSignal)
-        receptionEnded(check_and_cast<IReception *>(object));
+        handleRadioRemoved(check_and_cast<IRadio *>(object));
+    else if (signal == IRadioMedium::signalAddedSignal)
+        handleSignalAdded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalRemovedSignal)
+        handleSignalRemoved(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalDepartureStartedSignal)
+        handleSignalDepartureStarted(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalDepartureEndedSignal)
+        handleSignalDepartureEnded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalArrivalStartedSignal)
+        handleSignalArrivalStarted(check_and_cast<IReception *>(object));
+    else if (signal == IRadioMedium::signalArrivalEndedSignal)
+        handleSignalArrivalEnded(check_and_cast<IReception *>(object));
     else
         throw cRuntimeError("Unknown signal");
 }

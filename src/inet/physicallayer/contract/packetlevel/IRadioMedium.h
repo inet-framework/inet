@@ -41,66 +41,102 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * This interface represents the whole radio medium. It keeps track of all radio
- * signal sources, all radio signal transmissions, and all radio signal receptions.
+ * This interface represents the whole medium. It keeps track of radios,
+ * signals departures, signal arrivals, and propagating signals.
  *
- * This interface supports optimistic parallel computation of reception decisions
- * and related information.
+ * This interface supports optimistic parallel computation.
  */
 class INET_API IRadioMedium : public IPrintableObject
 {
   public:
+    /**
+     * This simsignal is emitted when a radio is added to the medium.
+     * The simsignal source is the medium and the emitted value is the radio.
+     */
     static simsignal_t radioAddedSignal;
+
+    /**
+     * This simsignal is emitted when a radio is removed from the medium.
+     * The simsignal source is the medium and the emitted value is the radio.
+     */
     static simsignal_t radioRemovedSignal;
 
-    static simsignal_t transmissionAddedSignal;
-    static simsignal_t transmissionRemovedSignal;
+    /**
+     * This simsignal is emitted when a signal is added to the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalAddedSignal;
 
-    static simsignal_t transmissionStartedSignal;
-    static simsignal_t transmissionEndedSignal;
+    /**
+     * This simsignal is emitted when a signal is removed from the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalRemovedSignal;
 
-    static simsignal_t receptionStartedSignal;
-    static simsignal_t receptionEndedSignal;
+    /**
+     * This simsignal is emitted when a signal departure is started on the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalDepartureStartedSignal;
+
+    /**
+     * This simsignal is emitted when a signal departure is ended on the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalDepartureEndedSignal;
+
+    /**
+     * This simsignal is emitted when a signal arrival is started on the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalArrivalStartedSignal;
+
+    /**
+     * This simsignal is emitted when a signal arrival is ended on the medium.
+     * The simsignal source is the medium and the emitted value is the signal.
+     */
+    static simsignal_t signalArrivalEndedSignal;
 
   public:
     /**
-     * Returns the material of the radio medium. This function never returns nullptr.
+     * Returns the material of this medium.
+     * This function never returns nullptr.
      */
     virtual const physicalenvironment::IMaterial *getMaterial() const = 0;
 
     /**
-     * Returns the radio signal propagation model of this radio medium. This
-     * function never returns nullptr.
+     * Returns the signal propagation model of this medium.
+     * This function never returns nullptr.
      */
     virtual const IPropagation *getPropagation() const = 0;
 
     /**
-     * Returns the radio signal path loss model of this radio medium. This
-     * function never returns nullptr.
+     * Returns the signal path loss model of this medium.
+     * This function never returns nullptr.
      */
     virtual const IPathLoss *getPathLoss() const = 0;
 
     /**
-     * Returns the radio signal obstacle loss model of this radio medium. This
-     * function may return nullptr if there's no obstacle loss model.
+     * Returns the signal obstacle loss model of this medium.
+     * This function may return nullptr if there's no obstacle loss model.
      */
     virtual const IObstacleLoss *getObstacleLoss() const = 0;
 
     /**
-     * Returns the radio signal analog model of this radio medium. This
-     * function never returns nullptr.
+     * Returns the signal analog model of this medium.
+     * This function never returns nullptr.
      */
     virtual const IAnalogModel *getAnalogModel() const = 0;
 
     /**
-     * Returns the background noise model of this radio medium. This function
-     * may return nullptr if there's no background noise model.
+     * Returns the background noise model of this medium.
+     * This function may return nullptr if there's no background noise model.
      */
     virtual const IBackgroundNoise *getBackgroundNoise() const = 0;
 
     /**
-     * Returns the physical environment model of this radio medium. This function
-     * may return nullptr if there's no physical environment model.
+     * Returns the physical environment model of this medium.
+     * This function may return nullptr if there's no physical environment model.
      */
     virtual const physicalenvironment::IPhysicalEnvironment *getPhysicalEnvironment() const = 0;
 
@@ -109,27 +145,27 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual const ICommunicationCache *getCommunicationCache() const = 0;
 
     /**
-     * Adds a new radio to the radio medium. An exception is thrown if the
+     * Adds a new radio to the medium. An exception is thrown if the
      * radio is already added. The radio may immediately start new transmissions
      * and will potentially receive all ongoing and further transmissions.
      */
     virtual void addRadio(const IRadio *radio) = 0;
 
     /**
-     * Removes a radio from the radio medium. An exception is thrown if the
+     * Removes a radio from the medium. An exception is thrown if the
      * radio is not yet added. The radio cannot start new transmissions and
      * will not receive any further transmission including the ongoing ones.
      */
     virtual void removeRadio(const IRadio *radio) = 0;
 
     /**
-     * Get radio instance from radio medium by id.
+     * Get radio instance from medium by id.
      * May return a nullptr if no matching radio is registered.
      */
     virtual const IRadio* getRadio(int id) const = 0;
 
     /**
-     * Returns a new signal containing the radio signal transmission that
+     * Returns a new signal containing the signal transmission that
      * represents the provided packet. A copy of this signal is sent to
      * all affected radios.
      */
@@ -142,49 +178,49 @@ class INET_API IRadioMedium : public IPrintableObject
 
     /**
      * Returns the listening decision that describes what the receiver detects
-     * on the radio medium.
+     * on the medium.
      */
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const = 0;
 
     /**
      * Returns the space and time coordinates of the transmission arriving at
      * the provided receiver. This function never returns nullptr as long as the
-     * transmission is live on the radio medium.
+     * transmission is live on the medium.
      */
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns how the radio is listening on the medium when the transmission
      * arrives at the provided receiver. This function never returns nullptr as
-     * long as the transmission is live on the radio medium.
+     * long as the transmission is live on the medium.
      */
     virtual const IListening *getListening(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the reception of the transmission arriving at the provided receiver.
      * This function never returns nullptr as long as the transmission is live on
-     * the radio medium.
+     * the medium.
      */
     virtual const IReception *getReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the interference of the transmission arriving at the provided receiver.
      * This function never returns nullptr as long as the transmission is live on
-     * the radio medium.
+     * the medium.
      */
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the total noise computed from the interference of the transmission
      * arriving at the provided receiver. This function never returns nullptr as
-     * long as the transmission is live on the radio medium.
+     * long as the transmission is live on the medium.
      */
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns the signal to noise and interference ratio of the transmission
      * arriving at the provided receiver. This function never returns nullptr as
-     * long as the transmission is live on the radio medium.
+     * long as the transmission is live on the medium.
      */
     virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;
 

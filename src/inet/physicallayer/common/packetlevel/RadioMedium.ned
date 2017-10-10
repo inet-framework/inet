@@ -63,12 +63,12 @@ module RadioMedium like IRadioMedium
 
         @signal[radioAdded];
         @signal[radioRemoved];
-        @signal[transmissionAdded];
-        @signal[transmissionRemoved];
-        @signal[transmissionStarted];
-        @signal[transmissionEnded];
-        @signal[receptionStarted];
-        @signal[receptionEnded];
+        @signal[signalAdded];
+        @signal[signalRemoved];
+        @signal[signalDepartureStarted];
+        @signal[signalDepartureEnded];
+        @signal[signalArrivalStarted];
+        @signal[signalArrivalEnded];
 
     submodules:
         propagation: <propagationType> like IPropagation {

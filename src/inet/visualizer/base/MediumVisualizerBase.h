@@ -55,12 +55,12 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double signalTransmissionAnimationSpeed = NaN;
     double signalTransmissionAnimationTime = NaN;
     double signalAnimationSpeedChangeTime = NaN;
-    bool displayTransmissions = false;
-    bool displayReceptions = false;
-    Displacement transmissionDisplacementHint;
-    Displacement receptionDisplacementHint;
-    double transmissionDisplacementPriority;
-    double receptionDisplacementPriority;
+    bool displaySignalDepartures = false;
+    bool displaySignalArrivals = false;
+    Displacement signalDepartureDisplacementHint;
+    Displacement signalArrivalDisplacementHint;
+    double signalDepartureDisplacementPriority;
+    double signalArrivalDisplacementPriority;
     bool displayInterferenceRanges = false;
     cFigure::Color interferenceRangeLineColor;
     cFigure::LineStyle interferenceRangeLineStyle;
@@ -86,16 +86,16 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 
     virtual bool matchesTransmission(const physicallayer::ITransmission *transmission) const;
 
-    virtual void radioAdded(const physicallayer::IRadio *radio) = 0;
-    virtual void radioRemoved(const physicallayer::IRadio *radio) = 0;
+    virtual void handleRadioAdded(const physicallayer::IRadio *radio) = 0;
+    virtual void handleRadioRemoved(const physicallayer::IRadio *radio) = 0;
 
-    virtual void transmissionAdded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void transmissionRemoved(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) = 0;
 
-    virtual void transmissionStarted(const physicallayer::ITransmission *transmission) = 0;
-    virtual void transmissionEnded(const physicallayer::ITransmission *transmission) = 0;
-    virtual void receptionStarted(const physicallayer::IReception *reception) = 0;
-    virtual void receptionEnded(const physicallayer::IReception *reception) = 0;
+    virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) = 0;
+    virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) = 0;
 
   public:
     virtual ~MediumVisualizerBase();

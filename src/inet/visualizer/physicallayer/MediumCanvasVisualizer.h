@@ -21,8 +21,8 @@
 #include "inet/common/figures/HeatMapFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
@@ -70,11 +70,11 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     /**
      * The list of transmission figures.
      */
-    std::map<const physicallayer::IRadio *, cFigure *> transmissionFigures;
+    std::map<const physicallayer::IRadio *, cFigure *> signalDepartureFigures;
     /**
      * The list of reception figures.
      */
-    std::map<const physicallayer::IRadio *, cFigure *> receptionFigures;
+    std::map<const physicallayer::IRadio *, cFigure *> signalArrivalFigures;
     /**
      * The propagating signal figures.
      */
@@ -98,13 +98,13 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void refreshDisplay() const override;
     virtual void setAnimationSpeed();
 
-    virtual cFigure *getTransmissionFigure(const physicallayer::IRadio *radio) const;
-    virtual void setTransmissionFigure(const physicallayer::IRadio *radio, cFigure *figure);
-    virtual cFigure *removeTransmissionFigure(const physicallayer::IRadio *radio);
+    virtual cFigure *getSignalDepartureFigure(const physicallayer::IRadio *radio) const;
+    virtual void setSignalDepartureFigure(const physicallayer::IRadio *radio, cFigure *figure);
+    virtual cFigure *removeSignalDepartureFigure(const physicallayer::IRadio *radio);
 
-    virtual cFigure *getReceptionFigure(const physicallayer::IRadio *radio) const;
-    virtual void setReceptionFigure(const physicallayer::IRadio *radio, cFigure *figure);
-    virtual cFigure *removeReceptionFigure(const physicallayer::IRadio *radio);
+    virtual cFigure *getSignalArrivalFigure(const physicallayer::IRadio *radio) const;
+    virtual void setSignalArrivalFigure(const physicallayer::IRadio *radio, cFigure *figure);
+    virtual cFigure *removeSignalArrivalFigure(const physicallayer::IRadio *radio);
 
     virtual cFigure *getSignalFigure(const physicallayer::ITransmission *transmission) const;
     virtual void setSignalFigure(const physicallayer::ITransmission *transmission, cFigure *figure);
@@ -113,16 +113,16 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual cGroupFigure *createSignalFigure(const physicallayer::ITransmission *transmission) const;
     virtual void refreshSignalFigure(const physicallayer::ITransmission *transmission) const;
 
-    virtual void radioAdded(const physicallayer::IRadio *radio) override;
-    virtual void radioRemoved(const physicallayer::IRadio *radio) override;
+    virtual void handleRadioAdded(const physicallayer::IRadio *radio) override;
+    virtual void handleRadioRemoved(const physicallayer::IRadio *radio) override;
 
-    virtual void transmissionAdded(const physicallayer::ITransmission *transmission) override;
-    virtual void transmissionRemoved(const physicallayer::ITransmission *transmission) override;
+    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) override;
+    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) override;
 
-    virtual void transmissionStarted(const physicallayer::ITransmission *transmission) override;
-    virtual void transmissionEnded(const physicallayer::ITransmission *transmission) override;
-    virtual void receptionStarted(const physicallayer::IReception *reception) override;
-    virtual void receptionEnded(const physicallayer::IReception *reception) override;
+    virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) override;
+    virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) override;
+    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override;
+    virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override;
 };
 
 } // namespace visualizer

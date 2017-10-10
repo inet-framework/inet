@@ -53,6 +53,12 @@ moduleinterface IRadio extends IPhysicalLayer
         @signal[receptionStateChanged](type=long);
         @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);
+        @signal[receivedSignalPartChanged](type=long);
+        @signal[transmittedSignalPartChanged](type=long);
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+	    @signal[receptionStarted];
+        @signal[receptionEnded];
     gates:
         input radioIn @labels(ISignal);
 }

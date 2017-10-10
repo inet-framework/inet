@@ -82,6 +82,10 @@ module Radio like IRadio
         @signal[transmissionStateChanged](type=long);
         @signal[receivedSignalPartChanged](type=long);
         @signal[transmittedSignalPartChanged](type=long);
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+        @signal[receptionStarted];
+        @signal[receptionEnded];
         @signal[minSNIR];
         @signal[packetErrorRate];
         @signal[bitErrorRate];

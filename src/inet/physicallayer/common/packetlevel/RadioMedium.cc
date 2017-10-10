@@ -239,7 +239,7 @@ void RadioMedium::removeNonInterferingTransmissions()
         const ISignal *signal = communicationCache->getCachedSignal(transmission);
         communicationCache->removeCachedSignal(transmission);
         communicationCache->removeTransmission(transmission);
-        emit(transmissionRemovedSignal, check_and_cast<const cObject *>(transmission));
+        emit(signalRemovedSignal, check_and_cast<const cObject *>(transmission));
         delete signal;
         delete transmission;
     }
@@ -507,7 +507,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         Enter_Method_Silent();
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmissions[0]), removeNonInterferingTransmissionsTimer);
     }
-    emit(transmissionAddedSignal, check_and_cast<const cObject *>(transmission));
+    emit(signalAddedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packet)
