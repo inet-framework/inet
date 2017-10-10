@@ -35,6 +35,8 @@
 
 namespace inet {
 
+using namespace physicallayer;
+
 namespace visualizer {
 
 Define_Module(MediumOsgVisualizer);

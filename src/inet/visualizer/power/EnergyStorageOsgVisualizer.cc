@@ -20,6 +20,8 @@
 
 namespace inet {
 
+using namespace power;
+
 namespace visualizer {
 
 Define_Module(EnergyStorageOsgVisualizer);
