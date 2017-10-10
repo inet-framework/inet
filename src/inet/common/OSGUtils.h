@@ -22,6 +22,7 @@
 #include "inet/common/geometry/common/EulerAngles.h"
 
 #if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
+#include <omnetpp/osgutil.h>
 #include <osg/AutoTransform>
 #include <osg/Geode>
 #include <osg/Geometry>
