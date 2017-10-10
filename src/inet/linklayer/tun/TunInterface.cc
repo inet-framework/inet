@@ -73,6 +73,10 @@ void TunInterface::handleMessage(cMessage *message)
                     copy->clearTags();
                     copy->ensureTag<SocketInd>()->setSocketId(socketId);
                     copy->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                    copy->ensureTag<PacketProtocolTag>()->setProtocol(message->getMandatoryTag<PacketProtocolTag>()->getProtocol());
+                    auto npTag = message->getMandatoryTag<NetworkProtocolInd>();
+                    auto newnpTag = copy->ensureTag<NetworkProtocolInd>();
+                    *newnpTag = *npTag;
                     send(copy, "upperLayerOut");
                 }
                 delete message;
