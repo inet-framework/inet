@@ -43,9 +43,9 @@ bool insertFragment(IPv4FragBuf& fragbuf, Frag& f)
     frag->setFragmentOffset(f.offset);
     frag->setMoreFragments(!f.islast);
     frag->setHeaderLength(24);
-    frag->setChunkLength(byte(24));
+    frag->setChunkLength(B(24));
     frag->setTotalLengthField(24 + f.bytes);
-    const auto& payload = makeShared<ByteCountChunk>(byte(f.bytes));
+    const auto& payload = makeShared<ByteCountChunk>(B(f.bytes));
     pk->insertHeader(payload);
     pk->insertHeader(frag);
     ASSERT(pk->getByteLength() == 24+f.bytes);

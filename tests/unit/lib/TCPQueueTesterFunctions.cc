@@ -11,7 +11,7 @@ void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
     Packet *msg = new Packet(msgname);
-    const auto & bytes = makeShared<ByteCountChunk>(byte(numBytes));
+    const auto & bytes = makeShared<ByteCountChunk>(B(numBytes));
     msg->insertTrailer(bytes);
     ASSERT(msg->getByteLength() == numBytes);
     sq->enqueueAppData(msg);
@@ -24,7 +24,7 @@ void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
     Packet *msg = new Packet(msgname);
-    const auto & bytes = makeShared<ByteCountChunk>(byte(numBytes));
+    const auto & bytes = makeShared<ByteCountChunk>(B(numBytes));
     msg->insertTrailer(bytes);
     ASSERT(msg->getByteLength() == numBytes);
     try {
@@ -50,7 +50,7 @@ Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq)
         for (int i = 0; tcpseg->getByteLength() > 0; i++)
         {
             const auto& payload = tcpseg->popHeader<Chunk>();
-            int len = byte(payload->getChunkLength()).get();
+            int len = B(payload->getChunkLength()).get();
             EV << (i?", ":" ") << payload->getClassName() << '[' << startSeq << ".." << startSeq + len <<')';
             startSeq += len;
         }
@@ -122,7 +122,7 @@ void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
 
     Packet *msg = new Packet();
     unsigned int numBytes = end - beg;
-    const auto& bytes = makeShared<ByteCountChunk>(byte(numBytes));
+    const auto& bytes = makeShared<ByteCountChunk>(B(numBytes));
     msg->insertTrailer(bytes);
     const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(beg);
@@ -140,7 +140,7 @@ void tryinsertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
 
     Packet *msg = new Packet();
     unsigned int numBytes = end - beg;
-    const auto& bytes = makeShared<ByteCountChunk>(byte(numBytes));
+    const auto& bytes = makeShared<ByteCountChunk>(B(numBytes));
     msg->insertTrailer(bytes);
     const auto& tcpseg = makeShared<TcpHeader>();
     tcpseg->setSequenceNo(beg);

@@ -16,6 +16,7 @@ Test serializing frames
 #include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
@@ -238,34 +239,44 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
 
     if (protocol == nullptr) {
         outPk = new Packet("inet");
-        if (pk->getDataLength() > bit(0)) {
+        if (pk->getDataLength() > b(0)) {
             const auto& chunk = pk->popHeader(pk->getDataLength());
             outPk->append(chunk);
         }
     }
     else if (*protocol == Protocol::ethernet) {
-        const auto& header = pk->popHeader<EtherFrame>();
-        const auto& fcs = pk->popTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));
+        const auto& header = pk->popHeader<EthernetMacHeader>();
+        Ptr<const Ieee8022LlcHeader> llcHeader;
+        const auto& fcs = pk->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
         protocol = nullptr;
         int etherType = -1;
-        if (auto eth2frame = dynamic_cast<const EthernetIIFrame *>(header.get())) {
-            etherType = eth2frame->getEtherType();
+        if (isEth2Header(*header)) {
+            etherType = header->getTypeOrLength();
         }
-        else if (auto snapframe = dynamic_cast<const EtherFrameWithSNAP *>(header.get())) {
-            etherType = snapframe->getLocalcode();
+        else if (isIeee8023Header(*header)) {
+            llcHeader = pk->popHeader<Ieee8022LlcHeader>();
+            if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
+                const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
+                if (snapHeader == nullptr)
+                    throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
+                if (snapHeader->getOui() == 0)
+                    etherType = snapHeader->getProtocolId();
+            }
         }
         if (etherType != -1) {
             protocol = ProtocolGroup::ethertype.findProtocol(etherType);
         }
         outPk = deserialize(protocol, pk);
+        if (llcHeader)
+            outPk->pushHeader(llcHeader);
         outPk->pushHeader(header);
         outPk->pushTrailer(fcs);
     }
     else if (*protocol == Protocol::ipv4) {
         const auto& header = pk->popHeader<Ipv4Header>();
-        bit trailerLength = header->getChunkLength() + pk->getDataLength() - byte(header->getTotalLengthField());
+        b trailerLength = header->getChunkLength() + pk->getDataLength() - B(header->getTotalLengthField());
         Ptr<const Chunk> trailer = nullptr;
-        if (trailerLength > bit(0))
+        if (trailerLength > b(0))
             trailer = pk->popTrailer(trailerLength);
         protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
@@ -304,7 +315,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         outPk->pushHeader(header);
     }
     else if (*protocol == Protocol::icmpv6) {
-        const auto& header = pk->popHeader<Icmpv6Header>(bit(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        const auto& header = pk->popHeader<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
         outPk->pushHeader(header);
