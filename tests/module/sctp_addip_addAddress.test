@@ -25,7 +25,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # udp app (off)
 
-**.numTcpApps = 0
+**.numApps = 0
 **.tcpType = "TCP"
 
 # sctp apps

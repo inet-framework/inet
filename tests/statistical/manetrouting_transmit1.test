@@ -116,10 +116,10 @@ description = "Aodv Simple test"
 
 # ping app (senderhost pinged by others)
 # ping app (off)
-**.pingApp.count = 0
-**.pingApp.startTime = 1s
-**.pingApp.stopTime = -1s
-**.pingApp.printPing = true
+**.app.count = 0
+**.app.startTime = 1s
+**.app.stopTime = -1s
+**.app.printPing = true
 
 # ip settings
 **.ip.procDelay = 10us
