@@ -25,8 +25,8 @@ enum Role
     RECIPIENT,
 };
 
-FrameSequenceContext *originatorContext = new FrameSequenceContext(MACAddress(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-FrameSequenceContext *recipientContext = new FrameSequenceContext(MACAddress(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+FrameSequenceContext *originatorContext = nullptr;
+FrameSequenceContext *recipientContext = nullptr;
 
 class DataFs : public IFrameSequence
 {
@@ -47,6 +47,7 @@ class DataFs : public IFrameSequence
                         const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("DATA");
                         header->setType(ST_DATA);
+                        packet->insertHeader(header);
                         return new TransmitStep(packet, 0);
                     }
                     case 1:
@@ -258,14 +259,14 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
     bool isOriginatorRunning = true;
     IFrameSequenceStep *originatorStep = nullptr;
     Packet *originatorFrame = nullptr;
-    originatorContext = new FrameSequenceContext(MACAddress(ORIGINATOR), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    originatorContext = new FrameSequenceContext(MACAddress(ORIGINATOR), nullptr, new InProgressFrames(nullptr, nullptr, nullptr), nullptr, nullptr, nullptr, nullptr);
     originatorFrameSequence->startSequence(originatorContext, 0);
 
     // prepare recipient
     bool isRecipientRunning = true;
     IFrameSequenceStep *recipientStep = nullptr;
     Packet *recipientFrame = nullptr;
-    recipientContext = new FrameSequenceContext(MACAddress(RECIPIENT), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    recipientContext = new FrameSequenceContext(MACAddress(RECIPIENT), nullptr, new InProgressFrames(nullptr, nullptr, nullptr), nullptr, nullptr, nullptr, nullptr);
     recipientFrameSequence->startSequence(recipientContext, 0);
 
     // run frame sequence
@@ -315,7 +316,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
             if (originatorStep->getType() == IFrameSequenceStep::Type::RECEIVE) {
                 IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(originatorStep);
                 ASSERT(recipientFrame);
-                receiveStep->setFrameToReceive(recipientFrame);
+                receiveStep->setFrameToReceive(recipientFrame->dup());
                 EV_INFO << "originator receive: " << recipientFrame->getName() << "\n";
             }
         }
@@ -325,7 +326,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
             if (recipientStep->getType() == IFrameSequenceStep::Type::RECEIVE) {
                 IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(recipientStep);
                 ASSERT(originatorFrame);
-                receiveStep->setFrameToReceive(originatorFrame);
+                receiveStep->setFrameToReceive(originatorFrame->dup());
                 EV_INFO << "recipient receive: " << originatorFrame->getName() << "\n";
             }
         }
@@ -348,8 +349,6 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
             }
         }
 
-        delete originatorFrame;
-        delete recipientFrame;
         originatorFrame = nullptr;
         recipientFrame = nullptr;
     }
