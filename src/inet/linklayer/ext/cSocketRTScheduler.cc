@@ -25,6 +25,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
@@ -186,7 +187,6 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     int32 headerLength;
     int32 datalink;
     cModule *module;
-    struct serializer::ether_header *ethernet_hdr;
 
     i = *(uint16 *)user;
     datalink = cSocketRTScheduler::datalinks.at(i);
@@ -195,9 +195,10 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
-    if (datalink == DLT_EN10MB) {
-        ethernet_hdr = (struct serializer::ether_header *)bytes;
-        if (ntohs(ethernet_hdr->ether_type) != 0x0800) // ipv4
+    if (datalink == DLT_EN10MB && hdr->caplen > ETHER_HDR_LEN) {
+        uint16_t etherType = (uint16_t)(bytes[ETHER_ADDR_LEN * 2]) << 8 | bytes[ETHER_ADDR_LEN * 2 + 1];
+        //TODO get ethertype from snap header when packet has snap header
+        if (etherType != ETHERTYPE_IPv4) // ipv4
             return;
     }
 
