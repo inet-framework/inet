@@ -42,11 +42,7 @@
 
 namespace inet {
 
-#if OMNETPP_BUILDNUM <= 1003
-#define FES(sim) (&sim->msgQueue)
-#else
 #define FES(sim) (sim->getFES())
-#endif
 
 std::vector<cModule *> cSocketRTScheduler::modules;
 std::vector<pcap_t *> cSocketRTScheduler::pds;

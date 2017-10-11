@@ -23,7 +23,7 @@
 namespace inet {
 
 // NOTE: this cPanelFigure is a copy of the one that will be present in the OMNeT++ 5.2 release
-#if OMNETPP_BUILDNUM < 1011
+#if OMNETPP_VERSION < 0x0502 && OMNETPP_BUILDNUM < 1011
 
 /**
  * @brief Sets up an axis-aligned, unscaled coordinate system for children, canceling the
