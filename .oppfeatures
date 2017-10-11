@@ -812,20 +812,6 @@
         linkerFlags = ""
         />
     <feature
-        id="visualization_examples"
-        name="Visualization examples"
-        description = "Provides examples for the various visualization modules."
-        initiallyEnabled = "true"
-        requires = "visualization physicalenvironment DYMO Ieee80211 IPv4 Ethernet"
-        labels = ""
-        nedPackages = "
-                       inet.examples.visualization
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="VoIPStream"
         name="VoIPStream"
         description = "Voice over IP tool. Required external libraries: libavcodec libavformat libavresample libavutil"
