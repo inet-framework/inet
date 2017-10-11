@@ -258,9 +258,7 @@
 // when ~IPv6 receives one, it forwards the packet to ~IPv6NeighbourDiscovery.
 //
 // The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-// the ~ICMPv6 module, just like with IPv4. ICMP errors are sent to
-// ~IPv6ErrorHandling, which the user can extend or replace to have errors
-// handled in the way she likes.
+// the ~ICMPv6 module, just like with IPv4.
 //
 
 package inet;
