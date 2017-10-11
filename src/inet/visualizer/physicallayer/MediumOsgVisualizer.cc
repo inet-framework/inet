@@ -63,7 +63,7 @@ void MediumOsgVisualizer::initialize(int stage)
         signalWaveLength = par("signalWaveLength");
         signalWaveAmplitude = par("signalWaveAmplitude");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
-        if (displayTransmissions) {
+        if (displaySignalDepartures) {
             const char *transmissionImageString = par("transmissionImage");
             auto path = resolveResourcePath(transmissionImageString);
             transmissionImage = inet::osg::createImage(path.c_str());
@@ -71,7 +71,7 @@ void MediumOsgVisualizer::initialize(int stage)
             if (imageStream != nullptr)
                 imageStream->play();
         }
-        if (displayReceptions) {
+        if (displaySignalArrivals) {
             const char *receptionImageString = par("receptionImage");
             auto path = resolveResourcePath(receptionImageString);
             receptionImage = inet::osg::createImage(path.c_str());
@@ -347,15 +347,15 @@ void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *tra
     endMaterial->setAlpha(osg::Material::FRONT_AND_BACK, std::max(0.1, endAlpha));
 }
 
-void MediumOsgVisualizer::radioAdded(const IRadio *radio)
+void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
 {
     Enter_Method_Silent();
-    if (displayTransmissions || displayReceptions || displayInterferenceRanges || displayCommunicationRanges) {
+    if (displaySignalDepartures || displaySignalArrivals || displayInterferenceRanges || displayCommunicationRanges) {
         auto group = new osg::Group();
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->addAnnotation(group, osg::Vec3d(0.0, 0.0, 0.0), 100.0);
-        if (displayTransmissions) {
+        if (displaySignalDepartures) {
             auto texture = new osg::Texture2D();
             texture->setImage(transmissionImage);
             auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-transmissionImage->s() / 2, 0.0, 0.0), osg::Vec3(transmissionImage->s(), 0.0, 0.0), osg::Vec3(0.0, transmissionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
@@ -369,7 +369,7 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
             geode->setNodeMask(0);
             group->addChild(geode);
         }
-        if (displayReceptions) {
+        if (displaySignalArrivals) {
             auto texture = new osg::Texture2D();
             texture->setImage(receptionImage);
             auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-transmissionImage->s() / 2, 0.0, 0.0), osg::Vec3(receptionImage->s(), 0.0, 0.0), osg::Vec3(0.0, receptionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
@@ -405,7 +405,7 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
     }
 }
 
-void MediumOsgVisualizer::radioRemoved(const IRadio *radio)
+void MediumOsgVisualizer::handleRadioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
     auto node = removeRadioOsgNode(radio);
@@ -446,7 +446,7 @@ void MediumOsgVisualizer::handleSignalDepartureStarted(const ITransmission *tran
     Enter_Method_Silent();
     if (displaySignals)
         setAnimationSpeed();
-    if (displayTransmissions) {
+    if (displaySignalDepartures) {
         auto group = static_cast<osg::Group *>(getRadioOsgNode(transmission->getTransmitter()));
         auto node = static_cast<osg::Node *>(group->getChild(0));
         node->setNodeMask(1);
@@ -458,7 +458,7 @@ void MediumOsgVisualizer::handleSignalDepartureEnded(const ITransmission *transm
     Enter_Method_Silent();
     if (displaySignals)
         setAnimationSpeed();
-    if (displayTransmissions) {
+    if (displaySignalDepartures) {
         auto transmitter = transmission->getTransmitter();
         auto group = static_cast<osg::Group *>(getRadioOsgNode(transmitter));
         auto node = static_cast<osg::Node *>(group->getChild(0));
@@ -471,7 +471,7 @@ void MediumOsgVisualizer::handleSignalArrivalStarted(const IReception *reception
     Enter_Method_Silent();
     if (displaySignals)
         setAnimationSpeed();
-    if (displayReceptions) {
+    if (displaySignalArrivals) {
         auto group = static_cast<osg::Group *>(getRadioOsgNode(reception->getReceiver()));
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(1);
@@ -483,7 +483,7 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
     Enter_Method_Silent();
     if (displaySignals)
         setAnimationSpeed();
-    if (displayReceptions) {
+    if (displaySignalArrivals) {
         auto receiver = reception->getReceiver();
         auto group = static_cast<osg::Group *>(getRadioOsgNode(receiver));
         auto node = static_cast<osg::Node *>(group->getChild(1));
