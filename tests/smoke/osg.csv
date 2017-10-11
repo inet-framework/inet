@@ -1,2 +1,0 @@
-# workingdir,                        args
-/examples/visualization/earth/,      -f omnetpp.ini -c General -r 0
