@@ -176,13 +176,11 @@ void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
     if (tcpseg->getPshBit())
         EV_INFO << "PSH ";
 
-#if 1
     auto payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
     if (payloadLength > 0 || tcpseg->getSynBit()) {
         EV_INFO << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + payloadLength) << ") ";
         EV_INFO << "(l=" << payloadLength << ") ";
     }
-#endif
 
     if (tcpseg->getAckBit())
         EV_INFO << "ack " << tcpseg->getAckNo() << " ";

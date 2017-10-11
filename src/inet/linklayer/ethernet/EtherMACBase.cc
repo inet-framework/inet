@@ -598,15 +598,13 @@ void EtherMACBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
-              << "txrate: " << curEtherDescr->txrate << ", "
-              << (duplexMode ? "full-duplex" : "half-duplex") << endl;
-#if 1
-    EV_DETAIL << "bitTime: " << 1.0 / curEtherDescr->txrate << endl;
-    EV_DETAIL << "frameBursting: " << frameBursting << endl;
-    EV_DETAIL << "slotTime: " << curEtherDescr->slotTime << endl;
-    EV_DETAIL << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl;
-    EV_DETAIL << endl;
-#endif // if 1
+              << "txrate: " << curEtherDescr->txrate << " bps, "
+              << (duplexMode ? "full-duplex" : "half-duplex") << endl
+              << "bitTime: " << 1e9 / curEtherDescr->txrate << " ns" << endl
+              << "frameBursting: " << (frameBursting ? "on" : "off") << endl
+              << "slotTime: " << curEtherDescr->slotTime << endl
+              << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl
+              << endl;
 }
 
 void EtherMACBase::getNextFrameFromQueue()
@@ -671,68 +669,6 @@ void EtherMACBase::refreshDisplay() const
 
     if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
-
-#if 0
-    // this code works but didn't turn out to be very useful
-    const char *txStateName;
-
-    switch (transmitState) {
-        case TX_IDLE_STATE:
-            txStateName = "IDLE";
-            break;
-
-        case WAIT_IFG_STATE:
-            txStateName = "WAIT_IFG";
-            break;
-
-        case SEND_IFG_STATE:
-            txStateName = "SEND_IFG";
-            break;
-
-        case TRANSMITTING_STATE:
-            txStateName = "TX";
-            break;
-
-        case JAMMING_STATE:
-            txStateName = "JAM";
-            break;
-
-        case BACKOFF_STATE:
-            txStateName = "BACKOFF";
-            break;
-
-        case PAUSE_STATE:
-            txStateName = "PAUSE";
-            break;
-
-        default:
-            throw cRuntimeError("wrong tx state");
-    }
-
-    const char *rxStateName;
-
-    switch (receiveState) {
-        case RX_IDLE_STATE:
-            rxStateName = "IDLE";
-            break;
-
-        case RECEIVING_STATE:
-            rxStateName = "RX";
-            break;
-
-        case RX_COLLISION_STATE:
-            rxStateName = "COLL";
-            break;
-
-        default:
-            throw cRuntimeError("wrong rx state");
-    }
-
-    char buf[80];
-    sprintf(buf, "tx:%s rx: %s\n#boff:%d #cTx:%d",
-            txStateName, rxStateName, backoffs, numConcurrentTransmissions);
-    getDisplayString().setTagArg("t", 0, buf);
-#endif // if 0
 }
 
 int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)

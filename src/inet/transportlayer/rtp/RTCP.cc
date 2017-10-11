@@ -512,12 +512,8 @@ RTPParticipantInfo *RTCP::findParticipantInfo(uint32 ssrc)
 void RTCP::calculateAveragePacketSize(int size)
 {
     // add size of ip and udp header to given size before calculating
-#if 1
     double sumPacketSize = (double)(_packetsCalculated) * _averagePacketSize + (double)(size + 20 + 8);
     _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
-#else // if 1
-    _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
-#endif // if 1
 }
 
 bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
