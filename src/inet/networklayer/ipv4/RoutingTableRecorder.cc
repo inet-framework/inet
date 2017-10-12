@@ -31,7 +31,7 @@
 
 Define_Module(RoutingTableRecorder);
 
-#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
+#define LL    PRId64  // for eventnumber_t
 
 class RoutingTableNotificationBoardListener : public cListener
 {
@@ -204,7 +204,7 @@ namespace inet {
 
 Define_Module(RoutingTableRecorder);
 
-#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
+#define LL    PRId64  // for eventnumber_t
 
 Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
 

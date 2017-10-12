@@ -18,6 +18,9 @@
 #ifndef __INET_INETDEFS_H
 #define __INET_INETDEFS_H
 
+// important WITH_* macros defined by OMNET
+#include "inet/opp_defines.h"
+
 // feature defines generated based on the actual feature enablement
 #include "inet/features.h"
 
@@ -94,6 +97,13 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
     return p;
 }
+
+//@}
+
+#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
+
+#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x); }
+#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x, y); }
 
 #define CHK(x)     __checknull((x), #x, __FILE__, __LINE__)
 

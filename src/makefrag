@@ -8,7 +8,7 @@ ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
     CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
-    LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+    LIBS += -Wl,-rpath,$(abspath ../3rdparty/nsc-$(NSC_VERSION))
   endif
 endif
 
@@ -47,3 +47,28 @@ endif
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
+
+clean: clean-defines
+
+# Create opp_defines.h so important WITH_* macros from OMNeT++ can be included as macros from a header file
+# This helps the IDE to properly enable/disable conditional code in the editor
+DEFINES_FILE=inet/opp_defines.h
+
+msgheaders: $(DEFINES_FILE)
+
+clean-defines:
+	$(Q)-rm -f $(DEFINES_FILE)
+
+$(DEFINES_FILE) : $(COPTS_FILE)
+	@echo "// Generated file, do not edit" >$(DEFINES_FILE)
+ifeq ($(WITH_OSG),yes)
+	@echo "#ifndef WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
+ifeq ($(WITH_OSGEARTH),yes)
+	@echo "#ifndef WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
+

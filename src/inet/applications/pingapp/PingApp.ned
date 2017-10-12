@@ -79,6 +79,7 @@ simple PingApp like IPingApp
         @signal[outOfOrderArrivals](type=long);
         @signal[pingTxSeq](type=long);
         @signal[pingRxSeq](type=long);
+        @signal[numOutOfOrderArrivals](type=long);
         @statistic[rtt](title="ping round-trip time"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[numLost](title="pings lost"; record=last,vector; interpolationmode=none);
         @statistic[numOutOfOrderArrivals](title="ping out-of-order arrivals"; record=last,vector; interpolationmode=none);

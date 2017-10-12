@@ -27,6 +27,7 @@ import sys
 import threading
 import time
 import unittest
+from distutils import spawn
 from StringIO import StringIO
 
 
@@ -39,6 +40,14 @@ cpuTimeLimit = "300s"
 logFile = "test.out"
 extraOppRunArgs = ""
 exitCode = 0
+
+if spawn.find_executable("opp_run_dbg"):
+       executable = "opp_run_dbg"
+elif spawn.find_executable("opp_run"):
+       executable = "opp_run"
+elif spawn.find_executable("opp_run_release"):
+       executable = "opp_run_release"
+opp_run = executable
 
 class FingerprintTestCaseGenerator():
     fileToSimulationsMap = {}
