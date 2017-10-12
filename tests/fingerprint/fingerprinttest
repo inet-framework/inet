@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Fingerprint-based regression tested for the INET Framework.
 #
@@ -28,7 +28,7 @@ import threading
 import time
 import unittest
 from distutils import spawn
-from StringIO import StringIO
+from io import StringIO
 
 
 inetRoot = os.path.abspath("../..")
@@ -82,7 +82,7 @@ class FingerprintTestCaseGenerator():
     def commentRemover(self, csvData):
         p = re.compile(' *#.*$')
         for line in csvData:
-            yield p.sub('',line)
+            yield p.sub('',line.decode('utf-8'))
 
     # parse the CSV into a list of dicts
     def parseSimulationsTable(self, csvFile):
@@ -104,34 +104,34 @@ class FingerprintTestCaseGenerator():
         return simulations
 
     def writeUpdatedCSVFiles(self):
-        for csvFile, simulations in self.fileToSimulationsMap.iteritems():
+        for csvFile, simulations in self.fileToSimulationsMap.items():
             updatedContents = self.formatUpdatedSimulationsTable(csvFile, simulations)
             if updatedContents:
                 updatedFile = csvFile + ".UPDATED"
                 ff = open(updatedFile, 'w')
                 ff.write(updatedContents)
                 ff.close()
-                print "Check " + updatedFile + " for updated fingerprints"
+                print("Check " + updatedFile + " for updated fingerprints")
 
     def writeFailedCSVFiles(self):
-        for csvFile, simulations in self.fileToSimulationsMap.iteritems():
+        for csvFile, simulations in self.fileToSimulationsMap.items():
             failedContents = self.formatFailedSimulationsTable(csvFile, simulations)
             if failedContents:
                 failedFile = csvFile + ".FAILED"
                 ff = open(failedFile, 'w')
                 ff.write(failedContents)
                 ff.close()
-                print "Check " + failedFile + " for failed fingerprints"
+                print("Check " + failedFile + " for failed fingerprints")
 
     def writeErrorCSVFiles(self):
-        for csvFile, simulations in self.fileToSimulationsMap.iteritems():
+        for csvFile, simulations in self.fileToSimulationsMap.items():
             errorContents = self.formatErrorSimulationsTable(csvFile, simulations)
             if errorContents:
                 errorFile = csvFile + ".ERROR"
                 ff = open(errorFile, 'w')
                 ff.write(errorContents)
                 ff.close()
-                print "Check " + errorFile + " for errors"
+                print("Check " + errorFile + " for errors")
 
     def escape(self, str):
         if re.search(r'[\r\n\",]', str):
@@ -171,7 +171,7 @@ class FingerprintTestCaseGenerator():
                 if (cnt == 1):
                     lines[line] = newLine
                 else:
-                    print "ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFingerprint, newFingerprint, csvFile, line, lines[line])
+                    print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFingerprint, newFingerprint, csvFile, line, lines[line]))
         return ''.join(lines) if containsComputedFingerprint else None
 
     def formatFailedSimulationsTable(self, csvFile, simulations):
@@ -189,7 +189,7 @@ class FingerprintTestCaseGenerator():
                 if oldFingerprint != newFingerprint:
                     if not containsFailures:
                         containsFailures = True
-                        result.append("# Failures:\n");
+                        result.append("# Failures:\n")
                     result.append(lines[simulation['line']])
         return ''.join(result) if containsFailures else None
 
@@ -205,7 +205,7 @@ class FingerprintTestCaseGenerator():
             if 'exitcode' in simulation and simulation['exitcode'] != 0:
                 if not containsErrors:
                     containsErrors = True
-                    result.append("# Errors:\n");
+                    result.append("# Errors:\n")
                 result.append(lines[simulation['line']])
 
         return ''.join(result) if containsErrors else None
@@ -278,10 +278,10 @@ class SimulationTestCase(unittest.TestCase):
                 errorMsg += "\n" + err
                 if re.search("CPU time limit reached", err):
                     result.cpuTimeLimitReached = True
-                m = re.search("at event #([0-9]+), t=([0-9]*(\\.[0-9]+)?)", err)
+                m = re.search(r"at t=([0-9]*(\.[0-9]+)?)s, event #([0-9]+)", err)
                 if m:
-                    result.numEvents = int(m.group(1))
-                    result.simulatedTime = float(m.group(2))
+                    result.simulatedTime = float(m.group(1))
+                    result.numEvents = int(m.group(3))
 
         result.errormsg = errorMsg.strip()
         return result
@@ -292,7 +292,7 @@ class SimulationTestCase(unittest.TestCase):
 #        env['CPUPROFILE_FREQUENCY'] = "1000"
         process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         out = process.communicate()[0]
-        out = re.sub("\r", "", out)
+        out = re.sub("\r", "", out.decode('utf-8'))
         return (process.returncode, out)
 
 
@@ -314,25 +314,22 @@ class FingerprintTestCase(SimulationTestCase):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
         global inetRoot, executable, nedPath, cpuTimeLimit, extraOppRunArgs
 
+
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
         wdname = '' + self.wd + ' ' + self.args
-        wdname = re.sub('/', '_', wdname);
-        wdname = re.sub('[\W]+', '_', wdname);
-        resultdir = os.path.abspath(".") + "/results/" + self.csvFile + "/" + wdname;
-        if not os.path.exists(resultdir):
-            try:
-                os.makedirs(resultdir)
-            except OSError:
-                pass
+        wdname = re.sub('/', '_', wdname)
+        wdname = re.sub('[\W]+', '_', wdname)
+        resultdir = os.path.abspath(".") + "/results/" + self.csvFile + "/" + wdname
+        ensure_dir(resultdir)
         command = executable + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
             " --result-dir=" + resultdir + \
-            extraOppRunArgs;
-        # print "COMMAND: " + command + '\n'
-        anyFingerprintBad = False;
+            extraOppRunArgs
+        # print("COMMAND: " + command + '\n')
+        anyFingerprintBad = False
         computedFingerprints = set()
         for rep in range(self.repeat):
             result = self.runSimulation(self.title, command, workingdir, resultdir)
@@ -374,9 +371,9 @@ class ThreadSafeIter:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         with self.lock:
-            return self.it.next()
+            return next(self.it)
 
 
 
@@ -511,7 +508,7 @@ class SimulationTextTestResult(ThreadedTestResult):
     def addError(self, test, err):
         # modified
         if test.expectedResult == 'ERROR':
-            self.addExpectedError(test, err);
+            self.addExpectedError(test, err)
         else:
             super(SimulationTextTestResult, self).addError(test, err)
             self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
@@ -621,11 +618,10 @@ def _iif(cond,t,f):
     return t if cond else f
 
 def ensure_dir(f):
-    if not os.path.exists(f):
-        os.makedirs(f)
+    os.makedirs(f, exist_ok=True)
 
 if __name__ == "__main__":
-    defaultNumThreads = multiprocessing.cpu_count();
+    defaultNumThreads = multiprocessing.cpu_count()
     if defaultNumThreads >= 6:
         defaultNumThreads = defaultNumThreads - 1
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
@@ -665,16 +661,17 @@ if __name__ == "__main__":
 
     testRunner.run(testSuite)
 
-    print
+    print()
+
     generator.writeUpdatedCSVFiles()
     generator.writeErrorCSVFiles()
     generator.writeFailedCSVFiles()
 
-    print "Log has been saved to %s" % logFile
+    print("Log has been saved to %s" % logFile)
 
     if exitCode == 0:
-        print "Test results equals to expected results"
+        print("Test results equals to expected results")
     else:
-        print "Test results differ from expected results"
+        print("Test results differ from expected results")
     exit(exitCode)
 
