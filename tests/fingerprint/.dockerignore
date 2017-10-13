@@ -1,0 +1,6 @@
+# this file is here to avoid sending the huge and unnecessary files to the docker daemon upon image build
+
+__pycache__
+results
+*.csv
+*.ini
