@@ -88,26 +88,23 @@ def replaceInetLib(gitHash):
 
     logger.info("replacing inet lib with the one built from commit " + gitHash)
 
-    try:
-        with open(directory + "/libINET.so", "xb") as f:
-            
-            # i THINK there could be a race condition if another worker locks the
-            # file with LOCK_SH (in the other branch) while we are right here
+    with open(directory + "/download.lock", "wb") as lf:
+        logger.info("starting download, or waiting for the in-progress download to finish")
+        with flock.Flock(lf, flock.LOCK_EX):
+            logger.info("download lock acquired")
+            try:
+                with open(directory + "/libINET.so", "xb") as f:
 
-            logger.info("we have just created the file, so we need to download it")
-            with flock.Flock(f, flock.LOCK_EX):
-                logger.info("write lock acquired")
-                client = pymongo.MongoClient(mongoHost)
-                gfs = gridfs.GridFS(client.opp)
-                logger.info("connected, downloading")
-                f.write(gfs.get(gitHash).read())
-                logger.info("download done")
+                    logger.info("we have just created the file, so we need to download it")
+                    client = pymongo.MongoClient(mongoHost)
+                    gfs = gridfs.GridFS(client.opp)
+                    logger.info("connected, downloading")
+                    f.write(gfs.get(gitHash).read())
+                    logger.info("download done")
 
-    except FileExistsError:
-        logger.info("the file was created by someone else, waiting for it to be downloaded")
-        with open(directory + "/libINET.so", "wb") as f:
-            with flock.Flock(f, flock.LOCK_SH):
-                logger.info("file download finished")
+            except FileExistsError:
+                logger.info("the file was already downloaded")
+
 
     shutil.copy(directory + "/libINET.so", inetLibFile)
     logger.info("file copied to the right place")
