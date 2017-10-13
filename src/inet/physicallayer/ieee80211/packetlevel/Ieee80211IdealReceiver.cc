@@ -23,6 +23,7 @@
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealReceiver.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
 namespace inet {
@@ -48,22 +49,16 @@ std::ostream& Ieee80211IdealReceiver::printToStream(std::ostream& stream, int le
     return IdealReceiver::printToStream(stream, level);
 }
 
-// TODO:
-//const ReceptionIndication *Ieee80211IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
-//{
-//    auto indication = new Ieee80211ReceptionIndication();
-//    auto reception = check_and_cast<const IdealReception *>(snir->getReception());
-//    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
-//    double errorRate = reception->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
-//    indication->setSymbolErrorRate(errorRate);
-//    indication->setBitErrorRate(errorRate);
-//    indication->setPacketErrorRate(errorRate);
-//    // TODO: should match and get the mode and channel from the receiver
-//    const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
-//    indication->setMode(transmission->getMode());
-//    indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
-//    return indication;
-//}
+const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
+{
+    auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
+    auto receptionResult = IdealReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
+    auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ModeInd>();
+    modeInd->setMode(transmission->getMode());
+    auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ChannelInd>();
+    channelInd->setChannel(transmission->getChannel());
+    return receptionResult;
+}
 
 } // namespace physicallayer
 

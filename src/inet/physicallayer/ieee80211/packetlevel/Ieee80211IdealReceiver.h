@@ -34,6 +34,8 @@ class INET_API Ieee80211IdealReceiver : public IdealReceiver
     Ieee80211IdealReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };
 
 } // namespace physicallayer
