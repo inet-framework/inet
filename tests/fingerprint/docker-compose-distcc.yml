@@ -1,0 +1,29 @@
+version: "3.2"
+services:
+  distcc:
+    image: torokati44/distcc-worker
+    networks:
+      buildnet:
+    deploy:
+      mode: global
+
+
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      buildnet:
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+networks:
+  buildnet:
+    attachable: true
+    ipam:
+      config:
+        - subnet: 13.37.42.0/24

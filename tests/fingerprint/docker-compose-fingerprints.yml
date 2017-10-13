@@ -1,0 +1,120 @@
+version: "3.2"
+
+services:
+
+  redis:
+    image: redis
+    networks:
+      interlink:
+        aliases:
+          - rds
+    ports:
+      - "6379:6379"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  mongo:
+    image: mongo
+    networks:
+      interlink:
+        aliases:
+          - mng
+    ports:
+      - "27017:27017"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  builder:
+    image: torokati44/worker-fingerprints
+    networks:
+      interlink:
+      buildnet:
+       ipv4_address: 13.37.42.254
+    depends_on:
+      - redis
+      - mongo
+    command: build -u redis://rds
+    deploy:
+      placement: # always on the same node to take advantage of a persistent ccache dir on the host
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+        delay: 2s
+        max_attempts: 5
+        window: 30s
+
+
+  runner:
+    image: torokati44/worker-fingerprints
+    networks:
+      interlink:
+    depends_on:
+      - redis
+      - mongo
+    command: run -u redis://rds
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.9'
+      mode: replicated
+      replicas: 100
+      restart_policy:
+        condition: on-failure
+        delay: 2s
+        max_attempts: 5
+        window: 30s
+    volumes:
+      - type: bind
+        source: /var/cache
+        target: /host-cache
+
+
+  visualizer:
+    image: dockersamples/visualizer
+    networks:
+      interlink:
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  dashboard:
+    image: robbieclarken/lightweight-rq-dashboard
+    networks:
+      interlink:
+    command: -H rds
+    ports:
+      - "9181:9181"
+    depends_on:
+      - redis
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  distcc:
+    image: torokati44/distcc-worker
+    networks:
+      buildnet:
+    deploy:
+      mode: global
+
+
+networks:
+
+  interlink:
+    attachable: true
+
+  buildnet:
+    attachable: true
+    ipam:
+      config:
+        - subnet: 13.37.42.0/24
