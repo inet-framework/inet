@@ -45,7 +45,7 @@ class INET_API PacketDrop : public PacketDropDetails {
     const cPacket *getPacket_() const { return packet; }
     const cModule* getModule() const;
     const cModule* getNetworkNode() const;
-    const InterfaceEntry *getInterfaceEntry() const;
+    const InterfaceEntry *getNetworkInterface() const;
     const Coord& getPosition() const { return position; }
 };
 

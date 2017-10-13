@@ -48,13 +48,13 @@ const cModule* PacketDrop::getModule() const
 const cModule *PacketDrop::getNetworkNode() const
 {
     auto module = getModule();
-    return module != nullptr ? getContainingNode(module) : nullptr;
+    return module != nullptr ? findContainingNode(module) : nullptr;
 }
 
-const InterfaceEntry *PacketDrop::getInterfaceEntry() const
+const InterfaceEntry *PacketDrop::getNetworkInterface() const
 {
     auto module = getModule();
-    return module != nullptr ? inet::visualizer::getInterfaceEntry(const_cast<cModule *>(getNetworkNode()), const_cast<InterfaceEntry *>(getContainingNicModule(module))) : nullptr;
+    return module != nullptr ? findContainingNicModule(module) : nullptr;
 }
 
 PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(const PacketDrop* packetDrop) :
@@ -198,11 +198,13 @@ void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t sig
         auto module = check_and_cast<cModule *>(source);
         auto packet = check_and_cast<cPacket *>(object);
         auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
-        auto networkNode = getContainingNode(module);
-        auto interfaceModule = getContainingNicModule(module);
-        auto interfaceEntry = getInterfaceEntry(networkNode, interfaceModule);
-        if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet) && detailsFilter.matches(packetDropDetails)) {
-            auto packetDrop = new PacketDrop(packetDropDetails->getReason(), packet->dup(), module->getId(), getPosition(networkNode));
+        auto networkNode = findContainingNode(module);
+        auto interfaceEntry = findContainingNicModule(module);
+        if ((networkNode == nullptr || nodeFilter.matches(networkNode)) && (interfaceEntry == nullptr || interfaceFilter.matches(interfaceEntry)) &&
+            packetFilter.matches(packet) && detailsFilter.matches(packetDropDetails))
+        {
+            auto position = networkNode != nullptr ? getPosition(networkNode) : Coord::NIL;
+            auto packetDrop = new PacketDrop(packetDropDetails->getReason(), packet->dup(), module->getId(), position);
             auto packetDropVisualization = createPacketDropVisualization(packetDrop);
             addPacketDropVisualization(packetDropVisualization);
         }
