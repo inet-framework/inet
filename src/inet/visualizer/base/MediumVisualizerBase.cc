@@ -59,10 +59,10 @@ void MediumVisualizerBase::initialize(int stage)
         signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
         displaySignalDepartures = par("displaySignalDepartures");
         displaySignalArrivals = par("displaySignalArrivals");
-        signalDepartureDisplacementHint = parseDisplacement(par("signalDepartureDisplacementHint"));
-        signalArrivalDisplacementHint = parseDisplacement(par("signalArrivalDisplacementHint"));
-        signalDepartureDisplacementPriority = par("signalDepartureDisplacementPriority");
-        signalArrivalDisplacementPriority = par("signalArrivalDisplacementPriority");
+        signalDeparturePlacementHint = parsePlacement(par("signalDeparturePlacementHint"));
+        signalArrivalPlacementHint = parsePlacement(par("signalArrivalPlacementHint"));
+        signalDeparturePlacementPriority = par("signalDeparturePlacementPriority");
+        signalArrivalPlacementPriority = par("signalArrivalPlacementPriority");
         displayInterferenceRanges = par("displayInterferenceRanges");
         interferenceRangeLineColor = cFigure::Color(par("interferenceRangeLineColor"));
         interferenceRangeLineStyle = cFigure::parseLineStyle(par("interferenceRangeLineStyle"));

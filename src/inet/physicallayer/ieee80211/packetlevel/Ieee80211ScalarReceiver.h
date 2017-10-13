@@ -29,6 +29,7 @@ class INET_API Ieee80211ScalarReceiver : public Ieee80211ReceiverBase
 {
   protected:
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
     Ieee80211ScalarReceiver();

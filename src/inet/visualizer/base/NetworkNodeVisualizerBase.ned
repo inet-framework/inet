@@ -29,7 +29,7 @@ simple NetworkNodeVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // determines which network nodes are displayed, all nodes by default
 
         double annotationSpacing = default(4);
-        double displacementPenalty = default(10);
+        double placementPenalty = default(10);
 
         @class(NetworkNodeVisualizerBase);
 }

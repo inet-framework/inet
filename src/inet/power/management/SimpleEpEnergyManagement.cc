@@ -95,6 +95,8 @@ void SimpleEpEnergyManagement::scheduleLifecycleOperationTimer()
     }
     // enforce target capacity to be in range
     simtime_t remainingTime = unit((targetCapacity - estimatedResidualCapacity) / totalPower / s(1)).get();
+    // make sure the targetCapacity is reached despite floating point arithmetic
+    remainingTime.setRaw(remainingTime.raw() + 1);
     if (lifecycleOperationTimer->isScheduled())
         cancelEvent(lifecycleOperationTimer);
     // don't schedule if there's no progress

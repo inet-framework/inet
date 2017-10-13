@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-09-29  Levente Mészáros
+
+	802.11: Removed expected access time from Contention display string.
+
+2017-08-11  Raphael Riebl
+
+	Edcaf: fix aifs calculation for customised aifsn
+
 2017-07-06  ------ inet-3.6.1 released ------
 
 2017-06-09  ------ inet-3.6.0 released ------

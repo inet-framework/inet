@@ -21,7 +21,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
-#include "inet/visualizer/util/Displacement.h"
+#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PacketFilter.h"
@@ -57,10 +57,10 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double signalAnimationSpeedChangeTime = NaN;
     bool displaySignalDepartures = false;
     bool displaySignalArrivals = false;
-    Displacement signalDepartureDisplacementHint;
-    Displacement signalArrivalDisplacementHint;
-    double signalDepartureDisplacementPriority;
-    double signalArrivalDisplacementPriority;
+    Placement signalDeparturePlacementHint;
+    Placement signalArrivalPlacementHint;
+    double signalDeparturePlacementPriority;
+    double signalArrivalPlacementPriority;
     bool displayInterferenceRanges = false;
     cFigure::Color interferenceRangeLineColor;
     cFigure::LineStyle interferenceRangeLineStyle;

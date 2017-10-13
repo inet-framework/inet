@@ -366,7 +366,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = signalDepartureFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(signalDepartureFigure, signalDepartureFigure->getBounds().getSize(), signalDepartureDisplacementHint, signalDepartureDisplacementPriority);
+                networkNodeVisualization->addAnnotation(signalDepartureFigure, signalDepartureFigure->getBounds().getSize(), signalDeparturePlacementHint, signalDeparturePlacementPriority);
                 setSignalDepartureFigure(radio, signalDepartureFigure);
             }
             if (displaySignalArrivals) {
@@ -380,7 +380,7 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
                 auto labelFigure = signalArrivalFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(signalArrivalFigure, signalArrivalFigure->getBounds().getSize(), signalArrivalDisplacementHint, signalArrivalDisplacementPriority);
+                networkNodeVisualization->addAnnotation(signalArrivalFigure, signalArrivalFigure->getBounds().getSize(), signalArrivalPlacementHint, signalArrivalPlacementPriority);
                 setSignalArrivalFigure(radio, signalArrivalFigure);
             }
         }

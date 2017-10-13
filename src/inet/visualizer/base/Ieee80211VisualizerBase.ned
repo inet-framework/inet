@@ -43,8 +43,8 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
-        string displacementHint = default("top"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double displacementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(Ieee80211VisualizerBase);
 }

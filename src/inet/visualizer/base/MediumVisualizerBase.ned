@@ -49,13 +49,13 @@ simple MediumVisualizerBase extends VisualizerBase
 
         bool displaySignalDepartures = default(false); // display an image where a signal departure is currently in progress, disabled by default
         string signalDepartureImage = default("misc/signal_departure.png"); // image for ongoing signal departures
-        string signalDepartureDisplacementHint = default("topCenter"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double signalDepartureDisplacementPriority = default(1); // determines the order of annotation positioning
+        string signalDeparturePlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double signalDeparturePlacementPriority = default(1); // determines the order of annotation positioning
 
         bool displaySignalArrivals = default(false); // display an image where a signal arrival is currently in progress, disabled by default
         string signalArrivalImage = default("misc/signal_arrival.png"); // image for ongoing signal arrivals
-        string signalArrivalDisplacementHint = default("topCenter"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
-        double signalArrivalDisplacementPriority = default(-1); // determines the order of annotation positioning
+        string signalArrivalPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double signalArrivalPlacementPriority = default(-1); // determines the order of annotation positioning
 
         bool displayCommunicationRanges = default(false); // display communication ranges as circles around radios, enabled by default
         string communicationRangeLineColor = default("blue"); // communication range circle line color, blue by default

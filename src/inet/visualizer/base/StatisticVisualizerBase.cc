@@ -73,6 +73,7 @@ void StatisticVisualizerBase::initialize(int stage)
         signalName = par("signalName");
         statisticName = par("statisticName");
         format.parseFormat(par("format"));
+        statisticUnit = par("statisticUnit");
         cStringTokenizer tokenizer(par("unit"));
         while (tokenizer.hasMoreTokens())
             units.push_back(tokenizer.nextToken());
@@ -80,8 +81,8 @@ void StatisticVisualizerBase::initialize(int stage)
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
         opacity = par("opacity");
-        displacementHint = parseDisplacement(par("displacementHint"));
-        displacementPriority = par("displacementPriority");
+        placementHint = parsePlacement(par("placementHint"));
+        placementPriority = par("placementPriority");
         if (displayStatistics)
             subscribe();
     }
@@ -159,7 +160,7 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
         if (!strcmp(property->getName(), "statistic") && !strcmp(property->getIndex(), statisticName))
             return property->getValue("unit", 0);
     }
-    return nullptr;
+    return statisticUnit;
 }
 
 const StatisticVisualizerBase::StatisticVisualization *StatisticVisualizerBase::getStatisticVisualization(cComponent *source, simsignal_t signal)

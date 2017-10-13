@@ -38,10 +38,11 @@ void AlternatingEpEnergyGenerator::initialize(int stage)
         timer = new cMessage("timer");
         updatePowerGeneration();
         scheduleIntervalTimer();
-        energySink->addEnergyGenerator(this);
         WATCH(isSleeping);
         WATCH(powerGeneration);
     }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
+        energySink->addEnergyGenerator(this);
 }
 
 void AlternatingEpEnergyGenerator::handleMessage(cMessage *message)

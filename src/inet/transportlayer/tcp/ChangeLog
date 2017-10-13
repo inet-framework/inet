@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-10  Levente Mészáros
+
+	Tcp: Fixed incorrect connection pointer in rexmitQueue, bug found and fix
+	provided by Karsten Heimann.
+
 2017-07-06  ------ inet-3.6.1 released ------
 
 2017-06-09  ------ inet-3.6.0 released ------

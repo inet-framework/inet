@@ -420,6 +420,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     }
     if (deleteFrame)
         delete frame;
+    getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
 
 void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)

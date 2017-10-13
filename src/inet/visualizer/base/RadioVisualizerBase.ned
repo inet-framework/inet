@@ -40,8 +40,8 @@ simple RadioVisualizerBase extends VisualizerBase
 		string transmissionStateImages = default("- - misc/transmission");
         double width = default(16);
         double height = default(16);
-        string displacementHint = default("bottomRight"); // annotation displacement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double displacementPriority = default(0); // determines the order of annotation positioning
+        string placementHint = default("bottomRight"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(RadioVisualizerBase);
 }

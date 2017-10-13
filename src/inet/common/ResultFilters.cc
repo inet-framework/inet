@@ -17,13 +17,14 @@
 // @author Zoltan Bojthe
 //
 
-#include "inet/common/ResultFilters.h"
-
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/Simsignals_m.h"
+#include "inet/common/ResultFilters.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
 
 namespace inet {
 
@@ -45,6 +46,16 @@ void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 {
     if (auto msg = dynamic_cast<cMessage *>(object))
         fire(this, t, t - msg->getTimestamp(), details);
+}
+
+Register_ResultFilter("receptionMinSignalPower", ReceptionMinSignalPowerFilter);
+
+void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto reception = dynamic_cast<inet::physicallayer::FlatReceptionBase *>(object)) {
+        W minReceptionPower = reception->computeMinPower(reception->getStartTime(), reception->getEndTime());
+        fire(this, t, minReceptionPower.get(), details);
+    }
 }
 
 Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);

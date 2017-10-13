@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+#include <omnetpp/osgutil.h>
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 

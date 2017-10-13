@@ -15,24 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211DIMENSIONALRECEIVER_H
-#define __INET_IEEE80211DIMENSIONALRECEIVER_H
+#ifndef __INET_APSKSCALARTRANSMISSION_H
+#define __INET_APSKSCALARTRANSMISSION_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211DimensionalReceiver : public Ieee80211ReceiverBase
+class INET_API APSKScalarTransmission : public ScalarTransmission
 {
-  protected:
-    virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
-
   public:
-    Ieee80211DimensionalReceiver();
+    APSKScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
@@ -41,5 +36,5 @@ class INET_API Ieee80211DimensionalReceiver : public Ieee80211ReceiverBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211DIMENSIONALRECEIVER_H
+#endif // ifndef __INET_APSKSCALARTRANSMISSION_H
 
