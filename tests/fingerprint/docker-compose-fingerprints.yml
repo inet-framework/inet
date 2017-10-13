@@ -57,9 +57,11 @@ services:
       - mongo
     command: run -u redis://rds
     deploy:
+#      placement:
+#        constraints: [node.role != manager]
       resources:
         reservations:
-          cpus: '0.9'
+          cpus: "0.9"
       mode: replicated
       replicas: 100
       restart_policy:
@@ -106,6 +108,8 @@ services:
       buildnet:
     deploy:
       mode: global
+#      placement:
+#        constraints: [node.role != manager]
 
 
 networks:
