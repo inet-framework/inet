@@ -80,18 +80,24 @@ CFLAGS += -Wno-overloaded-virtual
 #########################################################################
 # precompiled header support for GCC and CLANG
 
-ifeq ($(CC),gcc)
-PRECOMPILED_EXT=gch
-else ifeq ($(CC),clang)
-PRECOMPILED_EXT=pch
-else
-PRECOMPILED_EXT=
-endif
+# Set this to "no" if you want to avoid using the precompiled header. The default is "yes".
+USE_PRECOMPILED_HEADER ?= yes
 
 PRECOMPILED_HEADER=inet/common/precompiled_$(MODE).h
+
+ifeq ($(USE_PRECOMPILED_HEADER),yes)
+  ifeq ($(CC),gcc)
+    PRECOMPILED_EXT=gch
+  else ifeq ($(CC),clang)
+    PRECOMPILED_EXT=pch
+  else
+    PRECOMPILED_EXT=
+  endif
+  CFLAGS += -include $(PRECOMPILED_HEADER)
+endif
+
 PRECOMPILED_HEADER_PCH=$(PRECOMPILED_HEADER).$(PRECOMPILED_EXT)
 PRECOMPILED_HEADER_D=$(PRECOMPILED_HEADER_PCH:%.$(PRECOMPILED_EXT)=%.d)
-CFLAGS += -include $(PRECOMPILED_HEADER)
 
 # Main target
 all-pch: | pch msgheaders all
