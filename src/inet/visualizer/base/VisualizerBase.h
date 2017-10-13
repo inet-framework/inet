@@ -42,8 +42,6 @@ class INET_API VisualizerBase : public cSimpleModule
     virtual void mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const;
 };
 
-InterfaceEntry *getInterfaceEntry(cModule *networkNode, cModule *module);
-
 } // namespace visualizer
 
 } // namespace inet

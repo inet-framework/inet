@@ -91,15 +91,6 @@ void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::funct
         thunk(chunk->getChunkId());
 }
 
-InterfaceEntry *getInterfaceEntry(cModule *networkNode, cModule *module)
-{
-    L3AddressResolver addressResolver;
-    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-    if (interfaceTable == nullptr)
-        return nullptr;
-    return interfaceTable->getInterfaceByInterfaceModule(module);
-}
-
 } // namespace visualizer
 
 } // namespace inet
