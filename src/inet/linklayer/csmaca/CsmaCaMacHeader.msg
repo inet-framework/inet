@@ -29,7 +29,6 @@ class CsmaCaMacHeader extends FieldsChunk
 {
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
-    int networkProtocol = -1;
 }
 
 class CsmaCaMacAckHeader extends CsmaCaMacHeader
@@ -38,5 +37,18 @@ class CsmaCaMacAckHeader extends CsmaCaMacHeader
 
 class CsmaCaMacDataHeader extends CsmaCaMacHeader
 {
+    int networkProtocol = -1;
     int priority;  // 802.1d UP (User Priority) 
+}
+
+enum FcsMode {
+    FCS_DECLARED = 1;
+    FCS_COMPUTED = 2;
+}
+
+class CsmaCaMacTrailer extends FieldsChunk
+{
+    chunkLength = B(4);
+    uint32_t fcs = 0;
+    int fcsMode @enum(FcsMode) = -1;
 }
