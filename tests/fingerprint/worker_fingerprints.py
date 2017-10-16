@@ -84,7 +84,7 @@ def buildInet(gitHash):
 def replaceInetLib(gitHash):
     directory = inetLibCache + "/" + gitHash
 
-    ensure_dir(directory)
+    os.makedirs(directory, exist_ok=True)
 
     logger.info("replacing inet lib with the one built from commit " + gitHash)
 
@@ -140,9 +140,14 @@ def switchInetToCommit(gitHash):
         logger.info("not switching, already on it")
 
 
-def runSimulation(title, command, workingdir, resultdir):
+def runSimulation(gitHash, title, command, workingdir, resultdir):
+
+    os.makedirs(resultdir, exist_ok=True)
+
+    switchInetToCommit(gitHash)
+
     global logFile
-    ensure_dir(workingdir + "/results")
+    os.makedirs(workingdir + "/results", exist_ok=True)
 
     logger.info("running simulation")
     # run the program and log the output
@@ -175,7 +180,7 @@ def runSimulation(title, command, workingdir, resultdir):
     FILE.close()
 
     result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
-    result.out = out
+
     # process error messages
     errorLines = re.findall("<!>.*", out, re.M)
     errorMsg = ""
@@ -203,26 +208,14 @@ def runSimulation(title, command, workingdir, resultdir):
     result.errormsg = errorMsg.strip()
     return result
 
-def _iif(cond,t,f):
-    return t if cond else f
-
-def ensure_dir(f):
-    if not os.path.exists(f):
-        os.makedirs(f)
-
-
 
 
 # this is the second kind of job
-def runTest(gitHash, title, csvFile, wd, args, simtimelimit, fingerprint, repeat): # storeFingerprintCallback, storeExitcodeCallback):
+def runTest(gitHash, title, csvFile, wd, args, simtimelimit, fingerprint, repeat):
     # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-    
-    testBeginTime = time.time()
-    logger.info("test started: " + str(testBeginTime))
 
     global inetRoot, cpuTimeLimit, executable
 
-    switchInetToCommit(gitHash)
 
     # run the simulation
     workingdir = _iif(wd.startswith('/'), inetRoot + "/" + wd, wd)
@@ -268,10 +261,6 @@ def runTest(gitHash, title, csvFile, wd, args, simtimelimit, fingerprint, repeat
         else:
             # fingerprint OK:
             computedFingerprints.add(fingerprint)
-
-    testEndTime = time.time()
-    logger.info("test ended: " + str(testEndTime))
-    logger.info("test duration: " + str(testEndTime - testBeginTime))
 
     if anyFingerprintBad:
         return "some fingerprint mismatch; actual " + " '" + ",".join(computedFingerprints) +"'" # + result.out
