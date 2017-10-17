@@ -340,7 +340,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(scheduleAckTimeout(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-Ack,
-                                  isLowerMessage(msg) && isForUs(frame) && isAck(frame),
+                                  isLowerMessage(msg) && isFcsOk(frame) && isForUs(frame) && isAck(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
