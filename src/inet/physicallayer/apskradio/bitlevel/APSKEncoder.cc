@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
@@ -69,9 +69,16 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
 {
     auto packet = packetModel->getPacket();
     const auto& apskPhyHeader = packet->peekHeader<APSKPhyHeader>();
-    const auto& bytesChunk = packet->peekAllBytes();
-    auto bitLength = bytesChunk->getChunkLength();
-    BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
+    auto length = packet->getTotalLength();
+    BitVector *encodedBits;
+    if (b(length).get() % 8 == 0)
+        encodedBits = new BitVector(packet->peekAllBytes()->getBytes());
+    else {
+        encodedBits = new BitVector();
+        const auto& bitsChunk = packet->peekAllBits();
+        for (int i = 0; i < b(length).get(); i++)
+            encodedBits->appendBit(bitsChunk->getBit(i));
+    }
     const IScrambling *scrambling = nullptr;
     if (scrambler) {
         *encodedBits = scrambler->scramble(*encodedBits);
@@ -92,11 +99,11 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
     }
     b netHeaderLength = apskPhyHeader->getChunkLength();
     if (forwardErrorCorrection == nullptr)
-        return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), bitLength - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), length - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
         b grossHeaderLength = b(forwardErrorCorrection->getEncodedLength(b(netHeaderLength).get()));
         bps grossBitrate = packetModel->getBitrate() / forwardErrorCorrection->getCodeRate();
-        return new TransmissionBitModel(grossHeaderLength, grossBitrate, bitLength - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(grossHeaderLength, grossBitrate, length - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }
 }
 

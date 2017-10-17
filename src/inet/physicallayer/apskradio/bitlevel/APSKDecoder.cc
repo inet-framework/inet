@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 
@@ -77,9 +78,19 @@ const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitMo
     }
     if (descrambler)
         *decodedBits = descrambler->descramble(*decodedBits);
-    const auto& decodedData = makeShared<BytesChunk>(decodedBits->getBytes());
-    decodedData->markImmutable();
-    auto packet = new Packet(nullptr, decodedData);
+    Packet *packet;
+    if (decodedBits->getSize() % 8 == 0) {
+        const auto& bytesChunk = makeShared<BytesChunk>(decodedBits->getBytes());
+        packet = new Packet(nullptr, bytesChunk);
+    }
+    else {
+        std::vector<bool> bits;
+        for (int i = 0; i < decodedBits->getSize(); i++)
+            bits.push_back(decodedBits->getBit(i));
+        const auto& bitsChunk = makeShared<BitsChunk>(bits);
+        bitsChunk->markImmutable();
+        packet = new Packet(nullptr, bitsChunk);
+    }
     return new ReceptionPacketModel(packet, bps(NaN), -1, isPacketErrorless);
 }
 
