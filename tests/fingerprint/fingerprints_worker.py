@@ -17,15 +17,9 @@ MODEL_DIR = "/tmp/model/"
 
 inetRoot = "/opt/inet"
 inetLibCache = "/host-cache/inetlib"
-sep = ";" if sys.platform == 'win32' else ':'
-nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials" + sep + inetRoot + "/tests/networks"
-inetLib = inetRoot + "/src/INET"
 inetLibFile = inetRoot + "/src/libINET.so"
-cpuTimeLimit = "30000s"
-executable = "opp_run_release"
+
 logFile = "test.out"
-extraOppRunArgs = ""
-exitCode = 0
 
 mongoHost = "mng" # discovered using swarm internal dns
 
@@ -207,62 +201,3 @@ def runSimulation(gitHash, title, command, workingdir, resultdir):
 
     result.errormsg = errorMsg.strip()
     return result
-
-
-
-# this is the second kind of job
-def runTest(gitHash, title, csvFile, wd, args, simtimelimit, fingerprint, repeat):
-    # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-
-    global inetRoot, cpuTimeLimit, executable
-
-
-    # run the simulation
-    workingdir = _iif(wd.startswith('/'), inetRoot + "/" + wd, wd)
-    wdname = '' + wd + ' ' + args
-    wdname = re.sub('/', '_', wdname)
-    wdname = re.sub('[\\W]+', '_', wdname)
-    resultdir = workingdir + "/results/" + csvFile + "/" + wdname
-    if not os.path.exists(resultdir):
-        try:
-            os.makedirs(resultdir)
-        except OSError:
-            pass
-    command = executable + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + args + \
-        _iif(simtimelimit != "", " --sim-time-limit=" + simtimelimit, "") + \
-        " \"--fingerprint=" + fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
-        " --vector-recording=false --scalar-recording=true" + \
-        " --result-dir=" + resultdir + \
-        extraOppRunArgs
-    
-
-    logger.info("COMMAND: " + command)
-
-    anyFingerprintBad = False
-    computedFingerprints = set()
-    for rep in range(repeat):
-
-        result = runSimulation(title, command, workingdir, resultdir)
-
-        # process the result
-        # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
-
-        if result.exitcode != 0:
-            return "runtime error:" + result.errormsg + result.out
-        elif result.cpuTimeLimitReached:
-            return "cpu time limit exceeded"
-        elif result.simulatedTime == 0 and simtimelimit != '0s':
-            return "zero time simulated"
-        elif result.isFingerprintOK is None:
-            return "other error"
-        elif result.isFingerprintOK == False:
-            computedFingerprints.add(result.computedFingerprint)
-            anyFingerprintBad = True
-        else:
-            # fingerprint OK:
-            computedFingerprints.add(fingerprint)
-
-    if anyFingerprintBad:
-        return "some fingerprint mismatch; actual " + " '" + ",".join(computedFingerprints) +"'" # + result.out
-
-    return "OK, took " + str(result.elapsedTime)

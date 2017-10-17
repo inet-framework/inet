@@ -19,26 +19,22 @@ import argparse
 import copy
 import csv
 import glob
+import multiprocessing
 import os
 import re
 import subprocess
 import sys
-import time
 import threading
-import random
+import time
 import unittest
-from io import StringIO
 from distutils import spawn
+from io import StringIO
 
 
-import redis, rq, worker_fingerprints
-
-localInetRoot = os.path.abspath("../..")
-remoteInetRoot = "/opt/inet"
-
+inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
-nedPath = remoteInetRoot + "/src" + sep + remoteInetRoot + "/examples" + sep + remoteInetRoot + "/showcases" + sep + remoteInetRoot + "/tutorials" + sep + remoteInetRoot + "/tests/networks"
-inetLib = remoteInetRoot + "/src/INET"
+nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials" + sep + inetRoot + "/tests/networks"
+inetLib = inetRoot + "/src/INET"
 cpuTimeLimit = "30000s"
 logFile = "test.out"
 extraOppRunArgs = ""
@@ -210,132 +206,6 @@ class FingerprintTestCaseGenerator():
         return ''.join(result) if containsErrors else None
 
 
-def localToRemoteInetPath(localPath):
-    return remoteInetRoot + "/" + os.relpath(os.abspath(localPath), localInetRoot)
-
-class RemoteTestSuite(unittest.BaseTestSuite):
-
-    def __init__(self):
-        super(RemoteTestSuite,self).__init__()
-
-        # TODO: pass this, and executable as well, if custom
-        # testSuite.repeat = args.repeat
-
-        print("connecting to the job queue")
-        conn = redis.Redis(host="172.17.0.1")
-        self.build_q = rq.Queue("build", connection=conn, default_timeout=30*60)
-        self.run_q = rq.Queue("run", connection=conn, default_timeout=30*60)
-        
-
-    
-    def run(self, result):
-
-        result.buffered = True
-        global extraOppRunArgs
-
-        print("queueing build job")
-        buildJob = self.build_q.enqueue(worker_fingerprints.buildInet, "886487cc262647a0e82dcb05a6054c7faa900578")
-
-        print("waiting for build job to end")
-        while not (buildJob.is_finished or buildJob.is_failed):
-            if buildJob.is_failed:
-                print("ERROR: build job failed " + buildJob.exc_info)
-                exit(1)
-        
-        print("build finished: " + str(buildJob.result))
-
-        rng = random.SystemRandom()
-        cases = list(self)
-        rng.shuffle(cases)
-
-        jobToTest = dict()
-        runJobs = []
-        for test in cases:
-            wd = test.wd
-
-            if not wd.startswith('/'):
-                wd = "/" + os.path.relpath(os.path.abspath(test.wd), localInetRoot)
-
-
-            # run the simulation
-            workingdir = _iif(wd.startswith('/'), remoteInetRoot + "/" + wd, wd)
-
-            wdname = '' + wd + ' ' + test.args
-            wdname = re.sub('/', '_', wdname)
-            wdname = re.sub('[\\W]+', '_', wdname)
-            resultdir = workingdir + "/results/" + test.csvFile + "/" + wdname
-            
-            command = "opp_run_release " + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + test.args + \
-                _iif(test.simtimelimit != "", " --sim-time-limit=" + test.simtimelimit, "") + \
-                " \"--fingerprint=" + test.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
-                " --vector-recording=false --scalar-recording=true" + \
-                " --result-dir=" + resultdir + \
-                extraOppRunArgs
-
-            runJob = self.run_q.enqueue(worker_fingerprints.runSimulation, "886487cc262647a0e82dcb05a6054c7faa900578",
-                test.title, command, workingdir, resultdir, depends_on=buildJob)
-            
-            runJob.meta['title'] = test.title
-            runJob.save_meta()
-
-            runJobs.append(runJob)
-            jobToTest[runJob] = test
-
-
-        print("queued " + str(len(runJobs)) + " jobs")
-
-        stop = False
-        while runJobs and not stop:
-            try:
-                for j in runJobs[:]:
-                    if j.status is None:
-                        print("Test " + j.meta["title"] + " was removed from the queue")
-                        runJobs.remove(j)
-                    elif j.status == rq.job.JobStatus.FAILED:
-                        j.refresh()
-                        print("Test " + j.meta["title"] + " failed: " + str(j.exc_info))
-                        runJobs.remove(j)
-                    else:
-                        if j.result is not None:
-                            tst = jobToTest[j]
-                            result.startTest(tst)
-                            
-                            try:
-                                # process the result
-                                # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
-                                #self.storeExitcodeCallback(result.exitcode)
-                                if j.result.exitcode != 0:
-                                    raise Exception("runtime error:" + j.result.errormsg)
-                                elif j.result.cpuTimeLimitReached:
-                                    raise Exception("cpu time limit exceeded")
-                                elif j.result.simulatedTime == 0 and self.simtimelimit != '0s':
-                                    raise Exception("zero time simulated")
-                                elif j.result.isFingerprintOK is None:
-                                    raise Exception("other")
-                                elif j.result.isFingerprintOK == False:
-                                    computedFingerprints.add(result.computedFingerprint)
-                                    anyFingerprintBad = True
-                                else:
-                                    result.addSuccess(tst)
-                                    # fingerprint OK:
-                                    #computedFingerprints.add(self.fingerprint)
-                            except:
-                                result.addError(tst, sys.exc_info())
-
-                            result.stopTest(jobToTest[j])
-                            runJobs.remove(j)
-
-                time.sleep(0.1)
-            except KeyboardInterrupt:
-                stop = True
-
-        print("remaining: " + str(len(runJobs)) + " jobs")
-
-        return result
-
-
-
-
 class SimulationResult:
     def __init__(self, command, workingdir, exitcode, errorMsg=None, isFingerprintOK=None,
             computedFingerprint=None, simulatedTime=None, numEvents=None, elapsedTime=None, cpuTimeLimitReached=None):
@@ -354,17 +224,14 @@ class SimulationResult:
 class SimulationTestCase(unittest.TestCase):
     def runSimulation(self, title, command, workingdir, resultdir):
         global logFile
-        #os.makedirs(workingdir + "/results", exist_ok=True)
-
+        ensure_dir(workingdir + "/results")
 
         # run the program and log the output
         t0 = time.time()
 
         (exitcode, out) = self.runProgram(command, workingdir, resultdir)
-        
+
         elapsedTime = time.time() - t0
-
-
         FILE = open(logFile, "a")
         FILE.write("------------------------------------------------------\n"
                  + "Running: " + title + "\n\n"
@@ -384,7 +251,7 @@ class SimulationTestCase(unittest.TestCase):
                  + "Exit code: " + str(exitcode) + "\n"
                  + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
         FILE.close()
-        
+
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
 
         # process error messages
@@ -418,15 +285,9 @@ class SimulationTestCase(unittest.TestCase):
         env = os.environ
 #        env['CPUPROFILE'] = resultdir+"/cpuprofile"
 #        env['CPUPROFILE_FREQUENCY'] = "1000"
-
-
         process = subprocess.Popen(command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
-
         out = process.communicate()[0]
-
         out = re.sub("\r", "", out.decode("utf-8"))
-
-
         return (process.returncode, out)
 
 
@@ -445,10 +306,10 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global localInetRoot, remoteInetRoot, executable, nedPath, cpuTimeLimit, extraOppRunArgs
+        global inetRoot, executable, nedPath, cpuTimeLimit, extraOppRunArgs
 
         # run the simulation
-        workingdir = _iif(self.wd.startswith('/'), remoteInetRoot + "/" + self.wd, self.wd)
+        workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
         wdname = '' + self.wd + ' ' + self.args
         wdname = re.sub('/', '_', wdname)
         wdname = re.sub('[\W]+', '_', wdname)
@@ -458,7 +319,6 @@ class FingerprintTestCase(SimulationTestCase):
                 os.makedirs(resultdir)
             except OSError:
                 pass
-        
         command = executable + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
@@ -468,10 +328,9 @@ class FingerprintTestCase(SimulationTestCase):
         # print "COMMAND: " + command + '\n'
         anyFingerprintBad = False
         computedFingerprints = set()
-
         for rep in range(self.repeat):
             result = self.runSimulation(self.title, command, workingdir, resultdir)
-            
+
             # process the result
             # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
             self.storeExitcodeCallback(result.exitcode)
@@ -498,18 +357,64 @@ class FingerprintTestCase(SimulationTestCase):
     def __str__(self):
         return self.title
 
+class ThreadSafeIter:
+    """Takes an iterator/generator and makes it thread-safe by
+    serializing call to the `next` method of given iterator/generator.
+    """
+    def __init__(self, it):
+        self.it = it
+        self.lock = threading.Lock()
 
-def _iif(cond,t,f):
-    return t if cond else f
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        with self.lock:
+            return self.it.__next__()
 
 
 
+class ThreadedTestSuite(unittest.BaseTestSuite):
+    """ runs toplevel tests in n threads
+    """
 
+    # How many test process at the time.
+    thread_count = multiprocessing.cpu_count()
 
+    def run(self, result):
+        it = ThreadSafeIter(self.__iter__())
 
+        result.buffered = True
 
+        threads = []
 
+        for i in range(self.thread_count):
+            # Create self.thread_count number of threads that together will
+            # cooperate removing every ip in the list. Each thread will do the
+            # job as fast as it can.
+            t = threading.Thread(target=self.runThread, args=(result, it))
+            t.daemon = True
+            t.start()
+            threads.append(t)
 
+        # Wait until all the threads are done. .join() is blocking.
+        #for t in threads:
+        #    t.join()
+        runApp = True
+        while runApp and threading.active_count() > 1:
+            try:
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                runApp = False
+        return result
+
+    def runThread(self, result, it):
+        tresult = result.startThread()
+        for test in it:
+            if result.shouldStop:
+                break
+            test(tresult)
+        tresult.stopThread()
 
 
 class ThreadedTestResult(unittest.TestResult):
@@ -673,18 +578,22 @@ class SimulationTextTestResult(ThreadedTestResult):
         return (cause, detail)
 
 
+def _iif(cond,t,f):
+    return t if cond else f
 
-
-
-
-
-
+def ensure_dir(f):
+    if not os.path.exists(f):
+        os.makedirs(f)
 
 if __name__ == "__main__":
+    defaultNumThreads = multiprocessing.cpu_count()
+    if defaultNumThreads >= 6:
+        defaultNumThreads = defaultNumThreads - 1
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
+    parser.add_argument('-t', '--threads', type=int, default=defaultNumThreads, help='number of parallel threads (default: number of CPUs, currently '+str(defaultNumThreads)+')')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs='*', help='extra opp_run arguments without leading "--", you can terminate list with " -- " ')
     parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
@@ -708,16 +617,16 @@ if __name__ == "__main__":
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
 
-
-    testSuite = RemoteTestSuite()
+    testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)
+    testSuite.thread_count = args.threads
     testSuite.repeat = args.repeat
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
 
     testRunner.run(testSuite)
 
-
+    print()
     generator.writeUpdatedCSVFiles()
     generator.writeErrorCSVFiles()
     generator.writeFailedCSVFiles()
