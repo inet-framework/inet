@@ -230,13 +230,6 @@ void CsmaCaMac::handleUpperPacket(Packet *packet)
 void CsmaCaMac::handleLowerPacket(Packet *packet)
 {
     EV << "received message from lower layer: " << packet << endl;
-
-    auto frame = check_and_cast<Packet *>(packet);
-    const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
-    EV << "Self address: " << address
-       << ", receiver address: " << macHeader->getReceiverAddress()
-       << ", received frame is for us: " << isForUs(frame) << endl;
-
     handleWithFsm(packet);
 }
 
