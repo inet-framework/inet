@@ -30,7 +30,7 @@ from io import StringIO
 from distutils import spawn
 
 
-import redis, rq, worker_fingerprints
+import redis, rq, fingerprints_worker
 
 localInetRoot = os.path.abspath("../..")
 remoteInetRoot = "/opt/inet"
@@ -42,6 +42,7 @@ cpuTimeLimit = "30000s"
 logFile = "test.out"
 extraOppRunArgs = ""
 exitCode = 0
+
 
 if spawn.find_executable("opp_run_dbg"):
     executable = "opp_run_dbg"
@@ -229,17 +230,21 @@ class RemoteTestSuite(unittest.BaseTestSuite):
     
     def run(self, result):
 
-        result.buffered = True
         global extraOppRunArgs
+        global githash
+
+        result.buffered = True
 
         print("queueing build job")
-        buildJob = self.build_q.enqueue(worker_fingerprints.buildInet, "886487cc262647a0e82dcb05a6054c7faa900578")
+        buildJob = self.build_q.enqueue(fingerprints_worker.buildInet, githash)
 
         print("waiting for build job to end")
-        while not (buildJob.is_finished or buildJob.is_failed):
+        while not (buildJob.is_finished):
             if buildJob.is_failed:
-                print("ERROR: build job failed " + buildJob.exc_info)
+                buildJob.refresh()
+                print("ERROR: build job failed " + str(buildJob.exc_info))
                 exit(1)
+            time.sleep(0.1)
         
         print("build finished: " + str(buildJob.result))
 
@@ -271,7 +276,7 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                 " --result-dir=" + resultdir + \
                 extraOppRunArgs
 
-            runJob = self.run_q.enqueue(worker_fingerprints.runSimulation, "886487cc262647a0e82dcb05a6054c7faa900578",
+            runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash,
                 test.title, command, workingdir, resultdir, depends_on=buildJob)
             
             runJob.meta['title'] = test.title
@@ -312,12 +317,14 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                                 elif j.result.isFingerprintOK is None:
                                     raise Exception("other")
                                 elif j.result.isFingerprintOK == False:
-                                    computedFingerprints.add(result.computedFingerprint)
+                                    try:
+                                        raise Exception("some fingerprint mismatch; actual  '" + j.result.computedFingerprint + "'")
+                                    except:
+                                        result.addFailure(tst, sys.exc_info())
                                     anyFingerprintBad = True
                                 else:
                                     result.addSuccess(tst)
                                     # fingerprint OK:
-                                    #computedFingerprints.add(self.fingerprint)
                             except:
                                 result.addError(tst, sys.exc_info())
 
@@ -630,9 +637,11 @@ class SimulationTextTestResult(unittest.TestResult):
 
 
 
-
+global githash
 if __name__ == "__main__":
+    global githash
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
+    parser.add_argument('gitref', metavar='gitref')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
@@ -644,6 +653,8 @@ if __name__ == "__main__":
     if os.path.isfile(logFile):
         FILE = open(logFile, "w")
         FILE.close()
+
+    githash = args.gitref
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')

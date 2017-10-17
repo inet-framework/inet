@@ -68,7 +68,7 @@ ENV PATH $PATH:/opt/inet/src/
 RUN pip3 install pymongo flock
 
 COPY fingerprints.py /opt/
-COPY worker_fingerprints.py /opt/
+COPY fingerprints_worker.py /opt/
 
 
 ENTRYPOINT ["nice", "rq", "worker"]
