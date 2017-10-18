@@ -130,7 +130,7 @@ const Ptr<const Chunk> Packet::popTrailer(b length, int flags)
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekTrailer(length, flags);
     if (chunk != nullptr) {
-        contents->moveIterator(trailerIterator, -chunk->getChunkLength());
+        contents->moveIterator(trailerIterator, chunk->getChunkLength());
         CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
     }
     return chunk;
