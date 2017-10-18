@@ -33,12 +33,14 @@ class CsmaCaMacHeader extends FieldsChunk
 
 class CsmaCaMacAckHeader extends CsmaCaMacHeader
 {
+    chunkLength = B(13);
 }
 
 class CsmaCaMacDataHeader extends CsmaCaMacHeader
 {
+    chunkLength = B(16);
     int networkProtocol = -1;
-    int priority;  // 802.1d UP (User Priority) 
+    int priority = -1;  // 802.1d UP (User Priority)
 }
 
 enum FcsMode {

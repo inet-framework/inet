@@ -68,8 +68,8 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
         bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)
         bool useAck = default(true);
         double bitrate @unit(bps);
-        int headerLength @unit(B) = default(16B);
-        int ackLength @unit(B) = default(13B);
+        int headerLength @unit(B) = default(16B); // minimum 16B, see CsmaCaMacDataHeader
+        int ackLength @unit(B) = default(13B); // minimum 13B, see CsmaCaMacAckHeader
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);

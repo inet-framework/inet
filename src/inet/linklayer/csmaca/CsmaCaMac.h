@@ -39,8 +39,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
     MACAddress address;
     bool useAck = true;
     double bitrate = NaN;
-    int headerLength = -1;
-    int ackLength = -1;
+    b headerLength = b(-1);
+    b ackLength = b(-1);
     simtime_t ackTimeout = -1;
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;

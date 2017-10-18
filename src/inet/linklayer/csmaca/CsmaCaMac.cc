@@ -75,8 +75,12 @@ void CsmaCaMac::initialize(int stage)
         maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
-        headerLength = par("headerLength");
-        ackLength = par("ackLength");
+        headerLength = B(par("headerLength"));
+        if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength())
+            throw cRuntimeError("The specified headerLength is too short");
+        ackLength = B(par("ackLength"));
+        if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength())
+            throw cRuntimeError("The specified ackLength is too short");
         ackTimeout = par("ackTimeout");
         slotTime = par("slotTime");
         sifsTime = par("sifsTime");
@@ -443,7 +447,6 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = makeShared<CsmaCaMacDataHeader>();
-    macHeader->setChunkLength(B(headerLength));
     auto transportProtocol = frame->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
@@ -452,6 +455,8 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto userPriorityReq = frame->getTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
+    if (headerLength > macHeader->getChunkLength())
+        frame->insertHeader(makeShared<ByteCountChunk>(headerLength - macHeader->getChunkLength()));
     frame->insertHeader(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
@@ -574,8 +579,9 @@ void CsmaCaMac::sendAckFrame()
     endSifs->setContextPointer(nullptr);
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
     macHeader->setReceiverAddress(frameToAck->peekHeader<CsmaCaMacHeader>()->getTransmitterAddress());
-    macHeader->setChunkLength(B(ackLength));
     auto frame = new Packet("CsmaAck");
+    if (ackLength > macHeader->getChunkLength())
+        frame->insertHeader(makeShared<ByteCountChunk>(ackLength - macHeader->getChunkLength()));
     frame->insertHeader(macHeader);
     auto macTrailer = makeShared<CsmaCaMacTrailer>();
     macTrailer->setFcsMode(fcsMode);
