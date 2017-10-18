@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -452,11 +453,13 @@ void CsmaCaMac::encapsulate(Packet *frame)
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
     macHeader->markImmutable();
     frame->pushHeader(macHeader);
+    frame->insertTrailer(makeShared<ByteCountChunk>(B(4)));
 }
 
 void CsmaCaMac::decapsulate(Packet *frame)
 {
     auto macHeader = frame->popHeader<CsmaCaMacDataHeader>();
+    frame->popTrailer(B(4));
     auto addressInd = frame->ensureTag<MacAddressInd>();
     addressInd->setSrcAddress(macHeader->getTransmitterAddress());
     addressInd->setDestAddress(macHeader->getReceiverAddress());
@@ -571,6 +574,7 @@ void CsmaCaMac::sendAckFrame()
     macHeader->markImmutable();
     auto frame = new Packet("CsmaAck");
     frame->append(macHeader);
+    frame->insertTrailer(makeShared<ByteCountChunk>(B(4)));
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
     delete frameToAck;
