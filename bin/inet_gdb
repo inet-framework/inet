@@ -1,0 +1,3 @@
+#!/bin/sh
+gdb $INET_GDB_OPTIONS $@
+

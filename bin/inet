@@ -1,0 +1,64 @@
+#!/bin/sh
+DIR=`dirname $0`
+OUT=$DIR/../src
+
+TOOL=""
+MODE=""
+
+if [ "$1" = "--release" ]; then
+   MODE="release"
+   shift;
+fi
+
+if [ "$1" = "--debug" ]; then
+   MODE="debug"
+   shift;
+fi
+
+if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
+   TOOL="echo"
+   shift;
+fi
+
+if [ "$MODE" = "" ]; then
+  if [ -f $OUT/INET ]; then
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg ]; then
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET.exe ]; then
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg.exe ]; then
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ]; then
+    $TOOL opp_run_release -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ]; then
+    $TOOL opp_run_dbg -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET executable or shared library not found"
+  fi
+fi
+
+if [ "$MODE" = "release" ]; then
+  if [ -f $OUT/INET ]; then
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET.exe ]; then
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ]; then
+    $TOOL opp_run_release -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET release executable or shared library not found"
+  fi
+fi
+
+if [ "$MODE" = "debug" ]; then
+  if [ -f $OUT/INET_dbg ]; then
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg.exe ]; then
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ]; then
+    $TOOL opp_run_dbg -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET release executable or shared library not found"
+  fi
+fi
+
