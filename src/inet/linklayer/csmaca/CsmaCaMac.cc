@@ -19,6 +19,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"
@@ -64,6 +65,13 @@ void CsmaCaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
+        const char *fcsModeString = par("fcsMode");
+        if (!strcmp(fcsModeString, "declared"))
+            fcsMode = FCS_DECLARED;
+        else if (!strcmp(fcsModeString, "computed"))
+            fcsMode = FCS_COMPUTED;
+        else
+            throw cRuntimeError("Unknown fcs mode");
         maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
@@ -357,7 +365,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_Event_Transition(Receive-Bit-Error,
-                                  isLowerMessage(msg) && frame->hasBitError(),
+                                  isLowerMessage(msg) && !isFcsOk(frame),
                                   IDLE,
                 numCollision++;
                 emitPacketDropSignal(frame, INCORRECTLY_RECEIVED);
@@ -451,9 +459,12 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto userPriorityReq = frame->getTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
     macHeader->setPriority(userPriority == -1 ? UP_BE : userPriority);
-    macHeader->markImmutable();
-    frame->pushHeader(macHeader);
-    frame->insertTrailer(makeShared<ByteCountChunk>(B(4)));
+    frame->insertHeader(macHeader);
+    auto macTrailer = makeShared<CsmaCaMacTrailer>();
+    macTrailer->setFcsMode(fcsMode);
+    if (fcsMode == FCS_COMPUTED)
+        macTrailer->setFcs(computeFcs(frame->peekAllBytes()));
+    frame->insertTrailer(macTrailer);
 }
 
 void CsmaCaMac::decapsulate(Packet *frame)
@@ -571,10 +582,13 @@ void CsmaCaMac::sendAckFrame()
     auto macHeader = makeShared<CsmaCaMacAckHeader>();
     macHeader->setReceiverAddress(frameToAck->peekHeader<CsmaCaMacHeader>()->getTransmitterAddress());
     macHeader->setChunkLength(B(ackLength));
-    macHeader->markImmutable();
     auto frame = new Packet("CsmaAck");
-    frame->append(macHeader);
-    frame->insertTrailer(makeShared<ByteCountChunk>(B(4)));
+    frame->insertHeader(macHeader);
+    auto macTrailer = makeShared<CsmaCaMacTrailer>();
+    macTrailer->setFcsMode(fcsMode);
+    if (fcsMode == FCS_COMPUTED)
+        macTrailer->setFcs(computeFcs(frame->peekAllBytes()));
+    frame->insertTrailer(macTrailer);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
     delete frameToAck;
@@ -663,6 +677,39 @@ bool CsmaCaMac::isForUs(Packet *frame)
 {
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     return macHeader->getReceiverAddress() == address;
+}
+
+bool CsmaCaMac::isFcsOk(Packet *frame)
+{
+    const auto& trailer = frame->peekTrailer<CsmaCaMacTrailer>(B(4));
+    switch (trailer->getFcsMode()) {
+        case FCS_DECLARED: {
+            // if the FCS mode is declared to be correct, then the check passes if and only if the chunks are correct
+            const auto& header = frame->peekHeader<CsmaCaMacHeader>();
+            return !frame->hasBitError() && header->isCorrect() && trailer->isCorrect();
+        }
+        case FCS_COMPUTED: {
+            const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());
+            auto bufferLength = B(fcsBytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            fcsBytes->copyToBuffer(buffer, bufferLength);
+            auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+            delete [] buffer;
+            return computedFcs == trailer->getFcs();
+        }
+        default:
+            throw cRuntimeError("Unknown FCS mode");
+    }
+}
+
+uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
+{
+    auto bufferLength = B(bytes->getChunkLength()).get();
+    auto buffer = new uint8_t[bufferLength];
+    bytes->copyToBuffer(buffer, bufferLength);
+    auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+    delete [] buffer;
+    return computedFcs;
 }
 
 } // namespace inet

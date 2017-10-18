@@ -35,6 +35,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
      * @name Configuration parameters
      */
     //@{
+    FcsMode fcsMode;
     MACAddress address;
     bool useAck = true;
     double bitrate = NaN;
@@ -200,6 +201,9 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual bool isAck(Packet *frame);
     virtual bool isBroadcast(Packet *frame);
     virtual bool isForUs(Packet *frame);
+    virtual bool isFcsOk(Packet *frame);
+
+    virtual uint32_t computeFcs(const Ptr<const BytesChunk>& bytes);
     //@}
 };
 
