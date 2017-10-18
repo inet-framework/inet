@@ -53,14 +53,10 @@ class RemoteTestSuite(unittest.BaseTestSuite):
     def __init__(self):
         super(RemoteTestSuite, self).__init__()
 
-        # TODO: pass this, and executable as well, if custom
-        # testSuite.repeat = args.repeat
-
         print("connecting to the job queue")
         conn = redis.Redis(host="172.17.0.1")
         self.build_q = rq.Queue("build", connection=conn, default_timeout=30*60)
         self.run_q = rq.Queue("run", connection=conn, default_timeout=30*60)
-
 
 
     def run(self, result):
@@ -70,7 +66,9 @@ class RemoteTestSuite(unittest.BaseTestSuite):
 
         result.buffered = True
 
+        buildStarted = time.perf_counter()
         print("queueing build job")
+
         buildJob = self.build_q.enqueue(fingerprints_worker.buildInet, githash)
 
         print("waiting for build job to end")
@@ -79,9 +77,15 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                 buildJob.refresh()
                 print("ERROR: build job failed " + str(buildJob.exc_info))
                 exit(1)
-            time.sleep(0.1)
+            try:
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                print("interrupted, not running tests (the build will still finish)")
+                exit(1)
 
-        print("build finished: " + str(buildJob.result))
+        buildEnded = time.perf_counter()
+
+        print("build finished, took " + str(buildEnded - buildStarted) + "s, result:" + str(buildJob.result))
 
         rng = random.SystemRandom()
         cases = list(self)
@@ -111,14 +115,15 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                 " --result-dir=" + resultdir + \
                 extraOppRunArgs
 
-            runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, test.title,
-                                        command, workingdir, resultdir, depends_on=buildJob)
+            for _ in range(test.repeat):
+                runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, test.title,
+                                            command, workingdir, resultdir, depends_on=buildJob)
 
-            runJob.meta['title'] = test.title
-            runJob.save_meta()
+                runJob.meta['title'] = test.title
+                runJob.save_meta()
 
-            runJobs.append(runJob)
-            jobToTest[runJob] = test
+                runJobs.append(runJob)
+                jobToTest[runJob] = test
 
 
         print("queued " + str(len(runJobs)) + " jobs")
@@ -142,7 +147,7 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                             try:
                                 # process the result
                                 # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
-                                #self.storeExitcodeCallback(result.exitcode)
+                                tst.storeExitcodeCallback(j.result.exitcode)
                                 if j.result.exitcode != 0:
                                     raise Exception("runtime error:" + j.result.errormsg)
                                 elif j.result.cpuTimeLimitReached:
@@ -153,6 +158,7 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                                     raise Exception("other")
                                 elif not j.result.isFingerprintOK:
                                     try:
+                                        tst.storeFingerprintCallback(j.result.computedFingerprint)
                                         raise Exception("some fingerprint mismatch; actual  '" + j.result.computedFingerprint + "'")
                                     except:
                                         result.addFailure(tst, sys.exc_info())
@@ -170,7 +176,7 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                 stop = True
 
         if runJobs:
-            print("Cleaning up " + str(len([j for j in runJobs if j.status == 'queued' or j.status == 'deferred'])) + " pending jobs...")
+            print("Cancelling " + str(len([j for j in runJobs if j.status == 'queued' or j.status == 'deferred'])) + " pending jobs...")
             for j in runJobs[:]:
                 j.cancel()
 
@@ -196,7 +202,9 @@ if __name__ == "__main__":
         FILE = open(logFile, "w")
         FILE.close()
 
-    githash = args.commit
+    githash = subprocess.check_output(["git", "rev-parse", args.commit.strip()]).decode("utf-8").strip()
+
+    print("running with commit " + githash)
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
@@ -215,7 +223,6 @@ if __name__ == "__main__":
 
     testSuite = RemoteTestSuite()
     testSuite.addTests(testcases)
-    testSuite.repeat = args.repeat
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
 
@@ -226,6 +233,6 @@ if __name__ == "__main__":
     generator.writeErrorCSVFiles()
     generator.writeFailedCSVFiles()
 
-    print("Log has been saved to %s" % logFile)
+    #print("Log has been saved to %s" % logFile) # no logging yet...
 
     exit(exitCode)
