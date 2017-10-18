@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
@@ -47,10 +48,11 @@ void APSKRadio::encapsulate(Packet *packet) const
     const APSKModulationBase *modulation = nullptr;
     // TODO: const ConvolutionalCode *forwardErrorCorrection = nullptr;
     auto phyHeader = makeShared<APSKPhyHeader>();
+    b headerLength = phyHeader->getChunkLength();
 
     // KLUDGE:
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
-        phyHeader->setChunkLength(flatTransmitter->getHeaderLength());
+        headerLength = flatTransmitter->getHeaderLength();
         modulation = check_and_cast<const APSKModulationBase *>(flatTransmitter->getModulation());
     }
     // KLUDGE:
@@ -64,7 +66,6 @@ void APSKRadio::encapsulate(Packet *packet) const
     }
     // KLUDGE:
     else {
-        phyHeader->setChunkLength(B(1));
         ASSERT(modulation != nullptr);  //FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
     }
 
@@ -73,6 +74,8 @@ void APSKRadio::encapsulate(Packet *packet) const
     phyHeader->setCrc(0);
     phyHeader->setCrcMode(CRC_DISABLED);
     phyHeader->setLengthField(packet->getByteLength());
+    if (headerLength > phyHeader->getChunkLength())
+        packet->insertHeader(makeShared<BitCountChunk>(headerLength - phyHeader->getChunkLength()));
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
     auto paddingBitLength = b(computePaddingLength(b(packet->getTotalLength()).get(), nullptr, modulation));
@@ -85,7 +88,11 @@ void APSKRadio::encapsulate(Packet *packet) const
 
 void APSKRadio::decapsulate(Packet *packet) const
 {
-    packet->popHeader<APSKPhyHeader>();
+    const auto& phyHeader = packet->popHeader<APSKPhyHeader>();
+    b headerLength = phyHeader->getChunkLength();
+    if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter))
+        headerLength = flatTransmitter->getHeaderLength();
+    packet->popHeader(headerLength - phyHeader->getChunkLength());
 }
 
 } // namespace physicallayer
