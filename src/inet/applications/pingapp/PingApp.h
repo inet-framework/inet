@@ -67,6 +67,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     long sendSeqNo = 0;    // to match the response with the request that caused the response
     long expectedReplySeqNo = 0;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
+    bool pongReceived[PING_HISTORY_SIZE];
 
     // statistics
     cStdDev rttStat;
@@ -79,6 +80,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     long lossCount = 0;    // number of lost requests
     long outOfOrderArrivalCount = 0;    // number of responses which arrived too late
     long numPongs = 0;    // number of received Ping requests
+    long numDuplicatedPongs = 0;    // number of duplicated Ping responses
 
   protected:
     virtual void initialize(int stage) override;
@@ -97,7 +99,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPingRequest();
     virtual void processPingResponse(int identifier, int seqNumber, Packet *packet);
-    virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
+    virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
