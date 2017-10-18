@@ -119,9 +119,6 @@ class RemoteTestSuite(unittest.BaseTestSuite):
                 runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, test.title,
                                             command, workingdir, resultdir, depends_on=buildJob)
 
-                runJob.meta['title'] = test.title
-                runJob.save_meta()
-
                 runJobs.append(runJob)
                 jobToTest[runJob] = test
 
@@ -132,16 +129,18 @@ class RemoteTestSuite(unittest.BaseTestSuite):
         while runJobs and not stop:
             try:
                 for j in runJobs[:]:
+                    tst = jobToTest[j]
+
                     if j.status is None:
-                        print("Test " + j.meta["title"] + " was removed from the queue")
+                        print("Test " + tst.title + " was removed from the queue")
                         runJobs.remove(j)
                     elif j.status == rq.job.JobStatus.FAILED:
                         j.refresh()
-                        print("Test " + j.meta["title"] + " failed: " + str(j.exc_info))
+                        print("Test " + tst.title + " failed: " + str(j.exc_info))
                         runJobs.remove(j)
                     else:
                         if j.result is not None:
-                            tst = jobToTest[j]
+
                             result.startTest(tst)
 
                             try:
