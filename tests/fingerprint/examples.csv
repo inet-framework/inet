@@ -425,7 +425,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         556b-67bf/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         83e2-8959/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         3dca-c175/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         373e-456c/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5b99-2cb7/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         ed01-c22c/tplx
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            c3f3-d956/tplx

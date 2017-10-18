@@ -272,6 +272,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
             rtsPacket->append(rtsFrame);
+            rtsPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(packet, rtsPacket, context->getIfs());
         }
         case 1: {
