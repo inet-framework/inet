@@ -298,6 +298,9 @@ static void testHeader()
     assert(chunk3->getChunkLength() == B(10));
     assert(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
     assert(packet1.getHeaderPopOffset() == B(10));
+    packet1.setHeaderPopOffset(B(0));
+    packet1.popHeader(B(10));
+    assert(packet1.getHeaderPopOffset() == packet1.getTotalLength());
 
     // 3. packet provides headers in reverse prepend order
     Packet packet2;
@@ -355,6 +358,9 @@ static void testTrailer()
     assert(chunk3 != nullptr);
     assert(chunk3->getChunkLength() == B(10));
     assert(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
+    assert(packet1.getTrailerPopOffset() == b(0));
+    packet1.setTrailerPopOffset(packet1.getTotalLength());
+    packet1.popTrailer(B(10));
     assert(packet1.getTrailerPopOffset() == b(0));
 
     // 3. packet provides trailers in reverse order
