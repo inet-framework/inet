@@ -29,7 +29,8 @@ namespace physicallayer {
 class INET_API APSKRadio : public FlatRadioBase
 {
   protected:
-    virtual int computePaddingLength(int64_t bitLength, const ConvolutionalCode *forwardErrorCorrection, const APSKModulationBase *modulation) const;
+    virtual b computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const APSKModulationBase *modulation) const;
+    virtual const APSKModulationBase *getModulation() const;
 
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
