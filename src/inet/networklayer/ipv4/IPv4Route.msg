@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
 cplusplus {{
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"

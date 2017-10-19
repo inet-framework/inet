@@ -13,6 +13,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+import inet.common.INETDefs;
 cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/rsvp_te/IntServ.h"

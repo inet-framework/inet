@@ -18,6 +18,7 @@
 //
 
 
+import inet.common.INETDefs;
 cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}

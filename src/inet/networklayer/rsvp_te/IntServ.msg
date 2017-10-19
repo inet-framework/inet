@@ -18,6 +18,7 @@
 // This file defines data structures used in IntServ services
 //
 
+import inet.common.INETDefs;
 cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
