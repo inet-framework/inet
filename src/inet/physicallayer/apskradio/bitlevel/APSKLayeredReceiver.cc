@@ -161,13 +161,12 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     auto packet = packetModel->getPacket()->dup();
-    packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
-    const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(packet, bps(NaN), -1, packetModel->isPacketErrorless());
+    // TODO:? packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(errorMo->getPER());
+    const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(packet, bps(NaN));
     delete packetModel;
     auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-// TODO: true, true, receptionPacketModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, decisions, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 

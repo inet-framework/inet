@@ -46,15 +46,8 @@ class INET_API TransmissionPacketModel : public SignalPacketModel, public virtua
 
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
 {
-  protected:
-    const double per;
-    const bool packetErrorless;
-
   public:
-    ReceptionPacketModel(const Packet *packet, bps bitrate, double per, bool packetErrorless);
-
-    virtual double getPER() const override { return per; }
-    virtual bool isPacketErrorless() const override { return packetErrorless; }
+    ReceptionPacketModel(const Packet *packet, bps bitrate);
 };
 
 } // namespace physicallayer

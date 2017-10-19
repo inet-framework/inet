@@ -32,12 +32,12 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const Lay
     const TransmissionPacketModel *transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
     const Packet* packet = transmissionPacketModel->getPacket();
     if (packetErrorRate == 0)
-        return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate(), packetErrorRate, true);
+        return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate());
     else {
         if (uniform(0, 1) < packetErrorRate)
             return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate(), packetErrorRate, false);
         else
-            return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate(), packetErrorRate, true);
+            return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate());
     }
 }
 

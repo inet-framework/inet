@@ -81,11 +81,9 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitMod
 
 const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVector *decodedBits, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const
 {
-    double per = -1;
-    bool packetErrorless = true; // TODO: compute packet error rate, packetErrorLess
     const auto& decodedData = makeShared<BytesChunk>(decodedBits->getBytes());
     decodedData->markImmutable();
-    return new ReceptionPacketModel(new Packet(nullptr, decodedData), bps(NaN), per, packetErrorless);
+    return new ReceptionPacketModel(new Packet(nullptr, decodedData), bps(NaN));
 }
 
 ShortBitVector Ieee80211OFDMDecoder::getSignalFieldRate(const BitVector& signalField) const

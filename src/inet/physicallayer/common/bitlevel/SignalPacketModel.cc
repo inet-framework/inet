@@ -40,10 +40,8 @@ TransmissionPacketModel::TransmissionPacketModel(const Packet *packet, bps bitra
 {
 }
 
-ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps bitrate, double per, bool packetErrorless) :
-    SignalPacketModel(packet, bitrate),
-    per(per),
-    packetErrorless(packetErrorless)
+ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps bitrate) :
+    SignalPacketModel(packet, bitrate)
 {
 }
 

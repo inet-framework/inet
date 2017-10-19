@@ -150,9 +150,7 @@ const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const L
     // TODO: implement error model
     const ITransmissionPacketModel *transmissionPacketModel = transmission->getPacketModel();
     const Packet *packet = transmissionPacketModel->getPacket();
-    double per = 0.0;
-    bool packetErrorless = per == 0.0;
-    return new ReceptionPacketModel(packet, bps(NaN), per, packetErrorless);
+    return new ReceptionPacketModel(packet, bps(NaN));
 }
 } /* namespace physicallayer */
 } /* namespace inet */

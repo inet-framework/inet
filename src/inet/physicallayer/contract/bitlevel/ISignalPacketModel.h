@@ -48,16 +48,6 @@ class INET_API ITransmissionPacketModel : public virtual ISignalPacketModel
 
 class INET_API IReceptionPacketModel : public virtual ISignalPacketModel
 {
-  public:
-    /**
-     * Returns the packet error rate (probability).
-     */
-    virtual double getPER() const = 0;
-
-    /**
-     * Returns true if the packet is actually free of errors.
-     */
-    virtual bool isPacketErrorless() const = 0;
 };
 
 } // namespace physicallayer

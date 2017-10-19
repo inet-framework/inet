@@ -340,8 +340,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     const auto& data = makeShared<BytesChunk>(mergedBits->getBytes());
     data->markImmutable();
     Packet *packet = new Packet(nullptr, data);
-    bool isReceptionSuccessful = true; // TODO:
-    return new ReceptionPacketModel(packet, bps(NaN), 0, isReceptionSuccessful);
+    return new ReceptionPacketModel(packet, bps(NaN));
 }
 
 const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
@@ -399,8 +398,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-    packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
-// TODO: true, true, packetModel->isPacketErrorless()
+    packet->ensureTag<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 

@@ -67,13 +67,13 @@ std::ostream& APSKDecoder::printToStream(std::ostream& stream, int level) const
 
 const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitModel) const
 {
-    bool isPacketErrorless = true;
+    bool hasBitError = false;
     BitVector *decodedBits = new BitVector(*bitModel->getBits());
     if (deinterleaver)
         *decodedBits = deinterleaver->deinterleave(*decodedBits);
     if (fecDecoder) {
         std::pair<BitVector, bool> fecDecodedDataField = fecDecoder->decode(*decodedBits);
-        isPacketErrorless = fecDecodedDataField.second;
+        hasBitError = !fecDecodedDataField.second;
         *decodedBits = fecDecodedDataField.first;
     }
     if (descrambler)
@@ -91,7 +91,8 @@ const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitMo
         bitsChunk->markImmutable();
         packet = new Packet(nullptr, bitsChunk);
     }
-    return new ReceptionPacketModel(packet, bps(NaN), -1, isPacketErrorless);
+    packet->setBitError(hasBitError);
+    return new ReceptionPacketModel(packet, bps(NaN));
 }
 
 } // namespace physicallayer
