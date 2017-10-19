@@ -7,8 +7,6 @@ import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;
 
-class noncobject MACAddress;
-
 class LMacHeader extends MacHeaderBase
 {
     int        mySlot; // the node's current slot number

@@ -20,10 +20,10 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include <vector>
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
 }}
 
@@ -34,7 +34,6 @@ cplusplus {{
 typedef std::vector<L3Address> AddressVector;
 }}
 
-class noncobject L3Address;
 class noncobject AddressVector;
 
 //

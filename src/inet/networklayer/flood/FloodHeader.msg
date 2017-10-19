@@ -17,14 +17,9 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.NetworkHeaderBase;
-
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
 
 class FloodHeader extends NetworkHeaderBase
 {

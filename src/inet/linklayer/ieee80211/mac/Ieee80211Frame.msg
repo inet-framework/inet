@@ -17,15 +17,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MACAddress;
 
 cplusplus {{
 #include "inet/common/BitVector.h"
-#include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
-class noncobject MACAddress;
 class noncobject BitVector;
 
 namespace inet::ieee80211;

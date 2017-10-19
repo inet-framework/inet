@@ -19,9 +19,10 @@
 
 
 import inet.common.INETDefs;
+import inet.common.packet.Packet;
+import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/TCP.h"
 #include "inet/transportlayer/tcp/TCPAlgorithm.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
@@ -33,8 +34,6 @@ cplusplus {{
 
 namespace inet::tcp;
 
-class noncobject L3Address;
-class ChunkQueue extends cNamedObject;
 class ReorderBuffer extends cNamedObject;
 class TCPSendQueue extends cObject;
 class TCPReceiveQueue extends cObject;

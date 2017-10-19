@@ -18,14 +18,9 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.contract.ipv4.IPv4Address;
 import inet.transportlayer.rtp.RTPSenderControlMessage;
 import inet.transportlayer.rtp.RTPSenderStatusMessage;
-
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
-
-class noncobject inet::IPv4Address;
 
 namespace inet::rtp;
 

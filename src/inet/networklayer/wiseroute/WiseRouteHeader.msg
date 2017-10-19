@@ -20,8 +20,6 @@ import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
 
-class noncobject L3Address;
-
 class WiseRouteHeader extends NetworkHeaderBase
 {
     @customize(true);

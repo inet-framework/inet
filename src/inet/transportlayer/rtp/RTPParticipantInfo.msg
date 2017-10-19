@@ -19,13 +19,9 @@
 
 
 import inet.common.INETDefs;
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet::rtp;
-
-class noncobject IPv4Address;
 
 //
 // This class is a super class for classes intended for storing information

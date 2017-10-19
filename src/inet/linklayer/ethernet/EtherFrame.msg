@@ -20,15 +20,13 @@ import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.EtherType;
 import inet.linklayer.common.EthernetFcsMode;
 import inet.linklayer.common.Ieee802Ctrl;
+import inet.linklayer.common.MACAddress;
 
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
 
 namespace inet;
-
-class noncobject MACAddress;
 
 enum EthernetControlOpCode
 {

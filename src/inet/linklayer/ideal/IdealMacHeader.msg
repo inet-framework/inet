@@ -19,14 +19,9 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
 
 //
 // Packet for ~IdealMac. Packet size is configurable

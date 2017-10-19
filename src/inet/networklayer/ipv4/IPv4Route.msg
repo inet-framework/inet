@@ -14,14 +14,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.contract.ipv4.IPv4Address;
+
 cplusplus {{
 #include "inet/networklayer/ipv4/IPv4Route.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;
-
-class noncobject IPv4Address;
 
 class IPv4Route extends cNamedObject
 {

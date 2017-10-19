@@ -16,15 +16,11 @@
 //
 
 
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
-
+import inet.common.INETDefs;
 import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
 
 //
 // TCP command codes, sent by the application to TCP. These constants

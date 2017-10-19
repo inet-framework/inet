@@ -18,16 +18,10 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.linklayer.common.MACAddress;
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
-
-class noncobject IPv4Address;
-class noncobject MACAddress;
 
 cplusplus {{
 // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)

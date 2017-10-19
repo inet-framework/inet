@@ -28,7 +28,6 @@ import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
-class noncobject L3Address;
 class noncobject TLVOptions;
 
 //

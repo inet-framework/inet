@@ -19,16 +19,9 @@
 // Required for MACAddress declarations
 //
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 import inet.linklayer.ieee80211.mac.Ieee80211Frame;
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-
-namespace inet;
-
-class noncobject MACAddress;
-class FieldsChunk extends cObject;
+import inet.linklayer.common.MACAddress;
 
 namespace inet::ieee80211;
 

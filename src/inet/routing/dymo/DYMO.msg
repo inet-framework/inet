@@ -19,15 +19,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 }}
 
 namespace inet::dymo;
 
-class noncobject L3Address;
 class noncobject DYMOSequenceNumber;
 class noncobject DYMOMetricType;
 

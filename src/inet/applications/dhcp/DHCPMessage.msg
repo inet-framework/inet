@@ -19,16 +19,10 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
-class noncobject IPv4Address;
 
 enum DHCPOpcode
 {

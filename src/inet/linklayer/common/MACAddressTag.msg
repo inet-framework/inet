@@ -2,15 +2,11 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-cplusplus{{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-
+import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
 
 class MacAddressTagBase extends TagBase
 {

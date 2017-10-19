@@ -20,14 +20,9 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
-
-class noncobject IPv4Address;
 
 enum PIMContstants {
     PIM_HEADER_LENGTH = 4;

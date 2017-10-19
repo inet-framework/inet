@@ -18,17 +18,15 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.contract.ipv4.IPv4Address;
 import inet.transportlayer.rtp.RTPSenderControlMessage;
 import inet.transportlayer.rtp.RTPSenderStatusMessage;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/transportlayer/rtp/RTPPacket.h"
 }}
 
 namespace inet::rtp;
-
-class noncobject IPv4Address;
 
 //
 // This enumeration is a list of all possibly types of

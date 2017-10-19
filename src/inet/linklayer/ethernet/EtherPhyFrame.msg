@@ -17,15 +17,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MACAddress;
 
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
 
 namespace inet;
 
-class noncobject MACAddress;
 class noncobject MessageId;
 
 enum SAPCode;

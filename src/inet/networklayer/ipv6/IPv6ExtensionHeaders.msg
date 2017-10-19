@@ -20,10 +20,10 @@
 import inet.common.INETDefs;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.ipv6.IPv6Header;
+import inet.networklayer.contract.ipv6.IPv6Address;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
@@ -31,8 +31,6 @@ cplusplus {{
 
 
 namespace inet;
-
-class noncobject IPv6Address;
 
 class noncobject TLVOptions;
 

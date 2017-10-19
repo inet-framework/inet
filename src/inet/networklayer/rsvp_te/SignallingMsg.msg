@@ -14,8 +14,9 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.contract.ipv4.IPv4Address;
+
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/rsvp_te/IntServ.h"
 
 #define MSG_PSB_TIMER               1
@@ -39,10 +40,7 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject IPv4Address;
-
 class noncobject SessionObj_t;
-
 class noncobject SenderTemplateObj_t;
 
 //

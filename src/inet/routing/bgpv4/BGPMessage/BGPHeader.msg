@@ -17,16 +17,8 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
-
+import inet.networklayer.contract.ipv4.IPv4Address;
 import inet.routing.bgpv4.BGPCommon;
-
-namespace inet;
-
-class noncobject IPv4Address;
 
 namespace inet::bgp;
 

@@ -20,8 +20,6 @@ import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
 
-class noncobject L3Address;
-
 class ProbabilisticBroadcastHeader extends NetworkHeaderBase
 {
     @customize(true);

@@ -2,15 +2,11 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-cplusplus{{
-#include "inet/networklayer/common/L3Address.h"
-}}
-
+import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
 
 class L3AddressTagBase extends TagBase
 {

@@ -18,15 +18,9 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.common.IPProtocolId;   //FIXME remove it, unused
-
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
-
 
 //
 // UDP command codes, sent by the application to ~UDP. These constants

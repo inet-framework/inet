@@ -19,17 +19,9 @@
 //
 import inet.common.INETDefs;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtFrame;
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-
-namespace inet;
-
-class noncobject MACAddress;
+import inet.linklayer.common.MACAddress;
 
 namespace inet::ieee80211;
-
 
 //
 // IEEE 802.11 command codes, sent by the agent to the management entity.

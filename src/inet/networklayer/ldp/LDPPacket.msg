@@ -13,10 +13,9 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-
 // base header: version, length, LSR ID, Label space
 #define LDP_BASEHEADER_BYTES  10
 
@@ -26,8 +25,6 @@ cplusplus {{
 }}
 
 namespace inet;
-
-class noncobject IPv4Address;
 
 //
 // LDP message types

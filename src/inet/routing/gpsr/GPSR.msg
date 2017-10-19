@@ -19,6 +19,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
@@ -29,7 +30,6 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject L3Address;
 class noncobject Coord;
 class noncobject GPSRForwardingMode;
 class noncobject TLVOptionBase;

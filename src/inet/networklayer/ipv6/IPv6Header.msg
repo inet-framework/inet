@@ -20,12 +20,11 @@
 import inet.common.INETDefs;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
+import inet.networklayer.contract.ipv6.IPv6Address;
 import inet.networklayer.ipv6.IPv6Header;
 
 cplusplus {{
 #include <iostream>
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-
 }}
 
 
@@ -40,7 +39,6 @@ const int IPv6_HEADER_BYTES = 40;
 }}
 
 
-class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
 
 //

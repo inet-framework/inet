@@ -23,20 +23,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.ipv6.IPv6Header;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h" // added by CB
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
 namespace inet;
-
-class FieldsChunk extends cObject;
-
-class noncobject IPv6Address;
-
-class noncobject Ipv6ExtensionHeader;
 
 class noncobject Ipv6DestinationOptionsHeader;
 

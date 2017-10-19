@@ -19,9 +19,7 @@
 //
 
 import inet.common.INETDefs;
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
 
@@ -31,8 +29,6 @@ typedef std::vector<struct EroObj_t> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
-
-class noncobject IPv4Address;
 
 class noncobject IPAddressVector;
 

@@ -19,10 +19,10 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include "inet/common/Protocol.h"
-#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
@@ -49,7 +49,6 @@ class INET_API NetworkHeaderBase : public FieldsChunk
 
 namespace inet;
 
-class noncobject L3Address;
 class noncobject ConstProtocol;
 
 class NetworkHeaderBase extends FieldsChunk

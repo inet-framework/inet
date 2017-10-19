@@ -18,10 +18,10 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.ipv4.IPv4Address;
 import inet.transportlayer.common.CRC;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include <vector>
 }}
 
@@ -31,7 +31,6 @@ cplusplus {{
 typedef std::vector<IPv4Address> IPv4AddressVector;
 }}
 
-class noncobject IPv4Address;
 class noncobject IPv4AddressVector;
 
 enum IGMPType

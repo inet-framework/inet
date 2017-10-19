@@ -17,17 +17,11 @@
 //
 
 import inet.common.INETDefs;
+import inet.linklayer.common.MACAddress;
 import inet.networklayer.icmpv6.ICMPv6Header;
-
-cplusplus {{
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.networklayer.contract.ipv6.IPv6Address;
 
 namespace inet;
-
-class noncobject IPv6Address;
-class noncobject MACAddress;
 
 // TLB options (type, length, bytes), length must be divisible by eight, max value is 8*255
 // Length in bytes:
