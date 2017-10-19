@@ -58,14 +58,14 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
         if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                routerLSA->getHeader().setLsAge(MAX_AGE);
+                routerLSA->getMutableHeader().setLsAge(MAX_AGE);
                 intf->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
             }
             else {
                 RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
-                newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
@@ -97,7 +97,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
             NetworkLSA *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != nullptr) {
-                oldLSA->getHeader().setLsAge(MAX_AGE);
+                oldLSA->getMutableHeader().setLsAge(MAX_AGE);
                 intf->getArea()->floodLSA(oldLSA);
                 oldLSA->incrementInstallTime();
             }
@@ -108,7 +108,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
         NetworkLSA *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
         if (networkLSA != nullptr) {
-            networkLSA->getHeader().setLsAge(MAX_AGE);
+            networkLSA->getMutableHeader().setLsAge(MAX_AGE);
             intf->getArea()->floodLSA(networkLSA);
             networkLSA->incrementInstallTime();
         }

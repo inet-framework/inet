@@ -81,7 +81,7 @@ class INET_API MplsHeader : public MplsHeader_Base
 
     virtual void setLabelsArraySize(unsigned int size) override { throw cRuntimeError("do not use it"); }
     virtual unsigned int getLabelsArraySize() const override { return labels.size(); }
-    virtual MplsLabel& getLabels(unsigned int k) override { throw cRuntimeError("do not use it"); }
+    virtual MplsLabel& getMutableLabels(unsigned int k) override { throw cRuntimeError("do not use it"); }
     virtual const MplsLabel& getLabels(unsigned int k) const override { throw cRuntimeError("do not use it"); }
     virtual void setLabels(unsigned int k, const MplsLabel& labels) override { throw cRuntimeError("do not use it"); }
 };

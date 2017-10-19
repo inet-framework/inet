@@ -540,28 +540,28 @@ void DHCPClient::sendRequest()
     request->setChaddr(macAddress);    // my mac address;
     request->setSname("");    // no server name given
     request->setFile("");    // no file given
-    request->getOptions().setMessageType(DHCPREQUEST);
-    request->getOptions().setClientIdentifier(macAddress);
+    request->getMutableOptions().setMessageType(DHCPREQUEST);
+    request->getMutableOptions().setClientIdentifier(macAddress);
 
     // set the parameters to request
-    request->getOptions().setParameterRequestListArraySize(4);
-    request->getOptions().setParameterRequestList(0, SUBNET_MASK);
-    request->getOptions().setParameterRequestList(1, ROUTER);
-    request->getOptions().setParameterRequestList(2, DNS);
-    request->getOptions().setParameterRequestList(3, NTP_SRV);
+    request->getMutableOptions().setParameterRequestListArraySize(4);
+    request->getMutableOptions().setParameterRequestList(0, SUBNET_MASK);
+    request->getMutableOptions().setParameterRequestList(1, ROUTER);
+    request->getMutableOptions().setParameterRequestList(2, DNS);
+    request->getMutableOptions().setParameterRequestList(3, NTP_SRV);
 
     L3Address destAddr;
 
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
-        request->getOptions().setRequestedIp(lease->ip);
+        request->getMutableOptions().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
         destAddr = IPv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
     }
     else if (clientState == REQUESTING) {
-        request->getOptions().setServerIdentifier(lease->serverId);
-        request->getOptions().setRequestedIp(lease->ip);
+        request->getMutableOptions().setServerIdentifier(lease->serverId);
+        request->getMutableOptions().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
         destAddr = IPv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
@@ -601,16 +601,16 @@ void DHCPClient::sendDiscover()
     discover->setChaddr(macAddress);    // my mac address
     discover->setSname("");    // no server name given
     discover->setFile("");    // no file given
-    discover->getOptions().setMessageType(DHCPDISCOVER);
-    discover->getOptions().setClientIdentifier(macAddress);
-    discover->getOptions().setRequestedIp(IPv4Address());
+    discover->getMutableOptions().setMessageType(DHCPDISCOVER);
+    discover->getMutableOptions().setClientIdentifier(macAddress);
+    discover->getMutableOptions().setRequestedIp(IPv4Address());
 
     // set the parameters to request
-    discover->getOptions().setParameterRequestListArraySize(4);
-    discover->getOptions().setParameterRequestList(0, SUBNET_MASK);
-    discover->getOptions().setParameterRequestList(1, ROUTER);
-    discover->getOptions().setParameterRequestList(2, DNS);
-    discover->getOptions().setParameterRequestList(3, NTP_SRV);
+    discover->getMutableOptions().setParameterRequestListArraySize(4);
+    discover->getMutableOptions().setParameterRequestList(0, SUBNET_MASK);
+    discover->getMutableOptions().setParameterRequestList(1, ROUTER);
+    discover->getMutableOptions().setParameterRequestList(2, DNS);
+    discover->getMutableOptions().setParameterRequestList(3, NTP_SRV);
 
     discover->markImmutable();
     packet->append(discover);
@@ -635,8 +635,8 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     decline->setChaddr(macAddress);    // my MAC address
     decline->setSname("");    // no server name given
     decline->setFile("");    // no file given
-    decline->getOptions().setMessageType(DHCPDECLINE);
-    decline->getOptions().setRequestedIp(declinedIp);
+    decline->getMutableOptions().setMessageType(DHCPDECLINE);
+    decline->getMutableOptions().setRequestedIp(declinedIp);
 
     decline->markImmutable();
     packet->append(decline);

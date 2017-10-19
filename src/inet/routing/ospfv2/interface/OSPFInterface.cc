@@ -469,10 +469,10 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
                 updatePacket->setRouterLSAs(0, *routerLSA);
                 unsigned short lsAge = updatePacket->getRouterLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getRouterLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getMutableRouterLSAs(0).getMutableHeader().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getRouterLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getMutableRouterLSAs(0).getMutableHeader().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(routerLSA);
             }
@@ -483,10 +483,10 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
                 updatePacket->setNetworkLSAs(0, *networkLSA);
                 unsigned short lsAge = updatePacket->getNetworkLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getNetworkLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getMutableNetworkLSAs(0).getMutableHeader().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getNetworkLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getMutableNetworkLSAs(0).getMutableHeader().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(networkLSA);
             }
@@ -498,10 +498,10 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
                 updatePacket->setSummaryLSAs(0, *summaryLSA);
                 unsigned short lsAge = updatePacket->getSummaryLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getSummaryLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getMutableSummaryLSAs(0).getMutableHeader().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getSummaryLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getMutableSummaryLSAs(0).getMutableHeader().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(summaryLSA);
             }
@@ -512,10 +512,10 @@ Packet *Interface::createUpdatePacket(const OSPFLSA *lsa)
                 updatePacket->setAsExternalLSAs(0, *asExternalLSA);
                 unsigned short lsAge = updatePacket->getAsExternalLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getAsExternalLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getMutableAsExternalLSAs(0).getMutableHeader().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getAsExternalLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getMutableAsExternalLSAs(0).getMutableHeader().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(asExternalLSA);
             }

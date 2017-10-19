@@ -343,7 +343,7 @@ Packet *VoIPStreamSender::generatePacket()
         outFile.write(sampleBuffer.readPtr(), inBytes);
     sampleBuffer.notifyRead(inBytes);
 
-    vp->getBytes().setDataFromBuffer(opacket.data, opacket.size);
+    vp->getMutableBytes().setDataFromBuffer(opacket.data, opacket.size);
 
     if (isSilent) {
         pk->setName("SILENCE");

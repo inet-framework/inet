@@ -53,7 +53,16 @@ unsigned int Ipv6Header::getExtensionHeaderArraySize() const
     return extensionHeaders.size();
 }
 
-IPv6ExtensionHeaderPtr& Ipv6Header::getExtensionHeader(unsigned int k)
+IPv6ExtensionHeaderPtr& Ipv6Header::getMutableExtensionHeader(unsigned int k)
+{
+    static IPv6ExtensionHeaderPtr null;
+    handleChange();
+    if (k >= extensionHeaders.size())
+        return null = nullptr;
+    return extensionHeaders[k];
+}
+
+const IPv6ExtensionHeaderPtr& Ipv6Header::getExtensionHeader(unsigned int k) const
 {
     static IPv6ExtensionHeaderPtr null;
     if (k >= extensionHeaders.size())
@@ -61,7 +70,19 @@ IPv6ExtensionHeaderPtr& Ipv6Header::getExtensionHeader(unsigned int k)
     return extensionHeaders[k];
 }
 
-Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
+Ipv6ExtensionHeader *Ipv6Header::findMutableExtensionHeaderByType(IPProtocolId extensionType, int index)
+{
+    for (auto & elem : extensionHeaders)
+        if ((elem)->getExtensionType() == extensionType) {
+            if (index == 0)
+                return elem;
+            else
+                index--;
+        }
+    return nullptr;
+}
+
+const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
 {
     for (const auto & elem : extensionHeaders)
         if ((elem)->getExtensionType() == extensionType) {

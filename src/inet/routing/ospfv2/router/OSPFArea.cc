@@ -404,7 +404,7 @@ void Area::ageDatabase()
         bool unreachable = parentRouter->isDestinationUnreachable(lsa);
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
-            lsa->getHeader().setLsAge(lsAge + 1);
+            lsa->getMutableHeader().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->validateLSChecksum()) {
                     EV_ERROR << "Invalid LS checksum. Memory error detected!\n";
@@ -414,21 +414,21 @@ void Area::ageDatabase()
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
-                lsa->getHeader().setLsAge(MAX_AGE);
+                lsa->getMutableHeader().setLsAge(MAX_AGE);
                 floodLSA(lsa);
                 lsa->incrementInstallTime();
             }
             else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                    lsa->getHeader().setLsAge(MAX_AGE);
+                    lsa->getMutableHeader().setLsAge(MAX_AGE);
                     floodLSA(lsa);
                     lsa->incrementInstallTime();
                 }
                 else {
                     RouterLSA *newLSA = originateRouterLSA();
 
-                    newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                    newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -437,7 +437,7 @@ void Area::ageDatabase()
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
-            lsa->getHeader().setLsAge(MAX_AGE);
+            lsa->getMutableHeader().setLsAge(MAX_AGE);
             floodLSA(lsa);
             lsa->incrementInstallTime();
         }
@@ -460,7 +460,7 @@ void Area::ageDatabase()
                     RouterLSA *newLSA = originateRouterLSA();
                     long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
-                    newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+                    newLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -497,7 +497,7 @@ void Area::ageDatabase()
         }
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
-            lsa->getHeader().setLsAge(lsAge + 1);
+            lsa->getMutableHeader().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->validateLSChecksum()) {
                     EV_ERROR << "Invalid LS checksum. Memory error detected!\n";
@@ -507,14 +507,14 @@ void Area::ageDatabase()
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
-                lsa->getHeader().setLsAge(MAX_AGE);
+                lsa->getMutableHeader().setLsAge(MAX_AGE);
                 floodLSA(lsa);
                 lsa->incrementInstallTime();
             }
             else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                    lsa->getHeader().setLsAge(MAX_AGE);
+                    lsa->getMutableHeader().setLsAge(MAX_AGE);
                     floodLSA(lsa);
                     lsa->incrementInstallTime();
                 }
@@ -522,12 +522,12 @@ void Area::ageDatabase()
                     NetworkLSA *newLSA = originateNetworkLSA(localIntf);
 
                     if (newLSA != nullptr) {
-                        newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                        newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
                     }
                     else {    // no neighbors on the network -> old NetworkLSA must be flushed
-                        lsa->getHeader().setLsAge(MAX_AGE);
+                        lsa->getMutableHeader().setLsAge(MAX_AGE);
                         lsa->incrementInstallTime();
                     }
 
@@ -536,7 +536,7 @@ void Area::ageDatabase()
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
-            lsa->getHeader().setLsAge(MAX_AGE);
+            lsa->getMutableHeader().setLsAge(MAX_AGE);
             floodLSA(lsa);
             lsa->incrementInstallTime();
         }
@@ -560,7 +560,7 @@ void Area::ageDatabase()
                     long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                     if (newLSA != nullptr) {
-                        newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+                        newLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -592,7 +592,7 @@ void Area::ageDatabase()
         SummaryLSA *lsa = summaryLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
-            lsa->getHeader().setLsAge(lsAge + 1);
+            lsa->getMutableHeader().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->validateLSChecksum()) {
                     EV_ERROR << "Invalid LS checksum. Memory error detected!\n";
@@ -602,14 +602,14 @@ void Area::ageDatabase()
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
-                lsa->getHeader().setLsAge(MAX_AGE);
+                lsa->getMutableHeader().setLsAge(MAX_AGE);
                 floodLSA(lsa);
                 lsa->incrementInstallTime();
             }
             else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                    lsa->getHeader().setLsAge(MAX_AGE);
+                    lsa->getMutableHeader().setLsAge(MAX_AGE);
                     floodLSA(lsa);
                     lsa->incrementInstallTime();
                 }
@@ -617,14 +617,14 @@ void Area::ageDatabase()
                     SummaryLSA *newLSA = originateSummaryLSA(lsa);
 
                     if (newLSA != nullptr) {
-                        newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                        newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
                         floodLSA(lsa);
                     }
                     else {
-                        lsa->getHeader().setLsAge(MAX_AGE);
+                        lsa->getMutableHeader().setLsAge(MAX_AGE);
                         floodLSA(lsa);
                         lsa->incrementInstallTime();
                     }
@@ -632,7 +632,7 @@ void Area::ageDatabase()
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
-            lsa->getHeader().setLsAge(MAX_AGE);
+            lsa->getMutableHeader().setLsAge(MAX_AGE);
             floodLSA(lsa);
             lsa->incrementInstallTime();
         }
@@ -656,7 +656,7 @@ void Area::ageDatabase()
                     if (newLSA != nullptr) {
                         long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
-                        newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+                        newLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -751,7 +751,7 @@ bool Area::isLocalAddress(IPv4Address address) const
 RouterLSA *Area::originateRouterLSA()
 {
     RouterLSA *routerLSA = new RouterLSA;
-    OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
+    OSPFLSAHeader& lsaHeader = routerLSA->getMutableHeader();
     long interfaceCount = associatedInterfaces.size();
     OSPFOptions lsOptions;
     long i;
@@ -996,7 +996,7 @@ NetworkLSA *Area::originateNetworkLSA(const Interface *intf)
 {
     if (intf->hasAnyNeighborInStates(Neighbor::FULL_STATE)) {
         NetworkLSA *networkLSA = new NetworkLSA;
-        OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
+        OSPFLSAHeader& lsaHeader = networkLSA->getMutableHeader();
         long neighborCount = intf->getNeighborCount();
         OSPFOptions lsOptions;
 
@@ -1085,8 +1085,8 @@ LinkStateID Area::getUniqueLinkStateID(IPv4AddressRange destination,
 
                 long sequenceNumber = summaryLSA->getHeader().getLsSequenceNumber();
 
-                summaryLSA->getHeader().setLsAge(0);
-                summaryLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+                summaryLSA->getMutableHeader().setLsAge(0);
+                summaryLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                 summaryLSA->setNetworkMask(destination.mask);
                 summaryLSA->setRouteCost(destinationCost);
 
@@ -1128,7 +1128,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
         RoutingTableEntry *preferredEntry = parentRouter->getPreferredEntry(*(entry->getLinkStateOrigin()), false);
         if ((preferredEntry != nullptr) && (*preferredEntry == *entry) && (externalRoutingCapability)) {
             SummaryLSA *summaryLSA = new SummaryLSA;
-            OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+            OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
             OSPFOptions lsOptions;
 
             lsaHeader.setLsAge(0);
@@ -1172,7 +1172,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                 }
                 else {
                     SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                    OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                    OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                     lsaHeader.setLsAge(0);
                     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1183,7 +1183,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
             }
             else {
                 SummaryLSA *summaryLSA = new SummaryLSA;
-                OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
                 OSPFOptions lsOptions;
 
                 lsaHeader.setLsAge(0);
@@ -1232,7 +1232,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                     }
                     else {
                         SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1243,7 +1243,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                 }
                 else {
                     SummaryLSA *summaryLSA = new SummaryLSA;
-                    OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                    OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
                     OSPFOptions lsOptions;
 
                     lsaHeader.setLsAge(0);
@@ -1306,7 +1306,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         }
 
                         SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1324,7 +1324,7 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         }
 
                         SummaryLSA *summaryLSA = new SummaryLSA;
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
                         OSPFOptions lsOptions;
 
                         lsaHeader.setLsAge(0);

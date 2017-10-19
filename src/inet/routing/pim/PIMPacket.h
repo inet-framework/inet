@@ -47,8 +47,8 @@ class INET_API PIMHello : public PIMHello_Base
     // field getter/setter methods
     virtual void setOptionsArraySize(unsigned int size) override;
     virtual unsigned int getOptionsArraySize() const override;
-    virtual HelloOptionPtr& getOptions(unsigned int k) override;
-    virtual const HelloOptionPtr& getOptions(unsigned int k) const override { return const_cast<PIMHello *>(this)->getOptions(k); }
+    virtual HelloOptionPtr& getMutableOptions(unsigned int k) override;
+    virtual const HelloOptionPtr& getOptions(unsigned int k) const override;
     virtual void setOptions(unsigned int k, const HelloOptionPtr& options) override;
 };
 

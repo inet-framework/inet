@@ -57,7 +57,8 @@ class INET_API IPv6ExtHeaderTagBase : public IPv6ExtHeaderTagBase_Base
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
+    virtual IPv6ExtensionHeaderPtr& getMutableExtensionHeader(unsigned int k) override;
+    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const override;
 
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var) override;

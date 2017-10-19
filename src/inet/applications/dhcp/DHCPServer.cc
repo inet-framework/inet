@@ -298,8 +298,8 @@ void DHCPServer::sendNAK(const Ptr<const DHCPMessage>& msg)
     nak->setBroadcast(msg->getBroadcast());
     nak->setGiaddr(msg->getGiaddr());    // next server IP
     nak->setChaddr(msg->getChaddr());
-    nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
-    nak->getOptions().setMessageType(DHCPNAK);
+    nak->getMutableOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    nak->getMutableOptions().setMessageType(DHCPNAK);
 
     nak->markImmutable();
     pk->append(nak);
@@ -334,20 +334,20 @@ void DHCPServer::sendACK(DHCPLease *lease, const Ptr<const DHCPMessage>& packet)
     ack->setChaddr(lease->mac);    // client MAC address
     ack->setSname("");    // no server name given
     ack->setFile("");    // no file given
-    ack->getOptions().setMessageType(DHCPACK);
+    ack->getMutableOptions().setMessageType(DHCPACK);
 
     // add the lease options
-    ack->getOptions().setSubnetMask(lease->subnetMask);
-    ack->getOptions().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
-    ack->getOptions().setRebindingTime(leaseTime * 0.875);
-    ack->getOptions().setLeaseTime(leaseTime);
-    ack->getOptions().setRouterArraySize(1);
-    ack->getOptions().setRouter(0, lease->gateway);
-    ack->getOptions().setDnsArraySize(1);
-    ack->getOptions().setDns(0, lease->dns);
+    ack->getMutableOptions().setSubnetMask(lease->subnetMask);
+    ack->getMutableOptions().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
+    ack->getMutableOptions().setRebindingTime(leaseTime * 0.875);
+    ack->getMutableOptions().setLeaseTime(leaseTime);
+    ack->getMutableOptions().setRouterArraySize(1);
+    ack->getMutableOptions().setRouter(0, lease->gateway);
+    ack->getMutableOptions().setDnsArraySize(1);
+    ack->getMutableOptions().setDns(0, lease->dns);
 
     // add the server ID as the RFC says
-    ack->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    ack->getMutableOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     ack->markImmutable();
     pk->append(ack);
 
@@ -403,20 +403,20 @@ void DHCPServer::sendOffer(DHCPLease *lease, const Ptr<const DHCPMessage>& packe
     offer->setChaddr(lease->mac);    // client mac address
     offer->setSname("");    // no server name given
     offer->setFile("");    // no file given
-    offer->getOptions().setMessageType(DHCPOFFER);
+    offer->getMutableOptions().setMessageType(DHCPOFFER);
 
     // add the offer options
-    offer->getOptions().setSubnetMask(lease->subnetMask);
-    offer->getOptions().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
-    offer->getOptions().setRebindingTime(leaseTime * 0.875);
-    offer->getOptions().setLeaseTime(leaseTime);
-    offer->getOptions().setRouterArraySize(1);
-    offer->getOptions().setRouter(0, lease->gateway);
-    offer->getOptions().setDnsArraySize(1);
-    offer->getOptions().setDns(0, lease->dns);
+    offer->getMutableOptions().setSubnetMask(lease->subnetMask);
+    offer->getMutableOptions().setRenewalTime(leaseTime * 0.5);    // RFC 4.4.5
+    offer->getMutableOptions().setRebindingTime(leaseTime * 0.875);
+    offer->getMutableOptions().setLeaseTime(leaseTime);
+    offer->getMutableOptions().setRouterArraySize(1);
+    offer->getMutableOptions().setRouter(0, lease->gateway);
+    offer->getMutableOptions().setDnsArraySize(1);
+    offer->getMutableOptions().setDns(0, lease->dns);
 
     // add the server_id as the RFC says
-    offer->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    offer->getMutableOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
 
     // register the offering time // todo: ?
     lease->leaseTime = simTime();

@@ -87,7 +87,8 @@ class INET_API TLVOptions : public TLVOptions_Base
     // redefine and implement pure virtual functions from TLVOptions_Base
     virtual void setTlvOptionArraySize(unsigned int size) override { throw cRuntimeError("Do not use it!"); }
     virtual unsigned int getTlvOptionArraySize() const override { return size(); }
-    virtual TLVOptionBase& getTlvOption(unsigned int k) override { return at(k); }
+    virtual const TLVOptionBase& getTlvOption(unsigned int k) const override { return *optionVector.at(k); }
+    virtual TLVOptionBase& getMutableTlvOption(unsigned int k) override { return *optionVector.at(k); }
     virtual void setTlvOption(unsigned int k, const TLVOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
 
     virtual void parsimPack(cCommBuffer *b) const override;

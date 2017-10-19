@@ -86,9 +86,9 @@ class INET_API TcpLwipConnection
 
     void sendIndicationToApp(int code);
 
-    void listen(L3Address& localAddr, unsigned short localPort);
+    void listen(const L3Address& localAddr, unsigned short localPort);
 
-    void connect(L3Address& localAddr, unsigned short localPort, L3Address& remoteAddr, unsigned short remotePort);
+    void connect(const L3Address& localAddr, unsigned short localPort, const L3Address& remoteAddr, unsigned short remotePort);
 
     void close();
 

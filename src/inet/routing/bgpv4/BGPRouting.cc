@@ -407,28 +407,28 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
 
             unsigned int nbAS = entry->getASCount();
             content.setAsPathArraySize(1);
-            content.getAsPath(0).setValueArraySize(1);
-            content.getAsPath(0).getValue(0).setType(AS_SEQUENCE);
+            content.getMutableAsPath(0).setValueArraySize(1);
+            content.getMutableAsPath(0).getMutableValue(0).setType(AS_SEQUENCE);
             //RFC 4271 : set My AS in first position if it is not already
             if (entry->getAS(0) != _myAS) {
-                content.getAsPath(0).getValue(0).setAsValueArraySize(nbAS + 1);
-                content.getAsPath(0).getValue(0).setLength(1);
-                content.getAsPath(0).getValue(0).setAsValue(0, _myAS);
+                content.getMutableAsPath(0).getMutableValue(0).setAsValueArraySize(nbAS + 1);
+                content.getMutableAsPath(0).getMutableValue(0).setLength(1);
+                content.getMutableAsPath(0).getMutableValue(0).setAsValue(0, _myAS);
                 for (unsigned int j = 1; j < nbAS + 1; j++) {
-                    content.getAsPath(0).getValue(0).setAsValue(j, entry->getAS(j - 1));
+                    content.getMutableAsPath(0).getMutableValue(0).setAsValue(j, entry->getAS(j - 1));
                 }
             }
             else {
-                content.getAsPath(0).getValue(0).setAsValueArraySize(nbAS);
-                content.getAsPath(0).getValue(0).setLength(1);
+                content.getMutableAsPath(0).getMutableValue(0).setAsValueArraySize(nbAS);
+                content.getMutableAsPath(0).getMutableValue(0).setLength(1);
                 for (unsigned int j = 0; j < nbAS; j++) {
-                    content.getAsPath(0).getValue(0).setAsValue(j, entry->getAS(j));
+                    content.getMutableAsPath(0).getMutableValue(0).setAsValue(j, entry->getAS(j));
                 }
             }
 
             InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
-            content.getOrigin().setValue((elem).second->getType());
-            content.getNextHop().setValue(iftEntry->ipv4Data()->getIPAddress());
+            content.getMutableOrigin().setValue((elem).second->getType());
+            content.getMutableNextHop().setValue(iftEntry->ipv4Data()->getIPAddress());
             IPv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();

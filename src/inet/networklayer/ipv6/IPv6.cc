@@ -261,7 +261,7 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
-    const IPv6Address& destAddr = ipv6Header->getDestAddress();
+    IPv6Address destAddr = ipv6Header->getDestAddress();
     // remove control info
     delete packet->removeControlInfo();
 
@@ -614,7 +614,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
 
     // Defragmentation. skip defragmentation if datagram is not fragmented
-    Ipv6FragmentHeader *fh = dynamic_cast<Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+    const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (fh) {
         EV_DETAIL << "Datagram fragment: offset=" << fh->getFragmentOffset()
                   << ", MORE=" << (fh->getMoreFragments() ? "true" : "false") << ".\n";

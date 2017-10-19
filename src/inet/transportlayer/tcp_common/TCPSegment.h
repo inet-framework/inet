@@ -96,8 +96,9 @@ class INET_API TcpHeader : public TcpHeader_Base
     virtual unsigned int getHeaderOptionArraySize() const override;
 
     /** Returns the kth TCP options in this TCP segment */
-    virtual TCPOptionPtr& getHeaderOption(unsigned int k) override;
-    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const override {return const_cast<TcpHeader*>(this)->getHeaderOption(k);}
+    virtual TCPOptionPtr& getMutableHeaderOption(unsigned int k) override  { return headerOptionList.at(k); }
+
+    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const override  { return headerOptionList.at(k); }
 
     /** Generated but unused method, should not be called. */
     virtual void setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption) override;

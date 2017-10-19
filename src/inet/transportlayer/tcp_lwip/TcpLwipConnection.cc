@@ -234,7 +234,7 @@ void TcpLwipConnection::fillStatusInfo(TCPStatusInfo& statusInfo)
 //TODO    statusInfo.setFin_ack_rcvd(pcbM->fin_ack_rcvd);
 }
 
-void TcpLwipConnection::listen(L3Address& localAddr, unsigned short localPort)
+void TcpLwipConnection::listen(const L3Address& localAddr, unsigned short localPort)
 {
     onCloseM = false;
     tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, nullptr, localPort);
@@ -247,8 +247,8 @@ void TcpLwipConnection::listen(L3Address& localAddr, unsigned short localPort)
     totalSentM = 0;
 }
 
-void TcpLwipConnection::connect(L3Address& localAddr, unsigned short localPort,
-        L3Address& remoteAddr, unsigned short remotePort)
+void TcpLwipConnection::connect(const L3Address& localAddr, unsigned short localPort,
+        const L3Address& remoteAddr, unsigned short remotePort)
 {
     onCloseM = false;
     struct ip_addr src_addr;

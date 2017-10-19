@@ -140,7 +140,7 @@ const Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 pkt->setQueryIntervalCode(stream.readByte());
                 unsigned int vs = stream.readUint16Be();
                 for (unsigned int i = 0; i < vs && !stream.isReadBeyondEnd(); i++)
-                    pkt->getSourceList()[i] = stream.readIPv4Address();
+                    pkt->getMutableSourceList()[i] = stream.readIPv4Address();
             }
             break;
 

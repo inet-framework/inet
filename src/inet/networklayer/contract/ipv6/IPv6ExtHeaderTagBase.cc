@@ -67,7 +67,14 @@ void IPv6ExtHeaderTagBase::setExtensionHeaderArraySize(unsigned int size)
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-IPv6ExtensionHeaderPtr& IPv6ExtHeaderTagBase::getExtensionHeader(unsigned int k)
+IPv6ExtensionHeaderPtr& IPv6ExtHeaderTagBase::getMutableExtensionHeader(unsigned int k)
+{
+    handleChange();
+    ASSERT(k < extensionHeaders.size());
+    return extensionHeaders[k];
+}
+
+const IPv6ExtensionHeaderPtr& IPv6ExtHeaderTagBase::getExtensionHeader(unsigned int k) const
 {
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];

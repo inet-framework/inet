@@ -312,14 +312,14 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                         if (routerLSA != nullptr) {
                             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
                             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                                routerLSA->getHeader().setLsAge(MAX_AGE);
+                                routerLSA->getMutableHeader().setLsAge(MAX_AGE);
                                 intf->getArea()->floodLSA(routerLSA);
                                 routerLSA->incrementInstallTime();
                             }
                             else {
                                 RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
-                                newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                                newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                                 delete newLSA;
 

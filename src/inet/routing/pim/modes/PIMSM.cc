@@ -361,7 +361,7 @@ void PIMSM::processJoinPrunePacket(Packet *pk)
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const EncodedAddress& source = group.getJoinedSourceAddress(j);
             if (source.S) {
                 if (source.W) // (*,G) Join
                     processJoinG(groupAddr, source.IPaddress, upstreamNeighbor, holdTime, inInterface);
@@ -374,7 +374,7 @@ void PIMSM::processJoinPrunePacket(Packet *pk)
 
         // go through list of pruned sources
         for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getPrunedSourceAddress(j);
+            const EncodedAddress& source = group.getPrunedSourceAddress(j);
             if (source.S) {
                 if (source.W) // (*,G) Prune
                     processPruneG(groupAddr, upstreamNeighbor, inInterface);
@@ -1397,10 +1397,10 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     msg->setHoldTime(joinPruneHoldTime());
 
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& multGroup = msg->getJoinPruneGroups(0);
+    JoinPruneGroup& multGroup = msg->getMutableJoinPruneGroups(0);
     multGroup.setGroupAddress(group);
     multGroup.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& encodedAddr = multGroup.getJoinedSourceAddress(0);
+    EncodedAddress& encodedAddr = multGroup.getMutableJoinedSourceAddress(0);
     encodedAddr.IPaddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
@@ -1433,10 +1433,10 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     msg->setHoldTime(joinPruneHoldTime());
 
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& multGroup = msg->getJoinPruneGroups(0);
+    JoinPruneGroup& multGroup = msg->getMutableJoinPruneGroups(0);
     multGroup.setGroupAddress(group);
     multGroup.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& encodedAddr = multGroup.getPrunedSourceAddress(0);
+    EncodedAddress& encodedAddr = multGroup.getMutablePrunedSourceAddress(0);
     encodedAddr.IPaddress = source;
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);

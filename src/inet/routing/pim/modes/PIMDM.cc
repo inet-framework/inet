@@ -236,14 +236,14 @@ void PIMDM::processJoinPrunePacket(Packet *pk)
 
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getJoinedSourceAddress(j);
+            const EncodedAddress& source = group.getJoinedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
         }
 
         // go through list of pruned sources
         for (unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++) {
-            EncodedAddress& source = group.getPrunedSourceAddress(j);
+            const EncodedAddress& source = group.getPrunedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
             processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
         }
@@ -1515,10 +1515,10 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getPrunedSourceAddress(0);
+    EncodedAddress& address = group.getMutablePrunedSourceAddress(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
@@ -1544,10 +1544,10 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddress(0);
+    EncodedAddress& address = group.getMutableJoinedSourceAddress(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
@@ -1575,10 +1575,10 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     msg->setUpstreamNeighborAddress(nextHop);
 
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getJoinedSourceAddress(0);
+    EncodedAddress& address = group.getMutableJoinedSourceAddress(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));

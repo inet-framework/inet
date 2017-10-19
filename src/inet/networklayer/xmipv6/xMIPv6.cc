@@ -2036,7 +2036,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
     }
 
     bool validRH2 = false;
-    IPv6Address& HoA = rh->getAddress(0);
+    const IPv6Address& HoA = rh->getAddress(0);
 
     /*11.3.3
        A node receiving a packet addressed to itself (i.e., one of the
@@ -2120,8 +2120,8 @@ void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOp
 {
     // datagram from MN to CN
     bool validHoAOpt = false;
-    IPv6Address& HoA = hoaOpt->getHomeAddress();
-    IPv6Address& CoA = ipv6Header->getSrcAddress();
+    const IPv6Address& HoA = hoaOpt->getHomeAddress();
+    const IPv6Address& CoA = ipv6Header->getSrcAddress();
 
     /*9.3.1
        Packets containing a

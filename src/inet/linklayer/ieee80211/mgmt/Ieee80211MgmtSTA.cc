@@ -425,7 +425,7 @@ void Ieee80211MgmtSTA::sendScanConfirm()
     //XXX filter for req'd bssid and ssid
     for (int i = 0; i < n; i++, it++) {
         APInfo *ap = &(*it);
-        Ieee80211Prim_BSSDescription& bss = confirm->getBssList(i);
+        Ieee80211Prim_BSSDescription& bss = confirm->getMutableBssList(i);
         bss.setChannelNumber(ap->channel);
         bss.setBSSID(ap->address);
         bss.setSSID(ap->ssid.c_str());

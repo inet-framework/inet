@@ -722,7 +722,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     numQueriesRecv++;
 
-    const IPv4Address& groupAddr = igmpQry->getGroupAddress();
+    IPv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const IGMPv2Query>& v2Query = dynamicPtrCast<const IGMPv2Query>(igmpQry);
     simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
 
@@ -791,7 +791,7 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, Packet *packet)
 
     const auto& msg = packet->peekHeader<IGMPv2Report>();
 
-    const IPv4Address& groupAddr = msg->getGroupAddress();
+    IPv4Address groupAddr = msg->getGroupAddress();
 
     EV_INFO << "IGMPv2: received V2 Membership Report for group=" << groupAddr << " iface=" << ie->getInterfaceName() << "\n";
 
@@ -858,7 +858,7 @@ void IGMPv2::processLeave(InterfaceEntry *ie, Packet *packet)
             return;
         }
 
-        const IPv4Address& groupAddr = msg->getGroupAddress();
+        IPv4Address groupAddr = msg->getGroupAddress();
         RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
         RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
         if (groupData) {

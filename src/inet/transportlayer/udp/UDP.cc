@@ -541,7 +541,7 @@ void UDP::processICMPv6Error(Packet *packet)
     code = -1;    // FIXME this is dependent on getType()...
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
     const auto& ipv6Header = packet->popHeader<Ipv6Header>();
-    Ipv6FragmentHeader *fh = dynamic_cast<Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+    const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (!fh || fh->getFragmentOffset() == 0) {
         const auto& udpHeader = packet->peekHeader<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv6Header->getSrcAddress();

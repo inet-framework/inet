@@ -305,7 +305,7 @@ void IPv4::preroutingFinish(Packet *packet)
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     ASSERT(ipv4Header);
-    const IPv4Address& destAddr = ipv4Header->getDestAddress();
+    IPv4Address destAddr = ipv4Header->getDestAddress();
 
     // route packet
 
@@ -410,7 +410,7 @@ void IPv4::datagramLocalOut(Packet *packet)
     }
 
     // send
-    const IPv4Address& destAddr = ipv4Header->getDestAddress();
+    IPv4Address destAddr = ipv4Header->getDestAddress();
 
     EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 

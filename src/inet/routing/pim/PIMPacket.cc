@@ -144,7 +144,14 @@ unsigned int PIMHello::getOptionsArraySize() const
     return options_arraysize;
 }
 
-HelloOptionPtr& PIMHello::getOptions(unsigned int k)
+HelloOptionPtr& PIMHello::getMutableOptions(unsigned int k)
+{
+    if (k >= options_arraysize)
+        throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
+    return options_var[k];
+}
+
+const HelloOptionPtr& PIMHello::getOptions(unsigned int k) const
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
