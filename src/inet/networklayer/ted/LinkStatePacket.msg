@@ -16,16 +16,13 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/ted/TED_m.h"
 }}
+
+import inet.networklayer.ted.TED;
 
 namespace inet;
 
 class FieldsChunk extends cObject;
-
-// Represents a link in the ~TED and in ~LinkStateMsg packets; from TED.msg.
-struct TELinkStateInfo;
-
 
 //
 // Packet for disseminating link state information (~TELinkStateInfo[]) by the

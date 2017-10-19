@@ -28,13 +28,13 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 }}
+
+import inet.transportlayer.contract.sctp.SCTPCommand;
 
 namespace inet;
 
 class FieldsChunk extends cObject;
-class noncobject SCTPSimpleMessage;
 
 
 message NetPerfMeterTransmitTimer

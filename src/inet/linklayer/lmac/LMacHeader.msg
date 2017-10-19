@@ -11,7 +11,6 @@ import inet.linklayer.base.MacHeaderBase;
 namespace inet;
 
 class noncobject MACAddress;
-class MacHeaderBase extends cObject;
 
 class LMacHeader extends MacHeaderBase
 {

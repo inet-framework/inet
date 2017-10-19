@@ -19,8 +19,9 @@ cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/routing/bgpv4/BGPCommon_m.h"
 }}
+
+import inet.routing.bgpv4.BGPCommon;
 
 namespace inet;
 
@@ -28,10 +29,6 @@ class noncobject IPv4Address;
 class FieldsChunk extends cObject;
 
 namespace inet::bgp;
-
-enum BGPSessionType;
-
-enum BGPPathSegmentType;
 
 enum BgpConstants{
     BGP_HEADER_OCTETS = 19;

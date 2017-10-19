@@ -10,8 +10,6 @@ import inet.common.TagBase;
 
 namespace inet;
 
-class TagBase extends cObject;
-
 class Ieee80211SubtypeTagBase extends TagBase
 {
     int subtype;
