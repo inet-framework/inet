@@ -12,6 +12,19 @@ index 75bc1ad..e21a131 100644
  #
  # Optional features (set to "yes" to enable the feature)
  #
+diff --git a/include/omnetpp/cmessage.h b/include/omnetpp/cmessage.h
+index c68f739..db6fc73 100644
+--- a/include/omnetpp/cmessage.h
++++ b/include/omnetpp/cmessage.h
+@@ -295,7 +295,7 @@ class SIM_API cMessage : public cEvent
+      * does not define dup/copy operations.
+      * The assignment operator does not change control info.
+      */
+-    void setControlInfo(cObject *p);
++    virtual void setControlInfo(cObject *p);
+ 
+     /**
+      * Removes the "control info" structure (object) from the message
 diff --git a/include/omnetpp/cobject.h b/include/omnetpp/cobject.h
 index 70db509..5a356d1 100644
 --- a/include/omnetpp/cobject.h
@@ -207,3 +220,45 @@ index 76c74d4..7c2896b 100644
          ClassType classtype;
          std::string msgclass;
          std::string realmsgclass;
+diff --git a/src/sim/cobject.cc b/src/sim/cobject.cc
+index 1ad1139..792da20 100644
+--- a/src/sim/cobject.cc
++++ b/src/sim/cobject.cc
+@@ -113,8 +113,9 @@ void cObject::dropAndDelete(cOwnedObject *obj)
+     if (!obj)
+         return;
+     if (obj->owner != this)
+-        throw cRuntimeError(this, "dropAndDelete(): Not owner of object (%s)%s",
+-                obj->getClassName(), obj->getFullPath().c_str());
++        throw cRuntimeError(this, "dropAndDelete(): Not owner of object (%s)%s, owner is (%s)%s",
++                obj->getClassName(), obj->getFullPath().c_str(),
++                obj->owner->getClassName(), obj->owner->getFullPath().c_str());
+     obj->owner = nullptr;
+     delete obj;
+ }
+diff --git a/src/sim/cpacket.cc b/src/sim/cpacket.cc
+index 5af9519..ea5f688 100644
+--- a/src/sim/cpacket.cc
++++ b/src/sim/cpacket.cc
+@@ -249,6 +249,9 @@ void cPacket::encapsulate(cPacket *msg)
+             throw cRuntimeError(this, "encapsulate(): Not owner of message (%s)%s, owner is (%s)%s",
+                     msg->getClassName(), msg->getFullName(),
+                     msg->getOwner()->getClassName(), msg->getOwner()->getFullPath().c_str());
++        if (msg->getBitLength() < 0)
++            throw cRuntimeError(this, "encapsulate(): negative length (%" PRId64 ") in message (%s)%s",
++                    msg->getBitLength(), msg->getClassName(), msg->getFullName());
+         take(encapsulatedPacket = msg);
+ #ifdef REFCOUNTING
+         ASSERT(encapsulatedPacket->shareCount == 0);
+diff --git a/src/sim/sim_std.msg b/src/sim/sim_std.msg
+index dd77034..d3bc318 100644
+--- a/src/sim/sim_std.msg
++++ b/src/sim/sim_std.msg
+@@ -285,7 +285,7 @@ class cMessage extends cEvent
+     long treeId @group("message") @hint("Identifier shared between the message and its copies");
+     short kind @group("message") @editable @hint("Generic user-settable attribute, usually carries \"type\" or \"role\" or \"category\" of message");
+     string displayString @group("message") @hint("Controls appearance of the message in GUI");
+-    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags) @group("message") @hint("Pieces of metadata attached to the message");
++    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags) @hint("Pieces of metadata attached to the message");
+     cObject *controlInfo @hint("Used with protocol stacks: carries extra information when a packet is sent between protocol layers");
+     cArray *parList @getter(getParListPtr) @group("message") @hint("OBSOLETE: use of \"parList\" should be replaced with message subclassing in the few models that still use it");
