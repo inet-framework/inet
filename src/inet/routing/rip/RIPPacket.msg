@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject L3Address;
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
@@ -32,6 +31,7 @@ const int RIP_RTE_SIZE = 20;
 }}
 
 class FieldsChunk extends cObject;
+class noncobject L3Address;
 
 //
 // RIP commands

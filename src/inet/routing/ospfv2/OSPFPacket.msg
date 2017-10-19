@@ -23,10 +23,10 @@ cplusplus {{
 
 namespace inet;
 class FieldsChunk extends cObject;
+class noncobject IPv4Address;
 
 namespace inet::ospf;
 
-class noncobject IPv4Address;
 
 enum OSPFPacketType
 {
