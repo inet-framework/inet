@@ -22,6 +22,7 @@ enum PacketDropReason
     RETRY_LIMIT_REACHED       = 9;
     LIFETIME_EXPIRED          = 10;
     CONGESTION                = 11;
+    NO_PROTOCOL_FOUND         = 12;
 }
 
 class PacketDropDetails

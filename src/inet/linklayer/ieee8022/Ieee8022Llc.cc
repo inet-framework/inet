@@ -17,6 +17,8 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/Simsignals_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
@@ -41,7 +43,15 @@ void Ieee8022Llc::handleMessage(cMessage *message)
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
-        send(packet, "upperLayerOut");
+        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->getTag<Ieee802SapInd>() != nullptr)
+            send(packet, "upperLayerOut");
+        else {
+            EV_WARN << "Unknown protocol or SAP, dropping packet\n";
+            PacketDropDetails details;
+            details.setReason(NO_PROTOCOL_FOUND);
+            emit(packetDropSignal, packet, &details);
+            delete packet;
+        }
     }
     else
         throw cRuntimeError("Unknown message");
@@ -79,9 +89,9 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             llcHeader->setControl(3);
         }
         else {
-            auto sapTag = frame->getMandatoryTag<Ieee802SapReq>();
-            llcHeader->setSsap(sapTag->getSsap());
-            llcHeader->setDsap(sapTag->getDsap());
+            auto sapReq = frame->getMandatoryTag<Ieee802SapReq>();
+            llcHeader->setSsap(sapReq->getSsap());
+            llcHeader->setDsap(sapReq->getDsap());
             llcHeader->setControl(3);       //TODO get from sapTag
         }
         frame->insertHeader(llcHeader);
@@ -104,16 +114,18 @@ void Ieee8022Llc::decapsulate(Packet *frame)
         if (snapHeader == nullptr)
             throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
         if (snapHeader->getOui() == 0)
-            payloadProtocol = ProtocolGroup::ethertype.getProtocol(snapHeader->getProtocolId());
+            payloadProtocol = ProtocolGroup::ethertype.findProtocol(snapHeader->getProtocolId());
         else
-            payloadProtocol = ProtocolGroup::snapOui.getProtocol(snapHeader->getOui());
+            payloadProtocol = ProtocolGroup::snapOui.findProtocol(snapHeader->getOui());
     }
     else {
         int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
         payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
+        auto sapInd = frame->ensureTag<Ieee802SapInd>();
+        sapInd->setSsap(llcHeader->getSsap());
+        sapInd->setDsap(llcHeader->getDsap());
     }
-    if (payloadProtocol != nullptr)
-        frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     frame->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
