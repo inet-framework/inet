@@ -680,24 +680,25 @@ bool CsmaCaMac::isForUs(Packet *frame)
 
 bool CsmaCaMac::isFcsOk(Packet *frame)
 {
-    const auto& trailer = frame->peekTrailer<CsmaCaMacTrailer>(B(4));
-    switch (trailer->getFcsMode()) {
-        case FCS_DECLARED: {
-            // if the FCS mode is declared to be correct, then the check passes if and only if the chunks are correct
-            const auto& header = frame->peekHeader<CsmaCaMacHeader>();
-            return !frame->hasBitError() && header->isCorrect() && trailer->isCorrect();
+    if (frame->hasBitError() || !frame->peekData()->isCorrect())
+        return false;
+    else {
+        const auto& trailer = frame->peekTrailer<CsmaCaMacTrailer>(B(4));
+        switch (trailer->getFcsMode()) {
+            case FCS_DECLARED:
+                return true;
+            case FCS_COMPUTED: {
+                const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());
+                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto buffer = new uint8_t[bufferLength];
+                fcsBytes->copyToBuffer(buffer, bufferLength);
+                auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+                delete [] buffer;
+                return computedFcs == trailer->getFcs();
+            }
+            default:
+                throw cRuntimeError("Unknown FCS mode");
         }
-        case FCS_COMPUTED: {
-            const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());
-            auto bufferLength = B(fcsBytes->getChunkLength()).get();
-            auto buffer = new uint8_t[bufferLength];
-            fcsBytes->copyToBuffer(buffer, bufferLength);
-            auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
-            delete [] buffer;
-            return computedFcs == trailer->getFcs();
-        }
-        default:
-            throw cRuntimeError("Unknown FCS mode");
     }
 }
 
