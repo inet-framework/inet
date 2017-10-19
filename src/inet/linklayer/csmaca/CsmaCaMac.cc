@@ -239,7 +239,6 @@ void CsmaCaMac::handleLowerPacket(Packet *packet)
 
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
-    bool deleteFrame = false;
     Packet *frame = dynamic_cast<Packet *>(msg);
     FSMA_Switch(fsm)
     {
@@ -346,7 +345,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numSent++;
                 cancelAckTimer();
                 finishCurrentTransmission();
-                deleteFrame = true;
             );
             FSMA_Event_Transition(Give-Up-Transmission,
                                   msg == endAckTimeout && retryCounter == retryLimit,
@@ -367,13 +365,11 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numCollision++;
                 emitPacketDropSignal(frame, INCORRECTLY_RECEIVED);
                 resetStateVariables();
-                deleteFrame = true;
             );
             FSMA_Event_Transition(Receive-Unexpected-Ack,
                                   isLowerMessage(msg) && isAck(frame),
                                   IDLE,
                 resetStateVariables();
-                deleteFrame = true;
             );
             FSMA_Event_Transition(Receive-Broadcast,
                                   isLowerMessage(msg) && isBroadcast(frame),
@@ -404,7 +400,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   IDLE,
                 emitPacketDropSignal(frame, NOT_ADDRESSED_TO_US, retryLimit);
                 resetStateVariables();
-                deleteFrame = true;
             );
         }
         FSMA_State(WAITSIFS)
@@ -424,7 +419,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         else if (!transmissionQueue.isEmpty())
             handleWithFsm(transmissionQueue.front());
     }
-    if (deleteFrame)
+    if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
         delete frame;
     getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }
