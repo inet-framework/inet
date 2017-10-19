@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
+#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -29,16 +30,13 @@ namespace physicallayer {
 
 const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const
 {
-    const TransmissionPacketModel *transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
-    const Packet* packet = transmissionPacketModel->getPacket();
-    if (packetErrorRate == 0)
-        return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate());
-    else {
-        if (uniform(0, 1) < packetErrorRate)
-            return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate(), packetErrorRate, false);
-        else
-            return new ReceptionPacketModel(packet, transmissionPacketModel->getBitrate());
-    }
+    auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
+    auto transmittedPacket = transmissionPacketModel->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
+        receivedPacket->setBitError(true);
+    receivedPacket->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
 }
 
 const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const
