@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TLVOption;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 cplusplus {{
@@ -27,8 +28,6 @@ cplusplus {{
 import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
-
-class noncobject TLVOptions;
 
 //
 // Generic protocol TLV option types

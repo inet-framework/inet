@@ -18,6 +18,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TLVOption;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.ipv6.IPv6Header;
 import inet.networklayer.contract.ipv6.IPv6Address;
@@ -31,8 +32,6 @@ cplusplus {{
 
 
 namespace inet;
-
-class noncobject TLVOptions;
 
 //
 // IPv6 TLV option types

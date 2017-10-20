@@ -18,6 +18,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TLVOption;
 import inet.common.geometry.Geometry;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
@@ -30,7 +31,6 @@ cplusplus {{
 namespace inet;
 
 class noncobject GPSRForwardingMode;
-class noncobject TLVOptionBase;
 
 //
 // The GPSR beacon packet is sent periodically by all GPSR routers to notify

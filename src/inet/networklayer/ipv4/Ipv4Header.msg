@@ -18,6 +18,7 @@
 
 
 import inet.common.INETDefs;
+import inet.common.TLVOption;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
@@ -29,9 +30,6 @@ cplusplus {{
 }}
 
 namespace inet;
-
-class noncobject TLVOptionBase;
-class noncobject TLVOptions;
 
 cplusplus {{
 // default IPv4 header length: 20 bytes
