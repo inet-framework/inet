@@ -31,9 +31,7 @@
 #ifndef __INET_RTCPPACKET_H
 #define __INET_RTCPPACKET_H
 
-#include "inet/transportlayer/rtp/RTCPPacket1.h"
-#include "inet/transportlayer/rtp/RTCPPacket2.h"
-#include "inet/transportlayer/rtp/RTCPPacket3.h"
+#include "inet/transportlayer/rtp/RTCPPacket_m.h"
 
 namespace inet {
 
