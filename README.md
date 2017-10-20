@@ -1,8 +1,15 @@
 INET Framework for OMNEST/OMNeT++
 =================================
 
-The INET framework (inet.omnetpp.org) is an open-source communication networks
-simulation package, written for the OMNEST/OMNeT++ simulation system. The INET 
+---
+
+[![Build Status of master](https://travis-ci.org/inet-framework/inet.svg?branch=master)
+](https://travis-ci.org/inet-framework/inet/branches "master branch")
+[![Build Status of integration](https://travis-ci.org/inet-framework/inet.svg?branch=integration)
+](https://travis-ci.org/inet-framework/inet/branches "integration branch")
+
+The [INET framework](inet.omnetpp.org) is an open-source communication networks
+simulation package, written for the OMNEST/OMNeT++ simulation system. The INET
 framework contains models for numerous wired and wireless protocols, a detailed
 physical layer model, application models and more. See the CREDITS file for the
 names of people who have contributed to the INET Framework.
@@ -23,8 +30,8 @@ GETTING STARTED
 You may start by downloading and installing the INET framework. Read the INSTALL
 file for further information.
 
-Then you can gather initial experience by starting some examples or following the 
-INET wireless tutorial (tutorials/wireless). After that, you can learn the NED 
+Then you can gather initial experience by starting some examples or following the
+INET wireless tutorial (tutorials/wireless). After that, you can learn the NED
 language from the OMNeT++ manual & sample simulations.
 
 After that, you may write your own topologies using the NED language. You may
@@ -39,9 +46,9 @@ Finally, you will be ready to run your simulation. As you see, you may use
 the INET framework without writing any C++ code, as long as you use the
 available modules.
 
-To implement new protocols or modify existing ones, you'll need to add your 
-code somewhere under the src directory. If you add new files under the 'src' 
-directory you will need to regenerate the makefiles (using the 'make makefiles' 
+To implement new protocols or modify existing ones, you'll need to add your
+code somewhere under the src directory. If you add new files under the 'src'
+directory you will need to regenerate the makefiles (using the 'make makefiles'
 command).
 
 If you want to use external interfaces in INET, please install libpcap-dev (on linux)
