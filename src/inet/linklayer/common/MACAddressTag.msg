@@ -3,14 +3,14 @@
 //
 
 cplusplus{{
-#include "inet/common/TagBase_m.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
+
+import inet.common.TagBase;
 
 namespace inet;
 
 class noncobject MACAddress;
-class TagBase extends cObject;
 
 class MacAddressTagBase extends TagBase
 {

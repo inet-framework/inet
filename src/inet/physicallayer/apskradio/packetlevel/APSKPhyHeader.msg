@@ -17,12 +17,12 @@
 
 cplusplus {{
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
 }}
+
+import inet.transportlayer.common.CRC;
 
 namespace inet;
 
-enum CrcMode;
 class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk

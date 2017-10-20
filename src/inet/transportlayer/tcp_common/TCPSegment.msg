@@ -21,8 +21,6 @@ cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
-#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 namespace inet {
 namespace tcp {
@@ -34,9 +32,10 @@ typedef TCPOption *TCPOptionPtr;
 
 }}
 
+import inet.transportlayer.common.CRC;
+import inet.transportlayer.contract.TransportHeaderBase;
+
 namespace inet;
-class TransportHeaderBase extends cObject;
-enum CrcMode;
 
 namespace inet::tcp;
 

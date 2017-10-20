@@ -5,10 +5,11 @@
 cplusplus{{
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
-#include "inet/common/TagBase_m.h"
 #include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
 #include "inet/common/packet/chunk/Chunk.h"
 }}
+
+import inet.common.TagBase;
 
 namespace inet;
 
@@ -21,7 +22,6 @@ using namespace units::values;      //FIXME Why? Units unused in this file.
 
 class noncobject ChunkPtr;
 class noncobject ProtocolPtr;
-class TagBase extends cObject;
 
 //
 // This is an abstract base class that should not be directly added as a tag.

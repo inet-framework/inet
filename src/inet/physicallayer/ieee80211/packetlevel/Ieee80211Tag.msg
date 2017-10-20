@@ -16,14 +16,13 @@
 //
 
 cplusplus {{
-#include "inet/common/TagBase_m.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 }}
 
-namespace inet;
+import inet.common.TagBase;
 
-class TagBase extends cObject;
+namespace inet;
 
 namespace inet::physicallayer;
 

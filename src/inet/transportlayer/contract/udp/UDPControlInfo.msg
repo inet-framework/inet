@@ -19,7 +19,6 @@
 
 cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;
@@ -320,3 +319,4 @@ class UDPSetMulticastSourceFilterCommand extends UDPSetOptionCommand
     int filterMode @enum(UDPSourceFilterMode);
     L3Address sourceList[];
 }
+

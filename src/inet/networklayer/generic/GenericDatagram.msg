@@ -19,17 +19,16 @@ cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 }}
+
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
 class NetworkHeaderBase extends cObject;
 class noncobject L3Address;
 class noncobject TLVOptions;
-
-enum IPProtocolId;
 
 //
 // Generic protocol TLV option types

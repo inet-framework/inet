@@ -20,12 +20,12 @@
 // **************************************************************************/
 
 cplusplus {{
-#include "inet/linklayer/base/MacHeaderBase_m.h"
+#include "inet/common/INETDefs.h"
 }}
 
-namespace inet;
+import inet.linklayer.base.MacHeaderBase;
 
-class MacHeaderBase extends cObject;
+namespace inet;
 
 //
 // A CSMA mac header format definition

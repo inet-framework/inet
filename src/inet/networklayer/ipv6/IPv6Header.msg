@@ -23,8 +23,9 @@ cplusplus {{
 #include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
-#include "inet/networklayer/common/IPProtocolId_m.h"
 }}
+
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
@@ -36,8 +37,6 @@ std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
 const int IPv6_HEADER_BYTES = 40;
 }}
 
-
-enum IPProtocolId;
 
 class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;

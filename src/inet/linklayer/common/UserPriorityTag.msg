@@ -3,12 +3,12 @@
 //
 
 cplusplus{{
-#include "inet/common/TagBase_m.h"
+#include "inet/common/INETDefs.h"
 }}
 
-namespace inet;
+import inet.common.TagBase;
 
-class TagBase extends cObject;
+namespace inet;
 
 //
 // This is an abstract base class that should not be directly added as a tag.

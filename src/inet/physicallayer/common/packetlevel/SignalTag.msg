@@ -4,16 +4,16 @@
 
 cplusplus{{
 #include "inet/common/Units.h"
-#include "inet/common/TagBase_m.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 }}
+
+import inet.common.TagBase;
 
 namespace inet;
 
 class noncobject bps;
 class noncobject W;
 class noncobject Hz;
-class TagBase extends cObject;
 
 //
 // This is an abstract base class that should not be directly added as a tag.

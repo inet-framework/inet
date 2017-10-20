@@ -20,11 +20,12 @@
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/transportlayer/common/CRC_m.h"
 }}
+
+import inet.networklayer.contract.NetworkHeaderBase;
+import inet.networklayer.common.IPProtocolId;
+import inet.transportlayer.common.CRC;
 
 namespace inet;
 

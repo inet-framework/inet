@@ -19,9 +19,10 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/common/CRC_m.h"
-#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 }}
+
+import inet.transportlayer.common.CRC;
+import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet;
 
@@ -29,8 +30,6 @@ enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
 
-class TransportHeaderBase extends cObject;
-enum CrcMode;
 //
 // Represents an UDP header, to be used with the ~UDP module.
 //

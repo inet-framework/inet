@@ -3,12 +3,12 @@
 // 
 
 cplusplus{{
-#include "inet/common/TagBase_m.h"
+#include "inet/common/INETDefs.h"
 }}
 
-namespace inet;
+import inet.common.TagBase;
 
-class TagBase extends cObject;
+namespace inet;
 
 //
 // Some 8-bit SAP values for IEEE 802.x LLC headers.

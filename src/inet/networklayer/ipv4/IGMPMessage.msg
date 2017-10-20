@@ -20,9 +20,10 @@ cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/transportlayer/common/CRC_m.h"
 #include <vector>
 }}
+
+import inet.transportlayer.common.CRC;
 
 namespace inet;
 
@@ -33,7 +34,6 @@ typedef std::vector<IPv4Address> IPv4AddressVector;
 class FieldsChunk extends cObject;
 class noncobject IPv4Address;
 class noncobject IPv4AddressVector;
-enum CrcMode;
 
 enum IGMPType
 {

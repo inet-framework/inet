@@ -3,8 +3,10 @@
 //
 
 cplusplus{{
-#include "inet/common/TagBase_m.h"
+#include "inet/common/INETDefs.h"
 }}
+
+import inet.common.TagBase;
 
 namespace inet;
 

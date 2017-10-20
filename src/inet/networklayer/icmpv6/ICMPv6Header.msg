@@ -20,15 +20,15 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
 
 #define ICMPv6_HEADER_BYTES  8
 }}
 
+import inet.transportlayer.common.CRC;
+
 namespace inet;
 
 class FieldsChunk extends cObject;
-enum CrcMode;
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg

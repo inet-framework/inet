@@ -36,6 +36,7 @@ class INET_API TransportHeaderBase : public FieldsChunk
 
 }}
 
+
 namespace inet;
 
 class FieldsChunk extends cObject;

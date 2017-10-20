@@ -18,8 +18,9 @@
 
 cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
 }}
+
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 

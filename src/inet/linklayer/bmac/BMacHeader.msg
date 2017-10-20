@@ -16,8 +16,10 @@
 //
 
 cplusplus {{
-    #include "inet/linklayer/base/MacHeaderBase_m.h"
+    #include "inet/common/INETDefs.h"
 }}
+
+import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;
 
@@ -27,3 +29,4 @@ class MacHeaderBase extends cObject;
 class BMacHeader extends MacHeaderBase
 {
 }
+

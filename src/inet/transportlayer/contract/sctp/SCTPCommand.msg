@@ -21,10 +21,11 @@ cplusplus {{
 #include <vector>
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
 }}
+
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
