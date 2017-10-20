@@ -1,8 +1,6 @@
 INET Framework for OMNEST/OMNeT++
 =================================
 
----
-
 [![Build Status of master](https://travis-ci.org/inet-framework/inet.svg?branch=master)
 ](https://travis-ci.org/inet-framework/inet/branches "master branch")
 [![Build Status of integration](https://travis-ci.org/inet-framework/inet.svg?branch=integration)
