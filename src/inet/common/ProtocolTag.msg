@@ -6,7 +6,7 @@ cplusplus{{
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/TagBase_m.h"
-#include "inet/common/Units.h"
+#include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
 #include "inet/common/packet/chunk/Chunk.h"
 }}
 
@@ -16,7 +16,7 @@ cplusplus{{
 typedef Ptr<const Chunk> ChunkPtr;
 typedef const Protocol * ProtocolPtr;
 
-using namespace units::values;
+using namespace units::values;      //FIXME Why? Units unused in this file.
 }}
 
 class noncobject ChunkPtr;
