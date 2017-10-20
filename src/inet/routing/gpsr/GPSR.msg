@@ -24,7 +24,6 @@ import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 
