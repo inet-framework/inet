@@ -17,8 +17,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/TLVOption.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"

@@ -13,9 +13,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
+import inet.common.INETDefs;
 
 namespace inet;
 

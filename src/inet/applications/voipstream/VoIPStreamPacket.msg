@@ -16,12 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+
 cplusplus {{
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/ByteArray.h"
 }};

@@ -13,8 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}

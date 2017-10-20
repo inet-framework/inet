@@ -2,10 +2,7 @@
 //
 // @author Anna Foerster
 
-cplusplus {{
-    #include "inet/common/INETDefs.h"
-}}
-
+import inet.common.INETDefs;
 import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;

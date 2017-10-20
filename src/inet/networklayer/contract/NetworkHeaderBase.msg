@@ -17,8 +17,9 @@
 //
 
 
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"

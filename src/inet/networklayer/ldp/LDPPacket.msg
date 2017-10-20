@@ -11,8 +11,9 @@
 //
 
 
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 

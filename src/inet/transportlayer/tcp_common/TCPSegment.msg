@@ -17,9 +17,10 @@
 //
 
 
+import inet.common.INETDefs;
+
 cplusplus {{
 #include <iostream>
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 
 namespace inet {

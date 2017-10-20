@@ -2,8 +2,9 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
+import inet.common.INETDefs;
+
 cplusplus{{
-#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
 #include "inet/common/packet/chunk/Chunk.h"

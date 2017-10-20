@@ -16,9 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
+import inet.common.INETDefs;
 
 namespace inet::rtp;
 

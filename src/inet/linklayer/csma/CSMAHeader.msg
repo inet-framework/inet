@@ -19,10 +19,7 @@
 // *              - subclass to create your own MAC layer packets
 // **************************************************************************/
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
-
+import inet.common.INETDefs;
 import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;

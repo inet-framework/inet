@@ -22,8 +22,9 @@
 // (The terminating Flag is not counted, as rfc1331 states that
 // only one Flag is required between back-to-back frames.)
 //
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 }}

@@ -18,9 +18,9 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
+import inet.common.INETDefs;
 
+cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/TCP.h"
 #include "inet/transportlayer/tcp/TCPAlgorithm.h"

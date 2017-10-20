@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2015 OpenSim Ltd.
+// Copyright (C) 2017 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,28 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// @author Zoltan Bojthe
+// @author: Zoltan Bojthe
 //
 
 
-import inet.common.INETDefs;
-
-namespace inet;
-
-class TLVOptionBase
-{
-    short type = -1;
-    short length = 0;   // total length of option
-}
-
-class TLVOptionRaw extends TLVOptionBase
-{
-    char bytes[];
-}
-
-class TLVOptions
-{
-    @customize(true);
-    abstract TLVOptionBase tlvOption[];
-}
-
+cplusplus {{
+#include "inet/common/INETDefs.h"
+}}

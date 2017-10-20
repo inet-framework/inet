@@ -25,8 +25,9 @@
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
+import inet.common.INETDefs;
+
 cplusplus {{
-#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 }}
 
@@ -35,7 +36,6 @@ import inet.transportlayer.contract.sctp.SCTPCommand;
 namespace inet;
 
 class FieldsChunk extends cObject;
-
 
 message NetPerfMeterTransmitTimer
 {

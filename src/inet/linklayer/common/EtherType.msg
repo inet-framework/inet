@@ -16,9 +16,7 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
+import inet.common.INETDefs;
 
 namespace inet;
 

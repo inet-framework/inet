@@ -17,10 +17,7 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
-
+import inet.common.INETDefs;
 import inet.transportlayer.common.CRC;
 import inet.transportlayer.contract.TransportHeaderBase;
 

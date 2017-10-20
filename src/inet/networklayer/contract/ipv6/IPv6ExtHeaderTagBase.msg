@@ -16,10 +16,7 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
-
+import inet.common.INETDefs;
 import inet.common.TagBase;
 
 namespace inet;
@@ -42,3 +39,4 @@ class IPv6ExtHeaderTagBase
     @customize(true);
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
 }
+
