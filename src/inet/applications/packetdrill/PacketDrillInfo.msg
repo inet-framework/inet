@@ -16,6 +16,8 @@
 //
 
 
+import inet.common.INETDefs;
+
 message PacketDrillInfo
 {
     simtime_t scriptTime;

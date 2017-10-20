@@ -16,6 +16,8 @@
 //
 
 
+import inet.common.INETDefs;
+
 namespace inet::httptools;
 
 //

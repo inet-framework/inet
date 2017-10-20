@@ -2,6 +2,8 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
+import inet.common.INETDefs;
+
 cplusplus{{
 #include "inet/common/Units.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"

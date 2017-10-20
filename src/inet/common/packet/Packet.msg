@@ -13,6 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+
 cplusplus {{
 #include "inet/common/packet/ChunkBuffer.h"
 #include "inet/common/packet/ChunkQueue.h"

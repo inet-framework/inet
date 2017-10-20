@@ -16,6 +16,8 @@
 //
 
 
+import inet.common.INETDefs;
+
 cplusplus {{
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
 }}

@@ -7,6 +7,8 @@
 // (C) 2001 by Matthias Oppitz <Matthias.Oppitz@gmx.de>
 //
 
+import inet.common.INETDefs;
+
 namespace inet::rtp;
 
 //
