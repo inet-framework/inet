@@ -14,15 +14,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.geometry.Geometry;
 
 cplusplus {{
 #include "inet/environment/common/PhysicalObject.h"
 }}
 
 namespace inet::physicalenvironment;
-
-class noncobject Coord;
-class noncobject EulerAngles;
 
 class PhysicalObject extends cNamedObject
 {

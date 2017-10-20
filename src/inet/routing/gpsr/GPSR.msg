@@ -18,19 +18,18 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.geometry.Geometry;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/common/geometry/common/Coord.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 
 namespace inet;
 
-class noncobject Coord;
 class noncobject GPSRForwardingMode;
 class noncobject TLVOptionBase;
 
