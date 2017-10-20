@@ -1,0 +1,26 @@
+sudo: required
+
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - docker pull omnetpp/omnetpp-core-triplatform
+
+# can't really do it with a matrix because of the constraint that fingerprint tests can only be ran on linux
+env:
+  - MODE=release TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=yes
+  - MODE=release TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=no
+  - MODE=release TARGET_PLATFORM=windows RUN_FINGERPRINT_TESTS=no
+  - MODE=release TARGET_PLATFORM=macosx  RUN_FINGERPRINT_TESTS=no
+
+  - MODE=debug   TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=yes
+  - MODE=debug   TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=no
+  - MODE=debug   TARGET_PLATFORM=windows RUN_FINGERPRINT_TESTS=no
+  - MODE=debug   TARGET_PLATFORM=macosx  RUN_FINGERPRINT_TESTS=no
+
+script:
+  - docker run -ti --env TRAVIS_REPO_SLUG --env TARGET_PLATFORM --env RUN_FINGERPRINT_TESTS --env MODE
+      -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG
+      omnetpp/omnetpp-core-triplatform /bin/bash /root/travis-runner.sh
