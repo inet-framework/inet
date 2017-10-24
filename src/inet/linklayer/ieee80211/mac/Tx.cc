@@ -17,6 +17,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -60,10 +61,22 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     take(packet);
-    const auto& h = packet->removeHeader<Ieee80211MacHeader>();
-    if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(h))
+    const auto& updatedHeader = packet->removeHeader<Ieee80211MacHeader>();
+    if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(updatedHeader))
         twoAddressHeader->setTransmitterAddress(mac->getAddress());
-    packet->insertHeader(h);
+    packet->insertHeader(updatedHeader);
+    const auto& updatedTrailer = packet->removeTrailer<Ieee80211MacTrailer>();
+    updatedTrailer->setFcsMode(mac->getFcsMode());
+    if (mac->getFcsMode() == FCS_COMPUTED) {
+        const auto& fcsBytes = packet->peekAllBytes();
+        auto bufferLength = B(fcsBytes->getChunkLength()).get();
+        auto buffer = new uint8_t[bufferLength];
+        fcsBytes->copyToBuffer(buffer, bufferLength);
+        auto fcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+        updatedTrailer->setFcs(fcs);
+        delete [] buffer;
+    }
+    packet->insertTrailer(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);

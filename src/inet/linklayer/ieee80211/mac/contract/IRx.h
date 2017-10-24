@@ -54,7 +54,7 @@ class INET_API IRx
         virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
         virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
         virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
-        virtual bool lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        virtual bool lowerFrameReceived(Packet *packet) = 0;
 };
 
 } // namespace ieee80211

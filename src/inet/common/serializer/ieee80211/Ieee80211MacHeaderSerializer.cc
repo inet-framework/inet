@@ -220,10 +220,9 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
 void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& macTrailer = dynamicPtrCast<const Ieee80211MacTrailer>(chunk);
-    // TODO: re-enable this when FCS is properly computed in the MAC in all code paths
-//    auto fcsMode = macTrailer->getFcsMode();
-//    if (fcsMode != FCS_COMPUTED)
-//        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
+    auto fcsMode = macTrailer->getFcsMode();
+    if (fcsMode != FCS_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
     stream.writeUint32Be(macTrailer->getFcs());
 }
 

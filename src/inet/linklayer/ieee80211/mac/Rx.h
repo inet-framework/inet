@@ -50,7 +50,7 @@ class INET_API Rx : public cSimpleModule, public IRx
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
         virtual void setOrExtendNav(simtime_t navInterval);
-        virtual bool isFcsOk(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) const;
+        virtual bool isFcsOk(Packet *packet) const;
         virtual void recomputeMediumFree();
         virtual void refreshDisplay() const override;
 
@@ -63,7 +63,7 @@ class INET_API Rx : public cSimpleModule, public IRx
         virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState newReceptionState) override;
         virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
         virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
-        virtual bool lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+        virtual bool lowerFrameReceived(Packet *packet) override;
         virtual void frameTransmitted(simtime_t durationField) override;
         virtual void registerContention(IContention *contention) override;
 };

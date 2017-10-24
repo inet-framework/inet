@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
@@ -64,14 +65,15 @@ void Rx::handleMessage(cMessage *msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-bool Rx::lowerFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+bool Rx::lowerFrameReceived(Packet *packet)
 {
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet, header);
+    bool isFrameOk = isFcsOk(packet);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
+        const auto& header = packet->peekHeader<Ieee80211MacHeader>();
         if (header->getReceiverAddress() != address)
             setOrExtendNav(header->getDuration());
 //        statistics->frameReceived(frame);
@@ -104,11 +106,28 @@ bool Rx::isReceptionInProgress() const
            (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
-bool Rx::isFcsOk(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) const
+bool Rx::isFcsOk(Packet *packet) const
 {
-    // TODO: real FCS check based on fcs mode, see UDP for example
-    // TODO: e.g. packet->peekData()->isCorrect();
-    return !packet->hasBitError() && header->isCorrect();
+    if (packet->hasBitError() || !packet->peekData()->isCorrect())
+        return false;
+    else {
+        const auto& trailer = packet->peekTrailer<Ieee80211MacTrailer>(B(4));
+        switch (trailer->getFcsMode()) {
+            case FCS_DECLARED:
+                return true;
+            case FCS_COMPUTED: {
+                const auto& fcsBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - trailer->getChunkLength());
+                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto buffer = new uint8_t[bufferLength];
+                fcsBytes->copyToBuffer(buffer, bufferLength);
+                auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+                delete [] buffer;
+                return computedFcs == trailer->getFcs();
+            }
+            default:
+                throw cRuntimeError("Unknown FCS mode");
+        }
+    }
 }
 
 void Rx::recomputeMediumFree()

@@ -31,9 +31,10 @@ void Ieee80211TesterMac::handleLowerPacket(Packet *packet)
     if (msgCounter >= len)
         throw cRuntimeError("No action is defined for this msg %s", packet->getName());
     if (actions[msgCounter] == 'A') {
-        const auto& frame = packet->peekHeader<Ieee80211MacHeader>();
-        if (rx->lowerFrameReceived(packet, frame))
-            processLowerFrame(packet, frame);
+        if (rx->lowerFrameReceived(packet)) {
+            auto header = packet->peekHeader<Ieee80211MacHeader>();
+            processLowerFrame(packet, header);
+        }
         else { // corrupted frame received
             if (mib->qos)
                 hcf->corruptedFrameReceived();

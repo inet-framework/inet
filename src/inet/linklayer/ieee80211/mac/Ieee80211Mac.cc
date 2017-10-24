@@ -29,6 +29,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 
@@ -155,9 +156,7 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
     packet->insertHeader(header);
-    const auto& trailer = makeShared<Ieee80211MacTrailer>();
-    trailer->setFcsMode(fcsMode);
-    packet->insertTrailer(trailer);
+    packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(packet, header);
 }
 
@@ -186,8 +185,8 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
-    auto header = packet->peekHeader<Ieee80211MacHeader>();
-    if (rx->lowerFrameReceived(packet, header)) {
+    if (rx->lowerFrameReceived(packet)) {
+        auto header = packet->peekHeader<Ieee80211MacHeader>();
         processLowerFrame(packet, header);
     }
     else { // corrupted frame received
@@ -263,9 +262,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
         header->setTid(userPriorityReq->getUserPriority());
     }
     packet->insertHeader(header);
-    const auto& trailer = makeShared<Ieee80211MacTrailer>();
-    trailer->setFcsMode(fcsMode);
-    packet->insertTrailer(trailer);
+    packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
 }
 
 void Ieee80211Mac::decapsulate(Packet *packet)
