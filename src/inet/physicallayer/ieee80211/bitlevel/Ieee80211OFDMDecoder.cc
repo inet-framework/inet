@@ -56,6 +56,7 @@ std::ostream& Ieee80211OFDMDecoder::printToStream(std::ostream& stream, int leve
 
 const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitModel *bitModel) const
 {
+    bool hasBitError = false;
     BitVector *decodedBits = new BitVector(*bitModel->getBits());
     const IInterleaving *interleaving = nullptr;
     if (deinterleaver) {
@@ -65,9 +66,7 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitMod
     const IForwardErrorCorrection *forwardErrorCorrection = nullptr;
     if (fecDecoder) {
         std::pair<BitVector, bool> fecDecodedDataField = fecDecoder->decode(*decodedBits);
-        bool isDecodedSuccessfully = fecDecodedDataField.second;
-        if (!isDecodedSuccessfully)
-            throw cRuntimeError("FEC error");  // TODO: implement correct error handling
+        hasBitError = !fecDecodedDataField.second;
         *decodedBits = fecDecodedDataField.first;
         forwardErrorCorrection = fecDecoder->getForwardErrorCorrection();
     }
@@ -76,14 +75,27 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitMod
         scrambling = descrambler->getScrambling();
         *decodedBits = descrambler->descramble(*decodedBits);
     }
-    return createPacketModel(decodedBits, scrambling, forwardErrorCorrection, interleaving);
+    return createPacketModel(decodedBits, hasBitError, scrambling, forwardErrorCorrection, interleaving);
 }
 
-const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVector *decodedBits, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const
+const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVector *decodedBits, bool hasBitError, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const
 {
-    const auto& decodedData = makeShared<BytesChunk>(decodedBits->getBytes());
-    decodedData->markImmutable();
-    return new ReceptionPacketModel(new Packet(nullptr, decodedData), bps(NaN));
+    Packet *packet;
+    if (decodedBits->getSize() % 8 == 0) {
+        const auto& bytesChunk = makeShared<BytesChunk>(decodedBits->getBytes());
+        bytesChunk->markImmutable();
+        packet = new Packet(nullptr, bytesChunk);
+    }
+    else {
+        std::vector<bool> bits;
+        for (int i = 0; i < (int)decodedBits->getSize(); i++)
+            bits.push_back(decodedBits->getBit(i));
+        const auto& bitsChunk = makeShared<BitsChunk>(bits);
+        bitsChunk->markImmutable();
+        packet = new Packet(nullptr, bitsChunk);
+    }
+    packet->setBitError(hasBitError);
+    return new ReceptionPacketModel(packet, bps(NaN));
 }
 
 ShortBitVector Ieee80211OFDMDecoder::getSignalFieldRate(const BitVector& signalField) const

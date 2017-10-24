@@ -35,20 +35,23 @@ Ieee80211OFDMRadio::Ieee80211OFDMRadio() :
 void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
 {
     auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
-    auto paddingLength = ofdmTransmitter->getPaddingLength(packet);
     const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
     phyHeader->setRate(ofdmTransmitter->getMode(packet)->getSignalMode()->getRate());
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
     packet->insertHeader(phyHeader);
-    if (paddingLength != b(0)) {
-        const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength);
-        packet->insertTrailer(phyTrailer);
-    }
+    auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
+    // insert padding and 6 tail bits
+    const auto &phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
+    packet->insertTrailer(phyTrailer);
 }
 
 void Ieee80211OFDMRadio::decapsulate(Packet *packet) const
 {
-    packet->popHeader<Ieee80211OfdmPhyHeader>();
+    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
+    const auto& phyHeader = packet->popHeader<Ieee80211OfdmPhyHeader>();
+    auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
+    // pop padding and 6 tail bits
+    packet->popTrailer(paddingLength + b(6));
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
 }
 

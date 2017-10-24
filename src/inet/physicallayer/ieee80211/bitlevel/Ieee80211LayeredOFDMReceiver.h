@@ -87,7 +87,7 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
     const IReceptionPacketModel *createSignalFieldPacketModel(const IReceptionBitModel *signalFieldBitModel) const;
     const IReceptionPacketModel *createDataFieldPacketModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel, const IReceptionPacketModel *signalFieldPacketModel) const;
     const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
-    const IReceptionPacketModel *createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const;
+    const IReceptionPacketModel *createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const;
 
     const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
     unsigned int getSignalFieldLength(const BitVector *signalField) const;

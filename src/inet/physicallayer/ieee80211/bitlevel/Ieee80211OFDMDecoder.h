@@ -42,7 +42,7 @@ class INET_API Ieee80211OFDMDecoder : public IDecoder
     const IInterleaver *deinterleaver = nullptr;
 
   protected:
-    const IReceptionPacketModel *createPacketModel(const BitVector *decodedBits, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const;
+    const IReceptionPacketModel *createPacketModel(const BitVector *decodedBits, bool hasBitError, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const;
     ShortBitVector getSignalFieldRate(const BitVector& signalField) const;
     unsigned int getSignalFieldLength(const BitVector& signalField) const;
     unsigned int calculatePadding(unsigned int dataFieldLengthInBits, const IModulation *modulationScheme, const Ieee80211ConvolutionalCode *fec) const;

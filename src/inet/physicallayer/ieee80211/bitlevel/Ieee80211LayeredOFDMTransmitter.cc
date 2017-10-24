@@ -142,25 +142,15 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
 {
     // The SIGNAL field is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1), Tail (6),
     // fields, so the SIGNAL field is 24 bits (OFDM_SYMBOL_SIZE / 2) long.
-    BitVector *signalField = new BitVector();
-    const auto& bytesChunk = completePacketModel->getPacket()->peekAllBytes();
-    const BitVector *serializedPacket = new BitVector(bytesChunk->getBytes());
-    for (unsigned int i = 0; i < NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i++)
-        signalField->appendBit(serializedPacket->getBit(i));
-    const auto& signalChunk = makeShared<BytesChunk>(signalField->getBytes());
-    signalChunk->markImmutable();
+    auto packet = completePacketModel->getPacket();
+    const auto& signalChunk = packet->peekAt(b(0), b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
     return new TransmissionPacketModel(new Packet(nullptr, signalChunk), bps(NaN));
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
 {
-    BitVector *dataField = new BitVector();
-    const auto& bytesChunk = completePacketModel->getPacket()->peekAllBytes();
-    const BitVector *serializedPacket = new BitVector(bytesChunk->getBytes());
-    for (unsigned int i = NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i < serializedPacket->getSize(); i++)
-        dataField->appendBit(serializedPacket->getBit(i));
-    const auto& dataChunk = makeShared<BytesChunk>(dataField->getBytes());
-    dataChunk->markImmutable();
+    auto packet = completePacketModel->getPacket();
+    const auto& dataChunk = packet->peekAt(b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2), packet->getTotalLength() - b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
     return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN));
 }
 
@@ -241,11 +231,10 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
     return new TransmissionBitModel(b(-1), mode->getSignalMode()->getGrossBitrate(), b(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
-b Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) const
+b Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Ieee80211OFDMMode *mode, b length) const
 {
     // 18.3.5.4 Pad bits (PAD), 1597p.
     // TODO: in non-compliant mode: header padding.
-    const Ieee80211OFDMMode *mode = getMode(packet);
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OFDMCode *code = mode->getDataMode()->getCode();
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
@@ -253,7 +242,7 @@ b Ieee80211LayeredOFDMTransmitter::getPaddingLength(const Packet *packet) const
         const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
-    unsigned int dataBitsLength = 6 + b(packet->getTotalLength()).get() + 16;
+    unsigned int dataBitsLength = 6 + b(length).get() + 16;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD

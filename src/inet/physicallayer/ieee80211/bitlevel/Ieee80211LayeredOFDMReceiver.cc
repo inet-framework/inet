@@ -328,18 +328,11 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
     return nullptr;
 }
 
-const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
+const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    const auto& signalFieldBytesChunk = signalFieldPacketModel->getPacket()->peekAllBytes();
-    const BitVector *signalBits = new BitVector(signalFieldBytesChunk->getBytes());
-    BitVector *mergedBits = new BitVector(*signalBits);
-    const auto& dataFieldBytesChunk = dataFieldPacketModel->getPacket()->peekAllBytes();
-    const BitVector *dataBits = new BitVector(dataFieldBytesChunk->getBytes());
-    for (unsigned int i = 0; i < dataBits->getSize(); i++)
-        mergedBits->appendBit(dataBits->getBit(i));
-    const auto& data = makeShared<BytesChunk>(mergedBits->getBytes());
-    data->markImmutable();
-    Packet *packet = new Packet(nullptr, data);
+    Packet *packet = new Packet(name);
+    packet->append(signalFieldPacketModel->getPacket()->peekAll());
+    packet->append(dataFieldPacketModel->getPacket()->peekAll());
     return new ReceptionPacketModel(packet, bps(NaN));
 }
 
@@ -385,7 +378,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     if (!bitModel)
         bitModel = createCompleteBitModel(signalFieldBitModel, dataFieldBitModel);
     if (!packetModel)
-        packetModel = createCompletePacketModel(signalFieldPacketModel, dataFieldPacketModel);
+        packetModel = createCompletePacketModel(transmission->getPacket()->getName(), signalFieldPacketModel, dataFieldPacketModel);
 
     delete signalFieldSymbolModel;
     delete dataFieldSymbolModel;
