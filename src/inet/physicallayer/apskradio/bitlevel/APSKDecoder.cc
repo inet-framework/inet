@@ -81,6 +81,7 @@ const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitMo
     Packet *packet;
     if (decodedBits->getSize() % 8 == 0) {
         const auto& bytesChunk = makeShared<BytesChunk>(decodedBits->getBytes());
+        bytesChunk->markImmutable();
         packet = new Packet(nullptr, bytesChunk);
     }
     else {
