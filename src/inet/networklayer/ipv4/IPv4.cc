@@ -566,7 +566,8 @@ void IPv4::routeUnicastPacketFinish(Packet *packet)
 
 void IPv4::routeLocalBroadcastPacket(Packet *packet)
 {
-    const InterfaceEntry *destIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
+    auto interfaceReq = packet->getTag<InterfaceReq>();
+    const InterfaceEntry *destIE = interfaceReq != nullptr ? ift->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
     // The destination address is 255.255.255.255 or local subnet broadcast address.
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
     // and mapped to the broadcast MAC address.
