@@ -20,7 +20,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/scenario/IScriptable.h"
-#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/networklayer/rsvp_te/IntServ_m.h"
 #include "RSVPPathMsg.h"
 #include "RSVPResvMsg.h"
 #include "RSVPHelloMsg.h"

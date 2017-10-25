@@ -15,10 +15,9 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.rsvp_te.IntServ;
 
 cplusplus {{
-#include "inet/networklayer/rsvp_te/IntServ.h"
-
 #define MSG_PSB_TIMER               1
 #define MSG_PSB_TIMEOUT             2
 
@@ -39,9 +38,6 @@ cplusplus {{
 }}
 
 namespace inet;
-
-class noncobject SessionObj_t;
-class noncobject SenderTemplateObj_t;
 
 //
 // FIXME missing documentation

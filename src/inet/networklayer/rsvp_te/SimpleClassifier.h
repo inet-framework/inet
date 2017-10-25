@@ -26,7 +26,7 @@
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
 #include "inet/networklayer/mpls/LIBTable.h"
-#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 namespace inet {
 

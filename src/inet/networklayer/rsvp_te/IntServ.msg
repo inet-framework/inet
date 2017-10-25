@@ -34,6 +34,8 @@ class noncobject IPAddressVector;
 
 class noncobject EroVector;
 
+class noncobject FlowDescriptorVector;
+
 //
 // Intserv/RSVP: Session Structure
 //

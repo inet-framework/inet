@@ -15,17 +15,14 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.rsvp_te.IntServ;
+import inet.networklayer.rsvp_te.RSVPPacket;
 
 cplusplus {{
-#include "inet/networklayer/rsvp_te/IntServ.h"
 #include "inet/networklayer/rsvp_te/RSVPPacket.h"
 }}
 
 namespace inet;
-
-struct RsvpHopObj_t;
-class noncobject FlowDescriptorVector;
-class RSVPPacket extends cObject;
 
 //
 // FIXME missing documentation

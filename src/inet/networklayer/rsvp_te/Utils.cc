@@ -13,7 +13,7 @@
 //
 
 #include "inet/networklayer/rsvp_te/Utils.h"
-#include "inet/networklayer/rsvp_te/IntServ.h"
+#include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 namespace inet {
 
