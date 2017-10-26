@@ -12,12 +12,16 @@ import tempfile
 import multiprocessing
 import math
 
+import io
+import zipfile
 
 import time
 import random
 
 import redis
 import rq
+import pymongo
+import gridfs
 
 import pprint
 
@@ -82,6 +86,12 @@ the commands to perform the simulation runs are written into a temporary
 Makefile, and run using "make" with the appropriate -j option. The Makefile
 may be exported for inspection.
 """
+
+def unzip_bytes(bytestream):
+    with zipfile.ZipFile(bytestream, "r") as zipf:
+        zipf.extractall(".")
+
+
 
 class Runall:
 
@@ -179,6 +189,12 @@ class Runall:
                     else:
                         if j.result is not None:
                             pprint.pprint(vars(j.result))
+
+                            client = pymongo.MongoClient("172.17.0.1")
+                            gfs = gridfs.GridFS(client.opp)
+
+                            unzip_bytes(gfs.get(j.id).read())
+
                             runJobs.remove(j)
 
                 time.sleep(0.1)
@@ -204,19 +220,18 @@ class Runall:
         currentGitRef = subprocess.check_output(["git", "-C", localInetRoot, "rev-parse", "HEAD"]).decode("utf-8")
 
         parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
-        parser.add_argument('-c', '--commit', default=currentGitRef, metavar='commit')
-        parser.add_argument('simProgArgs', metavar='SIMULATION_COMMAND',  nargs=argparse.REMAINDER, help='Simulation command to execute. It should specify the name of the configuration that contains the parameter study (-c CONFIGNAME), and optionally a run filter (-r FILTEREXPR)')
+        parser.add_argument('--commit', default=currentGitRef, metavar='commit')
         parser.add_argument('-C', '--directory', metavar='DIR', help='Change to the given directory before doing anything.')
 
-
+        simProgArgs = []
         try:
-            opts = parser.parse_args()
+            opts, argv = parser.parse_known_args()
+            print(opts)
+            print(argv)
+            simProgArgs = argv
         except IOError as e:
             print(e)
             exit(1)
-        if not opts.simProgArgs:
-            parser.print_help()
-            sys.exit(0)
 
         global githash
         githash = subprocess.check_output(["git", "-C", localInetRoot, "rev-parse", opts.commit.strip()]).decode("utf-8").strip()
@@ -258,23 +273,3 @@ class Runall:
 
 tool = Runall()
 tool.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,6 +6,9 @@ import re
 import time
 import logging
 
+import rq
+import io
+import zipfile
 import pymongo
 import gridfs
 import flock
@@ -48,6 +51,10 @@ def checkoutGit(gitHash):
         raise Exception("Failed to fetch git repo:\n" + output)
 
     (exitCode, output) = runProgram("git reset --hard " + gitHash, inetRoot)
+    if exitCode != 0:
+        raise Exception("Failed to fetch git repo:\n" + output)
+
+    (exitCode, output) = runProgram("git submodule update", inetRoot)
     if exitCode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
@@ -134,6 +141,31 @@ def switchInetToCommit(gitHash):
         logger.info("not switching, already on it")
 
 
+def zip_directory(directory, exclude_dirs=[]):
+    with io.BytesIO() as bytestream:
+        with zipfile.ZipFile(bytestream, "w") as zipf:
+
+            for root, dirs, files in os.walk(directory):
+                dirs[:] = [d for d in dirs if d not in exclude_dirs]
+
+                for f in files:
+                    zipf.write(os.path.join(root, f))
+
+        bytestream.seek(0)
+        zipped = bytestream
+
+    return zipped
+
+def submitResults(workingdir):
+    client = pymongo.MongoClient(mongoHost)
+    gfs = gridfs.GridFS(client.opp)
+
+    results_zip = zip_directory(workingdir + "/results")
+
+    job = rq.get_current_job()
+
+    gfs.put(results_zip, _id = job.id)
+
 def runSimulation(gitHash, title, command, workingdir, resultdir):
 
     os.makedirs(resultdir, exist_ok=True)
@@ -200,4 +232,7 @@ def runSimulation(gitHash, title, command, workingdir, resultdir):
                 result.simulatedTime = float(m.group(2))
 
     result.errormsg = errorMsg.strip()
+
+    submitResults(workingdir)
+
     return result
