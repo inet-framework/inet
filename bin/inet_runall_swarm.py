@@ -19,6 +19,7 @@ import random
 import redis
 import rq
 
+import pprint
 
 localInetRoot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/..")
 
@@ -151,9 +152,9 @@ class Runall:
             #wdname = re.sub('/', '_', wdname)
             #wdname = re.sub('[\\W]+', '_', wdname)
             #resultdir = workingdir + "/results/" + test.csvFile + "/" + wdname
-            print (extraOppRunArgs)
+            # print (extraOppRunArgs)
             command = "opp_run_release " + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + \
-                " ".join(extraOppRunArgs)
+                " ".join(extraOppRunArgs) + " -r " + str(rn)
 
             runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, "test.title",
                                         command, workingdir, "results", depends_on=buildJob)
@@ -177,7 +178,7 @@ class Runall:
                         runJobs.remove(j)
                     else:
                         if j.result is not None:
-                            print("result: " + str(vars(j.result)))
+                            pprint.pprint(vars(j.result))
                             runJobs.remove(j)
 
                 time.sleep(0.1)
