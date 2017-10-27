@@ -27,7 +27,7 @@ RUN git checkout integration
 RUN git config --global user.email "anon@example.com"
 RUN git config --global user.name "Anonymous"
 
-# creating a new branch just to we don't mess up the integration reference
+# creating a new branch just so we don't mess up the integration reference
 RUN git branch work && git checkout work
 
 WORKDIR /opt/omnetpp-5.2
@@ -47,6 +47,7 @@ RUN make MODE=release -j $(nproc)
 RUN apt-get install ccache -y
 ENV PATH /usr/lib/ccache:$PATH
 
+# making
 ENV CCACHE_PREFIX distcc
 
 # putting ccache on the host

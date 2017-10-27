@@ -19,7 +19,7 @@ INET_ROOT = "/opt/inet"
 inetLibCache = "/host-cache/inetlib"
 inetLibFile = INET_ROOT + "/src/libINET.so"
 
-mongoHost = "mng" # discovered using swarm internal dns
+MONGO_HOST = "mng" # discovered using swarm internal dns
 
 INET_HASH_FILE = "/opt/current_inet_hash"
 
@@ -57,7 +57,7 @@ def checkoutGit(gitHash):
 def buildInet(gitHash):
     checkoutGit(gitHash)
 
-    client = pymongo.MongoClient(mongoHost)
+    client = pymongo.MongoClient(MONGO_HOST)
     gfs = gridfs.GridFS(client.opp)
 
     if gfs.exists(gitHash):
@@ -92,7 +92,7 @@ def replaceInetLib(gitHash):
                 with open(directory + "/libINET.so", "xb") as f:
 
                     logger.info("we have just created the file, so we need to download it")
-                    client = pymongo.MongoClient(mongoHost)
+                    client = pymongo.MongoClient(MONGO_HOST)
                     gfs = gridfs.GridFS(client.opp)
                     logger.info("connected, downloading")
                     f.write(gfs.get(gitHash).read())
@@ -152,7 +152,7 @@ def zip_directory(directory, exclude_dirs=[]):
     return zipped
 
 def submitResults(result_dir):
-    client = pymongo.MongoClient(mongoHost)
+    client = pymongo.MongoClient(MONGO_HOST)
     gfs = gridfs.GridFS(client.opp)
 
     results_zip = zip_directory(result_dir)
