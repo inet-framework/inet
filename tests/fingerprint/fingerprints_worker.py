@@ -1,28 +1,23 @@
 import subprocess
 import os
 import shutil
-import sys
 import re
 import time
 import logging
-
-import rq
 import io
 import zipfile
+
+import rq
 import pymongo
 import gridfs
 import flock
 
 from fingerprints import SimulationResult
 
-MODEL_DIR = "/tmp/model/"
 
-
-inetRoot = "/opt/inet"
+INET_ROOT = "/opt/inet"
 inetLibCache = "/host-cache/inetlib"
-inetLibFile = inetRoot + "/src/libINET.so"
-
-logFile = "test.out"
+inetLibFile = INET_ROOT + "/src/libINET.so"
 
 mongoHost = "mng" # discovered using swarm internal dns
 
@@ -46,16 +41,16 @@ def runProgram(command, workingdir):
 
 
 def checkoutGit(gitHash):
-    (exitCode, output) = runProgram("git fetch", inetRoot)
-    if exitCode != 0:
+    (exitcode, output) = runProgram("git fetch", INET_ROOT)
+    if exitcode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
-    (exitCode, output) = runProgram("git reset --hard " + gitHash, inetRoot)
-    if exitCode != 0:
+    (exitcode, output) = runProgram("git reset --hard " + gitHash, INET_ROOT)
+    if exitcode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
-    (exitCode, output) = runProgram("git submodule update", inetRoot)
-    if exitCode != 0:
+    (exitcode, output) = runProgram("git submodule update", INET_ROOT)
+    if exitcode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
 # this is the first kind of job
@@ -68,11 +63,11 @@ def buildInet(gitHash):
     if gfs.exists(gitHash):
         return "INET build " + gitHash + " already exists, not rebuilding."
 
-    (exitCode, output) = runProgram("make makefiles", inetRoot)
+    (exitCode, output) = runProgram("make makefiles", INET_ROOT)
     if exitCode != 0:
         raise Exception("Failed to make makefiles:\n" + output)
 
-    (exitCode, output) = runProgram("make -j $(distcc -j) MODE=release", inetRoot)
+    (exitCode, output) = runProgram("make -j $(distcc -j) MODE=release", INET_ROOT)
     if exitCode != 0:
         raise Exception("Failed to build INET:\n" + output)
 
@@ -152,87 +147,69 @@ def zip_directory(directory, exclude_dirs=[]):
                     zipf.write(os.path.join(root, f))
 
         bytestream.seek(0)
-        zipped = bytestream
+        zipped = bytes(bytestream.read())
 
     return zipped
 
-def submitResults(workingdir):
+def submitResults(result_dir):
     client = pymongo.MongoClient(mongoHost)
     gfs = gridfs.GridFS(client.opp)
 
-    results_zip = zip_directory(workingdir + "/results")
+    results_zip = zip_directory(result_dir)
 
     job = rq.get_current_job()
 
     gfs.put(results_zip, _id = job.id)
 
-def runSimulation(gitHash, title, command, workingdir, resultdir):
 
-    os.makedirs(resultdir, exist_ok=True)
+def runSimulation(gitHash, command, workingdir):
+
+    result_dir = "/results"
+
+    os.makedirs(result_dir, exist_ok=True)
 
     switchInetToCommit(gitHash)
 
-    global logFile
-    os.makedirs(workingdir + "/results", exist_ok=True)
-
     logger.info("running simulation")
     # run the program and log the output
+
+    command += " --result-dir " + result_dir
+
     t0 = time.time()
-
     (exitcode, out) = runProgram(command, workingdir)
-
     elapsedTime = time.time() - t0
 
     logger.info("sim terminated, elapsedTime: " + str(elapsedTime))
 
-    FILE = open(logFile, "a")
-    FILE.write("------------------------------------------------------\n"
-             + "Running: " + title + "\n\n"
-             + "$ cd " + workingdir + "\n"
-             + "$ " + command + "\n\n"
-             + out.strip() + "\n\n"
-             + "Exit code: " + str(exitcode) + "\n"
-             + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
-    FILE.close()
-
-    FILE = open(resultdir + "/test.out", "w")
-    FILE.write("------------------------------------------------------\n"
-             + "Running: " + title + "\n\n"
-             + "$ cd " + workingdir + "\n"
-             + "$ " + command + "\n\n"
-             + out.strip() + "\n\n"
-             + "Exit code: " + str(exitcode) + "\n"
-             + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
-    FILE.close()
-
     result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
 
     # process error messages
-    errorLines = re.findall("<!>.*", out, re.M)
-    errorMsg = ""
-    for err in errorLines:
+    error_lines = re.findall("<!>.*", out, re.M)
+    error_msg = ""
+    for err in error_lines:
         err = err.strip()
         if re.search("Fingerprint", err):
             if re.search("successfully", err):
                 result.isFingerprintOK = True
             else:
-                m = re.search("(computed|calculated): ([-a-zA-Z0-9]+(/[a-z0]+)?)", err)
-                if m:
+                match = re.search("(computed|calculated): ([-a-zA-Z0-9]+(/[a-z0]+)?)", err)
+                if match:
                     result.isFingerprintOK = False
-                    result.computedFingerprint = m.group(2)
+                    result.computedFingerprint = match.group(2)
                 else:
                     raise Exception("Cannot parse fingerprint-related error message: " + err)
         else:
-            errorMsg += "\n" + err
-            if re.search("CPU time limit reached", err):
-                result.cpuTimeLimitReached = True
-            m = re.search("at event #([0-9]+), t=([0-9]*(\\.[0-9]+)?)", err)
-            if m:
-                result.numEvents = int(m.group(1))
-                result.simulatedTime = float(m.group(2))
+            error_msg += "\n" + err
+            result.cpuTimeLimitReached = bool(re.search("CPU time limit reached", err))
+            match = re.search("at t=([0-9]*(\\.[0-9]+)?)s, event #([0-9]+)", err)
+            if match:
+                result.simulatedTime = float(match.group(1))
+                result.numEvents = int(match.group(2))
 
-    result.errormsg = errorMsg.strip()
+    result.errormsg = error_msg.strip()
 
-    submitResults(workingdir)
+    submitResults(result_dir)
+
+    shutil.rmtree(result_dir)
 
     return result

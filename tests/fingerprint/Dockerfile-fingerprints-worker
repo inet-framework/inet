@@ -43,12 +43,7 @@ RUN echo "CFLAGS_RELEASE='-O3 -DNDEBUG=1'" >> configure.user
 RUN ./configure WITH_TKENV=no WITH_QTENV=no WITH_OSG=no WITH_OSGEARTH=no
 RUN make MODE=release -j $(nproc)
 
-WORKDIR /opt/inet
 
-# (unused) disabling precompiled headers to make ccache work
-# RUN sed -e '/precompiled header support/,+8d' -i src/makefrag
-
-# (unused) ccache doesn't work if precompiled headers are not disabled...
 RUN apt-get install ccache -y
 ENV PATH /usr/lib/ccache:$PATH
 
@@ -57,9 +52,6 @@ ENV CCACHE_PREFIX distcc
 # putting ccache on the host
 ENV CCACHE_DIR /host-cache/inetccache
 
-RUN make makefiles
-# unused: doesn't make sense to build inet during image build if no ccache, and makes the image huge...
-# && make MODE=release -j $(nproc)
 
 WORKDIR /opt/
 

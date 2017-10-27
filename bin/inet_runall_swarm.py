@@ -6,28 +6,22 @@
 import argparse
 import os
 import sys
-import re
 import subprocess
-import tempfile
-import multiprocessing
-import math
 
 import io
 import zipfile
 
 import time
 import random
+import pprint
 
 import redis
 import rq
 import pymongo
 import gridfs
 
-import pprint
 
 localInetRoot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/..")
-
-print(localInetRoot)
 
 remoteInetRoot = "/opt/inet"
 
@@ -37,15 +31,11 @@ import  fingerprints_worker
 
 
 
-sep = ";" if sys.platform == 'win32' else ':'
-nedPath = remoteInetRoot + "/src" + sep + remoteInetRoot + "/examples" + sep + remoteInetRoot + "/showcases" + sep + remoteInetRoot + "/tutorials" + sep + remoteInetRoot + "/tests/networks"
+nedPath = remoteInetRoot + "/src;" + remoteInetRoot + "/examples;" + remoteInetRoot + "/showcases;" + remoteInetRoot + "/tutorials;" + remoteInetRoot + "/tests/networks"
 inetLib = remoteInetRoot + "/src/INET"
 cpuTimeLimit = "30000s"
-logFile = "test.out"
-extraOppRunArgs = ""
-exitCode = 0
-
 githash = ""
+
 
 def localToRemoteInetPath(localPath):
     return remoteInetRoot + "/" + os.path.relpath(os.path.abspath(localPath), localInetRoot)
@@ -87,9 +77,11 @@ Makefile, and run using "make" with the appropriate -j option. The Makefile
 may be exported for inspection.
 """
 
-def unzip_bytes(bytestream):
-    with zipfile.ZipFile(bytestream, "r") as zipf:
-        zipf.extractall(".")
+
+def unzip_bytes(zip_bytes):
+    with io.BytesIO(zip_bytes) as bytestream:
+        with zipfile.ZipFile(bytestream, "r") as zipf:
+            zipf.extractall(".")
 
 
 
@@ -113,12 +105,8 @@ class Runall:
         runNumbers = self.resolveRunNumbers(opts.simProgArgs)
 
 
-
-
-        global extraOppRunArgs
         global githash
 
-        extraOppRunArgs = opts.simProgArgs
         buildStarted = time.perf_counter()
         print("queueing build job")
 
@@ -158,16 +146,10 @@ class Runall:
             # run the simulation
             workingdir = (remoteInetRoot + "/" + wd) if wd.startswith('/') else wd
 
-            #wdname = '' + wd + ' ' + test.args
-            #wdname = re.sub('/', '_', wdname)
-            #wdname = re.sub('[\\W]+', '_', wdname)
-            #resultdir = workingdir + "/results/" + test.csvFile + "/" + wdname
-            # print (extraOppRunArgs)
             command = "opp_run_release " + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + \
-                " ".join(extraOppRunArgs) + " -r " + str(rn)
+                " ".join(opts.simProgArgs) + " -r " + str(rn)
 
-            runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, "test.title",
-                                        command, workingdir, "results", depends_on=buildJob)
+            runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, command, workingdir, depends_on = buildJob)
 
             runJobs.append(runJob)
 
@@ -209,10 +191,6 @@ class Runall:
 
         print("done")
 
-        #print("Log has been saved to %s" % logFile) # no logging yet...
-
-        exit(exitCode)
-
 
         sys.exit(0)
 
@@ -223,12 +201,12 @@ class Runall:
         parser.add_argument('--commit', default=currentGitRef, metavar='commit')
         parser.add_argument('-C', '--directory', metavar='DIR', help='Change to the given directory before doing anything.')
 
-        simProgArgs = []
         try:
             opts, argv = parser.parse_known_args()
             print(opts)
             print(argv)
-            simProgArgs = argv
+            opts.simProgArgs = argv
+
         except IOError as e:
             print(e)
             exit(1)
