@@ -12,8 +12,6 @@ cplusplus{{
 
 namespace inet::visualizer;
 
-class inet::PacketDropDetails extends cObject;
-
 class PacketDrop extends inet::PacketDropDetails
 {
     @existingClass();

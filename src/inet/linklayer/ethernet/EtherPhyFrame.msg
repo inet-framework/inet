@@ -25,8 +25,6 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject MessageId;
-
 enum SAPCode;
 
 //

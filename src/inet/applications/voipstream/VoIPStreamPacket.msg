@@ -17,6 +17,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.ByteArray;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
@@ -37,8 +38,6 @@ enum VoIPStreamPacketType
     VOICE = 1;
     SILENCE = 2;
 }
-
-class noncobject ByteArray;
 
 //
 // Packet type used by VoIPSourceApp and VoIPSinkApp

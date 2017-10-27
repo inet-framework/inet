@@ -25,14 +25,13 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv6.IPv6Address;
 import inet.networklayer.ipv6.IPv6Header;
+import inet.networklayer.ipv6.IPv6ExtensionHeaders;
 
 cplusplus {{
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
 namespace inet;
-
-class noncobject Ipv6DestinationOptionsHeader;
 
 enum MobilityHeaderType
 {
