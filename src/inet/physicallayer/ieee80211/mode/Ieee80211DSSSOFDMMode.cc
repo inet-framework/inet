@@ -33,9 +33,7 @@ Ieee80211DsssOfdmMode::Ieee80211DsssOfdmMode(const char *name, const Ieee80211Ds
 
 const simtime_t Ieee80211DsssOfdmMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
-
+    return -1;
 }
 
 } // namespace physicallayer

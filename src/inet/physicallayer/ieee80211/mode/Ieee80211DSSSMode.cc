@@ -55,9 +55,7 @@ const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode2Mbps("dsssMode2Mbp
 
 const simtime_t Ieee80211DsssMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
-
+    return -1;
 }
 
 

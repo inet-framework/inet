@@ -52,8 +52,7 @@ const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode2Mbps("fhssMode2Mbp
 
 const simtime_t Ieee80211FhssMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
+    return -1;
 }
 
 } // namespace physicallayer

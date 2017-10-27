@@ -138,14 +138,13 @@ const simtime_t Ieee80211OFDMMode::getPhyRxStartDelay() const
 
 const simtime_t Ieee80211OFDMMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
+    return -1;
 }
 
 const simtime_t Ieee80211OFDMMode::getRxTxTurnaroundTime() const
 {
-    throw cRuntimeError("< 2");
-    return 0;
+    // TODO: < 2;
+    return -1;
 }
 
 std::ostream& Ieee80211OFDMPreambleMode::printToStream(std::ostream& stream, int level) const

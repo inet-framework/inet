@@ -47,8 +47,7 @@ const Ieee80211ErpOfdmMode Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps
 
 const simtime_t Ieee80211ErpOfdmMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
+    return -1;
 }
 
 } /* namespace physicallayer */

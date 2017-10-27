@@ -63,8 +63,7 @@ const Ieee80211IrMode Ieee80211IrCompliantModes::irMode2Mbps("irMode2Mbps", &irP
 
 const simtime_t Ieee80211IrMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
+    return -1;
 }
 
 } // namespace physicallayer

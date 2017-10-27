@@ -86,8 +86,7 @@ const Ieee80211HrDsssMode Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsPbccSho
 
 const simtime_t Ieee80211HrDsssMode::getRifsTime() const
 {
-    throw cRuntimeError("Undefined physical layer parameter");
-    return SIMTIME_ZERO;
+    return -1;
 }
 
 
