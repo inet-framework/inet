@@ -39,6 +39,8 @@ class INET_API Ieee80211IrPreambleMode : public IIeee80211PreambleMode
     inline const simtime_t getSlotDuration() const { return 250E-9; }
 
     virtual inline const simtime_t getDuration() const override { return getSlotLength() * getSlotDuration(); }
+
+    virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211IrPhyPreamble>(); }
 };
 
 class INET_API Ieee80211IrHeaderMode : public IIeee80211HeaderMode
@@ -61,6 +63,8 @@ class INET_API Ieee80211IrHeaderMode : public IIeee80211HeaderMode
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get() + getSlotLength() * getSlotDuration(); }
     virtual const PPMModulationBase *getModulation() const override { return modulation; }
+
+    virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211IrPhyHeader>(); }
 };
 
 class INET_API Ieee80211IrDataMode : public IIeee80211DataMode

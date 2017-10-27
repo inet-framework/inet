@@ -17,15 +17,89 @@
 
 cplusplus {{
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
 
+enum CrcMode;
 class FieldsChunk extends cObject;
 
 namespace inet::physicallayer;
 
+class Ieee80211PhyPreamble extends FieldsChunk
+{
+}
+
 class Ieee80211PhyHeader extends FieldsChunk
+{
+    // TODO: remove this, because not all subtypes have lengthField
+    uint16_t lengthField;
+}
+
+//
+// IEEE 802.11 14. Frequency-Hopping spread spectrum (FHSS)
+//
+class Ieee80211FhssPhyPreamble extends Ieee80211PhyPreamble
+{
+    chunkLength = b(96);
+}
+
+class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
+{
+    chunkLength = b(32);
+    uint16_t plw;
+    uint8_t psf;
+    uint16_t crc;
+    int crcMode @enum(CrcMode) = -1;
+}
+
+//
+// IEEE 802.11 15. Infrared (IR) PHY
+//
+class Ieee80211IrPhyPreamble extends Ieee80211PhyPreamble
+{
+}
+
+class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
+{
+    // TODO: uint16_t lengthField;
+    uint16_t crc;
+    int crcMode @enum(CrcMode) = -1;
+}
+
+//
+// IEEE 802.11 16. DSSS PHY
+//
+class Ieee80211DsssPhyPreamble extends Ieee80211PhyPreamble
+{
+    chunkLength = b(144);
+}
+
+class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
+{
+    uint8_t signal;
+    uint8_t service;
+    // TODO: uint16_t lengthField;
+    uint16_t crc;
+    int crcMode @enum(CrcMode) = -1;
+}
+
+//
+// IEEE 802.11 17. High Rate direct sequence spread spectrum (HR/DSSS)
+//
+class Ieee80211HrDsssPhyPreamble extends Ieee80211DsssPhyPreamble
+{
+}
+
+class Ieee80211HrDsssPhyHeader extends Ieee80211DsssPhyHeader
+{
+}
+
+//
+// IEEE 802.11 18. Orthogonal frequency division multiplexing (OFDM)
+//
+class Ieee80211OfdmPhyPreamble extends Ieee80211PhyPreamble
 {
 }
 
@@ -45,11 +119,34 @@ class Ieee80211PhyHeader extends FieldsChunk
 // IEEE 802.11 PHY. For detailed description, you may refer to 18.3.2 PLCP
 // frame format, Figure 18-1—PPDU frame format in IEEE Std. 802.11-2012.
 //
-packet Ieee80211OfdmPhyHeader extends Ieee80211PhyHeader
+class Ieee80211OfdmPhyHeader extends Ieee80211PhyHeader
 {
     // The PLCP header is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1),
     // Tail (6) and SERVICE (16) fields.
     chunkLength = B(5);
     uint8_t rate;
-    uint16_t lengthField;
+    // TODO: uint16_t lengthField;
+    uint16_t service;
+}
+
+//
+// IEEE 802.11 19. Extended Rate PHY (ERP) OFDM
+//
+class Ieee80211ErpOfdmPhyPreamble extends Ieee80211OfdmPhyPreamble
+{
+}
+
+class Ieee80211ErpOfdmPhyHeader extends Ieee80211OfdmPhyHeader
+{
+}
+
+//
+// IEEE 802.11 20. High Throughput (HT)
+//
+class Ieee80211HtPhyPreamble extends Ieee80211PhyPreamble
+{
+}
+
+class Ieee80211HtPhyHeader extends Ieee80211PhyHeader
+{
 }

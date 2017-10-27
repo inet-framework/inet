@@ -19,6 +19,7 @@
 #define __INET_IIEEE80211MODE_H
 
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
 
@@ -28,6 +29,7 @@ class INET_API IIeee80211PreambleMode : public cObject, public IPrintableObject
 {
   public:
     virtual const simtime_t getDuration() const = 0;
+    virtual Ptr<Ieee80211PhyPreamble> createPreamble() const = 0;
 };
 
 class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
@@ -38,6 +40,7 @@ class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
     virtual int getBitLength() const = 0;
     virtual const simtime_t getDuration() const = 0;
     virtual const IModulation *getModulation() const = 0;
+    virtual Ptr<Ieee80211PhyHeader> createHeader() const = 0;
 };
 
 class INET_API IIeee80211DataMode : public cObject, public IPrintableObject

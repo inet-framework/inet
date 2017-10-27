@@ -80,6 +80,8 @@ class INET_API Ieee80211OFDMPreambleMode : public IIeee80211PreambleMode, public
     const simtime_t getShortTrainingSequenceDuration() const { return 10 * getFFTTransformPeriod() / 4; }
     const simtime_t getLongTrainingSequenceDuration() const { return getTrainingSymbolGIDuration() + 2 * getFFTTransformPeriod(); }
     virtual const simtime_t getDuration() const override { return getShortTrainingSequenceDuration() + getLongTrainingSequenceDuration(); }
+
+    virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211OfdmPhyPreamble>(); }
 };
 
 class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Ieee80211OFDMModeBase
@@ -108,6 +110,8 @@ class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Iee
 
     virtual bps getGrossBitrate() const override { return Ieee80211OFDMModeBase::getGrossBitrate(); }
     virtual bps getNetBitrate() const override { return Ieee80211OFDMModeBase::getNetBitrate(); }
+
+    virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211OfdmPhyHeader>(); }
 };
 
 class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee80211OFDMModeBase

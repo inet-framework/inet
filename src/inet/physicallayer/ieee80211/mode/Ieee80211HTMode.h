@@ -117,6 +117,8 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const IModulation *getModulation() const override { return modulation; }
+
+        virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HtPhyHeader>(); }
 };
 
 /*
@@ -164,6 +166,7 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
 
         virtual const simtime_t getDuration() const override;
 
+        virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HtPhyPreamble>(); }
 };
 
 class INET_API Ieee80211HTMCS

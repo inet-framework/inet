@@ -49,6 +49,8 @@ class INET_API Ieee80211HrDsssPreambleMode : public IIeee80211PreambleMode
     virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
     virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
+
+    virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HrDsssPhyPreamble>(); }
 };
 
 class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
@@ -69,6 +71,8 @@ class INET_API Ieee80211HrDsssHeaderMode : public IIeee80211HeaderMode
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
     virtual const DPSKModulationBase *getModulation() const override { return preambleType == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT ? static_cast<const DPSKModulationBase *>(&DQPSKModulation::singleton) : static_cast<const DPSKModulationBase *>(&DBPSKModulation::singleton); }
+
+    virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HrDsssPhyHeader>(); }
 };
 
 class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode

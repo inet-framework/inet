@@ -43,6 +43,8 @@ class INET_API Ieee80211DsssPreambleMode : public Ieee80211DsssChunkMode, public
     virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
     virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
+
+    virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211DsssPhyPreamble>(); }
 };
 
 class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public IIeee80211HeaderMode
@@ -60,6 +62,8 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return getBitLength() / getNetBitrate().get(); }
     virtual const DBPSKModulation *getModulation() const override { return &DBPSKModulation::singleton; }
+
+    virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211DsssPhyHeader>(); }
 };
 
 class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIeee80211DataMode
