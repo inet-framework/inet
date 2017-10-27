@@ -101,8 +101,9 @@ class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Iee
     inline int getLengthBitLength() const { return 12; }
     inline int getParityBitLength() const { return 1; }
     inline int getTailBitLength() const { return 6; }
+    inline int getServiceBitLength() const { return 16; }
 
-    virtual int getBitLength() const override { return getRateBitLength() + getReservedBitLength() + getLengthBitLength() + getParityBitLength() + getTailBitLength(); }
+    virtual int getBitLength() const override { return getRateBitLength() + getReservedBitLength() + getLengthBitLength() + getParityBitLength() + getTailBitLength() + getServiceBitLength(); }
     virtual const simtime_t getDuration() const override { return getSymbolInterval(); }
 
     const Ieee80211OFDMCode* getCode() const { return code; }
