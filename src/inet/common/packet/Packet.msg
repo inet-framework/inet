@@ -22,7 +22,6 @@ cplusplus {{
 namespace inet;
 
 class Chunk extends cObject;
-class noncobject ChunkBuffer::Region;
 
 class ChunkQueue extends cNamedObject
 {
@@ -32,7 +31,7 @@ class ChunkQueue extends cNamedObject
     Chunk* contents @getter(getContents);
 }
 
-class ChunkBuffer::Region
+class ChunkBuffer::Region extends void
 {
     @existingClass(true);
     @descriptor(readonly);
