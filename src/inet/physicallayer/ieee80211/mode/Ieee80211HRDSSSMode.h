@@ -85,6 +85,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
 
     virtual inline bps getNetBitrate() const override { return bitrate; }
     virtual inline bps getGrossBitrate() const override { return bitrate; }
+    virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual int getBitLength(int dataBitLength) const override { return dataBitLength; }
     virtual const simtime_t getDuration(int bitLength) const override;
     virtual IModulation *getModulation() const override { return nullptr; } // TODO:

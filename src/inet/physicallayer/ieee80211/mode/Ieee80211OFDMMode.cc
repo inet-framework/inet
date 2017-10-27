@@ -176,6 +176,21 @@ std::ostream& Ieee80211OFDMMode::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
+b Ieee80211OFDMDataMode::getPaddingLength(b dataLength) const
+{
+    unsigned int codedBitsPerOFDMSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
+    if (code->getConvolutionalCode()) {
+        const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
+        dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
+    }
+    unsigned int dataBitsLength = 6 + b(dataLength).get() + 16;
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0 * dataBitsLength / dataBitsPerOFDMSymbol));
+    unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
+    unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
+    return b(numberOfPadBits);
+}
+
 int Ieee80211OFDMDataMode::getBitLength(int dataBitLength) const
 {
     return getServiceBitLength() + dataBitLength + getTailBitLength(); // TODO: padding?

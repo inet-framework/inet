@@ -48,6 +48,7 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
   public:
     virtual bps getNetBitrate() const = 0;
     virtual bps getGrossBitrate() const = 0;
+    virtual b getPaddingLength(b dataLength) const = 0;
     virtual int getBitLength(int dataBitLength) const = 0;
     virtual const simtime_t getDuration(int dataBitLength) const = 0;
     virtual const IModulation *getModulation() const = 0;

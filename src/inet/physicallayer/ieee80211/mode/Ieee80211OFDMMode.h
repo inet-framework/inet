@@ -125,6 +125,7 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
     inline int getServiceBitLength() const { return 16; }
     inline int getTailBitLength() const { return 6; }
 
+    virtual b getPaddingLength(b dataLength) const override;
     virtual int getBitLength(int dataBitLength) const override;
     virtual const simtime_t getDuration(int dataBitLength) const override;
 
