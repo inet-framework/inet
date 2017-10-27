@@ -51,14 +51,13 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
 const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<Ieee80211PhyHeader>();
-    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(b(dataLength).get());
+    const simtime_t duration = transmissionMode->getDuration(b(B(phyHeader->getLengthField())).get());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -66,7 +65,8 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
-    b headerLength = b(transmissionMode->getHeaderMode()->getBitLength());
+    auto headerLength = b(transmissionMode->getHeaderMode()->getBitLength());
+    auto dataLength = b(transmissionMode->getDataMode()->getBitLength(b(B(phyHeader->getLengthField())).get()));
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;

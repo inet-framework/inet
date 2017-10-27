@@ -15,11 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
@@ -133,15 +136,27 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
-    auto phyHeader = makeShared<Ieee80211PhyHeader>();
+    auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
+    auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(ieee80211Transmitter->getHeaderLength());
-    phyHeader->markImmutable();
-    packet->pushHeader(phyHeader);
+    phyHeader->setLengthField(B(packet->getTotalLength()).get());
+    packet->insertHeader(phyHeader);
+    auto tailLength = dynamic_cast<const Ieee80211OFDMMode *>(mode) ? b(6) : b(0);
+    auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
+    if (tailLength + paddingLength != b(0)) {
+//        const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
+//        packet->insertTrailer(phyTrailer);
+    }
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
-    packet->popHeader<Ieee80211PhyHeader>();
+    auto mode = packet->getMandatoryTag<Ieee80211ModeInd>()->getMode();
+    const auto& phyHeader = packet->popHeader<Ieee80211PhyHeader>();
+    auto tailLength = dynamic_cast<const Ieee80211OFDMMode *>(mode) ? b(6) : b(0);
+    auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
+    if (tailLength + paddingLength != b(0))
+        ; // packet->popTrailer(tailLength + paddingLength);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
 }
 
