@@ -16,15 +16,12 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 
 cplusplus {{
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 }}
-
-import inet.common.TagBase;
-
-namespace inet;
 
 namespace inet::physicallayer;
 

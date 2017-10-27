@@ -17,15 +17,13 @@
 
 
 import inet.common.INETDefs;
+import inet.networklayer.contract.ipv6.IPv6ExtHeaderTagBase;
 
 cplusplus {{
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
 }}
 
 namespace inet;
-
-
-class IPv6ExtHeaderTagBase extends cObject;
 
 class IPv6ExtHeaderReq extends IPv6ExtHeaderTagBase
 {

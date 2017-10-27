@@ -21,8 +21,6 @@ import inet.common.TagBase;
 
 namespace inet;
 
-class noncobject IPv6ExtensionHeaderPtr;
-
 cplusplus {{
 class Ipv6ExtensionHeader;
 typedef Ipv6ExtensionHeader *IPv6ExtensionHeaderPtr;
@@ -33,6 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 #endif
 }}
 
+class noncobject IPv6ExtensionHeaderPtr;
 
 class IPv6ExtHeaderTagBase
 {

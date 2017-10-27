@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.physicallayer.base.packetlevel.FlatTransmissionBase;
 
 cplusplus {{
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
@@ -22,7 +23,6 @@ cplusplus {{
 namespace inet::physicallayer;
 
 class noncobject W;
-class FlatTransmissionBase extends cObject;
 
 class ScalarTransmission extends FlatTransmissionBase
 {

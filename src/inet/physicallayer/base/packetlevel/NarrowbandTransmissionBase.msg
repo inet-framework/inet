@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.physicallayer.base.packetlevel.TransmissionBase;
 
 cplusplus {{
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
@@ -22,7 +23,6 @@ cplusplus {{
 namespace inet::physicallayer;
 
 class noncobject Hz;
-class TransmissionBase extends cObject;
 
 class NarrowbandTransmissionBase extends TransmissionBase
 {

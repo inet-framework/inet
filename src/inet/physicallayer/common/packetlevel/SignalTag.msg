@@ -3,13 +3,12 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 
 cplusplus{{
 #include "inet/common/Units.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 }}
-
-import inet.common.TagBase;
 
 namespace inet;
 

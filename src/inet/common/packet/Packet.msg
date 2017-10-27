@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
 #include "inet/common/packet/ChunkBuffer.h"
@@ -23,7 +24,6 @@ cplusplus {{
 
 namespace inet;
 
-class Chunk extends cObject;
 
 class ChunkQueue extends cNamedObject
 {

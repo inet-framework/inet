@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.physicallayer.base.packetlevel.TransmissionBase;
 
 cplusplus {{
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
@@ -22,7 +23,6 @@ cplusplus {{
 namespace inet::physicallayer;
 
 class noncobject m;
-class TransmissionBase extends cObject;
 
 class IdealTransmission extends TransmissionBase
 {
