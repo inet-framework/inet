@@ -17,9 +17,11 @@ cplusplus {{
 #include "inet/common/queue/PacketQueue.h"
 }}
 
-namespace inet;
+namespace omnetpp;
 
-class cPacketQueue extends cObject;
+class cPacketQueue extends cOwnedObject;
+
+namespace inet;
 
 class PacketQueue extends cPacketQueue
 {
