@@ -92,7 +92,7 @@ const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
-        return  modeSet->getIsMandatory(mode) ? mode : fastestMandatoryMode; // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
     }
 }
 
@@ -103,7 +103,7 @@ const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : fastestMandatoryMode; // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
     }
 }
 
