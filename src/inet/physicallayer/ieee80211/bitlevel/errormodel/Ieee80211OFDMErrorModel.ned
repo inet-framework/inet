@@ -18,6 +18,7 @@
 package inet.physicallayer.ieee80211.bitlevel.errormodel;
 
 import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
+import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
 
 // This is the error model for the layered IEEE 802.11
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).
@@ -38,7 +39,7 @@ import inet.physicallayer.contract.bitlevel.ILayeredErrorModel;
 // 18.3.4) and data field (18.3.5).
 //
 //
-module Ieee80211OFDMErrorModel like ILayeredErrorModel
+module Ieee80211OFDMErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:
         double dataSymbolErrorRate = default(0/0);

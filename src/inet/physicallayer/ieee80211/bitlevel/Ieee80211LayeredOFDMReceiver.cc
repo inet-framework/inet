@@ -362,7 +362,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
-        const auto& signalFieldBytesChunk = signalFieldPacketModel->getPacket()->peekAllBytes();
+        const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllBytes() : packetModel->getPacket()->peekAllBytes();
         uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
         // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);

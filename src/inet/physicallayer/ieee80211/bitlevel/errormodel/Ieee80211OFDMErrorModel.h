@@ -20,12 +20,13 @@
 
 #include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMErrorModel : public ILayeredErrorModel, public cSimpleModule
+class INET_API Ieee80211OFDMErrorModel : public Ieee80211NistErrorModel, public ILayeredErrorModel
 {
   protected:
     double signalSymbolErrorRate;
@@ -36,7 +37,6 @@ class INET_API Ieee80211OFDMErrorModel : public ILayeredErrorModel, public cSimp
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("The module doesn't handle self messages"); }
     Ieee80211OFDMSymbol *corruptOFDMSymbol(const Ieee80211OFDMSymbol *symbol, double ser, int constellationSize, const std::vector<APSKSymbol> *constellation) const;
     void corruptBits(BitVector *bits, double ber, int begin, int end) const;
 

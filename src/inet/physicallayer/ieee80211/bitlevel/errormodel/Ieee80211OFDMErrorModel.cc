@@ -15,16 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OFDMErrorModel.h"
-#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
+#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OFDMErrorModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/modulation/BPSKModulation.h"
 
 namespace inet {
 
@@ -53,11 +55,22 @@ std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int l
     return stream;
 }
 
+const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+{
+    double packetErrorRate = computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
+    auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
+    auto transmittedPacket = transmissionPacketModel->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
+        receivedPacket->setBitError(true);
+    receivedPacket->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
+}
+
 const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
-    ASSERT(signalBitLength == 24);
     bps signalBitRate = transmissionBitModel->getHeaderBitRate();
     int dataBitLength = b(transmissionBitModel->getDataLength()).get();
     bps dataBitRate = transmissionBitModel->getDataBitRate();
@@ -145,14 +158,6 @@ const IReceptionSampleModel *Ieee80211OFDMErrorModel::computeSampleModel(const L
     return new ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
 }
 
-const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
-{
-    throw cRuntimeError("Unimplemented!");
-    // TODO: implement error model
-    const ITransmissionPacketModel *transmissionPacketModel = transmission->getPacketModel();
-    const Packet *packet = transmissionPacketModel->getPacket();
-    return new ReceptionPacketModel(packet, bps(NaN));
-}
 } /* namespace physicallayer */
 } /* namespace inet */
 
