@@ -37,7 +37,7 @@ class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
   public:
     virtual bps getNetBitrate() const = 0;
     virtual bps getGrossBitrate() const = 0;
-    virtual int getBitLength() const = 0;
+    virtual b getBitLength() const = 0;
     virtual const simtime_t getDuration() const = 0;
     virtual const IModulation *getModulation() const = 0;
     virtual Ptr<Ieee80211PhyHeader> createHeader() const = 0;
@@ -49,8 +49,8 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
     virtual bps getNetBitrate() const = 0;
     virtual bps getGrossBitrate() const = 0;
     virtual b getPaddingLength(b dataLength) const = 0;
-    virtual int getBitLength(int dataBitLength) const = 0;
-    virtual const simtime_t getDuration(int dataBitLength) const = 0;
+    virtual b getBitLength(b dataBitLength) const = 0;
+    virtual const simtime_t getDuration(b dataBitLength) const = 0;
     virtual const IModulation *getModulation() const = 0;
     virtual int getNumberOfSpatialStreams() const = 0;
 };
@@ -67,7 +67,7 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     IIeee80211PreambleMode *_getPreambleMode() const { return const_cast<IIeee80211PreambleMode*>(getPreambleMode()); }
     IIeee80211HeaderMode *_getHeaderMode() const { return const_cast<IIeee80211HeaderMode*>(getHeaderMode()); }
     IIeee80211DataMode *_getDataMode() const { return const_cast<IIeee80211DataMode*>(getDataMode()); }
-    virtual const simtime_t getDuration(int dataBitLength) const = 0;
+    virtual const simtime_t getDuration(b dataBitLength) const = 0;
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;

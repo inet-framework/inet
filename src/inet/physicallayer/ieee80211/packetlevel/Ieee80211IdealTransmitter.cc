@@ -58,7 +58,7 @@ const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio 
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(packet->getBitLength());
+    const simtime_t duration = transmissionMode->getDuration(packet->getDataLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();

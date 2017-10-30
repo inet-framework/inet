@@ -48,7 +48,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(b(B(phyHeader->getLengthField())).get());
+    const simtime_t duration = transmissionMode->getDuration(B(phyHeader->getLengthField()));
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -56,7 +56,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     auto headerLength = b(transmissionMode->getHeaderMode()->getBitLength());
-    auto dataLength = b(transmissionMode->getDataMode()->getBitLength(b(B(phyHeader->getLengthField())).get()));
+    auto dataLength = b(transmissionMode->getDataMode()->getBitLength(B(phyHeader->getLengthField())));
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;

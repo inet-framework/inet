@@ -26,6 +26,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
+class noncobject b;
 class noncobject bps;
 class noncobject Hz;
 
@@ -69,7 +70,7 @@ class IIeee80211HeaderMode
     @existingClass;
     bps netBitrate @editable(false) @opaque;
     bps grossBitrate @editable(false) @opaque;
-    int bitLength @editable(false);
+    b bitLength @editable(false) @opaque;
     simtime_t duration @editable(false);
 //    IModulation *modulation @editable(false);
 };

@@ -35,17 +35,17 @@ enum EtherType;
 namespace inet::ieee80211;
 
 cplusplus {{
-const unsigned int LENGTH_RTS = 160;    //bits
-const unsigned int LENGTH_CTS = 112;    //bits
-const unsigned int LENGTH_ACK = 112;    //bits
-const unsigned int LENGTH_MGMT = 28 * 8;    //bits
-const unsigned int LENGTH_ADDBAREQ = LENGTH_MGMT + 9*8; // mgmt length + action body length
-const unsigned int LENGTH_BASIC_BLOCKACK = (16 + 2 + (2 + 128) + 4) * 8; // header + ba control + ba information + fcs
+const b LENGTH_RTS = b(160);    //bits
+const b LENGTH_CTS = b(112);    //bits
+const b LENGTH_ACK = b(112);    //bits
+const b LENGTH_MGMT = B(28);    //bits
+const b LENGTH_ADDBAREQ = LENGTH_MGMT + B(9); // mgmt length + action body length
+const b LENGTH_BASIC_BLOCKACK = B(16 + 2 + (2 + 128) + 4); // header + ba control + ba information + fcs
 const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
 const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
 const short int MAX_NUM_FRAGMENTS = 16;
-const unsigned int LENGTH_A_MSDU_SUBFRAME_HEADER = 14 * 8; //48 + 48 + 16 bits
-const unsigned int LENGTH_A_MPDU_SUBFRAME_HEADER = 4 + 12 + 8 + 8;
+const b LENGTH_A_MSDU_SUBFRAME_HEADER = B(14); //48 + 48 + 16 bits
+const b LENGTH_A_MPDU_SUBFRAME_HEADER = b(4 + 12 + 8 + 8);
 }}
 
 //
@@ -118,7 +118,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 //
 class Ieee80211MacHeader extends FieldsChunk
 {
-    chunkLength = b(LENGTH_ACK) - B(4);
+    chunkLength = LENGTH_ACK - B(4);
     short type @enum(Ieee80211FrameType); // type and subtype
     bool toDS;
     bool fromDS;
@@ -143,7 +143,7 @@ class Ieee80211OneAddressHeader extends Ieee80211MacHeader
 //
 class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 {
-    chunkLength = b(LENGTH_ACK) - B(4);
+    chunkLength = LENGTH_ACK - B(4);
     type = ST_ACK;
 }
 
@@ -152,7 +152,7 @@ class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 //
 class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
-    chunkLength = b(LENGTH_RTS) - B(4);
+    chunkLength = LENGTH_RTS - B(4);
     MACAddress transmitterAddress; // aka address2
 }
 
@@ -161,7 +161,7 @@ class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 //
 class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 {
-    chunkLength = b(LENGTH_RTS) - B(4);
+    chunkLength = LENGTH_RTS - B(4);
     type = ST_RTS;
 }
 
@@ -170,7 +170,7 @@ class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 //
 class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 {
-    chunkLength = b(LENGTH_CTS) - B(4);
+    chunkLength = LENGTH_CTS - B(4);
     type = ST_CTS;
 }
 
@@ -179,7 +179,7 @@ class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 //
 class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
-    chunkLength = b(LENGTH_MGMT) - B(4);
+    chunkLength = LENGTH_MGMT - B(4);
     MACAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
@@ -233,7 +233,7 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 
 class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
-    chunkLength = b(LENGTH_A_MSDU_SUBFRAME_HEADER);
+    chunkLength = LENGTH_A_MSDU_SUBFRAME_HEADER;
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
     int length;
@@ -241,7 +241,7 @@ class Ieee80211MsduSubframeHeader extends FieldsChunk
 
 class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
-    chunkLength = b(LENGTH_A_MPDU_SUBFRAME_HEADER);
+    chunkLength = LENGTH_A_MPDU_SUBFRAME_HEADER;
     int length;
 }
 
@@ -250,7 +250,7 @@ class Ieee80211MpduSubframeHeader extends FieldsChunk
 //
 class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
-    chunkLength = b(LENGTH_ADDBAREQ) - B(4);
+    chunkLength = LENGTH_ADDBAREQ - B(4);
     category = 3; // representing Block Ack
     int blockAckAction = 0; // representing ADDBA request
     int dialogToken = 1; // nonzero, arbitrary

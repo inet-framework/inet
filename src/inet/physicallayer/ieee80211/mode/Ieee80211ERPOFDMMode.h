@@ -42,7 +42,7 @@ class INET_API Ieee80211ErpOfdmMode : public Ieee80211OFDMMode
         virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
         // For ERP-OFDM modes, an ERP packet is followed by a period of no transmission
         // with a length of 6 μs called the signal extension.
-        virtual inline const simtime_t getDuration(int dataBitLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataBitLength) + 6E-6; }
+        virtual inline const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataBitLength) + 6E-6; }
 };
 
 class INET_API Ieee80211ErpOfdmCompliantModes

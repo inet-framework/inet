@@ -96,14 +96,14 @@ class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Iee
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     unsigned int getRate() const { return rate; }
-    inline int getRateBitLength() const { return 4; }
-    inline int getReservedBitLength() const { return 1; }
-    inline int getLengthBitLength() const { return 12; }
-    inline int getParityBitLength() const { return 1; }
-    inline int getTailBitLength() const { return 6; }
-    inline int getServiceBitLength() const { return 16; }
+    b getRateBitLength() const { return b(4); }
+    b getReservedBitLength() const { return b(1); }
+    b getLengthBitLength() const { return b(12); }
+    b getParityBitLength() const { return b(1); }
+    b getTailBitLength() const { return b(6); }
+    b getServiceBitLength() const { return b(16); }
 
-    virtual int getBitLength() const override { return getRateBitLength() + getReservedBitLength() + getLengthBitLength() + getParityBitLength() + getTailBitLength() + getServiceBitLength(); }
+    virtual b getBitLength() const override { return getRateBitLength() + getReservedBitLength() + getLengthBitLength() + getParityBitLength() + getTailBitLength() + getServiceBitLength(); }
     virtual const simtime_t getDuration() const override { return getSymbolInterval(); }
 
     const Ieee80211OFDMCode* getCode() const { return code; }
@@ -123,12 +123,12 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    inline int getServiceBitLength() const { return 16; }
-    inline int getTailBitLength() const { return 6; }
+    b getServiceBitLength() const { return b(16); }
+    b getTailBitLength() const { return b(6); }
 
     virtual b getPaddingLength(b dataLength) const override;
-    virtual int getBitLength(int dataBitLength) const override;
-    virtual const simtime_t getDuration(int dataBitLength) const override;
+    virtual b getBitLength(b dataBitLength) const override;
+    virtual const simtime_t getDuration(b dataBitLength) const override;
 
     const Ieee80211OFDMCode* getCode() const { return code; }
     const Ieee80211OFDMModulation* getModulation() const override { return modulation; }
@@ -158,7 +158,7 @@ class INET_API Ieee80211OFDMMode : public Ieee80211ModeBase, public Ieee80211OFD
     virtual const Ieee80211OFDMDataMode *getDataMode() const override { return dataMode; }
     virtual const Ieee80211OFDMSignalMode *getSignalMode() const { return signalMode; }
 
-    virtual inline const simtime_t getDuration(int dataBitLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual inline const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataBitLength); }
 
     // Table 18-17—OFDM PHY characteristics
     virtual const simtime_t getSlotTime() const override;

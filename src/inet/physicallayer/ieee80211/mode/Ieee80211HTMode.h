@@ -92,28 +92,28 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
         /* Table 20-11—HT-SIG fields, 1699p */
 
         // HT-SIG_1 (24 bits)
-        virtual inline int getMCSLength() const { return 7; }
-        virtual inline int getCBWLength() const { return 1; }
-        virtual inline int getHTLengthLength() const { return 16; }
+        b getMCSLength() const { return b(7); }
+        b getCBWLength() const { return b(1); }
+        b getHTLengthLength() const { return b(16); }
 
         // HT-SIG_2 (24 bits)
-        virtual inline int getSmoothingLength() const { return 1; }
-        virtual inline int getNotSoundingLength() const { return 1; }
-        virtual inline int getReservedLength() const { return 1; }
-        virtual inline int getAggregationLength() const { return 1; }
-        virtual inline int getSTBCLength() const { return 2; }
-        virtual inline int getFECCodingLength() const { return 1; }
-        virtual inline int getShortGILength() const { return 1; }
-        virtual inline int getNumOfExtensionSpatialStreamsLength() const { return 2; }
-        virtual inline int getCRCLength() const { return 8; }
-        virtual inline int getTailBitsLength() const { return 6; }
+        b getSmoothingLength() const { return b(1); }
+        b getNotSoundingLength() const { return b(1); }
+        b getReservedLength() const { return b(1); }
+        b getAggregationLength() const { return b(1); }
+        b getSTBCLength() const { return b(2); }
+        b getFECCodingLength() const { return b(1); }
+        b getShortGILength() const { return b(1); }
+        b getNumOfExtensionSpatialStreamsLength() const { return b(2); }
+        b getCRCLength() const { return b(8); }
+        b getTailBitsLength() const { return b(6); }
         virtual unsigned int getSTBC() const { return 0; } // Limitation: We assume that STBC is not used
 
         virtual const inline simtime_t getHTSIGDuration() const { return 2 * getSymbolInterval(); } // HT-SIG
 
         virtual unsigned int getModulationAndCodingScheme() const { return mcsIndex; }
         virtual const simtime_t getDuration() const override { return getHTSIGDuration(); }
-        virtual int getBitLength() const override;
+        virtual b getBitLength() const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const IModulation *getModulation() const override { return modulation; }
@@ -213,13 +213,13 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
     public:
         Ieee80211HTDataMode(const Ieee80211HTMCS *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType);
 
-        inline int getServiceBitLength() const { return 16; }
-        inline int getTailBitLength() const { return 6 * numberOfBccEncoders; }
+        b getServiceBitLength() const { return b(16); }
+        b getTailBitLength() const { return b(6) * numberOfBccEncoders; }
 
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211HTModeBase::getNumberOfSpatialStreams(); }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
-        virtual int getBitLength(int dataBitLength) const override;
-        virtual const simtime_t getDuration(int dataBitLength) const override;
+        virtual b getBitLength(b dataBitLength) const override;
+        virtual const simtime_t getDuration(b dataBitLength) const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const Ieee80211HTMCS *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
@@ -267,7 +267,7 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
         virtual BandMode getCarrierFrequencyMode() const { return carrierFrequencyMode; }
 
-        virtual const simtime_t getDuration(int dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
+        virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)

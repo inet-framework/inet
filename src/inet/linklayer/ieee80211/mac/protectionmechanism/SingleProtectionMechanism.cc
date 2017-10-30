@@ -44,7 +44,7 @@ simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, 
 {
     // TODO: We assume that the RTS frame is not part of a dual clear-to-send
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader, txop);
-    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getBitLength());
+    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
     simtime_t durationId = ctsFrameDuration + modeSet->getSifsTime() + pendingFrameDuration + modeSet->getSifsTime();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(pendingHeader)) {
@@ -143,7 +143,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
             simtime_t duration = ackFrameDuration + modeSet->getSifsTime();
             if (pendingHeader) {
                 auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader, txop);
-                simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getBitLength());
+                simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
                 duration += pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
                     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
@@ -161,7 +161,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
             simtime_t duration = 0;
             if (pendingHeader) {
                 auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader, txop);
-                simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getBitLength());
+                simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
                 duration = pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
                     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge

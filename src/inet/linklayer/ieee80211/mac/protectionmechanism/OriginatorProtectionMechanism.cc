@@ -42,7 +42,7 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
-    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getBitLength());
+    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
     simtime_t durationId = ctsFrameDuration + pendingFrameDuration + ackFrameDuration;
@@ -67,7 +67,7 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
     if (!dataHeader->getMoreFragments())
         return ackToDataFrameDuration + modeSet->getSifsTime();
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getBitLength());
+        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
         auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
         RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode);
         simtime_t ackToPendingFrame = pendingFrameMode->getDuration(LENGTH_ACK);
@@ -94,7 +94,7 @@ simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *m
         return ackFrameDuration + modeSet->getSifsTime();
     }
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getBitLength());
+        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
         return pendingFrameDuration + 2 * ackFrameDuration + 3 * modeSet->getSifsTime();
     }
 }

@@ -53,7 +53,7 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
     virtual const IIeee80211DataMode *getDataMode() const override { return ofdmDataMode; }
 
     // TODO: fill in
-    virtual inline const simtime_t getDuration(int dataBitLength) const override { return 0; }
+    virtual inline const simtime_t getDuration(b dataBitLength) const override { return 0; }
 
     // TODO: fill in
     virtual inline const simtime_t getSlotTime() const override { return 0; }
