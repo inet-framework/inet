@@ -138,7 +138,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
     auto phyHeader = mode->getHeaderMode()->createHeader();
-    phyHeader->setChunkLength(ieee80211Transmitter->getHeaderLength());
+    phyHeader->setChunkLength(b(mode->getHeaderMode()->getBitLength()));
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
     packet->insertHeader(phyHeader);
     auto tailLength = dynamic_cast<const Ieee80211OFDMMode *>(mode) ? b(6) : b(0);
