@@ -182,6 +182,7 @@ def runSimulation(gitHash, command, workingdir):
     logger.info("sim terminated, elapsedTime: " + str(elapsedTime))
 
     result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
+    result.output = out
 
     # process error messages
     error_lines = re.findall("<!>.*", out, re.M)
@@ -201,10 +202,10 @@ def runSimulation(gitHash, command, workingdir):
         else:
             error_msg += "\n" + err
             result.cpuTimeLimitReached = bool(re.search("CPU time limit reached", err))
-            match = re.search("at t=([0-9]*(\\.[0-9]+)?)s, event #([0-9]+)", err)
+            match = re.search(r"at t=([0-9]*(\.[0-9]+)?)s, event #([0-9]+)", err)
             if match:
                 result.simulatedTime = float(match.group(1))
-                result.numEvents = int(match.group(2))
+                result.numEvents = int(match.group(3))
 
     result.errormsg = error_msg.strip()
 

@@ -31,7 +31,7 @@ import  fingerprints_worker
 
 
 
-nedPath = remoteInetRoot + "/src;" + remoteInetRoot + "/examples;" + remoteInetRoot + "/showcases;" + remoteInetRoot + "/tutorials;" + remoteInetRoot + "/tests/networks"
+nedPath = remoteInetRoot + "/src;" + remoteInetRoot + "/examples;" + remoteInetRoot + "/showcases;" + remoteInetRoot + "/tutorials;" + remoteInetRoot + "/tests/networks;."
 inetLib = remoteInetRoot + "/src/INET"
 cpuTimeLimit = "30000s"
 githash = ""
@@ -146,7 +146,7 @@ class Runall:
             # run the simulation
             workingdir = (remoteInetRoot + "/" + wd) if wd.startswith('/') else wd
 
-            command = "opp_run_release " + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + \
+            command = "opp_run_release " + " -n '" + nedPath + "' -l " + inetLib + " -u Cmdenv " + \
                 " ".join(opts.simProgArgs) + " -r " + str(rn)
 
             runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, command, workingdir, depends_on = buildJob)
