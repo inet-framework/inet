@@ -29,6 +29,7 @@
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMReceiver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoderModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
@@ -36,7 +37,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 
 namespace inet {
@@ -349,7 +350,7 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
+    const Ieee80211LayeredTransmission *transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
@@ -392,6 +393,10 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     packet->ensureTag<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
+    auto modeInd = packet->ensureTag<Ieee80211ModeInd>();
+    modeInd->setMode(transmission->getMode());
+    auto channelInd = packet->ensureTag<Ieee80211ChannelInd>();
+    channelInd->setChannel(transmission->getChannel());
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 

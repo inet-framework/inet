@@ -23,6 +23,7 @@
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
@@ -329,7 +330,8 @@ const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const I
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
+    // TODO: compute channel
+    return new Ieee80211LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
 }
 
 Ieee80211LayeredOFDMTransmitter::~Ieee80211LayeredOFDMTransmitter()
