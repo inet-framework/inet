@@ -5,11 +5,11 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           b73d-11a6/tplx
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 # /examples/adhoc/qos/,                -f omnetpp.ini -c MacBase -r 0,                100s,            0000-0000   # MacBase extended
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             084c-9f1c/tplx
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             b0c3-acb5/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             ed38-3afc/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             5b23-fe8f/tplx
 # /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,                   100s,            0000-0000   # Edca extended
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             8a9e-8dc1/tplx
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             e4fe-8b57/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             cb97-a0c4/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             6d46-f329/tplx
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          c77e-f40f/tplx
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          e91a-cd0b/tplx
@@ -31,8 +31,8 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           92fd-bfb7/tplx
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           c008-8e7e/tplx
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            1142-562a/tplx
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            4c2a-5a98/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            391b-bcbb/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            cf6f-e0b8/tplx
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            83f6-910a/tplx
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             b7d7-e771/tplx
@@ -99,7 +99,7 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             d887-b503/tplx
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             23c7-14ae/tplx
 
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            f6ea-1dd5/tplx
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            7d85-6986/tplx
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             c1c9-5c80/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             4b41-5e80/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             00db-ee4f/tplx
@@ -256,7 +256,7 @@
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             56ed-864e/tplx
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             8dc0-7294/tplx
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          72f8-5c0b/tplx
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          ce84-30b6/tplx
@@ -362,13 +362,13 @@
 
 ### /examples/voipstream/* : see voipstream.csv
 
-/examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           cbbf-827f/tplx
+/examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           c091-58f5/tplx
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         3926-b828/tplx
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         c5b0-f023/tplx
 
-/examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         2510-2ab9/tplx
+/examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         ed14-ce3a/tplx
 
-/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        246b-093b/tplx
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        e2db-5d43/tplx
 
 /examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         3ffb-76d5/tplx
 
@@ -414,19 +414,19 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,     9909-1881/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,     9909-1881/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,     0756-51cb/tplx
-/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     fd45-6b69/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     7d45-6b62/tplx
 
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            651c-ba1f/tplx
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            54da-b6fe/tplx
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            7d32-3176/tplx
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            2b74-819f/tplx
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            a92b-a80e/tplx
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            62a5-2b10/tplx
 
-/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            fbf2-c4c0/tplx
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            940e-431d/tplx
 
-/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         556b-67bf/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         83e2-8959/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         3dca-c175/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5b99-2cb7/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         ed01-c22c/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         47b7-3c20/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         dd72-1ed7/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         418f-d411/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         8ce7-883b/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         7414-b6d2/tplx
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            c3f3-d956/tplx
 
@@ -438,10 +438,10 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              8fca-81dd/tplx
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              8fb1-43e7/tplx
 
-/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          3a1e-9857/tplx
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          7786-547f/tplx
 
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           6988-111c/tplx
 # /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000   # Throughput2 extended
 /examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         6dcd-8891/tplx
 
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      4517-16ee/tplx
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      be8b-9e76/tplx
