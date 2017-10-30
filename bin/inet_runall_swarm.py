@@ -91,8 +91,8 @@ class Runall:
     def __init__(self):
         print("connecting to the job queue")
         conn = redis.Redis(host="172.17.0.1")
-        self.build_q = rq.Queue("build", connection=conn, default_timeout=30*60)
-        self.run_q = rq.Queue("run", connection=conn, default_timeout=30*60)
+        self.build_q = rq.Queue("build", connection=conn, default_timeout=10*60*60)
+        self.run_q = rq.Queue("run", connection=conn, default_timeout=10*60*60)
 
 
     def run(self):
@@ -172,10 +172,9 @@ class Runall:
                         if j.result is not None:
                             pprint.pprint(vars(j.result))
 
-                            client = pymongo.MongoClient("172.17.0.1")
-                            gfs = gridfs.GridFS(client.opp)
-
-                            unzip_bytes(gfs.get(j.id).read())
+                            with pymongo.MongoClient("172.17.0.1", socketTimeoutMS=10*60*1000, connectTimeoutMS=10*60*1000, serverSelectionTimeoutMS=10*60*1000) as client:
+                                gfs = gridfs.GridFS(client.opp)
+                                unzip_bytes(gfs.get(j.id).read())
 
                             runJobs.remove(j)
 
