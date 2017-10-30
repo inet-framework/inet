@@ -77,8 +77,8 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
-    virtual b getBitLength(b dataBitLength) const override { return dataBitLength; }
-    virtual const simtime_t getDuration(b bitLength) const override;
+    virtual b getBitLength(b dataLength) const override { return dataLength; }
+    virtual const simtime_t getDuration(b length) const override;
     virtual const DPSKModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
@@ -110,7 +110,7 @@ class INET_API Ieee80211DsssMode : public Ieee80211ModeBase
     virtual inline Hz getChannelSpacing() const { return MHz(5); }
     virtual inline Hz getBandwidth() const { return MHz(22); }
 
-    virtual inline const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
     // Table 19-8—ERP characteristics
     virtual inline const simtime_t getSlotTime() const override { return 20E-6; }

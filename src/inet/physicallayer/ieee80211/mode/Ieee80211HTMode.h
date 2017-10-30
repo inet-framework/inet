@@ -218,8 +218,8 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
 
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211HTModeBase::getNumberOfSpatialStreams(); }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
-        virtual b getBitLength(b dataBitLength) const override;
-        virtual const simtime_t getDuration(b dataBitLength) const override;
+        virtual b getBitLength(b dataLength) const override;
+        virtual const simtime_t getDuration(b dataLength) const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const Ieee80211HTMCS *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
@@ -267,7 +267,7 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
         virtual BandMode getCarrierFrequencyMode() const { return carrierFrequencyMode; }
 
-        virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
+        virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength); }
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)

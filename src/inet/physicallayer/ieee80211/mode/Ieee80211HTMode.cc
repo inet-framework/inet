@@ -257,9 +257,9 @@ int Ieee80211HTModeBase::getNumberOfPilotSubcarriers() const
         throw cRuntimeError("Unsupported bandwidth");
 }
 
-b Ieee80211HTDataMode::getBitLength(b dataBitLength) const
+b Ieee80211HTDataMode::getBitLength(b dataLength) const
 {
-    return getServiceBitLength() + getTailBitLength() + dataBitLength; // TODO: padding?
+    return getServiceBitLength() + getTailBitLength() + dataLength; // TODO: padding?
 }
 
 unsigned int Ieee80211HTDataMode::computeNumberOfSpatialStreams(const Ieee80211OFDMModulation* stream1Modulation, const Ieee80211OFDMModulation* stream2Modulation, const Ieee80211OFDMModulation* stream3Modulation, const Ieee80211OFDMModulation* stream4Modulation) const
@@ -284,13 +284,13 @@ unsigned int Ieee80211HTDataMode::computeNumberOfBccEncoders() const
     return getGrossBitrate() > Mbps(300) ? 2 : 1;
 }
 
-const simtime_t Ieee80211HTDataMode::getDuration(b dataBitLength) const
+const simtime_t Ieee80211HTDataMode::getDuration(b dataLength) const
 {
     unsigned int numberOfCodedBitsPerSubcarrierSum = computeNumberOfCodedBitsPerSubcarrierSum();
     unsigned int numberOfCodedBitsPerSymbol = numberOfCodedBitsPerSubcarrierSum * getNumberOfDataSubcarriers();
     const IForwardErrorCorrection *forwardErrorCorrection = getCode() ? getCode()->getForwardErrorCorrection() : nullptr;
     unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
-    int numberOfSymbols = lrint(ceil((double)getBitLength(dataBitLength).get() / dataBitsPerSymbol)); // TODO: getBitLength(dataBitLength) should be divisible by dataBitsPerSymbol
+    int numberOfSymbols = lrint(ceil((double)getBitLength(dataLength).get() / dataBitsPerSymbol)); // TODO: getBitLength(dataLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
 }
 

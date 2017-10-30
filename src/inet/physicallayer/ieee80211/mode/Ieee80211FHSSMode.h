@@ -70,8 +70,8 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
-    virtual b getBitLength(b dataBitLength) const override { return dataBitLength; }
-    virtual inline const simtime_t getDuration(b bitLength) const override { return (double)bitLength.get() / getNetBitrate().get(); }
+    virtual b getBitLength(b dataLength) const override { return dataLength; }
+    virtual inline const simtime_t getDuration(b length) const override { return (double)length.get() / getNetBitrate().get(); }
     virtual const GFSKModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
@@ -100,7 +100,7 @@ class INET_API Ieee80211FhssMode : public Ieee80211ModeBase
     virtual const IIeee80211HeaderMode *getHeaderMode() const override { return headerMode; }
     virtual const IIeee80211DataMode *getDataMode() const override { return dataMode; }
 
-    virtual inline const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
     // TODO: fill in
     virtual inline const simtime_t getSlotTime() const override { return 50E-6; }

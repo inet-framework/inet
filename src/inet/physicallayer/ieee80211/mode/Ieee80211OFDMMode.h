@@ -127,8 +127,8 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
     b getTailBitLength() const { return b(6); }
 
     virtual b getPaddingLength(b dataLength) const override;
-    virtual b getBitLength(b dataBitLength) const override;
-    virtual const simtime_t getDuration(b dataBitLength) const override;
+    virtual b getBitLength(b dataLength) const override;
+    virtual const simtime_t getDuration(b dataLength) const override;
 
     const Ieee80211OFDMCode* getCode() const { return code; }
     const Ieee80211OFDMModulation* getModulation() const override { return modulation; }
@@ -158,7 +158,7 @@ class INET_API Ieee80211OFDMMode : public Ieee80211ModeBase, public Ieee80211OFD
     virtual const Ieee80211OFDMDataMode *getDataMode() const override { return dataMode; }
     virtual const Ieee80211OFDMSignalMode *getSignalMode() const { return signalMode; }
 
-    virtual inline const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataLength); }
 
     // Table 18-17—OFDM PHY characteristics
     virtual const simtime_t getSlotTime() const override;
