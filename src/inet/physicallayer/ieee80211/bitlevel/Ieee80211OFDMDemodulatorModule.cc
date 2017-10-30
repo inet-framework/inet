@@ -20,7 +20,7 @@
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "../mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 
@@ -31,7 +31,7 @@ Define_Module(Ieee80211OFDMDemodulatorModule);
 void Ieee80211OFDMDemodulatorModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        ofdmDemodulator = new Ieee80211OFDMDemodulator(new Ieee80211OFDMModulation(APSKModulationBase::findModulation(par("subcarrierModulation"))));
+        ofdmDemodulator = new Ieee80211OFDMDemodulator(new Ieee80211OfdmModulation(APSKModulationBase::findModulation(par("subcarrierModulation"))));
 }
 
 const IReceptionBitModel *Ieee80211OFDMDemodulatorModule::demodulate(const IReceptionSymbolModel *symbolModel) const

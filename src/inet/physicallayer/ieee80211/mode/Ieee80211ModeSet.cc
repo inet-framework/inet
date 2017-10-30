@@ -14,14 +14,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211ErpOfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211IrMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211FHSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211IRMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211ERPOFDMMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HTMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include <algorithm>
 
 namespace inet {
@@ -32,14 +32,14 @@ Register_Abstract_Class(Ieee80211ModeSet);
 
 const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
     Ieee80211ModeSet("a", {
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS20MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS20MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS20MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode36Mbps },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode48Mbps },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode54Mbps },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode9MbpsCS20MHz },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode12MbpsCS20MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode18MbpsCS20MHz },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode36Mbps },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode48Mbps },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode54Mbps },
     }),
     Ieee80211ModeSet("b", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
@@ -73,14 +73,14 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps },
     }),
     Ieee80211ModeSet("p", {
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode3MbpsCS10MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode4_5MbpsCS10MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS10MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode9MbpsCS10MHz },
-        { true, &Ieee80211OFDMCompliantModes::ofdmMode12MbpsCS10MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode18MbpsCS10MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode24MbpsCS10MHz },
-        { false, &Ieee80211OFDMCompliantModes::ofdmMode27Mbps },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode4_5MbpsCS10MHz },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS10MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode9MbpsCS10MHz },
+        { true, &Ieee80211OfdmCompliantModes::ofdmMode12MbpsCS10MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode18MbpsCS10MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS10MHz },
+        { false, &Ieee80211OfdmCompliantModes::ofdmMode27Mbps },
         }),
     Ieee80211ModeSet("n(mixed-2.4Ghz)", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
         { true, Ieee80211HTCompliantModes::getCompliantMode(&Ieee80211HTMCSTable::htMcs0BW20MHz, Ieee80211HTMode::BAND_2_4GHZ, Ieee80211HTPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HTModeBase::HT_GUARD_INTERVAL_LONG) },

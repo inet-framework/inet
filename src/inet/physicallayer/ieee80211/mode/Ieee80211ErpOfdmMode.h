@@ -18,19 +18,19 @@
 #ifndef __INET_IEEE80211ERPOFDMMODE_H
 #define __INET_IEEE80211ERPOFDMMODE_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ErpOfdmMode : public Ieee80211OFDMMode
+class INET_API Ieee80211ErpOfdmMode : public Ieee80211OfdmMode
 {
     protected:
         bool isErpOnly;
 
     public:
-        Ieee80211ErpOfdmMode(const char *name, bool isErpOnly, const Ieee80211OFDMPreambleMode *preambleMode, const Ieee80211OFDMSignalMode *signalMode, const Ieee80211OFDMDataMode *dataMode);
+        Ieee80211ErpOfdmMode(const char *name, bool isErpOnly, const Ieee80211OfdmPreambleMode *preambleMode, const Ieee80211OfdmSignalMode *signalMode, const Ieee80211OfdmDataMode *dataMode);
 
         virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ErpOfdmMode"; }
 

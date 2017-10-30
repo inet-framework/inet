@@ -18,8 +18,8 @@
 #ifndef __INET_IEEE80211DSSSOFDMMODE_H
 #define __INET_IEEE80211DSSSOFDMMODE_H
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 
@@ -35,16 +35,16 @@ class INET_API Ieee80211DsssOfdmMode : public Ieee80211ModeBase
   protected:
     const Ieee80211DsssPreambleMode *dsssPreambleMode;
     const Ieee80211DsssHeaderMode *dsssHeaderMode;
-    const Ieee80211OFDMPreambleMode *ofdmPreambleMode;
-    const Ieee80211OFDMSignalMode *ofdmSignalMode;
-    const Ieee80211OFDMDataMode *ofdmDataMode;
+    const Ieee80211OfdmPreambleMode *ofdmPreambleMode;
+    const Ieee80211OfdmSignalMode *ofdmSignalMode;
+    const Ieee80211OfdmDataMode *ofdmDataMode;
 
   protected:
     virtual inline int getLegacyCwMin() const override { return -1; }
     virtual inline int getLegacyCwMax() const override { return -1; }
 
   public:
-    Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OFDMPreambleMode *ofdmPreambleMode, const Ieee80211OFDMSignalMode *ofdmSignalMode, const Ieee80211OFDMDataMode *ofdmDataMode);
+    Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OfdmPreambleMode *ofdmPreambleMode, const Ieee80211OfdmSignalMode *ofdmSignalMode, const Ieee80211OfdmDataMode *ofdmDataMode);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211DsssOfdmMode"; }
 

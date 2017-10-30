@@ -38,7 +38,7 @@ class INET_API Ieee80211OFDMModulatorModule : public IModulator, public cSimpleM
     virtual ~Ieee80211OFDMModulatorModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return ofdmModulator->printToStream(stream, level); }
-    const Ieee80211OFDMModulation *getModulation() const override { return ofdmModulator->getModulation(); }
+    const Ieee80211OfdmModulation *getModulation() const override { return ofdmModulator->getModulation(); }
     const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
 };
 

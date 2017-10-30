@@ -25,7 +25,7 @@
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "../mode/Ieee80211OfdmCode.h"
 
 namespace inet {
 
@@ -37,15 +37,15 @@ class INET_API Ieee80211OFDMEncoder : public IEncoder
     const IFECCoder *convolutionalCoder = nullptr;
     const IInterleaver *interleaver = nullptr;
     const IScrambler *scrambler = nullptr;
-    const Ieee80211OFDMCode *code = nullptr;
+    const Ieee80211OfdmCode *code = nullptr;
 
   public:
-    Ieee80211OFDMEncoder(const Ieee80211OFDMCode *code);
+    Ieee80211OFDMEncoder(const Ieee80211OfdmCode *code);
     ~Ieee80211OFDMEncoder();
 
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    const Ieee80211OFDMCode *getCode() const override { return code; }
+    const Ieee80211OfdmCode *getCode() const override { return code; }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

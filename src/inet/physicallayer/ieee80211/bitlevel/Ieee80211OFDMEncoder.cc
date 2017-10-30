@@ -22,7 +22,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "../mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
@@ -79,7 +79,7 @@ const ITransmissionBitModel *Ieee80211OFDMEncoder::encode(const ITransmissionPac
     return new TransmissionBitModel(encodedBits, forwardErrorCorrection, scrambling, interleaving);
 }
 
-Ieee80211OFDMEncoder::Ieee80211OFDMEncoder(const Ieee80211OFDMCode *code) :
+Ieee80211OFDMEncoder::Ieee80211OFDMEncoder(const Ieee80211OfdmCode *code) :
     convolutionalCoder(nullptr),
     interleaver(nullptr),
     scrambler(nullptr),

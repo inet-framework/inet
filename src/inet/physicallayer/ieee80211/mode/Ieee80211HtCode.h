@@ -22,12 +22,12 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211HTInterleaving.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "Ieee80211OfdmModulation.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211HTCode : public ICode
+class INET_API Ieee80211HtCode : public ICode
 {
     protected:
         const IForwardErrorCorrection *forwardErrorCorrection;
@@ -35,24 +35,24 @@ class INET_API Ieee80211HTCode : public ICode
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211HTCode(const IForwardErrorCorrection *forwardErrorCorrection, const Ieee80211HTInterleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211HtCode(const IForwardErrorCorrection *forwardErrorCorrection, const Ieee80211HTInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
         const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
         const AdditiveScrambling *getScrambling() const { return scrambling; }
         const Ieee80211HTInterleaving *getInterleaving() const { return interleaving; }
 
-        virtual ~Ieee80211HTCode();
+        virtual ~Ieee80211HtCode();
 
 };
 
-class INET_API Ieee80211HTCompliantCodes
+class INET_API Ieee80211HtCompliantCodes
 {
     public:
         // Convolutional codes (TODO: LDPC codes).
         // Note: 1/2, 2/3, 3/4 rates are defined in Ieee80211OFDMCompliantCodes.
         static const Ieee80211ConvolutionalCode htConvolutionalCode5_6;
 
-        static const Ieee80211HTCode *getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211OFDMModulation *stream3Modulation, const Ieee80211OFDMModulation *stream4Modulation, Hz bandwidth, bool withScrambling = true);
+        static const Ieee80211HtCode *getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, Hz bandwidth, bool withScrambling = true);
 
 };
 

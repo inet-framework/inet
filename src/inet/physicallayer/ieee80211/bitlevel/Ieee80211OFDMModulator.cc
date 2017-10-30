@@ -41,7 +41,7 @@ const double Ieee80211OFDMModulator::pilotSubcarrierPolarityVector[] = {
     -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1
 };
 
-Ieee80211OFDMModulator::Ieee80211OFDMModulator(const Ieee80211OFDMModulation *subcarrierModulation, unsigned int polarityVectorOffset) :
+Ieee80211OFDMModulator::Ieee80211OFDMModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset) :
     subcarrierModulation(subcarrierModulation),
     pilotSubcarrierPolarityVectorOffset(polarityVectorOffset)
 {

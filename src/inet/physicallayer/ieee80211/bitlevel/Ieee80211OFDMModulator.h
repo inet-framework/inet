@@ -23,7 +23,7 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "../mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 
@@ -36,7 +36,7 @@ class INET_API Ieee80211OFDMModulator : public IModulator
     static const APSKSymbol positivePilotSubcarrier;
 
   protected:
-    const Ieee80211OFDMModulation *subcarrierModulation;
+    const Ieee80211OfdmModulation *subcarrierModulation;
     static const double pilotSubcarrierPolarityVector[127];
     unsigned int pilotSubcarrierPolarityVectorOffset;
 
@@ -45,10 +45,10 @@ class INET_API Ieee80211OFDMModulator : public IModulator
     void insertPilotSubcarriers(Ieee80211OFDMSymbol *ofdmSymbol, int symbolID) const;
 
   public:
-    Ieee80211OFDMModulator(const Ieee80211OFDMModulation *subcarrierModulation, unsigned int polarityVectorOffset);
+    Ieee80211OFDMModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset);
 
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
-    const Ieee80211OFDMModulation *getModulation() const override { return subcarrierModulation; }
+    const Ieee80211OfdmModulation *getModulation() const override { return subcarrierModulation; }
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 

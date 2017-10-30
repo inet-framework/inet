@@ -20,9 +20,9 @@
 
 #define DI DelayedInitializer
 
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HTCode.h"
 #include "inet/common/DelayedInitializer.h"
 
 namespace inet {
@@ -77,16 +77,16 @@ class INET_API Ieee80211HTModeBase
 class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee80211HTModeBase, public Ieee80211HTTimingRelatedParametersBase
 {
     protected:
-        const Ieee80211OFDMModulation *modulation;
-        const Ieee80211HTCode *code;
+        const Ieee80211OfdmModulation *modulation;
+        const Ieee80211HtCode *code;
 
     protected:
         virtual bps computeGrossBitrate() const override;
         virtual bps computeNetBitrate() const override;
 
     public:
-        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OFDMModulation *modulation, const Ieee80211HTCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType);
-        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OFDMModulation *modulation, const Ieee80211ConvolutionalCode *convolutionalCode, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211HtCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211ConvolutionalCode *convolutionalCode, const Hz bandwidth, GuardIntervalType guardIntervalType);
         virtual ~Ieee80211HTSignalMode();
 
         /* Table 20-11—HT-SIG fields, 1699p */
@@ -136,7 +136,7 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
 
     protected:
         const Ieee80211HTSignalMode *highThroughputSignalMode; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
-        const Ieee80211OFDMSignalMode *legacySignalMode; // L-SIG
+        const Ieee80211OfdmSignalMode *legacySignalMode; // L-SIG
         const HighTroughputPreambleFormat preambleFormat;
         const unsigned int numberOfHTLongTrainings; // N_LTF, 20.3.9.4.6 HT-LTF definition
 
@@ -145,12 +145,12 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
         virtual unsigned int computeNumberOfHTLongTrainings(unsigned int numberOfSpaceTimeStreams) const;
 
     public:
-        Ieee80211HTPreambleMode(const Ieee80211HTSignalMode* highThroughputSignalMode, const Ieee80211OFDMSignalMode *legacySignalMode, HighTroughputPreambleFormat preambleFormat, unsigned int numberOfSpatialStream);
+        Ieee80211HTPreambleMode(const Ieee80211HTSignalMode* highThroughputSignalMode, const Ieee80211OfdmSignalMode *legacySignalMode, HighTroughputPreambleFormat preambleFormat, unsigned int numberOfSpatialStream);
         virtual ~Ieee80211HTPreambleMode() { delete highThroughputSignalMode; }
 
         HighTroughputPreambleFormat getPreambleFormat() const { return preambleFormat; }
         virtual const Ieee80211HTSignalMode *getSignalMode() const { return highThroughputSignalMode; }
-        virtual const Ieee80211OFDMSignalMode *getLegacySignalMode() const { return legacySignalMode; }
+        virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
         virtual const Ieee80211HTSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
         virtual inline unsigned int getNumberOfHTLongTrainings() const { return numberOfHTLongTrainings; }
 
@@ -173,27 +173,27 @@ class INET_API Ieee80211HTMCS
 {
     protected:
         const unsigned int mcsIndex;
-        const Ieee80211OFDMModulation *stream1Modulation;
-        const Ieee80211OFDMModulation *stream2Modulation;
-        const Ieee80211OFDMModulation *stream3Modulation;
-        const Ieee80211OFDMModulation *stream4Modulation;
-        const Ieee80211HTCode *code;
+        const Ieee80211OfdmModulation *stream1Modulation;
+        const Ieee80211OfdmModulation *stream2Modulation;
+        const Ieee80211OfdmModulation *stream3Modulation;
+        const Ieee80211OfdmModulation *stream4Modulation;
+        const Ieee80211HtCode *code;
         const Hz bandwidth;
 
     public:
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211HTCode *code, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211OFDMModulation *stream3Modulation, const Ieee80211OFDMModulation *stream4Modulation);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211OFDMModulation *stream3Modulation, const Ieee80211OFDMModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211OFDMModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211HtCode *code, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation);
+        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
         virtual ~Ieee80211HTMCS();
 
-        const Ieee80211HTCode* getCode() const { return code; }
+        const Ieee80211HtCode* getCode() const { return code; }
         unsigned int getMcsIndex() const { return mcsIndex; }
-        virtual const Ieee80211OFDMModulation* getModulation() const { return stream1Modulation; }
-        virtual const Ieee80211OFDMModulation* getStreamExtension1Modulation() const { return stream2Modulation; }
-        virtual const Ieee80211OFDMModulation* getStreamExtension2Modulation() const { return stream3Modulation; }
-        virtual const Ieee80211OFDMModulation* getStreamExtension3Modulation() const { return stream4Modulation; }
+        virtual const Ieee80211OfdmModulation* getModulation() const { return stream1Modulation; }
+        virtual const Ieee80211OfdmModulation* getStreamExtension1Modulation() const { return stream2Modulation; }
+        virtual const Ieee80211OfdmModulation* getStreamExtension2Modulation() const { return stream3Modulation; }
+        virtual const Ieee80211OfdmModulation* getStreamExtension3Modulation() const { return stream4Modulation; }
         virtual Hz getBandwidth() const { return bandwidth; }
 };
 
@@ -206,7 +206,7 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
     protected:
         bps computeGrossBitrate() const override;
         bps computeNetBitrate() const override;
-        unsigned int computeNumberOfSpatialStreams(const Ieee80211OFDMModulation* stream1Modulation, const Ieee80211OFDMModulation* stream2Modulation, const Ieee80211OFDMModulation* stream3Modulation, const Ieee80211OFDMModulation* stream4Modulation) const;
+        unsigned int computeNumberOfSpatialStreams(const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation) const;
         unsigned int computeNumberOfCodedBitsPerSubcarrierSum() const;
         unsigned int computeNumberOfBccEncoders() const;
 
@@ -223,8 +223,8 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const Ieee80211HTMCS *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
-        virtual const Ieee80211HTCode* getCode() const { return modulationAndCodingScheme->getCode(); }
-        virtual const Ieee80211OFDMModulation* getModulation() const override { return modulationAndCodingScheme->getModulation(); }
+        virtual const Ieee80211HtCode* getCode() const { return modulationAndCodingScheme->getCode(); }
+        virtual const Ieee80211OfdmModulation* getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
 
 class INET_API Ieee80211HTMode : public Ieee80211ModeBase
@@ -252,7 +252,7 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         virtual const Ieee80211HTDataMode* getDataMode() const override { return dataMode; }
         virtual const Ieee80211HTPreambleMode* getPreambleMode() const override { return preambleMode; }
         virtual const Ieee80211HTSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
-        virtual const Ieee80211OFDMSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
+        virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
 
         // Table 20-25—MIMO PHY characteristics
         virtual const simtime_t getSlotTime() const override;

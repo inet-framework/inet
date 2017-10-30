@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSOFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Ieee80211DsssOfdmMode::Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OFDMPreambleMode *ofdmPreambleMode, const Ieee80211OFDMSignalMode *ofdmSignalMode, const Ieee80211OFDMDataMode *ofdmDataMode) :
+Ieee80211DsssOfdmMode::Ieee80211DsssOfdmMode(const char *name, const Ieee80211DsssPreambleMode *dsssPreambleMode, const Ieee80211DsssHeaderMode *dsssHeaderMode, const Ieee80211OfdmPreambleMode *ofdmPreambleMode, const Ieee80211OfdmSignalMode *ofdmSignalMode, const Ieee80211OfdmDataMode *ofdmDataMode) :
     Ieee80211ModeBase(name),
     dsssPreambleMode(dsssPreambleMode),
     dsssHeaderMode(dsssHeaderMode),

@@ -31,7 +31,7 @@ class INET_API Ieee80211OFDMEncoderModule : public IEncoder, public cSimpleModul
     const IScrambler *scrambler = nullptr;
     const IFECCoder *convolutionalCoder = nullptr;
     const IInterleaver *interleaver = nullptr;
-    const Ieee80211OFDMCode *code = nullptr;
+    const Ieee80211OfdmCode *code = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -42,7 +42,7 @@ class INET_API Ieee80211OFDMEncoderModule : public IEncoder, public cSimpleModul
     virtual ~Ieee80211OFDMEncoderModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return encoder->printToStream(stream, level); }
-    const Ieee80211OFDMCode *getCode() const override { return code; }
+    const Ieee80211OfdmCode *getCode() const override { return code; }
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };
 } /* namespace physicallayer */

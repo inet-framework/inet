@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HTCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "Ieee80211HtCode.h"
+#include "Ieee80211OfdmCode.h"
 
 namespace inet {
 namespace physicallayer {
 
-Ieee80211HTCode::Ieee80211HTCode(
+Ieee80211HtCode::Ieee80211HtCode(
         const IForwardErrorCorrection* forwardErrorCorrection,
         const Ieee80211HTInterleaving* interleaving,
         const AdditiveScrambling* scrambling) :
@@ -32,7 +32,7 @@ Ieee80211HTCode::Ieee80211HTCode(
 
 }
 
-const Ieee80211HTCode* Ieee80211HTCompliantCodes::getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OFDMModulation *stream1Modulation, const Ieee80211OFDMModulation *stream2Modulation, const Ieee80211OFDMModulation *stream3Modulation, const Ieee80211OFDMModulation *stream4Modulation, Hz bandwidth, bool withScrambling)
+const Ieee80211HtCode* Ieee80211HtCompliantCodes::getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, Hz bandwidth, bool withScrambling)
 {
     std::vector<unsigned int> numberOfCodedBitsPerSpatialStreams;
     if (stream1Modulation)
@@ -43,17 +43,17 @@ const Ieee80211HTCode* Ieee80211HTCompliantCodes::getCompliantCode(const Ieee802
         numberOfCodedBitsPerSpatialStreams.push_back(stream3Modulation->getSubcarrierModulation()->getCodeWordSize());
     if (stream4Modulation)
         numberOfCodedBitsPerSpatialStreams.push_back(stream4Modulation->getSubcarrierModulation()->getCodeWordSize());
-    return withScrambling ? new Ieee80211HTCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), &Ieee80211OFDMCompliantCodes::ofdmScrambling) :
-                            new Ieee80211HTCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), nullptr);
+    return withScrambling ? new Ieee80211HtCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), &Ieee80211OfdmCompliantCodes::ofdmScrambling) :
+                            new Ieee80211HtCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), nullptr);
 }
 
-Ieee80211HTCode::~Ieee80211HTCode()
+Ieee80211HtCode::~Ieee80211HtCode()
 {
     // NOTE: We assume that convolutional code and scrambling are static variables
     delete interleaving;
 }
 
-const Ieee80211ConvolutionalCode Ieee80211HTCompliantCodes::htConvolutionalCode5_6(5,6);
+const Ieee80211ConvolutionalCode Ieee80211HtCompliantCodes::htConvolutionalCode5_6(5,6);
 
 } /* namespace physicallayer */
 } /* namespace inet */

@@ -26,7 +26,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMCode : public ICode
+class INET_API Ieee80211OfdmCode : public ICode
 {
     protected:
         const ConvolutionalCode *convolutionalCode;
@@ -34,7 +34,7 @@ class INET_API Ieee80211OFDMCode : public ICode
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211OFDMCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OFDMInterleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OFDMInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
         virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
@@ -43,7 +43,7 @@ class INET_API Ieee80211OFDMCode : public ICode
         const AdditiveScrambling *getScrambling() const { return scrambling; }
 };
 
-class INET_API Ieee80211OFDMCompliantCodes
+class INET_API Ieee80211OfdmCompliantCodes
 {
   public:
     // Convolutional codes supported by the OFDM PHY: 18.3.5.6 Convolutional encoder
@@ -61,15 +61,15 @@ class INET_API Ieee80211OFDMCompliantCodes
     static const AdditiveScrambling ofdmScrambling;
 
     // Codes: Table 18-4—Modulation-dependent parameters
-    static const Ieee80211OFDMCode ofdmCC1_2BPSKInterleaving;
-    static const Ieee80211OFDMCode ofdmCC1_2BPSKInterleavingWithoutScrambling; // For the SIGNAL field
-    static const Ieee80211OFDMCode ofdmCC3_4BPSKInterleaving;
-    static const Ieee80211OFDMCode ofdmCC1_2QPSKInterleaving;
-    static const Ieee80211OFDMCode ofdmCC3_4QPSKInterleaving;
-    static const Ieee80211OFDMCode ofdmCC1_2QAM16Interleaving;
-    static const Ieee80211OFDMCode ofdmCC3_4QAM16Interleaving;
-    static const Ieee80211OFDMCode ofdmCC2_3QAM64Interleaving;
-    static const Ieee80211OFDMCode ofdmCC3_4QAM64Interleaving;
+    static const Ieee80211OfdmCode ofdmCC1_2BPSKInterleaving;
+    static const Ieee80211OfdmCode ofdmCC1_2BPSKInterleavingWithoutScrambling; // For the SIGNAL field
+    static const Ieee80211OfdmCode ofdmCC3_4BPSKInterleaving;
+    static const Ieee80211OfdmCode ofdmCC1_2QPSKInterleaving;
+    static const Ieee80211OfdmCode ofdmCC3_4QPSKInterleaving;
+    static const Ieee80211OfdmCode ofdmCC1_2QAM16Interleaving;
+    static const Ieee80211OfdmCode ofdmCC3_4QAM16Interleaving;
+    static const Ieee80211OfdmCode ofdmCC2_3QAM64Interleaving;
+    static const Ieee80211OfdmCode ofdmCC3_4QAM64Interleaving;
 };
 
 } /* namespace physicallayer */

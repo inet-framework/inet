@@ -23,7 +23,7 @@
 #include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "../mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 
@@ -34,7 +34,7 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMDemodulator : public IDemodulator
 {
   protected:
-    const Ieee80211OFDMModulation *subcarrierModulation = nullptr;
+    const Ieee80211OfdmModulation *subcarrierModulation = nullptr;
 
   protected:
     BitVector demodulateSymbol(const Ieee80211OFDMSymbol *signalSymbol) const;
@@ -42,9 +42,9 @@ class INET_API Ieee80211OFDMDemodulator : public IDemodulator
     bool isPilotOrDcSubcarrier(int i) const;
 
   public:
-    Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *subcarrierModulation);
+    Ieee80211OFDMDemodulator(const Ieee80211OfdmModulation *subcarrierModulation);
 
-    const Ieee80211OFDMModulation *getModulation() const { return subcarrierModulation; }
+    const Ieee80211OfdmModulation *getModulation() const { return subcarrierModulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };

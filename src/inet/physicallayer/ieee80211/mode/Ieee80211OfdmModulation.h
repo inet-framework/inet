@@ -23,13 +23,13 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMModulation : public IModulation
+class INET_API Ieee80211OfdmModulation : public IModulation
 {
     protected:
         const APSKModulationBase *subcarrierModulation;
 
     public:
-        Ieee80211OFDMModulation(const APSKModulationBase *subcarrierModulation);
+        Ieee80211OfdmModulation(const APSKModulationBase *subcarrierModulation);
 
         const APSKModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
         virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
@@ -38,15 +38,15 @@ class INET_API Ieee80211OFDMModulation : public IModulation
         virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 
-class INET_API Ieee80211OFDMCompliantModulations
+class INET_API Ieee80211OfdmCompliantModulations
 {
   // Modulations supported by the OFDM PHY: Table 18-12—Major parameters of the OFDM PHY
   public:
-    static const Ieee80211OFDMModulation qbpskModulation;
-    static const Ieee80211OFDMModulation bpskModulation;
-    static const Ieee80211OFDMModulation qpskModulation;
-    static const Ieee80211OFDMModulation qam16Modulation;
-    static const Ieee80211OFDMModulation qam64Modulation;
+    static const Ieee80211OfdmModulation qbpskModulation;
+    static const Ieee80211OfdmModulation bpskModulation;
+    static const Ieee80211OfdmModulation qpskModulation;
+    static const Ieee80211OfdmModulation qam16Modulation;
+    static const Ieee80211OfdmModulation qam64Modulation;
 };
 
 } /* namespace physicallayer */

@@ -35,8 +35,8 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "../mode/Ieee80211OfdmMode.h"
+#include "../mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 
@@ -141,7 +141,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createSymbolModel(con
 double Ieee80211LayeredOFDMReceiver::getCodeRateFromDecoderModule(const IDecoder *decoder) const
 {
     const Ieee80211OFDMDecoderModule *decoderModule = check_and_cast<const Ieee80211OFDMDecoderModule *>(decoder);
-    const Ieee80211OFDMCode *code = decoderModule->getCode();
+    const Ieee80211OfdmCode *code = decoderModule->getCode();
     const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
     return convolutionalCode ? 1.0 * convolutionalCode->getCodeRatePuncturingN() / convolutionalCode->getCodeRatePuncturingK() : 1;
 }
@@ -165,7 +165,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createDataFieldPacket
         if (dataDecoder)
             dataFieldPacketModel = dataDecoder->decode(dataFieldBitModel);
         else {
-            const Ieee80211OFDMCode *code = mode->getDataMode()->getCode();
+            const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
             const Ieee80211OFDMDecoder decoder(code);
             dataFieldPacketModel = decoder.decode(dataFieldBitModel);
         }
@@ -181,7 +181,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createSignalFieldPack
             signalFieldPacketModel = signalDecoder->decode(signalFieldBitModel);
         else { // complaint
                // In compliant mode the code for the signal field is always the following:
-            const Ieee80211OFDMDecoder decoder(&Ieee80211OFDMCompliantCodes::ofdmCC1_2BPSKInterleavingWithoutScrambling);
+            const Ieee80211OFDMDecoder decoder(&Ieee80211OfdmCompliantCodes::ofdmCC1_2BPSKInterleavingWithoutScrambling);
             signalFieldPacketModel = decoder.decode(signalFieldBitModel);
         }
     }
@@ -245,7 +245,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createSignalFieldBitMode
             signalFieldBitModel = signalDemodulator->demodulate(signalFieldSymbolModel);
         else { // compliant
                // In compliant mode, the signal field modulation is always BPSK
-            const Ieee80211OFDMModulation *signalModulation = new Ieee80211OFDMModulation(&BPSKModulation::singleton);
+            const Ieee80211OfdmModulation *signalModulation = new Ieee80211OfdmModulation(&BPSKModulation::singleton);
             const Ieee80211OFDMDemodulator demodulator(signalModulation);
             signalFieldBitModel = demodulator.demodulate(signalFieldSymbolModel);
             delete signalModulation;
@@ -275,7 +275,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
         if (dataDemodulator) // non-compliant
             dataFieldBitModel = dataDemodulator->demodulate(dataFieldSymbolModel);
         else { // compliant
-            const Ieee80211OFDMDataMode *dataMode = mode->getDataMode();
+            const Ieee80211OfdmDataMode *dataMode = mode->getDataMode();
             const Ieee80211OFDMDemodulator ofdmDemodulator(dataMode->getModulation());
             dataFieldBitModel = ofdmDemodulator.demodulate(dataFieldSymbolModel);
         }
@@ -288,15 +288,15 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
         unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(bytesChunk->getBytes())) * 8;
         unsigned int dataFieldLengthInBits = psduLengthInBits + PPDU_SERVICE_FIELD_BITS_LENGTH + PPDU_TAIL_BITS_LENGTH;
         if (isCompliant) {
-            const Ieee80211OFDMDataMode *dataMode = mode->getDataMode();
+            const Ieee80211OfdmDataMode *dataMode = mode->getDataMode();
             modulation = dataMode->getModulation()->getSubcarrierModulation();
-            const Ieee80211OFDMCode *code = dataMode->getCode();
+            const Ieee80211OfdmCode *code = dataMode->getCode();
             convolutionalCode = code->getConvolutionalCode();
             codeRate = convolutionalCode->getCodeRatePuncturingN() * 1.0 / convolutionalCode->getCodeRatePuncturingK();
         }
         else {
             const Ieee80211OFDMDecoderModule *decoderModule = check_and_cast<const Ieee80211OFDMDecoderModule *>(dataDecoder);
-            const Ieee80211OFDMCode *code = decoderModule->getCode();
+            const Ieee80211OfdmCode *code = decoderModule->getCode();
             convolutionalCode = code->getConvolutionalCode();
             modulation = mode->getDataMode()->getModulation()->getSubcarrierModulation();
             codeRate = getCodeRateFromDecoderModule(dataDecoder);
@@ -337,15 +337,15 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     return new ReceptionPacketModel(packet, bps(NaN));
 }
 
-const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
+const Ieee80211OfdmMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
 {
     const Ieee80211OFDMDecoderModule *ofdmSignalDecoderModule = check_and_cast<const Ieee80211OFDMDecoderModule *>(signalDecoder);
     const Ieee80211OFDMDecoderModule *ofdmDataDecoderModule = check_and_cast<const Ieee80211OFDMDecoderModule *>(dataDecoder);
     const Ieee80211OFDMDemodulatorModule *ofdmSignalDemodulatorModule = check_and_cast<const Ieee80211OFDMDemodulatorModule *>(signalDemodulator);
     const Ieee80211OFDMDemodulatorModule *ofdmDataDemodulatorModule = check_and_cast<const Ieee80211OFDMDemodulatorModule *>(dataDemodulator);
-    const Ieee80211OFDMSignalMode *signalMode = new Ieee80211OFDMSignalMode(ofdmSignalDecoderModule->getCode(), ofdmSignalDemodulatorModule->getModulation(), channelSpacing, bandwidth, 0);
-    const Ieee80211OFDMDataMode *dataMode = new Ieee80211OFDMDataMode(ofdmDataDecoderModule->getCode(), ofdmDataDemodulatorModule->getModulation(), channelSpacing, bandwidth);
-    return new Ieee80211OFDMMode("", new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
+    const Ieee80211OfdmSignalMode *signalMode = new Ieee80211OfdmSignalMode(ofdmSignalDecoderModule->getCode(), ofdmSignalDemodulatorModule->getModulation(), channelSpacing, bandwidth, 0);
+    const Ieee80211OfdmDataMode *dataMode = new Ieee80211OfdmDataMode(ofdmDataDecoderModule->getCode(), ofdmDataDemodulatorModule->getModulation(), channelSpacing, bandwidth);
+    return new Ieee80211OfdmMode("", new Ieee80211OfdmPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
 const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
@@ -365,7 +365,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
         const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllBytes() : packetModel->getPacket()->peekAllBytes();
         uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
         // TODO: handle erroneous rate field
-        mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
+        mode = &Ieee80211OfdmCompliantModes::getCompliantMode(rate, channelSpacing);
     }
     else if (!mode)
         mode = computeMode(bandwidth);

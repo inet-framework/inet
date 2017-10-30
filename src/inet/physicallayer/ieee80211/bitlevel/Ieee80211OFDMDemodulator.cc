@@ -27,7 +27,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMDemodulator::Ieee80211OFDMDemodulator(const Ieee80211OFDMModulation *subcarrierModulation) :
+Ieee80211OFDMDemodulator::Ieee80211OFDMDemodulator(const Ieee80211OfdmModulation *subcarrierModulation) :
     subcarrierModulation(subcarrierModulation)
 {
 }

@@ -18,14 +18,14 @@
 // Author: Gary Pei <guangyu.pei@boeing.com>
 //
 
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
 #include "inet/physicallayer/modulation/QAM16Modulation.h"
 #include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/modulation/QPSKModulation.h"
 
 namespace inet {
 
@@ -188,7 +188,7 @@ double Ieee80211NistErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, un
 double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode, unsigned int bitLength, double snr) const
 {
     double successRate = 0;
-    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode)) {
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode)) {
         int chunkLength = bitLength - b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get();
         ASSERT(chunkLength == 24);
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
@@ -211,7 +211,7 @@ double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode,
 double Ieee80211NistErrorModel::getDataSuccessRate(const IIeee80211Mode* mode, unsigned int bitLength, double snr) const
 {
     double successRate = 0;
-    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
                                                         bitLength + b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get(),

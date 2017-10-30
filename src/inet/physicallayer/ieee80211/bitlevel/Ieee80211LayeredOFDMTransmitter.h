@@ -25,7 +25,7 @@
 #include "inet/physicallayer/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "../mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 
@@ -45,7 +45,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
 
   protected:
     LevelOfDetail levelOfDetail;
-    mutable const Ieee80211OFDMMode *mode = nullptr;
+    mutable const Ieee80211OfdmMode *mode = nullptr;
     const IEncoder *signalEncoder = nullptr;
     const IEncoder *dataEncoder = nullptr;
     const IModulator *signalModulator = nullptr;
@@ -79,13 +79,13 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
     const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const;
     const ITransmissionAnalogModel *createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
 
-    const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
+    const Ieee80211OfdmMode *computeMode(Hz bandwidth) const;
 
   public:
     virtual ~Ieee80211LayeredOFDMTransmitter();
 
-    virtual b getPaddingLength(const Ieee80211OFDMMode *mode, b length) const;
-    virtual const Ieee80211OFDMMode *getMode(const Packet* packet) const;
+    virtual b getPaddingLength(const Ieee80211OfdmMode *mode, b length) const;
+    virtual const Ieee80211OfdmMode *getMode(const Packet* packet) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
     virtual const IModulator *getModulator() const { return dataModulator; }

@@ -17,7 +17,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "../mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
@@ -141,7 +141,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
     packet->insertHeader(phyHeader);
-    auto tailLength = dynamic_cast<const Ieee80211OFDMMode *>(mode) ? b(6) : b(0);
+    auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0)) {
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
@@ -153,7 +153,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getMandatoryTag<Ieee80211ModeInd>()->getMode();
     const auto& phyHeader = packet->popHeader<Ieee80211PhyHeader>();
-    auto tailLength = dynamic_cast<const Ieee80211OFDMMode *>(mode) ? b(6) : b(0);
+    auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popTrailer(tailLength + paddingLength);

@@ -29,7 +29,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OFDMCode *code) :
+Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OfdmCode *code) :
     code(code),
     descrambler(nullptr),
     fecDecoder(nullptr),

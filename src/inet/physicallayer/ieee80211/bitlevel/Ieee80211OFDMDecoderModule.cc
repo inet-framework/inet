@@ -38,7 +38,7 @@ void Ieee80211OFDMDecoderModule::initialize(int stage)
         const ConvolutionalCode *convolutionalCode = convolutionalDecoder ? dynamic_cast<const ConvolutionalCode *>(convolutionalDecoder->getForwardErrorCorrection()) : nullptr;
         const Ieee80211OFDMInterleaving *interleaving = deinterleaver ? dynamic_cast<const Ieee80211OFDMInterleaving *>(deinterleaver->getInterleaving()) : nullptr;
         const AdditiveScrambling *scrambling = descrambler ? dynamic_cast<const AdditiveScrambling *>(descrambler->getScrambling()) : nullptr;
-        code = new Ieee80211OFDMCode(convolutionalCode, interleaving, scrambling);
+        code = new Ieee80211OfdmCode(convolutionalCode, interleaving, scrambling);
         ofdmDecoder = new Ieee80211OFDMDecoder(code);
     }
 }

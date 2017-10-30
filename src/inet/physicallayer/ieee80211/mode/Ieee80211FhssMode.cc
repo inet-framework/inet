@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211FHSSMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
 #include "inet/physicallayer/modulation/2GFSKModulation.h"
 #include "inet/physicallayer/modulation/4GFSKModulation.h"
 

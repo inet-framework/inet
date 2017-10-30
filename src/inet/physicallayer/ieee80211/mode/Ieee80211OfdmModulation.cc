@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/modulation/QBPSKModulation.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
 #include "inet/physicallayer/modulation/QPSKModulation.h"
@@ -25,12 +25,12 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211OFDMModulation::Ieee80211OFDMModulation(const APSKModulationBase* subcarrierModulation) :
+Ieee80211OfdmModulation::Ieee80211OfdmModulation(const APSKModulationBase* subcarrierModulation) :
         subcarrierModulation(subcarrierModulation)
 {
 }
 
-std::ostream& Ieee80211OFDMModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMModulation";
     if (level <= PRINT_LEVEL_TRACE)
@@ -39,11 +39,11 @@ std::ostream& Ieee80211OFDMModulation::printToStream(std::ostream& stream, int l
 }
 
 // Modulations
-const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qbpskModulation(&QBPSKModulation::singleton);
-const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::bpskModulation(&BPSKModulation::singleton);
-const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qpskModulation(&QPSKModulation::singleton);
-const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qam16Modulation(&QAM16Modulation::singleton);
-const Ieee80211OFDMModulation Ieee80211OFDMCompliantModulations::qam64Modulation(&QAM64Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qbpskModulation(&QBPSKModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::bpskModulation(&BPSKModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qpskModulation(&QPSKModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam16Modulation(&QAM16Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam64Modulation(&QAM64Modulation::singleton);
 
 } /* namespace physicallayer */
 } /* namespace inet */

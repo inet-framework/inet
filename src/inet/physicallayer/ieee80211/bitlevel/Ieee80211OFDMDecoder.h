@@ -22,7 +22,7 @@
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "../mode/Ieee80211OfdmCode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalPacketModel.h"
@@ -36,7 +36,7 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMDecoder : public IDecoder
 {
   protected:
-    const Ieee80211OFDMCode *code = nullptr;
+    const Ieee80211OfdmCode *code = nullptr;
     const IScrambler *descrambler = nullptr;
     const IFECCoder *fecDecoder = nullptr;
     const IInterleaver *deinterleaver = nullptr;
@@ -49,12 +49,12 @@ class INET_API Ieee80211OFDMDecoder : public IDecoder
 
   public:
     Ieee80211OFDMDecoder(const IScrambler *descrambler, const IFECCoder *fecDecoder, const IInterleaver *deinterleaver);
-    Ieee80211OFDMDecoder(const Ieee80211OFDMCode *code);
+    Ieee80211OFDMDecoder(const Ieee80211OfdmCode *code);
     virtual ~Ieee80211OFDMDecoder();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;
-    const Ieee80211OFDMCode *getCode() const { return code; }
+    const Ieee80211OfdmCode *getCode() const { return code; }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

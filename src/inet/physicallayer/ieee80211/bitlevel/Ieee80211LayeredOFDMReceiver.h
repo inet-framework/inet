@@ -29,7 +29,7 @@
 #include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
 #include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 #include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "../mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 
@@ -47,7 +47,7 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
 
   protected:
     LevelOfDetail levelOfDetail;
-    mutable const Ieee80211OFDMMode *mode = nullptr;
+    mutable const Ieee80211OfdmMode *mode = nullptr;
     const ILayeredErrorModel *errorModel = nullptr;
     const IDecoder *dataDecoder = nullptr;
     const IDecoder *signalDecoder = nullptr;
@@ -89,7 +89,7 @@ class INET_API Ieee80211LayeredOFDMReceiver : public SNIRReceiverBase
     const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
     const IReceptionPacketModel *createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const;
 
-    const Ieee80211OFDMMode *computeMode(Hz bandwidth) const;
+    const Ieee80211OfdmMode *computeMode(Hz bandwidth) const;
     unsigned int getSignalFieldLength(const BitVector *signalField) const;
     unsigned int calculatePadding(unsigned int dataFieldLengthInBits, const APSKModulationBase *modulation, double codeRate) const;
     double getCodeRateFromDecoderModule(const IDecoder *decoder) const;
