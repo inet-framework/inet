@@ -70,7 +70,7 @@ class IIeee80211HeaderMode
     @existingClass;
     bps netBitrate @editable(false) @opaque;
     bps grossBitrate @editable(false) @opaque;
-    b bitLength @editable(false) @opaque;
+    b Length @editable(false) @opaque;
     simtime_t duration @editable(false);
 //    IModulation *modulation @editable(false);
 };

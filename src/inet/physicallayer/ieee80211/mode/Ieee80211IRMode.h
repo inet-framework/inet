@@ -53,15 +53,15 @@ class INET_API Ieee80211IrHeaderMode : public IIeee80211HeaderMode
 
     inline int getDRSlotLength() const { return 3; }
     inline int getDCLASlotLength() const { return 32; }
-    b getLengthBitLength() const { return b(16); }
-    b getCRCBitLength() const { return b(16); }
+    b getLengthFieldLength() const { return b(16); }
+    b getCrcFieldLength() const { return b(16); }
     inline int getSlotLength() const { return getDRSlotLength() + getDCLASlotLength(); }
     inline const simtime_t getSlotDuration() const { return 250E-9; }
 
-    virtual b getBitLength() const override { return getLengthBitLength() + getCRCBitLength(); }
+    virtual b getLength() const override { return getLengthFieldLength() + getCrcFieldLength(); }
     virtual inline bps getNetBitrate() const override { return Mbps(1); }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get() + getSlotLength() * getSlotDuration(); }
+    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get() + getSlotLength() * getSlotDuration(); }
     virtual const PPMModulationBase *getModulation() const override { return modulation; }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211IrPhyHeader>(); }
@@ -78,7 +78,7 @@ class INET_API Ieee80211IrDataMode : public IIeee80211DataMode
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
-    virtual b getBitLength(b dataLength) const override { return dataLength; }
+    virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override { return (double)length.get() / getGrossBitrate().get(); }
     virtual const PPMModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }

@@ -96,14 +96,14 @@ class INET_API Ieee80211OFDMSignalMode : public IIeee80211HeaderMode, public Iee
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     unsigned int getRate() const { return rate; }
-    b getRateBitLength() const { return b(4); }
-    b getReservedBitLength() const { return b(1); }
-    b getLengthBitLength() const { return b(12); }
-    b getParityBitLength() const { return b(1); }
-    b getTailBitLength() const { return b(6); }
-    b getServiceBitLength() const { return b(16); }
+    b getRateFieldLength() const { return b(4); }
+    b getReservedFieldLength() const { return b(1); }
+    b getLengthFieldLength() const { return b(12); }
+    b getParityFieldLength() const { return b(1); }
+    b getTailFieldLength() const { return b(6); }
+    b getServiceFieldLength() const { return b(16); }
 
-    virtual b getBitLength() const override { return getRateBitLength() + getReservedBitLength() + getLengthBitLength() + getParityBitLength() + getTailBitLength() + getServiceBitLength(); }
+    virtual b getLength() const override { return getRateFieldLength() + getReservedFieldLength() + getLengthFieldLength() + getParityFieldLength() + getTailFieldLength() + getServiceFieldLength(); }
     virtual const simtime_t getDuration() const override { return getSymbolInterval(); }
 
     const Ieee80211OFDMCode* getCode() const { return code; }
@@ -123,11 +123,11 @@ class INET_API Ieee80211OFDMDataMode : public IIeee80211DataMode, public Ieee802
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    b getServiceBitLength() const { return b(16); }
-    b getTailBitLength() const { return b(6); }
+    b getServiceFieldLength() const { return b(16); }
+    b getTailFieldLength() const { return b(6); }
 
     virtual b getPaddingLength(b dataLength) const override;
-    virtual b getBitLength(b dataLength) const override;
+    virtual b getCompleteLength(b dataLength) const override;
     virtual const simtime_t getDuration(b dataLength) const override;
 
     const Ieee80211OFDMCode* getCode() const { return code; }

@@ -113,7 +113,7 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
 
         virtual unsigned int getModulationAndCodingScheme() const { return mcsIndex; }
         virtual const simtime_t getDuration() const override { return getHTSIGDuration(); }
-        virtual b getBitLength() const override;
+        virtual b getLength() const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
         virtual const IModulation *getModulation() const override { return modulation; }
@@ -213,12 +213,12 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
     public:
         Ieee80211HTDataMode(const Ieee80211HTMCS *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType);
 
-        b getServiceBitLength() const { return b(16); }
-        b getTailBitLength() const { return b(6) * numberOfBccEncoders; }
+        b getServiceFieldLength() const { return b(16); }
+        b getTailFieldLength() const { return b(6) * numberOfBccEncoders; }
 
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211HTModeBase::getNumberOfSpatialStreams(); }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
-        virtual b getBitLength(b dataLength) const override;
+        virtual b getCompleteLength(b dataLength) const override;
         virtual const simtime_t getDuration(b dataLength) const override;
         virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
         virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }

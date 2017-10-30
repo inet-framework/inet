@@ -34,8 +34,8 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadio
     auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
     auto ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
     auto mode = ieee80211Transmission->getMode();
-    auto headerLength = flatTransmission != nullptr ? flatTransmission->getHeaderLength() : mode->getHeaderMode()->getBitLength();
-    auto dataLength = flatTransmission != nullptr ? flatTransmission->getDataLength() : mode->getDataMode()->getBitLength(transmission->getPacket()->getTotalLength() - headerLength);
+    auto headerLength = flatTransmission != nullptr ? flatTransmission->getHeaderLength() : mode->getHeaderMode()->getLength();
+    auto dataLength = flatTransmission != nullptr ? flatTransmission->getDataLength() : mode->getDataMode()->getCompleteLength(transmission->getPacket()->getTotalLength() - headerLength);
     // TODO: check header length and data length for OFDM (signal) field
     double headerSuccessRate = getHeaderSuccessRate(mode, b(headerLength).get(), snir->getMin());
     double dataSuccessRate = getDataSuccessRate(mode, b(dataLength).get(), snir->getMin());

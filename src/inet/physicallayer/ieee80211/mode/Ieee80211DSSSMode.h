@@ -35,13 +35,13 @@ class INET_API Ieee80211DsssPreambleMode : public Ieee80211DsssChunkMode, public
   public:
     Ieee80211DsssPreambleMode() {}
 
-    b getSYNCBitLength() const { return b(128); }
-    b getSFDBitLength() const { return b(16); }
-    b getBitLength() const { return getSYNCBitLength() + getSFDBitLength(); }
+    b getSyncFieldLength() const { return b(128); }
+    b getSfdFieldLength() const { return b(16); }
+    b getLength() const { return getSyncFieldLength() + getSfdFieldLength(); }
 
     virtual inline bps getNetBitrate() const { return Mbps(1); }
     virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get(); }
+    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
     virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211DsssPhyPreamble>(); }
@@ -52,15 +52,15 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
   public:
     Ieee80211DsssHeaderMode() {}
 
-    b getSignalBitLength() const { return b(8); }
-    b getServiceBitLength() const { return b(8); }
-    b getLengthBitLength() const { return b(16); }
-    b getCRCBitLength() const { return b(16); }
+    b getSignalFieldLength() const { return b(8); }
+    b getServiceFieldLength() const { return b(8); }
+    b getLengthFieldLength() const { return b(16); }
+    b getCrcFieldLength() const { return b(16); }
 
-    virtual b getBitLength() const override { return getSignalBitLength() + getServiceBitLength() + getLengthBitLength() + getCRCBitLength(); }
+    virtual b getLength() const override { return getSignalFieldLength() + getServiceFieldLength() + getLengthFieldLength() + getCrcFieldLength(); }
     virtual inline bps getNetBitrate() const override { return Mbps(1); }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
-    virtual inline const simtime_t getDuration() const override { return (double)getBitLength().get() / getNetBitrate().get(); }
+    virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
     virtual const DBPSKModulation *getModulation() const override { return &DBPSKModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211DsssPhyHeader>(); }
@@ -77,7 +77,7 @@ class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIe
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
-    virtual b getBitLength(b dataLength) const override { return dataLength; }
+    virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
     virtual const DPSKModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }

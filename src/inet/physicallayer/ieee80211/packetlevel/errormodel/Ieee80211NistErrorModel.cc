@@ -189,7 +189,7 @@ double Ieee80211NistErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode,
 {
     double successRate = 0;
     if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode)) {
-        int chunkLength = bitLength - b(ofdmMode->getHeaderMode()->getServiceBitLength()).get();
+        int chunkLength = bitLength - b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get();
         ASSERT(chunkLength == 24);
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
@@ -214,7 +214,7 @@ double Ieee80211NistErrorModel::getDataSuccessRate(const IIeee80211Mode* mode, u
     if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength + b(ofdmMode->getHeaderMode()->getServiceBitLength()).get(),
+                                                        bitLength + b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get(),
                                                         snr);
     else if (auto dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode))
         successRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getDataMode()->getNetBitrate(), bitLength, snr);
