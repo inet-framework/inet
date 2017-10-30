@@ -57,6 +57,7 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
+    ASSERT(signalBitLength == 24);
     bps signalBitRate = transmissionBitModel->getHeaderBitRate();
     int dataBitLength = b(transmissionBitModel->getDataLength()).get();
     bps dataBitRate = transmissionBitModel->getDataBitRate();

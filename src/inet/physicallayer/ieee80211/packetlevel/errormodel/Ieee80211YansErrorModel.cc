@@ -187,13 +187,16 @@ double Ieee80211YansErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, un
 double Ieee80211YansErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode, unsigned int bitLength, double snr) const
 {
     double successRate = 0;
-    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode)) {
+        int chunkLength = bitLength - ofdmMode->getHeaderMode()->getServiceBitLength();
+        ASSERT(chunkLength = 24);
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength,
+                                                        chunkLength,
                                                         ofdmMode->getHeaderMode()->getGrossBitrate(),
                                                         ofdmMode->getHeaderMode()->getBandwidth(),
                                                         snr);
+    }
     else if (auto dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode))
         successRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getHeaderMode()->getNetBitrate(), bitLength, snr);
     else if (auto hrDsssMode = dynamic_cast<const Ieee80211HrDsssMode *>(mode))
@@ -212,7 +215,7 @@ double Ieee80211YansErrorModel::getDataSuccessRate(const IIeee80211Mode* mode, u
     if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength,
+                                                        bitLength + ofdmMode->getHeaderMode()->getServiceBitLength(),
                                                         ofdmMode->getDataMode()->getGrossBitrate(),
                                                         ofdmMode->getHeaderMode()->getBandwidth(),
                                                         snr);
