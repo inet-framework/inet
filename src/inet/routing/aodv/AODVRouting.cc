@@ -727,7 +727,8 @@ void AODVRouting::sendAODVPacket(const Ptr<AODVControlPacket>& packet, const L3A
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
-    Packet *udpPacket = new Packet(packet->getClassName());
+    auto className = packet->getClassName();
+    Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
     packet->markImmutable();
     udpPacket->append(packet);
     auto udpHeader = makeShared<UdpHeader>();
