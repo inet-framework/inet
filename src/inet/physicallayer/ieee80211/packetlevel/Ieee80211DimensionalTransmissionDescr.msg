@@ -20,18 +20,18 @@ cplusplus {{
 namespace inet::physicallayer;
 
 cplusplus {{
-typedef const IIeee80211Mode * IIeee80211ModePtr;
-typedef const Ieee80211Channel * Ieee80211ChannelPtr;
+typedef const IIeee80211Mode ConstIIeee80211Mode;
+typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class IIeee80211ModePtr;
-class Ieee80211ChannelPtr;
+class ConstIIeee80211Mode extends void;
+class ConstIeee80211Channel extends void;
 class DimensionalTransmission extends cObject;
 
 class Ieee80211DimensionalTransmission extends DimensionalTransmission
 {
     @existingClass(true);
     @descriptor(readonly);
-    IIeee80211ModePtr mode;
-    Ieee80211ChannelPtr channel;
+    ConstIIeee80211Mode *mode;
+    ConstIeee80211Channel *channel;
 }

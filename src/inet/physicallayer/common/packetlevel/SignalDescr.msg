@@ -14,24 +14,30 @@
 //
 
 cplusplus {{
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 }}
 
 namespace inet::physicallayer;
 
 cplusplus {{
-typedef const IIeee80211Mode * IIeee80211ModePtr;
-typedef const Ieee80211Channel * Ieee80211ChannelPtr;
+typedef const ITransmission ConstITransmission;
+typedef const IArrival ConstIArrival;
+typedef const IListening ConstIListening;
+typedef const IReception ConstIReception;
 }}
 
-class IIeee80211ModePtr;
-class Ieee80211ChannelPtr;
-class ScalarTransmission extends cObject;
+class ConstITransmission extends void;
+class ConstIArrival extends void;
+class ConstIListening extends void;
+class ConstIReception extends void;
 
-class Ieee80211ScalarTransmission extends ScalarTransmission
+packet Signal
 {
     @existingClass(true);
     @descriptor(readonly);
-    IIeee80211ModePtr mode;
-    Ieee80211ChannelPtr channel;
+    ConstITransmission *transmission;
+    ConstIArrival *arrival;
+    ConstIListening *listening;
+    ConstIReception *reception;
 }
+
