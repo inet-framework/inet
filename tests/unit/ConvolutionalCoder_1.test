@@ -1,0 +1,78 @@
+%description:
+Tests the convolutional coder bit error correction mechanism.
+
+The test checks if the computed bit error rates of packet level simulations
+are close enough to the bit error rates measured in bit level simulations.
+
+The test works in the following way:
+ - Creates a very long (several million bits) randomly generated bit vector.
+ - Encodes the bit vector using the convolutional coder.
+ - Adds random bit errors according to one of the predefined gross bit error rates.
+ - Decodes the resulting bit vector using the same convolutional coder.
+ - Measures the net bit error rate by comparing the result with the original.
+ - Computes the net bit error rate using the computation provided by the convolutional code.
+ - The measured and computed bit error rates are expected to be close enough.
+
+%includes:
+#include "inet/common/BitVector.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
+#include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
+
+%inifile: omnetpp.ini
+
+**.cmdenv-log-level = info
+
+%global:
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+void test()
+{
+    int bitLength = 10000000;
+    BitVector data;
+    for (int i = 0; i < bitLength; i++)
+        data.appendBit(RNGCONTEXT uniform(0, 1) < 0.5);
+	ConvolutionalCode code("1 3", "1; 1", "2", 1, 2, "truncated");
+    ConvolutionalCoder coder(&code);
+    auto encodedData = coder.encode(data);
+    for (auto grossBER : {0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1}) {
+        auto dataWithBitErrors = encodedData;
+        for (int i = 0; i < (int)dataWithBitErrors.getSize(); i++)
+            if (RNGCONTEXT uniform(0, 1) < grossBER)
+                dataWithBitErrors.toggleBit(i);
+        auto decodedData = coder.decode(dataWithBitErrors).first;
+        int measuredBitErrorCount = 0;
+        for (int i = 0; i < bitLength; i++)
+            if (data.getBit(i) != decodedData.getBit(i))
+                measuredBitErrorCount++;
+        double measuredNetBER = (double)measuredBitErrorCount / bitLength;
+        double computedNetBER = coder.getForwardErrorCorrection()->computeNetBitErrorRate(grossBER);
+        std::cout << "Bit length: " << bitLength << ", gross BER: " << grossBER << ", computed net BER: " << computedNetBER << ", measured net BER: " << measuredNetBER << ", relative error: " << (computedNetBER / measuredNetBER * 100 - 100) << "%" << std::endl;
+    }
+}
+
+%activity:
+
+test();
+
+%contains: stdout
+Bit length: 10000000, gross BER: 0.001, computed net BER: 6.99197e-06, measured net BER: 8.1e-06, relative error: -13.6794%
+Bit length: 10000000, gross BER: 0.002, computed net BER: 2.79355e-05, measured net BER: 2.6e-05, relative error: 7.44425%
+Bit length: 10000000, gross BER: 0.003, computed net BER: 6.27815e-05, measured net BER: 6.4e-05, relative error: -1.9039%
+Bit length: 10000000, gross BER: 0.004, computed net BER: 0.00011148, measured net BER: 0.0001182, relative error: -5.68517%
+Bit length: 10000000, gross BER: 0.005, computed net BER: 0.000173981, measured net BER: 0.0001746, relative error: -0.354624%
+Bit length: 10000000, gross BER: 0.006, computed net BER: 0.000250232, measured net BER: 0.0002519, relative error: -0.662038%
+Bit length: 10000000, gross BER: 0.007, computed net BER: 0.000340183, measured net BER: 0.0003417, relative error: -0.444058%
+Bit length: 10000000, gross BER: 0.008, computed net BER: 0.000443779, measured net BER: 0.0004531, relative error: -2.05713%
+Bit length: 10000000, gross BER: 0.009, computed net BER: 0.000560968, measured net BER: 0.0005723, relative error: -1.98%
+Bit length: 10000000, gross BER: 0.01, computed net BER: 0.000691696, measured net BER: 0.0006774, relative error: 2.11049%
+Bit length: 10000000, gross BER: 0.02, computed net BER: 0.00273125, measured net BER: 0.0027115, relative error: 0.728375%
+Bit length: 10000000, gross BER: 0.03, computed net BER: 0.0060605, measured net BER: 0.0060546, relative error: 0.0974613%
+Bit length: 10000000, gross BER: 0.04, computed net BER: 0.0106155, measured net BER: 0.0106628, relative error: -0.443661%
+Bit length: 10000000, gross BER: 0.05, computed net BER: 0.0163273, measured net BER: 0.0163589, relative error: -0.192903%
+Bit length: 10000000, gross BER: 0.06, computed net BER: 0.0231231, measured net BER: 0.0231056, relative error: 0.0758302%
+Bit length: 10000000, gross BER: 0.07, computed net BER: 0.0309267, measured net BER: 0.0309697, relative error: -0.138736%
+Bit length: 10000000, gross BER: 0.08, computed net BER: 0.0396598, measured net BER: 0.0397117, relative error: -0.130716%
+Bit length: 10000000, gross BER: 0.09, computed net BER: 0.0492424, measured net BER: 0.0492596, relative error: -0.0348344%
+Bit length: 10000000, gross BER: 0.1, computed net BER: 0.0595942, measured net BER: 0.0593894, relative error: 0.344797%
