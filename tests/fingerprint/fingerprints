@@ -76,7 +76,7 @@ class FingerprintTestCaseGenerator():
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
-                            simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
+                            simulation['simtimelimit'], simulation['fingerprint'], simulation['expectedResult'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
         return testcases
 
     def commentRemover(self, csvData):
@@ -91,10 +91,18 @@ class FingerprintTestCaseGenerator():
         csvReader = csv.reader(self.commentRemover(f), delimiter=',', quotechar='"', skipinitialspace=True)
         for fields in csvReader:
             if len(fields) == 0:
-                continue        # empty line
-            if len(fields) != 4:
-                raise Exception("Line " + str(csvReader.line_num) + " must contain 4 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
-            simulations.append({'file': csvFile, 'line' : csvReader.line_num, 'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3]})
+                pass        # empty line
+            elif len(fields) == 5:
+                if fields[4] in ['PASS', 'FAIL', 'ERROR']:
+                    simulations.append({'file': csvFile, 'line' : csvReader.line_num,
+                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4]})
+                else:
+                    raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
+            elif len(fields) == 4:
+                simulations.append({'file': csvFile, 'line' : csvReader.line_num,
+                        'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': 'PASS'})
+            else:
+                raise Exception(csvFile + " Line " + str(csvReader.line_num) + " must contain 5 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
         f.close()
         return simulations
 
@@ -292,7 +300,7 @@ class SimulationTestCase(unittest.TestCase):
 
 
 class FingerprintTestCase(SimulationTestCase):
-    def __init__(self, title, csvFile, wd, args, simtimelimit, fingerprint, storeFingerprintCallback, storeExitcodeCallback, repeat):
+    def __init__(self, title, csvFile, wd, args, simtimelimit, fingerprint, expectedResult, storeFingerprintCallback, storeExitcodeCallback, repeat):
         SimulationTestCase.__init__(self)
         self.title = title
         self.csvFile = csvFile
@@ -300,6 +308,7 @@ class FingerprintTestCase(SimulationTestCase):
         self.args = args
         self.simtimelimit = simtimelimit
         self.fingerprint = fingerprint
+        self.expectedResult = expectedResult
         self.storeFingerprintCallback = storeFingerprintCallback
         self.storeExitcodeCallback = storeExitcodeCallback
         self.repeat = repeat
@@ -493,43 +502,76 @@ class SimulationTextTestResult(ThreadedTestResult):
 
     def addSuccess(self, test):
         super(SimulationTextTestResult, self).addSuccess(test)
-        if self.showAll:
-            self.stream.write(": PASS\n")
-        elif self.dots:
-            self.stream.write('.')
-            self.stream.flush()
+        if test.expectedResult == 'PASS':
+            if self.showAll:
+                self.stream.write(": PASS\n")
+            elif self.dots:
+                self.stream.write('.')
+                self.stream.flush()
+        else:
+            if self.showAll:
+                self.stream.write(": PASS (should be %s)\n" % test.expectedResult)
+            elif self.dots:
+                self.stream.write('!')
+                self.stream.flush()
+            global exitCode
+            exitCode = 1   # result is not the expected result
 
     def addError(self, test, err):
         # modified
         super(SimulationTextTestResult, self).addError(test, err)
         self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
-        if self.showAll:
-            (cause, detail) = self._splitMsg(err[1])
-            self.stream.write(": ERROR (%s)\n" % cause)
-            if detail:
-                self.stream.write(detail)
-                self.stream.write("\n")
-        elif self.dots:
-            self.stream.write('E')
-            self.stream.flush()
-        global exitCode
-        exitCode = 1   #"there were errors or failures"
+        if test.expectedResult == 'ERROR':
+            if self.showAll:
+                (cause, detail) = self._splitMsg(err[1])
+                self.stream.write(": ERROR (%s)\n" % cause)
+                if detail:
+                    self.stream.write(detail)
+                    self.stream.write("\n")
+            elif self.dots:
+                self.stream.write('e')
+                self.stream.flush()
+        else:
+            if self.showAll:
+                (cause, detail) = self._splitMsg(err[1])
+                self.stream.write(": ERROR (should be %s) (%s)\n" % (test.expectedResult, cause))
+                if detail:
+                    self.stream.write(detail)
+                    self.stream.write("\n")
+            elif self.dots:
+                self.stream.write('E')
+                self.stream.flush()
+
+        if test.expectedResult != 'ERROR':
+            global exitCode
+            exitCode = 1   # result is not the expected result
 
     def addFailure(self, test, err):
         # modified
         super(SimulationTextTestResult, self).addFailure(test, err)
         self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
-        if self.showAll:
-            (cause, detail) = self._splitMsg(err[1])
-            self.stream.write(": FAIL (%s)\n" % cause)
-            if detail:
-                self.stream.write(detail)
-                self.stream.write("\n")
-        elif self.dots:
-            self.stream.write('F')
-            self.stream.flush()
-        global exitCode
-        exitCode = 1   #"there were errors or failures"
+        if test.expectedResult == 'FAIL':
+            if self.showAll:
+                (cause, detail) = self._splitMsg(err[1])
+                self.stream.write(": FAIL (%s)\n" % cause)
+                if detail:
+                    self.stream.write(detail)
+                    self.stream.write("\n")
+            elif self.dots:
+                self.stream.write('f')
+                self.stream.flush()
+        else:
+            if self.showAll:
+                (cause, detail) = self._splitMsg(err[1])
+                self.stream.write(": FAIL (should be %s) (%s)\n" % (test.expectedResult, cause))
+                if detail:
+                    self.stream.write(detail)
+                    self.stream.write("\n")
+            elif self.dots:
+                self.stream.write('F')
+                self.stream.flush()
+            global exitCode
+            exitCode = 1   # result is not the expected result
 
     def addSkip(self, test, reason):
         super(SimulationTextTestResult, self).addSkip(test, reason)
@@ -633,5 +675,9 @@ if __name__ == "__main__":
 
     print "Log has been saved to %s" % logFile
 
+    if exitCode == 0:
+        print "Test results equals to expected results"
+    else:
+        print "Test results differ from expected results"
     exit(exitCode)
 
