@@ -508,7 +508,7 @@ void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     // host associated. link is up. change the state to init.
     if (signalID == NF_L2_ASSOCIATED) {
         InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
-        if (associatedIE && ie == associatedIE) {
+        if (associatedIE && ie == associatedIE && clientState != IDLE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             unbindLease();
             initClient();
