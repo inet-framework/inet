@@ -1,3 +1,36 @@
+====== inet-4.x ======
+
+2016-07-20  Zoltan Bojthe
+
+	Replace deprecated cQueue functions: operator(), length(), empty().
+
+2016-06-14  Levente Mészáros
+
+	Added missing registerProtocol() call.
+
+2016-06-14  Levente Mészáros
+
+	Dropped vector gates from appIn/appOut and ipIn/ipOut.
+	This patch prepares for using SCTP with the MessageDispatcher node infrastructure.
+
+2015-08-28  Zoltan Bojthe
+
+	Replaced numeric constants with existing constant identifiers.
+
+2016-06-14  Levente Mészáros
+
+	Renamed input/output gates according to other transport protocols.
+	Renamed from_appl/to_appl to appIn/appOut. Renamed from_ip/to_ip to ipIn/ipOut.
+	Renamed assocId to socketId in SCTPCommand.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

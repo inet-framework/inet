@@ -1,3 +1,37 @@
+====== inet-4.x ======
+
+2017-07-05  Levente Mészáros
+
+	Adapted transport protocols to use the new L3 tools.
+
+2017-04-24  Zoltan Bojthe
+
+	Replaced ITransportPacket with TransportHeaderBase (based on FieldsChunk).
+
+2017-04-06  Zoltan Bojthe
+
+	Removed unused functions: truncateSegment(), truncateData().
+
+2017-03-29  Zoltan Bojthe
+
+	Added TcpCrcInsertionHook and optimized crc handling.
+
+2017-03-07  Levente Mészáros
+
+	Removed unused parts from TcpHeader.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed TCPSegment to TcpHeader.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-06-03  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

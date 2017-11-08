@@ -1,3 +1,38 @@
+====== inet-4.x ======
+
+2017-03-20  Zoltan Bojthe
+
+	Send ApplicationPacket instead of cPacketChunk in object mode.
+
+2016-12-21  Levente Mészáros
+
+	Changed chunks to be immutable before appending/prepending to a Packet.
+
+2016-12-20  Levente Mészáros
+
+	Removed unnecessary chunk duplication.
+
+2016-07-22  Zoltan Bojthe
+
+	Added refreshDisplay() to TCPSrvHostApp.
+
+2016-06-30  Zoltan Bojthe
+
+	Added lifecycle support to TCPSrvHostApp.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
+2015-06-11  Levente Mészáros
+
+	Added handling TCP_I_AVAILABLE to some TCP applications.
+
+2016-06-03  Levente Mészáros
+
+	Changed TCPEchoApp to be based on TCPSrvHostApp, sockets, threads.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

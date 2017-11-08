@@ -1,3 +1,55 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Removed remaining traces of cPacket.
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-13  Levente Mészáros
+
+	Extracted emitPacketDropSignal function.
+	Removed unnecessary popHeader no longer needed after L3 tools refactor.
+	Fixed invalid read detected by valgrind.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Added limit to packetDrop signals with retryLimitReached reason.
+	Added some missing packet drop signal emitting.
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+	Added reason codes where packet drop signals are emitted.
+	Fixed @signal[NF_LINK_BREAK] emitted object types.
+
+2017-06-20  Levente Mészáros
+
+	Fixed packet content for link break signal.
+
+2017-03-07  Levente Mészáros
+
+	Changed to use new Packet.
+
+2017-02-02  Levente Mészáros
+
+	Added network protocol to CsmaCaMacHeader.
+	Fixed to work with the new Packet class and other protocols.
+
+2017-01-26  Levente Mészáros
+
+	Renamed to CsmaCaMacHeader.
+
+2017-01-30  Levente Mészáros
+
+	Added network protocol to packet.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

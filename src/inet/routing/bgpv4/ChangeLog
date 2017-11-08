@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2016-06-02  Levente Mészáros
+
+	Changed BGPRouting to implement IApp interface.
+
+2015-06-11  Levente Mészáros
+
+	Added listening socket to socket map to allow processing TCP_I_AVAILABLE.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

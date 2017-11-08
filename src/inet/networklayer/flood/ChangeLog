@@ -1,3 +1,37 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Renamed arguments in handleLowerPacket and handleUpperPacket to packet.
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-06-16  Zoltan Bojthe
+
+	Fixed but caused by floodHeader being immutable.
+
+2017-02-01  Levente Mészáros
+
+	Renamed to FloodHeader.
+
+2017-02-01  Levente Mészáros
+
+	Changed to use new Packet class.
+
+2016-06-08  Zoltan Bojthe
+
+	Removed SimpleNetworkProtocolControlInfo, switched to GenericNetworkProtocolControlInfo.
+
+2016-05-30  Levente Mészáros
+
+	Added ether type to link layer control info.
+
+2016-05-30  Levente Mészáros
+
+	Dropped vector gate handling towards transport protocols and interfaces.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

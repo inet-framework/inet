@@ -1,3 +1,85 @@
+====== inet-4.x ======
+
+2017-09-27  Zoltan Bojthe
+
+	Added crc mode.
+
+2017-08-02  Zoltan Bojthe
+
+	ICMPv6* headers, messages renamed to Icmpv6.
+
+2017-07-11  Zoltan Bojthe
+
+	Fixed memory leaks.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leaks related to removing tags.
+
+2017-04-27  Zoltan Bojthe
+
+	Fixed missed tags, wrong echo reply name.
+
+2017-04-05  Zoltan Bojthe
+
+	ICMPv6 headers contain the identifier and sequence number.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-03-29  Levente Mészáros
+
+	Replaced to Packet::getTotalLength and ChunkQueue::getLength.
+
+2017-03-29  Zoltan Bojthe
+
+	Fixed memory leaks, fixes
+
+2017-03-01  Levente Mészáros
+
+	Added missing chksum field.
+
+2017-02-16  Levente Mészáros
+
+	Renamed ICMPv6Message to ICMPv6Header.
+
+2017-02-06  Levente Mészáros
+
+	Fixed sending error messages.
+
+2017-02-06  Levente Mészáros
+
+	Change to use the new Packet class.
+
+2016-06-20  Zoltan Bojthe
+
+	ICMPvX: moved icmp-specific codes from IPvX to ICMPvX.
+
+2016-06-17  Zoltan Bojthe
+
+	Added gate/connection for communicate with transportlayer.
+
+2016-06-20  Zoltan Bojthe
+
+	Removed errorOut gate, remove errorHandling module from networklayer.
+
+2016-06-17  Zoltan Bojthe
+
+	Removed unused ICMPv6 codes.
+
+2016-06-16  Zoltan Bojthe
+
+	Dropped unused pingIn/pingOut gates.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

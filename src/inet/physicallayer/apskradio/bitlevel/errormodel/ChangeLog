@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Changed APSK bitlevel radio to use Packet/Chunk properly.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

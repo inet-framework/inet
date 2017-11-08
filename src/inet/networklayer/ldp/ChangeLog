@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2017-08-09  Zoltan Bojthe
+
+	Switched to use removePoppedHeaders() before use removeHeader<T>().
+
+2017-08-09  Zoltan Bojthe
+
+	Removed const_pointer_cast kludge.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

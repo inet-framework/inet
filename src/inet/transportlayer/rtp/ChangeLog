@@ -1,3 +1,29 @@
+====== inet-4.x ======
+
+2017-05-10  Zoltan Bojthe
+
+	Converted RTPMpegPacket to chunks: RTPMpegHeader | ByteCountChunk.
+
+2017-05-08  Zoltan Bojthe
+
+	Removed obsolete RTCPCompoundPacket.
+
+2017-05-10  Zoltan Bojthe
+
+	Fixed headerLength, it was not added to RTPMpegPacket::byteLength.
+
+2017-05-04  Zoltan Bojthe
+
+	Fixed _commonName pointing to a deallocated memory.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds
+
+2016-08-03  Zoltan Bojthe
+
+	Removed @fieldNameSuffix("_var") when @omitGetVerb(true) is not used.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

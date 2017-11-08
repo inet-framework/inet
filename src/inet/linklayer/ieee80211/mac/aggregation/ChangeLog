@@ -1,0 +1,71 @@
+====== inet-4.x ======
+
+2017-07-27  Levente Mészáros
+
+	Added empty ampdu aggregation classes.
+
+2017-07-14  Levente Mészáros
+
+	Renamed variables, arguments to be more consistent.
+
+2017-07-06  Levente Mészáros
+
+	Fixed aggregation after merging changes from master.
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Moved transmitter address setting to Tx.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-09  Levente Mészáros
+
+	Renamed to Ieee80211MsduSubframeHeader.
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-04-28  Levente Mészáros
+
+	Removed kludges related to AMSDU aggregation and updated fingerprints.
+
+2017-04-27  Levente Mészáros
+
+	Moved Ieee80211MacTrailer handling so that fingerprints are kept.
+
+2017-04-26  Levente Mészáros
+
+	Renamed to Ieee80211MacTrailer and Ieee80211MacTrailerSerializer.
+
+2017-04-26  Levente Mészáros
+
+	Renamed to Ieee80211FcsTrailer.
+
+2017-04-26  Levente Mészáros
+
+	Removed Ieee80211DataFrameWithSNAP and add separate Ieee802SnapHeader.
+
+2017-04-25  Levente Mészáros
+
+	Fixed MsduAggregation and MsduDeaggregation, especially related
+	to msdu subframe length and SNAP headers.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.
+
+2017-04-12  Levente Mészáros
+
+	Replace cPacket with Packet.

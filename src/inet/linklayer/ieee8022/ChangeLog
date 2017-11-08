@@ -1,0 +1,17 @@
+====== inet-4.x ======
+
+2017-09-13  Levente Mészáros
+
+	Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-09-12  Zoltan Bojthe
+
+	Renamed ethernet, llc and snap headers.
+
+2017-05-09  Levente Mészáros
+
+	Added Ieee8022Llc module.

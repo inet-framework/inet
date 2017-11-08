@@ -1,3 +1,45 @@
+====== inet-4.x ======
+
+2017-07-27  Levente Mészáros
+
+	Resurrected APSKPhyHeaderSerialier to do the bare minimum.
+
+2017-07-27  Levente Mészáros
+
+	Removed superfluous APSKPhyHeaderSerializer dependency.
+
+2017-03-16  Zoltan Bojthe
+
+	Added more precise KLUDGE to APSKRadio.
+
+2017-01-30  Levente Mészáros
+
+	Fixed APSKPhyHeader length in APSKRadio.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Changed APSK bitlevel radio to use Packet/Chunk properly.
+
+2017-01-16  Levente Mészáros
+
+	Switched to use APSKPhyHeader and encapsulate/decapsulate in APSKRadio.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2016-06-02  Levente Mészáros
+
+	Removed tcp prefix from applications submodule vector.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------
@@ -84,4 +90,3 @@
 2011-11-12  Andras Varga
 
 	HttpTools: DirectHost moved into nodes/
-

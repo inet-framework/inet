@@ -1,3 +1,80 @@
+====== inet-4.x ======
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-04-12  Zoltan Bojthe
+
+	Merged INetworkHeader and NetworkHeaderBase.
+
+2017-04-12  Levente Mészáros
+
+	Removed getNetworkHeaderLength from INetworkHeader.
+
+2017-02-03  Levente Mészáros
+
+	Removed extra IPv4Header parameters from Netfilter.
+
+2017-02-03  Levente Mészáros
+
+	Renamed to INetworkHeader.
+
+2016-07-12  Levente Mészáros
+
+	Fixed double destructor after merge and cosmetics.
+
+2016-07-06  Florian Kauer
+
+	Fix regression bug in NetfilterBase
+
+	With the newly introduced NetfilterBase, sometimes a pure virtual method
+	call was issued during the destruction phase. Apparently, under some
+	conditions the NetfilterBase was destructed before the HookBase, leading
+	to this bug. The solution includes unregistering all registered hooks in
+	the destructor of NetfilterBase.
+
+	Signed-off-by: Florian Kauer <florian.kauer@koalo.de>
+
+2016-06-30  Zoltan Bojthe
+
+	Added destructor to NetfilterBase for unregister all registered hooks.
+
+2016-06-27  Zoltan Bojthe
+
+	NetFilter hook changes: auto unregister in destructor.
+
+2016-06-02  Levente Mészáros
+
+	Renamed gates in INetworkProtocol.
+
+2016-06-02  Levente Mészáros
+
+	Added a new raw socket called L3Socket.
+
+2016-05-31  Levente Mészáros
+
+	Merged unsused INetworkLayerUpper and INetworkLayerLower into INetworkLayer.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	interfaces with network layer control infos.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

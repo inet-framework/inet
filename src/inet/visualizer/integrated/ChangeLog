@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2017-10-04  Gyorgy Szaszko
+
+	Added IntegratedMultiVisualizer, IntegratedMultiCanvasVisualizer, IntegratedMultiOsgVisualizer
+
+2017-06-12  Levente Mészáros
+
+	Disabled OSG visualizer in IntegratedVisualizer, because the implementation is incomplete.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

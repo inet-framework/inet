@@ -1,3 +1,17 @@
+====== inet-4.x ======
+
+2017-10-09  Levente Mészáros
+
+	Added guard against visualizing paths with less than 2 elements.
+
+2017-06-21  Levente Mészáros
+
+	Simplified PacketDrop descriptor with recent omnetpp changes.
+
+2017-03-21  Levente Mészáros
+
+	Changed link and path identification to be based on chunk id instead of packet id.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

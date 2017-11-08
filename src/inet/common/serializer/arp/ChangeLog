@@ -1,0 +1,9 @@
+====== inet-4.x ======
+
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
+2017-02-21  Levente Mészáros
+
+	Moved headerserializers one level up.

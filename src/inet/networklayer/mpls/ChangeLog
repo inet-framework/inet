@@ -1,3 +1,10 @@
+====== inet-4.x ======
+
+2015-07-08  Levente Mészáros
+
+	Dropped vector gate handling towards network layer and interfaces.
+	Also added delegation for interface and protocol registration.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

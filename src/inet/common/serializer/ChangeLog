@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2017-03-24  Zoltan Bojthe
+
+	Removed the special pseudoheader-related TCPIPchecksum::checksum() function.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

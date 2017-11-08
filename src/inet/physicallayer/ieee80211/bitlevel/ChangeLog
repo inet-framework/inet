@@ -1,3 +1,54 @@
+====== inet-4.x ======
+
+2017-09-28  Zoltan Bojthe
+
+	Added PacketProtocolTag in Ieee80211OFDMRadio::decapsulate().
+
+2017-07-26  Levente Mészáros
+
+	Simplified retrieving rate field in 802.11 layered receiver.
+
+2017-07-24  Levente Mészáros
+
+	Extracted chunk variables to fix bug caused by lifetime of temporaries within
+	a for loop header.
+
+2017-07-24  Levente Mészáros
+
+	Fixed accidentally inserted const keyword after new operator.
+
+2017-05-11  Levente Mészáros
+
+	Revived layered OFDM transmitter and receiver.
+
+2017-05-11  Levente Mészáros
+
+	Dropped obsolete layered code.
+
+2017-03-21  Levente Mészáros
+
+	Replaced APSKScalarRadio with Ieee80211OFDMRadio in layered example.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Changed 802.11 bitlevel radio to use Packet/Chunk properly.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,17 @@
+====== inet-4.x ======
+
+2017-07-11  Zoltan Bojthe
+
+	Changed MultiFieldClassifier to use L4Tools.
+
+2017-03-29  Zoltan Bojthe
+
+	Optimized with removeHeader().
+
+2017-03-09  Zoltan Bojthe
+
+	Adapted to the new Packet API.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,0 +1,10 @@
+====== inet-4.x ======
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-05-08  Levente Mészáros
+
+	Added Ieee80211Portal as an IIeee802Llc implementation. This module
+	converts between 802.11 and ethernet frames as required by the standard.

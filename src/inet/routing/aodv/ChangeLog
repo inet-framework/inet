@@ -1,3 +1,38 @@
+====== inet-4.x ======
+
+2017-09-20  Zoltan Bojthe
+
+	Adapted to redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_LINK_BREAK signal to linkBreak signal.
+
+2017-07-05  Levente Mészáros
+
+	Adapted routing protocols to the new L3 tools.
+
+2017-02-02  Levente Mészáros
+
+	Changed to work with new Packet/Chunk classes and the new netfilter interface.
+
+2015-07-21  Zoltan Bojthe
+
+	Removed assert when RREP-ACK arrived after timeout.
+
+2016-04-27  Levente Mészáros
+
+	Updated according to new network node infrastructure.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

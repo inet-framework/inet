@@ -1,3 +1,21 @@
+====== inet-4.x ======
+
+2017-10-10  Zoltan Bojthe
+
+	Fixed swapping of src/dest addresses and ports.
+
+2017-07-05  Levente Mészáros
+
+	Fixed network/transport header handling.
+
+2016-06-03  Levente Mészáros
+
+	Added a new tunnel application that works with TUN interfaces.
+
+2016-06-03  Levente Mészáros
+
+	Updated TunLoopbackApp to work with a TunSocket using the new IApp interface.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

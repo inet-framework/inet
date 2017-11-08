@@ -1,3 +1,109 @@
+====== inet-4.x ======
+
+2017-09-20  Zoltan Bojthe
+
+	Refactored Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-07-05  Levente Mészáros
+
+	Replaced generic Packet API calls with L3 protocol tools.
+
+2017-07-04  Levente Mészáros
+
+	Dropped unused return values from encapsulate/decapsulate.
+
+2017-06-14  Zoltan Bojthe
+
+	Added EV_DETAIL logging.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-02-02  Levente Mészáros
+
+	Followed netfilter changes with GenericNetworkProtocol.
+
+2016-11-17  Levente Mészáros
+
+	Fixed Gnp forwarding.
+
+2016-11-16  Zoltan Bojthe
+
+	Fixed for incoming immutable packets.
+
+2016-11-11  Zoltan Bojthe
+
+	Renamed handleMessageFromHL() to handlePacketFromHL()
+
+2016-06-27  Zoltan Bojthe
+
+	Adapted to NetFilter hook changes: auto unregister in destructor.
+
+2016-06-16  Zoltan Bojthe
+
+	Dropped unused pingIn/pingOut gates.
+
+2016-06-02  Levente Mészáros
+
+	Implemented raw L3Socket support in network protocols.
+
+2016-06-02  Levente Mészáros
+
+	Moved registerProtocol to network layer stage.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2016-05-31  Levente Mészáros
+
+	Dropped vector gate handling towards transport protocol.
+
+2015-06-11  Levente Mészáros
+
+	Added interface id to control infos sent towards interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete queueOut gate vector indexing.
+
+2015-08-04  Zoltan Bojthe
+
+	Changed how and when receiving interface is determined similarly to IPv4.
+
+2016-05-30  Levente Mészáros
+
+	Added forwarding parameters to make sure parameter values reach the routing
+	tables. This allows the network node to control these parameters without
+	knowing the internal structure.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-02  Levente Mészáros
+
+	Added handleRegisterProtocol where necessary.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand handling.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

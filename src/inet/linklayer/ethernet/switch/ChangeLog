@@ -1,3 +1,21 @@
+====== inet-4.x ======
+
+2017-09-13  Levente Mészáros
+
+	Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-01-30  Zoltan Bojthe
+
+	Added FIXME to MACRelayUnit: should handle multicast mac addresses correctly.
+
+2017-01-25  Zoltan Bojthe
+
+	Moved phy layer frames to EtherPhyFrame.msg.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

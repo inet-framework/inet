@@ -1,3 +1,126 @@
+====== inet-4.x ======
+
+2017-09-21  Zoltan Bojthe
+
+	Merged InterfaceEntry and corresponding NIC module.
+	InterfaceEntry->getName() replaced to InterfaceEntry->getInterfaceName().
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-07-05  Levente Mészáros
+
+	Refactored L3/L4 protocol tools.
+
+2017-06-12  Zoltan Bojthe
+
+	Fixed copy-paste bug in InterfaceEntry (delete pointer before override)
+
+2017-05-08  Levente Mészáros
+
+	Extended L3AddressResolver host lookup with MAC addresses.
+
+2017-04-24  Zoltan Bojthe
+
+	Added L3, L4 tools: peekNetworkHeader(), removeNetworkHeader(),
+	peekTransportHeader(), removeTransportHeader()
+
+2017-04-05  Zoltan Bojthe
+
+	Added copy constructor and operator= to L3Address.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-03-23  Levente Mészáros
+
+	Fixed disabled IPv4 feature.
+
+2017-02-03  Levente Mészáros
+
+	Removed extra IPv4Header parameters from Netfilter.
+
+2017-02-03  Levente Mészáros
+
+	Renamed to INetworkHeader.
+
+2017-02-01  Levente Mészáros
+
+	Fixed processEchoRequest in EchoProtocol.
+
+2016-06-30  Zoltan Bojthe
+
+	Changed info() format in InterfaceEntry.
+
+2016-06-27  Zoltan Bojthe
+
+	NetFilter hook changes: auto unregister in destructor.
+
+2016-06-17  Zoltan Bojthe
+
+	Fixed EchoProtocol for PingApp.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete IPRegisterProtocolCommand.
+
+2016-06-08  Zoltan Bojthe
+
+	Remove SimpleNetworkProtocolControlInfo, switched to GenericNetworkProtocolControlInfo.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2016-05-30  Levente Mészáros
+
+	Filled missing fields in generic network control infos.
+
+2015-08-12  Zoltan Bojthe
+
+	Dropped obsolete getNetworkLayerGateIndex() and nwLayerGateIndex from InterfaceEntry.
+
+2015-08-12  Zoltan Bojthe
+
+	Dropped obsolete getInterfaceByNetworkLayerGateIndex() from InterfaceTable.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	interfaces with network layer control infos.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
+2016-04-27  Levente Mészáros
+
+	Dropped obsolete IPSocket.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

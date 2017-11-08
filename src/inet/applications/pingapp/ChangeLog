@@ -1,3 +1,61 @@
+====== inet-4.x ======
+
+2017-09-27  Zoltan Bojthe
+
+	Added ICMP, ICMPv6 crc handling mode.
+
+2017-07-11  Zoltan Bojthe
+
+	Fixed ping output to stdout.
+
+2017-06-16  Zoltan Bojthe
+
+	Changed default TTL to -1.
+
+2017-04-05  Zoltan Bojthe
+
+	Dropped PingPayload, ICMP headers contain the identifier and sequence number.
+
+2017-03-16  Zoltan Bojthe
+
+	Fixed IPv6 specific code - processing of ICMPv6_ECHO_REPLY
+
+2017-03-09  Levente Mészáros
+
+	Fixed for generic network protocols.
+
+2017-02-03  Levente Mészáros
+
+	Changed to work with the new Packet class using IPv6.
+
+2017-02-01  Levente Mészáros
+
+	Changed to use new echo protocol identifier.
+
+2017-02-01  Levente Mészáros
+
+	Fixed dispatch mechanism to avoid side effects.
+
+2017-01-16  Levente Mészáros
+
+	Fixed for Packet/Chunk infrastructure.
+
+2016-11-18  Zoltan Bojthe
+
+	Switched to using Packet, EchoPacket became a Chunk.
+
+2016-07-25  Andras Varga
+
+	Fixed inconsistency between @signal and @statistic
+
+2016-06-03  Zoltan Bojthe
+
+	Changed to work with a raw IP socket and implement IApp interface.
+
+2016-06-09  Zoltan Bojthe
+
+	Added getPid() to PingApp.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

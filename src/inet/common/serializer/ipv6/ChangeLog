@@ -1,0 +1,21 @@
+====== inet-4.x ======
+
+2017-07-31  Zoltan Bojthe
+
+	Fixed ICMPv6HeaderSerializer: removed 2 bytes extra read.
+
+2017-06-12  TÖRÖK Attila
+
+	Typedef BSD-style integer types on all platforms.
+
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
+2017-03-29  Zoltan Bojthe
+
+	Optimized and fixed memory leaks.
+
+2017-03-01  Levente Mészáros
+
+	Ported ICMPv6HeaderSerializer and IPv6HeaderSerializer to new API.

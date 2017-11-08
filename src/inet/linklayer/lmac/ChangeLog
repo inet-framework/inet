@@ -1,3 +1,28 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+
+2017-01-19  Levente Mészáros
+
+	Renamed LMacFrame to LMacHeader.
+	Renamed MACFrameBase to MacHeaderBase.
+	Changed to use the new Packet class.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

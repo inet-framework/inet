@@ -1,3 +1,16 @@
+====== inet-4.x ======
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Added packetDrop signals to REDDropper and ThresholdDropper.
+	Replaced remaining packet drop signals with the generic one.
+
+2017-07-10  Levente Mészáros
+
+	Added reason codes where packet drop signals are emitted.
+	Updated queue module packet drop statistics.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

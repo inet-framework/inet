@@ -1,0 +1,53 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Renamed variables, arguments to be more consistent.
+
+2017-07-10  Levente Mészáros
+
+	Added at least a log statement to avoid silently ignoring an RTS.
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-27  Levente Mészáros
+
+	Fixed when reassemly returns nullptr.
+
+2017-04-26  Benjamin Martin Seregi
+
+	RecipientQoSMacDataService: fixed memory leak.
+
+2017-04-20  Levente Mészáros
+
+	Removed obsolete solution from reassembly and switched to new chunk API.

@@ -1,0 +1,9 @@
+====== inet-4.x ======
+
+2017-03-16  Levente Mészáros
+
+	Properly implemented CRC handling.
+
+2017-02-16  Levente Mészáros
+
+	Ported UdpHeaderSerializer to new API.

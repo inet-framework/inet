@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2016-05-30  Levente Mészáros
+
+	Renamed numRadios to numWlanInterfaces to make it consistent with interface names.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------
@@ -86,4 +96,3 @@
 
 	merged commit is
 	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
-

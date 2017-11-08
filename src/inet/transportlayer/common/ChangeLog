@@ -1,0 +1,19 @@
+====== inet-4.x ======
+
+2017-07-11  Zoltan Bojthe
+
+	Added isTransportProtocol() to L4Tools.
+	Added flags argument for peekTransportProtocolHeader().
+	Fixed memory leaks related to removing tags.
+
+2017-07-05  Levente Mészáros
+
+	Refactored L4 protocol tools.
+
+2017-04-24  Zoltan Bojthe
+
+	Added peekTransportHeader(), removeTransportHeader() to L4Tools.
+
+2017-04-11  Levente Mészáros
+
+	Removed all chunkLength = -1 or chunkLength = 0 fields.

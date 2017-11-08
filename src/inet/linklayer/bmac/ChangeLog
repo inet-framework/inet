@@ -1,3 +1,41 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+	Added missing packet drop related statistics.
+	Added some missing packet drop signal emitting.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Fixed @signal[NF_LINK_BREAK] emitted object types.
+
+2017-01-19  Levente Mészáros
+
+	Renamed BMacFrame to BMacHeader.
+	Changed to use the new Packet class.
+	Renamed MACFrameBase to MacHeaderBase.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-07-22  Zoltan Bojthe
+
+	Removed hasPar() calls - parameters specified in NED.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

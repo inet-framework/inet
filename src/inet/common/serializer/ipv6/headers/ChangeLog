@@ -1,0 +1,5 @@
+====== inet-4.x ======
+
+2017-06-12  TÖRÖK Attila
+
+	Typedef BSD-style integer types on all platforms.

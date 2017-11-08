@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2016-10-19  Zoltan Bojthe
+
+	Changed getRootIndex() to be const.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

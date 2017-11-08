@@ -1,3 +1,31 @@
+====== inet-4.x ======
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Switched to use IdealPhyHeader and encapsulate/decapsulate in IdealRadio.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
+	Added some TODOs in layered implementations.
+
+2017-01-25  Zoltan Bojthe
+
+	Added phy header to IdealRadio packets.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

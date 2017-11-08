@@ -1,3 +1,21 @@
+====== inet-4.x ======
+
+2017-07-24  Levente Mészáros
+
+	Fixed accidentally inserted const keyword after new operator.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Adapted error model base class to new ISignalPacketModel.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

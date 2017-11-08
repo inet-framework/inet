@@ -1,0 +1,18 @@
+====== inet-4.x ======
+
+2017-03-24  Levente Mészáros
+
+	Fixed data processing for slices.
+
+2016-08-01  Zoltan Bojthe
+
+	Added refreshDisplay().
+
+2016-06-02  Levente Mészáros
+
+	Refactored base module for HttpServer modules.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.

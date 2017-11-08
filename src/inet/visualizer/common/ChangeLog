@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2017-07-10  Levente Mészáros
+
+	Extended packet drop visualization for all kinds of packet drops.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

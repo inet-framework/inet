@@ -1,3 +1,21 @@
+====== inet-4.x ======
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Renamed gates from netwIn/netwOut to upperLayerIn/upperLayerOut be similar to other MACs.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

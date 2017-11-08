@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2015-05-26  Levente Mészáros
+
+	Added status text to mobility submodule.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

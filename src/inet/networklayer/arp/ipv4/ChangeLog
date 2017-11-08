@@ -1,0 +1,17 @@
+====== inet-4.x ======
+
+2017-01-11  Zoltan Bojthe
+
+	Adapted to the new network node architecture.
+
+2015-06-09  Levente Mészáros
+
+	Shortened submodule text.
+
+2015-05-26  Levente Mészáros
+
+	Added separate gate to allow direct connection to the link layer.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.

@@ -1,3 +1,29 @@
+====== inet-4.x ======
+
+2017-03-20  Levente Mészáros
+
+	Fixed bug introduced with porting to the new Packet API.
+
+2017-02-01  Levente Mészáros
+
+	Renamed to ProbabilisticBroadcastHeader.
+
+2017-02-01  Levente Mészáros
+
+	Changed to use new Packet class.
+
+2016-06-08  Zoltan Bojthe
+
+	Removed SimpleNetworkProtocolControlInfo, switched to GenericNetworkProtocolControlInfo.
+
+2016-05-30  Levente Mészáros
+
+	Added ether type to link layer control info.
+
+2016-05-30  Levente Mészáros
+
+	Dropped vector gate handling towards transport protocols and interfaces.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

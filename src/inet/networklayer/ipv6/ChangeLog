@@ -1,3 +1,227 @@
+====== inet-4.x ======
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-08-09  Zoltan Bojthe
+
+	Removed kludge comment.
+
+2017-08-02  Zoltan Bojthe
+
+	Renamed ICMPv6* headers, messages to Icmpv6.
+
+2017-08-02  Zoltan Bojthe
+
+	Renamed IPv6*Header to Ipv6*Header.
+
+2017-07-26  Zoltan Bojthe
+
+	Added KLUDGE, prevent stack overflow bug (recursive call each others the
+	doStartService() and doEndService() in AbstractQueue when delay == 0)
+
+2017-07-11  Zoltan Bojthe
+
+	Set default header length in packet.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leak when processing ext headers.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leaks related to removing tags.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leak in L3 sockets descriptors.
+
+2017-07-10  Zoltan Bojthe
+
+	Fixed some kludges.
+
+2017-07-05  Zoltan Bojthe
+
+	Replaced "int get/setTransportProtocol()" to "int get/setProtocolId()".
+	Added "const Protocol* get/setProtocol()".
+
+2017-07-05  Levente Mészáros
+
+	Replaced generic Packet API calls with L3 protocol tools.
+
+2017-07-04  Zoltan Bojthe
+
+	Fragmentation fixes.
+
+2017-06-12  Zoltan Bojthe
+
+	Eliminated cast after dup().
+
+2017-04-10  Zoltan Bojthe
+
+	Optimized dynamic_cast usage.
+
+2017-04-12  Levente Mészáros
+
+	Removed getNetworkHeaderLength from INetworkHeader.
+
+2017-04-07  Zoltan Bojthe
+
+	Datagram variables/arguments renamed to ipv6Header or packet.
+
+2017-04-03  Zoltan Bojthe
+
+	Header position in NetworkProtocolInd tag replaced to shared ptr of the
+	network header.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-03-31  Zoltan Bojthe
+
+	Set payload length field, verify payload length, truncate packet to
+	payloadlength in decapsulate.
+
+2017-03-20  Zoltan Bojthe
+
+	Revived fragmentation.
+
+2017-03-01  Levente Mészáros
+
+	Added missing payloadLength field.
+
+2017-02-16  Levente Mészáros
+
+	Renamed ICMPv6Message to ICMPv6Header.
+
+2017-02-16  Levente Mészáros
+
+	Renamed IPv6Datagram to IPv6Header.
+
+2017-02-07  Levente Mészáros
+
+	Changed to use the new Packet class.
+
+2017-02-06  Levente Mészáros
+
+	Disabled fragmentation temporarily.
+
+2017-03-29  Zoltan Bojthe
+
+	Changed packet definitions in msg files to be subclasses of FieldsChunk.
+
+2016-07-20  Zoltan Bojthe
+
+	Fixed infinite recursion bug in IPv6RoutingTable::getInterfaceByAddress(const L3Address& address).
+
+2016-06-28  Levente Mészáros
+
+	Changed connection directions to be readable top down for --> and bottom up for <--.
+
+2016-06-28  Levente Mészáros
+
+	Reordered submodules and connections top to down and left to right.
+
+2016-06-28  Levente Mészáros
+
+	Renamed dispatcher submodules.
+
+2016-06-28  Levente Mészáros
+
+	Dropped unused error handling module from IPv6NetworkLayer.
+
+2016-06-28  Levente Mészáros
+
+	Changed submodule positions.
+
+2016-06-27  Zoltan Bojthe
+
+	NetFilter hook changes: auto unregister in destructor.
+
+2016-06-22  Zoltan Bojthe
+
+	Dropped icmpIn/icmpOut gates from IPv6NetworkLayer, icmp sends up messages
+	in transportOut gate.
+
+2016-06-22  Zoltan Bojthe
+
+	Added, used sendIcmpError() functions.
+
+2016-06-16  Zoltan Bojthe
+
+	Dropped unused pingIn/pingOut gates.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Levente Mészáros
+
+	Updated some documentation to reflect recent changes.
+
+2016-06-02  Levente Mészáros
+
+	Implemented raw L3Socket support in network protocols.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2015-06-24  Zoltan Bojthe
+
+	Dropped transportOut gate index handling.
+
+2015-06-11  Levente Mészáros
+
+	Added control info to specify interface id for all packets sent out towards
+	the interfaces.
+
+2016-05-30  Levente Mészáros
+
+	Added forwarding parameters to make sure parameter values reach the routing
+	tables. This allows the network node to control these parameters without
+	knowing the internal structure.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2015-06-25  Levente Mészáros
+
+	Changed how and when receiving interface is determined similarly to IPv4.
+
+2016-05-02  Levente Mészáros
+
+	Added handleRegisterProtocol where necessary.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand handling.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

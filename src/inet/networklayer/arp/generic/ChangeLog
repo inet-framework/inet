@@ -1,0 +1,5 @@
+====== inet-4.x ======
+
+2015-05-26  Levente Mészáros
+
+	Added separate gate to allow direct connection to the link layer.

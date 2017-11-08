@@ -1,3 +1,22 @@
+====== inet-4.x ======
+
+2017-09-20  Zoltan Bojthe
+
+	Refactored Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2016-06-27  Zoltan Bojthe
+
+	Adapted to NetFilter hook changes: auto unregister in destructor.
+
+2016-06-27  Zoltan Bojthe
+
+	Refactored network layer for the new host architecture.
+
+2016-06-27  Zoltan Bojthe
+
+	Changed to be network protocol agnostic.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

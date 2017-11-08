@@ -1,0 +1,17 @@
+====== inet-4.x ======
+
+2017-09-28  TÖRÖK Attila
+
+	Removed the requirement for a TCPCommand ControlInfo from TCPSocket ctor.
+
+2017-09-14  Levente Mészáros
+
+	Removed obsolete TCP socket parameter dataTransferMode from all implementations.
+
+2016-06-03  Levente Mészáros
+
+	Added explicit accept mechanism to listening.
+
+2015-06-11  Levente Mészáros
+
+	Renamed connId to socketId to be able to implement the ISocketControlInfo interface.

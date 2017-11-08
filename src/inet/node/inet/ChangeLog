@@ -1,3 +1,76 @@
+====== inet-4.x ======
+
+2017-07-27  Levente Mészáros
+
+	Enabled UDP by default if DHCP is enabled.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-01  Levente Mészáros
+
+	Deleted required gates from INetworkNode, because it's not generic enough
+	and not needed anyway.
+
+2016-06-02  Levente Mészáros
+
+	Changed Router base module to ApplicationLayerNodeBase.
+
+2016-06-01  Levente Mészáros
+
+	Changed StandardHost base module to ApplicationLayerNodeBase.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Connected OSPF and PIM to dispatcher instead of the network layer.
+
+2016-05-31  Levente Mészáros
+
+	Changed how ping apps are connected to network layers.
+
+2016-05-31  Levente Mészáros
+
+	Added routing table module path deep parameter assignments to network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Moved NodeBase from inet to base directory.
+
+2016-05-05  Levente Mészáros
+
+	Moved submodules layer to the top.
+
+2016-05-30  Levente Mészáros
+
+	Renamed numRadios to numWlanInterfaces to make it consistent with interface names.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
+2016-05-02  Levente Mészáros
+
+	Changed StandardHost and Router to have UDP and TCP protocols only when they
+	are actually used.
+
+2016-04-29  Levente Mészáros
+
+	Dropped various network node submodules inherited from base modules.
+
+2016-04-28  Levente Mészáros
+
+	Changed NodeBase to be the most basic base module of network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Changed base module for all network nodes.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

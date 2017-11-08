@@ -1,0 +1,49 @@
+====== inet-4.x ======
+
+2017-09-15  Gyorgy Szaszko
+
+	Modified StandardHost graphical layer rectangles.
+
+2017-05-10  Levente Mészáros
+
+	Fine tuned NodeBase submodule positions and sizes.
+
+2017-01-30  TÖRÖK Attila
+
+	Make node background size match the layer figures in it.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Zoltan Bojthe
+
+	Changed lo0 loopback interface to a submodule vector.
+
+2016-06-14  Levente Mészáros
+
+	Dropped vector gates from appIn/appOut and ipIn/ipOut.
+
+2016-06-14  Levente Mészáros
+
+	Renamed input/output gates according to other transport protocols.
+	Renamed from_appl/to_appl to appIn/appOut.
+	Renamed from_ip/to_ip to ipIn/ipOut.
+
+2016-06-02  Levente Mészáros
+
+	Added INetworkNode to implemented interfaces of NodeBase.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Moved NodeBase from inet to base directory.
+
+2016-05-30  Levente Mészáros
+
+	Added new separate base modules for the OSI link, network, transport and
+	application layers.

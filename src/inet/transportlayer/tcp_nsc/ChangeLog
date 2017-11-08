@@ -1,3 +1,41 @@
+====== inet-4.x ======
+
+2017-09-14  Levente Mészáros
+
+	Removed obsolete TCP socket parameter dataTransferMode from all implementations.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed TCPSegment to TcpHeader.
+
+2016-06-02  Levente Mészáros
+
+	Dropped gate index after switch to simple appIn/appOut gates.
+
+2016-06-01  Levente Mészáros
+
+	Added registerProtocol calls to transport protocols.
+
+2016-06-03  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates.
+
+2016-05-27  Zoltan Bojthe
+
+	Added explicit accept mechanism to listening.
+
+2015-06-11  Levente Mészáros
+
+	Renamed connId to socketId to be able to implement the ISocketControlInfo interface.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

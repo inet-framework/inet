@@ -1,3 +1,45 @@
+====== inet-4.x ======
+
+2017-07-12  Levente Mészáros
+
+	Added missing packet drop related statistics.
+	Replaced remaining packet drop signals with the generic one.
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-03-29  Levente Mészáros
+
+	Fixed peeking trailer for the case when deserializing from a BytesChunk.
+
+2017-03-16  Levente Mészáros
+
+	Added missing PacketProtocolTag.
+	Changed append/prepend to the more intentional push variants.
+
+2017-02-21  Levente Mészáros
+
+	Make sure the packet has the correct PacketProtocolTag before emitting.
+	Fixed ppp protocol group to use the correct one.
+	Added sendRawBytes parameter to allow sending out serialized packets.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Renamed gates from netwIn/netwOut to upperLayerIn/upperLayerOut be similar to other MACs.
+
+2015-05-27  Levente Mészáros
+
+	Added protocol field and added control info to packets that are sent up.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,49 @@
+====== inet-4.x ======
+
+2017-10-10  Levente Mészáros
+
+	Separated simsignals for transmission/reception from radio signal departure/arrival.
+
+2017-10-09  Levente Mészáros
+
+	Fixed all problems with using the newly introduced intrusive shared pointer.
+
+2017-09-15  Raphael Riebl
+
+	Added getMedium() to ITransmission.
+	Extracted IAntennaGain from IAntenna interface.
+	Added RadioMedium::getRadio() method for fetching radios by id.
+
+2017-08-08  Raphael Riebl
+
+	Changed transmitter lookup by id instead of internal pointer.
+
+2017-05-10  Levente Mészáros
+
+	Replaced radio frame with signal in documentation.
+	Renamed radioFrame variables to signal.
+	Renamed IRadioFrame to ISignal, and RadioFrame to Signal.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-16  Levente Mészáros
+
+	Merged getPhyFrame into getMacFrame.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

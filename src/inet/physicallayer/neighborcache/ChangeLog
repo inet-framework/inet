@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2017-05-10  Levente Mészáros
+
+	Renamed IRadioFrame to ISignal, and RadioFrame to Signal.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

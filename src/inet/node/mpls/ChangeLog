@@ -1,3 +1,34 @@
+====== inet-4.x ======
+
+2017-08-25  Zoltan Bojthe
+
+	Changed module positions.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Zoltan Bojthe
+
+	Changed lo0 loopback interface to a submodule vector.
+
+2016-06-02  Levente Mészáros
+
+	Changed appIn/appOut vector gates to simple gates.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher and removed RoutingTable according to new node architecture.
+
+2016-05-31  Levente Mészáros
+
+	Added routing table module path deep parameter assignments to network nodes.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

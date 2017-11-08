@@ -1,3 +1,14 @@
+====== inet-4.x ======
+
+2016-06-14  Levente Mészáros
+
+	Renamed assocId to socketId in SCTPCommand.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,0 +1,5 @@
+====== inet-4.x ======
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.

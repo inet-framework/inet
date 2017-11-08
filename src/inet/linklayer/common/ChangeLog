@@ -1,3 +1,44 @@
+====== inet-4.x ======
+
+2017-10-11  Zoltan Bojthe
+
+	Moved ethertype constants to new EtherType.msg file,
+	dropped some unused ethernet related structs.
+
+2017-09-13  Levente Mészáros
+
+	Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-02-03  Levente Mészáros
+
+	Changed example Qos classifier to work with IPv6 headers too.
+
+2016-12-09  Zoltan Bojthe
+
+	Added more ethertype values.
+	Fixed EtherPauseFrame.
+
+2016-07-20  Zoltan Bojthe
+
+	Remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-12  Levente Mészáros
+
+	Added a separate IInterfaceControlInfo to specify interface id.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	with link layer control infos.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

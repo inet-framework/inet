@@ -1,0 +1,5 @@
+====== inet-4.x ======
+
+2016-06-02  Levente Mészáros
+
+	Refactored base module for HttpServer modules.

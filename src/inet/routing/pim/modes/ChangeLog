@@ -1,0 +1,25 @@
+====== inet-4.x ======
+
+2017-07-07  Zoltan Bojthe
+
+	Switched to use const pointers in signal handler.
+
+2017-03-02  Zoltan Bojthe
+
+	Adapted to the new Chunk based Packet API.
+
+2016-05-31  Levente Mészáros
+
+	Changed module path parameters to be absolute by default.
+
+2016-05-30  Levente Mészáros
+
+	Changed how the incoming network interface is determined.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.

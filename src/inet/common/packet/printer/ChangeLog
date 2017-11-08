@@ -1,0 +1,9 @@
+====== inet-4.x ======
+
+2017-04-05  Zoltan Bojthe
+
+	Adapted InetPacketPrinter to new API.
+
+2017-03-02  Levente Mészáros
+
+	Moved packet printers under common/packet/printer.

@@ -1,3 +1,22 @@
+====== inet-4.x ======
+
+2017-04-12  Levente Mészáros
+
+	Dropped obsolete IMACFrame.
+
+2016-05-31  Levente Mészáros
+
+	Added missing @nic to IExternalNic.
+	Changed positions and icons in display string to at least have well-layouted network nodes.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo with link layer control infos.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2016-06-02  Levente Mészáros
+
+	Changed appIn/appOut vector gates to simple gates.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

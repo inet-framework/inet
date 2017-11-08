@@ -1,3 +1,218 @@
+====== inet-4.x ======
+
+2017-10-10  Gyorgy Szaszko
+
+	Added include for omnetpp/osgutil in inet/OSGUtils.
+
+2017-10-06  Levente Mészáros
+
+	Added a new shared ptr implementation called IntrusivePtr and
+	support for using it instead of std::shared_ptr.
+
+	The new implementation uses only 1 counter (no weak counter) that is
+	directly added to the shared object using inheritance. This is the reason
+	why it's called intrusive. This shared pointer is not thread safe, so it
+	doesn't use atomic operations to increment/decrement counters, but it's
+	not a requirement for simulation. According to speed measurements (see
+	tests folder) the release builds run 5-10% faster.
+
+2017-08-10  Rudolf Hornig
+
+	Updated version number (3.99.0) and check whether OMNeT++ is properly patched.
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Dropped some unused, obsolete signals.
+
+2017-07-12  Levente Mészáros
+
+	Renamed to Simsignals.msg.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NotifierConsts files to Simsignals.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NotifierConsts.msg to SignalDetails.msg.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+
+2017-07-12  Levente Mészáros
+
+	Common: Added new packetDropSignal reasons.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+
+2017-07-10  Levente Mészáros
+
+	Added PacketDropReasonFilter and subclasses for individual reasons.
+
+2017-06-20  Levente Mészáros
+
+	Added const qualifier to get/findContainingNicModule parameter.
+
+2017-06-19  Levente Mészáros
+
+	Renamed and reordered PacketDropReason enum members.
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2017-07-12  Levente Mészáros
+
+	Added some missing packet drop signal emitting.
+
+2017-07-10  Levente Mészáros
+
+	Added reason codes where packet drop signals are emitted.
+
+2017-07-12  Levente Mészáros
+
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-12  Levente Mészáros
+
+	Dropped obsolete DelegateSignalConfigurator, functionality
+	is present in omnetpp by default.
+
+2017-07-07  Levente Mészáros
+
+	Changed displaying bits to use bytes when divisible by 8.
+
+2017-07-05  Levente Mészáros
+
+	Added operator== to Protocol.
+
+2017-07-04  Levente Mészáros
+
+	Merged Transport/Network/Mac ProtocolTag into corresponding ProtocolInd.
+
+2017-06-09  Rudolf Hornig
+
+	build: version -> 3.6
+
+2017-05-26  Rudolf Hornig
+
+	Separate precompiled headers for debug and release mode.
+
+2017-04-25  Levente Mészáros
+
+	Renamed memory stream functions to include Be (Big Endian) in their names.
+
+2017-04-12  Levente Mészáros
+
+	Dropped obsolete OldReassemblyBuffer.
+
+2017-04-11  Levente Mészáros
+
+	Added type alias for std::shared_ptr called Ptr,
+	this allows replacing the default implementation.
+
+2017-04-11  Levente Mészáros
+
+	Renamed to MemoryInputStream and MemoryOutputStream.
+	Completed MemoryInputStream implementation for bit streaming.
+	Completed MemoryOutputStream implementation for bit streaming.
+
+2017-02-21  Zoltan Bojthe
+
+	Added gnp and mpls to PPP ProtocolGroup.
+
+2017-03-02  Levente Mészáros
+
+	Moved memory streams under common.
+
+2017-02-21  Zoltan Bojthe
+
+	Added IPv6 to PPP ProtocolGroup, modified www link.
+
+2017-02-21  Levente Mészáros
+
+	Added PPP protocol identifier and PPP protocol group.
+
+2017-02-16  Levente Mészáros
+
+	Changed readByteRepeatedly() to return whether it was successful or not.
+
+2017-02-16  Levente Mészáros
+
+	Extended memory streams with address reader/writers.
+
+2017-01-30  Zoltan Bojthe
+
+	Added CHK() and __checknull() for shared_ptr in INETDefs.
+
+2017-01-23  Levente Mészáros
+
+	Added integer based bit and byte units.
+	Units automatically check conversion loss from bit to bytes.
+
+2017-01-18  Levente Mészáros
+
+	Added byte array constructor to BitVector.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-10-19  Zoltan Bojthe
+
+	Changed ModuleAccess getters/finders to be const functions.
+
+2016-07-25  Andras Varga
+
+	Followed omnetpp-5.1, cResultFilterDescriptor was renamed to cResultFilterType.
+
+2016-07-20  Zoltan Bojthe
+
+	Replaced deprecated cQueue functions: operator(), length(), empty().
+
+2016-07-20  Zoltan Bojthe
+
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2016-06-28  Levente Mészáros
+
+	Fixed dispatching lower layer commands.
+
+2016-06-20  Zoltan Bojthe
+
+	Added Enter_Method_Silent() to MessageDispatcher.
+
+2015-07-01  Zoltan Bojthe
+
+	Added findContainingNicModule() and getContainingNicModule() to ModuleAccess.
+
+2015-06-11  Levente Mészáros
+
+	Added new control info classes to specify protocol ids and socket ids.
+
+2015-06-11  Levente Mészáros
+
+	Added new listener interfaces for protocol and interface registration.
+
+2015-06-11  Levente Mészáros
+
+	Added new generic MessageDispatcher class. This module connects multiple
+	protocol to another set of multiple protocols between two protocol layers.
+	It dispatches protocol specific packets, socket messages, and interface
+	specific packets according to the received registrations.
+
+2015-06-11  Levente Mészáros
+
+	Added new Protocol and ProtocolGroup classes. This allows easier identification
+	of protocols between protocol components and the message dispatcher.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,21 @@
+====== inet-4.x ======
+
+2017-08-09  Zoltan Bojthe
+
+	Removed const_cast kludge.
+
+2017-04-28  Zoltan Bojthe
+
+	Removed fixmes.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,29 @@
+====== inet-4.x ======
+
+2017-10-10  Zoltan Bojthe
+
+	Fixed tag usage.
+
+2017-09-19  Zoltan Bojthe
+
+	Added missing clearTags() when reusing packet.
+
+2017-02-06  Zoltan Bojthe
+
+	Changed from using cPacket to Packet.
+
+2016-06-03  Levente Mészáros
+
+	Changed TunInterface to communicate with tun sockets.
+
+2016-06-03  Levente Mészáros
+
+	Added TunSocket that provides read/write access for TUN interfaces.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

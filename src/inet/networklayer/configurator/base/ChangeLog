@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2017-03-13  Zoltan Bojthe
+
+	Added fixme to NetworkConfiguratorBase.
+
+2017-02-02  Levente Mészáros
+
+	Added temporary kludge to make errorRate metric work again in NetworkConfiguratorBase.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

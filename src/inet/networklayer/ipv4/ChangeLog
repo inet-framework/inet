@@ -1,3 +1,309 @@
+====== inet-4.x ======
+
+2017-09-27  Zoltan Bojthe
+
+	Added crc mode.
+
+2017-09-20  Zoltan Bojthe
+
+	More parameter optimizations: use tags instead of parameters.
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-09-13  Levente Mészáros
+
+	Removed unused parameters from IPv4.
+
+2017-08-09  Zoltan Bojthe
+
+	Eliminated shared_ptr::get().
+
+2017-08-09  Zoltan Bojthe
+
+	Optimized crc calculation.
+
+2017-08-02  Zoltan Bojthe
+
+	Renamed IPv4Header --> Ipv4Header, ICMPHeader --> IcmpHeader.
+
+2017-07-12  Levente Mészáros
+
+	Dropped unused, obsolete RawPacket.
+
+2017-07-12  Levente Mészáros
+
+	Added packetDrop related statistics.
+
+2017-07-12  Levente Mészáros
+
+	Fixed packetDrop reason.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_PACKET_DROP to packetDrop signal.
+
+2017-07-10  Levente Mészáros
+
+	Added reason codes where packet drop signals are emitted.
+
+2017-07-12  Levente Mészáros
+
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-12  Levente Mészáros
+
+	Fixed memory leaks related to CRC computation.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leaks related to removing tags.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leak in L3 sockets descriptors.
+
+2017-07-05  Zoltan Bojthe
+
+	Replaced "int get/setTransportProtocol()"  to "int get/setProtocolId()".
+	Added "const Protocol* get/setProtocol()".
+
+2017-07-05  Levente Mészáros
+
+	Replaced generic Packet API calls with L3 protocol tools.
+
+2017-07-04  Levente Mészáros
+
+	Changed cPacket to Packet in send functions.
+
+2017-06-16  Zoltan Bojthe
+
+	Defragmentation: keep orig Packet (for measuring RTT, end-to-end delay)
+
+2017-06-12  Zoltan Bojthe
+
+	Eliminated cast after dup().
+
+2017-05-04  Zoltan Bojthe
+
+	Fixed fragmentation: ip header length was duplicated at the mtu check.
+
+2017-05-04  Zoltan Bojthe
+
+	ICMP messages are only sent about errors in handling fragment zero of
+	fragmented datagrams.
+
+2017-04-11  Levente Mészáros
+
+	Fixed chunkLength, it must be independent of the header field's value to
+	allow representing incomplete chunks.
+
+2017-04-07  Zoltan Bojthe
+
+	Renamed datagram variables/arguments to packet; removed the unused ipv4HeaderPos.
+
+2017-04-05  Zoltan Bojthe
+
+	Dropped PingPayload, icmp headers contain the identifier and sequence number.
+
+2017-04-03  Zoltan Bojthe
+
+	Header position in NetworkProtocolInd tag replaced to shared ptr of the
+	network header.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-03-31  Zoltan Bojthe
+
+	Verify crc, verify total length, truncate packet to totallength.
+
+2017-03-29  Zoltan Bojthe
+
+	Optimized with removeHeader.
+
+2017-03-30  Levente Mészáros
+
+	Renamed to prepareForForwarding and simplified.
+
+2017-03-24  Zoltan Bojthe
+
+	Added crc calculation/check.
+
+2017-03-16  Levente Mészáros
+
+	Removed declaredIncorrect from crcMode.
+
+2017-02-22  Levente Mészáros
+
+	Added crcMode parameter.
+
+2017-02-21  Levente Mészáros
+
+	Added missing crc fields.
+
+2017-02-16  Levente Mészáros
+
+	Renamed ICMPMessage to ICMPHeader.
+
+2017-02-03  Levente Mészáros
+
+	Removed extra IPv4Header parameters from Netfilter.
+
+2017-01-26  Zoltan Bojthe
+
+	Renamed datagram variables/arguments to ipv4Header/packet.
+
+2017-01-17  Zoltan Bojthe
+
+	Fixed ICMP error header size to 8 bytes.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed IPv4Datagram to IPv4Header
+
+2016-06-29  Zoltan Bojthe
+
+	Send up ICMP error when original packet received from higher layer.
+
+2016-06-28  Levente Mészáros
+
+	Changed connection directions to be readable top down for --> and bottom up for <--.
+
+2016-06-28  Levente Mészáros
+
+	Reordered submodules and connections top to down and left to right.
+
+2016-06-28  Levente Mészáros
+
+	Changed external router detection to be based on protocol registration.
+
+2016-06-27  Zoltan Bojthe
+
+	Adapted to NetFilter hook changes: auto unregister in destructor.
+
+2016-06-22  Zoltan Bojthe
+
+	Removed the unused sendOnTransportOutGateByProtocolId() function.
+
+2015-06-15  Levente Mészáros
+
+	Dropped obsolete MANET kludge.
+
+2016-06-22  Zoltan Bojthe
+
+	Remove obsolete handleIncomingICMP().
+
+2016-06-22  Zoltan Bojthe
+
+	ICMP accepts registerprotocols from higher layer, send up packets for registered protocols only.
+
+2016-06-22  Zoltan Bojthe
+
+	Added sendIcmpError() function.
+
+2016-06-20  Zoltan Bojthe
+
+	Moved icmp-specific codes from IPv4 to ICMP
+
+2016-06-17  Zoltan Bojthe
+
+	Added gate/connection to ICMP to communicate with transportlayer.
+
+2016-06-20  Zoltan Bojthe
+
+	Remove errorOut gate from ICMP, removed errorHandling module from networklayer.
+
+2016-06-17  Zoltan Bojthe
+
+	Removed unused arpIn/arpOut gates in IPv4NetworkLayer.
+
+2016-06-17  Zoltan Bojthe
+
+	Renamed gates to ipIn/ipOut in ICMP.
+
+2016-06-16  Zoltan Bojthe
+
+	Fixed ICMP echo for PingApp.
+
+2016-06-16  Zoltan Bojthe
+
+	Dropped unused pingIn/pingOut gates.
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.
+
+2015-05-26  Levente Mészáros
+
+	Added separate gate to ARP to allow direct connection to the link layer.
+
+2016-06-13  Levente Mészáros
+
+	Fixed what is sent towards ICMP when protocol is unreachable in IPv4.
+
+2016-06-13  Levente Mészáros
+
+	Fixed deleting the packet when there are only sockets in IPv4.
+
+2016-06-13  Levente Mészáros
+
+	Dropped unused preRoutingOut branch.
+
+2016-06-02  Levente Mészáros
+
+	Implemented raw L3Socket support in network protocols.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2016-05-30  Levente Mészáros
+
+	Added forwarding parameters to make sure parameter values reach the routing
+	tables. This allows the network node to control these parameters without knowing
+	the internal structure.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-04-29  Levente Mészáros
+
+	Remove vector gate handling for transportOut u IPv4.
+
+2016-05-02  Levente Mészáros
+
+	Added handleRegisterProtocol where necessary.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-26  Levente Mészáros
+
+	Removed incoming/outgoing gate index handling, done by separate dispatcher.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand handling.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

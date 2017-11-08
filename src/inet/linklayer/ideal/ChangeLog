@@ -1,3 +1,55 @@
+====== inet-4.x ======
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+
+2017-07-12  Levente Mészáros
+
+	Added some missing packet drop signal emitting.
+	Replaced remaining packet drop signals with the generic one.
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leaks when processing lower frames.
+
+2017-02-02  Levente Mészáros
+
+	Fixed to work with the new Packet class and other protocols.
+
+2017-01-19  Levente Mészáros
+
+	Renamed IdealMacFrame to IdealMacHeader.
+
+2017-03-07  Levente Mészáros
+
+	Changed to use Packet/Chunk instead of cPacket.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Added interfaceId to control info sent up from MACs.
+
+2015-06-11  Levente Mészáros
+
+	Added network protocol to ideal MAC frames.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

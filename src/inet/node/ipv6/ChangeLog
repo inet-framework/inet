@@ -1,3 +1,30 @@
+====== inet-4.x ======
+
+2016-06-16  Levente Mészáros
+
+	Changed Router6 to extends Router similarly to StandardHost6.
+
+2016-06-02  Levente Mészáros
+
+	Changed IPv6 network layer configurations to default.
+
+2016-05-06  Levente Mészáros
+
+	Added a workaround for a deep parameter assignment bug in omnetpp.
+	Changed from default assignment to final, otherwise these have no effect.
+
+2016-05-31  Levente Mészáros
+
+	Updated IPv6 network layer configuration in network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added routing table module path deep parameter assignments to network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Changed base module for all network nodes.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2017-09-13  Levente Mészáros
+
+	Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

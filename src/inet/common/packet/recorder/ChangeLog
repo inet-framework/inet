@@ -1,0 +1,26 @@
+====== inet-4.x ======
+
+2017-08-07  Zoltan Bojthe
+
+	Converted PacketDump to use chunks.
+	Removed deprecated TCPDump module.
+
+2017-07-05  Zoltan Bojthe
+
+	Show TCP packets payload length in PacketDump.
+
+2017-04-25  Levente Mészáros
+
+	Added pcapNetwork constant for 802.11.
+
+2017-03-29  Levente Mészáros
+
+	Fixed some GCC warnings.
+
+2017-03-16  Levente Mészáros
+
+	Removed unused PcapRecorder IPv4 and IPv6 specific code.
+
+2017-03-02  Levente Mészáros
+
+	Moved packet recorders under common/packet/recorder.

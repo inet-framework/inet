@@ -1,3 +1,78 @@
+====== inet-4.x ======
+
+2017-10-10  Levente Mészáros
+
+	Separated simsignals for transmission/reception from radio signal departure/arrival.
+
+2017-09-15  Raphael Riebl
+
+	Added getMedium() to ITransmission.
+	Extracted IAntennaGain from IAntenna interface.
+	Add RadioMedium::getRadio() method for fetching radios by id.
+
+2017-08-08  Raphael Riebl
+
+	Changed transmitter lookup by id instead of internal pointer.
+
+2017-07-14  Levente Mészáros
+
+	Fixed invalid read bug found by valgrind.
+
+2017-05-10  Levente Mészáros
+
+	Renamed radioFrame variables to signal.
+
+2017-05-10  Levente Mészáros
+
+	Renamed IRadioFrame to ISignal, and RadioFrame to Signal.
+
+2017-05-09  Levente Mészáros
+
+	Removed obsolete KLUDGE and updated fingerprints.
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+	Ieee80211DataFrame -> Ieee80211DataHeader Ieee80211DataOrMgmtFrame ->
+	Ieee80211DataOrMgmtHeader Ieee80211ManagementHeader ->
+	Ieee80211MgmtHeader Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-04-27  Levente Mészáros
+
+	Added sendRawBytes parameter.
+
+2017-04-12  Levente Mészáros
+
+	Dropped obsolete IMACFrame.
+
+2017-03-20  Levente Mészáros
+
+	Fixed network configuration for wireless links.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Added encapsulate/decapsulate virtual methods to Radio.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-16  Levente Mészáros
+
+	Merged getPhyFrame into getMacFrame.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

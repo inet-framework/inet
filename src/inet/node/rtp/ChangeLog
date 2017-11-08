@@ -1,3 +1,22 @@
+====== inet-4.x ======
+
+2017-08-25  Zoltan Bojthe
+
+	Updated module positions.
+
+2016-06-23  Zoltan Bojthe
+
+	Connected RTP/RTPC to 'at' dispatcher.
+
+2016-06-02  Levente Mészáros
+
+	Changed appIn/appOut vector gates to simple gates.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------
@@ -29,6 +48,5 @@
 2015-06-22  ------ inet-3.0.0 released ------
 
 2015-05-13  ------ inet-2.99.1 released ------
-
 
 ====== inet-2.x ======

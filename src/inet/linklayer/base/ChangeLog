@@ -1,3 +1,30 @@
+====== inet-4.x ======
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2017-01-19  Levente Mészáros
+
+	Renamed MACFrameBase to MacHeaderBase.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-05-02  Levente Mészáros
+
+	Changed registerInterface calls to use the gate of the NIC module if possible.
+	This simplifies interface registration process for compound mac modules.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerInterface() calls.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

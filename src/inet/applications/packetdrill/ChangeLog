@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2017-06-08  Zoltan Bojthe
+
+	Fixed default IPv4 TimeToLive value.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

@@ -1,3 +1,9 @@
+====== inet-4.x ======
+
+2017-02-07  Levente Mészáros
+
+	Changed to use the new Packet class.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------
