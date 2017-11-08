@@ -519,19 +519,16 @@ class SimulationTextTestResult(ThreadedTestResult):
 
     def addError(self, test, err):
         # modified
-        super(SimulationTextTestResult, self).addError(test, err)
-        self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if test.expectedResult == 'ERROR':
             if self.showAll:
                 (cause, detail) = self._splitMsg(err[1])
-                self.stream.write(": ERROR (%s)\n" % cause)
-                if detail:
-                    self.stream.write(detail)
-                    self.stream.write("\n")
+                self.stream.write(": ERROR (expected)\n")
             elif self.dots:
                 self.stream.write('e')
                 self.stream.flush()
         else:
+            super(SimulationTextTestResult, self).addError(test, err)
+            self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
                 (cause, detail) = self._splitMsg(err[1])
                 self.stream.write(": ERROR (should be %s) (%s)\n" % (test.expectedResult, cause))
@@ -548,19 +545,16 @@ class SimulationTextTestResult(ThreadedTestResult):
 
     def addFailure(self, test, err):
         # modified
-        super(SimulationTextTestResult, self).addFailure(test, err)
-        self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if test.expectedResult == 'FAIL':
             if self.showAll:
                 (cause, detail) = self._splitMsg(err[1])
-                self.stream.write(": FAIL (%s)\n" % cause)
-                if detail:
-                    self.stream.write(detail)
-                    self.stream.write("\n")
+                self.stream.write(": FAIL (expected)\n")
             elif self.dots:
                 self.stream.write('f')
                 self.stream.flush()
         else:
+            super(SimulationTextTestResult, self).addFailure(test, err)
+            self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
             if self.showAll:
                 (cause, detail) = self._splitMsg(err[1])
                 self.stream.write(": FAIL (should be %s) (%s)\n" % (test.expectedResult, cause))
