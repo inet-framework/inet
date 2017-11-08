@@ -143,8 +143,8 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           ae0d-824f/tplx
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             5c63-f5a1/tplx
 
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            5ef8-7bf0/tplx
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,            95bf-a156/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            5ef8-7bf0/tplx,    ERROR
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,            95bf-a156/tplx,    ERROR
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f707-85a9/tplx
 
@@ -252,7 +252,7 @@
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             2b3b-a2be/tplx
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b616-49c7/tplx
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           5b8c-d4ad/tplx
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            660d-2a8a/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            660d-2a8a/tplx,    ERROR
 
 ### /examples/manetrouting/* : see manet.csv
 
@@ -352,9 +352,9 @@
 /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           b828-861b/tplx
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           81cc-c27b/tplx
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d348-1867/tplx
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx,    ERROR
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx,    ERROR
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d348-1867/tplx,    ERROR
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            891d-24f4/tplx
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            5cc0-9205/tplx
