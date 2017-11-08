@@ -1,3 +1,5 @@
+TODO: review and refactor all applications which have lifecycle, startTime, endTime parameters, move code from initialize to separate reusable functions (e.g. for lifecycle restart)
+
 TODO: DHCP Client should work multiple interfaces, but works with only one.
 
 TODO: UDP: add a parameter: used protocol number, default value is UDP.
