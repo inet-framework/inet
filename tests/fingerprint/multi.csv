@@ -7,7 +7,7 @@
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             a0c9-6552/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            10s,             b299-6c83/tplx
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            10s,             5fe9-22ea/tplx,     ERROR     # IPv6: Shutdown not supported
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0,         10s,             c74c-6c07/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0,         10s,             af66-3aae/tplx
 
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Random -r 0,                 ---100s,         0000-0000   # Random extended
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv4 -r 0,                  ---100s,         0000-0000   # _IPv4 extended
