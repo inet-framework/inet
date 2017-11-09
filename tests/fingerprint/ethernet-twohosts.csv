@@ -1,61 +1,61 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-.,                                   -f ethernet-twohosts.ini -r 0,                ,                 743c-d26c/tplx
-.,                                   -f ethernet-twohosts.ini -r 1,                ,                 1666-4c9c/tplx
-.,                                   -f ethernet-twohosts.ini -r 2,                ,                 9001-b401/tplx
-.,                                   -f ethernet-twohosts.ini -r 3,                ,                 03eb-038a/tplx
-.,                                   -f ethernet-twohosts.ini -r 4,                ,                 2272-b334/tplx
-.,                                   -f ethernet-twohosts.ini -r 5,                ,                 f753-9176/tplx
-.,                                   -f ethernet-twohosts.ini -r 6,                ,                 5c5e-4de0/tplx
-.,                                   -f ethernet-twohosts.ini -r 7,                ,                 cb5c-8f36/tplx
-.,                                   -f ethernet-twohosts.ini -r 8,                ,                 e712-43b7/tplx
-.,                                   -f ethernet-twohosts.ini -r 9,                ,                 fae8-d7f6/tplx
-.,                                   -f ethernet-twohosts.ini -r 10,               ,                 2ba5-6633/tplx
-.,                                   -f ethernet-twohosts.ini -r 11,               ,                 ebbc-528b/tplx
-.,                                   -f ethernet-twohosts.ini -r 12,               ,                 ff44-b9fb/tplx
-.,                                   -f ethernet-twohosts.ini -r 13,               ,                 f97e-0da8/tplx
-.,                                   -f ethernet-twohosts.ini -r 14,               ,                 f2de-1f53/tplx
-.,                                   -f ethernet-twohosts.ini -r 15,               ,                 bfe8-fece/tplx
-.,                                   -f ethernet-twohosts.ini -r 16,               ,                 dbcd-f012/tplx
-.,                                   -f ethernet-twohosts.ini -r 17,               ,                 fdfb-e204/tplx
-.,                                   -f ethernet-twohosts.ini -r 18,               ,                 1459-d171/tplx
-.,                                   -f ethernet-twohosts.ini -r 19,               ,                 0dab-bb6c/tplx
-.,                                   -f ethernet-twohosts.ini -r 20,               ,                 dafe-2442/tplx
-.,                                   -f ethernet-twohosts.ini -r 21,               ,                 b591-d276/tplx
-.,                                   -f ethernet-twohosts.ini -r 22,               ,                 016b-5ae1/tplx
-.,                                   -f ethernet-twohosts.ini -r 23,               ,                 6712-b04c/tplx
-.,                                   -f ethernet-twohosts.ini -r 24,               ,                 63f9-99a5/tplx
-.,                                   -f ethernet-twohosts.ini -r 25,               ,                 7d77-2a8a/tplx
-.,                                   -f ethernet-twohosts.ini -r 26,               ,                 1f1a-c900/tplx
-.,                                   -f ethernet-twohosts.ini -r 27,               ,                 cb01-b4e1/tplx
-.,                                   -f ethernet-twohosts.ini -r 28,               ,                 8225-c892/tplx
-.,                                   -f ethernet-twohosts.ini -r 29,               ,                 184b-c35e/tplx
-.,                                   -f ethernet-twohosts.ini -r 30,               ,                 eef6-da44/tplx
-.,                                   -f ethernet-twohosts.ini -r 31,               ,                 7ba7-30f5/tplx
-.,                                   -f ethernet-twohosts.ini -r 32,               ,                 e18b-25a4/tplx
-.,                                   -f ethernet-twohosts.ini -r 33,               ,                 3904-bf59/tplx
-.,                                   -f ethernet-twohosts.ini -r 34,               ,                 5ad6-0af2/tplx
-.,                                   -f ethernet-twohosts.ini -r 35,               ,                 4034-e620/tplx
-.,                                   -f ethernet-twohosts.ini -r 36,               ,                 65ff-416c/tplx
-.,                                   -f ethernet-twohosts.ini -r 37,               ,                 708a-6e9a/tplx
-.,                                   -f ethernet-twohosts.ini -r 38,               ,                 a4ca-6ea7/tplx
-.,                                   -f ethernet-twohosts.ini -r 39,               ,                 17e5-83de/tplx
-.,                                   -f ethernet-twohosts.ini -r 40,               ,                 32ce-6673/tplx
-.,                                   -f ethernet-twohosts.ini -r 41,               ,                 fa95-915c/tplx
-.,                                   -f ethernet-twohosts.ini -r 42,               ,                 2cd1-f9a1/tplx
-.,                                   -f ethernet-twohosts.ini -r 43,               ,                 640d-0497/tplx
-.,                                   -f ethernet-twohosts.ini -r 44,               ,                 cbdd-d22f/tplx
-.,                                   -f ethernet-twohosts.ini -r 45,               ,                 24d4-ad77/tplx
-.,                                   -f ethernet-twohosts.ini -r 46,               ,                 ece7-f19b/tplx
-.,                                   -f ethernet-twohosts.ini -r 47,               ,                 0cd3-cce2/tplx
-.,                                   -f ethernet-twohosts.ini -r 48,               ,                 9a11-afc3/tplx
-.,                                   -f ethernet-twohosts.ini -r 49,               ,                 115c-6266/tplx
-.,                                   -f ethernet-twohosts.ini -r 50,               ,                 2d93-f1e5/tplx
-.,                                   -f ethernet-twohosts.ini -r 51,               ,                 fcd6-ce9a/tplx
-.,                                   -f ethernet-twohosts.ini -r 52,               ,                 8f55-7472/tplx
-.,                                   -f ethernet-twohosts.ini -r 53,               ,                 5fb2-251d/tplx
-.,                                   -f ethernet-twohosts.ini -r 54,               ,                 cc61-847e/tplx
-.,                                   -f ethernet-twohosts.ini -r 55,               ,                 586d-1d13/tplx
-.,                                   -f ethernet-twohosts.ini -r 56,               ,                 f43d-888f/tplx
-.,                                   -f ethernet-twohosts.ini -r 57,               ,                 5255-6cd2/tplx
-.,                                   -f ethernet-twohosts.ini -r 58,               ,                 eb32-7473/tplx
-.,                                   -f ethernet-twohosts.ini -r 59,               ,                 a34b-90ba/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+.,                                   -f ethernet-twohosts.ini -r 0,                ,                 743c-d26c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 1,                ,                 1666-4c9c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 2,                ,                 9001-b401/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 3,                ,                 03eb-038a/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 4,                ,                 2272-b334/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 5,                ,                 f753-9176/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 6,                ,                 5c5e-4de0/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 7,                ,                 cb5c-8f36/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 8,                ,                 e712-43b7/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 9,                ,                 fae8-d7f6/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 10,               ,                 2ba5-6633/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 11,               ,                 ebbc-528b/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 12,               ,                 ff44-b9fb/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 13,               ,                 f97e-0da8/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 14,               ,                 f2de-1f53/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 15,               ,                 bfe8-fece/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 16,               ,                 dbcd-f012/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 17,               ,                 fdfb-e204/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 18,               ,                 1459-d171/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 19,               ,                 0dab-bb6c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 20,               ,                 dafe-2442/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 21,               ,                 b591-d276/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 22,               ,                 016b-5ae1/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 23,               ,                 6712-b04c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 24,               ,                 63f9-99a5/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 25,               ,                 7d77-2a8a/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 26,               ,                 1f1a-c900/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 27,               ,                 cb01-b4e1/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 28,               ,                 8225-c892/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 29,               ,                 184b-c35e/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 30,               ,                 eef6-da44/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 31,               ,                 7ba7-30f5/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 32,               ,                 e18b-25a4/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 33,               ,                 3904-bf59/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 34,               ,                 5ad6-0af2/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 35,               ,                 4034-e620/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 36,               ,                 65ff-416c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 37,               ,                 708a-6e9a/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 38,               ,                 a4ca-6ea7/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 39,               ,                 17e5-83de/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 40,               ,                 32ce-6673/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 41,               ,                 fa95-915c/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 42,               ,                 2cd1-f9a1/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 43,               ,                 640d-0497/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 44,               ,                 cbdd-d22f/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 45,               ,                 24d4-ad77/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 46,               ,                 ece7-f19b/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 47,               ,                 0cd3-cce2/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 48,               ,                 9a11-afc3/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 49,               ,                 115c-6266/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 50,               ,                 2d93-f1e5/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 51,               ,                 fcd6-ce9a/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 52,               ,                 8f55-7472/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 53,               ,                 5fb2-251d/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 54,               ,                 cc61-847e/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 55,               ,                 586d-1d13/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 56,               ,                 f43d-888f/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 57,               ,                 5255-6cd2/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 58,               ,                 eb32-7473/tplx, PASS,
+.,                                   -f ethernet-twohosts.ini -r 59,               ,                 a34b-90ba/tplx, PASS,
