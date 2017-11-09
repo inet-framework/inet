@@ -43,7 +43,7 @@ die("Not found ini files\n") if ($#inifiles lt 0);
 
 @runs = ();
 
-print '# workingdir,                        args,                                          simtimelimit,    fingerprint'."\n";
+print '# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags'."\n";
 
 foreach $fname (@inifiles)
 {
