@@ -364,12 +364,10 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   IDLE,
                 numCollision++;
                 emitPacketDropSignal(frame, INCORRECTLY_RECEIVED);
-                resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unexpected-Ack,
                                   isLowerMessage(msg) && isAck(frame),
                                   IDLE,
-                resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Broadcast,
                                   isLowerMessage(msg) && isBroadcast(frame),
@@ -377,7 +375,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 decapsulate(frame);
                 sendUp(frame);
                 numReceivedBroadcast++;
-                resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unicast-No-Ack,
                                   isLowerMessage(msg) && isForUs(frame) && !useAck,
@@ -385,7 +382,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 decapsulate(frame);
                 sendUp(frame);
                 numReceived++;
-                resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unicast-Use-Ack,
                                   isLowerMessage(msg) && isForUs(frame) && useAck,
@@ -399,7 +395,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   isLowerMessage(msg) && !isForUs(frame),
                                   IDLE,
                 emitPacketDropSignal(frame, NOT_ADDRESSED_TO_US, retryLimit);
-                resetStateVariables();
             );
         }
         FSMA_State(WAITSIFS)
@@ -409,7 +404,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   msg == endSifs,
                                   IDLE,
                 sendAckFrame();
-                resetStateVariables();
             );
         }
     }
@@ -594,7 +588,7 @@ void CsmaCaMac::sendAckFrame()
 void CsmaCaMac::finishCurrentTransmission()
 {
     popTransmissionQueue();
-    resetStateVariables();
+    resetTransmissionVariables();
 }
 
 void CsmaCaMac::giveUpCurrentTransmission()
@@ -603,7 +597,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
     emit(linkBreakSignal, packet);
     popTransmissionQueue();
-    resetStateVariables();
+    resetTransmissionVariables();
     numGivenUp++;
 }
 
@@ -631,7 +625,7 @@ void CsmaCaMac::popTransmissionQueue()
     }
 }
 
-void CsmaCaMac::resetStateVariables()
+void CsmaCaMac::resetTransmissionVariables()
 {
     backoffPeriod = -1;
     retryCounter = 0;
