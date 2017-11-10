@@ -122,6 +122,7 @@ std::vector<Packet *> *OriginatorQoSMacDataService::extractFramesToTransmit(Pend
 OriginatorQoSMacDataService::~OriginatorQoSMacDataService()
 {
     delete aMsduAggregation;
+    delete aMpduAggregation;
     delete sequenceNumberAssigment;
     delete fragmentation;
 }
