@@ -25,7 +25,7 @@ namespace inet {
 class INET_API PIMHello : public PIMHello_Base
 {
   protected:
-    HelloOptionPtr *options_var;    // array ptr
+    HelloOption **options_var;    // array ptr
     unsigned int options_arraysize;
 
   private:
@@ -47,9 +47,9 @@ class INET_API PIMHello : public PIMHello_Base
     // field getter/setter methods
     virtual void setOptionsArraySize(unsigned int size) override;
     virtual unsigned int getOptionsArraySize() const override;
-    virtual HelloOptionPtr& getMutableOptions(unsigned int k) override;
-    virtual const HelloOptionPtr& getOptions(unsigned int k) const override;
-    virtual void setOptions(unsigned int k, const HelloOptionPtr& options) override;
+    virtual HelloOption *getMutableOptions(unsigned int k) override;
+    virtual const HelloOption *getOptions(unsigned int k) const override;
+    virtual void setOptions(unsigned int k, HelloOption *options) override;
 };
 
 }    // namespace inet

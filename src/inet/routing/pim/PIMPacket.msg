@@ -90,9 +90,6 @@ class GenerationIDOption extends HelloOption
 //    IPv4Address secondaryAddresses[];
 //}
 
-cplusplus {{ class HelloOption; typedef HelloOption *HelloOptionPtr; }}
-class noncobject HelloOptionPtr;
-
 struct EncodedAddress
 {
     IPv4Address IPaddress;
@@ -124,7 +121,7 @@ class PIMHello extends PIMPacket
 {
     @customize(true);
     type = Hello;
-    abstract HelloOptionPtr  options[];
+    abstract HelloOption *options[];
 }
 
 // Join/Prune message

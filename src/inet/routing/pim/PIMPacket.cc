@@ -60,7 +60,7 @@ void PIMHello::copy(const PIMHello& other)
         delete options_var[i];
     delete[] options_var;
 
-    this->options_var = (other.options_arraysize == 0) ? nullptr : new HelloOptionPtr[other.options_arraysize];
+    this->options_var = (other.options_arraysize == 0) ? nullptr : new HelloOption*[other.options_arraysize];
     options_arraysize = other.options_arraysize;
     for (unsigned int i = 0; i < options_arraysize; i++)
         this->options_var[i] = other.options_var[i]->dup();
@@ -91,7 +91,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
         this->options_var = nullptr;
     }
     else {
-        this->options_var = new HelloOptionPtr[options_arraysize];
+        this->options_var = new HelloOption*[options_arraysize];
         for (unsigned int i = 0; i < options_arraysize; i++) {
             short int type;
             doParsimUnpacking(b, type);
@@ -129,7 +129,7 @@ void PIMHello::parsimUnpack(cCommBuffer *b)
 
 void PIMHello::setOptionsArraySize(unsigned int size)
 {
-    HelloOptionPtr *options_var2 = (size == 0) ? nullptr : new HelloOptionPtr[size];
+    HelloOption **options_var2 = (size == 0) ? nullptr : new HelloOption*[size];
     for (unsigned int i = 0; i < size; i++)
         options_var2[i] = i < options_arraysize ? options_var[i] : nullptr;
     for (unsigned int i = size; i < options_arraysize; i++)
@@ -144,21 +144,21 @@ unsigned int PIMHello::getOptionsArraySize() const
     return options_arraysize;
 }
 
-HelloOptionPtr& PIMHello::getMutableOptions(unsigned int k)
+HelloOption *PIMHello::getMutableOptions(unsigned int k)
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     return options_var[k];
 }
 
-const HelloOptionPtr& PIMHello::getOptions(unsigned int k) const
+const HelloOption *PIMHello::getOptions(unsigned int k) const
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     return options_var[k];
 }
 
-void PIMHello::setOptions(unsigned int k, const HelloOptionPtr& options)
+void PIMHello::setOptions(unsigned int k, HelloOption *options)
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
