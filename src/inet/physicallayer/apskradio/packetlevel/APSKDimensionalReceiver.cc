@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalReceiver.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSNIR.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalReceiver.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmission.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
 namespace inet {
@@ -36,6 +37,18 @@ std::ostream& APSKDimensionalReceiver::printToStream(std::ostream& stream, int l
 {
     stream << "APSKDimensionalReceiver";
     return FlatReceiverBase::printToStream(stream, level);
+}
+
+bool APSKDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+{
+    auto apskTransmission = dynamic_cast<const APSKDimensionalTransmission *>(transmission);
+    return apskTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
+}
+
+bool APSKDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+{
+    auto apksTransmission = dynamic_cast<const APSKDimensionalTransmission *>(reception->getTransmission());
+    return apksTransmission && FlatReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 
 } // namespace physicallayer
