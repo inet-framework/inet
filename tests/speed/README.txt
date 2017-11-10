@@ -13,7 +13,7 @@ right or wrong.
 The intended audience of this document are the users and the maintainers of
 the INET framework and its speed tests.
 
-1. TakeEnvironment
+1. Fix the Environment
 
 Make sure that the measurements take place in the same hardware and software
 environment. Start with creating a set of reference measurements, then change
