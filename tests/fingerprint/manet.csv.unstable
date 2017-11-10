@@ -1,4 +1,0 @@
-# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-# repeat 4 times
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             25s,             4517-a614/tplx, PASS,
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            10s,             24a7-f3cc/tplx, PASS,
