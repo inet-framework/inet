@@ -18,8 +18,8 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
