@@ -64,12 +64,12 @@ static const Ptr<ApplicationHeader> makeImmutableApplicationHeader(int someData)
     return chunk;
 }
 
-static const Ptr<TcpHeader> makeImmutableTcpHeader()
-{
-    auto chunk = makeShared<TcpHeader>();
-    chunk->markImmutable();
-    return chunk;
-}
+//static const Ptr<TcpHeader> makeImmutableTcpHeader()
+//{
+//    auto chunk = makeShared<TcpHeader>();
+//    chunk->markImmutable();
+//    return chunk;
+//}
 
 static const Ptr<IpHeader> makeImmutableIpHeader()
 {
