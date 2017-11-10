@@ -112,43 +112,45 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         auto canvas = visualizerTargetModule->getCanvas();
         auto module = const_cast<cModule *>(dynamic_cast<const cModule *>(mobility));
         auto visualRepresentation = findVisualRepresentation(module);
-        auto visualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
-        cArcFigure *orientationFigure = nullptr;
-        if (displayOrientations) {
-            auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
-            int radius = rectangle.getSize().getLength() * 1.25 / 2;
-            orientationFigure = new cArcFigure("orientation");
-            orientationFigure->setTags((std::string("orientation ") + tags).c_str());
-            orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
-            orientationFigure->setZIndex(zIndex);
-            orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
-            orientationFigure->setLineColor(orientationLineColor);
-            orientationFigure->setLineStyle(orientationLineStyle);
-            orientationFigure->setLineWidth(orientationLineWidth);
-            visualization->addFigure(orientationFigure);
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
+        if (networkNodeVisualization != nullptr) {
+            cArcFigure *orientationFigure = nullptr;
+            if (displayOrientations) {
+                auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
+                int radius = rectangle.getSize().getLength() * 1.25 / 2;
+                orientationFigure = new cArcFigure("orientation");
+                orientationFigure->setTags((std::string("orientation ") + tags).c_str());
+                orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
+                orientationFigure->setZIndex(zIndex);
+                orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
+                orientationFigure->setLineColor(orientationLineColor);
+                orientationFigure->setLineStyle(orientationLineStyle);
+                orientationFigure->setLineWidth(orientationLineWidth);
+                networkNodeVisualization->addFigure(orientationFigure);
+            }
+            cLineFigure *velocityFigure = nullptr;
+            if (displayVelocities) {
+                velocityFigure = new cLineFigure("velocity");
+                velocityFigure->setTags((std::string("velocity ") + tags).c_str());
+                velocityFigure->setTooltip("This arrow represents the current velocity of the mobility model");
+                velocityFigure->setZIndex(zIndex);
+                velocityFigure->setVisible(false);
+                velocityFigure->setEndArrowhead(cFigure::ARROW_SIMPLE);
+                velocityFigure->setLineColor(velocityLineColor);
+                velocityFigure->setLineStyle(velocityLineStyle);
+                velocityFigure->setLineWidth(velocityLineWidth);
+                networkNodeVisualization->addFigure(velocityFigure);
+            }
+            TrailFigure *trailFigure = nullptr;
+            if (displayMovementTrails) {
+                trailFigure = new TrailFigure(trailLength, true, "movement trail");
+                trailFigure->setTags((std::string("movement_trail recent_history ") + tags).c_str());
+                trailFigure->setZIndex(zIndex);
+                canvas->addFigure(trailFigure);
+            }
+            mobilityVisualization = new MobilityCanvasVisualization(networkNodeVisualization, visualRepresentation, orientationFigure, velocityFigure, trailFigure, mobility);
+            setMobilityVisualization(mobility, mobilityVisualization);
         }
-        cLineFigure *velocityFigure = nullptr;
-        if (displayVelocities) {
-            velocityFigure = new cLineFigure("velocity");
-            velocityFigure->setTags((std::string("velocity ") + tags).c_str());
-            velocityFigure->setTooltip("This arrow represents the current velocity of the mobility model");
-            velocityFigure->setZIndex(zIndex);
-            velocityFigure->setVisible(false);
-            velocityFigure->setEndArrowhead(cFigure::ARROW_SIMPLE);
-            velocityFigure->setLineColor(velocityLineColor);
-            velocityFigure->setLineStyle(velocityLineStyle);
-            velocityFigure->setLineWidth(velocityLineWidth);
-            visualization->addFigure(velocityFigure);
-        }
-        TrailFigure *trailFigure = nullptr;
-        if (displayMovementTrails) {
-            trailFigure = new TrailFigure(trailLength, true, "movement trail");
-            trailFigure->setTags((std::string("movement_trail recent_history ") + tags).c_str());
-            trailFigure->setZIndex(zIndex);
-            canvas->addFigure(trailFigure);
-        }
-        mobilityVisualization = new MobilityCanvasVisualization(visualization, visualRepresentation, orientationFigure, velocityFigure, trailFigure, mobility);
-        setMobilityVisualization(mobility, mobilityVisualization);
     }
     return mobilityVisualization;
 }
