@@ -4,17 +4,13 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.common.Units;
 
 cplusplus{{
-#include "inet/common/Units.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
 }}
 
 namespace inet;
-
-class noncobject bps;
-class noncobject W;
-class noncobject Hz;
 
 //
 // This is an abstract base class that should not be directly added as a tag.

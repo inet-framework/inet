@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 
 cplusplus {{
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
@@ -28,9 +29,6 @@ typedef IModulation * IModulationPtr;
 }}
 
 class noncobject IModulationPtr;
-class noncobject bps;
-class noncobject W;
-class noncobject Hz;
 
 //
 // Message kinds for sending commands to the radio.

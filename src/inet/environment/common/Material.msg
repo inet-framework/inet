@@ -14,14 +14,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 
 cplusplus {{
 #include "inet/environment/common/Material.h"
 }}
 
 namespace inet::physicalenvironment;
-
-class noncobject Ohmm;
 
 class Material extends cNamedObject
 {

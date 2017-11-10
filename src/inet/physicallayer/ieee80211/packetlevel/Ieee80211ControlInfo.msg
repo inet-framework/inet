@@ -16,21 +16,16 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.physicallayer.contract.packetlevel.RadioControlInfo;
 
 cplusplus {{
-#include "inet/common/Units.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 }}
 
-
 namespace inet::physicallayer;
-
-class noncobject b;
-class noncobject bps;
-class noncobject Hz;
 
 cplusplus {{
 typedef const IIeee80211Mode ConstIIeee80211Mode;

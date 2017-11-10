@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.physicallayer.base.packetlevel.NarrowbandTransmissionBase;
 
 cplusplus {{
@@ -21,8 +22,6 @@ cplusplus {{
 }}
 
 namespace inet::physicallayer;
-
-class noncobject bps;
 
 class FlatTransmissionBase extends NarrowbandTransmissionBase
 {
