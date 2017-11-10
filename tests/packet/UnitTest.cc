@@ -32,7 +32,7 @@ Register_Serializer(TlvHeaderBool, TlvHeaderBoolSerializer);
 Register_Serializer(TlvHeaderInt, TlvHeaderIntSerializer);
 Define_Module(UnitTest);
 
-#define ASSERT_ERROR(code, message) try { code; assert(false); } catch (std::exception& e) { assert(std::string(e.what()).find(message) != -1); }
+#define ASSERT_ERROR(code, message) try { code; ASSERT(false); } catch (std::exception& e) { ASSERT((int)std::string(e.what()).find(message) != -1); }
 
 static std::vector<uint8_t> makeVector(int length)
 {
@@ -131,10 +131,10 @@ void TlvHeaderBoolSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 const Ptr<Chunk> TlvHeaderBoolSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = makeShared<TlvHeaderBool>();
-    assert(tlvHeader->getType() == stream.readUint8());
+    ASSERT(tlvHeader->getType() == stream.readUint8());
     auto x = B(tlvHeader->getChunkLength());
     auto y = B(stream.readUint8());
-    assert(x == y);
+    ASSERT(x == y);
     tlvHeader->setBoolValue(stream.readUint8());
     return tlvHeader;
 }
@@ -150,8 +150,8 @@ void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
 const Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = makeShared<TlvHeaderInt>();
-    assert(tlvHeader->getType() == stream.readUint8());
-    assert(B(tlvHeader->getChunkLength()) == B(stream.readUint8()));
+    ASSERT(tlvHeader->getType() == stream.readUint8());
+    ASSERT(B(tlvHeader->getChunkLength()) == B(stream.readUint8()));
     tlvHeader->setInt16Value(stream.readUint16Be());
     return tlvHeader;
 }
@@ -160,7 +160,7 @@ static void testMutable()
 {
     // 1. chunk is mutable after construction
     auto byteCountChunk1 = makeShared<ByteCountChunk>(B(10));
-    assert(byteCountChunk1->isMutable());
+    ASSERT(byteCountChunk1->isMutable());
 }
 
 static void testImmutable()
@@ -168,7 +168,7 @@ static void testImmutable()
     // 1. chunk is immutable after marking it immutable
     auto byteCountChunk1 = makeShared<ByteCountChunk>(B(10));
     byteCountChunk1->markImmutable();
-    assert(byteCountChunk1->isImmutable());
+    ASSERT(byteCountChunk1->isImmutable());
 
     // 2. chunk is not modifiable when it is immutable
     auto byteCountChunk2 = makeImmutableByteCountChunk(B(10));
@@ -183,7 +183,7 @@ static void testComplete()
 {
     // 1. chunk is complete after construction
     auto byteCountChunk1 = makeShared<ByteCountChunk>(B(10));
-    assert(byteCountChunk1->isComplete());
+    ASSERT(byteCountChunk1->isComplete());
 }
 
 static void testIncomplete()
@@ -193,7 +193,7 @@ static void testIncomplete()
     packet1.append(makeImmutableApplicationHeader(42));
     Packet fragment1;
     fragment1.append(packet1.peekAt(B(0), B(5)));
-    assert(!fragment1.hasHeader<ApplicationHeader>());
+    ASSERT(!fragment1.hasHeader<ApplicationHeader>());
     ASSERT_ERROR(fragment1.peekHeader<ApplicationHeader>(), "incomplete chunk is not allowed");
 
     // 2. packet provides incomplete variable length header if requested
@@ -207,10 +207,10 @@ static void testIncomplete()
     tcpHeader1->markImmutable();
     packet2.append(tcpHeader1);
     const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(B(4), Chunk::PF_ALLOW_INCOMPLETE);
-    assert(tcpHeader2->isIncomplete());
-    assert(tcpHeader2->getChunkLength() == B(4));
-    assert(tcpHeader2->getCrcMode() == CRC_COMPUTED);
-    assert(tcpHeader2->getSrcPort() == 1000);
+    ASSERT(tcpHeader2->isIncomplete());
+    ASSERT(tcpHeader2->getChunkLength() == B(4));
+    ASSERT(tcpHeader2->getCrcMode() == CRC_COMPUTED);
+    ASSERT(tcpHeader2->getSrcPort() == 1000);
 
     // 3. packet provides incomplete variable length serialized header
     Packet packet3;
@@ -221,22 +221,22 @@ static void testIncomplete()
     tcpHeader3->markImmutable();
     packet3.append(tcpHeader3);
     const auto& bytesChunk1 = packet3.peekAllBytes();
-    assert(bytesChunk1->getChunkLength() == B(8));
+    ASSERT(bytesChunk1->getChunkLength() == B(8));
 
     // 4. packet provides incomplete variable length deserialized header
     Packet packet4;
     packet4.append(bytesChunk1);
     const auto& tcpHeader4 = packet4.peekHeader<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
-    assert(tcpHeader4->isIncomplete());
-    assert(tcpHeader4->getChunkLength() == B(8));
-    assert(tcpHeader4->getLengthField() == 16);
+    ASSERT(tcpHeader4->isIncomplete());
+    ASSERT(tcpHeader4->getChunkLength() == B(8));
+    ASSERT(tcpHeader4->getLengthField() == 16);
 }
 
 static void testCorrect()
 {
     // 1. chunk is correct after construction
     auto byteCountChunk1 = makeShared<ByteCountChunk>(B(10));
-    assert(byteCountChunk1->isCorrect());
+    ASSERT(byteCountChunk1->isCorrect());
 }
 
 static void testIncorrect()
@@ -244,14 +244,14 @@ static void testIncorrect()
     // 1. chunk is incorrect after marking it incorrect
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     applicationHeader1->markIncorrect();
-    assert(applicationHeader1->isIncorrect());
+    ASSERT(applicationHeader1->isIncorrect());
 }
 
 static void testProperlyRepresented()
 {
     // 1. chunk is proper after construction
     auto byteCountChunk1 = makeShared<ByteCountChunk>(B(10));
-    assert(byteCountChunk1->isProperlyRepresented());
+    ASSERT(byteCountChunk1->isProperlyRepresented());
 }
 
 static void testImproperlyRepresented()
@@ -261,13 +261,13 @@ static void testImproperlyRepresented()
     auto ipHeader1 = makeShared<IpHeader>();
     ipHeader1->markImmutable();
     packet1.append(ipHeader1);
-    assert(ipHeader1->isProperlyRepresented());
+    ASSERT(ipHeader1->isProperlyRepresented());
     auto bytesChunk1 = staticPtrCast<BytesChunk>(packet1.peekAllBytes()->dupShared());
     bytesChunk1->setByte(0, 42);
     bytesChunk1->markImmutable();
     Packet packet2(nullptr, bytesChunk1);
     const auto& ipHeader2 = packet2.peekHeader<IpHeader>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
-    assert(ipHeader2->isImproperlyRepresented());
+    ASSERT(ipHeader2->isImproperlyRepresented());
 }
 
 static void testEmpty()
@@ -284,23 +284,23 @@ static void testHeader()
     Packet packet1;
     packet1.pushHeader(makeImmutableByteCountChunk(B(10)));
     const auto& chunk1 = packet1.peekHeader();
-    assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
     const auto& chunk2 = packet1.peekHeader<ByteCountChunk>();
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet moves header pointer after pop
     const auto& chunk3 = packet1.popHeader<ByteCountChunk>();
-    assert(chunk3 != nullptr);
-    assert(chunk3->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
-    assert(packet1.getHeaderPopOffset() == B(10));
+    ASSERT(chunk3 != nullptr);
+    ASSERT(chunk3->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
+    ASSERT(packet1.getHeaderPopOffset() == B(10));
     packet1.setHeaderPopOffset(B(0));
     packet1.popHeader(B(10));
-    assert(packet1.getHeaderPopOffset() == packet1.getTotalLength());
+    ASSERT(packet1.getHeaderPopOffset() == packet1.getTotalLength());
 
     // 3. packet provides headers in reverse prepend order
     Packet packet2;
@@ -308,14 +308,14 @@ static void testHeader()
     packet2.pushHeader(makeImmutableByteCountChunk(B(10)));
     const auto& chunk4 = packet2.popHeader<ByteCountChunk>();
     const auto& chunk5 = packet2.popHeader<BytesChunk>();
-    assert(chunk4 != nullptr);
-    assert(chunk4->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
-    assert(chunk5 != nullptr);
-    assert(chunk5->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
+    ASSERT(chunk4 != nullptr);
+    ASSERT(chunk4->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
+    ASSERT(chunk5 != nullptr);
+    ASSERT(chunk5->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
     const auto& bytesChunk1 = staticPtrCast<const BytesChunk>(chunk5);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
 
     // 4. packet provides header from bytes
     Packet packet3;
@@ -324,19 +324,19 @@ static void testHeader()
     bytesChunk2->markImmutable();
     packet3.pushHeader(bytesChunk2);
     auto tlvHeader1 = packet3.peekHeader<TlvHeaderInt>();
-    assert(tlvHeader1->getInt16Value() == 42);
+    ASSERT(tlvHeader1->getInt16Value() == 42);
 
     // 5. packet provides mutable headers without duplication if possible
     Packet packet4;
     packet4.pushHeader(makeImmutableBytesChunk(makeVector(10)));
     const auto& chunk6 = packet4.peekHeader<BytesChunk>().get();
     const auto& chunk7 = packet4.removeHeader<BytesChunk>(B(10));
-    assert(chunk7.get() == chunk6);
-    assert(chunk7->isMutable());
-    assert(chunk7->getChunkLength() == B(10));
-    assert(packet4.getTotalLength() == B(0));
+    ASSERT(chunk7.get() == chunk6);
+    ASSERT(chunk7->isMutable());
+    ASSERT(chunk7->getChunkLength() == B(10));
+    ASSERT(packet4.getTotalLength() == B(0));
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk7);
-    assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
+    ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
 static void testTrailer()
@@ -345,23 +345,23 @@ static void testTrailer()
     Packet packet1;
     packet1.pushTrailer(makeImmutableByteCountChunk(B(10)));
     const auto& chunk1 = packet1.peekTrailer();
-    assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
     const auto& chunk2 = packet1.peekTrailer<ByteCountChunk>();
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet moves trailer pointer after pop
     const auto& chunk3 = packet1.popTrailer<ByteCountChunk>();
-    assert(chunk3 != nullptr);
-    assert(chunk3->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
-    assert(packet1.getTrailerPopOffset() == b(0));
+    ASSERT(chunk3 != nullptr);
+    ASSERT(chunk3->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
+    ASSERT(packet1.getTrailerPopOffset() == b(0));
     packet1.setTrailerPopOffset(packet1.getTotalLength());
     packet1.popTrailer(B(10));
-    assert(packet1.getTrailerPopOffset() == b(0));
+    ASSERT(packet1.getTrailerPopOffset() == b(0));
 
     // 3. packet provides trailers in reverse order
     Packet packet2;
@@ -369,14 +369,14 @@ static void testTrailer()
     packet2.pushTrailer(makeImmutableByteCountChunk(B(10)));
     const auto& chunk4 = packet2.popTrailer<ByteCountChunk>();
     const auto& chunk5 = packet2.popTrailer<BytesChunk>();
-    assert(chunk4 != nullptr);
-    assert(chunk4->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
-    assert(chunk5 != nullptr);
-    assert(chunk5->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
+    ASSERT(chunk4 != nullptr);
+    ASSERT(chunk4->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
+    ASSERT(chunk5 != nullptr);
+    ASSERT(chunk5->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
     const auto& bytesChunk1 = staticPtrCast<const BytesChunk>(chunk5);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
 
     // 4. packet provides trailer from bytes but only when length is provided
     Packet packet3;
@@ -386,19 +386,19 @@ static void testTrailer()
     packet3.pushTrailer(bytesChunk2);
     // TODO: ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(), "isForward()");
     auto tlvTrailer1 = packet3.peekTrailer<TlvHeaderInt>(B(4));
-    assert(tlvTrailer1->getInt16Value() == 42);
+    ASSERT(tlvTrailer1->getInt16Value() == 42);
 
     // 5. packet provides mutable trailers without duplication if possible
     Packet packet4;
     packet4.pushTrailer(makeImmutableBytesChunk(makeVector(10)));
     const auto& chunk6 = packet4.peekTrailer<BytesChunk>().get();
     const auto& chunk7 = packet4.removeTrailer<BytesChunk>(B(10));
-    assert(chunk7.get() == chunk6);
-    assert(chunk7->isMutable());
-    assert(chunk7->getChunkLength() == B(10));
-    assert(packet4.getTotalLength() == B(0));
+    ASSERT(chunk7.get() == chunk6);
+    ASSERT(chunk7->isMutable());
+    ASSERT(chunk7->getChunkLength() == B(10));
+    ASSERT(packet4.getTotalLength() == B(0));
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk7);
-    assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
+    ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
 static void testHeaderPopOffset()
@@ -411,16 +411,16 @@ static void testHeaderPopOffset()
     packet1.append(makeImmutableIpHeader());
     packet1.setHeaderPopOffset(B(0));
     const auto& chunk1 = packet1.peekHeader();
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1));
     packet1.setHeaderPopOffset(B(10));
     const auto& chunk2 = packet1.peekHeader();
-    assert(dynamicPtrCast<const BytesChunk>(chunk2));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk2));
     packet1.setHeaderPopOffset(B(20));
     const auto& chunk3 = packet1.peekHeader();
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk3));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk3));
     packet1.setHeaderPopOffset(B(30));
     const auto& chunk4 = packet1.peekHeader();
-    assert(dynamicPtrCast<const IpHeader>(chunk4));
+    ASSERT(dynamicPtrCast<const IpHeader>(chunk4));
     packet1.setHeaderPopOffset(B(50));
     ASSERT_ERROR(packet1.peekHeader(), "empty chunk is not allowed");
 }
@@ -435,16 +435,16 @@ static void testTrailerPopOffset()
     packet1.append(makeImmutableIpHeader());
     packet1.setTrailerPopOffset(B(50));
     const auto& chunk1 = packet1.peekTrailer();
-    assert(dynamicPtrCast<const IpHeader>(chunk1));
+    ASSERT(dynamicPtrCast<const IpHeader>(chunk1));
     packet1.setTrailerPopOffset(B(30));
     const auto& chunk2 = packet1.peekTrailer();
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk2));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2));
     packet1.setTrailerPopOffset(B(20));
     const auto& chunk3 = packet1.peekTrailer();
-    assert(dynamicPtrCast<const BytesChunk>(chunk3));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk3));
     packet1.setTrailerPopOffset(B(10));
     const auto& chunk4 = packet1.peekTrailer();
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk4));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4));
     packet1.setTrailerPopOffset(B(0));
     ASSERT_ERROR(packet1.peekTrailer(), "empty chunk is not allowed");
 }
@@ -464,15 +464,15 @@ static void testEncapsulation()
     const auto& byteCountChunk1 = packet2.peekDataAt(B(0), B(10));
     const auto& bytesChunk1 = packet2.peekDataAt(B(10), B(10));
     const auto& dataChunk1 = packet2.peekDataBytes();
-    assert(ethernetHeader1 != nullptr);
-    assert(ethernetTrailer1 != nullptr);
-    assert(byteCountChunk1 != nullptr);
-    assert(bytesChunk1 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(byteCountChunk1) != nullptr);
-    assert(dynamicPtrCast<const BytesChunk>(bytesChunk1) != nullptr);
-    assert(byteCountChunk1->getChunkLength() == B(10));
-    assert(bytesChunk1->getChunkLength() == B(10));
-    assert(dataChunk1->getChunkLength() == B(20));
+    ASSERT(ethernetHeader1 != nullptr);
+    ASSERT(ethernetTrailer1 != nullptr);
+    ASSERT(byteCountChunk1 != nullptr);
+    ASSERT(bytesChunk1 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(byteCountChunk1) != nullptr);
+    ASSERT(dynamicPtrCast<const BytesChunk>(bytesChunk1) != nullptr);
+    ASSERT(byteCountChunk1->getChunkLength() == B(10));
+    ASSERT(bytesChunk1->getChunkLength() == B(10));
+    ASSERT(dataChunk1->getChunkLength() == B(20));
 }
 
 static void testAggregation()
@@ -490,15 +490,15 @@ static void testAggregation()
     const auto& ipHeader1 = packet3.popHeader<IpHeader>();
     const auto& chunk1 = packet3.peekDataAt(B(0), B(10));
     const auto& chunk2 = packet3.peekDataAt(B(10), B(10));
-    assert(ipHeader1 != nullptr);
-    assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk2) != nullptr);
+    ASSERT(ipHeader1 != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk2) != nullptr);
     const auto& bytesChunk1 = staticPtrCast<const BytesChunk>(chunk2);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
 }
 
 static void testFragmentation()
@@ -515,19 +515,19 @@ static void testFragmentation()
     const auto& fragment1 = packet2.peekDataAt(b(0), packet2.getDataLength());
     const auto& chunk1 = fragment1->peek(B(0), B(3));
     const auto& chunk2 = fragment1->peek(B(3), B(7));
-    assert(packet2.getTotalLength() == B(30));
-    assert(ipHeader1 != nullptr);
-    assert(dynamicPtrCast<const IpHeader>(ipHeader1) != nullptr);
-    assert(fragment1 != nullptr);
-    assert(fragment1->getChunkLength() == B(10));
-    assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == B(3));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(7));
-    assert(dynamicPtrCast<const BytesChunk>(chunk2) != nullptr);
+    ASSERT(packet2.getTotalLength() == B(30));
+    ASSERT(ipHeader1 != nullptr);
+    ASSERT(dynamicPtrCast<const IpHeader>(ipHeader1) != nullptr);
+    ASSERT(fragment1 != nullptr);
+    ASSERT(fragment1->getChunkLength() == B(10));
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->getChunkLength() == B(3));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(7));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk2) != nullptr);
     const auto& bytesChunk1 = staticPtrCast<const BytesChunk>(chunk2);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(7).begin()));
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(7).begin()));
 }
 
 static void testPolymorphism()
@@ -543,32 +543,32 @@ static void testPolymorphism()
     tlvHeader2->markImmutable();
     packet1.append(tlvHeader2);
     const auto& tlvHeader3 = packet1.popHeader<TlvHeader>();
-    assert(tlvHeader3 != nullptr);
-    assert(tlvHeader3->getChunkLength() == B(3));
-    assert(dynamicPtrCast<const TlvHeaderBool>(tlvHeader3) != nullptr);
+    ASSERT(tlvHeader3 != nullptr);
+    ASSERT(tlvHeader3->getChunkLength() == B(3));
+    ASSERT(dynamicPtrCast<const TlvHeaderBool>(tlvHeader3) != nullptr);
     const auto & tlvHeaderBool1 = staticPtrCast<const TlvHeaderBool>(tlvHeader3);
-    assert(tlvHeaderBool1->getBoolValue());
+    ASSERT(tlvHeaderBool1->getBoolValue());
     const auto& tlvHeader4 = packet1.popHeader<TlvHeader>();
-    assert(tlvHeader4 != nullptr);
-    assert(tlvHeader4->getChunkLength() == B(4));
-    assert(dynamicPtrCast<const TlvHeaderInt>(tlvHeader4) != nullptr);
+    ASSERT(tlvHeader4 != nullptr);
+    ASSERT(tlvHeader4->getChunkLength() == B(4));
+    ASSERT(dynamicPtrCast<const TlvHeaderInt>(tlvHeader4) != nullptr);
     const auto & tlvHeaderInt1 = staticPtrCast<const TlvHeaderInt>(tlvHeader4);
-    assert(tlvHeaderInt1->getInt16Value() == 42);
+    ASSERT(tlvHeaderInt1->getInt16Value() == 42);
 
     // 2. packet provides deserialized headers in a polymorphic way after serialization
     Packet packet2(nullptr, packet1.peekAllBytes());
     const auto& tlvHeader5 = packet2.popHeader<TlvHeader>();
-    assert(tlvHeader5 != nullptr);
-    assert(tlvHeader5->getChunkLength() == B(3));
-    assert(dynamicPtrCast<const TlvHeaderBool>(tlvHeader5) != nullptr);
+    ASSERT(tlvHeader5 != nullptr);
+    ASSERT(tlvHeader5->getChunkLength() == B(3));
+    ASSERT(dynamicPtrCast<const TlvHeaderBool>(tlvHeader5) != nullptr);
     const auto & tlvHeaderBool2 = staticPtrCast<const TlvHeaderBool>(tlvHeader5);
-    assert(tlvHeaderBool2->getBoolValue());
+    ASSERT(tlvHeaderBool2->getBoolValue());
     const auto& tlvHeader6 = packet2.popHeader<TlvHeader>();
-    assert(tlvHeader6 != nullptr);
-    assert(tlvHeader6->getChunkLength() == B(4));
-    assert(dynamicPtrCast<const TlvHeaderInt>(tlvHeader6) != nullptr);
+    ASSERT(tlvHeader6 != nullptr);
+    ASSERT(tlvHeader6->getChunkLength() == B(4));
+    ASSERT(dynamicPtrCast<const TlvHeaderInt>(tlvHeader6) != nullptr);
     const auto & tlvHeaderInt2 = staticPtrCast<const TlvHeaderInt>(tlvHeader6);
-    assert(tlvHeaderInt2->getInt16Value() == 42);
+    ASSERT(tlvHeaderInt2->getInt16Value() == 42);
 }
 
 static void testStreaming()
@@ -581,22 +581,22 @@ static void testStreaming()
     outputStreamBits.writeBits(writeBitsVector);
     std::vector<bool> writeBitsData;
     outputStreamBits.copyData(writeBitsData);
-    assert(outputStreamBits.getLength() == b(21));
+    ASSERT(outputStreamBits.getLength() == b(21));
     MemoryInputStream inputStreamBits(outputStreamBits.getData(), outputStreamBits.getLength());
-    assert(inputStreamBits.getLength() == b(21));
-    assert(inputStreamBits.readBit() == true);
-    assert(inputStreamBits.readBitRepeatedly(false, 10));
+    ASSERT(inputStreamBits.getLength() == b(21));
+    ASSERT(inputStreamBits.readBit() == true);
+    ASSERT(inputStreamBits.readBitRepeatedly(false, 10));
     std::vector<bool> readBitsVector;
     inputStreamBits.readBits(readBitsVector, b(10));
-    assert(std::equal(readBitsVector.begin(), readBitsVector.end(), writeBitsVector.begin()));
+    ASSERT(std::equal(readBitsVector.begin(), readBitsVector.end(), writeBitsVector.begin()));
     std::vector<bool> readBitsData;
     inputStreamBits.copyData(readBitsData);
-    assert(std::equal(readBitsData.begin(), readBitsData.end(), writeBitsData.begin()));
-    assert(!inputStreamBits.isReadBeyondEnd());
-    assert(inputStreamBits.getRemainingLength() == b(0));
+    ASSERT(std::equal(readBitsData.begin(), readBitsData.end(), writeBitsData.begin()));
+    ASSERT(!inputStreamBits.isReadBeyondEnd());
+    ASSERT(inputStreamBits.getRemainingLength() == b(0));
     inputStreamBits.readBit();
-    assert(inputStreamBits.isReadBeyondEnd());
-    assert(inputStreamBits.getRemainingLength() == B(0));
+    ASSERT(inputStreamBits.isReadBeyondEnd());
+    ASSERT(inputStreamBits.getRemainingLength() == B(0));
 
     // 2. bytes
     MemoryOutputStream outputStreamBytes;
@@ -608,25 +608,25 @@ static void testStreaming()
     outputStreamBytes.writeBytes(writeBytesBuffer, B(10));
     std::vector<bool> writeBytesData;
     outputStreamBytes.copyData(writeBytesData);
-    assert(outputStreamBytes.getLength() == B(31));
+    ASSERT(outputStreamBytes.getLength() == B(31));
     MemoryInputStream inputStreamBytes(outputStreamBytes.getData());
-    assert(inputStreamBytes.getLength() == B(31));
-    assert(inputStreamBytes.readByte() == 42);
-    assert(inputStreamBytes.readByteRepeatedly(21, 10));
+    ASSERT(inputStreamBytes.getLength() == B(31));
+    ASSERT(inputStreamBytes.readByte() == 42);
+    ASSERT(inputStreamBytes.readByteRepeatedly(21, 10));
     std::vector<uint8_t> readBytesVector;
     inputStreamBytes.readBytes(readBytesVector, B(10));
-    assert(std::equal(readBytesVector.begin(), readBytesVector.end(), writeBytesVector.begin()));
+    ASSERT(std::equal(readBytesVector.begin(), readBytesVector.end(), writeBytesVector.begin()));
     uint8_t readBytesBuffer[10];
     inputStreamBytes.readBytes(readBytesBuffer, B(10));
-    assert(!memcmp(writeBytesBuffer, readBytesBuffer, 10));
+    ASSERT(!memcmp(writeBytesBuffer, readBytesBuffer, 10));
     std::vector<bool> readBytesData;
     inputStreamBytes.copyData(readBytesData);
-    assert(std::equal(readBytesData.begin(), readBytesData.end(), writeBytesData.begin()));
-    assert(!inputStreamBytes.isReadBeyondEnd());
-    assert(inputStreamBytes.getRemainingLength() == B(0));
+    ASSERT(std::equal(readBytesData.begin(), readBytesData.end(), writeBytesData.begin()));
+    ASSERT(!inputStreamBytes.isReadBeyondEnd());
+    ASSERT(inputStreamBytes.getRemainingLength() == B(0));
     inputStreamBytes.readByte();
-    assert(inputStreamBytes.isReadBeyondEnd());
-    assert(inputStreamBytes.getRemainingLength() == B(0));
+    ASSERT(inputStreamBytes.isReadBeyondEnd());
+    ASSERT(inputStreamBytes.getRemainingLength() == B(0));
 
     // 3. bit-byte conversion
     MemoryOutputStream outputStreamConversion;
@@ -635,71 +635,71 @@ static void testStreaming()
     MemoryInputStream inputStreamConversion(outputStreamConversion.getData());
     std::vector<uint8_t> data;
     inputStreamConversion.readBytes(data, B(2));
-    assert(data[0] == 0x0F);
-    assert(data[1] == 0xF0);
+    ASSERT(data[0] == 0x0F);
+    ASSERT(data[1] == 0xF0);
 
     // 4. uint8_t
     uint64_t uint8 = 0x42;
     MemoryOutputStream outputStream1;
     outputStream1.writeUint8(uint8);
     MemoryInputStream inputStream1(outputStream1.getData());
-    assert(inputStream1.readUint8() == uint8);
-    assert(!inputStream1.isReadBeyondEnd());
-    assert(inputStream1.getRemainingLength() == b(0));
+    ASSERT(inputStream1.readUint8() == uint8);
+    ASSERT(!inputStream1.isReadBeyondEnd());
+    ASSERT(inputStream1.getRemainingLength() == b(0));
 
     // 5. uint16_t
     uint64_t uint16 = 0x4242;
     MemoryOutputStream outputStream2;
     outputStream2.writeUint16Be(uint16);
     MemoryInputStream inputStream2(outputStream2.getData());
-    assert(inputStream2.readUint16Be() == uint16);
-    assert(!inputStream2.isReadBeyondEnd());
-    assert(inputStream2.getRemainingLength() == b(0));
+    ASSERT(inputStream2.readUint16Be() == uint16);
+    ASSERT(!inputStream2.isReadBeyondEnd());
+    ASSERT(inputStream2.getRemainingLength() == b(0));
 
     // 6. uint32_t
     uint64_t uint32 = 0x42424242;
     MemoryOutputStream outputStream3;
     outputStream3.writeUint32Be(uint32);
     MemoryInputStream inputStream3(outputStream3.getData());
-    assert(inputStream3.readUint32Be() == uint32);
-    assert(!inputStream3.isReadBeyondEnd());
-    assert(inputStream3.getRemainingLength() == b(0));
+    ASSERT(inputStream3.readUint32Be() == uint32);
+    ASSERT(!inputStream3.isReadBeyondEnd());
+    ASSERT(inputStream3.getRemainingLength() == b(0));
 
     // 7. uint64_t
     uint64_t uint64 = 0x4242424242424242L;
     MemoryOutputStream outputStream4;
     outputStream4.writeUint64Be(uint64);
     MemoryInputStream inputStream4(outputStream4.getData());
-    assert(inputStream4.readUint64Be() == uint64);
-    assert(!inputStream4.isReadBeyondEnd());
-    assert(inputStream4.getRemainingLength() == b(0));
+    ASSERT(inputStream4.readUint64Be() == uint64);
+    ASSERT(!inputStream4.isReadBeyondEnd());
+    ASSERT(inputStream4.getRemainingLength() == b(0));
 
     // 8. MACAddress
     MACAddress macAddress("0A:AA:01:02:03:04");
     MemoryOutputStream outputStream5;
     outputStream5.writeMACAddress(macAddress);
     MemoryInputStream inputStream5(outputStream5.getData());
-    assert(inputStream5.readMACAddress() ==macAddress);
-    assert(!inputStream5.isReadBeyondEnd());
-    assert(inputStream5.getRemainingLength() == b(0));
+    ASSERT(inputStream5.readMACAddress() ==macAddress);
+    ASSERT(!inputStream5.isReadBeyondEnd());
+    ASSERT(inputStream5.getRemainingLength() == b(0));
 
     // 9. IPv4Address
     IPv4Address ipv4Address("192.168.10.1");
     MemoryOutputStream outputStream6;
     outputStream6.writeIPv4Address(ipv4Address);
     MemoryInputStream inputStream6(outputStream6.getData());
-    assert(inputStream6.readIPv4Address() == ipv4Address);
-    assert(!inputStream6.isReadBeyondEnd());
-    assert(inputStream6.getRemainingLength() == b(0));
+    ASSERT(inputStream6.readIPv4Address() == ipv4Address);
+    ASSERT(!inputStream6.isReadBeyondEnd());
+    ASSERT(inputStream6.getRemainingLength() == b(0));
 
     // 10. IPv6Address
     IPv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
     MemoryOutputStream outputStream7;
     outputStream7.writeIPv6Address(ipv6Address);
     MemoryInputStream inputStream7(outputStream7.getData());
-    assert(inputStream7.readIPv6Address() == ipv6Address);
-    assert(!inputStream7.isReadBeyondEnd());
-    assert(inputStream7.getRemainingLength() == b(0));
+    ASSERT(inputStream7.readIPv6Address() == ipv6Address);
+    ASSERT(!inputStream7.isReadBeyondEnd());
+    ASSERT(inputStream7.getRemainingLength() == b(0));
 }
 
 static void testSerialization()
@@ -710,36 +710,36 @@ static void testSerialization()
     auto totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
     auto size = stream1.getLength();
-    assert(size != B(0));
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    ASSERT(size != B(0));
+    ASSERT(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
     totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
-    assert(stream1.getLength() == size * 2);
-    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
+    ASSERT(stream1.getLength() == size * 2);
+    ASSERT(totalSerializedLength == ChunkSerializer::totalSerializedLength);
 
     // 2. serialized bytes is cached after deserialization
     MemoryInputStream stream2(stream1.getData());
     auto totalDeserializedLength = ChunkSerializer::totalDeserializedLength;
     const auto& chunk1 = Chunk::deserialize(stream2, typeid(ApplicationHeader));
-    assert(chunk1 != nullptr);
-    assert(B(chunk1->getChunkLength()) == B(size));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(B(chunk1->getChunkLength()) == B(size));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
     auto applicationHeader2 = staticPtrCast<ApplicationHeader>(chunk1);
-    assert(totalDeserializedLength + size == ChunkSerializer::totalDeserializedLength);
+    ASSERT(totalDeserializedLength + size == ChunkSerializer::totalDeserializedLength);
     totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader2);
-    assert(stream1.getLength() == size * 3);
-    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
+    ASSERT(stream1.getLength() == size * 3);
+    ASSERT(totalSerializedLength == ChunkSerializer::totalSerializedLength);
 
     // 3. serialized bytes is deleted after change
     applicationHeader1->setSomeData(42);
     totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    ASSERT(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
     applicationHeader2->setSomeData(42);
     totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader2);
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    ASSERT(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
 }
 
 static void testConversion()
@@ -767,12 +767,12 @@ static void testIteration()
     int index1 = 0;
     auto chunk1 = packet1.popHeader();
     while (chunk1 != nullptr) {
-        assert(chunk1 != nullptr);
-        assert(chunk1->getChunkLength() == B(10));
+        ASSERT(chunk1 != nullptr);
+        ASSERT(chunk1->getChunkLength() == B(10));
         index1++;
         chunk1 = packet1.popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
-    assert(index1 == 3);
+    ASSERT(index1 == 3);
 
     // 2. SequenceChunk optimizes forward iteration to indexing
     auto sequenceChunk1 = makeShared<SequenceChunk>();
@@ -783,18 +783,18 @@ static void testIteration()
     int index2 = 0;
     auto iterator2 = Chunk::ForwardIterator(b(0), 0);
     auto chunk2 = sequenceChunk1->peek(iterator2);
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
     while (chunk2 != nullptr) {
-        assert(iterator2.getIndex() == index2);
-        assert(iterator2.getPosition() == B(index2 * 10));
-        assert(chunk2 != nullptr);
-        assert(chunk2->getChunkLength() == B(10));
+        ASSERT(iterator2.getIndex() == index2);
+        ASSERT(iterator2.getPosition() == B(index2 * 10));
+        ASSERT(chunk2 != nullptr);
+        ASSERT(chunk2->getChunkLength() == B(10));
         index2++;
         if (chunk2 != nullptr)
             sequenceChunk1->moveIterator(iterator2, chunk2->getChunkLength());
         chunk2 = sequenceChunk1->peek(iterator2, b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
-    assert(index2 == 3);
+    ASSERT(index2 == 3);
 
     // 3. SequenceChunk optimizes backward iteration to indexing
     auto sequenceChunk2 = makeShared<SequenceChunk>();
@@ -805,18 +805,18 @@ static void testIteration()
     int index3 = 0;
     auto iterator3 = Chunk::BackwardIterator(b(0), 0);
     auto chunk3 = sequenceChunk1->peek(iterator3);
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk3) != nullptr);
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk3) != nullptr);
     while (chunk3 != nullptr) {
-        assert(iterator3.getIndex() == index3);
-        assert(iterator3.getPosition() == B(index3 * 10));
-        assert(chunk3 != nullptr);
-        assert(chunk3->getChunkLength() == B(10));
+        ASSERT(iterator3.getIndex() == index3);
+        ASSERT(iterator3.getPosition() == B(index3 * 10));
+        ASSERT(chunk3 != nullptr);
+        ASSERT(chunk3->getChunkLength() == B(10));
         index3++;
         if (chunk3 != nullptr)
             sequenceChunk1->moveIterator(iterator3, chunk3->getChunkLength());
         chunk3 = sequenceChunk1->peek(iterator3, b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
-    assert(index2 == 3);
+    ASSERT(index2 == 3);
 }
 
 static void testCorruption()
@@ -843,9 +843,9 @@ static void testCorruption()
         packet2.append(clone);
         chunk = packet1.popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
-    assert(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isCorrect());
-    assert(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
-    assert(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isCorrect());
+    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
 }
 
 static void testDuplication()
@@ -855,8 +855,8 @@ static void testDuplication()
     const Ptr<ByteCountChunk> byteCountChunk1 = makeImmutableByteCountChunk(B(10));
     packet1.append(byteCountChunk1);
     auto packet2 = packet1.dup();
-    assert(packet2->getTotalLength() == B(10));
-    assert(byteCountChunk1.use_count() == 3); // 1 here + 2 in the packets
+    ASSERT(packet2->getTotalLength() == B(10));
+    ASSERT(byteCountChunk1.use_count() == 3); // 1 here + 2 in the packets
     delete packet2;
 }
 
@@ -867,21 +867,21 @@ static void testDuality()
     packet1.append(makeImmutableApplicationHeader(42));
     const auto& applicationHeader1 = packet1.peekHeader<ApplicationHeader>();
     const auto& bytesChunk1 = packet1.peekHeader<BytesChunk>(B(10));
-    assert(applicationHeader1 != nullptr);
-    assert(applicationHeader1->getChunkLength() == B(10));
-    assert(bytesChunk1 != nullptr);
-    assert(bytesChunk1->getChunkLength() == B(10));
+    ASSERT(applicationHeader1 != nullptr);
+    ASSERT(applicationHeader1->getChunkLength() == B(10));
+    ASSERT(bytesChunk1 != nullptr);
+    ASSERT(bytesChunk1->getChunkLength() == B(10));
 
     // 2. packet provides header in both fields and bytes representation after serialization
     Packet packet2(nullptr, packet1.peekAllBytes());
     const auto& applicationHeader2 = packet2.peekHeader<ApplicationHeader>();
     const auto& bytesChunk2 = packet2.peekHeader<BytesChunk>(B(10));
-    assert(applicationHeader2 != nullptr);
-    assert(applicationHeader2->getChunkLength() == B(10));
-    assert(bytesChunk2 != nullptr);
-    assert(bytesChunk2->getChunkLength() == B(10));
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), bytesChunk1->getBytes().begin()));
-    assert(applicationHeader2->getSomeData() == applicationHeader2->getSomeData());
+    ASSERT(applicationHeader2 != nullptr);
+    ASSERT(applicationHeader2->getChunkLength() == B(10));
+    ASSERT(bytesChunk2 != nullptr);
+    ASSERT(bytesChunk2->getChunkLength() == B(10));
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), bytesChunk1->getBytes().begin()));
+    ASSERT(applicationHeader2->getSomeData() == applicationHeader2->getSomeData());
 }
 
 static void testMerging()
@@ -893,14 +893,14 @@ static void testMerging()
     packet2.append(packet1.peekAt(B(0), B(5)));
     packet2.append(packet1.peekAt(B(5), B(5)));
     const auto& chunk1 = packet2.peekHeader();
-    assert(chunk1 != nullptr);
-    assert(chunk1->isComplete());
-    assert(chunk1->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->isComplete());
+    ASSERT(chunk1->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
     const auto& chunk2 = packet2.peekHeader<ApplicationHeader>();
-    assert(chunk2->isComplete());
-    assert(chunk2->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
+    ASSERT(chunk2->isComplete());
+    ASSERT(chunk2->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
 
     // 2. packet provides compacts ByteCountChunks
     Packet packet3;
@@ -908,12 +908,12 @@ static void testMerging()
     packet3.append(makeImmutableByteCountChunk(B(5)));
     const auto& chunk3 = packet3.peekAt(b(0), packet3.getTotalLength());
     const auto& chunk4 = packet3.peekAt<ByteCountChunk>(b(0), packet3.getTotalLength());
-    assert(chunk3 != nullptr);
-    assert(chunk3->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
-    assert(chunk4 != nullptr);
-    assert(chunk4->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
+    ASSERT(chunk3 != nullptr);
+    ASSERT(chunk3->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
+    ASSERT(chunk4 != nullptr);
+    ASSERT(chunk4->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
 
     // 2. packet provides compacts ByteChunks
     Packet packet4;
@@ -921,16 +921,16 @@ static void testMerging()
     packet4.append(makeImmutableBytesChunk(makeVector(5)));
     const auto& chunk5 = packet4.peekAt(b(0), packet4.getTotalLength());
     const auto& chunk6 = packet4.peekAllBytes();
-    assert(chunk5 != nullptr);
-    assert(chunk5->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
+    ASSERT(chunk5 != nullptr);
+    ASSERT(chunk5->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
     const auto& bytesChunk1 = staticPtrCast<const BytesChunk>(chunk5);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 0, 1, 2, 3, 4}).begin()));
-    assert(chunk6 != nullptr);
-    assert(chunk6->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk6) != nullptr);
+    ASSERT(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 0, 1, 2, 3, 4}).begin()));
+    ASSERT(chunk6 != nullptr);
+    ASSERT(chunk6->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk6) != nullptr);
     const auto& bytesChunk2 = staticPtrCast<const BytesChunk>(chunk6);
-    assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 0, 1, 2, 3, 4}).begin()));
+    ASSERT(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 0, 1, 2, 3, 4}).begin()));
 }
 
 static void testSlicing()
@@ -939,39 +939,39 @@ static void testSlicing()
     auto byteCountChunk1 = makeImmutableByteCountChunk(B(10));
     const auto& chunk1 = byteCountChunk1->peek(B(0), B(10));
     const auto& chunk2 = byteCountChunk1->peek(B(0), B(5));
-    assert(chunk1 == byteCountChunk1);
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
+    ASSERT(chunk1 == byteCountChunk1);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. BytesChunk always returns BytesChunk
     auto bytesChunk1 = makeImmutableBytesChunk(makeVector(10));
     const auto& chunk3 = bytesChunk1->peek(B(0), B(10));
     const auto& chunk4 = bytesChunk1->peek(B(0), B(5));
-    assert(chunk3 != nullptr);
-    assert(chunk3->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk3) != nullptr);
+    ASSERT(chunk3 != nullptr);
+    ASSERT(chunk3->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk3) != nullptr);
     const auto& bytesChunk2 = staticPtrCast<const BytesChunk>(chunk3);
-    assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
-    assert(chunk4 != nullptr);
-    assert(chunk4->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
+    ASSERT(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
+    ASSERT(chunk4 != nullptr);
+    ASSERT(chunk4->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
     const auto& bytesChunk3 = staticPtrCast<const BytesChunk>(chunk4);
-    assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(5).begin()));
+    ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(5).begin()));
 
     // 3a. SliceChunk returns a SliceChunk containing the requested slice of the chunk that is used by the original SliceChunk
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     auto sliceChunk1 = makeShared<SliceChunk>(applicationHeader1, b(0), B(10));
     sliceChunk1->markImmutable();
     const auto& chunk5 = sliceChunk1->peek(B(5), B(5));
-    assert(chunk5 != nullptr);
-    assert(chunk5->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const SliceChunk>(chunk5) != nullptr);
+    ASSERT(chunk5 != nullptr);
+    ASSERT(chunk5->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk5) != nullptr);
     auto sliceChunk2 = staticPtrCast<const SliceChunk>(chunk5);
-    assert(sliceChunk2->getChunk() == sliceChunk1->getChunk());
-    assert(sliceChunk2->getOffset() == B(5));
-    assert(sliceChunk2->getLength() == B(5));
+    ASSERT(sliceChunk2->getChunk() == sliceChunk1->getChunk());
+    ASSERT(sliceChunk2->getOffset() == B(5));
+    ASSERT(sliceChunk2->getLength() == B(5));
 
     // 4a. SequenceChunk may return an element chunk
     auto sequenceChunk1 = makeShared<SequenceChunk>();
@@ -982,49 +982,49 @@ static void testSlicing()
     const auto& chunk6 = sequenceChunk1->peek(B(0), B(10));
     const auto& chunk7 = sequenceChunk1->peek(B(10), B(10));
     const auto& chunk8 = sequenceChunk1->peek(B(20), B(10));
-    assert(chunk6 != nullptr);
-    assert(chunk6->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk6) != nullptr);
-    assert(chunk7 != nullptr);
-    assert(chunk7->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const BytesChunk>(chunk7) != nullptr);
-    assert(chunk8 != nullptr);
-    assert(chunk8->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk8) != nullptr);
+    ASSERT(chunk6 != nullptr);
+    ASSERT(chunk6->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk6) != nullptr);
+    ASSERT(chunk7 != nullptr);
+    ASSERT(chunk7->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk7) != nullptr);
+    ASSERT(chunk8 != nullptr);
+    ASSERT(chunk8->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk8) != nullptr);
 
     // 4b. SequenceChunk may return a (simplified) SliceChunk of an element chunk
     const auto& chunk9 = sequenceChunk1->peek(B(0), B(5));
     const auto& chunk10 = sequenceChunk1->peek(B(15), B(5));
     const auto& chunk11 = sequenceChunk1->peek(B(20), B(5));
-    assert(chunk9 != nullptr);
-    assert(chunk9->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk9) != nullptr);
-    assert(chunk10 != nullptr);
-    assert(chunk10->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const BytesChunk>(chunk10) != nullptr);
-    assert(chunk11 != nullptr);
-    assert(chunk11->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const SliceChunk>(chunk11) != nullptr);
+    ASSERT(chunk9 != nullptr);
+    ASSERT(chunk9->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk9) != nullptr);
+    ASSERT(chunk10 != nullptr);
+    ASSERT(chunk10->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk10) != nullptr);
+    ASSERT(chunk11 != nullptr);
+    ASSERT(chunk11->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk11) != nullptr);
 
     // 4c. SequenceChunk may return a new SequenceChunk
     const auto& chunk12 = sequenceChunk1->peek(B(5), B(10));
-    assert(chunk12 != nullptr);
-    assert(chunk12->getChunkLength() == B(10));
-    assert(dynamicPtrCast<const SequenceChunk>(chunk12) != nullptr);
+    ASSERT(chunk12 != nullptr);
+    ASSERT(chunk12->getChunkLength() == B(10));
+    ASSERT(dynamicPtrCast<const SequenceChunk>(chunk12) != nullptr);
     const auto& sequenceChunk2 = staticPtrCast<const SequenceChunk>(chunk12);
-    assert(sequenceChunk1 != sequenceChunk2);
-    assert(sequenceChunk2->getChunks().size() == 2);
+    ASSERT(sequenceChunk1 != sequenceChunk2);
+    ASSERT(sequenceChunk2->getChunks().size() == 2);
 
     // 5. any other chunk returns a SliceChunk
     auto applicationHeader2 = makeImmutableApplicationHeader(42);
     const auto& chunk13 = applicationHeader2->peek(B(0), B(5));
-    assert(chunk13 != nullptr);
-    assert(chunk13->getChunkLength() == B(5));
-    assert(dynamicPtrCast<const SliceChunk>(chunk13) != nullptr);
+    ASSERT(chunk13 != nullptr);
+    ASSERT(chunk13->getChunkLength() == B(5));
+    ASSERT(dynamicPtrCast<const SliceChunk>(chunk13) != nullptr);
     const auto& sliceChunk4 = dynamicPtrCast<const SliceChunk>(chunk13);
-    assert(sliceChunk4->getChunk() == applicationHeader2);
-    assert(sliceChunk4->getOffset() == b(0));
-    assert(sliceChunk4->getLength() == B(5));
+    ASSERT(sliceChunk4->getChunk() == applicationHeader2);
+    ASSERT(sliceChunk4->getOffset() == b(0));
+    ASSERT(sliceChunk4->getLength() == B(5));
 }
 
 static void testNesting()
@@ -1038,16 +1038,16 @@ static void testNesting()
     compoundHeader1->markImmutable();
     packet1.append(compoundHeader1);
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>(compoundHeader1->getChunkLength());
-    assert(compoundHeader2 != nullptr);
+    ASSERT(compoundHeader2 != nullptr);
 
     // 2. packet provides compound header after serialization
     Packet packet2(nullptr, packet1.peekAllBytes());
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
-    assert(compoundHeader3 != nullptr);
+    ASSERT(compoundHeader3 != nullptr);
     auto it = Chunk::ForwardIterator(b(0), 0);
     const auto& ipHeader2 = compoundHeader3->Chunk::peek<IpHeader>(it);
-    assert(ipHeader2 != nullptr);
-    assert(ipHeader2->getProtocol() == Protocol::Tcp);
+    ASSERT(ipHeader2 != nullptr);
+    ASSERT(ipHeader2->getProtocol() == Protocol::Tcp);
 }
 
 static void testPeeking()
@@ -1059,12 +1059,12 @@ static void testPeeking()
     packet1.append(makeImmutableByteCountChunk(B(10)));
     const auto& chunk1 = packet1.popHeader(B(15));
     const auto& chunk2 = packet1.popHeader(B(15));
-    assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == B(15));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == B(15));
-    assert(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
+    ASSERT(chunk1 != nullptr);
+    ASSERT(chunk1->getChunkLength() == B(15));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
+    ASSERT(chunk2 != nullptr);
+    ASSERT(chunk2->getChunkLength() == B(15));
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet provides BytesChunks by default if it contains a BytesChunk only
     Packet packet2;
@@ -1073,12 +1073,12 @@ static void testPeeking()
     packet2.append(makeImmutableBytesChunk(makeVector(10)));
     const auto& chunk3 = packet2.popHeader(B(15));
     const auto& chunk4 = packet2.popHeader(B(15));
-    assert(chunk3 != nullptr);
-    assert(chunk3->getChunkLength() == B(15));
-    assert(dynamicPtrCast<const BytesChunk>(chunk3) != nullptr);
-    assert(chunk4 != nullptr);
-    assert(chunk4->getChunkLength() == B(15));
-    assert(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
+    ASSERT(chunk3 != nullptr);
+    ASSERT(chunk3->getChunkLength() == B(15));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk3) != nullptr);
+    ASSERT(chunk4 != nullptr);
+    ASSERT(chunk4->getChunkLength() == B(15));
+    ASSERT(dynamicPtrCast<const BytesChunk>(chunk4) != nullptr);
 }
 
 static void testSequence()
@@ -1089,14 +1089,14 @@ static void testSequence()
     sequenceChunk1->insertAtEnd(applicationHeader1->peek(B(0), B(5)));
     sequenceChunk1->insertAtEnd(applicationHeader1->peek(B(5), B(5)));
     const auto& chunk1 = sequenceChunk1->peek(b(0));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
 
     // 2. sequence merges mutable slices
     auto sequenceChunk2 = makeShared<SequenceChunk>();
     sequenceChunk2->insertAtEnd(makeShared<SliceChunk>(applicationHeader1, B(0), B(5)));
     sequenceChunk2->insertAtEnd(makeShared<SliceChunk>(applicationHeader1, B(5), B(5)));
     const auto& chunk2 = sequenceChunk2->peek(b(0));
-    assert(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
+    ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
 }
 
 static void testChunkQueue()
@@ -1109,8 +1109,8 @@ static void testChunkQueue()
     queue1.push(byteCountChunk1);
     const auto& byteCountChunk2 = dynamicPtrCast<const ByteCountChunk>(queue1.pop(B(15)));
     const auto& byteCountChunk3 = dynamicPtrCast<const ByteCountChunk>(queue1.pop(B(15)));
-    assert(byteCountChunk2 != nullptr);
-    assert(byteCountChunk3 != nullptr);
+    ASSERT(byteCountChunk2 != nullptr);
+    ASSERT(byteCountChunk3 != nullptr);
 
     // 2. queue provides BytesChunks by default if it contains a BytesChunk only
     ChunkQueue queue2;
@@ -1120,18 +1120,18 @@ static void testChunkQueue()
     queue2.push(bytesChunk1);
     const auto& bytesChunk2 = dynamicPtrCast<const BytesChunk>(queue2.pop(B(15)));
     const auto& bytesChunk3 = dynamicPtrCast<const BytesChunk>(queue2.pop(B(15)));
-    assert(bytesChunk2 != nullptr);
-    assert(bytesChunk3 != nullptr);
+    ASSERT(bytesChunk2 != nullptr);
+    ASSERT(bytesChunk3 != nullptr);
 
     // 3. queue provides reassembled header
     ChunkQueue queue3;
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     queue3.push(applicationHeader1->peek(B(0), B(5)));
     queue3.push(applicationHeader1->peek(B(5), B(5)));
-    assert(queue3.has<ApplicationHeader>());
+    ASSERT(queue3.has<ApplicationHeader>());
     const auto& applicationHeader2 = queue3.pop<ApplicationHeader>();
-    assert(applicationHeader2 != nullptr);
-    assert(applicationHeader2->getSomeData() == 42);
+    ASSERT(applicationHeader2 != nullptr);
+    ASSERT(applicationHeader2->getSomeData() == 42);
 }
 
 static void testChunkBuffer()
@@ -1140,17 +1140,17 @@ static void testChunkBuffer()
     ChunkBuffer buffer1;
     auto byteCountChunk1 = makeImmutableByteCountChunk(B(10));
     buffer1.replace(b(0), byteCountChunk1);
-    assert(buffer1.getNumRegions() == 1);
-    assert(buffer1.getRegionData(0) != nullptr);
+    ASSERT(buffer1.getNumRegions() == 1);
+    ASSERT(buffer1.getRegionData(0) != nullptr);
 
     // 2. consecutive chunks
     ChunkBuffer buffer2;
     buffer2.replace(B(0), byteCountChunk1);
     buffer2.replace(B(10), byteCountChunk1);
     const auto& byteCountChunk2 = dynamicPtrCast<const ByteCountChunk>(buffer2.getRegionData(0));
-    assert(buffer2.getNumRegions() == 1);
-    assert(byteCountChunk2 != nullptr);
-    assert(byteCountChunk2->getChunkLength() == B(20));
+    ASSERT(buffer2.getNumRegions() == 1);
+    ASSERT(byteCountChunk2 != nullptr);
+    ASSERT(byteCountChunk2->getChunkLength() == B(20));
 
     // 3. consecutive slice chunks
     ChunkBuffer buffer3;
@@ -1158,9 +1158,9 @@ static void testChunkBuffer()
     buffer3.replace(B(0), applicationHeader1->peek(B(0), B(5)));
     buffer3.replace(B(5), applicationHeader1->peek(B(5), B(5)));
     const auto& applicationHeader2 = dynamicPtrCast<const ApplicationHeader>(buffer3.getRegionData(0));
-    assert(buffer3.getNumRegions() == 1);
-    assert(applicationHeader2 != nullptr);
-    assert(applicationHeader2->getSomeData() == 42);
+    ASSERT(buffer3.getNumRegions() == 1);
+    ASSERT(applicationHeader2 != nullptr);
+    ASSERT(applicationHeader2->getSomeData() == 42);
 
     // 4. out of order consecutive chunks
     ChunkBuffer buffer4;
@@ -1168,9 +1168,9 @@ static void testChunkBuffer()
     buffer4.replace(B(20), byteCountChunk1);
     buffer4.replace(B(10), byteCountChunk1);
     const auto& byteCountChunk3 = dynamicPtrCast<const ByteCountChunk>(buffer4.getRegionData(0));
-    assert(buffer4.getNumRegions() == 1);
-    assert(byteCountChunk3 != nullptr);
-    assert(byteCountChunk3->getChunkLength() == B(30));
+    ASSERT(buffer4.getNumRegions() == 1);
+    ASSERT(byteCountChunk3 != nullptr);
+    ASSERT(byteCountChunk3->getChunkLength() == B(30));
 
     // 5. out of order consecutive slice chunks
     ChunkBuffer buffer5;
@@ -1178,17 +1178,17 @@ static void testChunkBuffer()
     buffer5.replace(B(7), applicationHeader1->peek(B(7), B(3)));
     buffer5.replace(B(3), applicationHeader1->peek(B(3), B(4)));
     const auto& applicationHeader3 = dynamicPtrCast<const ApplicationHeader>(buffer5.getRegionData(0));
-    assert(buffer5.getNumRegions() == 1);
-    assert(applicationHeader3 != nullptr);
-    assert(applicationHeader3->getSomeData() == 42);
+    ASSERT(buffer5.getNumRegions() == 1);
+    ASSERT(applicationHeader3 != nullptr);
+    ASSERT(applicationHeader3->getSomeData() == 42);
 
     // 6. heterogeneous chunks
     ChunkBuffer buffer6;
     auto byteArrayChunk1 = makeImmutableBytesChunk(makeVector(10));
     buffer6.replace(B(0), byteCountChunk1);
     buffer6.replace(B(10), byteArrayChunk1);
-    assert(buffer6.getNumRegions() == 1);
-    assert(buffer6.getRegionData(0) != nullptr);
+    ASSERT(buffer6.getNumRegions() == 1);
+    ASSERT(buffer6.getRegionData(0) != nullptr);
 
     // 7. completely overwriting a chunk
     ChunkBuffer buffer7;
@@ -1196,26 +1196,26 @@ static void testChunkBuffer()
     buffer7.replace(B(1), byteCountChunk4);
     buffer7.replace(B(0), byteArrayChunk1);
     const auto& bytesChunk1 = dynamicPtrCast<const BytesChunk>(buffer7.getRegionData(0));
-    assert(buffer7.getNumRegions() == 1);
-    assert(bytesChunk1 != nullptr);
+    ASSERT(buffer7.getNumRegions() == 1);
+    ASSERT(bytesChunk1 != nullptr);
 
     // 8. partially overwriting multiple chunks
     ChunkBuffer buffer8;
     buffer8.replace(B(0), byteCountChunk1);
     buffer8.replace(B(10), byteCountChunk1);
     buffer8.replace(B(3), byteArrayChunk1);
-    assert(buffer8.getNumRegions() == 1);
+    ASSERT(buffer8.getNumRegions() == 1);
     const auto& sequenceChunk1 = dynamicPtrCast<const SequenceChunk>(buffer8.getRegionData(0));
-    assert(sequenceChunk1 != nullptr);
+    ASSERT(sequenceChunk1 != nullptr);
     const auto& byteCountChunk5 = dynamicPtrCast<const ByteCountChunk>(sequenceChunk1->peek(B(0), B(3)));
-    assert(byteCountChunk5 != nullptr);
-    assert(byteCountChunk5->getChunkLength() == B(3));
+    ASSERT(byteCountChunk5 != nullptr);
+    ASSERT(byteCountChunk5->getChunkLength() == B(3));
     const auto& byteCountChunk6 = dynamicPtrCast<const ByteCountChunk>(sequenceChunk1->peek(B(13), B(7)));
-    assert(byteCountChunk6 != nullptr);
-    assert(byteCountChunk6->getChunkLength() == B(7));
+    ASSERT(byteCountChunk6 != nullptr);
+    ASSERT(byteCountChunk6->getChunkLength() == B(7));
     const auto& bytesChunk2 = dynamicPtrCast<const BytesChunk>(sequenceChunk1->peek(B(3), B(10)));
-    assert(bytesChunk2 != nullptr);
-    assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
+    ASSERT(bytesChunk2 != nullptr);
+    ASSERT(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
 
     // 9. random test
     bool debug = false;
@@ -1261,13 +1261,13 @@ static void testChunkBuffer()
             auto data = dynamicPtrCast<const BytesChunk>(buffer9.getRegionData(i));
             auto startOffset = B(buffer9.getRegionStartOffset(i));
             for (B j = previousEndOffset; j < startOffset; j++)
-                assert(*(buffer10 + j.get()) == -1);
+                ASSERT(*(buffer10 + j.get()) == -1);
             for (B j = B(0); j < B(data->getChunkLength()); j++)
-                assert(data->getByte(j.get()) == *(buffer10 + startOffset.get() + j.get()));
+                ASSERT(data->getByte(j.get()) == *(buffer10 + startOffset.get() + j.get()));
             previousEndOffset = startOffset + data->getChunkLength();
         }
         for (B j = previousEndOffset; j < bufferSize; j++)
-            assert(*(buffer10 + j.get()) == -1);
+            ASSERT(*(buffer10 + j.get()) == -1);
     }
     delete [] buffer10;
 }
@@ -1278,35 +1278,35 @@ static void testReassemblyBuffer()
     ReassemblyBuffer buffer1(B(10));
     auto byteCountChunk1 = makeImmutableByteCountChunk(B(10));
     buffer1.replace(b(0), byteCountChunk1);
-    assert(buffer1.isComplete());
+    ASSERT(buffer1.isComplete());
     const auto& data1 = buffer1.getReassembledData();
-    assert(data1 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data1) != nullptr);
-    assert(data1->getChunkLength() == B(10));
+    ASSERT(data1 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data1) != nullptr);
+    ASSERT(data1->getChunkLength() == B(10));
 
     // 2. consecutive chunks
     ReassemblyBuffer buffer2(B(20));
     buffer2.replace(b(0), byteCountChunk1);
-    assert(!buffer2.isComplete());
+    ASSERT(!buffer2.isComplete());
     buffer2.replace(B(10), byteCountChunk1);
-    assert(buffer2.isComplete());
+    ASSERT(buffer2.isComplete());
     const auto& data2 = buffer2.getReassembledData();
-    assert(data2 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data2) != nullptr);
-    assert(data2->getChunkLength() == B(20));
+    ASSERT(data2 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data2) != nullptr);
+    ASSERT(data2->getChunkLength() == B(20));
 
     // 3. out of order consecutive chunks
     ReassemblyBuffer buffer3(B(30));
     buffer3.replace(b(0), byteCountChunk1);
-    assert(!buffer3.isComplete());
+    ASSERT(!buffer3.isComplete());
     buffer3.replace(B(20), byteCountChunk1);
-    assert(!buffer3.isComplete());
+    ASSERT(!buffer3.isComplete());
     buffer3.replace(B(10), byteCountChunk1);
-    assert(buffer3.isComplete());
+    ASSERT(buffer3.isComplete());
     const auto& data3 = buffer3.getReassembledData();
-    assert(data3 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data3) != nullptr);
-    assert(data3->getChunkLength() == B(30));
+    ASSERT(data3 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data3) != nullptr);
+    ASSERT(data3->getChunkLength() == B(30));
 }
 
 static void testReorderBuffer()
@@ -1316,32 +1316,32 @@ static void testReorderBuffer()
     auto byteCountChunk1 = makeImmutableByteCountChunk(B(10));
     buffer1.replace(B(1000), byteCountChunk1);
     const auto& data1 = buffer1.popAvailableData();
-    assert(data1 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data1) != nullptr);
-    assert(data1->getChunkLength() == B(10));
-    assert(buffer1.getExpectedOffset() == B(1010));
+    ASSERT(data1 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data1) != nullptr);
+    ASSERT(data1->getChunkLength() == B(10));
+    ASSERT(buffer1.getExpectedOffset() == B(1010));
 
     // 2. consecutive chunks
     ReorderBuffer buffer2(B(1000));
     buffer2.replace(B(1000), byteCountChunk1);
     buffer2.replace(B(1010), byteCountChunk1);
     const auto& data2 = buffer2.popAvailableData();
-    assert(data2 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data2) != nullptr);
-    assert(data2->getChunkLength() == B(20));
-    assert(buffer2.getExpectedOffset() == B(1020));
+    ASSERT(data2 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data2) != nullptr);
+    ASSERT(data2->getChunkLength() == B(20));
+    ASSERT(buffer2.getExpectedOffset() == B(1020));
 
     // 3. out of order consecutive chunks
     ReorderBuffer buffer3(B(1000));
     buffer3.replace(B(1020), byteCountChunk1);
-    assert(buffer2.popAvailableData() == nullptr);
+    ASSERT(buffer2.popAvailableData() == nullptr);
     buffer3.replace(B(1000), byteCountChunk1);
     buffer3.replace(B(1010), byteCountChunk1);
     const auto& data3 = buffer3.popAvailableData();
-    assert(data3 != nullptr);
-    assert(dynamicPtrCast<const ByteCountChunk>(data3) != nullptr);
-    assert(data3->getChunkLength() == B(30));
-    assert(buffer3.getExpectedOffset() == B(1030));
+    ASSERT(data3 != nullptr);
+    ASSERT(dynamicPtrCast<const ByteCountChunk>(data3) != nullptr);
+    ASSERT(data3->getChunkLength() == B(30));
+    ASSERT(buffer3.getExpectedOffset() == B(1030));
 }
 
 void UnitTest::initialize()
