@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
@@ -33,6 +34,7 @@ void RecipientQoSMacDataService::initialize()
     duplicateRemoval = new QoSDuplicateRemoval();
     basicReassembly = new BasicReassembly();
     aMsduDeaggregation = new MsduDeaggregation();
+    aMpduDeaggregation = new MpduDeaggregation();
     blockAckReordering = new BlockAckReordering();
 }
 
@@ -176,6 +178,7 @@ RecipientQoSMacDataService::~RecipientQoSMacDataService()
     delete duplicateRemoval;
     delete basicReassembly;
     delete aMsduDeaggregation;
+    delete aMpduDeaggregation;
     delete blockAckReordering;
 }
 

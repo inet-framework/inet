@@ -21,6 +21,7 @@
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/contract/IMpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSMacDataService.h"
@@ -36,7 +37,7 @@ class INET_API RecipientQoSMacDataService : public IRecipientQoSMacDataService, 
     protected:
         IReassembly *basicReassembly = nullptr;
 
-        // AMpduDeaggregation *aMpduDeaggregation = nullptr;
+        IMpduDeaggregation *aMpduDeaggregation = nullptr;
         // MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
         // Address1Filtering *address1Filtering = nullptr;
         IDuplicateRemoval *duplicateRemoval = nullptr;
