@@ -175,6 +175,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
+                delete packet;
             }
             else {
                 packetCopy = packet;
@@ -229,6 +230,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 nbDataPacketsForwarded++;
                 nbPureUnicastForwarded++;
             }
+            delete packet;
         }
         if (pCtrlInfo != nullptr)
             delete pCtrlInfo;
