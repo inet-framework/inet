@@ -46,6 +46,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
 
   protected:
     NetworkProtocolBase();
+    virtual ~NetworkProtocolBase() { for (auto entry : socketIdToSocketDescriptor) delete entry.second; }
 
     virtual void initialize(int stage) override;
 
