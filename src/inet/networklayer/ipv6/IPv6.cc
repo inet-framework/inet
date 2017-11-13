@@ -781,7 +781,7 @@ void IPv6::encapsulate(Packet *transportPacket)
 
     ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
-    ipv6Header->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv6Header->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
     auto extHeadersTag = transportPacket->removeTag<IPv6ExtHeaderReq>();

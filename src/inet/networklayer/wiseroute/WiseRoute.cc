@@ -262,7 +262,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();

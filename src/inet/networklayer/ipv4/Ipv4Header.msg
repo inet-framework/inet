@@ -185,7 +185,7 @@ class Ipv4Header extends NetworkHeaderBase
     uint16_t crc = 0;
     CrcMode crcMode = (CrcMode)-1;
 
-    int protocolId  @override @enum(IPProtocolId) = IP_PROT_NONE;
+    IPProtocolId protocolId @override = IP_PROT_NONE;
     short timeToLive;
     int identification;
     bool moreFragments;

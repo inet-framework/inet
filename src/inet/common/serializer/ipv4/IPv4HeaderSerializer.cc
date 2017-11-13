@@ -161,7 +161,7 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv4Header->setHeaderLength(IP_HEADER_BYTES);
     ipv4Header->setSrcAddress(IPv4Address(ntohl(iphdr.ip_src.s_addr)));
     ipv4Header->setDestAddress(IPv4Address(ntohl(iphdr.ip_dst.s_addr)));
-    ipv4Header->setProtocolId(iphdr.ip_p);
+    ipv4Header->setProtocolId((IPProtocolId)iphdr.ip_p);
     ipv4Header->setTimeToLive(iphdr.ip_ttl);
     ipv4Header->setIdentification(ntohs(iphdr.ip_id));
     uint16_t ip_off = ntohs(iphdr.ip_off);

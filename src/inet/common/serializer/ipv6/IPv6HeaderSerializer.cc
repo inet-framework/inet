@@ -134,7 +134,7 @@ const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
     flowinfo >>= 20;
     dest->setTrafficClass(flowinfo & 0xFF);
 
-    dest->setProtocolId(ip6h.ip6_nxt);
+    dest->setProtocolId((IPProtocolId)ip6h.ip6_nxt);
     dest->setHopLimit(ntohs(ip6h.ip6_hlim));
 
     IPv6Address temp;

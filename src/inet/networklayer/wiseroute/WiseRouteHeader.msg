@@ -29,7 +29,7 @@ class WiseRouteHeader extends NetworkHeaderBase
     unsigned long seqNum = 0;
     int     isFlood;
     int     nbHops;
-    int     protocolId @override = -1;
+    IPProtocolId     protocolId @override = (IPProtocolId)-1;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
 }

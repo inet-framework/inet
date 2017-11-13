@@ -134,7 +134,7 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
     virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader&);

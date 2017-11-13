@@ -104,7 +104,7 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv4()); }
     virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

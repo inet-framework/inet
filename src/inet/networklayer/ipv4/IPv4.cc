@@ -915,7 +915,7 @@ void IPv4::encapsulate(Packet *transportPacket)
     IPv4Address dest = l3AddressReq->getDestAddress().toIPv4();
     delete l3AddressReq;
 
-    ipv4Header->setProtocolId(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv4Header->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
