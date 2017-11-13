@@ -1110,6 +1110,7 @@ void TCP_NSC::process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCom
 
     sendDataToApp(connP);
     sendErrorNotificationToApp(connP, err);
+    delete tcpCommandP;
 }
 
 void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, Packet *msgP)
