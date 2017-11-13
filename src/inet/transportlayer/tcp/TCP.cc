@@ -120,7 +120,7 @@ void TCP::initialize(int stage)
                 ipv4->registerHook(0, &crcInsertion);
 #endif
 #ifdef WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
+            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
