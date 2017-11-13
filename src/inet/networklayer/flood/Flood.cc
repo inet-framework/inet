@@ -198,6 +198,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 setDownControlInfo(packetCopy, MACAddress::BROADCAST_ADDRESS);
                 sendDown(packetCopy);
                 nbDataPacketsForwarded++;
+                delete packet;
             }
             else {
                 //max hops reached -> delete
