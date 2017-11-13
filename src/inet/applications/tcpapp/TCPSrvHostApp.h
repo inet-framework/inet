@@ -58,6 +58,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     virtual void crash();
 
   public:
+    virtual ~TCPSrvHostApp() { socketMap.deleteSockets(); }
     virtual void removeThread(TCPServerThreadBase *thread);
 };
 
