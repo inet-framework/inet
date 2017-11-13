@@ -108,7 +108,7 @@ class Sack extends SackItem
 // Header Options (optional):
 class TCPOption extends cObject
 {
-    unsigned short kind @enum(TCPOptionNumbers) = -1;  // option kind
+    TCPOptionNumbers kind = (TCPOptionNumbers)-1;  // option kind
     unsigned short length = 1;                    // option length
 }
 
@@ -161,7 +161,7 @@ class TCPOptionTimestamp extends TCPOption
 
 class TCPOptionUnknown extends TCPOption
 {
-    kind = -1;
+    kind = (TCPOptionNumbers)-1;
     uint8_t bytes[];
 }
 

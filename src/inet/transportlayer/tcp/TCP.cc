@@ -178,6 +178,8 @@ bool TCP::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
             return true;
         case CRC_DECLARED_INCORRECT:
             return false;
+        default:
+            break;
     }
     throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }

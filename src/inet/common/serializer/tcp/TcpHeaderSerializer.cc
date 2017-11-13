@@ -87,7 +87,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPOption *option) const
 {
-    unsigned short kind = option->getKind();
+    TCPOptionNumbers kind = option->getKind();
     unsigned short length = option->getLength();    // length >= 1
 
     stream.writeByte(kind);
@@ -203,7 +203,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 
 TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
-    unsigned char kind = stream.readByte();
+    TCPOptionNumbers kind = (TCPOptionNumbers)stream.readByte();
     unsigned char length = 0;
 
     switch (kind) {
