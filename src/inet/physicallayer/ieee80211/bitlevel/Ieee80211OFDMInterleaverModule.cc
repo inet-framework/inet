@@ -40,6 +40,7 @@ std::ostream& Ieee80211OFDMInterleaverModule::printToStream(std::ostream& stream
 
 Ieee80211OFDMInterleaverModule::~Ieee80211OFDMInterleaverModule()
 {
+    delete interleaver->getInterleaving();
     delete interleaver;
 }
 } /* namespace physicallayer */

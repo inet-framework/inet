@@ -385,7 +385,9 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     delete dataFieldSymbolModel;
     delete signalFieldBitModel;
     delete dataFieldBitModel;
+    delete signalFieldPacketModel->getPacket();
     delete signalFieldPacketModel;
+    delete dataFieldPacketModel->getPacket();
     delete dataFieldPacketModel;
 
     auto packet = const_cast<Packet *>(packetModel->getPacket());
@@ -397,7 +399,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     modeInd->setMode(transmission->getMode());
     auto channelInd = packet->ensureTag<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
-    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *Ieee80211LayeredOFDMReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

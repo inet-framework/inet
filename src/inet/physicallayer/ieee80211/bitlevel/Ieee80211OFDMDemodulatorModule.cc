@@ -41,6 +41,7 @@ const IReceptionBitModel *Ieee80211OFDMDemodulatorModule::demodulate(const IRece
 
 Ieee80211OFDMDemodulatorModule::~Ieee80211OFDMDemodulatorModule()
 {
+    delete ofdmDemodulator->getModulation();
     delete ofdmDemodulator;
 }
 } /* namespace physicallayer */

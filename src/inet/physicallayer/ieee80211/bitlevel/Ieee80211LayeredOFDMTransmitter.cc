@@ -74,6 +74,10 @@ void Ieee80211LayeredOFDMTransmitter::initialize(int stage)
         else
             throw cRuntimeError("Unknown level of detail='%s'", levelOfDetailStr);
     }
+    else if (stage == INITSTAGE_LAST) {
+        if (!isCompliant)
+            mode = computeMode(bandwidth);
+    }
 }
 
 std::ostream& Ieee80211LayeredOFDMTransmitter::printToStream(std::ostream& stream, int level) const
@@ -188,6 +192,7 @@ void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacke
         else
             throw cRuntimeError("Modulator needs bit representation");
     }
+    delete fieldPacketModel->getPacket();
     delete fieldPacketModel;
 }
 
@@ -299,10 +304,8 @@ const Ieee80211OfdmMode *Ieee80211LayeredOFDMTransmitter::getMode(const Packet* 
     auto modeReq = const_cast<Packet*>(packet)->getTag<Ieee80211ModeReq>();
     if (isCompliant)
         return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode*>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
-    else if (mode)
-        return mode;
     else
-        return computeMode(bandwidth);
+        return mode;
 }
 
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const

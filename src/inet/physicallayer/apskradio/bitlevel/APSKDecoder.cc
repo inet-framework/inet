@@ -92,6 +92,7 @@ const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitMo
         bitsChunk->markImmutable();
         packet = new Packet(nullptr, bitsChunk);
     }
+    delete decodedBits;
     packet->setBitError(hasBitError);
     return new ReceptionPacketModel(packet, bps(NaN));
 }

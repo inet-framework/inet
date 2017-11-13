@@ -94,6 +94,7 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVe
         bitsChunk->markImmutable();
         packet = new Packet(nullptr, bitsChunk);
     }
+    delete decodedBits;
     packet->setBitError(hasBitError);
     return new ReceptionPacketModel(packet, bps(NaN));
 }
