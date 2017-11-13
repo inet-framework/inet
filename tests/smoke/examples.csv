@@ -230,7 +230,6 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0
-/examples/ipv6/fragmentation/,       -f omnetpp.ini -c General -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0
