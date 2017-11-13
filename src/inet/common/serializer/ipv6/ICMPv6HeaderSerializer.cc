@@ -36,6 +36,9 @@ Register_Serializer(Icmpv6PacketTooBigMsg, ICMPv6HeaderSerializer);
 Register_Serializer(Icmpv6ParamProblemMsg, ICMPv6HeaderSerializer);
 Register_Serializer(Icmpv6TimeExceededMsg, ICMPv6HeaderSerializer);
 Register_Serializer(Ipv6NeighbourSolicitation, ICMPv6HeaderSerializer);
+Register_Serializer(IPv6NeighbourAdvertisement, ICMPv6HeaderSerializer);
+Register_Serializer(IPv6RouterSolicitation, ICMPv6HeaderSerializer);
+Register_Serializer(IPv6RouterAdvertisement, ICMPv6HeaderSerializer);
 
 void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -90,6 +93,36 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
                 ASSERT(1 + 1 + MAC_ADDRESS_SIZE == 8);
             }
             break;
+        }
+
+        case ICMPv6_NEIGHBOUR_AD: {
+            auto frame = check_and_cast<const Ipv6NeighbourSolicitation *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
+            // TODO: incomplete
+            break;
+        }
+
+        case ICMPv6_ROUTER_SOL: {
+            auto frame = check_and_cast<const IPv6RouterSolicitation *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
+            stream.writeMACAddress(frame->getSourceLinkLayerAddress());
+            // TODO: incomplete
+            break;
+        }
+
+        case ICMPv6_ROUTER_AD: {
+            auto frame = check_and_cast<const IPv6RouterAdvertisement *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
+            // TODO: incomplete
         }
 
         default:
@@ -153,6 +186,34 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
                     neighbourSol->setSourceLinkLayerAddress(stream.readMACAddress());     // sourceLinkLayerAddress
                 }
             }
+            break;
+        }
+
+        case ICMPv6_NEIGHBOUR_AD: {
+            auto neighbourAd = makeShared<IPv6NeighbourAdvertisement>(); icmpv6Header = neighbourAd;
+            neighbourAd->setType(type);
+            neighbourAd->setCode(subcode);
+            stream.readUint32Be(); // reserved
+            // TODO: incomplete
+            break;
+        }
+
+        case ICMPv6_ROUTER_SOL: {
+            auto routerSol = makeShared<IPv6RouterSolicitation>(); icmpv6Header = routerSol;
+            routerSol->setType(type);
+            routerSol->setCode(subcode);
+            stream.readUint32Be(); // reserved
+            routerSol->setSourceLinkLayerAddress(stream.readMACAddress());
+            // TODO: incomplete
+            break;
+        }
+
+        case ICMPv6_ROUTER_AD: {
+            auto routerAd = makeShared<IPv6RouterAdvertisement>(); icmpv6Header = routerAd;
+            routerAd->setType(type);
+            routerAd->setCode(subcode);
+            stream.readUint32Be(); // reserved
+            // TODO: incomplete
             break;
         }
 
