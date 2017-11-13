@@ -22,8 +22,6 @@ cplusplus{{
 #include "inet/transportlayer/rtp/sdes.h"
 }}
 
-class cArray;
-
 namespace inet;
 
 namespace inet::rtp;

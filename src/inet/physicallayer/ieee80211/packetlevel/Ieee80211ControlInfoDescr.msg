@@ -15,10 +15,12 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ControlInfo;
+import inet.physicallayer.contract.packetlevel.RadioControlInfo;
+
 cplusplus {{
-#include "inet/common/Units.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 }}
@@ -26,14 +28,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class noncobject bps;
-
-class noncobject Ieee80211ChannelPtr;
-
-class ConfigureRadioCommand extends cObject;
-class Ieee80211ModeSet extends cObject;
-class IIeee80211Band extends cObject;
-class IIeee80211Mode extends cObject;
+class Ieee80211ChannelPtr { @existingClass; @descriptor(false); }
 
 //
 // Control info attached to a configure command that is sent to the ~Radio.
@@ -41,6 +36,7 @@ class IIeee80211Mode extends cObject;
 class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
     @existingClass;
+    @overwritePreviousDefinition;
     string opMode;                         // new default operation mode or "" if not set.
     Ieee80211ModeSet *modeSet = nullptr; // new default mode set or nullptr if not set.
     IIeee80211Mode *mode = nullptr;      // new default transmission mode or nullptr if not set.
@@ -48,3 +44,4 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     Ieee80211ChannelPtr channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }
+

@@ -15,7 +15,7 @@ namespace inet::rtp;
 // Represents an RTP sender report as contained
 // in an ~RTCPSenderReportPacket.
 //
-class SenderReport
+class SenderReport extends cObject
 {
     @customize(true);
 
@@ -36,7 +36,7 @@ class SenderReport
 // Rrepresents an RTP receiver report stored
 // in an RTPSenderReportPacket or RTPReceiverReport.
 //
-class ReceptionReport
+class ReceptionReport extends cObject
 {
     @customize(true);
 
@@ -62,3 +62,4 @@ class ReceptionReport
     // received in units of 1/65536 seconds.
     int delaySinceLastSR;
 };
+

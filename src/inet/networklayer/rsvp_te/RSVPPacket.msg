@@ -30,17 +30,6 @@ cplusplus {{
 
 namespace inet;
 
-struct SessionObj_t;
-struct RsvpHopObj_t;
-struct SenderTemplateObj_t;
-struct SenderTspecObj_t;
-struct FlowSpecObj_t;
-struct FilterSpecObj_t;
-struct LabelRequestObj_t;
-struct SenderDescriptor_t;
-struct FlowDescriptor_t;
-struct EroObj_t;
-
 //
 // RSVP message common part
 //

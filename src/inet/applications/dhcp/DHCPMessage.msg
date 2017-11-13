@@ -68,7 +68,8 @@ enum DHCPOptionCode
 //
 // @see DHCPMessage, DHCPClient, DHCPServer
 //
-class DHCPOptions {
+class DHCPOptions extends cObject
+{
     int messageType @enum(DHCPMessageType); // to convey the type of the DHCP message
     string hostName; // name of the client
     int parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters

@@ -34,7 +34,7 @@ cplusplus {{
 typedef std::vector<L3Address> AddressVector;
 }}
 
-class noncobject AddressVector;
+class AddressVector { @existingClass; }
 
 //
 // Currently not in use.
@@ -227,3 +227,4 @@ class SCTPSimpleMessage extends FieldsChunk
     simtime_t creationTime = 0;
     bool encaps = false;
 }
+

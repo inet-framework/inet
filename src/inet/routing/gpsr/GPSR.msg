@@ -30,7 +30,15 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject GPSRForwardingMode;
+enum GPSRForwardingMode {
+    GPSR_GREEDY_ROUTING = 1;
+    GPSR_PERIMETER_ROUTING = 2;
+};
+
+enum GPSRPlanarizationMode {
+    GPSR_GG_PLANARIZATION = 0;
+    GPSR_RNG_PLANARIZATION = 1;
+};
 
 //
 // The GPSR beacon packet is sent periodically by all GPSR routers to notify

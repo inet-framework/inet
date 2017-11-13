@@ -15,15 +15,9 @@
 
 import inet.common.INETDefs;
 import inet.linklayer.base.MacHeaderBase;
-
-cplusplus {{
-#include "inet/networklayer/rsvp_te/RSVPPacket.h"
-}}
+import inet.networklayer.rsvp_te.RSVPPacket;
 
 namespace inet;
-
-class RSVPMessage extends cObject;
-
 
 //
 // FIXME missing documentation
@@ -39,3 +33,4 @@ class RSVPHelloMsg extends RSVPMessage
 
     rsvpKind = HELLO_MESSAGE;
 }
+

@@ -31,7 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader* eh) {retu
 #endif
 }}
 
-class IPv6ExtHeaderTagBase
+class IPv6ExtHeaderTagBase extends cObject
 {
     @customize(true);
     abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag

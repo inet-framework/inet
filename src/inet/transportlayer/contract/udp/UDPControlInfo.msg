@@ -57,7 +57,7 @@ enum UDPStatusInd
 //
 // @see ~UDPCommandCode
 //
-class UDPControlInfo
+class UDPControlInfo extends cObject
 {
 }
 

@@ -20,7 +20,7 @@ namespace inet;
 //
 // MPLS label
 //
-class MplsLabel
+class MplsLabel extends cObject
 {
     long Label;     // @bit(20)  Label value. A label with the value of 1 represents the router alert label.
     short tc;       // @bit(3)   Traffic Class field for QoS (quality of service) priority and ECN (Explicit Congestion Notification). Prior to 2009 this field was called EXP.

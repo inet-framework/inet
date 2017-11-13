@@ -24,7 +24,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class noncobject IModulation;
+class IModulation { @existingClass; @descriptor(false); }
 
 //
 // Message kinds for sending commands to the radio.
@@ -37,7 +37,7 @@ enum RadioCommandCode
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
-class ConfigureRadioCommand
+class ConfigureRadioCommand extends cObject
 {
     int radioMode = -1;                  // new radio mode or -1 if not set.
     W power = W(NaN);                    // new default transmission power in the range (0, +infinity) or NaN if not set.

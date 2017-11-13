@@ -32,18 +32,18 @@ enum Ieee802MessageKind
 }
 
 
-class Ieee802RegisterDsapCommand
+class Ieee802RegisterDsapCommand extends cObject
 {
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
 }
 
-class Ieee802DeregisterDsapCommand
+class Ieee802DeregisterDsapCommand extends cObject
 {
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
 }
 
 // used with IEEE802CTRL_SENDPAUSE
-class Ieee802PauseCommand
+class Ieee802PauseCommand extends cObject
 {
     MACAddress destinationAddress;
     int pauseUnits;

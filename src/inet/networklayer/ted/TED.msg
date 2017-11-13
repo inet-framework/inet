@@ -49,7 +49,7 @@ struct TELinkStateInfo
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.
 //
-class TEDChangeInfo
+class TEDChangeInfo extends cObject
 {
     int tedLinkIndices[];
 }

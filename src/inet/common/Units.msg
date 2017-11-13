@@ -16,11 +16,11 @@ using namespace units::values;
 
 namespace inet::units::values;
 
-class b extends void { @existingClass; @byvalue; }
-class B extends void { @existingClass; @byvalue; }
-class bps extends void { @existingClass; @byvalue; }
-class Hz extends void { @existingClass; @byvalue; }
-class m extends void { @existingClass; @byvalue; }
-class Ohmm extends void { @existingClass; @byvalue; }
-class W extends void { @existingClass; @byvalue; }
+class b { @existingClass; @byvalue; }
+class B { @existingClass; @byvalue; }
+class bps { @existingClass; @byvalue; }
+class Hz { @existingClass; @byvalue; }
+class m { @existingClass; @byvalue; }
+class Ohmm { @existingClass; @byvalue; }
+class W { @existingClass; @byvalue; }
 

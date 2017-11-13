@@ -19,7 +19,7 @@ import inet.common.INETDefs;
 
 namespace inet;
 
-class L3SocketCommand
+class L3SocketCommand extends cObject
 {
 }
 

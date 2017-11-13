@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
@@ -29,16 +30,16 @@ class ChunkQueue extends cNamedObject
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit length;
+    b length;
     Chunk* contents @getter(getContents);
 }
 
-class ChunkBuffer::Region extends void
+class ChunkBuffer::Region
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit startOffset;
-    bit endOffset;
+    b startOffset;
+    b endOffset;
     Chunk* data @getter(getData);
 }
 
@@ -53,9 +54,9 @@ packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit totalLength;
-    bit headerPoppedLength;
-    bit dataLength;
-    bit trailerPoppedLength;
+    b totalLength;
+    b headerPoppedLength;
+    b dataLength;
+    b trailerPoppedLength;
     Chunk* contents @packetData @getter(getContents);
 }

@@ -594,7 +594,7 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
 {
     EV_INFO << "refresh reservation (RSB " << rsbEle->id << ")" << endl;
 
-    IPAddressVector phops;
+    IPv4AddressVector phops;
 
     for (auto & elem : PSBList) {
         if (elem.OutInterface != rsbEle->OI)

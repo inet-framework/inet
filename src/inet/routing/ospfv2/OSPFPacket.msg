@@ -90,7 +90,7 @@ enum LSAType
 //
 // Represents an OSPF LSA header
 //
-class OSPFLSAHeader
+class OSPFLSAHeader extends cObject
 {
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
@@ -104,7 +104,7 @@ class OSPFLSAHeader
 //
 // common ancestor type for all LSAs
 //
-class OSPFLSA
+class OSPFLSA extends cObject
 {
     OSPFLSAHeader header;
 }
@@ -123,7 +123,7 @@ struct TOSData
     unsigned char tosMetric[3];
 }
 
-class Link
+class Link extends cObject
 {
     IPv4Address linkID;
     unsigned long linkData = 0;
@@ -175,7 +175,7 @@ struct ExternalTOSInfo
 //
 // Represents the contents of an OSPF AS External LSA
 //
-class OSPFASExternalLSAContents
+class OSPFASExternalLSAContents extends cObject
 {
     IPv4Address networkMask;
     bool E_ExternalMetricType = false;

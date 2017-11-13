@@ -21,7 +21,6 @@ import inet.common.INETDefs;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv6.IPv6Address;
-import inet.networklayer.ipv6.IPv6Header;
 
 cplusplus {{
 #include <iostream>
@@ -40,7 +39,7 @@ const int IPv6_HEADER_BYTES = 40;
 //
 // This serves as the base class for all the IPv6 extension headers.
 //
-class Ipv6ExtensionHeader
+class Ipv6ExtensionHeader extends cObject
 {
     short extensionType;
     short byteLength = 0;   // byteLength = n * 8;

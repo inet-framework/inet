@@ -192,7 +192,7 @@ int TED::assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr)
     return vertices.size() - 1;
 }
 
-IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
+IPv4AddressVector TED::calculateShortestPath(IPv4AddressVector dest,
         const TELinkStateInfoVector& topology, double req_bandwidth, int priority)
 {
     // FIXME comment: what do we do here?
@@ -213,7 +213,7 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
         minIndex = i;
     }
 
-    IPAddressVector result;
+    IPv4AddressVector result;
 
     if (minIndex < 0)
         return result;
@@ -463,7 +463,7 @@ void TED::updateTimestamp(TELinkStateInfo *link)
     link->messageId = ++maxMessageId;
 }
 
-IPAddressVector TED::getLocalAddress()
+IPv4AddressVector TED::getLocalAddress()
 {
     return interfaceAddrs;
 }

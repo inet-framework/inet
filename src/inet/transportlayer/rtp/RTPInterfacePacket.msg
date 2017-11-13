@@ -24,10 +24,6 @@ import inet.transportlayer.rtp.RTPSenderStatusMessage;
 
 namespace inet::rtp;
 
-enum RTPSenderControlMessageCommands;
-
-enum RTPSenderStatus;
-
 //
 // An enumeration to distinguish the different functions of the
 // RTPInterfacePacket.
@@ -57,7 +53,7 @@ message RTPControlMsg
 };
 
 // base class
-class RTPControlInfo
+class RTPControlInfo extends cObject
 {
     short type @enum(RTP_IFP_TYPE);
 };

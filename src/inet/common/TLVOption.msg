@@ -22,7 +22,7 @@ import inet.common.INETDefs;
 
 namespace inet;
 
-class TLVOptionBase
+class TLVOptionBase extends cObject
 {
     short type = -1;
     short length = 0;   // total length of option
@@ -33,7 +33,7 @@ class TLVOptionRaw extends TLVOptionBase
     char bytes[];
 }
 
-class TLVOptions
+class TLVOptions extends cObject
 {
     @customize(true);
     abstract TLVOptionBase tlvOption[];

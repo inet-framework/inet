@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 
 cplusplus {{
 #include "inet/common/packet/chunk/BitsChunk.h"
@@ -36,7 +37,7 @@ class Chunk extends cObject
     bool complete @packetData(false) @getter("isComplete");
     bool correct @packetData(false) @getter("isCorrect");
     bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
-    bit chunkLength @packetData(false);
+    b chunkLength @packetData(false);
     string bits[] @getter("getBitsAsString");
     string bytes[] @getter("getBytesAsString");
 }
@@ -64,8 +65,8 @@ class SliceChunk extends Chunk
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit offset;
-    bit length;
+    b offset;
+    b length;
     Chunk* chunk @getter(_getChunk);
 }
 

@@ -19,10 +19,6 @@ cplusplus {{
 #include "inet/common/queue/PacketQueue.h"
 }}
 
-namespace omnetpp;
-
-class cPacketQueue extends cOwnedObject;
-
 namespace inet;
 
 class PacketQueue extends cPacketQueue
@@ -32,3 +28,4 @@ class PacketQueue extends cPacketQueue
     int maxPacketLength;
     int64_t maxBitLength;
 }
+

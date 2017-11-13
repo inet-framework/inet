@@ -25,7 +25,7 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject BitVector;
+class BitVector { @existingClass; }
 
 namespace inet::ieee80211;
 

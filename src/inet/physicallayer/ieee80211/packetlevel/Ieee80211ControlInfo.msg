@@ -115,12 +115,11 @@ class Ieee80211ModeSet extends cObject
     int cwMax @editable(false);
 }
 
-class noncobject IIeee80211ModePtr;
-class noncobject Ieee80211ModeSetPtr;
-class noncobject IIeee80211ModePtr;
-class noncobject IIeee80211BandPtr_;
-class noncobject Ieee80211ChannelPtr_;
-class noncobject ConfigureRadioCommand;
+class IIeee80211ModePtr { @existingClass; @descriptor(false); }
+class Ieee80211ModeSetPtr { @existingClass; @descriptor(false); }
+class IIeee80211BandPtr_ { @existingClass; @descriptor(false); }
+class Ieee80211ChannelPtr_ { @existingClass; @descriptor(false); }
+
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
@@ -134,3 +133,4 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     Ieee80211ChannelPtr_ channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }
+

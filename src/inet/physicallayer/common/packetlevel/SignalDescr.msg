@@ -26,10 +26,10 @@ typedef const IListening ConstIListening;
 typedef const IReception ConstIReception;
 }}
 
-class ConstITransmission extends void;
-class ConstIArrival extends void;
-class ConstIListening extends void;
-class ConstIReception extends void;
+class ConstITransmission { @existingClass; @descriptor(false); }
+class ConstIArrival { @existingClass; @descriptor(false); }
+class ConstIListening { @existingClass; @descriptor(false); }
+class ConstIReception { @existingClass; @descriptor(false); }
 
 packet Signal
 {

@@ -26,19 +26,19 @@ cplusplus {{
 namespace inet::physicallayer;
 
 cplusplus {{
-typedef const IIeee80211Mode * IIeee80211ModePtr;
-typedef const Ieee80211Channel * Ieee80211ChannelPtr;
+typedef const IIeee80211Mode ConstIIeee80211Mode;
+typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class noncobject IIeee80211ModePtr;
-class noncobject Ieee80211ChannelPtr;
+class ConstIIeee80211Mode { @existingClass; @descriptor(false); }
+class ConstIeee80211Channel { @existingClass; @descriptor(false); }
 
 //
 // This is an abstract base class that should not be directly added as a tag.
 //
 class Ieee80211ModeTagBase extends TagBase
 {
-    IIeee80211ModePtr mode = nullptr; // IEEE 802.11 transmission mode
+    ConstIIeee80211Mode *mode = nullptr; // IEEE 802.11 transmission mode
 }
 
 //
@@ -62,7 +62,7 @@ class Ieee80211ModeInd extends Ieee80211ModeTagBase
 //
 class Ieee80211ChannelTagBase extends TagBase
 {
-    Ieee80211ChannelPtr channel = nullptr; // IEEE 802.11 band and channel
+    ConstIeee80211Channel *channel = nullptr; // IEEE 802.11 band and channel
 }
 
 //

@@ -31,7 +31,7 @@ enum BgpConstants{
 //
 // Represents a BGPv4 AS_PATH path attribute (RFC 4271 Section 4.3)
 //
-class BGPASPathSegment
+class BGPASPathSegment extends cObject
 {
     unsigned char type @enum(BGPPathSegmentType);
     unsigned char length;
@@ -142,7 +142,7 @@ struct BGPUpdateAttributeType
     unsigned char typeCode @enum(BGPUpdateAttributeTypeCode);
 }
 
-class BGPUpdatePathAttributes
+class BGPUpdatePathAttributes extends cObject
 {
     BGPUpdateAttributeType type; // 2 octets
     unsigned short length; // 2 octets
@@ -200,7 +200,7 @@ struct BGPUpdateNLRI
 // Represents the list of path attributes in a BGPv4 UPDATE message.
 // See RFC 4271, section 4.3
 //
-class BGPUpdatePathAttributeList
+class BGPUpdatePathAttributeList extends cObject
 {
     BGPUpdatePathAttributesOrigin origin; // mandatory attribute
     BGPUpdatePathAttributesASPath asPath[]; // mandatory attribute

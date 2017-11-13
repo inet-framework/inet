@@ -55,7 +55,7 @@ enum PIMHelloOptionType
    AddressList = 24;
 }
 
-class HelloOption
+class HelloOption extends cObject
 {
     short type @enum(PIMHelloOptionType);
 }
@@ -100,7 +100,7 @@ struct EncodedAddress
 
 // Record for Join/Prune message
 // in structure it is not possible to use dynamic arrays, iit is needed to use class
-class JoinPruneGroup
+class JoinPruneGroup extends cObject
 {
     IPv4Address     groupAddress;
     EncodedAddress     joinedSourceAddress[];

@@ -87,7 +87,7 @@ enum TCPErrorCode
 //
 // @see ~TcpCommandCode, ~TcpStatusInd, ~TCPOpenCommand, ~TCPStatusInfo, ~ITCP
 //
-class TCPCommand
+class TCPCommand extends cObject
 {
     int userId = -1;   // id than can be freely used by the app
 }

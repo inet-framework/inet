@@ -49,7 +49,7 @@ class INET_API NetworkHeaderBase : public FieldsChunk
 
 namespace inet;
 
-class noncobject ConstProtocol;
+class ConstProtocol { @existingClass; @descriptor(false); }
 
 class NetworkHeaderBase extends FieldsChunk
 {

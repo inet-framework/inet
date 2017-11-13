@@ -25,8 +25,11 @@ cplusplus {{
 
 namespace inet;
 
-class MACAddress extends void
+class MACAddress
 {
     @existingClass;
+    @opaque;
+    @tostring(.str());
+    @fromstring(MACAddress($));
 }
 

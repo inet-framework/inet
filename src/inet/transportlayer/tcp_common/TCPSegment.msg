@@ -94,7 +94,7 @@ enum TCPOptionNumbers
 //
 // This structure represents a single SACK (selective acknowledgment):
 //
-class SackItem
+class SackItem extends cObject
 {
     unsigned int start;     // start seq no. of sack block
     unsigned int end;       // end seq no. of sack block
@@ -106,7 +106,7 @@ class Sack extends SackItem
 }
 
 // Header Options (optional):
-class TCPOption
+class TCPOption extends cObject
 {
     unsigned short kind @enum(TCPOptionNumbers) = -1;  // option kind
     unsigned short length = 1;                    // option length

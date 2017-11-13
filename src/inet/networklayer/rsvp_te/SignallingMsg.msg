@@ -129,3 +129,4 @@ message PathNotifyMsg extends SignallingMsg
 
     command = MSG_PATH_NOTIFY;
 }
+

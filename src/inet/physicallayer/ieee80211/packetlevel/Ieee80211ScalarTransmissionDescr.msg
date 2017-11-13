@@ -13,6 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.physicallayer.analogmodel.packetlevel.ScalarTransmission;
+
 cplusplus {{
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
 }}
@@ -24,9 +27,8 @@ typedef const IIeee80211Mode  ConstIIeee80211Mode;
 typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class ConstIIeee80211Mode extends void;
-class ConstIeee80211Channel extends void;
-class ScalarTransmission extends cObject;
+class ConstIIeee80211Mode  { @existingClass; @descriptor(false); }
+class ConstIeee80211Channel  { @existingClass; @descriptor(false); }
 
 class Ieee80211ScalarTransmission extends ScalarTransmission
 {

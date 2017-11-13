@@ -17,12 +17,12 @@
 
 namespace inet {
 
-std::string vectorToString(const IPAddressVector& vec)
+std::string vectorToString(const IPv4AddressVector& vec)
 {
     return vectorToString(vec, ", ");
 }
 
-std::string vectorToString(const IPAddressVector& vec, const char *delim)
+std::string vectorToString(const IPv4AddressVector& vec, const char *delim)
 {
     std::ostringstream stream;
     for (unsigned int i = 0; i < vec.size(); i++) {
@@ -54,7 +54,7 @@ std::string vectorToString(const EroVector& vec, const char *delim)
     return str;
 }
 
-EroVector routeToEro(const IPAddressVector& rro)
+EroVector routeToEro(const IPv4AddressVector& rro)
 {
     EroVector ero;
 
@@ -102,7 +102,7 @@ bool find(std::vector<int>& vec, int value)
     return false;
 }
 
-bool find(const IPAddressVector& vec, IPv4Address addr)
+bool find(const IPv4AddressVector& vec, IPv4Address addr)
 {
     for (auto & elem : vec)
         if (elem == addr)

@@ -20,7 +20,7 @@ import inet.common.INETDefs;
 
 namespace inet;
 
-class TunControlInfo
+class TunControlInfo extends cObject
 {
 }
 
@@ -31,3 +31,4 @@ class TunOpenCommand extends TunControlInfo
 class TunCloseCommand extends TunControlInfo
 {
 }
+

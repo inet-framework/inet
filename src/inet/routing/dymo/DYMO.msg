@@ -27,14 +27,27 @@ cplusplus {{
 
 namespace inet::dymo;
 
-class noncobject DYMOSequenceNumber;
-class noncobject DYMOMetricType;
+// TODO: metric types are defined in a separate [RFC 6551]
+enum DYMOMetricType {
+    HOP_COUNT = 3;    // Hop Count has Metric Type assignment 3
+};
+
+class DYMOSequenceNumber
+{
+    @existingClass;
+    @primitive;
+    @descriptor(false);
+    @fromstring(string2ulong($));
+    @tostring(ulong2string($));
+    @defaultvalue(0);
+}
 
 //
 // classes
 //
 
-class AddressBlock {
+class AddressBlock extends cObject
+{
     L3Address address;
     int prefixLength;
     bool hasValidityTime;

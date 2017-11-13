@@ -25,8 +25,9 @@ cplusplus {{
 
 namespace inet;
 
-class L3Address extends void
+class L3Address
 {
     @existingClass;
+    //FIXME @tostring()...
 }
 

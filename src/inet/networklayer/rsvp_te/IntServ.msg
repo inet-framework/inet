@@ -24,17 +24,14 @@ import inet.networklayer.contract.ipv4.IPv4Address;
 namespace inet;
 
 cplusplus {{
-typedef std::vector<IPv4Address> IPAddressVector;
 typedef std::vector<struct EroObj_t> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
 
-class noncobject IPAddressVector;
+class EroVector { @existingClass; }
 
-class noncobject EroVector;
-
-class noncobject FlowDescriptorVector;
+class FlowDescriptorVector { @existingClass; }
 
 //
 // Intserv/RSVP: Session Structure
@@ -123,6 +120,6 @@ struct FlowDescriptor_t
 {
     FlowSpecObj_t Flowspec_Object;
     FilterSpecObj_t Filter_Spec_Object;
-    IPAddressVector RRO;
+    IPv4AddressVector RRO;
     int label;
 }

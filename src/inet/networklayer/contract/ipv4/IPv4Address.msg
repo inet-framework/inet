@@ -25,8 +25,21 @@ cplusplus {{
 
 namespace inet;
 
-class IPv4Address extends void
+cplusplus {{
+typedef std::vector<IPv4Address> IPv4AddressVector;
+}}
+
+
+class IPv4Address
 {
     @existingClass;
+    @opaque;
+    @tostring(.str());
+    @fromstring(IPv4Address($));
 }
 
+class IPv4AddressVector
+{
+   @existingClass;
+   //FIXME tostring, ...
+}

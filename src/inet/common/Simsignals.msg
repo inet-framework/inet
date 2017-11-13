@@ -23,7 +23,7 @@ enum PacketDropReason
     NO_PROTOCOL_FOUND         = 12;
 }
 
-class PacketDropDetails
+class PacketDropDetails extends cObject
 {
     int reason @enum(PacketDropReason) = -1;
     int limit = -1;

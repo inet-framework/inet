@@ -24,9 +24,9 @@ typedef const IIeee80211Mode ConstIIeee80211Mode;
 typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class ConstIIeee80211Mode extends void;
-class ConstIeee80211Channel extends void;
-class DimensionalTransmission extends cObject;
+class ConstIIeee80211Mode { @existingClass; @descriptor(false); }
+class ConstIeee80211Channel { @existingClass; @descriptor(false); }
+class DimensionalTransmission extends cObject { @existingClass; @descriptor(false); }
 
 class Ieee80211DimensionalTransmission extends DimensionalTransmission
 {

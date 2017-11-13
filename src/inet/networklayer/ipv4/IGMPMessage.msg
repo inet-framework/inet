@@ -27,12 +27,6 @@ cplusplus {{
 
 namespace inet;
 
-cplusplus {{
-typedef std::vector<IPv4Address> IPv4AddressVector;
-}}
-
-class noncobject IPv4AddressVector;
-
 enum IGMPType
 {
     IGMP_MEMBERSHIP_QUERY = 0x11;
