@@ -883,7 +883,7 @@ void IPv4::fragmentAndSend(Packet *packet)
         }
 
         ASSERT(fragment->getByteLength() == 0);
-        const auto& fraghdr = makeShared<Ipv4Header>(*ipv4Header.get()->dup());
+        const auto& fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());
         const auto& fragData = packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength));
         ASSERT(B(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->append(fragData);
