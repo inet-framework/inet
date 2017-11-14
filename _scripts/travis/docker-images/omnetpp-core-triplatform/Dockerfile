@@ -82,4 +82,4 @@ RUN make -j $(nproc)
 ENV PATH /root/omnetpp-5.2-linux/bin:$PATH
 
 WORKDIR /root
-COPY travis-runner.sh /root/
+
