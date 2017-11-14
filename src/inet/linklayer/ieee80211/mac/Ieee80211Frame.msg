@@ -200,7 +200,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     chunkLength = b(DATAFRAME_HEADER_MINLENGTH) - B(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
-    int ackPolicy @enum(AckPolicy);
+    int ackPolicy @enum(AckPolicy) = NORMAL_ACK;
     uint8 tid;
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
