@@ -605,7 +605,6 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
             }
         }
     }
-#endif // ifndef WITH_TCP_COMMON
 
     // comment
     if (comment)
@@ -613,6 +612,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
 
     out << endl;
 }
+#endif // ifdef WITH_TCP_COMMON
 
 } // namespace inet
 

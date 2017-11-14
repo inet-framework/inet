@@ -391,8 +391,7 @@ void UDP::processPacketFromApp(Packet *packet)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
     udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + packet->getTotalLength()).get());
-    if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
-        insertCrc(l3Protocol, L3Address(), L3Address(), udpHeader, packet);
+    insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
 

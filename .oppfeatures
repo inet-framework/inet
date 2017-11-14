@@ -1078,6 +1078,7 @@
         requires = ""
         labels = ""
         nedPackages = "
+                       inet.common.serializer.csmaca
                        inet.linklayer.csmaca
                       "
         extraSourceFolders = ""

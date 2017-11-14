@@ -44,7 +44,7 @@ std::ostream& ConvolutionalCoderModule::printToStream(std::ostream& stream, int 
 
 ConvolutionalCoderModule::~ConvolutionalCoderModule()
 {
-    delete convolutionalCoder->getForwardErrorCorrection();
+    //delete convolutionalCoder->getForwardErrorCorrection();
     delete convolutionalCoder;
 }
 } /* namespace physicallayer */
