@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-10-30  Levente Mészáros
+
+	Replaced (unsigned) ints with b(its) where appropriate.
+
 2017-05-11  Levente Mészáros
 
 	Renamed frame variables to header where applicable.

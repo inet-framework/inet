@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-11-09  Levente Mészáros
+
+	Removed call to resetStateVariables from receiving state machine transitions,
+	and renamed function to resetTransmissionVariables for clarity.
+	Changed FCS verification to always check for packet hasBitError() and chunk isCorrect().
+	Simplified deleting lower frames.
+
+2017-10-17  Levente Mészáros
+
+	Fixed error caused by receiving ACK with bit errors.
+
+2017-10-18  Levente Mészáros
+
+	Changed headerLength and ackLength to the minimum value.
+	Additional length is represented by a separate ByteCount chunk.
+	Added fcsMode parameter and FCS computation and verification.
+
 2017-07-14  Levente Mészáros
 
 	Removed remaining traces of cPacket.

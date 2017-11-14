@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2017-10-30  Levente Mészáros
+
+	Extended 802.11 layered error model for packet level simulation.
+	Changed 802.11 OFDM error models wrt. to the service field.
+	The service field is part of the PHY header in terms of bits but it's
+	sent in the data part in terms of symbols (modulation).
+
+2017-10-19  Levente Mészáros
+
+	Removed obsolete per and packetErrorless members from SignalPacketModel.
+
 2017-07-24  Levente Mészáros
 
 	Fixed accidentally inserted const keyword after new operator.

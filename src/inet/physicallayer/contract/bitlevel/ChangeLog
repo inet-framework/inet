@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-10-19  Levente Mészáros
+
+	Removed obsolete per and packetErrorless members from SignalPacketModel.
+
 2017-01-26  Levente Mészáros
 
 	Switched to bit type where appropriate.

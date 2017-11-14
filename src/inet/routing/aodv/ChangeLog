@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-06  Levente Mészáros
+
+	Removed inet:: from packet names.
+
 2017-09-20  Zoltan Bojthe
 
 	Adapted to redesigned Netfilter hooks: functions have only the Packet

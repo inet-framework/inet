@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Fixed memory leaks found by Valgrind.
+
+2017-10-24  Levente Mészáros
+
+	Fixed chunk mutability in APSKDecoder.
+
+2017-10-19  Levente Mészáros
+
+	Simplified the reception process in APSKLayeredReceiver.
+	Removed obsolete per and packetErrorless members from SignalPacketModel.
+
+2017-10-17  Levente Mészáros
+
+	Fixed decoding/encoding in APSKRadio when the number of bits is not divisible by 8.
+
 2017-07-27  Levente Mészáros
 
 	Resurrected APSKPhyHeaderSerialier to do the bare minimum.

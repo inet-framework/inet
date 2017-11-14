@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-10-30  Levente Mészáros
+
+	Renamed mode classes to have camel case names.
+	Renamed various 802.11 PHY header field length getters.
+	Renamed bitLength variables, arguments in 802.11 modes.
+	Replaced (unsigned) ints with b(its) where appropriate.
+
+2017-10-27  Levente Mészáros
+
+	Added OFDM signal field length to Ieee80211OFDMSignalMode.
+	Removed OFDM signal field length from Ieee80211OFDMDataMode. This change
+	only affects the bit length, the symbols produced by the modulation
+	should still have the signal field in the data part.
+	Added getPaddingLength() 802.11 modes.
+	Removed exceptions from 802.11 mode parameters, it prevents runtime UI inspection.
+	Added all 802.11 phy and preamble chunks.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

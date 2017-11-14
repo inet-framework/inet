@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2017-11-10  Levente Mészáros
+
+	Updated dimensional transmitters/transmissions to be similar to scalar ones.
+	Fixed APSKScalarReceiver signal power check against sensitivity.
+
+2017-10-18  Levente Mészáros
+
+	Fixed padding in APSKRadio, especially when its not byte aligned.
+
 2017-07-27  Levente Mészáros
 
 	Resurrected APSKPhyHeaderSerialier to do the bare minimum.

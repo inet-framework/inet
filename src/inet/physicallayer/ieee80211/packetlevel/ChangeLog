@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-11-10  Levente Mészáros
+
+	Updated dimensional transmitters/transmissions to be similar to scalar ones.
+
+2017-10-30  Levente Mészáros
+
+	Changed 802.11 OFDM error models wrt. to the service field.
+	The service field is part of the PHY header in terms of bits but it's
+	sent in the data part in terms of symbols (modulation).
+	Fixed PHY header length in Ieee80211Radio.
+	Enabled PHY padding bits in 802.11 packets.
+
+2017-10-27  Levente Mészáros
+
+	Added all 802.11 phy and preamble chunks.
+	Added descriptors for Signal and some 802.11 transmissions.
+
 2017-05-11  Levente Mészáros
 
 	Revived layered OFDM transmitter and receiver.

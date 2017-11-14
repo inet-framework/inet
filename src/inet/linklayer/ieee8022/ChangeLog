@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-10-19  Levente Mészáros
+
+	Fixed handling packets with bit errors.
+
 2017-09-13  Levente Mészáros
 
 	Renamed protocol to ieee8022 and protocol group to ieee8022protocol.

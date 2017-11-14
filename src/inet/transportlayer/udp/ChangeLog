@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Fixed IPV6 module path in transport layers.
+
 2017-09-27  Zoltan Bojthe
 
 	Initializing registerHook moved to later stage from STAGE_LOCAL.

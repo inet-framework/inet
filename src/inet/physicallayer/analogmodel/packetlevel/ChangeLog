@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-10  Levente Mészáros
+
+	Updated dimensional transmitters/transmissions to be similar to scalar ones.
+
 2017-01-26  Levente Mészáros
 
 	Switched to bit type where appropriate.

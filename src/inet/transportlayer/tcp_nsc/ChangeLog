@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Fixed IPV6 module path in transport layers.
+	Fixed memory leak found by Valgrind.
+
 2017-09-14  Levente Mészáros
 
 	Removed obsolete TCP socket parameter dataTransferMode from all implementations.

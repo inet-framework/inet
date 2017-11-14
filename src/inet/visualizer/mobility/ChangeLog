@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-10  Levente Mészáros
+
+	Added guard against non-existent network node visualization.
+
 ====== inet-3.x ======
 
 2017-10-02  ------ inet-3.6.2 released ------

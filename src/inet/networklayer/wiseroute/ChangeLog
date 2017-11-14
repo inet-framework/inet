@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Fixed memory leak found by Valgrind.
+
 2017-02-01  Levente Mészáros
 
 	Renamed to WiseRouteHeader.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-10-20  Zoltan Bojthe
+
+	Merged RTCPPacket1-3.msg and RTCPPacket1-3.h to the single RTCPPacket.msg file.
+
 2017-05-10  Zoltan Bojthe
 
 	Converted RTPMpegPacket to chunks: RTPMpegHeader | ByteCountChunk.

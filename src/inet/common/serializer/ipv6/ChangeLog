@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Added missing ICMP v6 headers to serializer, still incomplete.
+
 2017-07-31  Zoltan Bojthe
 
 	Fixed ICMPv6HeaderSerializer: removed 2 bytes extra read.

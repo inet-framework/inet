@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-11-13  Levente Mészáros
+
+	Fixed NetfilterInfoHook for non-mandatory tags.
+
 2017-09-21  Zoltan Bojthe
 
 	Merged InterfaceEntry and corresponding NIC module.
