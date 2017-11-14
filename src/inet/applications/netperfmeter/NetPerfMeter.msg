@@ -43,6 +43,6 @@ message NetPerfMeterTransmitTimer
 }
 
 
-message NetPerfMeterDataMessage extends SCTPSimpleMessage
+class NetPerfMeterDataMessage extends SCTPSimpleMessage
 {
 }

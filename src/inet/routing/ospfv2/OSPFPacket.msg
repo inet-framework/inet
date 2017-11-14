@@ -236,7 +236,7 @@ struct LSARequest
 //
 // Represents an OSPF Link State Request packet
 //
-packet OSPFLinkStateRequestPacket extends OSPFPacket
+class OSPFLinkStateRequestPacket extends OSPFPacket
 {
     LSARequest requests[];
 }
