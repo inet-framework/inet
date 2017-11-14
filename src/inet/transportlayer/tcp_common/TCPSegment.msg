@@ -225,7 +225,7 @@ class TcpHeader extends TransportHeaderBase
     unsigned short urgentPointer;
 
     uint16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    CrcMode crcMode = (CrcMode)-1;
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented

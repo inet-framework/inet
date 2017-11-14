@@ -241,7 +241,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 auto *option = new IPv4OptionTimestamp();
                 option->setType(type);
                 option->setLength(length);
-                option->setFlag(flag);
+                option->setFlag((TimestampFlag)flag);
                 option->setOverflow(overflow);
                 option->setRecordTimestampArraySize((length - 4) / bytes);
                 if (bytes == 8)

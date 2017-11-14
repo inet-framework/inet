@@ -57,7 +57,7 @@ enum PIMHelloOptionType
 
 class HelloOption extends cObject
 {
-    short type @enum(PIMHelloOptionType);
+    PIMHelloOptionType type;
 }
 
 class HoldtimeOption extends HelloOption
@@ -112,7 +112,7 @@ class JoinPruneGroup extends cObject
 class PIMPacket extends FieldsChunk
 {
     short         version = 2;
-    short         type @enum(PIMPacketType);
+    PIMPacketType type;
 }
 
 // Hello message

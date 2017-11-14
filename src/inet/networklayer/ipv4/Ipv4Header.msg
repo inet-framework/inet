@@ -128,7 +128,7 @@ class IPv4OptionTimestamp extends IPv4Option
 {
     type = IPOPTION_TIMESTAMP;
     // length = 4 + 4 * getRecordAddressArraySize() + 4 * getRecordTimestampArraySize();
-    int flag @enum(TimestampFlag);
+    TimestampFlag flag;
     short overflow;
     short nextIdx;
     // pointer = 5 + (flag == IP_TIMESTAMP_TIMESTAMP_ONLY ? 4 : 8) * nextIdx
@@ -183,7 +183,7 @@ class Ipv4Header extends NetworkHeaderBase
     IPv4Address destAddress;
 
     uint16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    CrcMode crcMode = (CrcMode)-1;
 
     int protocolId  @override @enum(IPProtocolId) = IP_PROT_NONE;
     short timeToLive;

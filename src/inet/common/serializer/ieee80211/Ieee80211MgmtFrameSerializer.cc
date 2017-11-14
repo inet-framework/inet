@@ -291,21 +291,21 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             auto frame = makeShared<Ieee80211AuthenticationFrame>();
             stream.readUint16Be();
             frame->setSequenceNumber(stream.readUint16Be());
-            frame->setStatusCode(stream.readUint16Be());
+            frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
             return frame;
         }
 
         case 0xC0: //ST_ST_DEAUTHENTICATION
         {
             auto frame = makeShared<Ieee80211DeauthenticationFrame>();
-            frame->setReasonCode(stream.readUint16Be());
+            frame->setReasonCode((Ieee80211ReasonCode)stream.readUint16Be());
             return frame;
         }
 
         case 0xA0: // ST_DISASSOCIATION
         {
             auto frame = makeShared<Ieee80211DisassociationFrame>();
-            frame->setReasonCode(stream.readUint16Be());
+            frame->setReasonCode((Ieee80211ReasonCode)stream.readUint16Be());
             return frame;
         }
 
@@ -377,7 +377,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         {
             auto frame = makeShared<Ieee80211AssociationResponseFrame>();
             stream.readUint16Be();
-            frame->setStatusCode(stream.readUint16Be());
+            frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
             frame->setAid(stream.readUint16Be());
 
             Ieee80211SupportedRatesElement supRat;
@@ -393,7 +393,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         {
             auto frame = makeShared<Ieee80211ReassociationResponseFrame>();
             stream.readUint16Be();
-            frame->setStatusCode(stream.readUint16Be());
+            frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
             frame->setAid(stream.readUint16Be());
 
             Ieee80211SupportedRatesElement supRat;

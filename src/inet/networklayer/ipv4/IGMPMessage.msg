@@ -38,9 +38,9 @@ enum IGMPType
 
 class IGMPMessage extends FieldsChunk
 {
-    short type @enum(IGMPType);         // 1 byte
+    IGMPType type;         // 1 byte
     uint16_t crc = 0;                   // 2 bytes
-    short crcMode @enum(CrcMode) = -1;  // 0 bytes, inet only
+    CrcMode crcMode = (CrcMode)-1;  // 0 bytes, inet only
 }
 
 class IGMPQuery extends IGMPMessage

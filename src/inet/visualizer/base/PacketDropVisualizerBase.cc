@@ -26,7 +26,7 @@ namespace inet {
 
 namespace visualizer {
 
-PacketDrop::PacketDrop(int reason, const cPacket* packet, const int moduleId, const Coord& position) :
+PacketDrop::PacketDrop(PacketDropReason reason, const cPacket* packet, const int moduleId, const Coord& position) :
     packet(packet),
     moduleId(moduleId),
     position(position)

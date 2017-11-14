@@ -135,7 +135,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
 const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto icmpv6Header = makeShared<Icmpv6Header>();
-    uint8_t type = stream.readByte();     // type
+    ICMPv6Type type = (ICMPv6Type)stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
     uint16_t chksum = stream.readUint16Be();
 
@@ -157,7 +157,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         case ICMPv6_DESTINATION_UNREACHABLE: {
             auto destUnreach = makeShared<Icmpv6DestUnreachableMsg>(); icmpv6Header = destUnreach;
             destUnreach->setType(type);
-            destUnreach->setCode(subcode);
+            destUnreach->setCode((ICMPv6DEST_UN)subcode);
             stream.readUint32Be();        // unused
             break;
         }
@@ -165,7 +165,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         case ICMPv6_TIME_EXCEEDED: {
             auto timeExceeded = makeShared<Icmpv6TimeExceededMsg>(); icmpv6Header = timeExceeded;
             timeExceeded->setType(type);
-            timeExceeded->setCode(subcode);
+            timeExceeded->setCode((ICMPv6_TIME_EX)subcode);
             stream.readUint32Be();        // unused
             break;
         }

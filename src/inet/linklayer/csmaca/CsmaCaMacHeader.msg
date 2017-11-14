@@ -48,5 +48,5 @@ class CsmaCaMacTrailer extends FieldsChunk
 {
     chunkLength = B(4);
     uint32_t fcs = 0;
-    int fcsMode @enum(FcsMode) = -1;
+    FcsMode fcsMode = (FcsMode)-1;
 }

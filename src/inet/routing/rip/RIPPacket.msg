@@ -52,7 +52,7 @@ enum RIP_AF {
 //
 struct RIPEntry
 {
-    unsigned short addressFamilyId @enum(RIP_AF); // usually AF_INET (2), but NONE (0) for whole table requests
+    RIP_AF addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
     L3Address address;                // destination address
     int prefixLength;               // prefix length of the destination
@@ -67,7 +67,7 @@ struct RIPEntry
 //
 class RIPPacket extends FieldsChunk
 {
-    unsigned char command @enum(RIPCommand);
+    RIPCommand command;
     // version is fixed: 2
     RIPEntry entry[];
 }

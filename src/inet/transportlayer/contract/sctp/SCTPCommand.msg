@@ -78,7 +78,7 @@ packet SCTPCommand
 //
 message SCTPErrorInfo extends SCTPCommand
 {
-    int errorCode @enum(SCTPErrorCode);
+    SCTPErrorCode errorCode;
     string messageText;
 }
 

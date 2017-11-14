@@ -122,10 +122,10 @@ inline bool isIcmpInfoType(int type)
 class IcmpHeader extends FieldsChunk
 {
     chunkLength = B(8);
-    int type = -1 @enum(ICMPType);   // 1 byte
+    ICMPType type = (ICMPType)-1;   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    int crcMode @enum(CrcMode) = -1;
+    CrcMode crcMode = (CrcMode)-1;
 }
 
 class ICMPEchoRequest extends IcmpHeader

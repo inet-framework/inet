@@ -208,14 +208,14 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     Packet *errorMsg;
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
-        errorMsg = createDestUnreachableMsg(code);
+        errorMsg = createDestUnreachableMsg((ICMPv6DEST_UN)code);
     //TODO: implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
         errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED)
-        errorMsg = createTimeExceededMsg(code);
+        errorMsg = createTimeExceededMsg((ICMPv6_TIME_EX)code);
     else if (type == ICMPv6_PARAMETER_PROBLEM)
-        errorMsg = createParamProblemMsg(code);
+        errorMsg = createParamProblemMsg((ICMPv6_PARAMETER_PROB)code);
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
@@ -268,7 +268,7 @@ void ICMPv6::sendToIP(Packet *msg)
     send(msg, "ipv6Out");
 }
 
-Packet *ICMPv6::createDestUnreachableMsg(int code)
+Packet *ICMPv6::createDestUnreachableMsg(ICMPv6DEST_UN code)
 {
     auto errorMsg = makeShared<Icmpv6DestUnreachableMsg>();
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
@@ -291,7 +291,7 @@ Packet *ICMPv6::createPacketTooBigMsg(int mtu)
     return packet;
 }
 
-Packet *ICMPv6::createTimeExceededMsg(int code)
+Packet *ICMPv6::createTimeExceededMsg(ICMPv6_TIME_EX code)
 {
     auto errorMsg = makeShared<Icmpv6TimeExceededMsg>();
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
@@ -302,7 +302,7 @@ Packet *ICMPv6::createTimeExceededMsg(int code)
     return packet;
 }
 
-Packet *ICMPv6::createParamProblemMsg(int code)
+Packet *ICMPv6::createParamProblemMsg(ICMPv6_PARAMETER_PROB code)
 {
     auto errorMsg = makeShared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);

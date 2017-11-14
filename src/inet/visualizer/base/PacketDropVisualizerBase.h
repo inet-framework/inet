@@ -39,7 +39,7 @@ class INET_API PacketDrop : public PacketDropDetails {
     const Coord position;
 
   public:
-    PacketDrop(int reason, const cPacket* packet, const int moduleId, const Coord& position);
+    PacketDrop(PacketDropReason reason, const cPacket* packet, const int moduleId, const Coord& position);
     virtual ~PacketDrop();
 
     const cPacket *getPacket_() const { return packet; }

@@ -116,5 +116,5 @@ class HttpReplyMessage extends HttpBaseMessage
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
-    int contentType @enum(HttpContentType) = CT_UNKNOWN;
+    HttpContentType contentType = CT_UNKNOWN;
 }

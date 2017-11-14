@@ -50,7 +50,7 @@ enum RTPSenderControlMessageCommands
 
 packet RTPSenderControlMessage
 {
-    short command @enum(RTPSenderControlMessageCommands);
+    RTPSenderControlMessageCommands command;
     float commandParameter1;
     float commandParameter2;
 };

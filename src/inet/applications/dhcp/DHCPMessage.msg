@@ -70,7 +70,7 @@ enum DHCPOptionCode
 //
 class DHCPOptions extends cObject
 {
-    int messageType @enum(DHCPMessageType); // to convey the type of the DHCP message
+    DHCPMessageType messageType; // to convey the type of the DHCP message
     string hostName; // name of the client
     int parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters
     MACAddress clientIdentifier; // used by DHCP clients to specify their unique identifier
@@ -93,7 +93,7 @@ class DHCPOptions extends cObject
 //
 class DHCPMessage extends FieldsChunk
 {
-    int op @enum(DHCPOpcode); // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
+    DHCPOpcode op; // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
     int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)
     int hops; // client sets to zero, optionally used by relay agents when booting via a relay agent

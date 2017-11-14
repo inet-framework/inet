@@ -48,7 +48,7 @@ enum MobilityHeaderType
 
 class MobilityHeader extends FieldsChunk  // extends Ipv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of Ipv6ExtensionHeader
 {
-    int mobilityHeaderType @enum(MobilityHeaderType);
+    MobilityHeaderType mobilityHeaderType;
 }
 
 
@@ -93,7 +93,7 @@ enum BAStatus
 
 class BindingAcknowledgement extends MobilityHeader
 {
-    int status @enum(BAStatus);
+    BAStatus status;
     unsigned int sequenceNumber;
     unsigned int lifetime;
     bool keyManagementFlag = false;//K-Flag (Key Management Flag)
@@ -116,7 +116,7 @@ enum BEStatus
 
 class BindingError extends MobilityHeader
 {
-    int status @enum(BEStatus);
+    BEStatus status;
     IPv6Address homeAddress;
     //Mobility Options not defined
 

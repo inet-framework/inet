@@ -39,6 +39,6 @@ enum RTPSenderStatus
 
 packet RTPSenderStatusMessage
 {
-    short status @enum(RTPSenderStatus);
+    RTPSenderStatus status;
     uint32 timeStamp;
 };

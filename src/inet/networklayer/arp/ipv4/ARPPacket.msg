@@ -56,7 +56,7 @@ enum ARPOpcode
 class ARPPacket extends FieldsChunk
 {
     chunkLength = B(ARP_HEADER_BYTES);
-    int opcode @enum(ARPOpcode);
+    ARPOpcode opcode;
     MACAddress srcMACAddress;
     MACAddress destMACAddress;
     IPv4Address srcIPAddress;

@@ -25,6 +25,6 @@ enum PacketDropReason
 
 class PacketDropDetails extends cObject
 {
-    int reason @enum(PacketDropReason) = -1;
+    PacketDropReason reason = (PacketDropReason)-1;
     int limit = -1;
 }

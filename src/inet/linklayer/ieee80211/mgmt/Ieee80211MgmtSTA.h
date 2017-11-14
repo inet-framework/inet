@@ -154,16 +154,16 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendScanConfirm();
 
     /** Sends back result of authentication to the agent */
-    virtual void sendAuthenticationConfirm(APInfo *ap, int resultCode);
+    virtual void sendAuthenticationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Sends back result of association to the agent */
-    virtual void sendAssociationConfirm(APInfo *ap, int resultCode);
+    virtual void sendAssociationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: Cancel the existing association */
     virtual void disassociate();
 
     /** Utility function: sends a confirmation to the agent */
-    virtual void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
+    virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: sends a management frame */
     virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MACAddress& address);
@@ -173,7 +173,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
-    virtual int statusCodeToPrimResultCode(int statusCode);
+    virtual Ieee80211PrimResultCode statusCodeToPrimResultCode(int statusCode);
 
     /** @name Processing of different frame types */
     //@{

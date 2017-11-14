@@ -60,10 +60,10 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtoco
     virtual void sendToIP(Packet *msg, const IPv6Address& dest);
     virtual void sendToIP(Packet *msg);    // FIXME check if really needed
 
-    virtual Packet *createDestUnreachableMsg(int code);
+    virtual Packet *createDestUnreachableMsg(ICMPv6DEST_UN code);
     virtual Packet *createPacketTooBigMsg(int mtu);
-    virtual Packet *createTimeExceededMsg(int code);
-    virtual Packet *createParamProblemMsg(int code);    //TODO:Section 3.4 describes a pointer. What is it?
+    virtual Packet *createTimeExceededMsg(ICMPv6_TIME_EX code);
+    virtual Packet *createParamProblemMsg(ICMPv6_PARAMETER_PROB code);    //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**

@@ -312,7 +312,7 @@ class UDPSetMulticastSourceFilterCommand extends UDPSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
-    int filterMode @enum(UDPSourceFilterMode);
+    UDPSourceFilterMode filterMode;
     L3Address sourceList[];
 }
 

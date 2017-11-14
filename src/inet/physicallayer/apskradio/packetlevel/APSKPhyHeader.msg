@@ -26,5 +26,5 @@ class APSKPhyHeader extends FieldsChunk
     chunkLength = B(6);
     uint16_t lengthField;
     uint16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    CrcMode crcMode = (CrcMode)-1;
 }

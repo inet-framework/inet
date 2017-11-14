@@ -97,6 +97,6 @@ class EthernetFcs extends FieldsChunk
 {
     chunkLength = B(ETHER_FCS_BYTES);
     int32_t fcs;
-    int fcsMode @enum(EthernetFcsMode) = FCS_DECLARED_CORRECT;
+    EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT;
 }
 

@@ -84,10 +84,10 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     //@{
     virtual void sendScanRequest();
     virtual void sendAuthenticateRequest(const MACAddress& address);
-    virtual void sendDeauthenticateRequest(const MACAddress& address, int reasonCode);
+    virtual void sendDeauthenticateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode);
     virtual void sendAssociateRequest(const MACAddress& address);
     virtual void sendReassociateRequest(const MACAddress& address);
-    virtual void sendDisassociateRequest(const MACAddress& address, int reasonCode);
+    virtual void sendDisassociateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode);
     //@}
 
     /** Processing Confirm primitives */

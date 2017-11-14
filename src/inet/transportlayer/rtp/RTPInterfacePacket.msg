@@ -55,7 +55,7 @@ message RTPControlMsg
 // base class
 class RTPControlInfo extends cObject
 {
-    short type @enum(RTP_IFP_TYPE);
+    RTP_IFP_TYPE type;
 };
 
 // base class
@@ -87,7 +87,7 @@ class RTPCISenderControl extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_CONTROL;
     // from ~RTPSenderControlMessage:
-    short command @enum(RTPSenderControlMessageCommands);
+    RTPSenderControlMessageCommands command;
     float commandParameter1;
     float commandParameter2;
 }
@@ -97,7 +97,7 @@ class RTPCISenderStatus extends RTPSessionControlInfo
 {
     type = RTP_IFP_SENDER_STATUS;
     // from ~RTPSenderStatusMessage:
-    short status @enum(RTPSenderStatus);
+    RTPSenderStatus status;
     uint32 timeStamp;
 };
 

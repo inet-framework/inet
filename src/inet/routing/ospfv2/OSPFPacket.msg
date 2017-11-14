@@ -49,7 +49,7 @@ struct OSPFOptions
 class OSPFPacket extends FieldsChunk
 {
     char version = 2;
-    char type @enum(OSPFPacketType) = HELLO_PACKET;
+    OSPFPacketType type = HELLO_PACKET;
 
     IPv4Address routerID;
     IPv4Address areaID;
@@ -94,7 +94,7 @@ class OSPFLSAHeader extends cObject
 {
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
-    char lsType @enum(LSAType) = ROUTERLSA_TYPE;
+    LSAType lsType = ROUTERLSA_TYPE;
     IPv4Address linkStateID;
     IPv4Address advertisingRouter;
     long lsSequenceNumber = 0;
@@ -127,7 +127,7 @@ class Link extends cObject
 {
     IPv4Address linkID;
     unsigned long linkData = 0;
-    unsigned char type @enum(LinkType) = POINTTOPOINT_LINK;
+    LinkType type = POINTTOPOINT_LINK;
     unsigned char numberOfTOS = 0;
     unsigned long linkCost = 1;
     TOSData tosData[];

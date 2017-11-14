@@ -64,7 +64,7 @@ const Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) con
         arpPacket->markIncorrect();
     uint8_t macAddressLength = stream.readByte();     //ar_hln
     uint8_t ipAddressLength = stream.readByte();     //ar_pln
-    arpPacket->setOpcode(stream.readUint16Be());   // arphdr->ar_op
+    arpPacket->setOpcode((ARPOpcode)stream.readUint16Be());   // arphdr->ar_op
     arpPacket->setSrcMACAddress(readMACAddress(stream, macAddressLength));
     arpPacket->setSrcIPAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
     arpPacket->setDestMACAddress(readMACAddress(stream, macAddressLength));

@@ -515,19 +515,19 @@ void Ieee80211MgmtSTA::disassociate()
     assocAP = AssociatedAPInfo();    // clear it
 }
 
-void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, int resultCode)
+void Ieee80211MgmtSTA::sendAuthenticationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode)
 {
     Ieee80211Prim_AuthenticateConfirm *confirm = new Ieee80211Prim_AuthenticateConfirm();
     confirm->setAddress(ap->address);
     sendConfirm(confirm, resultCode);
 }
 
-void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, int resultCode)
+void Ieee80211MgmtSTA::sendAssociationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode)
 {
     sendConfirm(new Ieee80211Prim_AssociateConfirm(), resultCode);
 }
 
-void Ieee80211MgmtSTA::sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode)
+void Ieee80211MgmtSTA::sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode)
 {
     confirm->setResultCode(resultCode);
     cMessage *msg = new cMessage(confirm->getClassName());
@@ -535,7 +535,7 @@ void Ieee80211MgmtSTA::sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode
     send(msg, "agentOut");
 }
 
-int Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
+Ieee80211PrimResultCode Ieee80211MgmtSTA::statusCodeToPrimResultCode(int statusCode)
 {
     return statusCode == SC_SUCCESSFUL ? PRC_SUCCESS : PRC_REFUSED;
 }

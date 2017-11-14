@@ -164,7 +164,7 @@ void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address)
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, int reasonCode)
+void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode)
 {
     EV << "Sending DeauthenticateRequest primitive to mgmt\n";
     Ieee80211Prim_DeauthenticateRequest *req = new Ieee80211Prim_DeauthenticateRequest();
@@ -194,7 +194,7 @@ void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, int reasonCode)
+void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode)
 {
     EV << "Sending DisassociateRequest primitive to mgmt\n";
     Ieee80211Prim_DisassociateRequest *req = new Ieee80211Prim_DisassociateRequest();

@@ -107,10 +107,10 @@ enum ICMPv6_PARAMETER_PROB
 class Icmpv6Header extends FieldsChunk
 {
     chunkLength = B(ICMPv6_HEADER_BYTES);
-    int type @enum(ICMPv6Type);     // 1 byte
+    ICMPv6Type type;     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
-    int crcMode @enum(CrcMode) = -1;
+    CrcMode crcMode = (CrcMode)-1;
     // 4 bytes 'type' specific values
 }
 
@@ -121,7 +121,7 @@ class Icmpv6Header extends FieldsChunk
 class Icmpv6DestUnreachableMsg extends Icmpv6Header
 {
     type = ICMPv6_DESTINATION_UNREACHABLE;
-    int code @enum(ICMPv6DEST_UN);
+    ICMPv6DEST_UN code;
     // unused 4 bytes
 }
 
@@ -135,13 +135,13 @@ class Icmpv6PacketTooBigMsg extends Icmpv6Header
 class Icmpv6TimeExceededMsg extends Icmpv6Header
 {
     type = ICMPv6_TIME_EXCEEDED;
-    int code @enum(ICMPv6_TIME_EX);
+    ICMPv6_TIME_EX code;
 }
 
 class Icmpv6ParamProblemMsg extends Icmpv6Header
 {
     type = ICMPv6_PARAMETER_PROBLEM;
-    int code @enum(ICMPv6_PARAMETER_PROB);
+    ICMPv6_PARAMETER_PROB code;
 }
 
 //

@@ -98,7 +98,7 @@ class TCPCommand extends cObject
 //
 class TCPErrorInfo extends TCPCommand
 {
-    int errorCode @enum(TCPErrorCode);
+    TCPErrorCode errorCode;
     string messageText;
 }
 

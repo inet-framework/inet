@@ -124,7 +124,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
 
-void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &stream, const Ptr<Ieee80211DataOrMgmtHeader> frame, short type, uint8_t fc1) const
+void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &stream, const Ptr<Ieee80211DataOrMgmtHeader> frame, Ieee80211FrameType type, uint8_t fc1) const
 {
     frame->setType(type);
     frame->setToDS(fc1 & 0x1);
@@ -145,7 +145,7 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
         auto dataHeader = dynamicPtrCast<Ieee80211DataHeader>(frame);
         uint16_t qos = stream.readUint16Le();
         dataHeader->setTid(qos & 0xF);
-        dataHeader->setAckPolicy((qos >> 5) & 0x03);
+        dataHeader->setAckPolicy((inet::ieee80211::AckPolicy)((qos >> 5) & 0x03));
         dataHeader->setAMsduPresent(qos & 0x80);
     }
 }

@@ -44,7 +44,7 @@ enum VoIPStreamPacketType
 //
 class VoIPStreamPacket extends FieldsChunk
 {
-    int type @enum(VoIPStreamPacketType);
+    VoIPStreamPacketType type;
 
     int codec;  // FFmpeg identifier of the codec
     short sampleBits;

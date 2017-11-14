@@ -94,7 +94,7 @@ class Ieee80211PrimRequest extends cObject
 //
 class Ieee80211PrimConfirm extends cObject
 {
-    int resultCode @enum(Ieee80211PrimResultCode);
+    Ieee80211PrimResultCode resultCode;
 }
 
 //
@@ -102,7 +102,7 @@ class Ieee80211PrimConfirm extends cObject
 //
 class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
 {
-    int BSSType @enum(Ieee80211BSSType); // determines type of BSS's to include in the scan
+    Ieee80211BSSType BSSType; // determines type of BSS's to include in the scan
     MACAddress BSSID; // specific BSSID to scan for (default: any)
     string SSID;      // SSID to scan for SSID (default: any)
     bool activeScan;  // whether to perform active or passive scanning
@@ -165,7 +165,7 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 {
     MACAddress address;
-    int reasonCode @enum(Ieee80211ReasonCode);
+    Ieee80211ReasonCode reasonCode;
 }
 
 //
@@ -210,6 +210,6 @@ class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
 class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 {
     MACAddress address;
-    int reasonCode @enum(Ieee80211ReasonCode);
+    Ieee80211ReasonCode reasonCode;
 }
 

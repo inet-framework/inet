@@ -33,7 +33,7 @@ enum BgpConstants{
 //
 class BGPASPathSegment extends cObject
 {
-    unsigned char type @enum(BGPPathSegmentType);
+    BGPPathSegmentType type;
     unsigned char length;
     unsigned short asValue[];
 }
@@ -61,7 +61,7 @@ enum BGPType
 class BGPHeader extends FieldsChunk
 {
     chunkLength = B(BGP_HEADER_OCTETS);
-    char type @enum(BGPType);
+    BGPType type;
 }
 
 //
@@ -139,7 +139,7 @@ struct BGPUpdateAttributeFlags
 struct BGPUpdateAttributeType
 {
     BGPUpdateAttributeFlags flags;
-    unsigned char typeCode @enum(BGPUpdateAttributeTypeCode);
+    BGPUpdateAttributeTypeCode typeCode;
 }
 
 class BGPUpdatePathAttributes extends cObject
@@ -151,7 +151,7 @@ class BGPUpdatePathAttributes extends cObject
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
 class BGPUpdatePathAttributesOrigin extends BGPUpdatePathAttributes
 {
-    int value @enum(BGPSessionType);
+    BGPSessionType value;
 }
 
 // AS_PATH (RFC4271 Section 4.3, Type code 2):
@@ -181,7 +181,7 @@ enum BGPUpdateAtomicAggregateValues
 
 class BGPUpdatePathAttributesAtomicAggregate extends BGPUpdatePathAttributes
 {
-    int value @enum(BGPUpdateAtomicAggregateValues);
+    BGPUpdateAtomicAggregateValues value;
 }
 
 struct BGPUpdateWithdrawnRoutes

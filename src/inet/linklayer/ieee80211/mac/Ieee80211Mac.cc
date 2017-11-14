@@ -151,7 +151,7 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 void Ieee80211Mac::handleMgmtPacket(Packet *packet)
 {
     const auto& header = makeShared<Ieee80211MgmtHeader>();
-    header->setType(packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
+    header->setType((Ieee80211FrameType)packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
     header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);

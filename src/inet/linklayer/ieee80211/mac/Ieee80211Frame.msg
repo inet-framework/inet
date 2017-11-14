@@ -100,7 +100,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 {
     chunkLength = B(4);
     uint32_t fcs = 0;
-    int fcsMode @enum(FcsMode) = -1;
+    FcsMode fcsMode = (FcsMode)-1;
 }
 
 //
@@ -114,7 +114,7 @@ class Ieee80211MacTrailer extends FieldsChunk
 class Ieee80211MacHeader extends FieldsChunk
 {
     chunkLength = LENGTH_ACK - B(4);
-    short type @enum(Ieee80211FrameType); // type and subtype
+    Ieee80211FrameType type; // type and subtype
     bool toDS;
     bool fromDS;
     bool retry;
@@ -195,7 +195,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     chunkLength = b(DATAFRAME_HEADER_MINLENGTH) - B(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
-    int ackPolicy @enum(AckPolicy) = NORMAL_ACK;
+    AckPolicy ackPolicy = NORMAL_ACK;
     uint8 tid;
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
@@ -205,7 +205,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //{
 //    type = ST_DATA_WITH_QOS;
 //    chunkLength = b(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - B(4);
-//    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
+//    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
 //}
@@ -223,7 +223,7 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
     type = ST_ACTION;
     short category;
     // TODO: subclasses will add action subfield contents
-    //short action @enum(WirelessNetworkManagementAction); // action TODO: remove it
+    //WirelessNetworkManagementAction action; // action TODO: remove it
 }
 
 class Ieee80211MsduSubframeHeader extends FieldsChunk
