@@ -1596,7 +1596,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(const IPv6NDPref
         IPv6Address newAddr = linkLocalAddress.setPrefix(prefix, prefixLength);
         //TODO: for now we leave the newly formed address as not tentative,
         //according to Greg, we have to always perform DAD for a newly formed address.
-        EV_INFO << "Assigning new address to: " << ie->getName() << endl;
+        EV_INFO << "Assigning new address to: " << ie->getInterfaceName() << endl;
         ie->ipv6Data()->assignAddress(newAddr, false, simTime() + validLifetime,
                 simTime() + preferredLifetime);
     }

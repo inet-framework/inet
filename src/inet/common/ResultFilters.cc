@@ -52,10 +52,12 @@ Register_ResultFilter("receptionMinSignalPower", ReceptionMinSignalPowerFilter);
 
 void ReceptionMinSignalPowerFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
+#ifdef WITH_RADIO
     if (auto reception = dynamic_cast<inet::physicallayer::FlatReceptionBase *>(object)) {
         W minReceptionPower = reception->computeMinPower(reception->getStartTime(), reception->getEndTime());
         fire(this, t, minReceptionPower.get(), details);
     }
+#endif  // WITH_RADIO
 }
 
 Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);

@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
@@ -23,7 +24,6 @@
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
 namespace inet {
@@ -36,7 +36,9 @@ void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
+#ifdef WITH_ETHERNET
         fcsMode = EtherEncap::parseFcsMode(par("fcsMode").stringValue());
+#endif // ifdef WITH_ETHERNET
     }
 }
 
