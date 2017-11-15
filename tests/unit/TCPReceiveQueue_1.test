@@ -59,6 +59,7 @@ EV << ".\n";
 %subst: /[\{\}]/ /
 
 %contains: stdout
+Running simulation...
 ** Event #1  t=0   Test (Test, id=1)
 [1000..1000)EmptyChunk
 rcv_nxt=1000
@@ -98,7 +99,3 @@ SQ:discardUpTo(2300): [2300..2300)EmptyChunk
 .
 
 <!> No more events, simulation completed -- at t=0s, event #1
-
-Calling finish() at end of Run #0...
-
-End.

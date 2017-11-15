@@ -35,6 +35,7 @@ EV << ".\n";
 ///////////////////////////////////////////////////////////////
 
 %contains: stdout
+Running simulation...
 ** Event #1  t=0   Test (Test, id=1)
 rcv_nxt=1000
 RQ:insertSeg [1000..1001) --> rcv_nxt=1001 [1000..1001)
@@ -50,8 +51,3 @@ RQ:insertSeg [2200000000..3300000000) --> Error: The new segment is [2200000000,
 .
 
 <!> No more events, simulation completed -- at t=0s, event #1
-
-Calling finish() at end of Run #0...
-
-End.
-

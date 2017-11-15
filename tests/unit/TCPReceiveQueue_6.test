@@ -33,6 +33,7 @@ EV << ".\n";
 ///////////////////////////////////////////////////////////////
 
 %contains: stdout
+Running simulation...
 ** Event #1  t=0   Test (Test, id=1)
 rcv_nxt=1000
 RQ:insertSeg [1000..1000001000) --> rcv_nxt=1000001000 [1000..1000001000)
@@ -47,7 +48,3 @@ RQ:extractUpTo(2000001000): < > --> rcv_nxt=2000001000
 .
 
 <!> No more events, simulation completed -- at t=0s, event #1
-
-Calling finish() at end of Run #0...
-
-End.
