@@ -21,7 +21,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ieee8021d/rstp/RSTP.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 

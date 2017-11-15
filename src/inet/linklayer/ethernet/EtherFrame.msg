@@ -17,8 +17,10 @@
 
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/EtherType_m.h" // for enums
+#include "inet/linklayer/common/EthernetFcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -31,6 +33,7 @@ class FieldsChunk extends cObject;
 class noncobject MACAddress;
 
 enum EtherType;
+enum EthernetFcsMode;
 
 enum EthernetControlOpCode
 {
@@ -91,13 +94,6 @@ class Ieee802_1QHeader extends FieldsChunk
                     // the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges,
                     // VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific.
     int nextTypeOrLength;
-}
-
-
-enum EthernetFcsMode {
-    FCS_DECLARED_CORRECT = 1;
-    FCS_DECLARED_INCORRECT = 2;
-    FCS_COMPUTED = 3;
 }
 
 class EthernetPadding extends FieldsChunk

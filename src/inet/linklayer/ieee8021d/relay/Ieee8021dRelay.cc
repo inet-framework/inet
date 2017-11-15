@@ -41,7 +41,7 @@ void Ieee8021dRelay::initialize(int stage)
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
-        fcsMode = EtherEncap::parseFcsMode(par("fcsMode").stringValue());
+        fcsMode = parseEthernetFcsMode(par("fcsMode").stringValue());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::ethernet, gate("ifOut"));

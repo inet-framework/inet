@@ -19,6 +19,7 @@
 #define __INET_ETHERENCAP_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/EthernetFcsMode_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
@@ -58,7 +59,6 @@ class INET_API EtherEncap : public Ieee8022Llc
     virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
 
   public:
-    static EthernetFcsMode parseFcsMode(const char *fcsModeString);
     static void addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
     static void addFcs(Packet *packet, EthernetFcsMode fcsMode);
 

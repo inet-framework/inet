@@ -23,7 +23,6 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
