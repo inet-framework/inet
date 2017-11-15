@@ -111,7 +111,8 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
-            stream.writeMACAddress(frame->getSourceLinkLayerAddress());
+            if (frame->getChunkLength() > B(8))
+                stream.writeMACAddress(frame->getSourceLinkLayerAddress());     // OPTIONAL field
             // TODO: incomplete
             break;
         }
@@ -203,7 +204,9 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             routerSol->setType(type);
             routerSol->setCode(subcode);
             stream.readUint32Be(); // reserved
-            routerSol->setSourceLinkLayerAddress(stream.readMACAddress());
+            if (stream.getRemainingLength() > B(0)) {   // has options
+                routerSol->setSourceLinkLayerAddress(stream.readMACAddress());
+            }
             // TODO: incomplete
             break;
         }

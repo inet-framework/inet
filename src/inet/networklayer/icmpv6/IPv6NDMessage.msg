@@ -106,7 +106,7 @@ class IPv6RouterSolicitation extends IPv6NDMessage
     // The link-layer address of the sender, if known.
     // MUST NOT be included if the Source Address is the unspecified address.
     // Otherwise, it SHOULD be included on link layers that have addresses.
-    MACAddress sourceLinkLayerAddress;
+    MACAddress sourceLinkLayerAddress;  //TODO this field is optional!!!
 }
 
 //
