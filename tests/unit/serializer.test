@@ -143,7 +143,8 @@ static bool testRecords(const char* filename, bool fcs = true)
     else
         throw cRuntimeError("unknown pcap fileheader from file '%s'", filename);
 
-    while(1) {
+    for (int i=1; true; i++) {
+    EV << "  === Testing frame " << i << " in file " << filename << endl;
         err = fread(&recordHeader, sizeof(recordHeader), 1, pcapFile);
         if (err != 1) {
             if (feof(pcapFile))
