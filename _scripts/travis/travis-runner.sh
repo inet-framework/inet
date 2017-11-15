@@ -19,10 +19,15 @@ export PATH="/root/omnetpp-5.2-$TARGET_PLATFORM/bin:$PATH"
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
 
-# only enabling VoIP on native compilation, because we don't [want to?] have cross-compiled ffmpeg
+cp -r /root/nsc-0.5.3 3rdparty
+
+# only enabling some features only with native compilation, because we don't [want to?] have cross-compiled ffmpeg and NSC
 if [ "$TARGET_PLATFORM" = "linux" ]; then
     opp_featuretool enable VoIPStream
     opp_featuretool enable VoIPStream_examples
+
+    opp_featuretool enable TCP_NSC
+    opp_featuretool enable TCP_lwIP
 fi
 
 make makefiles
