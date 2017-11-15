@@ -13,109 +13,126 @@ OMNeT++ 5.1 or 5.2. The modification is distributed as a patch file in the
 
 The highlights of this release are:
 
-1. Shared pointer
+1. General
 
- - Added aliases for std::make_shared, std::dynamic_pointer_cast, etc. to support
-   replacing the shared pointer implementation used by the new Packet API.
-
- - Added a new shared pointer (from Boost) implementation called IntrusivePtr.
-   The new implementation uses only 1 counter (no weak counter) that is directly
-   added to the shared object using inheritance. This is the reason why it's
-   called intrusive. This shared pointer is not thread safe, so it doesn't use
-   atomic operations to increment/decrement counters, but generally it's not a
-   requirement for simulation. According to speed measurements (see tests/speed
-   folder) the release builds run 5-10% faster.
-
-2. General
-
+ - Dropped obsolete run scripts for individual simulations. The run scripts are
+   replaced by a setenv script in the INET installation and separate inet scripts
+   in the bin folder. Run 'setenv' once from the shell to setup the environment
+   variables, and run 'inet', 'inet_release' or 'inet_dbg' from the simulation
+   directory. 
+ - Removed compatibility macros required for OMNeT++ 4.x builds. This new INET
+   version doesn't build with OMNeT++ 4.x versions.
  - Renamed the byte and bit C++ units to B and b respectively. The new names
    were selected to be conformant with the IEC & IEEE unit conventions.
-
- - Removed compatibility macros required for OMNeT++ 4.x builds.
-
  - Fixed several memory leaks and other minor bugs.
+
+2. Shared pointer
+
+ - Added aliases for std::shared_ptr, std::make_shared, std::dynamic_pointer_cast,
+   etc. to support replacing the shared pointer implementation used by the new
+   Packet API.
+ - Added a new shared pointer implementation (from Boost) called IntrusivePtr.
+   The new implementation uses only 1 counter (no weak counter) that is directly
+   added to the shared object using inheritance (thus intrusive). This shared
+   pointer is not thread safe, so it doesn't use atomic operations to increment
+   and decrement counters, but generally that isn't a requirement for simulation.
+   According to speed measurements (see tests/speed folder) the release builds
+   run 5-10% faster.
 
 3. CRC handling
 
  - CRC insertion and validation code has been refactored and adapted to the new
-   Packet API. This change affects the following protocols: UDP, TCP, IPv4, ICMP,
-   Ethernet, IEEE 802.11. The protocol modules support different CRC operation
-   modes: disabled, declared, and computed. Either the disabled (if supported by
-   the protocol) or the computed mode must be selected if packets are recorded
-   in a PCAP file.
+   Packet API. This change affects UDP, TCP, IPv4, IPv6, ICMPv4, ICMPv6, Ethernet,
+   and IEEE 802.11. The protocol modules have a parameter to control CRC handling.
+   They support different CRC operation modes: disabled, declared, and computed.
+   Either the disabled (if supported by the protocol) or the computed mode must
+   be selected if packets are recorded in a PCAP file.
 
 4. Ethernet
 
- - Refactored and renamed physical layer representation
+ - Refactored physical layer packet representation and processing
+ - Cleaned up MSG files defining ethernet PHY and MAC frames and headers.
 
- - Moved ethertype constants to new EtherType.msg file,
- - dropped some unused ethernet related structs.
- - Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
- - Switched to using new ethernet header structures.
- - Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
- - Switched to using new ethernet header structures.
- - EthernetSerializer:Correctly implemented EthernetPhyHeaderSerializer.
- - EthernetSerializer: Fixed deserializing non-representable control frames.
+5. IEEE 802.2
 
-5. CsmaCa
+ - Renamed the global C++ protocol variable to Protocol::ieee8022, and the global
+   C++ protocol group variable to ProtocolGroup::ieee8022protocol.
+ - Fixed handling incoming packets with bit errors.
 
-- Moved ethertype constants to new EtherType.msg file,
-  dropped some unused ethernet related structs
-- Added missing PacketProtocolTag.
-- Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
-- Replaced EtherPhyFrame with EthernetPhyHeader in MACs.
-- Renamed EtherTraffic to EthernetSignal and extracted jam processing.
-- Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
-- Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
-- EtherEncap extends Ieee8022Llc module.
-- Normalized EtherEncap handleMessage.
-- Renamed ethernet, llc and snap headers.
-- Switched to new Ethernet header structures.
+6. IEEE 802.11
 
-6. IEEE 802.2
+ - Revived the FCS computation and verification. The FCS computation is optional,
+   you can enable it using the 'fcsMode' parameter of the Ieee80211Mac.
+ - Fixed rate selection mechanism for control response frames. They must be sent
+   with a mandatory rate that is not faster than the rate of the packet for which
+   they are a response. If the received packet was not sent with a mandatory rate,
+   then they were sent with the highest mandatory rate.
+ - Changed 802.11 OFDM error models with respect to the service field. The service
+   field is part of the PHY header in terms of bits, but it's sent in the data part
+   in terms of symbols.
+ - Fixed PHY header length in Ieee80211Radio. Added separate PHY chunks and PHY
+   padding bits for completeness. This change doesn't affect the signal duration,
+   because it was alrady correctly computed.
+ - Added descriptors for several parts for signals, transmissions, modes, bands,
+   channels, etc. The new descriptors allow inspecting of the signal meta data
+   in the runtime user interface.
+ - Extended 802.11 layered error model for packet level simulation.
 
- - Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
- - Adapted to using new ethernet header structures.
- - Renamed ethernet, llc and snap headers.
+7. CsmaCa
 
-7. Netfilter
+ - Added 'fcsMode' parameter and FCS computation and verification.
+ - Changed headerLength and ackLength to the minimum value, any additional length
+   specified is represented by a separate ByteCount chunk.
+ - Fixed error caused by receiving an ACK frame with bit errors.
+ - Fixed state machine when receiving unexpected frames while trying to transmit one.
 
- - Redesigned Netfilter hooks: functions have only the Packet
-   parameter, in/out interfaces and nextHop are TAGs on the packet.
+8. Netfilter
 
-8. Network interface
+ - Refactored netfilter hooks so that the new interface functions only get the
+   datagram as a parameter. Hook implementations should query and modify the
+   packet and/or the attached tags. For example, setting the outgoing interface
+   can be done by attaching an InterfaceReq tag.
 
- - Merged InterfaceEntry and corresponding NIC module.
- - InterfaceEntry->getName() replaced to InterfaceEntry->getInterfaceName().
+9. Network interface
 
-8. Radio enchanced to better support dynamic networks
+ - Added the InterfaceEntry class used by InterfaceTable to the corresponding
+   NIC modules, because they represent the same network interface. All network
+   interface modules are required to have a @class(InterfaceEntry) property in
+   their NED definition. This change also allows one to see the internal state
+   of a network interface just by selecting its submodule in the runtime user
+   interface.
 
- - Extracted IAntennaGain from IAntenna interface.
- - Changed transmitter lookup by id instead of internal pointer.
+10. Radio
+
+ - Extracted a separate IAntennaGain interface from the IAntenna interface. This
+   change allows the transmissions to carry directional selectivity even if the
+   transmitter radio gets destroyed during the propagation of the signal.
+ - Changed transmitter lookup to use radio identifier instead of internal pointer
+   to fix crashes when the condition described above occurs.
  - Separated simsignals for transmission/reception from radio signal departure/arrival.
- - Add RadioMedium::getRadio() method for fetching radios by id.
+   This allows differentiating signals at the receiver which are actually attempted
+   to be received as opposed to simply arriving there.
 
-9. MANET routing
+11. MANET routing
 
- - Adapted all MANET routing protocols (AODV, DYMO, and GPSR) to the redesigned
-   INetfilter hook interface. The new interface functions only get the datagram
-   as a parameter. Routing protocols may query and modify the packet and/or the
-   attached tags.
+ - Adapted all MANET routing protocols (AODV, DYMO, and GPSR) to the refactored
+   INetfilter hook interface. Routing protocols query and modify the packet and/or
+   the attached tags as they need.
 
-10. TCP parameter change
+12. TCP
 
- - Removed obsolete TCP socket parameter dataTransferMode from all implementations.
-   Applications need not select between sending byte count based packets, field
-   based packets, or raw bytes based packets. With the new API, applications can
-   send any combination of the above over the same connection.
+ - Removed obsolete TCP socket 'dataTransferMode' parameter from all implementations.
+   Applications don't have to decide upfront between sending byte count based, field
+   based, or raw bytes based packets. With the new API, applications can send any
+   combination of the above over the same connection.
 
-11 New visualizer modules
+13. Visualizer
 
  - Added a new set of integrated visualizer modules called IntegratedMultiVisualizer,
    IntegratedMultiCanvasVisualizer, and IntegratedMultiOsgVisualizer. These modules
-   contain a submodule vector of all specialized visualizers inside as opposed to a
-   single instance. For example, this allows the user to easily configure several
-   visualizers to display various parts of the network differently.
+   contain a submodule vector of all special purpose visualizers inside as opposed
+   to a single instance. This change allows, for example, one to easily configure
+   several visualizers to display various aspects of the simulation differently.
 
 
 INET-3.99.0 (August, 2017) - Development
