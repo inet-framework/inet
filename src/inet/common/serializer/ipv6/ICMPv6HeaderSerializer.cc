@@ -101,6 +101,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
+            //FIXME serialize TLV options
             // TODO: incomplete
             break;
         }
@@ -111,8 +112,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
-            if (frame->getChunkLength() > B(8))
-                stream.writeMACAddress(frame->getSourceLinkLayerAddress());     // OPTIONAL field
+            //FIXME serialize TLV options
             // TODO: incomplete
             break;
         }
@@ -123,6 +123,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
+            //FIXME serialize TLV options
             // TODO: incomplete
         }
 
@@ -176,6 +177,8 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
 
             stream.readUint32Be(); // reserved
             neighbourSol->setTargetAddress(stream.readIPv6Address());
+
+            //FIXME deserialize TLV options
             while (stream.getRemainingLength() != B(0)) {   // has options
                 unsigned char type = stream.readByte();
                 unsigned char length = stream.readByte();
@@ -195,6 +198,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             neighbourAd->setType(type);
             neighbourAd->setCode(subcode);
             stream.readUint32Be(); // reserved
+            //FIXME deserialize TLV options
             // TODO: incomplete
             break;
         }
@@ -204,9 +208,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             routerSol->setType(type);
             routerSol->setCode(subcode);
             stream.readUint32Be(); // reserved
-            if (stream.getRemainingLength() > B(0)) {   // has options
-                routerSol->setSourceLinkLayerAddress(stream.readMACAddress());
-            }
+            //FIXME deserialize TLV options
             // TODO: incomplete
             break;
         }
@@ -216,6 +218,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             routerAd->setType(type);
             routerAd->setCode(subcode);
             stream.readUint32Be(); // reserved
+            //FIXME deserialize TLV options
             // TODO: incomplete
             break;
         }

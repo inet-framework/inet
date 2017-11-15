@@ -101,12 +101,12 @@ class IPv6NDMessage extends Icmpv6Header
 //
 class IPv6RouterSolicitation extends IPv6NDMessage
 {
-    //Possible Options
+    //Possible Options   //FIXME these fields are TLV options!
 
     // The link-layer address of the sender, if known.
     // MUST NOT be included if the Source Address is the unspecified address.
     // Otherwise, it SHOULD be included on link layers that have addresses.
-    MACAddress sourceLinkLayerAddress;  //TODO this field is optional!!!
+    MACAddress sourceLinkLayerAddress;
 }
 
 //
@@ -125,7 +125,8 @@ class IPv6RouterAdvertisement extends IPv6NDMessage
     unsigned int reachableTime;
     unsigned int retransTimer;
 
-    //Possible Options
+    //Possible Options   //FIXME these fields are TLV options!
+
     MACAddress sourceLinkLayerAddress;        //source link layer option
     unsigned int MTU;                //MTU option
     IPv6NDPrefixInformation prefixInformation[];    //Prefix Information Option
@@ -142,7 +143,7 @@ class Ipv6NeighbourSolicitation extends IPv6NDMessage
     //Additional ICMP fields
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
-    //Possible Options
+    //Possible Options   //FIXME these fields are TLV options!
 
     // The link-layer address for the sender.
     // MUST NOT be included when the source IP address is the unspecified address.
@@ -163,7 +164,8 @@ class IPv6NeighbourAdvertisement extends IPv6NDMessage
     bool overrideFlag;    //O-flag
     IPv6Address targetAddress;// MUST NOT be a multicast address.
 
-    //Possible Options
+    //Possible Options   //FIXME these fields are TLV options!
+
     MACAddress targetLinkLayerAddress;    //Target Link Layer Address option
 }
 
@@ -177,7 +179,8 @@ class IPv6Redirect extends IPv6NDMessage
     IPv6Address targetAddress;
     IPv6Address destinationAddress;
 
-    //Possible Options
+    //Possible Options   //FIXME these fields are TLV options!
+
     MACAddress targetLinkLayerAddress;
         //Redirected Header Encapsulated Msg
 }
