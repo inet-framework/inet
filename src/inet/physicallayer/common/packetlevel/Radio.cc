@@ -283,7 +283,7 @@ void Radio::handleLowerCommand(cMessage *message)
 
 void Radio::handleUpperPacket(Packet *packet)
 {
-    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
+    emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
         if (transmissionTimer->isScheduled())
             throw cRuntimeError("Received frame from upper layer while already transmitting.");
@@ -489,7 +489,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         decapsulate(macFrame);
-        emit(LayeredProtocolBase::packetSentToUpperSignal, macFrame);
+        emit(packetSentToUpperSignal, macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));

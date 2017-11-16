@@ -94,7 +94,7 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
             numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
             delete frame->removeTag<DispatchProtocolReq>();
-            emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
+            emit(packetReceivedFromLowerSignal, frame);
             handleAndDispatchFrame(frame);
         }
     }
@@ -204,7 +204,7 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     packet->clearTags();
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->removePoppedChunks();
-    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+    emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
 }
 
@@ -244,7 +244,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
-    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+    emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
 }
 

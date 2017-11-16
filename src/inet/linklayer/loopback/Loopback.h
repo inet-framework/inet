@@ -40,9 +40,6 @@ class INET_API Loopback : public MACBase
     long numSent = 0;
     long numRcvdOK = 0;
 
-    static simsignal_t packetSentToUpperSignal;
-    static simsignal_t packetReceivedFromUpperSignal;
-
   protected:
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void flushQueue() override;

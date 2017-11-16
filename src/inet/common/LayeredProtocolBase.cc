@@ -15,14 +15,9 @@
 //
 
 #include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
-
-simsignal_t LayeredProtocolBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t LayeredProtocolBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
-
-simsignal_t LayeredProtocolBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
-simsignal_t LayeredProtocolBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
 
 void LayeredProtocolBase::handleMessageWhenUp(cMessage *message)
 {

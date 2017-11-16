@@ -58,7 +58,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     Packet *packet = check_and_cast<Packet *>(msg);
     const auto& frame = packet->peekHeader<EthernetMacHeader>();
     // Frame received from MAC unit
-    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
+    emit(packetReceivedFromLowerSignal, packet);
     handleAndDispatchFrame(packet, frame);
 }
 
@@ -98,7 +98,7 @@ void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
         packet->clearTags();
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         packet->removePoppedChunks();
-        emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+        emit(packetSentToLowerSignal, packet);
         send(packet, "ifOut");
     }
     else {
@@ -120,7 +120,7 @@ void MACRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
         if (inputInterfaceId != ifId) {
             Packet *dupFrame = packet->dup();
             dupFrame->ensureTag<InterfaceReq>()->setInterfaceId(ifId);
-            emit(LayeredProtocolBase::packetSentToLowerSignal, dupFrame);
+            emit(packetSentToLowerSignal, dupFrame);
             send(dupFrame, "ifOut");
         }
     }

@@ -27,11 +27,6 @@ namespace inet {
 class INET_API TunInterface : public MACBase
 {
     protected:
-        static simsignal_t packetSentToLowerSignal;
-        static simsignal_t packetReceivedFromLowerSignal;
-        static simsignal_t packetSentToUpperSignal;
-        static simsignal_t packetReceivedFromUpperSignal;
-
         std::vector<int> socketIds;
 
     protected:

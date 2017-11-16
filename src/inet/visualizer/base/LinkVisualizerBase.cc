@@ -123,8 +123,8 @@ void LinkVisualizerBase::refreshDisplay() const
 void LinkVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
+    subscriptionModule->subscribe(packetSentToUpperSignal, this);
+    subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
 }
 
 void LinkVisualizerBase::unsubscribe()
@@ -132,8 +132,8 @@ void LinkVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
+        subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
+        subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
     }
 }
 
@@ -210,7 +210,7 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
+    if (signal == packetReceivedFromUpperSignal) {
         if (isLinkStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
@@ -222,7 +222,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             }
         }
     }
-    else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
+    else if (signal == packetSentToUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);

@@ -114,7 +114,13 @@ extern INET_API simsignal_t    // admin
 //...
 
 // general
-    packetDropSignal;
+    packetDropSignal,
+
+    packetSentToUpperSignal,
+    packetReceivedFromUpperSignal,
+
+    packetSentToLowerSignal,
+    packetReceivedFromLowerSignal;
 
 /**
  * Utility function

@@ -36,10 +36,6 @@ Define_Module(PPP);
 
 simsignal_t PPP::txStateSignal = registerSignal("txState");
 simsignal_t PPP::rxPkOkSignal = registerSignal("rxPkOk");
-simsignal_t PPP::packetSentToLowerSignal = registerSignal("packetSentToLower");
-simsignal_t PPP::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-simsignal_t PPP::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t PPP::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 PPP::~PPP()
 {

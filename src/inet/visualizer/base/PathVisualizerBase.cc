@@ -121,9 +121,9 @@ void PathVisualizerBase::refreshDisplay() const
 void PathVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
-    subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromLowerSignal, this);
+    subscriptionModule->subscribe(packetSentToUpperSignal, this);
+    subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
+    subscriptionModule->subscribe(packetReceivedFromLowerSignal, this);
 }
 
 void PathVisualizerBase::unsubscribe()
@@ -131,9 +131,9 @@ void PathVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
-        subscriptionModule->unsubscribe(LayeredProtocolBase::packetReceivedFromLowerSignal, this);
+        subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
+        subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
+        subscriptionModule->unsubscribe(packetReceivedFromLowerSignal, this);
     }
 }
 
@@ -230,7 +230,7 @@ void PathVisualizerBase::refreshPathVisualization(const PathVisualization *pathV
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
+    if (signal == packetReceivedFromUpperSignal) {
         if (isPathStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
@@ -246,7 +246,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             }
         }
     }
-    else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
+    else if (signal == packetReceivedFromLowerSignal) {
         if (isPathElement(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<Packet *>(object);
             if (packetFilter.matches(packet)) {
@@ -259,7 +259,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             }
         }
     }
-    else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
+    else if (signal == packetSentToUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);

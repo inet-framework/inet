@@ -123,11 +123,6 @@ simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits"
 simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
 simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
 
-simsignal_t EtherMACBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
-simsignal_t EtherMACBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-simsignal_t EtherMACBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t EtherMACBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
-
 simsignal_t EtherMACBase::transmitStateSignal = registerSignal("transmitState");
 simsignal_t EtherMACBase::receiveStateSignal = registerSignal("receiveState");
 

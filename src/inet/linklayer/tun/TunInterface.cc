@@ -29,11 +29,6 @@ namespace inet {
 
 Define_Module(TunInterface);
 
-simsignal_t TunInterface::packetSentToLowerSignal = registerSignal("packetSentToLower");
-simsignal_t TunInterface::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-simsignal_t TunInterface::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t TunInterface::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
-
 void TunInterface::initialize(int stage)
 {
     MACBase::initialize(stage);

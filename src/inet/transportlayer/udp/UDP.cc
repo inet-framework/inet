@@ -324,7 +324,7 @@ void UDP::processCommandFromApp(cMessage *msg)
 
 void UDP::processPacketFromApp(Packet *packet)
 {
-    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
+    emit(packetReceivedFromUpperSignal, packet);
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
@@ -397,7 +397,7 @@ void UDP::processPacketFromApp(Packet *packet)
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(sentPkSignal, packet);
-    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+    emit(packetSentToLowerSignal, packet);
     send(packet, "ipOut");
     numSent++;
 }
@@ -405,7 +405,7 @@ void UDP::processPacketFromApp(Packet *packet)
 void UDP::processUDPPacket(Packet *udpPacket)
 {
     ASSERT(udpPacket->getControlInfo() == nullptr);
-    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, udpPacket);
+    emit(packetReceivedFromLowerSignal, udpPacket);
     emit(rcvdPkSignal, udpPacket);
 
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
@@ -831,7 +831,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
     payload->ensureTag<L4PortInd>()->setDestPort(destPort);
 
     emit(passedUpPkSignal, payload);
-    emit(LayeredProtocolBase::packetSentToUpperSignal, payload);
+    emit(packetSentToUpperSignal, payload);
     send(payload, "appOut");
     numPassedUp++;
 }

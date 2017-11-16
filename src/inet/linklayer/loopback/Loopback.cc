@@ -34,9 +34,6 @@ namespace inet {
 
 Define_Module(Loopback);
 
-simsignal_t Loopback::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t Loopback::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
-
 Loopback::~Loopback()
 {
 }

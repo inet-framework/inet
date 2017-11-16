@@ -245,7 +245,7 @@ void IPv4::handleIncomingDatagram(Packet *packet)
 {
     ASSERT(packet);
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
+    emit(packetReceivedFromLowerSignal, packet);
 
     //
     // "Prerouting"
@@ -375,7 +375,7 @@ void IPv4::preroutingFinish(Packet *packet)
 void IPv4::handlePacketFromHL(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer.\n";
-    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
+    emit(packetReceivedFromUpperSignal, packet);
 
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
@@ -727,11 +727,11 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet)
     for (auto it = lowerBound; it != upperBound; it++) {
         cPacket *packetCopy = packet->dup();
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
-        emit(LayeredProtocolBase::packetSentToUpperSignal, packetCopy);
+        emit(packetSentToUpperSignal, packetCopy);
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {
-        emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
+        emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
     }

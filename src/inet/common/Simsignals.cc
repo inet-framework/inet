@@ -95,6 +95,13 @@ simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_
 
 simsignal_t packetDropSignal = cComponent::registerSignal("packetDrop");
 
+simsignal_t packetSentToUpperSignal = cComponent::registerSignal("packetSentToUpper");
+simsignal_t packetReceivedFromUpperSignal = cComponent::registerSignal("packetReceivedFromUpper");
+
+simsignal_t packetSentToLowerSignal = cComponent::registerSignal("packetSentToLower");
+simsignal_t packetReceivedFromLowerSignal = cComponent::registerSignal("packetReceivedFromLower");
+
+
 void printSignalBanner(simsignal_t signalID, const cObject *obj)
 {
     EV << "** Signal at T=" << simTime()
