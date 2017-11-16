@@ -57,6 +57,15 @@ void LinkVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayLinks = par("displayLinks");
+        const char *activityLevelString = par("activityLevel");
+        if (!strcmp(activityLevelString, "service"))
+            activityLevel = ACTIVITY_LEVEL_SERVICE;
+        else if (!strcmp(activityLevelString, "peer"))
+            activityLevel = ACTIVITY_LEVEL_PEER;
+        else if (!strcmp(activityLevelString, "protocol"))
+            activityLevel = ACTIVITY_LEVEL_PROTOCOL;
+        else
+            throw cRuntimeError("Unknown activity level: %s", activityLevelString);
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         packetFilter.setPattern(par("packetFilter"));
@@ -123,8 +132,18 @@ void LinkVisualizerBase::refreshDisplay() const
 void LinkVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(packetSentToUpperSignal, this);
-    subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
+    if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
+        subscriptionModule->subscribe(packetSentToUpperSignal, this);
+        subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
+    }
+    else if (activityLevel == ACTIVITY_LEVEL_PEER) {
+        subscriptionModule->subscribe(packetSentToPeerSignal, this);
+        subscriptionModule->subscribe(packetReceivedFromPeerSignal, this);
+    }
+    else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
+        subscriptionModule->subscribe(packetSentToLowerSignal, this);
+        subscriptionModule->subscribe(packetReceivedFromLowerSignal, this);
+    }
 }
 
 void LinkVisualizerBase::unsubscribe()
@@ -132,8 +151,18 @@ void LinkVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
-        subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
+        if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
+            subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
+            subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
+        }
+        else if (activityLevel == ACTIVITY_LEVEL_PEER) {
+            subscriptionModule->unsubscribe(packetSentToPeerSignal, this);
+            subscriptionModule->unsubscribe(packetReceivedFromPeerSignal, this);
+        }
+        else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
+            subscriptionModule->unsubscribe(packetSentToLowerSignal, this);
+            subscriptionModule->unsubscribe(packetReceivedFromLowerSignal, this);
+        }
     }
 }
 
@@ -210,7 +239,10 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == packetReceivedFromUpperSignal) {
+    if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetReceivedFromUpperSignal) ||
+        (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetSentToPeerSignal) ||
+        (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal))
+    {
         if (isLinkStart(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);
@@ -222,7 +254,10 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             }
         }
     }
-    else if (signal == packetSentToUpperSignal) {
+    else if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetSentToUpperSignal) ||
+             (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetReceivedFromPeerSignal) ||
+             (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetReceivedFromLowerSignal))
+    {
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto packet = check_and_cast<Packet *>(object);

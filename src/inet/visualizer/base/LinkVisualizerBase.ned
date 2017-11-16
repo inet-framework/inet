@@ -42,6 +42,7 @@ simple LinkVisualizerBase extends VisualizerBase
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for signals, root module by default
 
         bool displayLinks = default(false); // display arrows for active links, disabled by default
+        string activityLevel @enum("service", "peer", "protocol") = default("service"); // determines what level of activity is displayed, service level by default 
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default

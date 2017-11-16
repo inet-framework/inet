@@ -34,6 +34,12 @@ namespace visualizer {
 class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
+    enum ActivityLevel {
+        ACTIVITY_LEVEL_SERVICE,
+        ACTIVITY_LEVEL_PEER,
+        ACTIVITY_LEVEL_PROTOCOL,
+    };
+
     class INET_API LinkVisualization : public LineManager::ModuleLine {
       public:
         mutable AnimationPosition lastUsageAnimationPosition;
@@ -58,6 +64,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     /** @name Parameters */
     //@{
     bool displayLinks = false;
+    ActivityLevel activityLevel = (ActivityLevel)-1;
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
