@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2016-10-26  Zoltan Bojthe
 
 	Removed compatibility macros required for OMNeT++ 4.x builds.

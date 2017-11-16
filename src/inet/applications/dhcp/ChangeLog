@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2017-11-08  Zoltan Bojthe
 
 	Fixed bug related to processsing NF_L2_ASSOCIATED signal,

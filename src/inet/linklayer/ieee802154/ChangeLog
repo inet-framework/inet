@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2015-07-01  Zoltan Bojthe
 
 	Added @nic property to all network interfaces.

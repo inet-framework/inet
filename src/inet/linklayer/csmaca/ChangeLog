@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2017-11-09  Levente Mészáros
 
 	Removed call to resetStateVariables from receiving state machine transitions,

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2017-03-20  Levente Mészáros
 
 	Fixed bug introduced with porting to the new Packet API.

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2016-06-02  Levente Mészáros
 
 	Changed applications to implement the new IApp interface.

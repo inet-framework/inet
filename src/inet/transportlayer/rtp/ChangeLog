@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2017-10-20  Zoltan Bojthe
 
 	Merged RTCPPacket1-3.msg and RTCPPacket1-3.h to the single RTCPPacket.msg file.

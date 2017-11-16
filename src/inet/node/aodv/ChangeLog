@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2016-04-27  Levente Mészáros
 
 	Adapted AODVRouter to new network node infrastructure.

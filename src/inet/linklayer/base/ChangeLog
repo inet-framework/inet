@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2017-11-16  ------ inet-3.99.1 released ------
+
 2017-07-12  Levente Mészáros
 
 	Replaced remaining packet drop signals with the generic one.
