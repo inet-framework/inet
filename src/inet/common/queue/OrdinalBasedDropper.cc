@@ -22,9 +22,6 @@ namespace inet {
 
 Define_Module(OrdinalBasedDropper);
 
-simsignal_t OrdinalBasedDropper::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t OrdinalBasedDropper::sentPkSignal = registerSignal("sentPk");
-
 void OrdinalBasedDropper::initialize()
 {
     numPackets = 0;

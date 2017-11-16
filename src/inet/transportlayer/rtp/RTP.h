@@ -204,9 +204,6 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     bool _leaveSession;
 
     int appInGate, profileInGate, rtcpInGate, udpInGate;
-
-    //statistics:
-    static simsignal_t rcvdPkSignal;
 };
 
 } // namespace rtp

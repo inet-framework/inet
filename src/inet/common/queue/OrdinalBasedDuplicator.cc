@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/queue/OrdinalBasedDuplicator.h"
-
 #include "inet/common/INETUtils.h"
+#include "inet/common/queue/OrdinalBasedDuplicator.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 
 Define_Module(OrdinalBasedDuplicator);
 
-simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t OrdinalBasedDuplicator::sentPkSignal = registerSignal("sentPk");
 simsignal_t OrdinalBasedDuplicator::duplPkSignal = registerSignal("duplPk");
 
 void OrdinalBasedDuplicator::initialize()

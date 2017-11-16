@@ -133,8 +133,6 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
     bool isOperational = false;
 
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
     static simsignal_t passedUpPkSignal;
     static simsignal_t droppedPkWrongPortSignal;
     static simsignal_t droppedPkBadChecksumSignal;

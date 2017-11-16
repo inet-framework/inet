@@ -28,9 +28,6 @@ namespace inet {
 
 Define_Module(TunLoopbackApp);
 
-simsignal_t TunLoopbackApp::sentPkSignal = registerSignal("sentPk");
-simsignal_t TunLoopbackApp::rcvdPkSignal = registerSignal("rcvdPk");
-
 TunLoopbackApp::TunLoopbackApp() :
     packetsSent(0),
     packetsReceived(0)

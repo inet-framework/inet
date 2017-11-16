@@ -86,9 +86,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     int notificationsReceived;
     int numSessions;
     int chunksAbandoned;
-    static simsignal_t sentPkSignal;
     static simsignal_t echoedPkSignal;
-    static simsignal_t rcvdPkSignal;
 
   protected:
 

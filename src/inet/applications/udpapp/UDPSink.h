@@ -42,7 +42,6 @@ class INET_API UDPSink : public ApplicationBase
     cMessage *selfMsg = nullptr;
 
     int numReceived = 0;
-    static simsignal_t rcvdPkSignal;
 
   public:
     UDPSink() {}

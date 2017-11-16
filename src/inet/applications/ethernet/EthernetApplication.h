@@ -38,9 +38,6 @@ class INET_API EthernetApplication : public cSimpleModule
     long packetsSent = 0;
     long packetsReceived = 0;
 
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
-
   protected:
 
     virtual void initialize(int stage) override;

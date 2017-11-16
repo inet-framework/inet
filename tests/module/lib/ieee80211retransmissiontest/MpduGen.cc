@@ -27,9 +27,6 @@ namespace inet {
 
 Define_Module(MpduGen);
 
-simsignal_t MpduGen::sentPkSignal = registerSignal("sentPk");
-simsignal_t MpduGen::rcvdPkSignal = registerSignal("rcvdPk");
-
 void MpduGen::initialize(int stage)
 {
     ApplicationBase::initialize(stage);

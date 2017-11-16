@@ -139,9 +139,6 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     Buffer sampleBuffer;
 
     cMessage *timer = nullptr;
-
-    // statistics:
-    static simsignal_t sentPkSignal;
 };
 
 } // namespace inet

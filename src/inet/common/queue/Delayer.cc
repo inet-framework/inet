@@ -18,13 +18,12 @@
 //
 
 #include "inet/common/queue/Delayer.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 
 Define_Module(Delayer);
 
-simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t Delayer::sentPkSignal = registerSignal("sentPk");
 simsignal_t Delayer::delaySignal = registerSignal("delay");
 
 void Delayer::initialize()

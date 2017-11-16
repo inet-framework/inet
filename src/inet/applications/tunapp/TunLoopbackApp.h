@@ -30,9 +30,6 @@ class INET_API TunLoopbackApp : public cSimpleModule
         unsigned int packetsSent;
         unsigned int packetsReceived;
 
-        static simsignal_t sentPkSignal;
-        static simsignal_t rcvdPkSignal;
-
         TunSocket tunSocket;
 
     public:

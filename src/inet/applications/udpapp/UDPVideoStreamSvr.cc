@@ -28,7 +28,6 @@ namespace inet {
 Define_Module(UDPVideoStreamSvr);
 
 simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = registerSignal("reqStreamBytes");
-simsignal_t UDPVideoStreamSvr::sentPkSignal = registerSignal("sentPk");
 
 inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d)
 {

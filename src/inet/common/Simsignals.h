@@ -120,7 +120,10 @@ extern INET_API simsignal_t    // admin
     packetReceivedFromUpperSignal,
 
     packetSentToLowerSignal,
-    packetReceivedFromLowerSignal;
+    packetReceivedFromLowerSignal,
+
+    sentPkSignal,
+    rcvdPkSignal;
 
 /**
  * Utility function

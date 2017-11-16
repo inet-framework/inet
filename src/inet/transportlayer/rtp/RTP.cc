@@ -37,8 +37,6 @@ namespace rtp {
 
 Define_Module(RTP);
 
-simsignal_t RTP::rcvdPkSignal = registerSignal("rcvdPk");
-
 //
 // methods inherited from cSimpleModule
 //

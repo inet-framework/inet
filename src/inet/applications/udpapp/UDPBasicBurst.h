@@ -80,8 +80,6 @@ class INET_API UDPBasicBurst : public ApplicationBase
     int numDeleted = 0;
     int numDuplicated = 0;
 
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
     static simsignal_t outOfOrderPkSignal;
     static simsignal_t dropPkSignal;
 

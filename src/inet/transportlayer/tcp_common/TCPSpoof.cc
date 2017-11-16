@@ -25,8 +25,6 @@ namespace tcp {
 
 Define_Module(TCPSpoof);
 
-simsignal_t TCPSpoof::sentPkSignal = registerSignal("sentPk");
-
 void TCPSpoof::initialize()
 {
     simtime_t t = par("t").doubleValue();

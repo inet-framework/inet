@@ -26,8 +26,6 @@ namespace inet {
 
 Define_Module(UDPSink);
 
-simsignal_t UDPSink::rcvdPkSignal = registerSignal("rcvdPk");
-
 UDPSink::~UDPSink()
 {
     cancelAndDelete(selfMsg);

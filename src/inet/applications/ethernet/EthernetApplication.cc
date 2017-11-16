@@ -11,17 +11,17 @@
  *
  ******************************************************/
 
-#include "inet/applications/ethernet/EthernetApplication.h"
 #include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/applications/ethernet/EthernetApplication.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
 Define_Module(EthernetApplication);
-simsignal_t EthernetApplication::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EthernetApplication::rcvdPkSignal = SIMSIGNAL_NULL;
+
 void EthernetApplication::initialize(int stage)
 {
     // we can only initialize in the 2nd stage (stage==1), because
@@ -36,8 +36,6 @@ void EthernetApplication::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 

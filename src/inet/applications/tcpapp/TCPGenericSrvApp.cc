@@ -30,9 +30,6 @@ namespace inet {
 
 Define_Module(TCPGenericSrvApp);
 
-simsignal_t TCPGenericSrvApp::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t TCPGenericSrvApp::sentPkSignal = registerSignal("sentPk");
-
 void TCPGenericSrvApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

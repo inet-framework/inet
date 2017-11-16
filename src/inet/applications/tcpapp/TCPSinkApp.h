@@ -34,9 +34,6 @@ class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
     TCPSocket socket;
     long bytesRcvd;
 
-    //statistics:
-    static simsignal_t rcvdPkSignal;
-
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;

@@ -35,7 +35,6 @@ class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
   protected:
     int numReceived;
     bool isOperational;
-    static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void printPacket(cPacket *msg);

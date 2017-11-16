@@ -27,8 +27,6 @@ namespace inet {
 
 Define_Module(UDPVideoStreamCli);
 
-simsignal_t UDPVideoStreamCli::rcvdPkSignal = registerSignal("rcvdPk");
-
 void UDPVideoStreamCli::initialize(int stage)
 {
     ApplicationBase::initialize(stage);

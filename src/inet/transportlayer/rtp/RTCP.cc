@@ -35,8 +35,6 @@ namespace rtp {
 
 Define_Module(RTCP);
 
-simsignal_t RTCP::rcvdPkSignal = registerSignal("rcvdPk");
-
 RTCP::RTCP()
 {
 }

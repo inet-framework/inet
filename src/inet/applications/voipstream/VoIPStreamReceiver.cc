@@ -28,7 +28,6 @@ namespace inet {
 
 Define_Module(VoIPStreamReceiver);
 
-simsignal_t VoIPStreamReceiver::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t VoIPStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
 simsignal_t VoIPStreamReceiver::lostPacketsSignal = registerSignal("lostPackets");
 simsignal_t VoIPStreamReceiver::dropPkSignal = registerSignal("dropPk");

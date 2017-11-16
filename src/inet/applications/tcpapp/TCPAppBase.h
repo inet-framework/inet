@@ -44,8 +44,6 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
 
     //statistics:
     static simsignal_t connectSignal;
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
 
   protected:
     virtual void initialize(int stage) override;

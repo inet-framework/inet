@@ -41,8 +41,6 @@ Define_Module(UDPBasicBurst);
 
 int UDPBasicBurst::counter;
 
-simsignal_t UDPBasicBurst::sentPkSignal = registerSignal("sentPk");
-simsignal_t UDPBasicBurst::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
 simsignal_t UDPBasicBurst::dropPkSignal = registerSignal("dropPk");
 

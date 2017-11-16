@@ -238,9 +238,6 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
      * writes its calculated rtcp interval (without variation
      */
 //  cOutVector *_rtcpIntervalOutVector;
-
-    //statistics
-    static simsignal_t rcvdPkSignal;
 };
 
 } // namespace rtp

@@ -33,9 +33,6 @@ namespace inet {
 
 Define_Module(EtherAppCli);
 
-simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
-simsignal_t EtherAppCli::rcvdPkSignal = registerSignal("rcvdPk");
-
 EtherAppCli::~EtherAppCli()
 {
     cancelAndDelete(timerMsg);

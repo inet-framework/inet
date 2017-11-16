@@ -52,9 +52,6 @@ class INET_API UDPBasicApp : public ApplicationBase
     int numSent = 0;
     int numReceived = 0;
 
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

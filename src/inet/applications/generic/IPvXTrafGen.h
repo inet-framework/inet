@@ -55,8 +55,6 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     // statistic
     int numSent = 0;
     int numReceived = 0;
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void scheduleNextPacket(simtime_t previous);

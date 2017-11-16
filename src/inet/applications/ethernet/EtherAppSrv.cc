@@ -33,9 +33,6 @@ namespace inet {
 
 Define_Module(EtherAppSrv);
 
-simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");
-simsignal_t EtherAppSrv::rcvdPkSignal = registerSignal("rcvdPk");
-
 void EtherAppSrv::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

@@ -39,9 +39,7 @@ namespace inet {
 
 Define_Module(SCTPPeer);
 
-simsignal_t SCTPPeer::sentPkSignal = registerSignal("sentPk");
 simsignal_t SCTPPeer::echoedPkSignal = registerSignal("echoedPk");
-simsignal_t SCTPPeer::rcvdPkSignal = registerSignal("rcvdPk");
 
 SCTPPeer::SCTPPeer()
 {

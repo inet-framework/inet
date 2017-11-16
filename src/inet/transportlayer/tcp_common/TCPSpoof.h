@@ -37,9 +37,6 @@ class INET_API TCPSpoof : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-
-  protected:
-    static simsignal_t sentPkSignal;
 };
 
 } // namespace tcp

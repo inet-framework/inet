@@ -34,9 +34,6 @@ protected:
     int localPort = -1, destPort = -1;
     UDPSocket socket;
 
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
-
     cMessage *selfMsg = nullptr;
     int numSent = 0;
     int numReceived = 0;

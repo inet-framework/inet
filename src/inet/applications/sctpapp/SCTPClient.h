@@ -79,8 +79,6 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     int numSessions;
     int numBroken;
     int chunksAbandoned;
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
     static simsignal_t echoedPkSignal;
 
   protected:

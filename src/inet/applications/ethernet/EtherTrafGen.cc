@@ -34,9 +34,6 @@ namespace inet {
 
 Define_Module(EtherTrafGen);
 
-simsignal_t EtherTrafGen::sentPkSignal = registerSignal("sentPk");
-simsignal_t EtherTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
-
 EtherTrafGen::EtherTrafGen()
 {
     sendInterval = nullptr;

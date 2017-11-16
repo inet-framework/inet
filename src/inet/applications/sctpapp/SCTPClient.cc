@@ -35,8 +35,6 @@ namespace inet {
 
 Define_Module(SCTPClient);
 
-simsignal_t SCTPClient::sentPkSignal = registerSignal("sentPk");
-simsignal_t SCTPClient::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t SCTPClient::echoedPkSignal = registerSignal("echoedPk");
 
 SCTPClient::SCTPClient()

@@ -45,10 +45,6 @@ class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
 
     std::map<int, ChunkQueue> socketQueue;
 
-    // statistics:
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
-
   protected:
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);

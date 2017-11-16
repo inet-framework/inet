@@ -29,10 +29,6 @@ namespace inet {
 
 Define_Module(UDPBasicApp);
 
-simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
-simsignal_t UDPBasicApp::rcvdPkSignal = registerSignal("rcvdPk");
-
-
 UDPBasicApp::~UDPBasicApp()
 {
     cancelAndDelete(selfMsg);

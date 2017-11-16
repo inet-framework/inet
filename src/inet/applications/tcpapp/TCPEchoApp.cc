@@ -17,10 +17,10 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPEchoApp.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
@@ -28,9 +28,6 @@ namespace inet {
 Define_Module(TCPEchoApp);
 
 Define_Module(TCPEchoAppThread);
-
-simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
 
 TCPEchoApp::TCPEchoApp()
 {
@@ -87,7 +84,7 @@ void TCPEchoAppThread::established()
 
 void TCPEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
-    echoAppModule->emit(echoAppModule->rcvdPkSignal, rcvdPkt);
+    echoAppModule->emit(rcvdPkSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;
 

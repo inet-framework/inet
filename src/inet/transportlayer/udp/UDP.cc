@@ -64,8 +64,6 @@ namespace inet {
 
 Define_Module(UDP);
 
-simsignal_t UDP::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t UDP::sentPkSignal = registerSignal("sentPk");
 simsignal_t UDP::passedUpPkSignal = registerSignal("passedUpPk");
 simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
 simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");

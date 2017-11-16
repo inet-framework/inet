@@ -39,9 +39,6 @@ class INET_API TCPEchoApp : public TCPSrvHostApp
     long bytesRcvd = 0;
     long bytesSent = 0;
 
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
-
   protected:
     virtual void sendDown(cMessage *msg);
 

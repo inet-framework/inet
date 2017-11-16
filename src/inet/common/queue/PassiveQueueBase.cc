@@ -22,7 +22,6 @@
 
 namespace inet {
 
-simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
 simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
 simsignal_t PassiveQueueBase::queueingTimeSignal = registerSignal("queueingTime");

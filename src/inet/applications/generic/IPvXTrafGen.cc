@@ -33,8 +33,6 @@ namespace inet {
 
 Define_Module(IPvXTrafGen);
 
-simsignal_t IPvXTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t IPvXTrafGen::sentPkSignal = registerSignal("sentPk");
 
 IPvXTrafGen::IPvXTrafGen()
 {

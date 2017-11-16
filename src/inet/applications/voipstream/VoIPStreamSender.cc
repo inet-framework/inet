@@ -30,8 +30,6 @@ extern "C" {
 
 Define_Module(VoIPStreamSender);
 
-simsignal_t VoIPStreamSender::sentPkSignal = registerSignal("sentPk");
-
 VoIPStreamSender::VoIPStreamSender()
 {
 }
