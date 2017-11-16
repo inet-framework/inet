@@ -142,7 +142,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
         virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
         virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
-        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header);
+        virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
         // Originator
         virtual void originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);

@@ -111,7 +111,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
         virtual void recipientProcessControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
-        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header);
+        virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     protected:
         // IChannelAccess::ICallback

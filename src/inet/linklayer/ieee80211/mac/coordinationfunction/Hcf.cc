@@ -297,6 +297,7 @@ void Hcf::frameSequenceFinished()
 
 void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    mac->emit(packetReceivedFromPeerSignal, packet);
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
@@ -361,7 +362,7 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     else if (hcca->isOwning())
         throw cRuntimeError("Hcca is unimplemented!");
     else
-        recipientProcessTransmittedControlResponseFrame(header);
+        recipientProcessTransmittedControlResponseFrame(packet, header);
     delete packet;
 }
 
@@ -403,6 +404,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 
 void Hcf::originatorProcessTransmittedFrame(Packet *packet)
 {
+    mac->emit(packetSentToPeerSignal, packet);
     auto transmittedHeader = packet->peekHeader<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -526,6 +528,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
 
 void Hcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTransmittedPacket)
 {
+    mac->emit(packetReceivedFromPeerSignal, receivedPacket);
     auto receivedHeader = receivedPacket->peekHeader<Ieee80211MacHeader>();
     auto lastTransmittedHeader = lastTransmittedPacket->peekHeader<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
@@ -686,8 +689,9 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     delete responsePacket;
 }
 
-void Hcf::recipientProcessTransmittedControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header)
+void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    mac->emit(packetSentToPeerSignal, packet);
     if (auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(header))
         ctsProcedure->processTransmittedCts(ctsFrame);
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header)) {
