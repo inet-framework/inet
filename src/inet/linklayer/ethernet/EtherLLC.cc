@@ -35,7 +35,6 @@ Define_Module(EtherLLC);
 simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");
 simsignal_t EtherLLC::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherLLC::decapPkSignal = registerSignal("decapPk");
-simsignal_t EtherLLC::passedUpPkSignal = registerSignal("passedUpPk");
 simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
 simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
 
@@ -195,7 +194,7 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
 
     // pass up to higher layer
     totalPassedUp++;
-    emit(passedUpPkSignal, packet);
+    emit(packetSentToUpperSignal, packet);
     send(packet, "upperLayerOut", port);
 }
 

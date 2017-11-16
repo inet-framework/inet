@@ -79,12 +79,11 @@ simple UDP like IUDP
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @signal[passedUpPk](type=cPacket);
         @signal[droppedPkWrongPort](type=cPacket);
         @signal[droppedPkBadChecksum](type=cPacket);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[passedUpPk](title="packets passed up"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; record=count,"vector(count)"; interpolationmode=none);
 

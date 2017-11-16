@@ -64,7 +64,6 @@ namespace inet {
 
 Define_Module(UDP);
 
-simsignal_t UDP::passedUpPkSignal = registerSignal("passedUpPk");
 simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
 simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
@@ -828,7 +827,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
     payload->ensureTag<L4PortInd>()->setSrcPort(srcPort);
     payload->ensureTag<L4PortInd>()->setDestPort(destPort);
 
-    emit(passedUpPkSignal, payload);
     emit(packetSentToUpperSignal, payload);
     send(payload, "appOut");
     numPassedUp++;

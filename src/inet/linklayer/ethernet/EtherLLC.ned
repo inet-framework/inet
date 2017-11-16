@@ -59,13 +59,13 @@ simple EtherLLC
         @signal[dsap](type=long);
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
-        @signal[passedUpPk](type=cPacket);
+        @signal[packetSentToUpper](type=cPacket);
         @signal[droppedPkUnknownDSAP](type=cPacket);
         @signal[pauseSent](type=long); // pause units
         @statistic[dsap](title="dsap registering";record=sum,vector);
         @statistic[encapPk](title="packets encapsulated";source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[decapPk](title="packets decapsulated";source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[passedUpPk](title="packets passed up";source=passedUpPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[passedUpPk](title="packets passed up";source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[droppedPkUnknownDSAP](title="dropped packets unknown DSAP";source=droppedPkUnknownDSAP; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[pauseSent](title="pause sent";record=count,vector);
     gates:

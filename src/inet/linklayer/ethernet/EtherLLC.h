@@ -51,7 +51,6 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     static simsignal_t dsapSignal;
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
-    static simsignal_t passedUpPkSignal;
     static simsignal_t droppedPkUnknownDSAPSignal;
     static simsignal_t pauseSentSignal;
 
