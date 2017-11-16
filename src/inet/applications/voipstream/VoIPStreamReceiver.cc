@@ -30,7 +30,6 @@ Define_Module(VoIPStreamReceiver);
 
 simsignal_t VoIPStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
 simsignal_t VoIPStreamReceiver::lostPacketsSignal = registerSignal("lostPackets");
-simsignal_t VoIPStreamReceiver::dropPkSignal = registerSignal("dropPk");
 simsignal_t VoIPStreamReceiver::packetHasVoiceSignal = registerSignal("packetHasVoice");
 simsignal_t VoIPStreamReceiver::connStateSignal = registerSignal("connState");
 simsignal_t VoIPStreamReceiver::delaySignal = registerSignal("delay");
@@ -92,8 +91,11 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
         emit(rcvdPkSignal, pk);
         decodePacket(pk);
     }
-    else
-        emit(dropPkSignal, msg);
+    else {
+        PacketDropDetails details;
+        details.setReason(CONGESTION);
+        emit(packetDropSignal, msg, &details);
+    }
 
     delete msg;
 }

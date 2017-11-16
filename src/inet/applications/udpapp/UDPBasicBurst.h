@@ -81,7 +81,6 @@ class INET_API UDPBasicBurst : public ApplicationBase
     int numDuplicated = 0;
 
     static simsignal_t outOfOrderPkSignal;
-    static simsignal_t dropPkSignal;
 
   protected:
     // chooses random destination address

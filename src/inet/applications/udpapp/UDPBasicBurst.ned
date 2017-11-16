@@ -120,11 +120,11 @@ simple UDPBasicBurst like IApp
         double delayLimit @unit(s) = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @signal[dropPk](type=cPacket);
+        @signal[packetDrop](type=Packet);
         @signal[outOfOrderPk](type=cPacket);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=packetDrop; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[outOfOrderPk](title="packets received out of order"; source=outOfOrderPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @display("i=block/app");

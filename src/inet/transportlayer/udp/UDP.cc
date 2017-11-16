@@ -64,9 +64,6 @@ namespace inet {
 
 Define_Module(UDP);
 
-simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
-simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
-
 bool UDP::MulticastMembership::isSourceAllowed(L3Address sourceAddr)
 {
     auto it = std::find(sourceList.begin(), sourceList.end(), sourceAddr);
@@ -422,7 +419,9 @@ void UDP::processUDPPacket(Packet *udpPacket)
 
     if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
         EV_WARN << "Packet has bit error, discarding\n";
-        emit(droppedPkBadChecksumSignal, udpPacket);
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDropSignal, udpPacket, &details);
         numDroppedBadChecksum++;
         delete udpPacket;
         return;
@@ -575,7 +574,9 @@ void UDP::processICMPv6Error(Packet *packet)
 void UDP::processUndeliverablePacket(Packet *udpPacket)
 {
     const auto& udpHeader = udpPacket->peekHeader<UdpHeader>();
-    emit(droppedPkWrongPortSignal, udpPacket);
+    PacketDropDetails details;
+    details.setReason(NO_PORT_FOUND);
+    emit(packetDropSignal, udpPacket, &details);
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE

@@ -21,6 +21,7 @@ enum PacketDropReason
     LIFETIME_EXPIRED          = 10;
     CONGESTION                = 11;
     NO_PROTOCOL_FOUND         = 12;
+    NO_PORT_FOUND             = 13;
 }
 
 class PacketDropDetails extends cObject

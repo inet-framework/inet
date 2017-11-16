@@ -77,15 +77,14 @@ simple UDP like IUDP
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetDrop](type=Packet);
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @signal[droppedPkWrongPort](type=cPacket);
-        @signal[droppedPkBadChecksum](type=cPacket);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; record=count,"vector(count)"; interpolationmode=none);
+        @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonNoPortFound(packetDrop); record=count,"vector(count)"; interpolationmode=none);
+        @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; source=packetDropReasonReceivedIncorrectly(packetDrop); record=count,"vector(count)"; interpolationmode=none);
 
     gates:
         input appIn @labels(UDPControlInfo/down);

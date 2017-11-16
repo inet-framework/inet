@@ -40,14 +40,14 @@ simple VoIPStreamReceiver like IApp
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;
         @signal[rcvdPk](type=cPacket); // expected type=VoIPStreamPacket
-        @signal[dropPk](type=cPacket);
+        @signal[packetDrop](type=Packet);
         @signal[lostSamples](type=long);
         @signal[lostPackets](type=long);
         @signal[packetHasVoice](type=long);  // 1=yes, 0=no
         @signal[connState](type=long);  // 1=open, -1=close
         @signal[delay](type=simtime_t);  // total time lag of voice transmission
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=packetDrop; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[lostSamples](title="lost samples"; interpolationmode=none; record=vector,stats);
         @statistic[lostPackets](title="lost packets"; interpolationmode=none; record=vector,stats);
         @statistic[packetHasVoice](title="voice or silence packet"; record=mean,vector; interpolationmode=none);

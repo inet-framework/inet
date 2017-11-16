@@ -106,7 +106,6 @@ class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 
     Connection curConn;
 
-    static simsignal_t dropPkSignal;
     static simsignal_t lostSamplesSignal;
     static simsignal_t lostPacketsSignal;
     static simsignal_t packetHasVoiceSignal;

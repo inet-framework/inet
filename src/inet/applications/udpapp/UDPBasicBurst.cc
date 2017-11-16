@@ -42,7 +42,6 @@ Define_Module(UDPBasicBurst);
 int UDPBasicBurst::counter;
 
 simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
-simsignal_t UDPBasicBurst::dropPkSignal = registerSignal("dropPk");
 
 UDPBasicBurst::~UDPBasicBurst()
 {
@@ -244,7 +243,9 @@ void UDPBasicBurst::processPacket(cPacket *pk)
     if (delayLimit > 0) {
         if (simTime() - pk->getTimestamp() > delayLimit) {
             EV_DEBUG << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
-            emit(dropPkSignal, pk);
+            PacketDropDetails details;
+            details.setReason(CONGESTION);
+            emit(packetDropSignal, pk, &details);
             delete pk;
             numDeleted++;
             return;

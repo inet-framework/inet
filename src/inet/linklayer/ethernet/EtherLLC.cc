@@ -35,7 +35,6 @@ Define_Module(EtherLLC);
 simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");
 simsignal_t EtherLLC::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherLLC::decapPkSignal = registerSignal("decapPk");
-simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
 simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
 
 void EtherLLC::initialize(int stage)
@@ -174,7 +173,9 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
         EV << "No higher layer registered for DSAP=" << dsap << ", discarding frame `" << packet->getName() << "'\n";
         droppedUnknownDSAP++;
         packet->setHeaderPopOffset(headerPopOffset);    // restore original packet
-        emit(droppedPkUnknownDSAPSignal, packet);
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDropSignal, packet, &details);
         delete packet;
         return;
     }
