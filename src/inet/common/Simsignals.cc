@@ -101,6 +101,9 @@ simsignal_t packetReceivedFromUpperSignal = cComponent::registerSignal("packetRe
 simsignal_t packetSentToLowerSignal = cComponent::registerSignal("packetSentToLower");
 simsignal_t packetReceivedFromLowerSignal = cComponent::registerSignal("packetReceivedFromLower");
 
+simsignal_t packetSentToPeerSignal = cComponent::registerSignal("packetSentToPeer");
+simsignal_t packetReceivedFromPeerSignal = cComponent::registerSignal("packetReceivedFromPeer");
+
 simsignal_t sentPkSignal = cComponent::registerSignal("sentPk");
 simsignal_t rcvdPkSignal = cComponent::registerSignal("rcvdPk");
 

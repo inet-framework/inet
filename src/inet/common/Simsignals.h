@@ -122,6 +122,9 @@ extern INET_API simsignal_t    // admin
     packetSentToLowerSignal,
     packetReceivedFromLowerSignal,
 
+    packetSentToPeerSignal,
+    packetReceivedFromPeerSignal,
+
     sentPkSignal,
     rcvdPkSignal;
 
