@@ -43,7 +43,7 @@ if [ "$RUN_FINGERPRINT_TESTS" = "yes" ]; then
     fi
 
     cd tests/fingerprint
-    ./fingerprinttest -e opp_run$POSTFIX
+    ./fingerprints -e opp_run$POSTFIX
 else
     make MODE=$MODE -j $(nproc)
 fi
