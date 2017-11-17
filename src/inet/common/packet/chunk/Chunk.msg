@@ -32,6 +32,7 @@ class Chunk extends cObject
 {
     @packetData;
     @existingClass(true);
+    @beforeChange(handleChange());
     @descriptor(readonly);
     bool mutable @packetData(false) @getter("isMutable");
     bool complete @packetData(false) @getter("isComplete");
