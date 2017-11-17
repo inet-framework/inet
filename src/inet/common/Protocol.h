@@ -39,7 +39,7 @@ class INET_API Protocol
     bool operator==(const Protocol& other) const { return id == other.id; }
     bool operator!=(const Protocol& other) const { return id != other.id; }
 
-    const int getId() const { return id; }
+    int getId() const { return id; }
     const char *getName() const { return name; }
 
     std::string info() const;
