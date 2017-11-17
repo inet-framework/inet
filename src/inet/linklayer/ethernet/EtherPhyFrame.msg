@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
@@ -26,7 +27,6 @@ namespace inet;
 
 class noncobject MACAddress;
 class noncobject MessageId;
-class FieldsChunk extends cObject;
 
 enum SAPCode;
 

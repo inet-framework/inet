@@ -17,15 +17,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 }}
-
-namespace inet;
-
-class FieldsChunk extends cObject;
 
 namespace inet::dymo;
 

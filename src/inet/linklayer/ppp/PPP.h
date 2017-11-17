@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/TxNotifDetails.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/base/MACBase.h"
 
 namespace inet {

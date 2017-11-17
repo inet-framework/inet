@@ -16,14 +16,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;
-class FieldsChunk extends cObject;
 class noncobject IPv4Address;
 
 namespace inet::ospf;

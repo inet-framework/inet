@@ -16,9 +16,9 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 
 namespace inet {
 
@@ -39,8 +39,6 @@ class INET_API TransportHeaderBase : public FieldsChunk
 
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 // This base class provides an abstraction for different transport layer packets.

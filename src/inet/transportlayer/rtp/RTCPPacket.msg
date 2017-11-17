@@ -13,9 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.rtp.reports;
+
 cplusplus{{
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/transportlayer/rtp/reports.h"
 #include "inet/transportlayer/rtp/sdes.h"
 }}
@@ -23,9 +25,6 @@ cplusplus{{
 class cArray;
 
 namespace inet;
-
-class FieldsChunk extends cObject;
-class noncobject SenderReport;
 
 namespace inet::rtp;
 

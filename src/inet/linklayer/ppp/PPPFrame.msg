@@ -22,12 +22,9 @@
 // (The terminating Flag is not counted, as rfc1331 states that
 // only one Flag is required between back-to-back frames.)
 //
-import inet.common.INETDefs;
 
-cplusplus {{
-#include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
@@ -35,9 +32,6 @@ cplusplus {{
 const B PPP_HEADER_LENGTH = B(5);
 const B PPP_TRAILER_LENGTH = B(2);
 }}
-
-class FieldsChunk extends cObject;
-
 
 //
 // PPP frame.

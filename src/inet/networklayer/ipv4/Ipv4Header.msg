@@ -17,26 +17,25 @@
 //
 
 
-cplusplus {{
-#include "inet/common/TLVOption.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
-
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.common.IPProtocolId;
 import inet.transportlayer.common.CRC;
 
+cplusplus {{
+#include "inet/common/TLVOption.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+}}
+
 namespace inet;
 
-class NetworkHeaderBase extends cObject;
 class noncobject TLVOptionBase;
 class noncobject TLVOptions;
 
 class noncobject IPv4Address;
 
 enum CrcMode;
-enum IPProtocolId;
 
 cplusplus {{
 // default IPv4 header length: 20 bytes

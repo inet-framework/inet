@@ -17,18 +17,18 @@
 //
 // Required for MACAddress declarations
 //
+import inet.common.INETDefs;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtFrame;
+
 cplusplus {{
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/common/MACAddress.h"
 }}
+
+namespace inet;
 
 class noncobject MACAddress;
 
 namespace inet::ieee80211;
-
-
-class noncobject Ieee80211SupportedRatesElement;
-
-enum Ieee80211ReasonCode;
 
 
 //

@@ -15,15 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
-
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 import inet.transportlayer.common.CRC;
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk
 {

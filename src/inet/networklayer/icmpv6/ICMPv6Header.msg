@@ -18,18 +18,14 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.common.CRC;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-
 #define ICMPv6_HEADER_BYTES  8
 }}
 
-import inet.transportlayer.common.CRC;
-
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg

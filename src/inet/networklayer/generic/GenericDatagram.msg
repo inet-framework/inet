@@ -15,18 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.networklayer.contract.NetworkHeaderBase;
+
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 }}
 
 import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
-class NetworkHeaderBase extends cObject;
 class noncobject L3Address;
 class noncobject TLVOptions;
 

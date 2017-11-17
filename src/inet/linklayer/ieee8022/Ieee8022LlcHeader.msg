@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 // ieee 802.2 LLC header
 class Ieee8022LlcHeader extends FieldsChunk

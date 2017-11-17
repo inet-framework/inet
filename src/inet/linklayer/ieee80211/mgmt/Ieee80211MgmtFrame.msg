@@ -18,9 +18,11 @@
 //
 // Required for MACAddress declarations
 //
+import inet.common.INETDefs;
+import inet.linklayer.ieee80211.mac.Ieee80211Frame;
+
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 }}
 
 namespace inet;

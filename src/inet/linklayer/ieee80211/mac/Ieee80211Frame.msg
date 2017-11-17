@@ -15,12 +15,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
 cplusplus {{
 #include "inet/common/BitVector.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
@@ -28,9 +27,6 @@ namespace inet;
 
 class noncobject MACAddress;
 class noncobject BitVector;
-class FieldsChunk extends cObject;
-
-enum EtherType;
 
 namespace inet::ieee80211;
 

@@ -15,15 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
-}}
-
-namespace inet;
-
-enum CrcMode;
-class FieldsChunk extends cObject;
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.common.CRC;
 
 namespace inet::physicallayer;
 

@@ -17,6 +17,10 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.ipv6.IPv6Header;
+
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
@@ -25,13 +29,10 @@ cplusplus {{
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
 }}
 
-import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
 class noncobject IPv6Address;
-
-class noncobject Ipv6ExtensionHeader;
 
 class noncobject TLVOptions;
 

@@ -17,14 +17,9 @@
 
 
 import inet.common.INETDefs;
-
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 // Message class for generic request-reply style applications.

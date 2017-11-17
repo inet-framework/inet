@@ -18,17 +18,15 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
 class noncobject MACAddress;
-class FieldsChunk extends cObject;
 
 //
 // Packet for ~IdealMac. Packet size is configurable

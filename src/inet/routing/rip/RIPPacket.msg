@@ -18,9 +18,9 @@
 
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 }}
 
@@ -31,7 +31,6 @@ const int RIP_HEADER_SIZE = 4;
 const int RIP_RTE_SIZE = 20;
 }}
 
-class FieldsChunk extends cObject;
 class noncobject L3Address;
 
 //

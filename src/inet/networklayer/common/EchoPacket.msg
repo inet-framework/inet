@@ -16,14 +16,10 @@
 //
 
 import inet.common.INETDefs;
-
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
-class FieldsChunk extends cObject;
 //
 // Determines the packet type.
 //

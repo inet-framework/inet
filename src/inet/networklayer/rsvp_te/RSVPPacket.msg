@@ -13,11 +13,12 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.NetworkHeaderBase;
+import inet.networklayer.rsvp_te.IntServ;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/rsvp_te/IntServ_m.h"
-
 #define PATH_MESSAGE   1
 #define RESV_MESSAGE   2
 #define PTEAR_MESSAGE  3
@@ -30,26 +31,15 @@ cplusplus {{
 namespace inet;
 
 struct SessionObj_t;
-
 struct RsvpHopObj_t;
-
 struct SenderTemplateObj_t;
-
 struct SenderTspecObj_t;
-
 struct FlowSpecObj_t;
-
 struct FilterSpecObj_t;
-
 struct LabelRequestObj_t;
-
 struct SenderDescriptor_t;
-
 struct FlowDescriptor_t;
-
 struct EroObj_t;
-
-class FieldsChunk extends cObject;
 
 //
 // RSVP message common part

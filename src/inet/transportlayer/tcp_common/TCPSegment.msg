@@ -18,10 +18,12 @@
 
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.common.CRC;
+import inet.transportlayer.contract.TransportHeaderBase;
 
 cplusplus {{
 #include <iostream>
-#include "inet/common/packet/chunk/FieldsChunk.h"
 
 namespace inet {
 namespace tcp {
@@ -32,11 +34,6 @@ typedef TCPOption *TCPOptionPtr;
 }
 
 }}
-
-import inet.transportlayer.common.CRC;
-import inet.transportlayer.contract.TransportHeaderBase;
-
-namespace inet;
 
 namespace inet::tcp;
 

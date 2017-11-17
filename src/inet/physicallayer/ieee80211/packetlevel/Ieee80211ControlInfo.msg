@@ -15,9 +15,11 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.physicallayer.contract.packetlevel.RadioControlInfo;
+
 cplusplus {{
 #include "inet/common/Units.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"

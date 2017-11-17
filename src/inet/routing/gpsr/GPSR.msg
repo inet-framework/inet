@@ -18,25 +18,20 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 
 namespace inet;
 
-class FieldsChunk extends cObject;
-
 class noncobject L3Address;
-
 class noncobject Coord;
-
 class noncobject GPSRForwardingMode;
-
 class noncobject TLVOptionBase;
 
 //

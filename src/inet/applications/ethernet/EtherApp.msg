@@ -16,17 +16,14 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-
 #define ETHERAPP_CLI_SAP  0xf0
 #define ETHERAPP_SRV_SAP  0xf1
 }}
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 // Request packet sent by ~EtherAppCli. Contains the number of bytes to be

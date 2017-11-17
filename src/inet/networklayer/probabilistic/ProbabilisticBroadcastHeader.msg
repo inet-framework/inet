@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
-}}
+import inet.common.INETDefs;
+import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
 
 class noncobject L3Address;
-class NetworkHeaderBase extends cObject;
 
 class ProbabilisticBroadcastHeader extends NetworkHeaderBase
 {

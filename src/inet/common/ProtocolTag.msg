@@ -3,14 +3,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 
 cplusplus{{
 #include "inet/common/Protocol.h"
 #include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
 #include "inet/common/packet/chunk/Chunk.h"
 }}
-
-import inet.common.TagBase;
 
 namespace inet;
 

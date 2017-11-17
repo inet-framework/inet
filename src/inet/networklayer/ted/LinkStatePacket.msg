@@ -14,16 +14,10 @@
 
 
 import inet.common.INETDefs;
-
-cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
-
+import inet.common.packet.chunk.Chunk;
 import inet.networklayer.ted.TED;
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 // Packet for disseminating link state information (~TELinkStateInfo[]) by the

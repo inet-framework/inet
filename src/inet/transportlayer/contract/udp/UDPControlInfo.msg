@@ -16,6 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.networklayer.common.IPProtocolId;   //FIXME remove it, unused
 
 cplusplus {{
 #include "inet/networklayer/common/L3Address.h"

@@ -13,6 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+import inet.common.INETDefs;
+import inet.linklayer.base.MacHeaderBase;
 
 cplusplus {{
 #include "inet/networklayer/rsvp_te/RSVPPacket.h"

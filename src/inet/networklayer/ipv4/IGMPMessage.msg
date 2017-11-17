@@ -17,14 +17,13 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.common.CRC;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include <vector>
 }}
-
-import inet.transportlayer.common.CRC;
 
 namespace inet;
 
@@ -32,7 +31,6 @@ cplusplus {{
 typedef std::vector<IPv4Address> IPv4AddressVector;
 }}
 
-class FieldsChunk extends cObject;
 class noncobject IPv4Address;
 class noncobject IPv4AddressVector;
 

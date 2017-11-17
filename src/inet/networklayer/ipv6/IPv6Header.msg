@@ -17,15 +17,17 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.contract.NetworkHeaderBase;
+import inet.networklayer.ipv6.IPv6Header;
+
 cplusplus {{
 #include <iostream>
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 }}
 
-import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
@@ -40,7 +42,6 @@ const int IPv6_HEADER_BYTES = 40;
 
 class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
-class NetworkHeaderBase extends cObject;
 
 //
 // IPv6 datagram. RFC 2460 Section 3.

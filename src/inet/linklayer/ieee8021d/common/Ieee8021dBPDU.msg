@@ -14,15 +14,14 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
-class FieldsChunk extends cObject;
 class noncobject MACAddress;
 
 

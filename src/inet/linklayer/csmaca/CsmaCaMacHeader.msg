@@ -15,15 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 }}
 
 namespace inet;
 
 class noncobject MACAddress;
-class FieldsChunk extends cObject;
 
 class CsmaCaMacHeader extends FieldsChunk
 {

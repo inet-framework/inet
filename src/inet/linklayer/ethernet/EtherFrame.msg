@@ -15,25 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.EtherType;
+import inet.linklayer.common.EthernetFcsMode;
+import inet.linklayer.common.Ieee802Ctrl;
 
 cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/linklayer/common/EtherType_m.h" // for enums
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 }}
 
 namespace inet;
 
-class FieldsChunk extends cObject;
-
 class noncobject MACAddress;
-
-enum EtherType;
-enum EthernetFcsMode;
 
 enum EthernetControlOpCode
 {

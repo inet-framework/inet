@@ -2,9 +2,11 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
+import inet.common.INETDefs;
+import inet.common.Simsignals;
+
 cplusplus{{
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/Simsignals_m.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 }}
 
@@ -23,3 +25,4 @@ class PacketDrop extends inet::PacketDropDetails
     cObject *networkInterface;
     Coord position @opaque;
 }
+

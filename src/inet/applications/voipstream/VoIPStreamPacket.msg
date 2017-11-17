@@ -17,19 +17,17 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
 
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/ByteArray.h"
 }};
 
 namespace inet;
-
-class FieldsChunk extends cObject;
 
 //
 // For the type field of VoIPPacket
