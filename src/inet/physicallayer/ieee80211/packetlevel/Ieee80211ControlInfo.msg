@@ -43,7 +43,7 @@ class IIeee80211Band
 {
     @existingClass;
     string name @editable(false);
-    Hz centerFrequency[] @sizeGetter(getNumChannels) @opaque;
+    Hz centerFrequency[] @sizeGetter(getNumChannels) @opaque @editable(false);
 }
 
 class Ieee80211EnumeratedBand extends IIeee80211Band
