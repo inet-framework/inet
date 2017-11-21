@@ -37,7 +37,7 @@ class IIeee80211Band
 {
     @existingClass;
     string name @editable(false);
-    Hz centerFrequency[] @sizeGetter(getNumChannels) @opaque @editable(false);
+    Hz centerFrequency[] @sizeGetter(getNumChannels) @editable(false);
 }
 
 class Ieee80211Channel
@@ -67,9 +67,9 @@ class IIeee80211PreambleMode
 class IIeee80211HeaderMode
 {
     @existingClass;
-    bps netBitrate @editable(false) @opaque;
-    bps grossBitrate @editable(false) @opaque;
-    b Length @editable(false) @opaque;
+    bps netBitrate @editable(false);
+    bps grossBitrate @editable(false);
+    b Length @editable(false);
     simtime_t duration @editable(false);
 //    IModulation *modulation @editable(false);
 };
@@ -77,8 +77,8 @@ class IIeee80211HeaderMode
 class IIeee80211DataMode
 {
     @existingClass;
-    bps netBitrate @editable(false) @opaque;
-    bps grossBitrate @editable(false) @opaque;
+    bps netBitrate @editable(false);
+    bps grossBitrate @editable(false);
 //    IModulation *modulation @editable(false);
     int numberOfSpatialStreams @editable(false);
 };

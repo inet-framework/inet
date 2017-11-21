@@ -28,11 +28,11 @@ class TransmissionBase extends cObject
     @descriptor(readonly);
     int id;
     simtime_t startTime;
-    Coord startPosition @opaque;
-    EulerAngles startOrientation @opaque;
+    Coord startPosition;
+    EulerAngles startOrientation;
     simtime_t endTime;
-    Coord endPosition @opaque;
-    EulerAngles endOrientation @opaque;
+    Coord endPosition;
+    EulerAngles endOrientation;
     simtime_t duration;
     simtime_t preambleDuration;
     simtime_t headerDuration;

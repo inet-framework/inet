@@ -27,6 +27,6 @@ class NarrowbandTransmissionBase extends TransmissionBase
 {
     @existingClass(true);
     @descriptor(readonly);
-    Hz carrierFrequency @opaque;
-    Hz bandwidth @opaque;
+    Hz carrierFrequency;
+    Hz bandwidth;
 }

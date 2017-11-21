@@ -34,5 +34,5 @@ class InterfaceEntry extends cModule
     bool loopback @getter("isLoopback");
     int mtu @getter("getMTU");
     MACAddress macAddress;
-    IPv4Address ipv4Address @opaque @getter("getIPv4Address");
+    IPv4Address ipv4Address @getter("getIPv4Address");
 }

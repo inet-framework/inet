@@ -26,7 +26,7 @@ class Material extends cNamedObject
 {
     @existingClass(true);
     @descriptor(readonly);
-    Ohmm resistivity @opaque;
+    Ohmm resistivity;
     double relativePermittivity;
     double relativePermeability;
 }

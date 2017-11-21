@@ -27,5 +27,5 @@ class ScalarTransmission extends FlatTransmissionBase
 {
     @existingClass(true);
     @descriptor(readonly);
-    W power @opaque;
+    W power;
 }

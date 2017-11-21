@@ -28,6 +28,7 @@ namespace inet;
 class L3Address
 {
     @existingClass;
+    @opaque;
     //FIXME @tostring()...
 }
 

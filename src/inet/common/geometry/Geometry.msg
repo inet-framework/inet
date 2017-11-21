@@ -11,5 +11,5 @@ cplusplus{{
 
 namespace inet;
 
-class Coord extends cObject  { @existingClass; }
-class EulerAngles extends cObject  { @existingClass; }
+class Coord extends cObject { @existingClass; @opaque; @tostring($.str()); }
+class EulerAngles extends cObject { @existingClass; @opaque; @tostring($.str()); }

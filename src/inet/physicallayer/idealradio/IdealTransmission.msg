@@ -27,7 +27,7 @@ class IdealTransmission extends TransmissionBase
 {
     @existingClass(true);
     @descriptor(readonly);
-    m communicationRange @opaque;
-    m interferenceRange @opaque;
-    m detectionRange @opaque;
+    m communicationRange;
+    m interferenceRange;
+    m detectionRange;
 }

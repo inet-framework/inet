@@ -27,6 +27,6 @@ class PhysicalObject extends cNamedObject
     @existingClass(true);
     @descriptor(readonly);
     int id;
-    Coord position @opaque;
-    EulerAngles orientation @opaque;
+    Coord position;
+    EulerAngles orientation;
 }

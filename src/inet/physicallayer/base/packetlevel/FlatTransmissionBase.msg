@@ -29,5 +29,5 @@ class FlatTransmissionBase extends NarrowbandTransmissionBase
     @descriptor(readonly);
     b headerLength;
     b dataLength;
-    bps bitrate @opaque;
+    bps bitrate;
 }

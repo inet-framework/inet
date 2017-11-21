@@ -56,8 +56,8 @@ class NetworkHeaderBase extends FieldsChunk
 {
     @existingClass(true);
 
-    L3Address sourceAddress @opaque;
-    L3Address destinationAddress @opaque;
+    L3Address sourceAddress;
+    L3Address destinationAddress;
     IPProtocolId protocolId;
     ConstProtocol *protocol;
 };

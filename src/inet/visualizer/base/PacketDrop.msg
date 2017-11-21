@@ -20,6 +20,6 @@ class PacketDrop extends inet::PacketDropDetails
     cModule *module;
     cModule *networkNode;
     cObject *networkInterface;
-    Coord position @opaque;
+    Coord position;
 }
 
