@@ -17,6 +17,7 @@ class Coord extends cObject
     @primitive;
     @opaque;
     @tostring($.str());
+    @fromstring($ ? Coord() : Coord()); // TODO: KLUDGE:
 }
 
 class EulerAngles extends cObject
@@ -25,4 +26,5 @@ class EulerAngles extends cObject
     @primitive;
     @opaque;
     @tostring($.str());
+    @fromstring($ ? Coord() : Coord()); // TODO: KLUDGE:
 }
