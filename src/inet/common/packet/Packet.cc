@@ -300,5 +300,27 @@ void Packet::removeAll()
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
+#if 0
+// for descriptor:
+// FIXME ez igy nem jo, mindig uj pointer keletkezik, az elozo pointer pedig ervenytelenne valik
+const Chunk *Packet::getHeaderPart() const
+{
+    __headerCache = contents->peek(Chunk::ForwardIterator(b(0), 0), getHeaderPoppedLength());
+    return __headerCache.get();
+}
+
+const Chunk *Packet::getDataPart() const
+{
+    __dataCache = peekData();
+    return __dataCache.get();
+}
+
+const Chunk *Packet::getTrailerPart() const
+{
+    __trailerCache = contents->peek(Chunk::BackwardIterator(b(0), 0), getTrailerPoppedLength());
+    return __trailerCache.get();
+}
+#endif
+
 } // namespace
 

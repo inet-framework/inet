@@ -65,8 +65,22 @@ class INET_API Packet : public cPacket
     Chunk::BackwardIterator trailerIterator;
     b totalLength;
 
+#if 0
+    //FIXME next cache variables needed for getHeader/Data/TrailerPart() functions
+    Ptr<const Chunk> __headerCache;
+    Ptr<const Chunk> __dataCache;
+    Ptr<const Chunk> __trailerCache;
+#endif
+
   protected:
     const Chunk *getContents() const { return contents.get(); } // only for class descriptor
+
+#if 0
+    //FIXME next functions generates a new shared pointer, cache variable needed
+    const Chunk *getHeaderPart() const; // only for class descriptor
+    const Chunk *getDataPart() const; // only for class descriptor
+    const Chunk *getTrailerPart() const; // only for class descriptor
+#endif
 
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
