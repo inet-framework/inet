@@ -28,14 +28,14 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class Ieee80211ChannelPtr { @existingClass; @descriptor(false); }
+class Ieee80211ChannelPtr { @existingClass(true); @descriptor(false); }
 
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
 class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
-    @existingClass;
+    @existingClass(true);
     @overwritePreviousDefinition;
     string opMode;                         // new default operation mode or "" if not set.
     Ieee80211ModeSet *modeSet = nullptr; // new default mode set or nullptr if not set.

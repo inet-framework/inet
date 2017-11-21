@@ -32,14 +32,14 @@ typedef std::vector<IPv4Address> IPv4AddressVector;
 
 class IPv4Address
 {
-    @existingClass;
-    @opaque;
+    @existingClass(true);
+    @opaque(true);
     @tostring(.str());
     @fromstring(IPv4Address($));
 }
 
 class IPv4AddressVector
 {
-   @existingClass;
+   @existingClass(true);
    //FIXME tostring, ...
 }

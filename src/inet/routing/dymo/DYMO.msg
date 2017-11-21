@@ -34,8 +34,8 @@ enum DYMOMetricType {
 
 class DYMOSequenceNumber
 {
-    @existingClass;
-    @primitive;
+    @existingClass(true);
+    @primitive(true);
     @descriptor(false);
     @fromstring(string2ulong($));
     @tostring(ulong2string($));

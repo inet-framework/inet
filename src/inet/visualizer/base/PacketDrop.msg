@@ -14,8 +14,8 @@ namespace inet::visualizer;
 
 class PacketDrop extends inet::PacketDropDetails
 {
-    @existingClass();
-    @readOnly();
+    @existingClass(true);
+    @descriptor(readOnly);
     cPacket *packet_;
     cModule *module;
     cModule *networkNode;

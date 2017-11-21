@@ -84,7 +84,7 @@ class MIPv6HAInformation extends cObject
 //
 class IPv6NDMessage extends Icmpv6Header
 {
-    //customize=true;
+    //customize(true);
     int code = 0;
 }
 

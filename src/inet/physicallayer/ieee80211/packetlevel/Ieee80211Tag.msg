@@ -30,8 +30,8 @@ typedef const IIeee80211Mode ConstIIeee80211Mode;
 typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class ConstIIeee80211Mode { @existingClass; @descriptor(false); }
-class ConstIeee80211Channel { @existingClass; @descriptor(false); }
+class ConstIIeee80211Mode { @existingClass(true); @descriptor(false); }
+class ConstIeee80211Channel { @existingClass(true); @descriptor(false); }
 
 //
 // This is an abstract base class that should not be directly added as a tag.

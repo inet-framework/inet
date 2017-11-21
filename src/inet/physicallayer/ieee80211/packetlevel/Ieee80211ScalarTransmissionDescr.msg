@@ -27,8 +27,8 @@ typedef const IIeee80211Mode  ConstIIeee80211Mode;
 typedef const Ieee80211Channel ConstIeee80211Channel;
 }}
 
-class ConstIIeee80211Mode  { @existingClass; @descriptor(false); }
-class ConstIeee80211Channel  { @existingClass; @descriptor(false); }
+class ConstIIeee80211Mode  { @existingClass(true); @descriptor(false); }
+class ConstIeee80211Channel  { @existingClass(true); @descriptor(false); }
 
 class Ieee80211ScalarTransmission extends ScalarTransmission
 {
