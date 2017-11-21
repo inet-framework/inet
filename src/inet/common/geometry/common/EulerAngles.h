@@ -5,7 +5,7 @@
 
 namespace inet {
 
-class INET_API EulerAngles
+class INET_API EulerAngles : public cObject
 {
   public:
     // Constant with all values set to 0
@@ -28,6 +28,8 @@ class INET_API EulerAngles
     EulerAngles(double alpha, double beta = 0.0, double gamma = 0.0)
         : alpha(alpha), beta(beta), gamma(gamma) {}
 
+    std::string str() const override;
+
     bool isNil() const
     {
         return this == &NIL;
@@ -48,6 +50,13 @@ class INET_API EulerAngles
 inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)
 {
     return os << "(" << a.alpha << ", " << a.beta << ", " << a.gamma << ")";
+}
+
+inline std::string EulerAngles::str() const
+{
+    std::stringstream os;
+    os << *this;
+    return os.str();
 }
 
 } // namespace inet
