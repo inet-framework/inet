@@ -1,8 +1,6 @@
 All: import inet.common.INETDefs;
 INETDefs.msg: ???
 
-All: #define FOO 42
-
 All:
 const B PPP_HEADER_LENGTH = B(5);
 const int RIP_HEADER_SIZE = 4;

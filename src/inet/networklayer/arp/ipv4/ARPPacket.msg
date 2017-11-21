@@ -23,13 +23,6 @@ import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
 
-cplusplus {{
-// ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
-#define ARP_HEADER_BYTES   28
-}}
-
-
-
 //
 // The list of practically important ARP opcodes
 //
@@ -55,7 +48,8 @@ enum ARPOpcode
 //
 class ARPPacket extends FieldsChunk
 {
-    chunkLength = B(ARP_HEADER_BYTES);
+    // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
+    chunkLength = B(28);
     ARPOpcode opcode;
     MACAddress srcMACAddress;
     MACAddress destMACAddress;

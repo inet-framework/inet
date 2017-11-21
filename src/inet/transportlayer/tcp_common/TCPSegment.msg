@@ -36,16 +36,14 @@ class TCPOption;
 
 namespace inet::tcp;
 
-cplusplus {{
-    // default TCP header length: 20 bytes
-    #define TCP_HEADER_OCTETS  20    // without options
-
+enum TcpConstants {
+    // default TCP header length: 20 bytes without options
+    TCP_HEADER_OCTETS = 20;
     // maximum TCP header length (base + options): 60 = 4 * 15 bytes
-    const unsigned int TCP_MAX_HEADER_OCTETS = 60;
-
+    TCP_MAX_HEADER_OCTETS = 60;
     // maximum allowed sack entry number, if no other options are used
-    const unsigned int MAX_SACK_ENTRIES = 4;
-}}
+    TCP_MAX_SACK_ENTRIES = 4;
+}
 
 //
 // TCP Option Numbers

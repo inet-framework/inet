@@ -25,12 +25,7 @@ import inet.linklayer.common.MACAddress;
 
 namespace inet::ieee80211;
 
-cplusplus {{
-#define PREQElemLen 11
-#define PERRElemLen 13
-}}
-
- //
+//
 // Capability Information field format. This field is not used
 // by the model (and is omitted from management frame formats too),
 // because its fields are related to features not supported by this model

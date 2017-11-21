@@ -18,11 +18,6 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-cplusplus {{
-#define ETHERAPP_CLI_SAP  0xf0
-#define ETHERAPP_SRV_SAP  0xf1
-}}
-
 namespace inet;
 
 //

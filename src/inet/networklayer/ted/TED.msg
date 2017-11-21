@@ -19,8 +19,6 @@ import inet.networklayer.contract.ipv4.IPv4Address;
 namespace inet;
 
 cplusplus {{
-#define LINK_STATE_MESSAGE      1
-
 typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
 }}
 

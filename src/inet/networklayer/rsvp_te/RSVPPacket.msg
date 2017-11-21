@@ -18,17 +18,17 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.rsvp_te.IntServ;
 
-cplusplus {{
-#define PATH_MESSAGE   1
-#define RESV_MESSAGE   2
-#define PTEAR_MESSAGE  3
-#define RTEAR_MESSAGE  4
-#define PERROR_MESSAGE 5
-#define RERROR_MESSAGE 6
-#define HELLO_MESSAGE   7
-}}
-
 namespace inet;
+
+enum RsvpConstants {
+    PATH_MESSAGE   = 1;
+    RESV_MESSAGE   = 2;
+    PTEAR_MESSAGE  = 3;
+    RTEAR_MESSAGE  = 4;
+    PERROR_MESSAGE = 5;
+    RERROR_MESSAGE = 6;
+    HELLO_MESSAGE  = 7;
+}
 
 //
 // RSVP message common part

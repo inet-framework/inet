@@ -17,27 +17,27 @@ import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.IPv4Address;
 import inet.networklayer.rsvp_te.IntServ;
 
-cplusplus {{
-#define MSG_PSB_TIMER               1
-#define MSG_PSB_TIMEOUT             2
-
-#define MSG_RSB_REFRESH_TIMER       3
-#define MSG_RSB_COMMIT_TIMER        4
-#define MSG_RSB_TIMEOUT             5
-
-#define MSG_HELLO_TIMER             6
-#define MSG_HELLO_TIMEOUT           7
-
-#define MSG_PATH_NOTIFY             8
-
-#define PATH_CREATED                1
-#define PATH_UNFEASIBLE             2
-#define PATH_FAILED                 3
-#define PATH_PREEMPTED              4
-#define PATH_RETRY                  5
-}}
-
 namespace inet;
+
+enum SignallingConstants {
+    MSG_PSB_TIMER         = 1;
+    MSG_PSB_TIMEOUT       = 2;
+    
+    MSG_RSB_REFRESH_TIMER = 3;
+    MSG_RSB_COMMIT_TIMER  = 4;
+    MSG_RSB_TIMEOUT       = 5;
+    
+    MSG_HELLO_TIMER       = 6;
+    MSG_HELLO_TIMEOUT     = 7;
+    
+    MSG_PATH_NOTIFY       = 8;
+    
+    PATH_CREATED          = 1;
+    PATH_UNFEASIBLE       = 2;
+    PATH_FAILED           = 3;
+    PATH_PREEMPTED        = 4;
+    PATH_RETRY            = 5;
+}
 
 //
 // FIXME missing documentation

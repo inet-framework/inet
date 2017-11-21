@@ -21,16 +21,15 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.transportlayer.common.CRC;
 
-cplusplus {{
-#define ICMPv6_HEADER_BYTES  8
-}}
-
 namespace inet;
+
+enum Icmpv6Constants {
+	ICMPv6_HEADER_BYTES = 8;
+}
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg
 //
-
 enum ICMPv6Type
 {
 

@@ -26,12 +26,13 @@ import inet.networklayer.contract.ipv6.IPv6Address;
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-
-#define IPv6_FRAGMENT_HEADER_LENGTH 8
 }}
 
-
 namespace inet;
+
+enum Ipv6ExtensionConstants {
+	IPv6_FRAGMENT_HEADER_LENGTH = 8;
+}
 
 //
 // IPv6 TLV option types
