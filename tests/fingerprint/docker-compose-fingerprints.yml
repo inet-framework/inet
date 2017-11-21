@@ -37,6 +37,7 @@ services:
     depends_on:
       - redis
       - mongo
+    hostname: builder-{{.Node.Hostname}}-{{.Task.Slot}} # this only works on Docker 17.10 and up
     command: build -u redis://rds
     deploy:
       placement: # always on the same node to take advantage of a persistent ccache dir on the host
@@ -56,6 +57,7 @@ services:
       - redis
       - mongo
     command: run -u redis://rds
+    hostname: runner-{{.Node.Hostname}}-{{.Task.Slot}} # this only works on Docker 17.10 and up
     deploy:
 #      placement:
 #        constraints: [node.role != manager]
