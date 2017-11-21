@@ -68,7 +68,7 @@ class INET_API Coord : public cObject
         : cObject(other) { copy(other); }
 
     /** @brief Returns a string with the value of the coordinate. */
-    std::string info() const override;
+    std::string str() const override;
 
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b)
@@ -293,7 +293,7 @@ inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
     return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
 }
 
-inline std::string Coord::info() const
+inline std::string Coord::str() const
 {
     std::stringstream os;
     os << *this;
