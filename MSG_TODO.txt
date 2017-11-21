@@ -36,6 +36,9 @@ All:
 typedef const IIeee80211Mode ConstIIeee80211Mode;
 
 All:
+getCompleteStringRepresentation() -> expandable descriptors
+
+All:
 @descriptor(false) vs @descriptor(readonly);
 
 TCPConnection:
