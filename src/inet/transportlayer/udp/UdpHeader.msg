@@ -23,7 +23,7 @@ import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet;
 
-enum UdpConstants{
+enum UdpConstants {
     UDP_HEADER_BYTES = 8;
 };
 

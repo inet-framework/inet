@@ -22,7 +22,7 @@ import inet.routing.bgpv4.BGPCommon;
 
 namespace inet::bgp;
 
-enum BgpConstants{
+enum BgpConstants {
     BGP_HEADER_OCTETS = 19;
     BGP_OPEN_OCTETS = 10;
     BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)

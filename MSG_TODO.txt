@@ -41,9 +41,6 @@ All:
 TCPConnection:
 @descriptor(readonly); vs @readonly??? wtf?
 
-All:
-Constants{ -> Constants {
-
 Chunk.msg:
 _getChunk -> getChunk
 _packet -> packet
