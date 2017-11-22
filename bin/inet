@@ -1,4 +1,20 @@
 #!/bin/sh
+#
+# This script is intended to run INET simulations both in debug and release mode.
+# It can be used only after the 'setenv' script has been run from both the OMNeT++
+# and the INET top level directory using the '. setenv' command. To run a simulation,
+# simply go into its directory and run 'inet' possibly passing additional command
+# line arguments. Please note that INET must be compiled either in debug and/or
+# release mode using 'make MODE=debug' and/or 'make MODE=release' before.
+#
+# This script takes a few additional command line arguments compared to the ones
+# already allowed by OMNeT++. The command line argument '--release' starts the
+# INET release version and '--debug' starts the debug version. If no such argument
+# is provided, then the script automatically selects one prefering the release
+# version over the debug version. The script can run INET independently of how
+# its compiled, as executable or shared lib.
+#
+
 DIR=`dirname $0`
 OUT=$DIR/../src
 
