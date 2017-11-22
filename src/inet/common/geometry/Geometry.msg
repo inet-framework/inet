@@ -14,17 +14,15 @@ namespace inet;
 class Coord extends cObject
 {
     @existingClass(true);
-    @primitive(true);
-    @opaque(true);
-    @tostring($.str());
-    @fromstring($ ? Coord() : Coord()); // TODO: KLUDGE:
+    double x;
+    double y;
+    double z;
 }
 
 class EulerAngles extends cObject
 {
     @existingClass(true);
-    @primitive(true);
-    @opaque(true);
-    @tostring($.str());
-    @fromstring($ ? Coord() : Coord()); // TODO: KLUDGE:
+    double alpha;
+    double beta;
+    double gamma;
 }
