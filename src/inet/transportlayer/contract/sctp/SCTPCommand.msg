@@ -57,7 +57,7 @@ enum SCTPErrorCode
 //
 // @see ~SctpCommandCode, ~SctpStatusInd, ~SCTPOpenCommand, ~SCTPStatusInfo, SCTPMain
 //
-packet SCTPCommand
+message SCTPCommand
 {
     int socketId = -1;   // identifies the socket within the application
     int sid = -1;
