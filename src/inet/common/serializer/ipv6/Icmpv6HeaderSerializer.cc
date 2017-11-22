@@ -18,7 +18,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ipv6/Icmpv6HeaderSerializer.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
-#include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...

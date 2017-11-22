@@ -31,7 +31,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/routing/gpsr/PositionTable.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
-#include "inet/routing/gpsr/GPSR_m.h"
+#include "inet/routing/gpsr/Gpsr_m.h"
 
 namespace inet {
 

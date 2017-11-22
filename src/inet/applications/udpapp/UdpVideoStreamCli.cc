@@ -20,7 +20,7 @@
 #include "inet/applications/udpapp/UdpVideoStreamCli.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

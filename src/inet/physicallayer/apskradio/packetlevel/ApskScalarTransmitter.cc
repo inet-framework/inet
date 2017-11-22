@@ -17,7 +17,7 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"

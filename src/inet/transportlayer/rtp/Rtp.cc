@@ -25,9 +25,9 @@
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RtpProfile.h"
-#include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
-#include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/rtp/RtpSenderControlMessage_m.h"
+#include "inet/transportlayer/rtp/RtpSenderStatusMessage_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 

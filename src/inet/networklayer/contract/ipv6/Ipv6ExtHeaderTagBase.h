@@ -18,7 +18,7 @@
 #ifndef __INET_IPV6EXTHEADERTAGBASE_H
 #define __INET_IPV6EXTHEADERTAGBASE_H
 
-#include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase_m.h"
+#include "inet/networklayer/contract/ipv6/Ipv6ExtHeaderTagBase_m.h"
 
 namespace inet {
 

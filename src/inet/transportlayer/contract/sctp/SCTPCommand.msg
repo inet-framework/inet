@@ -19,7 +19,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{

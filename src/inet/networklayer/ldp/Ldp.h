@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ldp/LDPPacket_m.h"
+#include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocketMap.h"

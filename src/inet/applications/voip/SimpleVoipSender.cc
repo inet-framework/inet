@@ -21,7 +21,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/applications/voip/SimpleVoIPPacket_m.h"
+#include "inet/applications/voip/SimpleVoipPacket_m.h"
 
 namespace inet {
 

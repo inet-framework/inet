@@ -19,7 +19,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalTransmitter.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 
 namespace inet {
 

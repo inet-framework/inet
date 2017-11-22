@@ -19,7 +19,7 @@
 #define __INET_IGMPMESSAGE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/IGMPMessage_m.h"
+#include "inet/networklayer/ipv4/IgmpMessage_m.h"
 
 namespace inet {
 

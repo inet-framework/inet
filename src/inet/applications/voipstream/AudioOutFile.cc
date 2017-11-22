@@ -30,7 +30,7 @@ extern "C" {
 
 namespace inet {
 
-void AudioOutFile::addAudioStream(enum AvCodecId codec_id, int sampleRate, short int sampleBits)
+void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
 {
     AVStream *st = avformat_new_stream(oc, nullptr);
 

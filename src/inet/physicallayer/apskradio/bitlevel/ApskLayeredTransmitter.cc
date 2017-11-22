@@ -20,7 +20,7 @@
 #include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"

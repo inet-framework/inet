@@ -25,7 +25,7 @@
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/Simsignals.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/common/lifecycle/NodeOperations.h"

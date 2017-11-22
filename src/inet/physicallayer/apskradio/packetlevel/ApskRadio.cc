@@ -19,7 +19,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskRadio.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 

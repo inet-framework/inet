@@ -46,7 +46,7 @@ class INET_API AudioOutFile
     bool isOpen() const { return opened; }
 
   protected:
-    void addAudioStream(enum AvCodecId codec_id, int sampleRate, short int sampleBits);
+    void addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits);
 
   protected:
     bool opened;

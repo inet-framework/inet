@@ -36,9 +36,9 @@ extern "C" {
 #include <sys/stat.h>
 
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/applications/voipstream/VoIPStreamPacket_m.h"
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
@@ -68,7 +68,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle
     {
       public:
         Connection() {}
-        void addAudioStream(enum AvCodecId codec_id);
+        void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);
         void writeLostSamples(int sampleCount);
@@ -79,7 +79,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle
         uint16_t seqNo = 0;
         uint32_t timeStamp = 0;
         uint32_t ssrc = 0;
-        enum AvCodecId codec = AV_CODEC_ID_NONE;
+        enum AVCodecID codec = AV_CODEC_ID_NONE;
         short sampleBits = 0;
         int sampleRate = 0;
         int samplesPerPacket = 0;

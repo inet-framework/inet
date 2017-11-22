@@ -25,7 +25,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 

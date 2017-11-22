@@ -25,7 +25,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
-#include "inet/routing/pim/PIMPacket_m.h"
+#include "inet/routing/pim/PimPacket_m.h"
 
 namespace inet {
 

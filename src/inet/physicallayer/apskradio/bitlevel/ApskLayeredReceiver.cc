@@ -20,7 +20,7 @@
 #include "inet/physicallayer/apskradio/bitlevel/ApskDecoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskDemodulator.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskLayeredReceiver.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"

@@ -20,7 +20,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 

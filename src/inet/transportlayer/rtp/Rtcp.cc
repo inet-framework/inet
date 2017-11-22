@@ -26,7 +26,7 @@
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 #include "inet/transportlayer/rtp/RtpSenderInfo.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {

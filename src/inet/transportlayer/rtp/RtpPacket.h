@@ -18,7 +18,7 @@
 #ifndef __INET_RTPPACKET_H
 #define __INET_RTPPACKET_H
 
-#include "inet/transportlayer/rtp/RTPPacket_m.h"
+#include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
 

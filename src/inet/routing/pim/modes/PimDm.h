@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/Packet.h"
-#include "inet/routing/pim/PIMPacket_m.h"
+#include "inet/routing/pim/PimPacket_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/routing/pim/tables/PimNeighborTable.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"

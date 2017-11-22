@@ -18,7 +18,7 @@
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
-#include "inet/transportlayer/rtp/RTPParticipantInfo_m.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo_m.h"
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"

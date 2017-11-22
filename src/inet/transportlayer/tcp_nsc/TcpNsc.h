@@ -29,7 +29,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CRC_m.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 

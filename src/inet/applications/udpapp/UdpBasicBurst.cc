@@ -21,7 +21,7 @@
 #include "inet/applications/udpapp/UdpBasicBurst.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"

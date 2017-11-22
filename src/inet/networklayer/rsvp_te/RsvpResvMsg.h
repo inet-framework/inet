@@ -16,7 +16,7 @@
 #ifndef __INET_RSVPRESVMSG_H
 #define __INET_RSVPRESVMSG_H
 
-#include "RSVPResvMsg_m.h"
+#include "RsvpResvMsg_m.h"
 
 namespace inet {
 

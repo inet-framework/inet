@@ -25,7 +25,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/arp/ipv4/Arp.h"
-#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"

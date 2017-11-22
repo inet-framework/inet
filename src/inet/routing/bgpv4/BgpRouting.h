@@ -26,7 +26,7 @@
 #include "inet/routing/bgpv4/BGPCommon.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BgpHeader_m.h"
 #include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 

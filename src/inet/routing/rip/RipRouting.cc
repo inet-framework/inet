@@ -31,7 +31,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
-#include "inet/routing/rip/RIPPacket_m.h"
+#include "inet/routing/rip/RipPacket_m.h"
 #include "inet/routing/rip/RipRouting.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 

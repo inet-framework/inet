@@ -24,7 +24,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 
 namespace inet {
