@@ -20,7 +20,7 @@
 
 package inet.examples.pim.sm.basic;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
@@ -85,7 +85,7 @@ network PIM_SM_Network
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=510,420");
         }
     connections allowunconnected:

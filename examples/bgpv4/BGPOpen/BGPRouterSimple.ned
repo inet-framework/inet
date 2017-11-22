@@ -22,8 +22,8 @@ import inet.common.misc.MessageChecker;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.routing.bgpv4.BGPRouting;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.routing.bgpv4.BgpRouting;
 import inet.transportlayer.contract.ITCP;
 
 
@@ -36,7 +36,7 @@ module BGPRouterSimple
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".routingTable"));
     gates:
@@ -46,13 +46,13 @@ module BGPRouterSimple
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        routingTable: IPv4RoutingTable {
+        routingTable: Ipv4RoutingTable {
             parameters:
                 forwarding = true;
                 routerId = "auto";
                 @display("p=52,172;i=block/table2_s");
         }
-        bgp: BGPRouting {
+        bgp: BgpRouting {
             parameters:
                 ospfRoutingModule = "";
                 @display("p=160,50;i=block/network");

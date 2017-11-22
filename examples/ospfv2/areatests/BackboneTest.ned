@@ -3,7 +3,7 @@
 package inet.examples.ospfv2.areatests;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network OSPF_BackboneTest
@@ -14,7 +14,7 @@ network OSPF_BackboneTest
                 numHosts = 10;
                 @display("p=138,156;b=136,136");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 //                            "<route hosts='Backbone.R[*]' destination='224.0.0.0' netmask='240.0.0.0' interface='eth0' />"+
                 config = xml("<config>"+

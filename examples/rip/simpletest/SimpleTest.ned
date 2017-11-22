@@ -3,7 +3,7 @@ package inet.examples.rip.simpletest;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.inet.StandardHost;
@@ -61,7 +61,7 @@ network SimpleTest
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.0' />"+

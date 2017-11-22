@@ -17,7 +17,7 @@
 
 package inet.examples.internetcloud.earthcloud;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -49,7 +49,7 @@ network EarthCloud
 {
     @display("bgi=maps/world;bgb=875,414");
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=75,315");
         }

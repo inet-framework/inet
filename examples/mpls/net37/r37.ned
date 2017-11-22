@@ -13,7 +13,7 @@
 package inet.examples.mpls.net37;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.mpls.RSVP_LSR;
 
@@ -28,7 +28,7 @@ network R37
             thruputDisplayFormat = "u";
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,100");
         }

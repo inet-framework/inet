@@ -20,7 +20,7 @@
 package inet.examples.diffserv.onedomain;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -92,7 +92,7 @@ network DiffservNetwork
         H4: StandardHost {
             @display("p=42,346");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=300,24");
         }
     connections:

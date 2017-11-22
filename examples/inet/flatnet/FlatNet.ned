@@ -22,7 +22,7 @@
 
 package inet.examples.inet.flatnet;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -42,7 +42,7 @@ network FlatNet
             datarate = 10Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");
         }

@@ -16,7 +16,7 @@
 package inet.examples.ethernet.arptest2;
 
 import inet.linklayer.ethernet.EtherBus;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -71,7 +71,7 @@ network ARPTest
         client: StandardHost {
             @display("p=54,274;i=device/laptop_l");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=46,111");
         }
     connections:

@@ -4,7 +4,7 @@
 
 package inet.examples.inet.tcpsack;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -33,7 +33,7 @@ network tcpsack
             gates:
                 pppg[1];
         }
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
     connections:
         router.pppg[0] <--> NormalPath <--> client.pppg[0];
         router.pppg[1] <--> NormalPath <--> server.pppg[0];

@@ -4,7 +4,7 @@
 
 package inet.examples.wireless.wiredandwirelesshostswithap;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -21,7 +21,7 @@ network WiredAndWirelessHostsWithAP
             parameters:
                 @display("p=100,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
                 @display("p=100,150");

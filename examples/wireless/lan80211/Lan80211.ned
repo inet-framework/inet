@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -34,7 +34,7 @@ network Lan80211
             parameters:
                 @display("p=100,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
@@ -45,10 +45,10 @@ network Lan80211
         }
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
+            wlan[*].mgmtType = "Ieee80211MgmtStaSimplified";
         }
         ap: AccessPoint {
             @display("p=213,174;r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+            wlan[*].mgmtType = "Ieee80211MgmtApSimplified";
         }
 }

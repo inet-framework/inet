@@ -14,7 +14,7 @@
 
 package inet.examples.ethernet.arptest;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -56,7 +56,7 @@ network ARPTest
         server: StandardHost {
             @display("p=512,58;i=device/server_l");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=495,160");
         }
     connections:

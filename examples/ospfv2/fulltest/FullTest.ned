@@ -5,7 +5,7 @@ package inet.examples.ospfv2.fulltest;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OSPFRouter;
 
@@ -258,7 +258,7 @@ network OSPF_RFC2328_Fig6
                 h = 1;
                 @display("p=608,356");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+"\n"+
                             "<interface among='Area1.N1.* Area1.RT1' address='10.1.11.x' netmask='255.255.255.0' />"+"\n"+

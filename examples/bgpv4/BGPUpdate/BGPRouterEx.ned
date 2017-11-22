@@ -22,9 +22,9 @@ import inet.common.misc.MessageChecker;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.routing.bgpv4.BGPRouting;
-import inet.routing.ospfv2.OSPFRouting;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.routing.bgpv4.BgpRouting;
+import inet.routing.ospfv2.OspfRouting;
 import inet.transportlayer.contract.ITCP;
 
 
@@ -37,7 +37,7 @@ module BGPRouterEx
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         bool forwarding = true;
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
@@ -52,11 +52,11 @@ module BGPRouterEx
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        ospf: OSPFRouting {
+        ospf: OspfRouting {
             parameters:
                 @display("p=235,284,row;i=block/network2");
         }
-        bgp: BGPRouting {
+        bgp: BgpRouting {
             parameters:
                 ospfRoutingModule = "^.ospf";
                 @display("p=160,50;i=block/network");

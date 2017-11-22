@@ -19,7 +19,7 @@
 package inet.examples.inet.tcpclientserver;
 
 import inet.common.misc.NetAnimTrace;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -45,7 +45,7 @@ network ClientServer
             parameters:
                 @display("p=181,67;i=device/pc2");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=53,134");
         }

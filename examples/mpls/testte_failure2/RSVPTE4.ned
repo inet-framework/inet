@@ -16,20 +16,20 @@ package inet.examples.mpls.testte_failure2;
 
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.mpls.RSVP_LSR;
 
 
 //
-// Example network to demonstrate RSVP-TE.
+// Example network to demonstrate Rsvp-TE.
 //
 // See the README file in the model directory for scenario description.
 //
 network RSVPTE4
 {
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=115,50");
         }

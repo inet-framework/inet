@@ -21,7 +21,7 @@
 
 package inet.examples.inet.bulktransfer;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -56,7 +56,7 @@ network BulkTransfer
             parameters:
                 @display("p=239,156");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=62,119");
         }

@@ -16,7 +16,7 @@
 
 package inet.examples.pim.dm.assert;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.MulticastRouter;
@@ -41,7 +41,7 @@ network Network
         Source: StandardHost {
             @display("p=208,33");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=44,41");
         }
         R4: MulticastRouter {

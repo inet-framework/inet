@@ -2,7 +2,7 @@
 
 package inet.examples.rtp.multicast1;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.rtp.RTPHost;
 import ned.DatarateChannel;
@@ -20,7 +20,7 @@ network RTPMulticast1
         host1: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -29,7 +29,7 @@ network RTPMulticast1
         host2: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -38,7 +38,7 @@ network RTPMulticast1
         host3: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -47,7 +47,7 @@ network RTPMulticast1
         host4: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -61,7 +61,7 @@ network RTPMulticast1
                 pppg[];
 
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             config = xml("<config>"
                 +"<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>"
                 +"<multicast-group hosts='**' address='225.0.0.1'/>"

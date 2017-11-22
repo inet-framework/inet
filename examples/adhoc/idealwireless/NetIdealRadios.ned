@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.idealwireless;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.idealradio.IdealRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -33,7 +33,7 @@ network Net
             parameters:
                 @display("p=100,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
         }

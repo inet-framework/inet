@@ -17,7 +17,7 @@
 
 package inet.examples.inet.igmp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
@@ -48,7 +48,7 @@ network Network
         etherSwitch: EtherSwitch {
             @display("p=203,124");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=195,25");
             config = xmldoc("config.xml");
         }

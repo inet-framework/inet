@@ -21,7 +21,7 @@ import inet.node.mpls.RSVP_LSR;
 
 
 //
-// Example network to demonstrate RSVP-TE.
+// Example network to demonstrate Rsvp-TE.
 //
 // See the README file in the model directory for scenario description.
 //

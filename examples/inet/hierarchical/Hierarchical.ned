@@ -18,7 +18,7 @@
 
 package inet.examples.inet.hierarchical;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100G;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth1G;
@@ -77,7 +77,7 @@ network Hierarchical
         }
 
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=37,31");
             config = xmldoc("hierarchical.xml");
         }

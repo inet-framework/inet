@@ -23,7 +23,7 @@ import inet.common.queue.Join;
 import inet.common.queue.Sink;
 import inet.linklayer.contract.ITrafficConditioner;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
-import inet.networklayer.diffserv.DSCPMarker;
+import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.SingleRateThreeColorMeter;
 import inet.networklayer.diffserv.TokenBucketMeter;
@@ -52,30 +52,30 @@ module TrafficConditioner like ITrafficConditioner
         defaultMeter: SingleRateThreeColorMeter {
             @display("p=339,356");
         }
-        efMarker: DSCPMarker {
+        efMarker: DscpMarker {
             dscps = "EF";
             @display("p=204,113");
         }
-        af11Marker: DSCPMarker {
+        af11Marker: DscpMarker {
             dscps = "AF11";
             @display("p=204,236");
         }
-        af21Marker: DSCPMarker {
+        af21Marker: DscpMarker {
             dscps = "AF21";
             @display("p=204,356");
         }
-        af13Marker: DSCPMarker {
+        af13Marker: DscpMarker {
             dscps = "AF13";
             @display("p=556,405");
         }
-        af23Marker: DSCPMarker {
+        af23Marker: DscpMarker {
             dscps = "AF23";
             @display("p=556,512");
         }
         join: Join {
             @display("p=665,296");
         }
-        beMarker: DSCPMarker {
+        beMarker: DscpMarker {
             dscps = "BE";
             @display("p=204,479");
         }
@@ -83,7 +83,7 @@ module TrafficConditioner like ITrafficConditioner
             dscps = "AF11 AF21";
             @display("p=450,405");
         }
-        af11Marker2: DSCPMarker {
+        af11Marker2: DscpMarker {
             dscps = "AF11";
             @display("p=517,114");
         }

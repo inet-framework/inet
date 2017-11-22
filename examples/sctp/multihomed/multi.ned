@@ -17,7 +17,7 @@
 //
 
 package inet.examples.sctp.multihomed;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -79,7 +79,7 @@ network multi
             gates:
                 pppg[2];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             addStaticRoutes = false;
             config = xml("<config>"+
                     "<interface hosts='cli1' towards='router1' address='10.1.1.1' netmask='255.255.255.0' />"+

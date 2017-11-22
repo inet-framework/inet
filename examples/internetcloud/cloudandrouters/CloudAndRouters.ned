@@ -17,7 +17,7 @@
 
 package inet.examples.internetcloud.cloudandrouters;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -37,7 +37,7 @@ network CloudAndRouters
             datarate = 5Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=61,163");
         }

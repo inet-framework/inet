@@ -19,7 +19,7 @@
 
 package inet.examples.inet.multicast;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -116,7 +116,7 @@ network MulticastNetwork
             gates:
                 pppg[3];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=275,26");
         }
     connections:

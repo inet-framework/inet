@@ -42,12 +42,12 @@
 
 package inet.examples.mobility;
 
-import inet.mobility.group.MoBANCoordinator;
+import inet.mobility.group.MoBanCoordinator;
 
 
 //
 // This network is exactly the same as baseNetwork existing among the examples of MiXiM, but the desired number of MoBAN coordinator modules have been added.
-// Some nodes of type BaseNode use MoBANLocal module as their mobility module. Then those nodes will be considered as WBAN nodes.
+// Some nodes of type BaseNode use MoBanLocal module as their mobility module. Then those nodes will be considered as WBAN nodes.
 // Those node have a parameter named "coordinatorIndex" that determines to which WBAN (coordinator) the node belongs.
 //
 network MoBANNetwork
@@ -61,7 +61,7 @@ network MoBANNetwork
             parameters:
                 @display("b=8,8,oval,red,,");
         }
-        coordinator[numMoBAN]: MoBANCoordinator {
+        coordinator[numMoBAN]: MoBanCoordinator {
             parameters:
                 @display("i=block/wheelbarrow");
         }

@@ -4,7 +4,7 @@
 
 package inet.examples.inet.ber;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 
 
@@ -26,7 +26,7 @@ network ber
             gates:
                 pppg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=199,34");
         }
     connections:

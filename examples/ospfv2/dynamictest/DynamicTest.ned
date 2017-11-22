@@ -6,7 +6,7 @@ package inet.examples.ospfv2.dynamictest;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OSPFRouter;
 
@@ -59,7 +59,7 @@ network DynamicTest
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=94,42");
                 config = xml("<config>"

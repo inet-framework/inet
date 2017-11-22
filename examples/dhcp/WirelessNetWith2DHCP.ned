@@ -17,7 +17,7 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
@@ -52,7 +52,7 @@ network WirelessNetWith2DHCP
         dhcpServer2: StandardHost {
             @display("p=511,307");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=180,35");
         }
         server: StandardHost {

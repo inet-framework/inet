@@ -1,7 +1,7 @@
 package inet.examples.bgpv4.BGPOpen;
 
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network Net
@@ -23,7 +23,7 @@ network Net
             parameters:
                 @display("p=200,60");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=62,127");
             config = xmldoc("IPv4Config.xml");
             //assignAddresses = false;

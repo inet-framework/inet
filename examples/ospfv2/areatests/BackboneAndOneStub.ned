@@ -4,7 +4,7 @@ package inet.examples.ospfv2.areatests;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network OSPF_BackboneAndOneStubTest
@@ -28,7 +28,7 @@ network OSPF_BackboneAndOneStubTest
                 extGates = 1;
                 @display("p=325,156;b=136,136");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface hosts='**.B[*]' names='eth0' address='192.168.3.x' netmask='255.255.255.x' />"+

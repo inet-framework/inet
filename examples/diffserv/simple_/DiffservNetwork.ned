@@ -19,7 +19,7 @@
 
 package inet.examples.diffserv.simple_;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -32,7 +32,7 @@ import ned.DatarateChannel;
 //
 // The dialup connection is the bottleneck of the traffic from the clients
 // to the server. Without QoS, high traffic can cause random packet drops
-// at the router PPP interface.
+// at the router Ppp interface.
 //
 network DiffservNetwork
 {
@@ -57,7 +57,7 @@ network DiffservNetwork
         server: StandardHost {
             @display("p=436,108");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=181,21");
         }
         etherSwitch: EtherSwitch {

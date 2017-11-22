@@ -21,7 +21,7 @@ package inet.examples.diffserv.onedomain;
 
 import inet.common.queue.Join;
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.networklayer.diffserv.DSCPMarker;
+import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 import inet.networklayer.diffserv.TokenBucketMeter;
 
@@ -46,7 +46,7 @@ module TC2 like ITrafficConditioner
         meter: TokenBucketMeter {
             @display("p=157,62");
         }
-        marker: DSCPMarker {
+        marker: DscpMarker {
             @display("p=252,62");
         }
         join: Join {

@@ -21,7 +21,7 @@ package inet.examples.voipstream.VoIPStreamLargeNet;
 
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
@@ -211,7 +211,7 @@ network VoIPStreamLargeNet
         llanD[dl]: VoIPStreamLargeLAN;
         voipClient: StandardHost;
         voipServer: StandardHost;
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
                 @display("p=495,160;i=block/cogwheel_s");

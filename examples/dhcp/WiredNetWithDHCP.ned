@@ -18,7 +18,7 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
@@ -39,7 +39,7 @@ network WiredNetWithDHCP
         client[numHosts]: StandardHost {
             @display("p=193,122,ri,350,350,200");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0' /></config>");
                 @display("p=109,71");

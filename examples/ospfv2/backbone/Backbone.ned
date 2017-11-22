@@ -3,7 +3,7 @@ package inet.examples.ospfv2.backbone;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OSPFRouter;
 
@@ -110,7 +110,7 @@ network Backbone
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface hosts='R2' towards='N1 R1' address='192.168.1.1' netmask='255.255.255.0' metric='1' />"+

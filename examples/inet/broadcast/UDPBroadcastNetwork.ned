@@ -1,6 +1,6 @@
 package inet.examples.inet.broadcast;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -34,7 +34,7 @@ network UDPBroadcastNetwork
 
             @display("p=279,115");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xmldoc("config.xml");
                 @display("p=62,31");

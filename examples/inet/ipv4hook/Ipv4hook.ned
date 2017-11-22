@@ -5,7 +5,7 @@
 package inet.examples.inet.ipv4hook;
 
 import inet.networklayer.common.NetfilterInfoHook;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -51,7 +51,7 @@ network Ipv4hook
         router: MyRouter {
             @display("p=157,197");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=112,278");
         }
     connections:

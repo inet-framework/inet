@@ -2,7 +2,7 @@
 
 package inet.examples.rtp.unicast1;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.rtp.RTPHost;
 import ned.DatarateChannel;
@@ -20,7 +20,7 @@ network RTPUnicast1
         host1: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -29,7 +29,7 @@ network RTPUnicast1
         host2: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -38,7 +38,7 @@ network RTPUnicast1
         host3: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -47,7 +47,7 @@ network RTPUnicast1
         host4: RTPHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host1";
                 portNumber = 5004;
                 bandwidth = 8000;
@@ -60,7 +60,7 @@ network RTPUnicast1
                 pppg[];
 
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=58,32");
         }
     connections:

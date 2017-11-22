@@ -3,7 +3,7 @@
 package inet.examples.ospfv2.areas;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network OSPF_AreaTest
@@ -21,7 +21,7 @@ network OSPF_AreaTest
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface among='Area1.*' address='192.168.11.x' netmask='255.255.255.x' />"+

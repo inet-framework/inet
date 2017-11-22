@@ -6,7 +6,7 @@
 
 package inet.examples.voip;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
@@ -33,7 +33,7 @@ network Voip
             parameters:
                 @display("p=260,94");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=126,20");
         }
         internetCloud: InternetCloud {

@@ -17,7 +17,7 @@
 
 package inet.examples.wireless.layeredapsk;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.apskradio.bitlevel.APSKLayeredScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -31,7 +31,7 @@ network LayeredAPSK
             parameters:
                 @display("p=100,250");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
         }

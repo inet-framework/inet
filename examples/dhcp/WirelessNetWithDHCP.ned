@@ -17,7 +17,7 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -47,7 +47,7 @@ network WirelessNetWithDHCP
         dhcpServer: StandardHost {
             @display("p=64,307");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=180,35");
         }

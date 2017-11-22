@@ -32,7 +32,7 @@
 package inet.examples.httptools.socket.simpleddos;
 
 import inet.applications.httptools.configurator.HttpController;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
@@ -61,7 +61,7 @@ network HttpNnodes
         ////                channelAttrs = "format=u";
         //                @display("p=98,50;i=block/cogwheel_s");
         //        }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";

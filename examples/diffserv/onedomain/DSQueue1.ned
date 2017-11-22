@@ -21,7 +21,7 @@ package inet.examples.diffserv.onedomain;
 import inet.common.queue.DropTailQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.PriorityScheduler;
-import inet.common.queue.WRRScheduler;
+import inet.common.queue.WrrScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 
@@ -66,7 +66,7 @@ module DSQueue1 like IOutputQueue
             frameCapacity = frameCapacity;
             @display("p=195,628");
         }
-        wrr: WRRScheduler {
+        wrr: WrrScheduler {
             @display("p=384,368");
         }
         priority: PriorityScheduler {

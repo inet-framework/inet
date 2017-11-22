@@ -24,7 +24,7 @@ package inet.examples.inet.shutdownrestart;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -67,7 +67,7 @@ network NClients
         srv: StandardHost {
             @display("p=544,194;i=device/server_l");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=75,47");
         }
         scenarioManager: ScenarioManager {

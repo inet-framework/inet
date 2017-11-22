@@ -19,7 +19,7 @@ package inet.examples.aodv;
 
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AODVRouter;
 import inet.physicallayer.idealradio.IdealRadioMedium;
@@ -34,7 +34,7 @@ network SimpleRREQ
             parameters:
                 @display("p=50,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
@@ -79,7 +79,7 @@ network SimpleRREQ2
             parameters:
                 @display("p=50,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
@@ -128,7 +128,7 @@ network ShortestPath
             parameters:
                 @display("p=50,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;

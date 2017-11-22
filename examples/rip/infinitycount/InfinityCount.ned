@@ -5,7 +5,7 @@
 package inet.examples.rip.infinitycount;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import ned.DatarateChannel;
 
@@ -33,7 +33,7 @@ network RIPInfinityCountTest
             hasRIP = true;
             @display("p=487,192,ri,100,100");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=59,31");
             config = xml("<config>"
                             +"<interface among='cRouter bRouter' address='10.0.0.x' netmask='255.255.255.x' add-static-route='off'/>"

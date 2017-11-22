@@ -1,7 +1,7 @@
 package inet.examples.bgpv4.BGPUpdate;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 
 
@@ -42,7 +42,7 @@ network BGPTest
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=208,23");
             config = xmldoc("IPv4Config.xml");
             //assignAddresses = false;
