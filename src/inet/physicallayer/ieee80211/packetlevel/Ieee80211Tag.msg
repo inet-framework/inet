@@ -17,21 +17,10 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-
-cplusplus {{
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
-}}
+import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
 
 namespace inet::physicallayer;
-
-cplusplus {{
-typedef const IIeee80211Mode ConstIIeee80211Mode;
-typedef const Ieee80211Channel ConstIeee80211Channel;
-}}
-
-class ConstIIeee80211Mode { @existingClass(true); }
-class ConstIeee80211Channel { @existingClass(true); }
 
 //
 // This is an abstract base class that should not be directly added as a tag.

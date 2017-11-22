@@ -13,19 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.physicallayer.ieee80211.mode.IIeee80211Mode;
+import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+
 cplusplus {{
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 }}
 
 namespace inet::physicallayer;
 
-cplusplus {{
-typedef const IIeee80211Mode ConstIIeee80211Mode;
-typedef const Ieee80211Channel ConstIeee80211Channel;
-}}
-
-class ConstIIeee80211Mode { @existingClass(true); }
-class ConstIeee80211Channel { @existingClass(true); }
 class DimensionalTransmission extends cObject { @existingClass(true); }
 
 class Ieee80211DimensionalTransmission extends DimensionalTransmission
