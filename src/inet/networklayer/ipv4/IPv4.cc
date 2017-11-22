@@ -30,7 +30,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
-#include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"

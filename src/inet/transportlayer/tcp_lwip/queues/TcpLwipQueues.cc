@@ -20,7 +20,7 @@
 
 #include "inet/common/serializer/tcp/TcpHeaderSerializer.h"
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 

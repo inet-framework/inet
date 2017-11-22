@@ -18,7 +18,7 @@
 #ifndef __INET_UDPCONTROLINFO_H
 #define __INET_UDPCONTROLINFO_H
 
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 

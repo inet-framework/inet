@@ -19,7 +19,7 @@
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 

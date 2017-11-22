@@ -24,7 +24,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
 namespace inet {
 

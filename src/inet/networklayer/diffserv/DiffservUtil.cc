@@ -28,7 +28,7 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/networklayer/diffserv/DiffservUtil.h"
-#include "inet/networklayer/diffserv/DSCP_m.h"
+#include "inet/networklayer/diffserv/Dscp_m.h"
 
 namespace inet {
 

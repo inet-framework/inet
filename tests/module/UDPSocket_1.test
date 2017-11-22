@@ -7,7 +7,7 @@ Tests UdpSocket method calls:
 
 %file: TestApp.cc
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 using namespace inet;
 namespace UDPSocket_1 {

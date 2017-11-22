@@ -21,7 +21,7 @@
 
 #include "inet/applications/dhcp/DhcpServer.h"
 
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"

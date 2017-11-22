@@ -24,7 +24,7 @@
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"

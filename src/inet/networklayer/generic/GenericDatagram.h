@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 

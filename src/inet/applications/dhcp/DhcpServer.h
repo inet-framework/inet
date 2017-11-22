@@ -25,7 +25,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/dhcp/DHCPMessage_m.h"
+#include "inet/applications/dhcp/DhcpMessage_m.h"
 #include "inet/applications/dhcp/DhcpLease.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/arp/ipv4/Arp.h"

@@ -18,7 +18,7 @@
 #ifndef __INET_BGPUPDATE_H
 #define __INET_BGPUPDATE_H
 
-#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BgpHeader_m.h"
 
 namespace inet {
 

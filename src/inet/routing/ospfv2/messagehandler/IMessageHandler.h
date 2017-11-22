@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/routing/ospfv2/OSPFPacket_m.h"
+#include "inet/routing/ospfv2/OspfPacket_m.h"
 
 namespace inet {
 

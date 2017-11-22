@@ -24,7 +24,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
-#include "inet/routing/ospfv2/OSPFPacket_m.h"
+#include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/OSPFTimer.h"
 
 namespace inet {

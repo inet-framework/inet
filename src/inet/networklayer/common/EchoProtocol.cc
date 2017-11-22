@@ -19,7 +19,7 @@
 #include <string.h>
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/EchoProtocol.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
