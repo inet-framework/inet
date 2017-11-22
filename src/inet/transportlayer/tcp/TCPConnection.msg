@@ -191,6 +191,6 @@ class TCPConnection extends cObject
     TCPSACKRexmitQueue *rexmitQueue;
 
     TCPAlgorithm *tcpAlgorithm;
-    int fsmState @readonly;
+    int fsmState;
 };
 
