@@ -25,11 +25,9 @@ namespace inet::httptools;
 //
 // Used by the controller to trigger popularity modifications for web sites.
 //
-// NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
 // @author  Kristjan V. Jonsson
 //
-packet HttpServerStatusUpdateMsg
+message HttpServerStatusUpdateMsg
 {
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
