@@ -50,7 +50,7 @@ class ChunkBuffer extends cNamedObject
     ChunkBuffer::Region* regions[] @getter(getRegion) @sizeGetter(getNumRegions);
 }
 
-packet Packet
+class Packet extends cPacket
 {
     @existingClass(true);
     @descriptor(readonly);
