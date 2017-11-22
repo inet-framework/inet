@@ -18,16 +18,14 @@
 
 
 import inet.common.INETDefs;
+import inet.common.ProtocolTag;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/common/Protocol.h"
 
 namespace inet {
-
-typedef const Protocol ConstProtocol;
 
 class INET_API NetworkHeaderBase : public FieldsChunk
 {
@@ -49,8 +47,6 @@ class INET_API NetworkHeaderBase : public FieldsChunk
 }}
 
 namespace inet;
-
-class ConstProtocol { @existingClass(true); }
 
 class NetworkHeaderBase extends FieldsChunk
 {
