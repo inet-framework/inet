@@ -26,10 +26,10 @@ typedef const IListening ConstIListening;
 typedef const IReception ConstIReception;
 }}
 
-class ConstITransmission { @existingClass(true); @descriptor(false); }
-class ConstIArrival { @existingClass(true); @descriptor(false); }
-class ConstIListening { @existingClass(true); @descriptor(false); }
-class ConstIReception { @existingClass(true); @descriptor(false); }
+class ConstITransmission { @existingClass(true); }
+class ConstIArrival { @existingClass(true); }
+class ConstIListening { @existingClass(true); }
+class ConstIReception { @existingClass(true); }
 
 packet Signal
 {

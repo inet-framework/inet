@@ -36,7 +36,6 @@ class DYMOSequenceNumber
 {
     @existingClass(true);
     @primitive(true);
-    @descriptor(false);
     @fromstring(string2ulong($));
     @tostring(ulong2string($));
     @defaultvalue(0);

@@ -20,8 +20,8 @@ typedef const Protocol ConstProtocol;
 using namespace units::values;      //FIXME Why? Units unused in this file.
 }}
 
-class ChunkPtr { @existingClass(true); @descriptor(false); }
-class ConstProtocol { @existingClass(true); @descriptor(false); }
+class ChunkPtr { @existingClass(true); }
+class ConstProtocol { @existingClass(true); }
 
 //
 // This is an abstract base class that should not be directly added as a tag.

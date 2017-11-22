@@ -117,15 +117,14 @@ class Ieee80211ModeSet extends cObject
     int cwMax @editable(false);
 }
 
-class ConstIIeee80211Mode extends IIeee80211Mode { @existingClass(true); @editable(false); @descriptor(false); }
-class ConstIeee80211ModeSet extends Ieee80211ModeSet { @existingClass(true); @editable(false); @descriptor(false); }
+class ConstIIeee80211Mode extends IIeee80211Mode { @existingClass(true); @editable(false); }
+class ConstIeee80211ModeSet extends Ieee80211ModeSet { @existingClass(true); @editable(false); }
 
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
 class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
-    @descriptor(false);
     string opMode;                         // new default operation mode or "" if not set.
     ConstIeee80211ModeSet *modeSet = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default mode set or nullptr if not set.
     ConstIIeee80211Mode *mode = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default transmission mode or nullptr if not set.

@@ -34,9 +34,9 @@ cplusplus {{
 
 namespace inet::tcp;
 
-class ReorderBuffer extends cNamedObject { @existingClass(true); @descriptor(false); }
-class TCPSACKRexmitQueue { @existingClass(true); @descriptor(false); }
-class TCPAlgorithm extends cObject { @existingClass(true); @descriptor(false); }
+class ReorderBuffer extends cNamedObject { @existingClass(true); }
+class TCPSACKRexmitQueue { @existingClass(true); }
+class TCPAlgorithm extends cObject { @existingClass(true); }
 
 struct TCPStateVariables
 {

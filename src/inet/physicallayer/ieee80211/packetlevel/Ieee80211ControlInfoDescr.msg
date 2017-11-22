@@ -28,7 +28,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class Ieee80211ChannelPtr { @existingClass(true); @descriptor(false); }
+class Ieee80211ChannelPtr { @existingClass(true); }
 
 //
 // Control info attached to a configure command that is sent to the ~Radio.
