@@ -12,11 +12,10 @@ remove if possible:
  - @opaque
  - @override
  - @primitive-ek -> primitive foo;
+ - @[a-Z]+(true); -> ;
 
-@descriptor(false) vs @descriptor(readonly);
-@descriptor(readonly); vs @readonly(true)??? wtf?
-@editable(false) vs @descriptor(readonly)??? and in general
-editable is a GUI concept
+@descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?
+@editable(false) vs @descriptor(readonly)??? and in general editable is a GUI concept
 
 Chunk.msg:
 _getChunk -> getChunk
