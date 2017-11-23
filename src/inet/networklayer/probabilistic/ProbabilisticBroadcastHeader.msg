@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
@@ -28,7 +29,7 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
     L3Address   destAddr;
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
     int       nbHops;
-    IPProtocolId   protocolId @override = (IPProtocolId)-1;
+    IPProtocolId   protocolId = (IPProtocolId)-1;
     simtime_t appTtl;   // Message time-to-live set by application.
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;

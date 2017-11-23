@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.networklayer.common.IPProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
@@ -29,7 +30,7 @@ class WiseRouteHeader extends NetworkHeaderBase
     unsigned long seqNum = 0;
     int     isFlood;
     int     nbHops;
-    IPProtocolId     protocolId @override = (IPProtocolId)-1;
+    IPProtocolId     protocolId = (IPProtocolId)-1;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
 }

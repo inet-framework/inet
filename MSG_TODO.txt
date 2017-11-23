@@ -10,7 +10,6 @@ remove if possible:
  - @fieldNameSuffix
  - @omitGetVerb
  - @opaque
- - @override
  - @primitive-ek -> primitive foo;
 
 @descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?

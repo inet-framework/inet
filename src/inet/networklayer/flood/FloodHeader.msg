@@ -18,6 +18,7 @@
 import inet.common.INETDefs;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.common.L3Address;
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
 
@@ -28,5 +29,5 @@ class FloodHeader extends NetworkHeaderBase
     L3Address     destAddr;
     int           ttl = 1;    // time to live field
     unsigned long seqNum = 0; // sequence number
-    IPProtocolId  protocolId @override = (IPProtocolId)-1;
+    IPProtocolId  protocolId = (IPProtocolId)-1;
 }

@@ -65,7 +65,7 @@ class Ipv6Header extends NetworkHeaderBase
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
-    IPProtocolId protocolId @override = IP_PROT_NONE;
+    IPProtocolId protocolId = IP_PROT_NONE;
 
     abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }
