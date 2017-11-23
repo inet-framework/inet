@@ -6,7 +6,6 @@ remove if possible:
  - #include-ok
  - const-ansok
  - typedef-ek
- - getCompleteStringRepresentation()-ek (expandable descriptors)
  - @opaque
  - @primitive-ek -> primitive foo;
 
