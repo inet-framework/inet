@@ -73,31 +73,43 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API cPointerResultFilter : public cResultFilter
+{
+    protected:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override { }
+};
+
 /**
  * Filter that expects a Coord and outputs its X coordinate
  */
-class INET_API XCoordFilter : public cObjectResultFilter
+class INET_API XCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
 };
 
 /**
  * Filter that expects a Coord and outputs its Y coordinate
  */
-class INET_API YCoordFilter : public cObjectResultFilter
+class INET_API YCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
 };
 
 /**
  * Filter that expects a Coord and outputs its Z coordinate
  */
-class INET_API ZCoordFilter : public cObjectResultFilter
+class INET_API ZCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
 };
 
 /**
