@@ -83,8 +83,8 @@ simple UDP like IUDP
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonNoPortFound(packetDrop); record=count,"vector(count)"; interpolationmode=none);
-        @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; source=packetDropReasonReceivedIncorrectly(packetDrop); record=count,"vector(count)"; interpolationmode=none);
+        @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonIsNoPortFound(packetDrop); record=count,"vector(count)"; interpolationmode=none);
+        @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,"vector(count)"; interpolationmode=none);
 
     gates:
         input appIn @labels(UDPControlInfo/down);
