@@ -27,8 +27,8 @@ namespace inet;
 
 class MACAddress
 {
-    @existingClass(true);
-    @opaque(true);
+    @existingClass;
+    @opaque;
     @tostring(.str());
     @fromstring(MACAddress($));
 }

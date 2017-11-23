@@ -33,13 +33,13 @@ typedef const IIeee80211Mode ConstIIeee80211Mode;
 
 class IIeee80211PreambleMode
 {
-    @existingClass(true);
+    @existingClass;
     simtime_t duration @editable(false);
 };
 
 class IIeee80211HeaderMode
 {
-    @existingClass(true);
+    @existingClass;
     bps netBitrate @editable(false);
     bps grossBitrate @editable(false);
     b Length @editable(false);
@@ -49,7 +49,7 @@ class IIeee80211HeaderMode
 
 class IIeee80211DataMode
 {
-    @existingClass(true);
+    @existingClass;
     bps netBitrate @editable(false);
     bps grossBitrate @editable(false);
 //    IModulation *modulation @editable(false);
@@ -58,7 +58,7 @@ class IIeee80211DataMode
 
 class IIeee80211Mode extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     int legacyCwMin @editable(false);
     int legacyCwMax @editable(false);
     string name @editable(false);
@@ -78,7 +78,7 @@ class IIeee80211Mode extends cObject
 
 class Ieee80211ModeSet extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     IIeee80211Mode *slowestMode @getter(_getSlowestMode) @editable(false);
     IIeee80211Mode *fastestMode @getter(_getFastestMode) @editable(false);
     IIeee80211Mode *slowestMandatoryMode @getter(_getSlowestMandatoryMode) @editable(false);
@@ -90,5 +90,5 @@ class Ieee80211ModeSet extends cObject
     int cwMax @editable(false);
 }
 
-class ConstIIeee80211Mode extends IIeee80211Mode { @existingClass(true); @editable(false); }
-class ConstIeee80211ModeSet extends Ieee80211ModeSet { @existingClass(true); @editable(false); }
+class ConstIIeee80211Mode extends IIeee80211Mode { @existingClass; @editable(false); }
+class ConstIeee80211ModeSet extends Ieee80211ModeSet { @existingClass; @editable(false); }

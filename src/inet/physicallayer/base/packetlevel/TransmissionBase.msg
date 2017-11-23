@@ -24,7 +24,7 @@ namespace inet::physicallayer;
 
 class TransmissionBase extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int id;
     simtime_t startTime;

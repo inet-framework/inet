@@ -23,7 +23,7 @@ namespace inet;
 
 class FloodHeader extends NetworkHeaderBase
 {
-    @customize(true);
+    @customize;
     L3Address     srcAddr;
     L3Address     destAddr;
     int           ttl = 1;    // time to live field

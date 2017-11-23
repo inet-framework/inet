@@ -22,11 +22,11 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class DimensionalTransmission extends cObject { @existingClass(true); }
+class DimensionalTransmission extends cObject { @existingClass; }
 
 class Ieee80211DimensionalTransmission extends DimensionalTransmission
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     ConstIIeee80211Mode *mode;
     ConstIeee80211Channel *channel;

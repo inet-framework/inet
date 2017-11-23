@@ -25,7 +25,7 @@ namespace inet::physicallayer;
 
 class FlatTransmissionBase extends NarrowbandTransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     b headerLength;
     b dataLength;

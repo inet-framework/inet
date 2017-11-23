@@ -27,7 +27,7 @@ namespace inet;
 
 class IPv6Address
 {
-    @existingClass(true);
+    @existingClass;
     //FIXME @tostring, ...
 }
 

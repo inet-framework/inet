@@ -119,7 +119,7 @@ class PIMPacket extends FieldsChunk
 // DM, SM
 class PIMHello extends PIMPacket
 {
-    @customize(true);
+    @customize;
     type = Hello;
     abstract HelloOption *options[];
 }

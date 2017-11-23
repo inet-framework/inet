@@ -24,7 +24,7 @@ namespace inet;
 //
 class RSVPHelloMsg extends RSVPMessage
 {
-    @customize(true);
+    @customize;
     bool request;
     bool ack;
 

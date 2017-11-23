@@ -13,7 +13,7 @@ namespace inet;
 
 class Coord
 {
-    @existingClass(true);
+    @existingClass;
     double x;
     double y;
     double z;
@@ -21,7 +21,7 @@ class Coord
 
 class EulerAngles
 {
-    @existingClass(true);
+    @existingClass;
     double alpha;
     double beta;
     double gamma;

@@ -58,7 +58,7 @@ packet ApplicationData
 
 packet TcpSegment
 {
-    @customize(true);
+    @customize;
     uint16_t srcPort = -1;
     uint16_t destPort = -1;
     FragmentPtr payload[];

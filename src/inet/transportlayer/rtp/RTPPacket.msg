@@ -37,7 +37,7 @@ enum RtpHeaderEnums
 //
 class RtpHeader extends FieldsChunk
 {
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
 
     chunkLength = B(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
 

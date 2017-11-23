@@ -29,9 +29,9 @@ typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
 
-class EroVector { @existingClass(true); }
+class EroVector { @existingClass; }
 
-class FlowDescriptorVector { @existingClass(true); }
+class FlowDescriptorVector { @existingClass; }
 
 //
 // Intserv/RSVP: Session Structure

@@ -24,7 +24,7 @@ namespace inet::physicalenvironment;
 
 class Material extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     Ohmm resistivity;
     double relativePermittivity;

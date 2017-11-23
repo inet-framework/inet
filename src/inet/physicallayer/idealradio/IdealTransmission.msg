@@ -25,7 +25,7 @@ namespace inet::physicallayer;
 
 class IdealTransmission extends TransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     m communicationRange;
     m interferenceRange;

@@ -31,7 +31,7 @@ namespace inet;
 class Chunk extends cObject
 {
     @packetData;
-    @existingClass(true);
+    @existingClass;
     @beforeChange(handleChange());
     @descriptor(readonly);
     bool mutable @packetData(false) @getter("isMutable");
@@ -45,26 +45,26 @@ class Chunk extends cObject
 
 class BitsChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
 }
 
 class BytesChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
 }
 
 class SequenceChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 
 class SliceChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     b offset;
     b length;
@@ -73,13 +73,13 @@ class SliceChunk extends Chunk
 
 class cPacketChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     cPacket* _packet @getter(getPacket) @getval(.getPacket());
 }
 
 class FieldsChunk extends Chunk
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
 }

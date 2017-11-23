@@ -24,7 +24,7 @@ namespace inet;
 
 class IPv4Route extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     IPv4Address destination;
     IPv4Address netmask;

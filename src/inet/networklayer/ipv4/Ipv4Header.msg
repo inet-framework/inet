@@ -172,7 +172,7 @@ class IPv4OptionUnknown extends IPv4Option
 // TODO: cleanup order of fields
 class Ipv4Header extends NetworkHeaderBase
 {
-    @customize(true);
+    @customize;
 
     chunkLength = B(IP_HEADER_BYTES);
 

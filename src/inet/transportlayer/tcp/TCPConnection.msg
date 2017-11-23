@@ -34,13 +34,13 @@ cplusplus {{
 
 namespace inet::tcp;
 
-class ReorderBuffer extends cNamedObject { @existingClass(true); }
-class TCPSACKRexmitQueue { @existingClass(true); }
-class TCPAlgorithm extends cObject { @existingClass(true); }
+class ReorderBuffer extends cNamedObject { @existingClass; }
+class TCPSACKRexmitQueue { @existingClass; }
+class TCPAlgorithm extends cObject { @existingClass; }
 
 struct TCPStateVariables
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
 
     bool active;    // set if the connection was initiated by an active open
@@ -157,21 +157,21 @@ struct TCPStateVariables
 
 class TCPSendQueue extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     ChunkQueue dataBuffer;
 }
 
 class TCPReceiveQueue extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     ReorderBuffer reorderBuffer;
 }
 
 class TCPConnection extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
 
     int socketId;    // identifies connection within the app

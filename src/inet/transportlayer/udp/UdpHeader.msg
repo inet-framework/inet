@@ -32,7 +32,7 @@ enum UdpConstants {
 //
 class UdpHeader extends TransportHeaderBase
 {
-    @customize(true);
+    @customize;
     unsigned short srcPort;
     unsigned short destPort;
     chunkLength = B(UDP_HEADER_BYTES);

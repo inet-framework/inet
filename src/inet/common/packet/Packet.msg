@@ -28,7 +28,7 @@ namespace inet;
 
 class ChunkQueue extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     b length;
     Chunk* contents @getter(getContents);
@@ -36,7 +36,7 @@ class ChunkQueue extends cNamedObject
 
 class ChunkBuffer::Region
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     b startOffset;
     b endOffset;
@@ -45,14 +45,14 @@ class ChunkBuffer::Region
 
 class ChunkBuffer extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     ChunkBuffer::Region* regions[] @getter(getRegion) @sizeGetter(getNumRegions);
 }
 
 class Packet extends cPacket
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     b totalLength;
     b headerPoppedLength;

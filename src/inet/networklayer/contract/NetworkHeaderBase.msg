@@ -50,7 +50,7 @@ namespace inet;
 
 class NetworkHeaderBase extends FieldsChunk
 {
-    @existingClass(true);
+    @existingClass;
 
     L3Address sourceAddress;
     L3Address destinationAddress;

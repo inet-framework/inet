@@ -45,7 +45,7 @@ namespace inet;
 //
 class TransportHeaderBase extends FieldsChunk
 {
-    @existingClass(true);
+    @existingClass;
     unsigned int sourcePort;
     unsigned int destinationPort;
 };

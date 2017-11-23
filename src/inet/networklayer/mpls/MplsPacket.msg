@@ -30,7 +30,7 @@ class MplsLabel extends cObject
 
 class MplsHeader extends FieldsChunk
 {
-    @customize(true);
+    @customize;
     abstract MplsLabel labels[];
 }
 

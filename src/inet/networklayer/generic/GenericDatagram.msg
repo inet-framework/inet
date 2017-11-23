@@ -44,7 +44,7 @@ enum GenericTLVOptionTypes
 //
 class GenericDatagramHeader extends NetworkHeaderBase
 {
-    @customize(true);
+    @customize;
     L3Address srcAddr;
     L3Address destAddr;
     IPProtocolId protocolId @override = IP_PROT_NONE;

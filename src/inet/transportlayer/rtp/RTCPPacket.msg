@@ -38,7 +38,7 @@ enum RTCPPacketType
 class RTCPPacket extends FieldsChunk
 {
     chunkLength = B(4);
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
     int8 version = 2;
     bool padding = 0;
     short count = 0;
@@ -70,7 +70,7 @@ class INET_API RTCPPacket : public RTCPPacket_Base
 class RTCPReceiverReportPacket extends RTCPPacket
 {
     packetType = RTCP_PT_RR;
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
     uint32 ssrc = 0;
     cArray receptionReports;
 }
@@ -96,7 +96,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 class RTCPSDESPacket extends RTCPPacket
 {
     packetType = RTCP_PT_SDES;
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
     cArray sdesChunks;
 }
 
@@ -119,7 +119,7 @@ class RTCPByePacket extends RTCPPacket
 {
     packetType = RTCP_PT_BYE;
     count = 1;
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
     uint32 ssrc = 0;
 }
 
@@ -140,7 +140,7 @@ class INET_API RTCPByePacket : public RTCPByePacket_Base
 class RTCPSenderReportPacket extends RTCPReceiverReportPacket
 {
     packetType = RTCP_PT_SR;
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
     SenderReport senderReport;
 }
 

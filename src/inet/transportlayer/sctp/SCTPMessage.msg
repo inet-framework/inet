@@ -30,7 +30,7 @@ struct cPacketPtr;
 
 message SCTPMessage extends cPacket
 {
-    @customize(true);
+    @customize;
     // Source Port
     uint16 srcPort;
     // Destination Port
@@ -229,7 +229,7 @@ message SCTPShutdownCompleteChunk extends SCTPChunk
 
 message SCTPErrorChunk extends SCTPChunk
 {
-    @customize(true);
+    @customize;
     bool TBit = 0;
     bool MBit = 0;
     abstract cPacketPtr parameters[];
@@ -253,7 +253,7 @@ message SCTPPacketDropChunk extends SCTPChunk
 
 message SCTPStreamResetChunk extends SCTPChunk
 {
-    @customize(true);
+    @customize;
     abstract cPacketPtr parameters[];
 }
 
@@ -267,7 +267,7 @@ message SCTPOutgoingSSNResetRequestParameter extends SCTPParameter
 
 message SCTPIncomingSSNResetRequestParameter extends SCTPParameter
 {
-    @customize(true);
+    @customize;
     uint32 srReqSn; //Stream Reset Request Sequence Number
     uint16 streamNumbers[];
 }
@@ -310,7 +310,7 @@ message SCTPAuthenticationChunk extends SCTPChunk
 
 message SCTPAsconfChunk extends SCTPChunk
 {
-    @customize(true);
+    @customize;
     uint32 serialNumber;
     L3Address addressParam;
     uint32 peerVTag; //for NAT
@@ -319,7 +319,7 @@ message SCTPAsconfChunk extends SCTPChunk
 
 message SCTPAsconfAckChunk extends SCTPChunk
 {
-    @customize(true);
+    @customize;
     uint32 serialNumber;
     abstract cPacketPtr asconfResponse[];
 }

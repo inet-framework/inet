@@ -64,7 +64,7 @@ class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 //
 class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 {
-    @customize(true);
+    @customize;
     extensionType = IP_PROT_IPv6EXT_ROUTING;
     byteLength = 8;
     //byteLength = 8+16*getAddressArraySize() when routingType == 0

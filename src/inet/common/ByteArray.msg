@@ -23,7 +23,7 @@ namespace inet;
 //
 class ByteArray extends cObject
 {
-    @customize(true);
+    @customize;
     char data[];
 }
 

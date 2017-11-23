@@ -17,7 +17,7 @@ namespace inet::rtp;
 //
 class SenderReport extends cObject
 {
-    @customize(true);
+    @customize;
 
     // The ntp time stamp.
     uint64 NTPTimeStamp;
@@ -38,7 +38,7 @@ class SenderReport extends cObject
 //
 class ReceptionReport extends cObject
 {
-    @customize(true);
+    @customize;
 
     // The ssrc identifier of the sender this ~ReceptionReport is for.
     uint32 ssrc;

@@ -29,7 +29,7 @@ namespace inet;
 //
 class RSVPPathMsg extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     RsvpHopObj_t hop;
     LabelRequestObj_t label_request;
     SenderDescriptor_t sender_descriptor;
@@ -44,7 +44,7 @@ class RSVPPathMsg extends RSVPPacket
 //
 class RSVPPathTear extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     RsvpHopObj_t hop;
     SenderTemplateObj_t senderTemplate;
     bool force;
@@ -57,7 +57,7 @@ class RSVPPathTear extends RSVPPacket
 //
 class RSVPPathError extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     IPv4Address errorNode;
     int errorCode;
     SenderDescriptor_t sender_descriptor;

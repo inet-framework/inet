@@ -25,7 +25,7 @@ class SequenceChunk extends cObject;
 
 class CompoundHeader extends SequenceChunk
 {
-    @customize(true);
+    @customize;
 }
 
 class TlvHeader extends FieldsChunk

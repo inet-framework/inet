@@ -35,7 +35,7 @@ class TLVOptionRaw extends TLVOptionBase
 
 class TLVOptions extends cObject
 {
-    @customize(true);
+    @customize;
     abstract TLVOptionBase tlvOption[];
 }
 

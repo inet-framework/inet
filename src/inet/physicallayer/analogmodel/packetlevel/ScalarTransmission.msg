@@ -25,7 +25,7 @@ namespace inet::physicallayer;
 
 class ScalarTransmission extends FlatTransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     W power;
 }

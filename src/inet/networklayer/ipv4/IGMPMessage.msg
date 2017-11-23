@@ -90,7 +90,7 @@ class IGMPv2Leave extends IGMPMessage
 // differently than in IGMPv2.
 class IGMPv3Query extends IGMPv2Query
 {
-    @customize(true);
+    @customize;
     // maxRespTime stored in `code` in units of 1/10 second
     //     0-127: 0-12.7s
     //   128-255: 1eeemmmm : (mant | 0x10) << (exp + 3)

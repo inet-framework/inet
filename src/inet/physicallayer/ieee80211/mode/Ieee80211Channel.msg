@@ -32,27 +32,27 @@ typedef const IIeee80211Band ConstIIeee80211Band;
 
 class IIeee80211Band
 {
-    @existingClass(true);
+    @existingClass;
     string name @editable(false);
     Hz centerFrequency[] @sizeGetter(getNumChannels) @editable(false);
 }
 
 class Ieee80211EnumeratedBand extends IIeee80211Band
 {
-    @existingClass(true);
+    @existingClass;
 }
 
 class Ieee80211ArithmeticalBand extends IIeee80211Band
 {
-    @existingClass(true);
+    @existingClass;
 }
 
 class Ieee80211Channel
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     IIeee80211Band *band @editable(false);
     int channelNumber;
 }
 
-class ConstIeee80211Channel extends Ieee80211Channel { @existingClass(true); }
+class ConstIeee80211Channel extends Ieee80211Channel { @existingClass; }

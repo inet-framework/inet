@@ -22,7 +22,7 @@ namespace inet;
 
 class WiseRouteHeader extends NetworkHeaderBase
 {
-    @customize(true);
+    @customize;
 
     L3Address   srcAddr;
     L3Address   destAddr;

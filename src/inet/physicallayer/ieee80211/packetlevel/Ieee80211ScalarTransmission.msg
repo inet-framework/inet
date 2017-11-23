@@ -26,7 +26,7 @@ namespace inet::physicallayer;
 
 class Ieee80211ScalarTransmission extends ScalarTransmission
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     ConstIIeee80211Mode *mode;
     ConstIeee80211Channel *channel;

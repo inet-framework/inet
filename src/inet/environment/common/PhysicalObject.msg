@@ -24,7 +24,7 @@ namespace inet::physicalenvironment;
 
 class PhysicalObject extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int id;
     Coord position;

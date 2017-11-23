@@ -43,7 +43,7 @@ class RSVPMessage extends FieldsChunk
 //
 class RSVPPacket extends RSVPMessage
 {
-    @customize(true);
+    @customize;
     SessionObj_t session;
     bool checksumValid = true;
 }

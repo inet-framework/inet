@@ -34,7 +34,7 @@ cplusplus {{
 typedef std::vector<L3Address> AddressVector;
 }}
 
-class AddressVector { @existingClass(true); }
+class AddressVector { @existingClass; }
 
 //
 // Currently not in use.

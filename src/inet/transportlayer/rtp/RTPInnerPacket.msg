@@ -58,7 +58,7 @@ enum RTP_INP_TYPE
 //
 packet RTPInnerPacket
 {
-    @customize(true);  // see the generated C++ header for more info
+    @customize;  // see the generated C++ header for more info
 
     // The type of this ~RTPInnerPacket.
     RTP_INP_TYPE type = RTP_INP_UNDEF;

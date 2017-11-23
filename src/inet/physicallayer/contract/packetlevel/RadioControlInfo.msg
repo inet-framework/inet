@@ -24,7 +24,7 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-class IModulation { @existingClass(true); }
+class IModulation { @existingClass; }
 
 //
 // Message kinds for sending commands to the radio.

@@ -74,7 +74,7 @@ namespace inet::httptools;
 //
 class HttpBaseMessage extends FieldsChunk
 {
-    @omitGetVerb(true);
+    @omitGetVerb;
     @fieldNameSuffix("_var");
     string targetUrl;               // The target URL - request set for browsers, echoed by servers.
     string originatorUrl = "";      // The originator URL. Only applicable for servers.
@@ -90,7 +90,7 @@ class HttpBaseMessage extends FieldsChunk
 //
 class HttpRequestMessage extends HttpBaseMessage
 {
-    @omitGetVerb(true);         // Dont append get to generated getter methods.
+    @omitGetVerb;         // Dont append get to generated getter methods.
     @fieldNameSuffix("_var");
     bool badRequest = false;    // Set to true to simulate a bad request. Server answers w. 404.
 }
@@ -113,7 +113,7 @@ enum HttpContentType
 //
 class HttpReplyMessage extends HttpBaseMessage
 {
-    @omitGetVerb(true);
+    @omitGetVerb;
     @fieldNameSuffix("_var");
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
     HttpContentType contentType = CT_UNKNOWN;

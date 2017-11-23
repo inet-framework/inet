@@ -100,7 +100,7 @@ class SackItem extends cObject
 
 class Sack extends SackItem
 {
-    @customize(true);
+    @customize;
 }
 
 // Header Options (optional):
@@ -179,7 +179,7 @@ class TCPOptionUnknown extends TCPOption
 //
 class TcpHeader extends TransportHeaderBase
 {
-    @customize(true);
+    @customize;
     chunkLength = B(TCP_HEADER_OCTETS);
 
     // Source Port

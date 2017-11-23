@@ -23,7 +23,7 @@ namespace inet;
 
 class PacketQueue extends cPacketQueue
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int maxPacketLength;
     int64_t maxBitLength;

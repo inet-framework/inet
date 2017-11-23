@@ -29,7 +29,7 @@ namespace inet::httptools;
 //
 message HttpServerStatusUpdateMsg
 {
-    @omitGetVerb(true);
+    @omitGetVerb;
     @fieldNameSuffix("_var");
     string www;             // Name of the WWW site.
     simtime_t setTime;      // The event set time.

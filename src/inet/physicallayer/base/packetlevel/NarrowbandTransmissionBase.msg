@@ -25,7 +25,7 @@ namespace inet::physicallayer;
 
 class NarrowbandTransmissionBase extends TransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     Hz carrierFrequency;
     Hz bandwidth;

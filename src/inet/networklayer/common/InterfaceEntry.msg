@@ -25,7 +25,7 @@ namespace inet;
 
 class InterfaceEntry extends cModule
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     bool up @getter("isUp");
     bool broadcast @getter("isBroadcast");

@@ -29,7 +29,7 @@ namespace inet;
 //
 class RSVPResvMsg extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     RsvpHopObj_t hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RESV_MESSAGE;
@@ -40,7 +40,7 @@ class RSVPResvMsg extends RSVPPacket
 //
 class RSVPResvTear extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     RsvpHopObj_t hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RTEAR_MESSAGE;
@@ -51,7 +51,7 @@ class RSVPResvTear extends RSVPPacket
 //
 class RSVPResvError extends RSVPPacket
 {
-    @customize(true);
+    @customize;
     RsvpHopObj_t hop;
     IPv4Address errorNode;
     int errorCode;

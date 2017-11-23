@@ -55,7 +55,7 @@ class Ipv6ExtensionHeader extends cObject
 //
 class Ipv6Header extends NetworkHeaderBase
 {
-    @customize(true);
+    @customize;
     chunkLength = B(IPv6_HEADER_BYTES);
     IPv6Address srcAddress;
     IPv6Address destAddress;
