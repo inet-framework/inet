@@ -284,24 +284,24 @@ void HttpBrowserBase::handleDataMessage(Packet *pk)
 
     messagesInCurrentSession++;
 
-    int serial = appmsg->serial();
+    int serial = appmsg->getSerial();
 
-    std::string senderWWW = appmsg->originatorUrl();
+    std::string senderWWW = appmsg->getOriginatorUrl();
     EV_DEBUG << "Handling received message from " << senderWWW << ": " << pk->getName() << ". Received @T=" << simTime() << endl;
 
-    if (appmsg->result() != 200 || (HttpContentType)appmsg->contentType() == CT_UNKNOWN) {
-        EV_INFO << "Result for " << pk->getName() << " was other than OK. Code: " << appmsg->result() << endl;
+    if (appmsg->getResult() != 200 || (HttpContentType)appmsg->getContentType() == CT_UNKNOWN) {
+        EV_INFO << "Result for " << pk->getName() << " was other than OK. Code: " << appmsg->getResult() << endl;
         htmlErrorsReceived++;
         delete pk;
         return;
     }
     else {
-        switch ((HttpContentType)appmsg->contentType()) {
+        switch ((HttpContentType)appmsg->getContentType()) {
             case CT_HTML:
                 EV_INFO << "HTML Document received: " << pk->getName() << "'. Size is " << pk->getByteLength() << " bytes and serial " << serial << endl;
-                if (strlen(appmsg->payload()) != 0)
-                    EV_DEBUG << "Payload of " << pk->getName() << " is: " << endl << appmsg->payload()
-                             << ", " << strlen(appmsg->payload()) << " bytes" << endl;
+                if (strlen(appmsg->getPayload()) != 0)
+                    EV_DEBUG << "Payload of " << pk->getName() << " is: " << endl << appmsg->getPayload()
+                             << ", " << strlen(appmsg->getPayload()) << " bytes" << endl;
                 else
                     EV_DEBUG << pk->getName() << " has no referenced resources. No GETs will be issued in parsing" << endl;
                 htmlReceived++;
@@ -324,15 +324,15 @@ void HttpBrowserBase::handleDataMessage(Packet *pk)
                 break;
 
             case CT_UNKNOWN:
-                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->contentType() << endl;
+                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->getContentType() << endl;
                 if (hasGUI())
                     bubble("Received an unknown resource type");
                 break;
         }
         // Parse the html page body
-        if ((HttpContentType)appmsg->contentType() == CT_HTML && strlen(appmsg->payload()) != 0) {
+        if ((HttpContentType)appmsg->getContentType() == CT_HTML && strlen(appmsg->getPayload()) != 0) {
             EV_DEBUG << "Processing HTML document body:\n";
-            cStringTokenizer lineTokenizer((const char *)appmsg->payload(), "\n");
+            cStringTokenizer lineTokenizer((const char *)appmsg->getPayload(), "\n");
             std::vector<std::string> lines = lineTokenizer.asVector();
             std::map<std::string, HttpRequestQueue> requestQueues;
             for (auto resourceLine : lines) {

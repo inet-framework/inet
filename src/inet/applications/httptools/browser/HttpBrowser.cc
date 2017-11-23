@@ -104,13 +104,13 @@ void HttpBrowser::sendRequestToServer(Packet *pk)
     int connectPort;
     char szModuleName[127];
 
-    if (controller->getServerInfo(request->targetUrl(), szModuleName, connectPort) != 0) {
-        EV_ERROR << "Unable to get server info for URL " << request->targetUrl() << endl;
+    if (controller->getServerInfo(request->getTargetUrl(), szModuleName, connectPort) != 0) {
+        EV_ERROR << "Unable to get server info for URL " << request->getTargetUrl() << endl;
         delete pk;
         return;
     }
 
-    EV_DEBUG << "Sending request to server " << request->targetUrl() << " (" << szModuleName << ") on port " << connectPort << endl;
+    EV_DEBUG << "Sending request to server " << request->getTargetUrl() << " (" << szModuleName << ") on port " << connectPort << endl;
     submitToSocket(szModuleName, connectPort, pk);
 }
 

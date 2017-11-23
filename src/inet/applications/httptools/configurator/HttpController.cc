@@ -110,8 +110,8 @@ void HttpController::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         HttpServerStatusUpdateMsg *statusMsg = check_and_cast<HttpServerStatusUpdateMsg *>(msg);
-        EV_DEBUG << "Handling a status change message @T=" << simTime() << " for www " << statusMsg->www() << endl;
-        setSpecialStatus(statusMsg->www(), (ServerStatus)statusMsg->eventKind(), statusMsg->pvalue(), statusMsg->pamortize());
+        EV_DEBUG << "Handling a status change message @T=" << simTime() << " for www " << statusMsg->getWww() << endl;
+        setSpecialStatus(statusMsg->getWww(), (ServerStatus)statusMsg->getEventKind(), statusMsg->getPvalue(), statusMsg->getPamortize());
         delete statusMsg;
     }
     else {

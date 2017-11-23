@@ -7,8 +7,6 @@ remove if possible:
  - const-ansok
  - typedef-ek
  - getCompleteStringRepresentation()-ek (expandable descriptors)
- - @fieldNameSuffix
- - @omitGetVerb
  - @opaque
  - @primitive-ek -> primitive foo;
 

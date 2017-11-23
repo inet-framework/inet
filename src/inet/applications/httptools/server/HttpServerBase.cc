@@ -203,29 +203,29 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     if (request == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
-    EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
+    EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->getTargetUrl() << endl;
 
     logRequest(msg);
 
-    if (extractServerName(request->targetUrl()) != hostName) {
+    if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
-        throw cRuntimeError("Received message intended for '%s'", request->targetUrl());    // TODO: DEBUG HERE
+        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl());    // TODO: DEBUG HERE
         return nullptr;
     }
 
     Packet *replymsg = nullptr;
 
     // Parse the request string on spaces
-    cStringTokenizer tokenizer = cStringTokenizer(request->heading(), " ");
+    cStringTokenizer tokenizer = cStringTokenizer(request->getHeading(), " ");
     std::vector<std::string> res = tokenizer.asVector();
     if (res.size() != 3) {
-        EV_ERROR << "Invalid request string: " << request->heading() << endl;
+        EV_ERROR << "Invalid request string: " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
         logResponse(replymsg);
         return replymsg;
     }
 
-    if (request->badRequest()) {
+    if (request->getBadRequest()) {
         // Bad requests get a 404 reply.
         EV_ERROR << "Bad request - bad flag set. Message: " << request->getName() << endl;
         replymsg = generateErrorReply(request, 404);
@@ -234,7 +234,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
         replymsg = handleGetRequest(msg, res[1]);    // Pass in the resource string part
     }
     else {
-        EV_ERROR << "Unsupported request type " << res[0] << " for " << request->heading() << endl;
+        EV_ERROR << "Unsupported request type " << res[0] << " for " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
     }
 
@@ -252,7 +252,7 @@ Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
     resource = trimLeft(resource, "/");
     std::vector<std::string> req = parseResourceName(resource);
     if (req.size() != 3) {
-        EV_ERROR << "Invalid GET request string: " << request->heading() << endl;
+        EV_ERROR << "Invalid GET request string: " << request->getHeading() << endl;
         return generateErrorReply(request, 400);
     }
 
@@ -285,7 +285,7 @@ Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
         return generateResourceMessage(request, resource, cat);
     }
     else {
-        EV_ERROR << "Unknown or unsupported resource requested in " << request->heading() << endl;
+        EV_ERROR << "Unknown or unsupported resource requested in " << request->getHeading() << endl;
         return generateErrorReply(request, 400);
     }
 }
@@ -301,9 +301,9 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
@@ -334,7 +334,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
 
 Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessage>& request, std::string resource, HttpContentType category)
 {
-    EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
+    EV_DEBUG << "Generating resource message in response to request " << request->getHeading() << " with serial " << request->getSerial() << endl;
 
     if (category == CT_TEXT)
         textResourcesServed++;
@@ -357,9 +357,9 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(category);    // Emulates the content-type header field
     replymsg->setChunkLength(B(size)); // Set the resource size
@@ -379,9 +379,9 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
     replymsg->markImmutable();

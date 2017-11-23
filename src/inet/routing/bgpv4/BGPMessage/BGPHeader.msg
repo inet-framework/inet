@@ -107,8 +107,6 @@ struct BGPOptionalParameters
 //
 class BGPOpenMessage extends BGPHeader
 {
-    @omitGetVerb;
-    @fieldNameSuffix("_var");
     type = BGP_OPEN;
     chunkLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS);
 
