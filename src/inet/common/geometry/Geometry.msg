@@ -11,7 +11,7 @@ cplusplus{{
 
 namespace inet;
 
-class Coord extends cObject
+class Coord
 {
     @existingClass(true);
     double x;
@@ -19,7 +19,7 @@ class Coord extends cObject
     double z;
 }
 
-class EulerAngles extends cObject
+class EulerAngles
 {
     @existingClass(true);
     double alpha;

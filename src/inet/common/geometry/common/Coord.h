@@ -33,7 +33,7 @@ namespace inet {
  * @ingroup utils
  * @author Christian Frank
  */
-class INET_API Coord : public cObject
+class INET_API Coord
 {
   public:
     /** @brief Constant with all values set to 0. */
@@ -64,8 +64,7 @@ class INET_API Coord : public cObject
         : x(x), y(y), z(z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord(const Coord& other)
-        : cObject(other) { copy(other); }
+    Coord(const Coord& other) { copy(other); }
 
     double getX() const { return x; }
     void setX(double x) { this->x = x; }
@@ -77,7 +76,7 @@ class INET_API Coord : public cObject
     void setZ(double z) { this->z = z; }
 
     /** @brief Returns a string with the value of the coordinate. */
-    std::string str() const override;
+    std::string str() const;
 
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b)
@@ -169,7 +168,6 @@ class INET_API Coord : public cObject
     {
         if (this == &other)
             return *this;
-        cObject::operator=(other);
         copy(other);
         return *this;
     }

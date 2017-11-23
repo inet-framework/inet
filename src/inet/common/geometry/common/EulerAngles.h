@@ -5,7 +5,7 @@
 
 namespace inet {
 
-class INET_API EulerAngles : public cObject
+class INET_API EulerAngles
 {
   public:
     // Constant with all values set to 0
@@ -37,7 +37,7 @@ class INET_API EulerAngles : public cObject
     double getGamma() const { return gamma; }
     void setGamma(double gamma) { this->gamma = gamma; }
 
-    std::string str() const override;
+    std::string str() const;
 
     bool isNil() const
     {
