@@ -1,0 +1,31 @@
+TCP -> Tcp
+UDP -> Udp
+IMACRelayUnit -> IMacRelayUnit
+IIPv6Tunneling -> IIpv6Tunneling
+IIPRouting -> IIpRouting
+IBGPRouting -> IBgpRouting
+PPPInterface -> PppInterface
+IPv4 -> Ipv4
+IPv6 -> Ipv6
+ITCP -> ITcp
+IRTPPayloadSender -> IRtpPayloadSender
+RTPModule -> RtpModule
+RTPMpegPacket -> RtpMpegPacket
+LinuxTCP -> LinuxTcp
+
+########################
+
+Cli -> Client
+Srv -> Server
+Svr -> Server
+Icmpv6DestUn -> ???
+Icmpv6ParameterProb -> Icmpv6ParameterProblem???
+IpAddressVector -> Ipv4AddressVector
+IpOption -> Ipv4Option
+IpOptionClass -> Ipv4OptionClass
+IpProtocolId -> Ipv4ProtocolId
+IdealMac -> MaMac?
+IdealRadio -> UnitDiskRadio
+Ieee80211* -> *???
+RandomWpMobility -> RandomWaypointMobility
+
