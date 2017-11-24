@@ -28,16 +28,16 @@ namespace physicallayer {
  * This class implements quadrature binary phase-shift keying defined
  * in 20.3.9.4.3 HT-SIG definition.
  */
-class INET_API QBPSKModulation : public MQAMModulationBase
+class INET_API QbpskModulation : public MqamModulationBase
 {
   public:
-    static const QBPSKModulation singleton;
+    static const QbpskModulation singleton;
 
   protected:
-    static const std::vector<APSKSymbol> constellation;
+    static const std::vector<ApskSymbol> constellation;
 
   public:
-    QBPSKModulation();
+    QbpskModulation();
 
     virtual void printToStream(std::ostream& stream) const { stream << "QBPSKModulation"; }
 

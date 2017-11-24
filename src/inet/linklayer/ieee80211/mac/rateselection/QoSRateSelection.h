@@ -44,7 +44,7 @@ class INET_API QoSRateSelection : public IQoSRateSelection, public ModeSetListen
         IRateControl *dataOrMgmtRateControl = nullptr;
 
         const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
-        std::map<MACAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
+        std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
         // originator frame modes
         const physicallayer::IIeee80211Mode *multicastFrameMode = nullptr;

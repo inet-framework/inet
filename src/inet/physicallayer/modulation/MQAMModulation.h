@@ -30,11 +30,11 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Quadrature_amplitude_modulation#Rectangular_QAM
  */
-class INET_API MQAMModulation : public MQAMModulationBase
+class INET_API MqamModulation : public MqamModulationBase
 {
   public:
-    MQAMModulation(unsigned int codeWordSize);
-    virtual ~MQAMModulation();
+    MqamModulation(unsigned int codeWordSize);
+    virtual ~MqamModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };

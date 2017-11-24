@@ -25,10 +25,10 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // @author Andras Varga
 //
-simple ANSimMobility extends MovingMobilityBase
+simple AnsimMobility extends MovingMobilityBase
 {
     parameters:
         xml ansimTrace; // the ANSim trace file in XML
         int nodeId; // <position_change> elements to match; -1 gets substituted to parent module's index
-        @class(ANSimMobility);
+        @class(AnsimMobility);
 }

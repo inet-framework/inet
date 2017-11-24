@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class IIPv4RoutingTable;
+class IIpv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
 
@@ -33,7 +33,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class INET_API TED : public cSimpleModule, public ILifecycle
+class INET_API Ted : public cSimpleModule, public ILifecycle
 {
   public:
     /**
@@ -42,7 +42,7 @@ class INET_API TED : public cSimpleModule, public ILifecycle
      */
     struct vertex_t
     {
-        IPv4Address node;    // FIXME *** is this the routerID? ***
+        Ipv4Address node;    // FIXME *** is this the routerID? ***
         int parent;    // index into the same vertex_t vector
         double dist;    // distance to root (???)
     };
@@ -61,11 +61,11 @@ class INET_API TED : public cSimpleModule, public ILifecycle
     /**
      * The link state database. (TELinkStateInfoVector is defined in TED.msg)
      */
-    TELinkStateInfoVector ted;
+    TeLinkStateInfoVector ted;
 
   public:
-    TED();
-    virtual ~TED();
+    Ted();
+    virtual ~Ted();
 
   protected:
     virtual void initialize(int stage) override;
@@ -74,21 +74,21 @@ class INET_API TED : public cSimpleModule, public ILifecycle
 
     virtual void initializeTED();
 
-    virtual IPv4AddressVector calculateShortestPath(IPv4AddressVector dest,
-            const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
+    virtual Ipv4AddressVector calculateShortestPath(Ipv4AddressVector dest,
+            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority);
 
   public:
     /** @name Public interface to the Traffic Engineering Database */
     //@{
-    virtual IPv4Address getInterfaceAddrByPeerAddress(IPv4Address peerIP);
-    virtual IPv4Address peerRemoteInterface(IPv4Address peerIP);
-    virtual IPv4Address getPeerByLocalAddress(IPv4Address localInf);
-    virtual IPv4Address primaryAddress(IPv4Address localInf);
-    virtual bool isLocalPeer(IPv4Address inetAddr);
-    virtual bool isLocalAddress(IPv4Address addr);
-    virtual unsigned int linkIndex(IPv4Address localInf);
-    virtual unsigned int linkIndex(IPv4Address advrouter, IPv4Address linkid);
-    virtual IPv4AddressVector getLocalAddress();
+    virtual Ipv4Address getInterfaceAddrByPeerAddress(Ipv4Address peerIP);
+    virtual Ipv4Address peerRemoteInterface(Ipv4Address peerIP);
+    virtual Ipv4Address getPeerByLocalAddress(Ipv4Address localInf);
+    virtual Ipv4Address primaryAddress(Ipv4Address localInf);
+    virtual bool isLocalPeer(Ipv4Address inetAddr);
+    virtual bool isLocalAddress(Ipv4Address addr);
+    virtual unsigned int linkIndex(Ipv4Address localInf);
+    virtual unsigned int linkIndex(Ipv4Address advrouter, Ipv4Address linkid);
+    virtual Ipv4AddressVector getLocalAddress();
 
     virtual void rebuildRoutingTable();
     //@}
@@ -96,26 +96,26 @@ class INET_API TED : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
-    IIPv4RoutingTable *rt = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    IPv4Address routerId;
+    Ipv4Address routerId;
 
-    IPv4AddressVector interfaceAddrs;    // list of local interface addresses
+    Ipv4AddressVector interfaceAddrs;    // list of local interface addresses
 
     int maxMessageId = 0;
 
   protected:
-    virtual int assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr);
+    virtual int assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr);
 
-    std::vector<vertex_t> calculateShortestPaths(const TELinkStateInfoVector& topology,
+    std::vector<vertex_t> calculateShortestPaths(const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority);
 
   public:    //FIXME
-    virtual bool checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match);
-    virtual void updateTimestamp(TELinkStateInfo *link);
+    virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
+    virtual void updateTimestamp(TeLinkStateInfo *link);
 };
 
-std::ostream& operator<<(std::ostream& os, const TELinkStateInfo& info);
+std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info);
 
 } // namespace inet
 

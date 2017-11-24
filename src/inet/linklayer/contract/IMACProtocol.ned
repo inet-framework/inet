@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // This interface provides an abstraction for different network protocols.
 //
-moduleinterface IMACProtocol
+moduleinterface IMacProtocol
 {
     parameters:
         @display("i=block/rxtx");

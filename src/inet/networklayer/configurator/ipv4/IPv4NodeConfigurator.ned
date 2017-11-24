@@ -36,7 +36,7 @@ package inet.networklayer.configurator.ipv4;
 // a restart, because being a global module, it doesn't know about node
 // lifecycle events.
 //
-simple IPv4NodeConfigurator
+simple Ipv4NodeConfigurator
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

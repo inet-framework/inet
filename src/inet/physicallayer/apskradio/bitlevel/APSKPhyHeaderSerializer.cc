@@ -23,11 +23,11 @@ namespace inet {
 
 namespace physicallayer {
 
-Register_Serializer(APSKPhyHeader, APSKPhyHeaderSerializer);
+Register_Serializer(ApskPhyHeader, ApskPhyHeaderSerializer);
 
-void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
+void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const
 {
-    const auto& phyHeader = staticPtrCast<const APSKPhyHeader>(chunk);
+    const auto& phyHeader = staticPtrCast<const ApskPhyHeader>(chunk);
     stream.writeUint16Be(0);
     stream.writeUint16Be(phyHeader->getLengthField());
     auto crcMode = phyHeader->getCrcMode();
@@ -36,9 +36,9 @@ void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint16Be(phyHeader->getCrc());
 }
 
-const Ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto phyHeader = makeShared<APSKPhyHeader>();
+    auto phyHeader = makeShared<ApskPhyHeader>();
     stream.readUint16Be();
     phyHeader->setLengthField(stream.readUint16Be());
     auto crc = stream.readUint16Be();

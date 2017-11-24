@@ -23,21 +23,21 @@ namespace physicallayer {
 
 #define SYMBOL_SIZE    48
 
-APSKCode::APSKCode(const ConvolutionalCode *convCode, const IInterleaving *interleaving, const IScrambling *scrambling) :
+ApskCode::ApskCode(const ConvolutionalCode *convCode, const IInterleaving *interleaving, const IScrambling *scrambling) :
     convolutionalCode(convCode),
     interleaving(interleaving),
     scrambling(scrambling)
 {
 }
 
-APSKCode::~APSKCode()
+ApskCode::~ApskCode()
 {
     delete convolutionalCode;
     delete interleaving;
     delete scrambling;
 }
 
-std::ostream& APSKCode::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskCode::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKCode";
     if (level <= PRINT_LEVEL_DETAIL)

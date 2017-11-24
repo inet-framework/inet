@@ -25,7 +25,7 @@ namespace inet {
 
 namespace bgp {
 
-class BGPSession;
+class BgpSession;
 
 namespace fsm {
 
@@ -37,11 +37,11 @@ TOPSTATE(TopState) {
     struct Box
     {
         Box() : _mod(0) {}
-        Box(BGPSession& session) : _mod(&session) {}
-        BGPSession& getModule() { return *_mod; }
+        Box(BgpSession& session) : _mod(&session) {}
+        BgpSession& getModule() { return *_mod; }
 
       private:
-        BGPSession *_mod;
+        BgpSession *_mod;
     };
 
     STATE(TopState)

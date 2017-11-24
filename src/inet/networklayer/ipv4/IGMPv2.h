@@ -31,9 +31,9 @@
 namespace inet {
 
 class IInterfaceTable;
-class IIPv4RoutingTable;
+class IIpv4RoutingTable;
 
-class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListener, public cListener
+class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListener, public cListener
 {
   protected:
     enum RouterState {
@@ -57,77 +57,77 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
 
     struct HostGroupData
     {
-        IGMPv2 *owner;
-        IPv4Address groupAddr;
+        Igmpv2 *owner;
+        Ipv4Address groupAddr;
         HostGroupState state;
         bool flag;    // true when we were the last host to send a report for this group
         cMessage *timer;
 
-        HostGroupData(IGMPv2 *owner, const IPv4Address& group);
+        HostGroupData(Igmpv2 *owner, const Ipv4Address& group);
         virtual ~HostGroupData();
     };
-    typedef std::map<IPv4Address, HostGroupData *> GroupToHostDataMap;
+    typedef std::map<Ipv4Address, HostGroupData *> GroupToHostDataMap;
 
     struct RouterGroupData
     {
-        IGMPv2 *owner;
-        IPv4Address groupAddr;
+        Igmpv2 *owner;
+        Ipv4Address groupAddr;
         RouterGroupState state;
         cMessage *timer;
         cMessage *rexmtTimer;
         //cMessage *v1HostTimer;
 
-        RouterGroupData(IGMPv2 *owner, const IPv4Address& group);
+        RouterGroupData(Igmpv2 *owner, const Ipv4Address& group);
         virtual ~RouterGroupData();
     };
-    typedef std::map<IPv4Address, RouterGroupData *> GroupToRouterDataMap;
+    typedef std::map<Ipv4Address, RouterGroupData *> GroupToRouterDataMap;
 
     struct HostInterfaceData
     {
-        IGMPv2 *owner;
+        Igmpv2 *owner;
         GroupToHostDataMap groups;
 
-        HostInterfaceData(IGMPv2 *owner);
+        HostInterfaceData(Igmpv2 *owner);
         virtual ~HostInterfaceData();
     };
     typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
 
     struct RouterInterfaceData
     {
-        IGMPv2 *owner;
+        Igmpv2 *owner;
         GroupToRouterDataMap groups;
         RouterState igmpRouterState;
         cMessage *igmpQueryTimer;
 
-        RouterInterfaceData(IGMPv2 *owner);
+        RouterInterfaceData(Igmpv2 *owner);
         virtual ~RouterInterfaceData();
     };
     typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
 
     // Timers
-    enum IGMPTimerKind {
+    enum IgmpTimerKind {
         IGMP_QUERY_TIMER,
         IGMP_HOSTGROUP_TIMER,
         IGMP_LEAVE_TIMER,
         IGMP_REXMT_TIMER
     };
 
-    struct IGMPHostTimerContext
+    struct IgmpHostTimerContext
     {
         InterfaceEntry *ie;
         HostGroupData *hostGroup;
-        IGMPHostTimerContext(InterfaceEntry *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
+        IgmpHostTimerContext(InterfaceEntry *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
     };
 
-    struct IGMPRouterTimerContext
+    struct IgmpRouterTimerContext
     {
         InterfaceEntry *ie;
         RouterGroupData *routerGroup;
-        IGMPRouterTimerContext(InterfaceEntry *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
+        IgmpRouterTimerContext(InterfaceEntry *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
     };
 
   protected:
-    IIPv4RoutingTable *rt;    // cached pointer
+    IIpv4RoutingTable *rt;    // cached pointer
     IInterfaceTable *ift;    // cached pointer
 
     bool enabled;
@@ -171,40 +171,40 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual ~IGMPv2();
+    virtual ~Igmpv2();
 
   protected:
     virtual HostInterfaceData *createHostInterfaceData();
     virtual RouterInterfaceData *createRouterInterfaceData();
-    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const IPv4Address& group);
-    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const IPv4Address& group);
+    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
     virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
     virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
-    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const IPv4Address& group);
-    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const IPv4Address& group);
+    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
     virtual void deleteHostInterfaceData(int interfaceId);
     virtual void deleteRouterInterfaceData(int interfaceId);
-    virtual void deleteHostGroupData(InterfaceEntry *ie, const IPv4Address& group);
-    virtual void deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address& group);
+    virtual void deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual void deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
 
     virtual void configureInterface(InterfaceEntry *ie);
-    virtual void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
-    virtual void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
+    virtual void multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr);
+    virtual void multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr);
 
     virtual void startTimer(cMessage *timer, double interval);
     virtual void startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime);
 
-    virtual void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime);
+    virtual void sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime);
     virtual void sendReport(InterfaceEntry *ie, HostGroupData *group);
     virtual void sendLeave(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest);
+    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest);
 
     virtual void processQueryTimer(cMessage *msg);
     virtual void processHostGroupTimer(cMessage *msg);
     virtual void processLeaveTimer(cMessage *msg);
     virtual void processRexmtTimer(cMessage *msg);
 
-    virtual void processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& igmp);
+    virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
     virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
     //virtual void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);

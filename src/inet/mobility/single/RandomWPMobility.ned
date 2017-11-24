@@ -39,7 +39,7 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // @author Georg Lutz
 //
-simple RandomWPMobility extends MovingMobilityBase
+simple RandomWpMobility extends MovingMobilityBase
 {
     parameters:
         double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
@@ -48,5 +48,5 @@ simple RandomWPMobility extends MovingMobilityBase
         bool initFromDisplayString = default(true);
         volatile double speed @unit(mps) = default(mps); // use uniform(minSpeed, maxSpeed) or another distribution
         volatile double waitTime @unit(s) = default(0s); // wait time between reaching a target and choosing a new one
-        @class(RandomWPMobility);
+        @class(RandomWpMobility);
 }

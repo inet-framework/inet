@@ -31,17 +31,17 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMEncoder : public IEncoder
+class INET_API Ieee80211OfdmEncoder : public IEncoder
 {
   protected:
-    const IFECCoder *convolutionalCoder = nullptr;
+    const IFecCoder *convolutionalCoder = nullptr;
     const IInterleaver *interleaver = nullptr;
     const IScrambler *scrambler = nullptr;
     const Ieee80211OfdmCode *code = nullptr;
 
   public:
-    Ieee80211OFDMEncoder(const Ieee80211OfdmCode *code);
-    ~Ieee80211OFDMEncoder();
+    Ieee80211OfdmEncoder(const Ieee80211OfdmCode *code);
+    ~Ieee80211OfdmEncoder();
 
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

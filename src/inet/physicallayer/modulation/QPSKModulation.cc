@@ -23,13 +23,13 @@ namespace physicallayer {
 
 const double k = 1 / sqrt(2);
 
-const std::vector<APSKSymbol> QPSKModulation::constellation = {
-    k * APSKSymbol(-1, -1), k * APSKSymbol(1, -1), k * APSKSymbol(-1, 1), k * APSKSymbol(1, 1)
+const std::vector<ApskSymbol> QpskModulation::constellation = {
+    k * ApskSymbol(-1, -1), k * ApskSymbol(1, -1), k * ApskSymbol(-1, 1), k * ApskSymbol(1, 1)
 };
 
-const QPSKModulation QPSKModulation::singleton;
+const QpskModulation QpskModulation::singleton;
 
-QPSKModulation::QPSKModulation() : MQAMModulationBase(&constellation)
+QpskModulation::QpskModulation() : MqamModulationBase(&constellation)
 {
 }
 

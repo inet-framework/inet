@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API _4PPMModulation : public PPMModulationBase
+class INET_API _4PpmModulation : public PpmModulationBase
 {
   public:
-    static const _4PPMModulation singleton;
+    static const _4PpmModulation singleton;
 
   public:
-    _4PPMModulation();
+    _4PpmModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "4PPMModulation"; }
 };

@@ -35,30 +35,30 @@ namespace ospf {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class OSPFRouting : public cSimpleModule, public ILifecycle
+class OspfRouting : public cSimpleModule, public ILifecycle
 {
   private:
-    IIPv4RoutingTable *rt = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
     bool isUp = false;
     Router *ospfRouter = nullptr;    // root object of the OSPF data structure
 
   public:
-    OSPFRouting();
-    virtual ~OSPFRouting();
+    OspfRouting();
+    virtual ~OspfRouting();
 
     /**
      * Insert a route learn by BGP in OSPF routingTable as an external route.
      * Used by the BGPRouting module.
      * @ifIndex: interface ID
      */
-    void insertExternalRoute(int ifIndex, const IPv4AddressRange& netAddr);
+    void insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr);
 
     /**
      * Return true if the route is in OSPF external LSA Table, false else.
      * Used by the BGPRouting module.
      */
-    bool checkExternalRoute(const IPv4Address& route);
+    bool checkExternalRoute(const Ipv4Address& route);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

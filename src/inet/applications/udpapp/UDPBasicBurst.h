@@ -34,7 +34,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicBurst : public ApplicationBase
+class INET_API UdpBasicBurst : public ApplicationBase
 {
   public:
     enum ChooseDestAddrMode {
@@ -61,7 +61,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     cPar *sendIntervalPar = nullptr;
 
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     L3Address destAddr;
     SourceSequence sourceSequence;
     cMessage *timerNext = nullptr;
@@ -104,8 +104,8 @@ class INET_API UDPBasicBurst : public ApplicationBase
     virtual void handleNodeCrash() override;
 
   public:
-    UDPBasicBurst() {}
-    ~UDPBasicBurst();
+    UdpBasicBurst() {}
+    ~UdpBasicBurst();
 };
 
 } // namespace inet

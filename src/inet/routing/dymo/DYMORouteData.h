@@ -31,24 +31,24 @@ namespace dymo {
 /**
  * DYMO-specific extra route data attached to routes in the routing table.
  */
-class INET_API DYMORouteData : public cObject
+class INET_API DymoRouteData : public cObject
 {
   private:
     bool isBroken;
-    DYMOSequenceNumber sequenceNumber;
+    DymoSequenceNumber sequenceNumber;
     simtime_t lastUsed;
     simtime_t expirationTime;
-    DYMOMetricType metricType;
+    DymoMetricType metricType;
 
   public:
-    DYMORouteData();
-    virtual ~DYMORouteData() {}
+    DymoRouteData();
+    virtual ~DymoRouteData() {}
 
     bool getBroken() const { return isBroken; }
     void setBroken(bool isBroken) { this->isBroken = isBroken; }
 
-    DYMOSequenceNumber getSequenceNumber() const { return sequenceNumber; }
-    void setSequenceNumber(DYMOSequenceNumber sequenceNumber) { this->sequenceNumber = sequenceNumber; }
+    DymoSequenceNumber getSequenceNumber() const { return sequenceNumber; }
+    void setSequenceNumber(DymoSequenceNumber sequenceNumber) { this->sequenceNumber = sequenceNumber; }
 
     simtime_t getLastUsed() const { return lastUsed; }
     void setLastUsed(simtime_t lastUsed) { this->lastUsed = lastUsed; }
@@ -56,8 +56,8 @@ class INET_API DYMORouteData : public cObject
     simtime_t getExpirationTime() const { return expirationTime; }
     void setExpirationTime(simtime_t expirationTime) { this->expirationTime = expirationTime; }
 
-    DYMOMetricType getMetricType() const { return metricType; }
-    void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
+    DymoMetricType getMetricType() const { return metricType; }
+    void setMetricType(DymoMetricType metricType) { this->metricType = metricType; }
 };
 
 } // namespace dymo

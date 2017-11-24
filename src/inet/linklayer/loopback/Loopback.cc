@@ -40,7 +40,7 @@ Loopback::~Loopback()
 
 void Loopback::initialize(int stage)
 {
-    MACBase::initialize(stage);
+    MacBase::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {

@@ -34,7 +34,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
 {
     Interface::InterfaceStateType oldState = currentState->getState();
     Interface::InterfaceStateType nextState = newState->getState();
-    Interface::OSPFInterfaceType intfType = intf->getType();
+    Interface::OspfInterfaceType intfType = intf->getType();
     bool shouldRebuildRoutingTable = false;
 
     intf->changeState(newState, currentState);
@@ -53,7 +53,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
          ((oldState == Interface::WAITING_STATE) ||
           (nextState == Interface::WAITING_STATE))))
     {
-        RouterLSA *routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
+        RouterLsa *routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
         if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -63,7 +63,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
                 routerLSA->incrementInstallTime();
             }
             else {
-                RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
+                RouterLsa *newLSA = intf->getArea()->originateRouterLSA();
 
                 newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -73,7 +73,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
             }
         }
         else {    // (lsa == nullptr) -> This must be the first time any interface is up...
-            RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
+            RouterLsa *newLSA = intf->getArea()->originateRouterLSA();
 
             shouldRebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
 
@@ -86,7 +86,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
     }
 
     if (nextState == Interface::DESIGNATED_ROUTER_STATE) {
-        NetworkLSA *newLSA = intf->getArea()->originateNetworkLSA(intf);
+        NetworkLsa *newLSA = intf->getArea()->originateNetworkLSA(intf);
         if (newLSA != nullptr) {
             shouldRebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
@@ -94,7 +94,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
             delete newLSA;
         }
         else {    // no neighbors on the network -> old NetworkLSA must be flushed
-            NetworkLSA *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
+            NetworkLsa *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != nullptr) {
                 oldLSA->getMutableHeader().setLsAge(MAX_AGE);
@@ -105,7 +105,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
     }
 
     if (oldState == Interface::DESIGNATED_ROUTER_STATE) {
-        NetworkLSA *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
+        NetworkLsa *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
         if (networkLSA != nullptr) {
             networkLSA->getMutableHeader().setLsAge(MAX_AGE);
@@ -121,22 +121,22 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
 
 void InterfaceState::calculateDesignatedRouter(Interface *intf)
 {
-    RouterID routerID = intf->parentArea->getRouter()->getRouterID();
-    DesignatedRouterID currentDesignatedRouter = intf->designatedRouter;
-    DesignatedRouterID currentBackupRouter = intf->backupDesignatedRouter;
+    RouterId routerID = intf->parentArea->getRouter()->getRouterID();
+    DesignatedRouterId currentDesignatedRouter = intf->designatedRouter;
+    DesignatedRouterId currentBackupRouter = intf->backupDesignatedRouter;
 
     unsigned int neighborCount = intf->neighboringRouters.size();
     unsigned char repeatCount = 0;
     unsigned int i;
 
-    DesignatedRouterID declaredBackup;
+    DesignatedRouterId declaredBackup;
     unsigned char declaredBackupPriority;
-    RouterID declaredBackupID;
+    RouterId declaredBackupID;
     bool backupDeclared;
 
-    DesignatedRouterID declaredDesignatedRouter;
+    DesignatedRouterId declaredDesignatedRouter;
     unsigned char declaredDesignatedRouterPriority;
-    RouterID declaredDesignatedRouterID;
+    RouterId declaredDesignatedRouterID;
     bool designatedRouterDeclared;
 
     do {
@@ -146,9 +146,9 @@ void InterfaceState::calculateDesignatedRouter(Interface *intf)
         declaredBackupID = NULL_ROUTERID;
         backupDeclared = false;
 
-        DesignatedRouterID highestRouter = NULL_DESIGNATEDROUTERID;
+        DesignatedRouterId highestRouter = NULL_DESIGNATEDROUTERID;
         unsigned char highestPriority = 0;
-        RouterID highestID = NULL_ROUTERID;
+        RouterId highestID = NULL_ROUTERID;
 
         for (i = 0; i < neighborCount; i++) {
             Neighbor *neighbor = intf->neighboringRouters[i];
@@ -161,9 +161,9 @@ void InterfaceState::calculateDesignatedRouter(Interface *intf)
                 continue;
             }
 
-            RouterID neighborID = neighbor->getNeighborID();
-            DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
-            DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
+            RouterId neighborID = neighbor->getNeighborID();
+            DesignatedRouterId neighborsDesignatedRouter = neighbor->getDesignatedRouter();
+            DesignatedRouterId neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
 
             if (neighborsDesignatedRouter.routerID != neighborID) {
                 if (neighborsBackupDesignatedRouter.routerID == neighborID) {
@@ -243,9 +243,9 @@ void InterfaceState::calculateDesignatedRouter(Interface *intf)
                 continue;
             }
 
-            RouterID neighborID = neighbor->getNeighborID();
-            DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
-            DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
+            RouterId neighborID = neighbor->getNeighborID();
+            DesignatedRouterId neighborsDesignatedRouter = neighbor->getDesignatedRouter();
+            DesignatedRouterId neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
 
             if (neighborsDesignatedRouter.routerID == neighborID) {
                 if ((neighborPriority > declaredDesignatedRouterPriority) ||
@@ -316,8 +316,8 @@ void InterfaceState::calculateDesignatedRouter(Interface *intf)
         }
     } while (repeatCount < 2);
 
-    RouterID routersOldDesignatedRouterID = intf->designatedRouter.routerID;
-    RouterID routersOldBackupID = intf->backupDesignatedRouter.routerID;
+    RouterId routersOldDesignatedRouterID = intf->designatedRouter.routerID;
+    RouterId routersOldBackupID = intf->backupDesignatedRouter.routerID;
 
     intf->designatedRouter = declaredDesignatedRouter;
     intf->backupDesignatedRouter = declaredBackup;

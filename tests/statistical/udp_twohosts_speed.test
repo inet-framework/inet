@@ -1,13 +1,13 @@
 %description:
 Testing TCP communication speed
     TCP
-    TCP_NSC
+    TcpNsc
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -38,7 +38,7 @@ network UdpClientServer
             parameters:
                 @display("p=181,67;i=device/pc2");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=109,142");
         }
@@ -80,7 +80,7 @@ sim-time-limit = 20s
 **.host*snap.eth[*].useSNAP = true
 **.host*.eth[*].queue.frameCapacity = 1
 
-# ARP
+# Arp
 **.arpType = "GlobalARP"
 
 %#--------------------------------------------------------------------------------------------------------------

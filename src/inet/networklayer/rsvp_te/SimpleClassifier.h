@@ -30,34 +30,34 @@
 
 namespace inet {
 
-class RSVP;
+class Rsvp;
 
 /**
  * TODO documentation
  */
-class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, public IRSVPClassifier
+class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, public IRsvpClassifier
 {
   public:
-    struct FECEntry
+    struct FecEntry
     {
         int id;
 
-        IPv4Address src;
-        IPv4Address dest;
+        Ipv4Address src;
+        Ipv4Address dest;
 
-        SessionObj_t session;
-        SenderTemplateObj_t sender;
+        SessionObj session;
+        SenderTemplateObj sender;
 
         int inLabel;
     };
 
   protected:
-    IPv4Address routerId;
+    Ipv4Address routerId;
     int maxLabel = 0;
 
-    std::vector<FECEntry> bindings;
-    LIBTable *lt = nullptr;
-    RSVP *rsvp = nullptr;
+    std::vector<FecEntry> bindings;
+    LibTable *lt = nullptr;
+    Rsvp *rsvp = nullptr;
 
   public:
     SimpleClassifier() {}
@@ -72,12 +72,12 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
 
     // IRSVPClassifier implementation
     virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
-    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) override;
+    virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) override;
 
   protected:
     virtual void readTableFromXML(const cXMLElement *fectable);
     virtual void readItemFromXML(const cXMLElement *fec);
-    std::vector<FECEntry>::iterator findFEC(int fecid);
+    std::vector<FecEntry>::iterator findFEC(int fecid);
 };
 
 } // namespace inet

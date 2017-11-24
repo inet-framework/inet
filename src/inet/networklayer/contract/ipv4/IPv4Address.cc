@@ -35,28 +35,28 @@ namespace inet {
 static const int IPADDRESS_STRING_SIZE = 20;
 
 // predefined addresses
-const IPv4Address IPv4Address::UNSPECIFIED_ADDRESS;
-const IPv4Address IPv4Address::LOOPBACK_ADDRESS("127.0.0.1");
-const IPv4Address IPv4Address::LOOPBACK_NETMASK("255.0.0.0");
-const IPv4Address IPv4Address::ALLONES_ADDRESS("255.255.255.255");
+const Ipv4Address Ipv4Address::UNSPECIFIED_ADDRESS;
+const Ipv4Address Ipv4Address::LOOPBACK_ADDRESS("127.0.0.1");
+const Ipv4Address Ipv4Address::LOOPBACK_NETMASK("255.0.0.0");
+const Ipv4Address Ipv4Address::ALLONES_ADDRESS("255.255.255.255");
 
-const IPv4Address IPv4Address::ALL_HOSTS_MCAST("224.0.0.1");
-const IPv4Address IPv4Address::ALL_ROUTERS_MCAST("224.0.0.2");
-const IPv4Address IPv4Address::ALL_DVMRP_ROUTERS_MCAST("224.0.0.4");
-const IPv4Address IPv4Address::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
-const IPv4Address IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
-const IPv4Address IPv4Address::ALL_IGMPV3_ROUTERS_MCAST("224.0.0.22");
+const Ipv4Address Ipv4Address::ALL_HOSTS_MCAST("224.0.0.1");
+const Ipv4Address Ipv4Address::ALL_ROUTERS_MCAST("224.0.0.2");
+const Ipv4Address Ipv4Address::ALL_DVMRP_ROUTERS_MCAST("224.0.0.4");
+const Ipv4Address Ipv4Address::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
+const Ipv4Address Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
+const Ipv4Address Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST("224.0.0.22");
 
-const IPv4Address IPv4Address::LL_MANET_ROUTERS("224.0.0.109");
+const Ipv4Address Ipv4Address::LL_MANET_ROUTERS("224.0.0.109");
 
-const IPv4Address IPv4Address::ALL_RIP_ROUTERS_MCAST("224.0.0.9");
+const Ipv4Address Ipv4Address::ALL_RIP_ROUTERS_MCAST("224.0.0.9");
 
-void IPv4Address::set(int i0, int i1, int i2, int i3)
+void Ipv4Address::set(int i0, int i1, int i2, int i3)
 {
     addr = (i0 << 24) | (i1 << 16) | (i2 << 8) | i3;
 }
 
-bool IPv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
+bool Ipv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
 {
     if (!text)
         return false;
@@ -93,7 +93,7 @@ bool IPv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
     return i == 4;    // must have all 4 numbers
 }
 
-void IPv4Address::set(const char *text)
+void Ipv4Address::set(const char *text)
 {
     unsigned char buf[4];
     if (!text)
@@ -106,7 +106,7 @@ void IPv4Address::set(const char *text)
     set(buf[0], buf[1], buf[2], buf[3]);
 }
 
-std::string IPv4Address::str(bool printUnspec    /* = true */) const
+std::string Ipv4Address::str(bool printUnspec    /* = true */) const
 {
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");
@@ -116,7 +116,7 @@ std::string IPv4Address::str(bool printUnspec    /* = true */) const
     return std::string(buf);
 }
 
-char IPv4Address::getIPClass() const
+char Ipv4Address::getIPClass() const
 {
     unsigned char buf = getDByte(0);
     if ((buf & 0x80) == 0x00) // 0xxxx
@@ -133,7 +133,7 @@ char IPv4Address::getIPClass() const
         return '?';
 }
 
-IPv4Address::AddressCategory IPv4Address::getAddressCategory() const
+Ipv4Address::AddressCategory Ipv4Address::getAddressCategory() const
 {
     if (isUnspecified())
         return UNSPECIFIED; // 0.0.0.0
@@ -165,57 +165,57 @@ IPv4Address::AddressCategory IPv4Address::getAddressCategory() const
     return GLOBAL;
 }
 
-IPv4Address IPv4Address::getNetwork() const
+Ipv4Address Ipv4Address::getNetwork() const
 {
     switch (getIPClass()) {
         case 'A':
             // Class A: network = 7 bits
-            return IPv4Address(getDByte(0), 0, 0, 0);
+            return Ipv4Address(getDByte(0), 0, 0, 0);
 
         case 'B':
             // Class B: network = 14 bits
-            return IPv4Address(getDByte(0), getDByte(1), 0, 0);
+            return Ipv4Address(getDByte(0), getDByte(1), 0, 0);
 
         case 'C':
             // Class C: network = 21 bits
-            return IPv4Address(getDByte(0), getDByte(1), getDByte(2), 0);
+            return Ipv4Address(getDByte(0), getDByte(1), getDByte(2), 0);
 
         default:
             // Class D or E
-            return IPv4Address();
+            return Ipv4Address();
     }
 }
 
-IPv4Address IPv4Address::getNetworkMask() const
+Ipv4Address Ipv4Address::getNetworkMask() const
 {
     switch (getIPClass()) {
         case 'A':
             // Class A: network = 7 bits
-            return IPv4Address(255, 0, 0, 0);
+            return Ipv4Address(255, 0, 0, 0);
 
         case 'B':
             // Class B: network = 14 bits
-            return IPv4Address(255, 255, 0, 0);
+            return Ipv4Address(255, 255, 0, 0);
 
         case 'C':
             // Class C: network = 21 bits
-            return IPv4Address(255, 255, 255, 0);
+            return Ipv4Address(255, 255, 255, 0);
 
         default:
             // Class D or E: return null address
-            return IPv4Address();
+            return Ipv4Address();
     }
 }
 
-bool IPv4Address::isNetwork(const IPv4Address& toCmp) const
+bool Ipv4Address::isNetwork(const Ipv4Address& toCmp) const
 {
-    IPv4Address netmask = getNetworkMask();
+    Ipv4Address netmask = getNetworkMask();
     if (netmask.isUnspecified())
         return false; // Class is D or E
     return maskedAddrAreEqual(*this, toCmp, netmask);
 }
 
-bool IPv4Address::prefixMatches(const IPv4Address& other, int length) const
+bool Ipv4Address::prefixMatches(const Ipv4Address& other, int length) const
 {
     if (length < 1)
         return true;
@@ -226,7 +226,7 @@ bool IPv4Address::prefixMatches(const IPv4Address& other, int length) const
     return (addr & mask) == (other.addr & mask);
 }
 
-int IPv4Address::getNumMatchingPrefixBits(const IPv4Address& to_cmp) const
+int Ipv4Address::getNumMatchingPrefixBits(const Ipv4Address& to_cmp) const
 {
     uint32 addr2 = to_cmp.getInt();
 
@@ -242,7 +242,7 @@ int IPv4Address::getNumMatchingPrefixBits(const IPv4Address& to_cmp) const
     return 32;
 }
 
-int IPv4Address::getNetmaskLength() const
+int Ipv4Address::getNetmaskLength() const
 {
     for (int i = 0; i < 32; i++)
         if (addr & (1 << i))
@@ -251,30 +251,30 @@ int IPv4Address::getNetmaskLength() const
     return 0;
 }
 
-void IPv4Address::_checkNetmaskLength(int length)
+void Ipv4Address::_checkNetmaskLength(int length)
 {
     if (length < 0 || length > 32)
         throw cRuntimeError("IPv4Address: wrong netmask length %d (not in 0..32)", length);
 }
 
-bool IPv4Address::maskedAddrAreEqual(const IPv4Address& addr1,
-        const IPv4Address& addr2,
-        const IPv4Address& netmask)
+bool Ipv4Address::maskedAddrAreEqual(const Ipv4Address& addr1,
+        const Ipv4Address& addr2,
+        const Ipv4Address& netmask)
 {
     // return addr1.doAnd(netmask).equals(addr2.doAnd(netmask));
     // Looks weird, but is the same and is faster
     return !(bool)((addr1.addr ^ addr2.addr) & netmask.addr);
 }
 
-bool IPv4Address::isWellFormed(const char *text)
+bool Ipv4Address::isWellFormed(const char *text)
 {
     unsigned char dummy[4];
     return parseIPAddress(text, dummy);
 }
 
-IPv4Address IPv4Address::makeBroadcastAddress(IPv4Address netmask) const
+Ipv4Address Ipv4Address::makeBroadcastAddress(Ipv4Address netmask) const
 {
-    IPv4Address br(getInt() | ~(netmask.getInt()));
+    Ipv4Address br(getInt() | ~(netmask.getInt()));
     return br;
 }
 

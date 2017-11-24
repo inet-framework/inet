@@ -1,5 +1,5 @@
 %description:
-Tests UDPSocket::bind() can not be called more than once on a socket.
+Tests UdpSocket::bind() can not be called more than once on a socket.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.cc
@@ -21,7 +21,7 @@ Define_Module(TestApp);
 
 void TestApp::activity()
 {
-  UDPSocket s;
+  UdpSocket s;
   s.setOutputGate(gate("socketOut"));
   s.bind(100);
   s.bind(200); // will fail

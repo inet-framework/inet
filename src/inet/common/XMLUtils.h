@@ -20,8 +20,8 @@ INET_API int getParameterIntValue(const cXMLElement *ptr, const char *name);
 INET_API int getParameterIntValue(const cXMLElement *ptr, const char *name, int def);
 INET_API const char *getParameterStrValue(const cXMLElement *ptr, const char *name);
 INET_API const char *getParameterStrValue(const cXMLElement *ptr, const char *name, const char *def);
-INET_API IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name);
-INET_API IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name, IPv4Address def);
+INET_API Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name);
+INET_API Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name, Ipv4Address def);
 INET_API double getParameterDoubleValue(const cXMLElement *ptr, const char *name);
 INET_API double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double def);
 

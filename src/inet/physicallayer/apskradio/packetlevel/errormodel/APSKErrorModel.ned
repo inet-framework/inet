@@ -25,8 +25,8 @@ import inet.physicallayer.base.packetlevel.ErrorModelBase;
 // It assumes no forward error correction or any other techinque is used in the
 // physical signal.
 //
-module APSKErrorModel extends ErrorModelBase
+module ApskErrorModel extends ErrorModelBase
 {
     parameters:
-        @class(APSKErrorModel);
+        @class(ApskErrorModel);
 }

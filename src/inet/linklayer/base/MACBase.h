@@ -30,7 +30,7 @@ class InterfaceEntry;
 /**
  * Base class for MAC modules.
  */
-class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListener
+class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
     cModule *hostModule = nullptr;
@@ -38,8 +38,8 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
     InterfaceEntry *interfaceEntry = nullptr;    // nullptr if no InterfaceTable or node is down
 
   public:
-    MACBase() {}
-    virtual ~MACBase();
+    MacBase() {}
+    virtual ~MacBase();
 
   protected:
     using cListener::receiveSignal;

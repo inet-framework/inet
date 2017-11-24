@@ -1,8 +1,8 @@
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.ipv4.IIGMP;
-import inet.networklayer.ipv4.IPv4RoutingTable;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.common.scenario.ScenarioManager;
 
 module IgmpTesterNic
@@ -39,7 +39,7 @@ network TestIGMPNetwork
                 interfaceTable: InterfaceTable {
                     @display("p=57,31");
                 }
-                routingTable: IPv4RoutingTable {
+                routingTable: Ipv4RoutingTable {
                     @display("p=168,31");
                 }
                 tester: IgmpTesterNic {
@@ -48,7 +48,7 @@ network TestIGMPNetwork
                 igmp: <igmpType> like IIGMP {
                     @display("p=176,153");
                 }
-                nodeConfigurator: IPv4NodeConfigurator {
+                nodeConfigurator: Ipv4NodeConfigurator {
                     @display("p=285,95");
                     networkConfiguratorModule = "";
                     configureRoutingTable = false;

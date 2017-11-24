@@ -31,7 +31,7 @@ namespace inet {
 
 namespace tcp {
 
-TCPStateVariables::TCPStateVariables()
+TcpStateVariables::TcpStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
     active = false;
@@ -119,7 +119,7 @@ TCPStateVariables::TCPStateVariables()
     queueUpdate = true;
 }
 
-std::string TCPStateVariables::info() const
+std::string TcpStateVariables::info() const
 {
     std::stringstream out;
     out << "snd_una=" << snd_una;
@@ -131,7 +131,7 @@ std::string TCPStateVariables::info() const
     return out.str();
 }
 
-std::string TCPStateVariables::detailedInfo() const
+std::string TcpStateVariables::detailedInfo() const
 {
     std::stringstream out;
     out << "active=" << active << "\n";
@@ -169,7 +169,7 @@ std::string TCPStateVariables::detailedInfo() const
     return out.str();
 }
 
-TCPConnection::TCPConnection(TCP *mod) :
+TcpConnection::TcpConnection(TCP *mod) :
         tcpMain(mod)
 {
     // Note: this ctor is NOT used to create live connections, only
@@ -180,7 +180,7 @@ TCPConnection::TCPConnection(TCP *mod) :
 // FSM framework, TCP FSM
 //
 
-TCPConnection::TCPConnection(TCP *_mod, int _socketId)
+TcpConnection::TcpConnection(TCP *_mod, int _socketId)
 {
     tcpMain = _mod;
     socketId = _socketId;
@@ -224,7 +224,7 @@ TCPConnection::TCPConnection(TCP *_mod, int _socketId)
     }
 }
 
-TCPConnection::~TCPConnection()
+TcpConnection::~TcpConnection()
 {
     delete sendQueue;
     delete rexmitQueue;
@@ -261,13 +261,13 @@ TCPConnection::~TCPConnection()
     delete sackedBytesVector;
 }
 
-bool TCPConnection::processTimer(cMessage *msg)
+bool TcpConnection::processTimer(cMessage *msg)
 {
     printConnBrief();
     EV_DETAIL << msg->getName() << " timer expired\n";
 
     // first do actions
-    TCPEventCode event;
+    TcpEventCode event;
 
     if (msg == the2MSLTimer) {
         event = TCP_E_TIMEOUT_2MSL;
@@ -294,7 +294,7 @@ bool TCPConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TCPConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
+bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
 {
     printConnBrief();
     if (!localAddr.isUnspecified()) {
@@ -311,19 +311,19 @@ bool TCPConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>
         return true;
 
     // first do actions
-    TCPEventCode event = process_RCV_SEGMENT(packet, tcpseg, segSrcAddr, segDestAddr);
+    TcpEventCode event = process_RCV_SEGMENT(packet, tcpseg, segSrcAddr, segDestAddr);
 
     // then state transitions
     return performStateTransition(event);
 }
 
-bool TCPConnection::processAppCommand(cMessage *msg)
+bool TcpConnection::processAppCommand(cMessage *msg)
 {
     printConnBrief();
 
     // first do actions
-    TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
-    TCPEventCode event = preanalyseAppCommandEvent(msg->getKind());
+    TcpCommand *tcpCommand = (TcpCommand *)(msg->removeControlInfo());
+    TcpEventCode event = preanalyseAppCommandEvent(msg->getKind());
     EV_INFO << "App command: " << eventName(event) << "\n";
 
     switch (event) {
@@ -371,7 +371,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
     return performStateTransition(event);
 }
 
-TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
+TcpEventCode TcpConnection::preanalyseAppCommandEvent(int commandCode)
 {
     switch (commandCode) {
         case TCP_C_OPEN_ACTIVE:
@@ -406,7 +406,7 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
     }
 }
 
-bool TCPConnection::performStateTransition(const TCPEventCode& event)
+bool TcpConnection::performStateTransition(const TcpEventCode& event)
 {
     ASSERT(fsm.getState() != TCP_S_CLOSED);    // closed connections should be deleted immediately
 
@@ -724,7 +724,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     return fsm.getState() != TCP_S_CLOSED;
 }
 
-void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
+void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 {
     // cancel timers
     switch (state) {

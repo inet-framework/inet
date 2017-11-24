@@ -382,7 +382,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
             dumpIPv4(l2r, "", ipv4Hdr, "");
         }
         else
-        if (const auto& arpPacket = dynamicPtrCast<const ARPPacket>(chunk)) {
+        if (const auto& arpPacket = dynamicPtrCast<const ArpPacket>(chunk)) {
             dumpARP(l2r, "", arpPacket, "");
         }
         else
@@ -457,7 +457,7 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
-void PacketDump::dumpARP(bool l2r, const char *label, const Ptr<const ARPPacket>& arp, const char *comment)
+void PacketDump::dumpARP(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment)
 {
     std::ostream& out = *outp;
     char buf[30];
@@ -600,7 +600,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
             out << "\n  TCP Header Option(s) " << direction << ":\n";
 
             for (int i = 0; i < numOptions; i++) {
-                const TCPOption *option = tcpHeader->getHeaderOption(i);
+                const TcpOption *option = tcpHeader->getHeaderOption(i);
                 out << "    " << (i + 1) << ". option kind=" << option->getKind() << " length=" << option->getLength() << "\n";
             }
         }

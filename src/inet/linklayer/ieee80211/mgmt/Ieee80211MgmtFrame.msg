@@ -21,7 +21,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.ieee80211.mac.Ieee80211Frame;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet::ieee80211;
 
@@ -109,7 +109,7 @@ enum Ieee80211StatusCode
     SC_TBTT_REQUEST = 78;
 }
 
-enum Ieee80211HWMPCode
+enum Ieee80211HwmpCode
 {
     IE11S_GANN = 125;
     IE11S_RANN = 126;
@@ -193,7 +193,7 @@ class Ieee80211AssociationRequestFrame extends Ieee80211MgmtFrame
 //
 class Ieee80211ReassociationRequestFrame extends Ieee80211AssociationRequestFrame
 {
-    MACAddress currentAP;
+    MacAddress currentAP;
 }
 
 //

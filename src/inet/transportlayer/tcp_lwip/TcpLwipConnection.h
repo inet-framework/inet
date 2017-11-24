@@ -30,13 +30,13 @@
 namespace inet {
 
 // forward declarations:
-class TCPConnectInfo;
-class TCPStatusInfo;
+class TcpConnectInfo;
+class TcpStatusInfo;
 
 namespace tcp {
 
 // forward declarations:
-class TCP_lwIP;
+class TcpLwip;
 class TcpLwipReceiveQueue;
 class TcpLwipSendQueue;
 class INetStack;
@@ -71,7 +71,7 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP);
+    TcpLwipConnection(TcpLwip& tcpLwipP, int connIdP);
 
     TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
@@ -98,7 +98,7 @@ class INET_API TcpLwipConnection
 
     void send(Packet *msgP);
 
-    void fillStatusInfo(TCPStatusInfo& statusInfo);
+    void fillStatusInfo(TcpStatusInfo& statusInfo);
 
     void notifyAboutSending(const TcpHeader& tcpsegP);
 
@@ -119,7 +119,7 @@ class INET_API TcpLwipConnection
     LwipTcpLayer::tcp_pcb *pcbM;
     TcpLwipSendQueue *sendQueueM;
     TcpLwipReceiveQueue *receiveQueueM;
-    TCP_lwIP& tcpLwipM;
+    TcpLwip& tcpLwipM;
 
   protected:
     long int totalSentM;

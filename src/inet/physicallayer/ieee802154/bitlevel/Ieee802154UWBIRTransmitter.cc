@@ -28,36 +28,36 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee802154UWBIRTransmitter);
+Define_Module(Ieee802154UwbIrTransmitter);
 
-Ieee802154UWBIRTransmitter::Ieee802154UWBIRTransmitter()
+Ieee802154UwbIrTransmitter::Ieee802154UwbIrTransmitter()
 {
 }
 
-void Ieee802154UWBIRTransmitter::initialize(int stage)
+void Ieee802154UwbIrTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        cfg = Ieee802154UWBIRMode::cfg_mandatory_16M;
+        cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
     }
 }
 
-std::ostream& Ieee802154UWBIRTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level) const
 {
     return stream << "Ieee802154UWBIRTransmitter";
 }
 
-simtime_t Ieee802154UWBIRTransmitter::getFrameDuration(int psduLength) const
+simtime_t Ieee802154UwbIrTransmitter::getFrameDuration(int psduLength) const
 {
     return cfg.preambleLength + (psduLength * 8 + 48) * cfg.data_symbol_duration;
 }
 
-simtime_t Ieee802154UWBIRTransmitter::getMaxFrameDuration() const
+simtime_t Ieee802154UwbIrTransmitter::getMaxFrameDuration() const
 {
-	return cfg.preambleLength + Ieee802154UWBIRMode::MaxPSDULength * cfg.data_symbol_duration;
+	return cfg.preambleLength + Ieee802154UwbIrMode::MaxPSDULength * cfg.data_symbol_duration;
 }
 
-simtime_t Ieee802154UWBIRTransmitter::getPhyMaxFrameDuration() const
+simtime_t Ieee802154UwbIrTransmitter::getPhyMaxFrameDuration() const
 {
     simtime_t phyMaxFrameDuration = 0;
     simtime_t TSHR, TPHR, TPSDU, TCCApreamble;
@@ -67,20 +67,20 @@ simtime_t Ieee802154UWBIRTransmitter::getPhyMaxFrameDuration() const
     return phyMaxFrameDuration;
 }
 
-simtime_t Ieee802154UWBIRTransmitter::getThdr() const
+simtime_t Ieee802154UwbIrTransmitter::getThdr() const
 {
 	switch (cfg.channel) {
         default:
             switch (cfg.prf) {
-                case Ieee802154UWBIRMode::NOMINAL_4_M:
+                case Ieee802154UwbIrMode::NOMINAL_4_M:
                     //throw cRuntimeError("This optional mode is not implemented.");
                     return 0;
                     break;
-                case Ieee802154UWBIRMode::NOMINAL_16_M:
+                case Ieee802154UwbIrMode::NOMINAL_16_M:
                     return 16.4E-6;
-                case Ieee802154UWBIRMode::NOMINAL_64_M:
+                case Ieee802154UwbIrMode::NOMINAL_64_M:
                     return 16.8E-6;
-                case Ieee802154UWBIRMode::PRF_OFF:
+                case Ieee802154UwbIrMode::PRF_OFF:
                     return 0;
             }
             break;
@@ -88,12 +88,12 @@ simtime_t Ieee802154UWBIRTransmitter::getThdr() const
 	return 0;
 }
 
-void Ieee802154UWBIRTransmitter::generateSyncPreamble(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generateSyncPreamble(Mapping* mapping, Argument* arg, const simtime_t startTime) const
 {
     // NSync repetitions of the Si symbol
     for (short n = 0; n < cfg.NSync; n = n + 1) {
         for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
-            if (Ieee802154UWBIRMode::C31[Ieee802154UWBIRMode::Ci - 1][pos] != 0) {
+            if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
                 if(n==0 && pos==0) {
                     // we slide the first pulse slightly in time to get the first point "inside" the signal
                   arg->setTime(1E-12 + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
@@ -101,34 +101,34 @@ void Ieee802154UWBIRTransmitter::generateSyncPreamble(Mapping* mapping, Argument
                   arg->setTime(n * cfg.sync_symbol_duration + pos * cfg.spreadingdL * cfg.pulse_duration);
                 }
                 //generatePulse(mapping, arg, startTime, C31[Ci - 1][pos], IEEE802154A::maxPulse, IEEE802154A::mandatory_pulse);
-                generatePulse(mapping, arg, startTime, 1, Ieee802154UWBIRMode::maxPulse, cfg.pulse_duration); // always positive polarity
+                generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
             }
         }
     }
 }
 
-void Ieee802154UWBIRTransmitter::generateSFD(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generateSFD(Mapping* mapping, Argument* arg, const simtime_t startTime) const
 {
     const simtime_t sfdStart = cfg.NSync * cfg.sync_symbol_duration;
     for (short n = 0; n < 8; n = n + 1) {
-        if (Ieee802154UWBIRMode::shortSFD[n] != 0) {
+        if (Ieee802154UwbIrMode::shortSFD[n] != 0) {
             for (short pos = 0; pos < cfg.CLength; pos = pos + 1) {
-                if (Ieee802154UWBIRMode::C31[Ieee802154UWBIRMode::Ci - 1][pos] != 0) {
+                if (Ieee802154UwbIrMode::C31[Ieee802154UwbIrMode::Ci - 1][pos] != 0) {
                     arg->setTime(sfdStart + n * cfg.sync_symbol_duration + pos * cfg.spreadingdL*cfg.pulse_duration);
                     //generatePulse(mapping, arg, startTime, C31[Ci - 1][pos] * shortSFD[n]); // change pulse polarity
-                    generatePulse(mapping, arg, startTime, 1, Ieee802154UWBIRMode::maxPulse, cfg.pulse_duration); // always positive polarity
+                    generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration); // always positive polarity
                 }
             }
         }
     }
 }
 
-void Ieee802154UWBIRTransmitter::generatePhyHeader(Mapping* mapping, Argument* arg, const simtime_t startTime) const
+void Ieee802154UwbIrTransmitter::generatePhyHeader(Mapping* mapping, Argument* arg, const simtime_t startTime) const
 {
     // not implemented
 }
 
-void Ieee802154UWBIRTransmitter::generatePulse(Mapping* mapping, Argument* arg, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const
+void Ieee802154UwbIrTransmitter::generatePulse(Mapping* mapping, Argument* arg, const simtime_t startTime, short polarity, double peak, const simtime_t chip) const
 {
     ASSERT(polarity == -1 || polarity == +1);
     arg->setTime(arg->getTime() + startTime);  // adjust argument so that we use absolute time values in Mapping
@@ -140,19 +140,19 @@ void Ieee802154UWBIRTransmitter::generatePulse(Mapping* mapping, Argument* arg, 
     mapping->setValue(*arg, 0);
 }
 
-void Ieee802154UWBIRTransmitter::generateBurst(Mapping* mapping, Argument* arg, const simtime_t startTime, const simtime_t burstStart, short /*polarity*/) const
+void Ieee802154UwbIrTransmitter::generateBurst(Mapping* mapping, Argument* arg, const simtime_t startTime, const simtime_t burstStart, short /*polarity*/) const
 {
     // ASSERT(burstStart < cfg.preambleLength + (psduLength * 8 + 48 + 2) * cfg.data_symbol_duration);
     // 1. Start point = zeros
     simtime_t offset = burstStart;
     for (int pulse = 0; pulse < cfg.nbPulsesPerBurst; pulse++) {
         arg->setTime(offset);
-        generatePulse(mapping, arg, startTime, 1, Ieee802154UWBIRMode::maxPulse, cfg.pulse_duration);
+        generatePulse(mapping, arg, startTime, 1, Ieee802154UwbIrMode::maxPulse, cfg.pulse_duration);
         offset = offset + cfg.pulse_duration;
     }
 }
 
-ConstMapping *Ieee802154UWBIRTransmitter::generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const
+ConstMapping *Ieee802154UwbIrTransmitter::generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const
 {
     // 48 R-S parity bits, the 2 symbols phy header is not modeled as it includes its own parity bits
     // and is thus very robust
@@ -179,7 +179,7 @@ ConstMapping *Ieee802154UWBIRTransmitter::generateIEEE802154AUWBSignal(const sim
     return mapping;
 }
 
-const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *Ieee802154UwbIrTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     int bitLength = packet->getBitLength();
     // KLUDGE: generate random bits until serializer is implemented

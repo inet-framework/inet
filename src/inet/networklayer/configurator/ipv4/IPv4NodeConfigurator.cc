@@ -25,9 +25,9 @@
 
 namespace inet {
 
-Define_Module(IPv4NodeConfigurator);
+Define_Module(Ipv4NodeConfigurator);
 
-IPv4NodeConfigurator::IPv4NodeConfigurator()
+Ipv4NodeConfigurator::Ipv4NodeConfigurator()
 {
     nodeStatus = nullptr;
     interfaceTable = nullptr;
@@ -35,7 +35,7 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
     networkConfigurator = nullptr;
 }
 
-void IPv4NodeConfigurator::initialize(int stage)
+void Ipv4NodeConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -46,7 +46,7 @@ void IPv4NodeConfigurator::initialize(int stage)
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routingTable = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        routingTable = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         if (!networkConfiguratorPath[0])
             networkConfigurator = nullptr;
@@ -54,7 +54,7 @@ void IPv4NodeConfigurator::initialize(int stage)
             cModule *module = getModuleByPath(networkConfiguratorPath);
             if (!module)
                 throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
-            networkConfigurator = check_and_cast<IPv4NetworkConfigurator *>(module);
+            networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);
         }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
@@ -71,7 +71,7 @@ void IPv4NodeConfigurator::initialize(int stage)
     }
 }
 
-bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -93,42 +93,42 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
     return true;
 }
 
-void IPv4NodeConfigurator::prepareNode()
+void Ipv4NodeConfigurator::prepareNode()
 {
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         prepareInterface(interfaceTable->getInterface(i));
 }
 
-void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
+void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
     ASSERT(!interfaceEntry->ipv4Data());
-    IPv4InterfaceData *interfaceData = new IPv4InterfaceData();
+    Ipv4InterfaceData *interfaceData = new Ipv4InterfaceData();
     interfaceEntry->setIPv4Data(interfaceData);
     if (interfaceEntry->isLoopback()) {
         // we may reconfigure later it to be the routerId
-        interfaceData->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
-        interfaceData->setNetmask(IPv4Address::LOOPBACK_NETMASK);
+        interfaceData->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
+        interfaceData->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
         interfaceData->setMetric(1);
     }
     else {
         // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
         interfaceData->setMetric((int)ceil(2e9 / interfaceEntry->getDatarate()));    // use OSPF cost as default
         if (interfaceEntry->isMulticast()) {
-            interfaceData->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
+            interfaceData->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
             if (routingTable->isForwardingEnabled())
-                interfaceData->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+                interfaceData->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
         }
     }
 }
 
-void IPv4NodeConfigurator::configureInterface()
+void Ipv4NodeConfigurator::configureInterface()
 {
     ASSERT(networkConfigurator);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
 }
 
-void IPv4NodeConfigurator::configureRoutingTable()
+void Ipv4NodeConfigurator::configureRoutingTable()
 {
     ASSERT(networkConfigurator);
     if (par("configureRoutingTable").boolValue())

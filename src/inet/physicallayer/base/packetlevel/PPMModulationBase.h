@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API PPMModulationBase : public IModulation
+class INET_API PpmModulationBase : public IModulation
 {
   protected:
     unsigned int numberOfPulses;
 
   public:
-    PPMModulationBase(unsigned int numberOfPulses);
+    PpmModulationBase(unsigned int numberOfPulses);
 
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }

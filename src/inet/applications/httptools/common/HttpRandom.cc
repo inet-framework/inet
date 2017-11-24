@@ -321,7 +321,7 @@ void rdZipf::__setup_c()
 rdObject *rdObjectFactory::create(cXMLAttributeMap attributes)
 {
     std::string typeName = attributes["type"];
-    DISTR_TYPE dt;
+    DistrType dt;
     if (typeName == "normal")
         dt = dt_normal;
     else if (typeName == "uniform")

@@ -19,9 +19,9 @@ package inet.physicallayer.ieee80211.bitlevel;
 
 import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
-module Ieee80211OFDMRadio extends FlatRadioBase
+module Ieee80211OfdmRadio extends FlatRadioBase
 {
     parameters:
         antennaType = default("IsotropicAntenna");
-        @class(Ieee80211OFDMRadio);
+        @class(Ieee80211OfdmRadio);
 }

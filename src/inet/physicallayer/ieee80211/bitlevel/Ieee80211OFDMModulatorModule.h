@@ -24,10 +24,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMModulatorModule : public IModulator, public cSimpleModule
+class INET_API Ieee80211OfdmModulatorModule : public IModulator, public cSimpleModule
 {
   protected:
-    const Ieee80211OFDMModulator *ofdmModulator;
+    const Ieee80211OfdmModulator *ofdmModulator;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -35,7 +35,7 @@ class INET_API Ieee80211OFDMModulatorModule : public IModulator, public cSimpleM
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
-    virtual ~Ieee80211OFDMModulatorModule();
+    virtual ~Ieee80211OfdmModulatorModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return ofdmModulator->printToStream(stream, level); }
     const Ieee80211OfdmModulation *getModulation() const override { return ofdmModulator->getModulation(); }

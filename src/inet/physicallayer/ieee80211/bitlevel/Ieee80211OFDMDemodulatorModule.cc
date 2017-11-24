@@ -26,20 +26,20 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMDemodulatorModule);
+Define_Module(Ieee80211OfdmDemodulatorModule);
 
-void Ieee80211OFDMDemodulatorModule::initialize(int stage)
+void Ieee80211OfdmDemodulatorModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        ofdmDemodulator = new Ieee80211OFDMDemodulator(new Ieee80211OfdmModulation(APSKModulationBase::findModulation(par("subcarrierModulation"))));
+        ofdmDemodulator = new Ieee80211OfdmDemodulator(new Ieee80211OfdmModulation(ApskModulationBase::findModulation(par("subcarrierModulation"))));
 }
 
-const IReceptionBitModel *Ieee80211OFDMDemodulatorModule::demodulate(const IReceptionSymbolModel *symbolModel) const
+const IReceptionBitModel *Ieee80211OfdmDemodulatorModule::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
     return ofdmDemodulator->demodulate(symbolModel);
 }
 
-Ieee80211OFDMDemodulatorModule::~Ieee80211OFDMDemodulatorModule()
+Ieee80211OfdmDemodulatorModule::~Ieee80211OfdmDemodulatorModule()
 {
     delete ofdmDemodulator->getModulation();
     delete ofdmDemodulator;

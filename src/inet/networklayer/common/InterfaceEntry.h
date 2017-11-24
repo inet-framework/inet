@@ -35,10 +35,10 @@ class InterfaceEntry;
 class IInterfaceTable;
 class InterfaceProtocolData;
 class GenericNetworkProtocolInterfaceData;
-class IPv4InterfaceData;
-class IPv6InterfaceData;
-class TRILLInterfaceData;
-class ISISInterfaceData;
+class Ipv4InterfaceData;
+class Ipv6InterfaceData;
+class TrillInterfaceData;
+class IsisInterfaceData;
 class Ieee8021dInterfaceData;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
@@ -47,10 +47,10 @@ class INET_API MacEstimateCostProcess
 {
   public:
     virtual ~MacEstimateCostProcess() {};
-    virtual double getCost(int, MACAddress&) = 0;
+    virtual double getCost(int, MacAddress&) = 0;
     virtual double getNumCost() = 0;
     virtual int getNumNeighbors() = 0;
-    virtual int getNeighbors(MACAddress[]) = 0;
+    virtual int getNeighbors(MacAddress[]) = 0;
 };
 
 /**
@@ -116,14 +116,14 @@ class INET_API InterfaceEntry : public cModule
     bool pointToPoint = false;    ///< interface is point-to-point link
     bool loopback = false;    ///< interface is loopback interface
     double datarate = 0;    ///< data rate in bit/s
-    MACAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
+    MacAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token;    ///< for IPv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
-    IPv4InterfaceData *ipv4data = nullptr;    ///< IPv4-specific interface info (IPv4 address, etc)
-    IPv6InterfaceData *ipv6data = nullptr;    ///< IPv6-specific interface info (IPv6 addresses, etc)
+    Ipv4InterfaceData *ipv4data = nullptr;    ///< IPv4-specific interface info (IPv4 address, etc)
+    Ipv6InterfaceData *ipv6data = nullptr;    ///< IPv6-specific interface info (IPv6 addresses, etc)
     GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
-    ISISInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
-    TRILLInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
+    IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
+    TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
     Ieee8021dInterfaceData *ieee8021ddata = nullptr;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
@@ -199,7 +199,7 @@ class INET_API InterfaceEntry : public cModule
     bool isPointToPoint() const { return pointToPoint; }
     bool isLoopback() const { return loopback; }
     double getDatarate() const { return datarate; }
-    const MACAddress& getMacAddress() const { return macAddr; }
+    const MacAddress& getMacAddress() const { return macAddr; }
     const InterfaceToken& getInterfaceToken() const { return token; }
     //@}
 
@@ -216,18 +216,18 @@ class INET_API InterfaceEntry : public cModule
     virtual void setPointToPoint(bool b) { if (pointToPoint != b) { pointToPoint = b; configChanged(F_POINTTOPOINT); } }
     virtual void setLoopback(bool b) { if (loopback != b) { loopback = b; configChanged(F_LOOPBACK); } }
     virtual void setDatarate(double d) { if (datarate != d) { datarate = d; configChanged(F_DATARATE); } }
-    virtual void setMACAddress(const MACAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
+    virtual void setMACAddress(const MacAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
     virtual void setInterfaceToken(const InterfaceToken& t) { token = t; configChanged(F_TOKEN); }
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
-    IPv4InterfaceData *ipv4Data() const { return ipv4data; }
-    IPv4Address getIPv4Address() const;
-    IPv6InterfaceData *ipv6Data() const { return ipv6data; }
+    Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
+    Ipv4Address getIPv4Address() const;
+    Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
     GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
-    TRILLInterfaceData *trillData() const { return trilldata; }
-    ISISInterfaceData *isisData() const { return isisdata; }
+    TrillInterfaceData *trillData() const { return trilldata; }
+    IsisInterfaceData *isisData() const { return isisdata; }
     Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
     //@}
 
@@ -238,11 +238,11 @@ class INET_API InterfaceEntry : public cModule
 
     /** @name Installing protocol-specific interface data */
     //@{
-    virtual void setIPv4Data(IPv4InterfaceData *p);
-    virtual void setIPv6Data(IPv6InterfaceData *p);
+    virtual void setIPv4Data(Ipv4InterfaceData *p);
+    virtual void setIPv6Data(Ipv6InterfaceData *p);
     virtual void setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p);
-    virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
-    virtual void setISISInterfaceData(ISISInterfaceData *p);
+    virtual void setTRILLInterfaceData(TrillInterfaceData *p);
+    virtual void setISISInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
     //@}
 

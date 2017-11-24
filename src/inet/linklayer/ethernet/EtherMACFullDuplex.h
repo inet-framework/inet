@@ -30,10 +30,10 @@ namespace inet {
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.
  */
-class INET_API EtherMACFullDuplex : public EtherMACBase
+class INET_API EtherMacFullDuplex : public EtherMacBase
 {
   public:
-    EtherMACFullDuplex();
+    EtherMacFullDuplex();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

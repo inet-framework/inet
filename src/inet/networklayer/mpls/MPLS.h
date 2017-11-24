@@ -35,7 +35,7 @@ namespace inet {
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API MPLS : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
+class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
     simtime_t delay1;
@@ -43,7 +43,7 @@ class INET_API MPLS : public cSimpleModule, public IProtocolRegistrationListener
     //no longer used, see comment in intialize
     //std::vector<bool> labelIf;
 
-    LIBTable *lt;
+    LibTable *lt;
     IInterfaceTable *ift;
     IClassifier *pct;
 

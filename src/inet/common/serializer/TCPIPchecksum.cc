@@ -21,7 +21,7 @@
 namespace inet {
 namespace serializer {
 
-uint16_t TCPIPchecksum::_checksum(const void *_addr, unsigned int count)
+uint16_t TcpIpChecksum::_checksum(const void *_addr, unsigned int count)
 {
     const uint8_t *addr = static_cast<const uint8_t *>(_addr);
     uint32_t sum = 0;

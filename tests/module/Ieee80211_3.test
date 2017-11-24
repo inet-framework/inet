@@ -4,7 +4,7 @@ Carrier sense test for Ieee80211 out of range concurrent and synchronized mutual
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -12,7 +12,7 @@ network Test
 {
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
 }

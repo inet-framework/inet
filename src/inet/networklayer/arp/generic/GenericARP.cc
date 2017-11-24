@@ -24,20 +24,20 @@
 
 namespace inet {
 
-Define_Module(GenericARP);
+Define_Module(GenericArp);
 
-MACAddress GenericARP::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
+MacAddress GenericArp::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
 {
     if (address.isUnicast())
         return mapUnicastAddress(address);
     else if (address.isMulticast())
         return mapMulticastAddress(address);
     else if (address.isBroadcast())
-        return MACAddress::BROADCAST_ADDRESS;
+        return MacAddress::BROADCAST_ADDRESS;
     throw cRuntimeError("address must be one of unicast or multicast or broadcast");
 }
 
-void GenericARP::initialize(int stage)
+void GenericArp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -46,7 +46,7 @@ void GenericARP::initialize(int stage)
     }
 }
 
-void GenericARP::handleMessage(cMessage *msg)
+void GenericArp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("This module doesn't accept any self message");
@@ -55,7 +55,7 @@ void GenericARP::handleMessage(cMessage *msg)
     delete msg;
 }
 
-MACAddress GenericARP::mapUnicastAddress(L3Address addr)
+MacAddress GenericArp::mapUnicastAddress(L3Address addr)
 {
     cModule *module;
     switch (addr.getType()) {
@@ -78,11 +78,11 @@ MACAddress GenericARP::mapUnicastAddress(L3Address addr)
     return interfaceEntry->getMacAddress();
 }
 
-MACAddress GenericARP::mapMulticastAddress(L3Address addr)
+MacAddress GenericArp::mapMulticastAddress(L3Address addr)
 {
     ASSERT(addr.isMulticast());
 
-    MACAddress macAddr;
+    MacAddress macAddr;
     macAddr.setAddressByte(0, 0x01);
     macAddr.setAddressByte(1, 0x00);
     macAddr.setAddressByte(2, 0x5e);

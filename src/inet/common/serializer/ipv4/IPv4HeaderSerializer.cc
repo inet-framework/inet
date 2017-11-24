@@ -25,9 +25,9 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(Ipv4Header, IPv4HeaderSerializer);
+Register_Serializer(Ipv4Header, Ipv4HeaderSerializer);
 
-void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     struct ip iphdr;
@@ -61,7 +61,7 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         unsigned int optionsLength = 0;
         if (numOptions > 0) {    // options present?
             for (unsigned short i = 0; i < numOptions; i++) {
-                const TLVOptionBase *option = &ipv4Header->getOption(i);
+                const TlvOptionBase *option = &ipv4Header->getOption(i);
                 serializeOption(stream, option);
                 optionsLength += option->getLength();
             }
@@ -74,7 +74,7 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const
+void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option) const
 {
     unsigned short type = option->getType();
     unsigned short length = option->getLength();    // length >= 1
@@ -83,7 +83,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
     if (length > 1)
         stream.writeByte(length);
 
-    auto *opt = dynamic_cast<const TLVOptionRaw *>(option);
+    auto *opt = dynamic_cast<const TlvOptionRaw *>(option);
     if (opt) {
         unsigned int datalen = opt->getBytesArraySize();
         ASSERT(length == 2 + datalen);
@@ -94,24 +94,24 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
 
     switch (type) {
         case IPOPTION_END_OF_OPTIONS:
-            check_and_cast<const IPv4OptionEnd *>(option);
+            check_and_cast<const Ipv4OptionEnd *>(option);
             ASSERT(length == 1);
             break;
 
         case IPOPTION_NO_OPTION:
-            check_and_cast<const IPv4OptionNop *>(option);
+            check_and_cast<const Ipv4OptionNop *>(option);
             ASSERT(length == 1);
             break;
 
         case IPOPTION_STREAM_ID: {
-            auto *opt = check_and_cast<const IPv4OptionStreamId *>(option);
+            auto *opt = check_and_cast<const Ipv4OptionStreamId *>(option);
             ASSERT(length == 4);
             stream.writeUint16Be(opt->getStreamId());
             break;
         }
 
         case IPOPTION_TIMESTAMP: {
-            auto *opt = check_and_cast<const IPv4OptionTimestamp *>(option);
+            auto *opt = check_and_cast<const Ipv4OptionTimestamp *>(option);
             int bytes = (opt->getFlag() == IP_TIMESTAMP_TIMESTAMP_ONLY) ? 4 : 8;
             ASSERT(length == 4 + bytes * opt->getRecordTimestampArraySize());
             uint8_t pointer = 5 + opt->getNextIdx() * bytes;
@@ -129,7 +129,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
         case IPOPTION_RECORD_ROUTE:
         case IPOPTION_LOOSE_SOURCE_ROUTING:
         case IPOPTION_STRICT_SOURCE_ROUTING: {
-            auto *opt = check_and_cast<const IPv4OptionRecordRoute *>(option);
+            auto *opt = check_and_cast<const Ipv4OptionRecordRoute *>(option);
             ASSERT(length == 3 + 4 * opt->getRecordAddressArraySize());
             uint8_t pointer = 4 + opt->getNextAddressIdx() * 4;
             stream.writeByte(pointer);
@@ -147,7 +147,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
     }
 }
 
-const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
@@ -159,9 +159,9 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 
     ipv4Header->setVersion(iphdr.ip_v);
     ipv4Header->setHeaderLength(IP_HEADER_BYTES);
-    ipv4Header->setSrcAddress(IPv4Address(ntohl(iphdr.ip_src.s_addr)));
-    ipv4Header->setDestAddress(IPv4Address(ntohl(iphdr.ip_dst.s_addr)));
-    ipv4Header->setProtocolId((IPProtocolId)iphdr.ip_p);
+    ipv4Header->setSrcAddress(Ipv4Address(ntohl(iphdr.ip_src.s_addr)));
+    ipv4Header->setDestAddress(Ipv4Address(ntohl(iphdr.ip_dst.s_addr)));
+    ipv4Header->setProtocolId((IpProtocolId)iphdr.ip_p);
     ipv4Header->setTimeToLive(iphdr.ip_ttl);
     ipv4Header->setIdentification(ntohs(iphdr.ip_id));
     uint16_t ip_off = ntohs(iphdr.ip_off);
@@ -186,7 +186,7 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 
     if (headerLength > IP_HEADER_BYTES) {    // options present?
         while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < B(headerLength)) {
-            TLVOptionBase *option = deserializeOption(stream);
+            TlvOptionBase *option = deserializeOption(stream);
             ipv4Header->addOption(option);
         }
     }
@@ -200,7 +200,7 @@ const Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     return ipv4Header;
 }
 
-TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream) const
+TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     unsigned char type = stream.readByte();
@@ -208,15 +208,15 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
 
     switch (type) {
         case IPOPTION_END_OF_OPTIONS:    // EOL
-            return new IPv4OptionEnd();
+            return new Ipv4OptionEnd();
 
         case IPOPTION_NO_OPTION:    // NOP
-            return new IPv4OptionNop();
+            return new Ipv4OptionNop();
 
         case IPOPTION_STREAM_ID:
             length = stream.readByte();
             if (length == 4) {
-                auto *option = new IPv4OptionStreamId();
+                auto *option = new Ipv4OptionStreamId();
                 option->setType(type);
                 option->setLength(length);
                 option->setStreamId(stream.readUint16Be());
@@ -238,7 +238,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 default: break;
             }
             if (flag != -1 && length > 4 && bytes && ((length-4) % bytes) == 0 && pointer >= 5 && ((pointer-5) % bytes) == 0) {
-                auto *option = new IPv4OptionTimestamp();
+                auto *option = new Ipv4OptionTimestamp();
                 option->setType(type);
                 option->setLength(length);
                 option->setFlag((TimestampFlag)flag);
@@ -263,7 +263,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
             length = stream.readByte();
             uint8_t pointer = stream.readByte();
             if (length > 3 && (length % 4) == 3 && pointer >= 4 && (pointer % 4) == 0) {
-                auto *option = new IPv4OptionRecordRoute();
+                auto *option = new Ipv4OptionRecordRoute();
                 option->setType(type);
                 option->setLength(length);
                 option->setRecordAddressArraySize((length - 3) / 4);
@@ -283,7 +283,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
             break;
     }    // switch
 
-    auto *option = new TLVOptionRaw();
+    auto *option = new TlvOptionRaw();
     stream.seek(position);
     type = stream.readByte();
     length = stream.readByte();

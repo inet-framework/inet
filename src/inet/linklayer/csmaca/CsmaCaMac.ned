@@ -17,8 +17,8 @@
 
 package inet.linklayer.csmaca;
 
-import inet.linklayer.base.MACProtocolBase;
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.base.MacProtocolBase;
+import inet.linklayer.contract.IMacProtocol;
 
 //
 // Implements an imaginary CSMA/CA-based MAC protocol with optional
@@ -55,7 +55,7 @@ import inet.linklayer.contract.IMACProtocol;
 // to keep its code simple and accessible, so lost ACKs will cause duplicates
 // in the stream of packets sent up to higher layers.
 //
-simple CsmaCaMac extends MACProtocolBase like IMACProtocol
+simple CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value

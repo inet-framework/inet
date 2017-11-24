@@ -25,15 +25,15 @@ namespace inet {
 
 namespace ieee80211 {
 
-Define_Module(Ieee80211AgentSTA);
+Define_Module(Ieee80211AgentSta);
 
 #define MK_STARTUP    1
 
-simsignal_t Ieee80211AgentSTA::sentRequestSignal = registerSignal("sentRequest");
-simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = registerSignal("acceptConfirm");
-simsignal_t Ieee80211AgentSTA::dropConfirmSignal = registerSignal("dropConfirm");
+simsignal_t Ieee80211AgentSta::sentRequestSignal = registerSignal("sentRequest");
+simsignal_t Ieee80211AgentSta::acceptConfirmSignal = registerSignal("acceptConfirm");
+simsignal_t Ieee80211AgentSta::dropConfirmSignal = registerSignal("dropConfirm");
 
-void Ieee80211AgentSTA::initialize(int stage)
+void Ieee80211AgentSta::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -72,7 +72,7 @@ void Ieee80211AgentSTA::initialize(int stage)
     }
 }
 
-void Ieee80211AgentSTA::handleMessage(cMessage *msg)
+void Ieee80211AgentSta::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleTimer(msg);
@@ -80,7 +80,7 @@ void Ieee80211AgentSTA::handleMessage(cMessage *msg)
         handleResponse(msg);
 }
 
-void Ieee80211AgentSTA::handleTimer(cMessage *msg)
+void Ieee80211AgentSta::handleTimer(cMessage *msg)
 {
     if (msg->getKind() == MK_STARTUP) {
         EV << "Starting up\n";
@@ -92,7 +92,7 @@ void Ieee80211AgentSTA::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211AgentSTA::handleResponse(cMessage *msg)
+void Ieee80211AgentSta::handleResponse(cMessage *msg)
 {
     cObject *ctrl = msg->removeControlInfo();
     delete msg;
@@ -114,7 +114,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
@@ -129,14 +129,14 @@ void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, 
     }
 }
 
-void Ieee80211AgentSTA::sendRequest(Ieee80211PrimRequest *req)
+void Ieee80211AgentSta::sendRequest(Ieee80211PrimRequest *req)
 {
     cMessage *msg = new cMessage(req->getClassName());
     msg->setControlInfo(req);
     send(msg, "mgmtOut");
 }
 
-void Ieee80211AgentSTA::sendScanRequest()
+void Ieee80211AgentSta::sendScanRequest()
 {
     EV << "Sending ScanRequest primitive to mgmt\n";
     Ieee80211Prim_ScanRequest *req = new Ieee80211Prim_ScanRequest();
@@ -154,7 +154,7 @@ void Ieee80211AgentSTA::sendScanRequest()
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address)
+void Ieee80211AgentSta::sendAuthenticateRequest(const MacAddress& address)
 {
     EV << "Sending AuthenticateRequest primitive to mgmt\n";
     Ieee80211Prim_AuthenticateRequest *req = new Ieee80211Prim_AuthenticateRequest();
@@ -164,7 +164,7 @@ void Ieee80211AgentSTA::sendAuthenticateRequest(const MACAddress& address)
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode)
+void Ieee80211AgentSta::sendDeauthenticateRequest(const MacAddress& address, Ieee80211ReasonCode reasonCode)
 {
     EV << "Sending DeauthenticateRequest primitive to mgmt\n";
     Ieee80211Prim_DeauthenticateRequest *req = new Ieee80211Prim_DeauthenticateRequest();
@@ -174,7 +174,7 @@ void Ieee80211AgentSTA::sendDeauthenticateRequest(const MACAddress& address, Iee
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
+void Ieee80211AgentSta::sendAssociateRequest(const MacAddress& address)
 {
     EV << "Sending AssociateRequest primitive to mgmt\n";
     Ieee80211Prim_AssociateRequest *req = new Ieee80211Prim_AssociateRequest();
@@ -184,7 +184,7 @@ void Ieee80211AgentSTA::sendAssociateRequest(const MACAddress& address)
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
+void Ieee80211AgentSta::sendReassociateRequest(const MacAddress& address)
 {
     EV << "Sending ReassociateRequest primitive to mgmt\n";
     Ieee80211Prim_ReassociateRequest *req = new Ieee80211Prim_ReassociateRequest();
@@ -194,7 +194,7 @@ void Ieee80211AgentSTA::sendReassociateRequest(const MACAddress& address)
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode)
+void Ieee80211AgentSta::sendDisassociateRequest(const MacAddress& address, Ieee80211ReasonCode reasonCode)
 {
     EV << "Sending DisassociateRequest primitive to mgmt\n";
     Ieee80211Prim_DisassociateRequest *req = new Ieee80211Prim_DisassociateRequest();
@@ -204,7 +204,7 @@ void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, Ieee8
     sendRequest(req);
 }
 
-void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
+void Ieee80211AgentSta::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 {
     // choose best AP
 
@@ -236,16 +236,16 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
     dumpAPList(resp);
     emit(acceptConfirmSignal, PR_SCAN_CONFIRM);
 
-    const Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
+    const Ieee80211Prim_BssDescription& bssDesc = resp->getBssList(bssIndex);
     EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
     sendAuthenticateRequest(bssDesc.getBSSID());
 }
 
-void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
+void Ieee80211AgentSta::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
 {
     EV << "Received AP list:\n";
     for (int i = 0; i < (int)resp->getBssListArraySize(); i++) {
-        const Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
+        const Ieee80211Prim_BssDescription& bssDesc = resp->getBssList(i);
         EV << "    " << i << ". "
            << " address=" << bssDesc.getBSSID()
            << " channel=" << bssDesc.getChannelNumber()
@@ -257,7 +257,7 @@ void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
     }
 }
 
-int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
+int Ieee80211AgentSta::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
 {
     if (resp->getBssListArraySize() == 0)
         return -1;
@@ -272,7 +272,7 @@ int Ieee80211AgentSTA::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
     return bestIndex;
 }
 
-void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
+void Ieee80211AgentSta::processAuthenticateConfirm(Ieee80211Prim_AuthenticateConfirm *resp)
 {
     if (resp->getResultCode() != PRC_SUCCESS) {
         EV << "Authentication error\n";
@@ -289,7 +289,7 @@ void Ieee80211AgentSTA::processAuthenticateConfirm(Ieee80211Prim_AuthenticateCon
     }
 }
 
-void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
+void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp)
 {
     if (resp->getResultCode() != PRC_SUCCESS) {
         EV << "Association error\n";
@@ -313,7 +313,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
     }
 }
 
-void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp)
+void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp)
 {
     // treat the same way as AssociateConfirm
     if (resp->getResultCode() != PRC_SUCCESS) {

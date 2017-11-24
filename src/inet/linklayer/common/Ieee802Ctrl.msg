@@ -16,7 +16,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
@@ -45,6 +45,6 @@ class Ieee802DeregisterDsapCommand extends cObject
 // used with IEEE802CTRL_SENDPAUSE
 class Ieee802PauseCommand extends cObject
 {
-    MACAddress destinationAddress;
+    MacAddress destinationAddress;
     int pauseUnits;
 }

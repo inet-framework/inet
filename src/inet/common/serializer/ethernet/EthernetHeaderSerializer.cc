@@ -40,8 +40,8 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
-    MACAddress destAddr = stream.readMACAddress();
-    MACAddress srcAddr = stream.readMACAddress();
+    MacAddress destAddr = stream.readMACAddress();
+    MacAddress srcAddr = stream.readMACAddress();
     uint16_t typeOrLength = stream.readUint16Be();
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);

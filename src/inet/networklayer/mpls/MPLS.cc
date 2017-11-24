@@ -35,16 +35,16 @@ namespace inet {
 
 #define ICMP_TRAFFIC    6
 
-Define_Module(MPLS);
+Define_Module(Mpls);
 
-void MPLS::initialize(int stage)
+void Mpls::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // interfaceTable must be initialized
 
-        lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
+        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         pct = getModuleFromPar<IClassifier>(par("classifierModule"), this);
     }
@@ -53,7 +53,7 @@ void MPLS::initialize(int stage)
     }
 }
 
-void MPLS::handleMessage(cMessage *msg)
+void Mpls::handleMessage(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet *>(msg);
     if (msg->getArrivalGate()->isName("ifIn")) {
@@ -69,7 +69,7 @@ void MPLS::handleMessage(cMessage *msg)
     }
 }
 
-void MPLS::processPacketFromL3(Packet *msg)
+void Mpls::processPacketFromL3(Packet *msg)
 {
     using namespace tcp;
 
@@ -100,7 +100,7 @@ void MPLS::processPacketFromL3(Packet *msg)
     labelAndForwardIPv4Datagram(msg);
 }
 
-bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
+bool Mpls::tryLabelAndForwardIPv4Datagram(Packet *packet)
 {
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     (void)ipv4Header;       // unused variable
@@ -144,7 +144,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
     return true;
 }
 
-void MPLS::labelAndForwardIPv4Datagram(Packet *ipdatagram)
+void Mpls::labelAndForwardIPv4Datagram(Packet *ipdatagram)
 {
     if (tryLabelAndForwardIPv4Datagram(ipdatagram))
         return;
@@ -157,7 +157,7 @@ void MPLS::labelAndForwardIPv4Datagram(Packet *ipdatagram)
     sendToL2(ipdatagram);
 }
 
-void MPLS::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
+void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
 {
     unsigned int n = outLabel.size();
 
@@ -190,7 +190,7 @@ void MPLS::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
     }
 }
 
-void MPLS::processPacketFromL2(Packet *packet)
+void Mpls::processPacketFromL2(Packet *packet)
 {
     const Protocol *protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::mpls) {
@@ -211,7 +211,7 @@ void MPLS::processPacketFromL2(Packet *packet)
     }
 }
 
-void MPLS::processMPLSPacketFromL2(Packet *packet)
+void Mpls::processMPLSPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
@@ -285,26 +285,26 @@ void MPLS::processMPLSPacketFromL2(Packet *packet)
     }
 }
 
-void MPLS::sendToL2(cMessage *msg)
+void Mpls::sendToL2(cMessage *msg)
 {
     ASSERT(msg->getTag<InterfaceReq>());
     ASSERT(msg->getTag<PacketProtocolTag>());
     send(msg, "ifOut");
 }
 
-void MPLS::sendToL3(cMessage *msg)
+void Mpls::sendToL3(cMessage *msg)
 {
     ASSERT(msg->getTag<InterfaceInd>());
     ASSERT(msg->getTag<DispatchProtocolReq>());
     send(msg, "netwOut");
 }
 
-void MPLS::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingate)
+void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingate)
 {
     registerInterface(interface, gate("netwOut"));
 }
 
-void MPLS::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
+void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
 {
     if (!strcmp("ifIn", protocolGate->getName())) {
         registerProtocol(protocol, gate("netwOut"));

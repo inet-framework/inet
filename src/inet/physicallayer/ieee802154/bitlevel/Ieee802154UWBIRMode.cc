@@ -26,11 +26,11 @@ namespace inet {
 
 namespace physicallayer {
 
-const double Ieee802154UWBIRMode::maxPulse = 1;
-const double Ieee802154UWBIRMode::mandatory_pulse = 0.000000002003203125;
+const double Ieee802154UwbIrMode::maxPulse = 1;
+const double Ieee802154UwbIrMode::mandatory_pulse = 0.000000002003203125;
 
 // Ci values
-const short Ieee802154UWBIRMode::C31[8][31] = {
+const short Ieee802154UwbIrMode::C31[8][31] = {
     // C1
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     // C2
@@ -49,12 +49,12 @@ const short Ieee802154UWBIRMode::C31[8][31] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0 },
 };
 
-const short Ieee802154UWBIRMode::shortSFD[8] = { 0, 1, 0, -1, 1, 0, 0, -1 };
+const short Ieee802154UwbIrMode::shortSFD[8] = { 0, 1, 0, -1, 1, 0, 0, -1 };
 
-short Ieee802154UWBIRMode::s_array[maxS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
-int Ieee802154UWBIRMode::last_s = 15;
+short Ieee802154UwbIrMode::s_array[maxS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
+int Ieee802154UwbIrMode::last_s = 15;
 
-const Ieee802154UWBIRMode Ieee802154UWBIRMode::cfg_mandatory_4M = {
+const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_4M = {
     3,                  // channel
     NOMINAL_4_M,        // PRF
     NON_RANGING,        // Frame type
@@ -74,7 +74,7 @@ const Ieee802154UWBIRMode Ieee802154UWBIRMode::cfg_mandatory_4M = {
     MHz(499.2)          // bandwidth
 };
 
-const Ieee802154UWBIRMode Ieee802154UWBIRMode::cfg_mandatory_16M = {
+const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_16M = {
     3,					// channel
     NOMINAL_16_M, 		// PRF
     NON_RANGING, 		// Frame type
@@ -95,7 +95,7 @@ const Ieee802154UWBIRMode Ieee802154UWBIRMode::cfg_mandatory_16M = {
 };
 
 // TODO: do this in a static initializer once (even better: simply create a mapping from symbol index to hopping position)
-int Ieee802154UWBIRMode::s(int n) const
+int Ieee802154UwbIrMode::s(int n) const
 {
     ASSERT(n < maxS);
     for (; last_s < n; last_s = last_s + 1) {
@@ -106,7 +106,7 @@ int Ieee802154UWBIRMode::s(int n) const
     return s_array[n];
 }
 
-int Ieee802154UWBIRMode::getHoppingPos(int sym) const
+int Ieee802154UwbIrMode::getHoppingPos(int sym) const
 {
     //int m = 3;  // or 5 with 4M
     int pos = 0;

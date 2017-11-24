@@ -46,7 +46,7 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
     class INET_API BssData {
       public:
-        MACAddress bssid;
+        MacAddress bssid;
     };
 
     class INET_API BssStationData {
@@ -57,11 +57,11 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
     class INET_API BssAccessPointData {
       public:
-        std::map<MACAddress, BssMemberStatus> stations;
+        std::map<MacAddress, BssMemberStatus> stations;
     };
 
   public:
-    MACAddress address;
+    MacAddress address;
     Mode mode = (Mode)-1;
     bool qos = false;
 

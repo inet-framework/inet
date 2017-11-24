@@ -22,14 +22,14 @@
 
 namespace inet {
 
-Register_Class(TCPGenericSrvThread);
+Register_Class(TcpGenericSrvThread);
 
-void TCPGenericSrvThread::established()
+void TcpGenericSrvThread::established()
 {
     // no initialization needed
 }
 
-void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
+void TcpGenericSrvThread::dataArrived(Packet *msg, bool)
 {
     const auto& appmsg = msg->peekDataAt<GenericAppMsg>(B(0), B(msg->getByteLength()));
 
@@ -63,7 +63,7 @@ void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
         getSocket()->close();
 }
 
-void TCPGenericSrvThread::timerExpired(cMessage *timer)
+void TcpGenericSrvThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }

@@ -33,23 +33,23 @@ namespace physicallayer {
  * Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.7 Data interleaving
  */
-class INET_API Ieee80211OFDMInterleaver : public IInterleaver
+class INET_API Ieee80211OfdmInterleaver : public IInterleaver
 {
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
     int s;
-    const Ieee80211OFDMInterleaving *interleaving = nullptr;
+    const Ieee80211OfdmInterleaving *interleaving = nullptr;
 
   public:
-    Ieee80211OFDMInterleaver(const Ieee80211OFDMInterleaving *interleaving);
+    Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleaving *interleaving);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     BitVector interleave(const BitVector& bits) const override;
     BitVector deinterleave(const BitVector& bits) const override;
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-    const Ieee80211OFDMInterleaving *getInterleaving() const override { return interleaving; }
+    const Ieee80211OfdmInterleaving *getInterleaving() const override { return interleaving; }
 };
 
 } /* namespace physicallayer */

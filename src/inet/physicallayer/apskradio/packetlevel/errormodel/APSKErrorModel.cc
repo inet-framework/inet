@@ -23,14 +23,14 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKErrorModel);
+Define_Module(ApskErrorModel);
 
-std::ostream& APSKErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskErrorModel::printToStream(std::ostream& stream, int level) const
 {
     return stream << "APSKErrorModel";
 }
 
-double APSKErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     double bitErrorRate = computeBitErrorRate(snir, part);
@@ -57,19 +57,19 @@ double APSKErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::S
     }
 }
 
-double APSKErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(flatTransmission->getModulation());
+    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateBER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 
-double APSKErrorModel::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double ApskErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(snir->getReception()->getTransmission());
-    const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(flatTransmission->getModulation());
+    const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(flatTransmission->getModulation());
     return modulation->calculateSER(snir->getMin(), flatTransmission->getBandwidth(), flatTransmission->getBitrate());
 }
 

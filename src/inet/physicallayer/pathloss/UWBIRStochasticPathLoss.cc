@@ -21,14 +21,14 @@ namespace inet {
 
 namespace physicallayer {
 
-const Hz UWBIRStochasticPathLoss::fc = MHz(4492.8); // mandatory band 3, center frequency
-const m UWBIRStochasticPathLoss::d0 = m(1);
-const double UWBIRStochasticPathLoss::kappa = 1;
-const double UWBIRStochasticPathLoss::n1_limit = 1.25;
-const double UWBIRStochasticPathLoss::n2_limit = 2;
-const double UWBIRStochasticPathLoss::n3_limit = 2;
+const Hz UwbIrStochasticPathLoss::fc = MHz(4492.8); // mandatory band 3, center frequency
+const m UwbIrStochasticPathLoss::d0 = m(1);
+const double UwbIrStochasticPathLoss::kappa = 1;
+const double UwbIrStochasticPathLoss::n1_limit = 1.25;
+const double UwbIrStochasticPathLoss::n2_limit = 2;
+const double UwbIrStochasticPathLoss::n3_limit = 2;
 
-UWBIRStochasticPathLoss::UWBIRStochasticPathLoss() :
+UwbIrStochasticPathLoss::UwbIrStochasticPathLoss() :
     PL0(0),
     muGamma(0),
     muSigma(0),
@@ -39,7 +39,7 @@ UWBIRStochasticPathLoss::UWBIRStochasticPathLoss() :
 {
 }
 
-double UWBIRStochasticPathLoss::simtruncnormal(double mean, double stddev, double a, int /*rng*/) const
+double UwbIrStochasticPathLoss::simtruncnormal(double mean, double stddev, double a, int /*rng*/) const
 {
     double result = a + 1;
     while (result > a || result < -a)
@@ -47,7 +47,7 @@ double UWBIRStochasticPathLoss::simtruncnormal(double mean, double stddev, doubl
     return result;
 }
 
-void UWBIRStochasticPathLoss::initialize(int stage)
+void UwbIrStochasticPathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         PL0 = par("PL0");
@@ -59,7 +59,7 @@ void UWBIRStochasticPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "UWBIRStochasticPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
@@ -72,17 +72,17 @@ std::ostream& UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int l
     return stream;
 }
 
-double UWBIRStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const {
+double UwbIrStochasticPathLoss::getFDPathLoss(Hz frequency, m distance) const {
     return 0.5 * PL0 * pow(unit(frequency / fc).get(), -2 * (kappa + 1)) / pow(unit(distance / d0).get(), pathloss_exponent);
 }
 
-double UWBIRStochasticPathLoss::getNarrowBandFreeSpacePathLoss(Hz frequency, m distance) const
+double UwbIrStochasticPathLoss::getNarrowBandFreeSpacePathLoss(Hz frequency, m distance) const
 {
     double attenuation = 4 * M_PI * unit(distance * frequency / mps(SPEED_OF_LIGHT)).get();
     return 1.0 / (attenuation * attenuation);
 }
 
-double UWBIRStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, m distance) const
+double UwbIrStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, m distance) const
 {
     double attenuation = PL0;
     if (distance < d0)
@@ -93,7 +93,7 @@ double UWBIRStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, 
     return math::dB2fraction(attenuation);
 }
 
-double UWBIRStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double UwbIrStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     double n1 = simtruncnormal(0, 1, n1_limit, 1);
     double n2 = simtruncnormal(0, 1, n2_limit, 2);

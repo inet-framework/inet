@@ -31,12 +31,12 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API BGPSession : public cObject
+class INET_API BgpSession : public cObject
 {
   public:
-    BGPSession(BGPRouting& _bgpRouting);
+    BgpSession(BgpRouting& _bgpRouting);
 
-    virtual ~BGPSession();
+    virtual ~BgpSession();
 
     void startConnection();
     void restartsHoldTimer();
@@ -47,33 +47,33 @@ class INET_API BGPSession : public cObject
     void addUpdateMsgSent() { _updateMsgSent++; }
     void listenConnectionFromPeer() { _bgpRouting.listenConnectionFromPeer(_info.sessionID); }
     void openTCPConnectionToPeer() { _bgpRouting.openTCPConnectionToPeer(_info.sessionID); }
-    SessionID findAndStartNextSession(BGPSessionType type) { return _bgpRouting.findNextSession(type, true); }
+    SessionId findAndStartNextSession(BgpSessionType type) { return _bgpRouting.findNextSession(type, true); }
 
     //setters for creating and editing the information in the BGPRouting session:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
-    void setSocket(TCPSocket *socket) { delete _info.socket; _info.socket = socket; }
-    void setSocketListen(TCPSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
+    void setSocket(TcpSocket *socket) { delete _info.socket; _info.socket = socket; }
+    void setSocketListen(TcpSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
     //getters for accessing session information:
     void getStatistics(unsigned int *statTab);
     bool isEstablished() { return _info.sessionEstablished; }
-    SessionID getSessionID() { return _info.sessionID; }
-    BGPSessionType getType() { return _info.sessionType; }
+    SessionId getSessionID() { return _info.sessionID; }
+    BgpSessionType getType() { return _info.sessionType; }
     InterfaceEntry *getLinkIntf() { return _info.linkIntf; }
-    IPv4Address getPeerAddr() { return _info.peerAddr; }
-    TCPSocket *getSocket() { return _info.socket; }
-    TCPSocket *getSocketListen() { return _info.socketListen; }
-    IIPv4RoutingTable *getIPRoutingTable() { return _bgpRouting.getIPRoutingTable(); }
+    Ipv4Address getPeerAddr() { return _info.peerAddr; }
+    TcpSocket *getSocket() { return _info.socket; }
+    TcpSocket *getSocketListen() { return _info.socketListen; }
+    IIpv4RoutingTable *getIPRoutingTable() { return _bgpRouting.getIPRoutingTable(); }
     std::vector<RoutingTableEntry *> getBGPRoutingTable() { return _bgpRouting.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() { return *_fsm; }
-    bool checkExternalRoute(const IPv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
+    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
     void updateSendProcess(RoutingTableEntry *entry) { return _bgpRouting.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
 
   private:
     SessionInfo _info;
-    BGPRouting& _bgpRouting;
+    BgpRouting& _bgpRouting;
 
     static const int BGP_RETRY_TIME = 120;
     static const int BGP_HOLD_TIME = 180;

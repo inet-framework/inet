@@ -44,6 +44,6 @@ simple MpduGen like IApp
     @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }

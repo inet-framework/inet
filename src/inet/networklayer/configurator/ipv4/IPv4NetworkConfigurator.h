@@ -37,7 +37,7 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
+class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 {
   protected:
     /**
@@ -46,8 +46,8 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     class Node : public NetworkConfiguratorBase::Node
     {
       public:
-        std::vector<IPv4Route *> staticRoutes;
-        std::vector<IPv4MulticastRoute *> staticMulticastRoutes;
+        std::vector<Ipv4Route *> staticRoutes;
+        std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
 
       public:
         Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
@@ -60,7 +60,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     class Topology : public NetworkConfiguratorBase::Topology
     {
       protected:
-        virtual Node *createNode(cModule *module) override { return new IPv4NetworkConfigurator::Node(module); }
+        virtual Node *createNode(cModule *module) override { return new Ipv4NetworkConfigurator::Node(module); }
     };
 
     /**
@@ -73,13 +73,13 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
         uint32 addressSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
         uint32 netmask;    // the bits
         uint32 netmaskSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
-        std::vector<IPv4Address> multicastGroups;
+        std::vector<Ipv4Address> multicastGroups;
 
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
 
-        IPv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return IPv4Address(address); }
-        IPv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return IPv4Address(netmask); }
+        Ipv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return Ipv4Address(address); }
+        Ipv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return Ipv4Address(netmask); }
     };
 
     /**
@@ -157,7 +157,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     /**
      * Configures the provided routing table based on the current network configuration.
      */
-    virtual void configureRoutingTable(IIPv4RoutingTable *routingTable);
+    virtual void configureRoutingTable(IIpv4RoutingTable *routingTable);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -204,7 +204,7 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
      * holds: any packet routed by the original routes will still be routed
      * the same way by the optimized routes.
      */
-    virtual void optimizeRoutes(std::vector<IPv4Route *>& routes);
+    virtual void optimizeRoutes(std::vector<Ipv4Route *>& routes);
 
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
@@ -224,9 +224,9 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
     virtual const char *getMandatoryAttribute(cXMLElement *element, const char *attr);
-    virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, InterfaceEntry *& outIE, IPv4Address& outGateway, Topology& topology);
+    virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, InterfaceEntry *& outIE, Ipv4Address& outGateway, Topology& topology);
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
-    virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, IPv4Address address);
+    virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);
     virtual LinkInfo *findLinkOfInterface(Topology& topology, InterfaceEntry *interfaceEntry);
     virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node) override;
 
@@ -238,9 +238,9 @@ class INET_API IPv4NetworkConfigurator : public NetworkConfiguratorBase
             uint32& mergedNetmask, uint32& mergedNetmaskSpecifiedBits, uint32& mergedNetmaskIncompatibleBits);
 
     // helpers for routing table optimization
-    bool containsRoute(const std::vector<IPv4Route *>& routes, IPv4Route *route);
-    bool routesHaveSameColor(IPv4Route *route1, IPv4Route *route2);
-    int findRouteIndexWithSameColor(const std::vector<IPv4Route *>& routes, IPv4Route *route);
+    bool containsRoute(const std::vector<Ipv4Route *>& routes, Ipv4Route *route);
+    bool routesHaveSameColor(Ipv4Route *route1, Ipv4Route *route2);
+    int findRouteIndexWithSameColor(const std::vector<Ipv4Route *>& routes, Ipv4Route *route);
     bool routesCanBeSwapped(RouteInfo *routeInfo1, RouteInfo *routeInfo2);
     bool routesCanBeNeighbors(const std::vector<RouteInfo *>& routeInfos, int i, int j);
     bool interruptsOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, RouteInfo *originalRouteInfo);

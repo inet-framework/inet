@@ -51,9 +51,9 @@ void EthernetApplication::initialize(int stage)
     }
 }
 
-MACAddress EthernetApplication::resolveDestMACAddress()
+MacAddress EthernetApplication::resolveDestMACAddress()
 {
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
         // try as mac address first, then as a module
@@ -116,7 +116,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
 
     if (req != nullptr) {
-        MACAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+        MacAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
 
@@ -144,7 +144,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     delete msg;
 }
 
-void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
+void EthernetApplication::sendPacket(cMessage *datapacket, const MacAddress& destAddr)
 {
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
     emit(sentPkSignal, datapacket);

@@ -42,7 +42,7 @@ namespace httptools {
 #define HTTPT_RESPONSE_MESSAGE            10010
 #define HTTPT_DELAYED_RESPONSE_MESSAGE    10011
 
-enum LOG_FORMAT { lf_short, lf_long };
+enum LogFormat { lf_short, lf_long };
 
 /**
  * The base class for browser and server nodes.
@@ -61,7 +61,7 @@ class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
     int httpProtocol = 0;    // the http protocol. http/1.0: 10 ; http/1.1: 11
     std::string logFileName;    // the log file name for message generation events
     bool enableLogging = true;    // enable/disable of logging message generation events to file
-    LOG_FORMAT outputFormat = lf_short;    // The format used to log message events to the log file (if enabled)
+    LogFormat outputFormat = lf_short;    // The format used to log message events to the log file (if enabled)
     bool m_bDisplayMessage = true;    // enable/disable logging of message events to the console
     bool m_bDisplayResponseContent = true;    // enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set
     cModule *host = nullptr;

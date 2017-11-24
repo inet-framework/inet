@@ -26,7 +26,7 @@ package inet.networklayer.icmpv6;
 //
 // @see ~IPv6, ~IPv6RoutingTable, ~ICMPv6
 //
-simple IPv6NeighbourDiscovery
+simple Ipv6NeighbourDiscovery
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

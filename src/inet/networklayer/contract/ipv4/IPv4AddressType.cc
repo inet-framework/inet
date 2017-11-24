@@ -19,9 +19,9 @@
 
 namespace inet {
 
-IPv4AddressType IPv4AddressType::INSTANCE;
+Ipv4AddressType Ipv4AddressType::INSTANCE;
 
-const IPv4Address IPv4AddressType::ALL_RIP_ROUTERS_MCAST("224.0.0.9");
+const Ipv4Address Ipv4AddressType::ALL_RIP_ROUTERS_MCAST("224.0.0.9");
 
 } // namespace inet
 

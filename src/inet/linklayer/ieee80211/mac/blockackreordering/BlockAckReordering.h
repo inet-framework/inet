@@ -37,7 +37,7 @@ class INET_API BlockAckReordering
         typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
     protected:
-        std::map<std::pair<Tid, MACAddress>, ReceiveBuffer *> receiveBuffers;
+        std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
     protected:
         ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber);

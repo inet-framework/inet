@@ -29,7 +29,7 @@ class INET_API BasicReassembly : public IReassembly, public cObject
 {
     protected:
         struct Key {
-            MACAddress macAddress;
+            MacAddress macAddress;
             Tid tid;
             SequenceNumber seqNum;
             bool operator == (const Key& o) const { return macAddress == o.macAddress && tid == o.tid && seqNum == o.seqNum; }
@@ -45,7 +45,7 @@ class INET_API BasicReassembly : public IReassembly, public cObject
     public:
         virtual ~BasicReassembly();
         virtual Packet *addFragment(Packet *packet) override;
-        virtual void purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
+        virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
 };
 
 } // namespace ieee80211

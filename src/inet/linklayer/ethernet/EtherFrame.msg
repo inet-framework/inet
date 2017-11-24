@@ -20,7 +20,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.EtherType;
 import inet.linklayer.common.EthernetFcsMode;
 import inet.linklayer.common.Ieee802Ctrl;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -33,7 +33,7 @@ enum EthernetControlOpCode
     ETHERNET_CONTROL_PAUSE = 1;
 }
 
-enum SAPCode;
+enum SapCode;
 
 //
 // Ethernet MAC header
@@ -41,8 +41,8 @@ enum SAPCode;
 class EthernetMacHeader extends FieldsChunk
 {
     chunkLength = B(14);
-    MACAddress dest;
-    MACAddress src;
+    MacAddress dest;
+    MacAddress src;
     int typeOrLength;
 }
 

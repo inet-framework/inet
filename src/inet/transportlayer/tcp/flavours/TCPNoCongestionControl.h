@@ -29,29 +29,29 @@ namespace tcp {
 /**
  * State variables for TCPNoCongestionControl.
  */
-typedef TCPBaseAlgStateVariables TCPNoCongestionControlStateVariables;
+typedef TcpBaseAlgStateVariables TcpNoCongestionControlStateVariables;
 
 /**
  * TCP with no congestion control (i.e. congestion window kept very large).
  * Can be used to demonstrate effect of lack of congestion control.
  */
-class INET_API TCPNoCongestionControl : public TCPBaseAlg
+class INET_API TcpNoCongestionControl : public TcpBaseAlg
 {
   protected:
-    TCPNoCongestionControlStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    TcpNoCongestionControlStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPNoCongestionControlStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() override
+    virtual TcpStateVariables *createStateVariables() override
     {
-        return new TCPNoCongestionControlStateVariables();
+        return new TcpNoCongestionControlStateVariables();
     }
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event) override;
+    virtual void processRexmitTimer(TcpEventCode& event) override;
 
   public:
     /** Ctor */
-    TCPNoCongestionControl();
+    TcpNoCongestionControl();
 
     /** Initialize state vars */
     virtual void initialize() override;

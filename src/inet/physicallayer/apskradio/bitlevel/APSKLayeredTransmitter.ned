@@ -48,7 +48,7 @@ import inet.physicallayer.contract.bitlevel.IPulseShaper;
 //
 // See also ~APSKEncoder, ~APSKModulator, and ~APSKLayeredReceiver.
 //
-module APSKLayeredTransmitter like ITransmitter
+module ApskLayeredTransmitter like ITransmitter
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
@@ -61,7 +61,7 @@ module APSKLayeredTransmitter like ITransmitter
         double carrierFrequency @unit(Hz); // center frequency of the narrowband carrier signal
         double bandwidth @unit(Hz); // bandwidth
         @display("i=block/wtx");
-        @class(APSKLayeredTransmitter);
+        @class(ApskLayeredTransmitter);
 
     submodules:
         encoder: <encoderType> like IEncoder if encoderType != "" {

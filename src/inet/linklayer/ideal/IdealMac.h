@@ -36,14 +36,14 @@ class IPassiveQueue;
  *
  * See the NED file for details.
  */
-class INET_API IdealMac : public MACProtocolBase
+class INET_API IdealMac : public MacProtocolBase
 {
   protected:
     // parameters
     int headerLength = 0;    // IdealMacFrame header length in bytes
     double bitrate = 0;    // [bits per sec]
     bool promiscuous = false;    // promiscuous mode
-    MACAddress address;    // MAC address
+    MacAddress address;    // MAC address
     bool fullDuplex = false;
     bool useAck = true;
 

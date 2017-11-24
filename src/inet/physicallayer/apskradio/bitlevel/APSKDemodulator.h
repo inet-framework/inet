@@ -29,20 +29,20 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDemodulator : public IDemodulator, public cSimpleModule
+class INET_API ApskDemodulator : public IDemodulator, public cSimpleModule
 {
   protected:
-    const APSKModulationBase *modulation;
+    const ApskModulationBase *modulation;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
   public:
-    APSKDemodulator();
+    ApskDemodulator();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const APSKModulationBase *getModulation() const { return modulation; }
+    virtual const ApskModulationBase *getModulation() const { return modulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;
 };
 

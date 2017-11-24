@@ -35,11 +35,11 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
             TIME_PRIORITY,
             DATA
         };
-        typedef std::pair<MACAddress, Tid> Key;
+        typedef std::pair<MacAddress, Tid> Key;
 
         std::map<Key, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
-        std::map<MACAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
-        std::map<MACAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
         SequenceNumber lastSentSharedCounterSeqNum = 0;
 
     protected:

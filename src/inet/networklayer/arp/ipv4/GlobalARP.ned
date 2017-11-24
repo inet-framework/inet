@@ -18,24 +18,24 @@
 
 package inet.networklayer.arp.ipv4;
 
-import inet.networklayer.contract.IARP;
+import inet.networklayer.contract.IArp;
 
 
 //
 // TODO
 //
-simple GlobalARP like IARP
+simple GlobalArp like IArp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         @display("i=block/layer");
-        @signal[initiatedARPResolution](type=IARP::Notification);
-        @signal[completedARPResolution](type=IARP::Notification);
-        @signal[failedARPResolution](type=IARP::Notification);
+        @signal[initiatedARPResolution](type=IArp::Notification);
+        @signal[completedARPResolution](type=IArp::Notification);
+        @signal[failedARPResolution](type=IArp::Notification);
     gates:
-        input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
-        output netwOut @labels(ARPPacket+Ieee802Ctrl);  // outgoing ARP requests/replies
-        input ifIn @labels(ARPPacket,Ieee802Ctrl);
-        output ifOut @labels(ARPPacket,Ieee802Ctrl);
+        input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
+        output netwOut @labels(ArpPacket+Ieee802Ctrl);  // outgoing ARP requests/replies
+        input ifIn @labels(ArpPacket,Ieee802Ctrl);
+        output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }

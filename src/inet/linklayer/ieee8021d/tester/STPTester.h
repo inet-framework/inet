@@ -35,7 +35,7 @@ namespace inet {
  * with cycle detection. The results can be obtained with getter methods.
  */
 // TODO: this module should be moved into the test folder somewhere
-class INET_API STPTester : public cSimpleModule
+class INET_API StpTester : public cSimpleModule
 {
   public:
     enum Color {
@@ -55,8 +55,8 @@ class INET_API STPTester : public cSimpleModule
 
   public:
     // Includes network topology extraction
-    STPTester();
-    ~STPTester();
+    StpTester();
+    ~StpTester();
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 

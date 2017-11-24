@@ -34,13 +34,13 @@ namespace rtp {
  * The class RTPPayloadReceiver acts as a base class for modules
  * processing incoming RTP data packets.
  */
-class INET_API RTPPayloadReceiver : public cSimpleModule
+class INET_API RtpPayloadReceiver : public cSimpleModule
 {
   public:
     /**
      * Destructor. Disposes the queue object and closes the output file.
      */
-    virtual ~RTPPayloadReceiver();
+    virtual ~RtpPayloadReceiver();
 
   protected:
     /**

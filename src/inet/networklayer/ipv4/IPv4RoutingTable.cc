@@ -37,21 +37,21 @@ namespace inet {
 
 using namespace utils;
 
-Define_Module(IPv4RoutingTable);
+Define_Module(Ipv4RoutingTable);
 
-std::ostream& operator<<(std::ostream& os, const IPv4Route& e)
+std::ostream& operator<<(std::ostream& os, const Ipv4Route& e)
 {
     os << e.info();
     return os;
 };
 
-std::ostream& operator<<(std::ostream& os, const IPv4MulticastRoute& e)
+std::ostream& operator<<(std::ostream& os, const Ipv4MulticastRoute& e)
 {
     os << e.info();
     return os;
 };
 
-IPv4RoutingTable::~IPv4RoutingTable()
+Ipv4RoutingTable::~Ipv4RoutingTable()
 {
     for (auto & elem : routes)
         delete elem;
@@ -59,7 +59,7 @@ IPv4RoutingTable::~IPv4RoutingTable()
         delete elem;
 }
 
-void IPv4RoutingTable::initialize(int stage)
+void Ipv4RoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -94,7 +94,7 @@ void IPv4RoutingTable::initialize(int stage)
             // do it later in a later stage, after network configurators configured the interfaces)
             const char *routerIdStr = par("routerId").stringValue();
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
-                routerId = IPv4Address(routerIdStr);
+                routerId = Ipv4Address(routerIdStr);
         }
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
@@ -115,7 +115,7 @@ void IPv4RoutingTable::initialize(int stage)
     }
 }
 
-void IPv4RoutingTable::configureRouterId()
+void Ipv4RoutingTable::configureRouterId()
 {
     if (routerId.isUnspecified()) {    // not yet configured
         const char *routerIdStr = par("routerId").stringValue();
@@ -135,12 +135,12 @@ void IPv4RoutingTable::configureRouterId()
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
             ASSERT(lo0);
             lo0->ipv4Data()->setIPAddress(routerId);
-            lo0->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);
+            lo0->ipv4Data()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
 }
 
-void IPv4RoutingTable::refreshDisplay() const
+void Ipv4RoutingTable::refreshDisplay() const
 {
     char buf[80];
     if (routerId.isUnspecified())
@@ -150,12 +150,12 @@ void IPv4RoutingTable::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void IPv4RoutingTable::handleMessage(cMessage *msg)
+void Ipv4RoutingTable::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
@@ -185,18 +185,18 @@ void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     }
 }
 
-cModule *IPv4RoutingTable::getHostModule()
+cModule *Ipv4RoutingTable::getHostModule()
 {
     return findContainingNode(this);
 }
 
-void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
+void Ipv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 {
     bool changed = false;
 
     // delete unicast routes using this interface
     for (auto it = routes.begin(); it != routes.end(); ) {
-        IPv4Route *route = *it;
+        Ipv4Route *route = *it;
         if (route->getInterface() == entry) {
             it = routes.erase(it);
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
@@ -212,7 +212,7 @@ void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
     //   1. delete routes has entry as input interface
     //   2. remove entry from output interface list
     for (auto it = multicastRoutes.begin(); it != multicastRoutes.end(); ) {
-        IPv4MulticastRoute *route = *it;
+        Ipv4MulticastRoute *route = *it;
         if (route->getInInterface() && route->getInInterface()->getInterface() == entry) {
             it = multicastRoutes.erase(it);
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
@@ -235,21 +235,21 @@ void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
     }
 }
 
-void IPv4RoutingTable::invalidateCache()
+void Ipv4RoutingTable::invalidateCache()
 {
     routingCache.clear();
     localAddresses.clear();
     localBroadcastAddresses.clear();
 }
 
-void IPv4RoutingTable::printRoutingTable() const
+void Ipv4RoutingTable::printRoutingTable() const
 {
     EV << "-- Routing table --\n";
     EV << stringf("%-16s %-16s %-16s %-4s %-16s %s\n",
             "Destination", "Netmask", "Gateway", "Iface", "", "Metric");
 
     for (int i = 0; i < getNumRoutes(); i++) {
-        IPv4Route *route = getRoute(i);
+        Ipv4Route *route = getRoute(i);
         InterfaceEntry *interfacePtr = route->getInterface();
         EV << stringf("%-16s %-16s %-16s %-4s (%s) %d\n",
                 route->getDestination().isUnspecified() ? "*" : route->getDestination().str().c_str(),
@@ -262,14 +262,14 @@ void IPv4RoutingTable::printRoutingTable() const
     EV << "\n";
 }
 
-void IPv4RoutingTable::printMulticastRoutingTable() const
+void Ipv4RoutingTable::printMulticastRoutingTable() const
 {
     EV << "-- Multicast routing table --\n";
     EV << stringf("%-16s %-16s %-16s %-6s %-6s %s\n",
             "Source", "Netmask", "Group", "Metric", "In", "Outs");
 
     for (int i = 0; i < getNumMulticastRoutes(); i++) {
-        IPv4MulticastRoute *route = getMulticastRoute(i);
+        Ipv4MulticastRoute *route = getMulticastRoute(i);
         EV << stringf("%-16s %-16s %-16s %-6d %-6s ",
                 route->getOrigin().isUnspecified() ? "*" : route->getOrigin().str().c_str(),
                 route->getOriginNetmask().isUnspecified() ? "*" : route->getOriginNetmask().str().c_str(),
@@ -286,9 +286,9 @@ void IPv4RoutingTable::printMulticastRoutingTable() const
     EV << "\n";
 }
 
-std::vector<IPv4Address> IPv4RoutingTable::gatherAddresses() const
+std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 {
-    std::vector<IPv4Address> addressvector;
+    std::vector<Ipv4Address> addressvector;
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i)
         addressvector.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
@@ -297,9 +297,9 @@ std::vector<IPv4Address> IPv4RoutingTable::gatherAddresses() const
 
 //---
 
-void IPv4RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
+void Ipv4RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
 {
-    IPv4InterfaceData *d = new IPv4InterfaceData();
+    Ipv4InterfaceData *d = new Ipv4InterfaceData();
     ie->setIPv4Data(d);
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
@@ -307,13 +307,13 @@ void IPv4RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
 
     // join "224.0.0.1" and "224.0.0.2" (if router) multicast groups automatically
     if (ie->isMulticast()) {
-        d->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
+        d->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
         if (forwarding)
-            d->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+            d->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
     }
 }
 
-InterfaceEntry *IPv4RoutingTable::getInterfaceByAddress(const IPv4Address& addr) const
+InterfaceEntry *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr) const
 {
     Enter_Method("getInterfaceByAddress(%u.%u.%u.%u)", addr.getDByte(0), addr.getDByte(1), addr.getDByte(2), addr.getDByte(3));    // note: str().c_str() too slow here
 
@@ -327,15 +327,15 @@ InterfaceEntry *IPv4RoutingTable::getInterfaceByAddress(const IPv4Address& addr)
     return nullptr;
 }
 
-void IPv4RoutingTable::configureLoopbackForIPv4()
+void Ipv4RoutingTable::configureLoopbackForIPv4()
 {
     InterfaceEntry *ie = ift->getFirstLoopbackInterface();
     if (ie) {
         // add IPv4 info. Set 127.0.0.1/8 as address by default --
         // we may reconfigure later it to be the routerId
-        IPv4InterfaceData *d = new IPv4InterfaceData();
-        d->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
-        d->setNetmask(IPv4Address::LOOPBACK_NETMASK);
+        Ipv4InterfaceData *d = new Ipv4InterfaceData();
+        d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
+        d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
         d->setMetric(1);
         ie->setIPv4Data(d);
     }
@@ -343,7 +343,7 @@ void IPv4RoutingTable::configureLoopbackForIPv4()
 
 //---
 
-bool IPv4RoutingTable::isLocalAddress(const IPv4Address& dest) const
+bool Ipv4RoutingTable::isLocalAddress(const Ipv4Address& dest) const
 {
     Enter_Method("isLocalAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
@@ -361,7 +361,7 @@ bool IPv4RoutingTable::isLocalAddress(const IPv4Address& dest) const
 }
 
 // JcM add: check if the dest addr is local network broadcast
-bool IPv4RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
+bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
 {
     Enter_Method("isLocalBroadcastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
@@ -371,8 +371,8 @@ bool IPv4RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
             InterfaceEntry *ie = ift->getInterface(i);
             if (!ie->isBroadcast())
                 continue;
-            IPv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
-            IPv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
+            Ipv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
+            Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
             if (!broadcastAddr.isUnspecified()) {
                 localBroadcastAddresses.insert(broadcastAddr);
             }
@@ -383,21 +383,21 @@ bool IPv4RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
     return it != localBroadcastAddresses.end();
 }
 
-InterfaceEntry *IPv4RoutingTable::findInterfaceByLocalBroadcastAddress(const IPv4Address& dest) const
+InterfaceEntry *Ipv4RoutingTable::findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const
 {
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (!ie->isBroadcast())
             continue;
-        IPv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
-        IPv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
+        Ipv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
+        Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
         if (broadcastAddr == dest)
             return ie;
     }
     return nullptr;
 }
 
-bool IPv4RoutingTable::isLocalMulticastAddress(const IPv4Address& dest) const
+bool Ipv4RoutingTable::isLocalMulticastAddress(const Ipv4Address& dest) const
 {
     Enter_Method("isLocalMulticastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
@@ -409,13 +409,13 @@ bool IPv4RoutingTable::isLocalMulticastAddress(const IPv4Address& dest) const
     return false;
 }
 
-void IPv4RoutingTable::purge()
+void Ipv4RoutingTable::purge()
 {
     bool deleted = false;
 
     // purge unicast routes
     for (auto it = routes.begin(); it != routes.end(); ) {
-        IPv4Route *route = *it;
+        Ipv4Route *route = *it;
         if (route->isValid())
             ++it;
         else {
@@ -429,7 +429,7 @@ void IPv4RoutingTable::purge()
 
     // purge multicast routes
     for (auto it = multicastRoutes.begin(); it != multicastRoutes.end(); ) {
-        IPv4MulticastRoute *route = *it;
+        Ipv4MulticastRoute *route = *it;
         if (route->isValid())
             ++it;
         else {
@@ -446,7 +446,7 @@ void IPv4RoutingTable::purge()
     }
 }
 
-IPv4Route *IPv4RoutingTable::findBestMatchingRoute(const IPv4Address& dest) const
+Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
@@ -458,11 +458,11 @@ IPv4Route *IPv4RoutingTable::findBestMatchingRoute(const IPv4Address& dest) cons
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
-    IPv4Route *bestRoute = nullptr;
+    Ipv4Route *bestRoute = nullptr;
     for (auto e : routes) {
         if (e->isValid()) {
-            if (IPv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) {    // match
-                bestRoute = const_cast<IPv4Route *>(e);
+            if (Ipv4Address::maskedAddrAreEqual(dest, e->getDestination(), e->getNetmask())) {    // match
+                bestRoute = const_cast<Ipv4Route *>(e);
                 break;
             }
         }
@@ -472,23 +472,23 @@ IPv4Route *IPv4RoutingTable::findBestMatchingRoute(const IPv4Address& dest) cons
     return bestRoute;
 }
 
-InterfaceEntry *IPv4RoutingTable::getInterfaceForDestAddr(const IPv4Address& dest) const
+InterfaceEntry *Ipv4RoutingTable::getInterfaceForDestAddr(const Ipv4Address& dest) const
 {
     Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
-    const IPv4Route *e = findBestMatchingRoute(dest);
+    const Ipv4Route *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : nullptr;
 }
 
-IPv4Address IPv4RoutingTable::getGatewayForDestAddr(const IPv4Address& dest) const
+Ipv4Address Ipv4RoutingTable::getGatewayForDestAddr(const Ipv4Address& dest) const
 {
     Enter_Method("getGatewayForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
-    const IPv4Route *e = findBestMatchingRoute(dest);
-    return e ? e->getGateway() : IPv4Address();
+    const Ipv4Route *e = findBestMatchingRoute(dest);
+    return e ? e->getGateway() : Ipv4Address();
 }
 
-const IPv4MulticastRoute *IPv4RoutingTable::findBestMatchingMulticastRoute(const IPv4Address& origin, const IPv4Address& group) const
+const Ipv4MulticastRoute *Ipv4RoutingTable::findBestMatchingMulticastRoute(const Ipv4Address& origin, const Ipv4Address& group) const
 {
     Enter_Method("getMulticastRoutesFor(%u.%u.%u.%u, %u.%u.%u.%u)",
             origin.getDByte(0), origin.getDByte(1), origin.getDByte(2), origin.getDByte(3),
@@ -504,14 +504,14 @@ const IPv4MulticastRoute *IPv4RoutingTable::findBestMatchingMulticastRoute(const
     return nullptr;
 }
 
-IPv4Route *IPv4RoutingTable::getRoute(int k) const
+Ipv4Route *Ipv4RoutingTable::getRoute(int k) const
 {
     if (k < (int)routes.size())
         return routes[k];
     return nullptr;
 }
 
-IPv4Route *IPv4RoutingTable::getDefaultRoute() const
+Ipv4Route *Ipv4RoutingTable::getDefaultRoute() const
 {
     // if exists default route entry, it is the last valid entry
     for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getNetmask().isUnspecified(); ++i) {
@@ -524,7 +524,7 @@ IPv4Route *IPv4RoutingTable::getDefaultRoute() const
 // The 'routes' vector stores the routes in this order.
 // The best matching route should precede the other matching routes,
 // so the method should return true if a is better the b.
-bool IPv4RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b) const
+bool Ipv4RoutingTable::routeLessThan(const Ipv4Route *a, const Ipv4Route *b) const
 {
     // longer prefixes are better, because they are more specific
     if (a->getNetmask() != b->getNetmask())
@@ -543,12 +543,12 @@ bool IPv4RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b) con
     return a->getMetric() < b->getMetric();
 }
 
-void IPv4RoutingTable::setRouterId(IPv4Address a)
+void Ipv4RoutingTable::setRouterId(Ipv4Address a)
 {
     routerId = a;
 }
 
-void IPv4RoutingTable::internalAddRoute(IPv4Route *entry)
+void Ipv4RoutingTable::internalAddRoute(Ipv4Route *entry)
 {
     if (!entry->getNetmask().isValidNetmask())
         throw cRuntimeError("addRoute(): wrong netmask %s in route", entry->getNetmask().str().c_str());
@@ -567,7 +567,7 @@ void IPv4RoutingTable::internalAddRoute(IPv4Route *entry)
 
     // if this is a default route, remove old default route (we're replacing it)
     if (entry->getNetmask().isUnspecified()) {
-        IPv4Route *oldDefaultRoute = getDefaultRoute();
+        Ipv4Route *oldDefaultRoute = getDefaultRoute();
         if (oldDefaultRoute != nullptr)
             deleteRoute(oldDefaultRoute);
     }
@@ -587,7 +587,7 @@ void IPv4RoutingTable::internalAddRoute(IPv4Route *entry)
     entry->setRoutingTable(this);
 }
 
-void IPv4RoutingTable::addRoute(IPv4Route *entry)
+void Ipv4RoutingTable::addRoute(Ipv4Route *entry)
 {
     Enter_Method("addRoute(...)");
     EV_INFO << "add route " << entry->info() << "\n";
@@ -599,7 +599,7 @@ void IPv4RoutingTable::addRoute(IPv4Route *entry)
     emit(NF_ROUTE_ADDED, entry);
 }
 
-IPv4Route *IPv4RoutingTable::internalRemoveRoute(IPv4Route *entry)
+Ipv4Route *Ipv4RoutingTable::internalRemoveRoute(Ipv4Route *entry)
 {
     auto i = std::find(routes.begin(), routes.end(), entry);
     if (i != routes.end()) {
@@ -609,7 +609,7 @@ IPv4Route *IPv4RoutingTable::internalRemoveRoute(IPv4Route *entry)
     return nullptr;
 }
 
-IPv4Route *IPv4RoutingTable::removeRoute(IPv4Route *entry)
+Ipv4Route *Ipv4RoutingTable::removeRoute(Ipv4Route *entry)
 {
     Enter_Method("removeRoute(...)");
 
@@ -625,7 +625,7 @@ IPv4Route *IPv4RoutingTable::removeRoute(IPv4Route *entry)
     return entry;
 }
 
-bool IPv4RoutingTable::deleteRoute(IPv4Route *entry)    //TODO this is almost duplicate of removeRoute()
+bool Ipv4RoutingTable::deleteRoute(Ipv4Route *entry)    //TODO this is almost duplicate of removeRoute()
 {
     Enter_Method("deleteRoute(...)");
 
@@ -641,7 +641,7 @@ bool IPv4RoutingTable::deleteRoute(IPv4Route *entry)    //TODO this is almost du
     return entry != nullptr;
 }
 
-bool IPv4RoutingTable::multicastRouteLessThan(const IPv4MulticastRoute *a, const IPv4MulticastRoute *b)
+bool Ipv4RoutingTable::multicastRouteLessThan(const Ipv4MulticastRoute *a, const Ipv4MulticastRoute *b)
 {
     // We want routes with longer
     // prefixes to be at front, so we compare them as "less".
@@ -659,7 +659,7 @@ bool IPv4RoutingTable::multicastRouteLessThan(const IPv4MulticastRoute *a, const
     return a->getMetric() < b->getMetric();
 }
 
-void IPv4RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
+void Ipv4RoutingTable::internalAddMulticastRoute(Ipv4MulticastRoute *entry)
 {
     if (!entry->getOriginNetmask().isValidNetmask())
         throw cRuntimeError("addMulticastRoute(): wrong netmask %s in multicast route", entry->getOriginNetmask().str().c_str());
@@ -677,7 +677,7 @@ void IPv4RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
         throw cRuntimeError("addMulticastRoute(): input interface must be multicast capable");
 
     for (unsigned int i = 0; i < entry->getNumOutInterfaces(); i++) {
-        IPv4MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
+        Ipv4MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
         if (!outInterface)
             throw cRuntimeError("addMulticastRoute(): output interface cannot be nullptr");
         else if (!outInterface->getInterface()->isMulticast())
@@ -696,7 +696,7 @@ void IPv4RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
     entry->setRoutingTable(this);
 }
 
-void IPv4RoutingTable::addMulticastRoute(IPv4MulticastRoute *entry)
+void Ipv4RoutingTable::addMulticastRoute(Ipv4MulticastRoute *entry)
 {
     Enter_Method("addMulticastRoute(...)");
 
@@ -707,7 +707,7 @@ void IPv4RoutingTable::addMulticastRoute(IPv4MulticastRoute *entry)
     emit(NF_MROUTE_ADDED, entry);
 }
 
-IPv4MulticastRoute *IPv4RoutingTable::internalRemoveMulticastRoute(IPv4MulticastRoute *entry)
+Ipv4MulticastRoute *Ipv4RoutingTable::internalRemoveMulticastRoute(Ipv4MulticastRoute *entry)
 {
     auto i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
     if (i != multicastRoutes.end()) {
@@ -717,7 +717,7 @@ IPv4MulticastRoute *IPv4RoutingTable::internalRemoveMulticastRoute(IPv4Multicast
     return nullptr;
 }
 
-IPv4MulticastRoute *IPv4RoutingTable::removeMulticastRoute(IPv4MulticastRoute *entry)
+Ipv4MulticastRoute *Ipv4RoutingTable::removeMulticastRoute(Ipv4MulticastRoute *entry)
 {
     Enter_Method("removeMulticastRoute(...)");
 
@@ -732,7 +732,7 @@ IPv4MulticastRoute *IPv4RoutingTable::removeMulticastRoute(IPv4MulticastRoute *e
     return entry;
 }
 
-bool IPv4RoutingTable::deleteMulticastRoute(IPv4MulticastRoute *entry)
+bool Ipv4RoutingTable::deleteMulticastRoute(Ipv4MulticastRoute *entry)
 {
     Enter_Method("deleteMulticastRoute(...)");
 
@@ -747,9 +747,9 @@ bool IPv4RoutingTable::deleteMulticastRoute(IPv4MulticastRoute *entry)
     return entry != nullptr;
 }
 
-void IPv4RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
+void Ipv4RoutingTable::routeChanged(Ipv4Route *entry, int fieldCode)
 {
-    if (fieldCode == IPv4Route::F_DESTINATION || fieldCode == IPv4Route::F_PREFIX_LENGTH || fieldCode == IPv4Route::F_METRIC) {    // our data structures depend on these fields
+    if (fieldCode == Ipv4Route::F_DESTINATION || fieldCode == Ipv4Route::F_PREFIX_LENGTH || fieldCode == Ipv4Route::F_METRIC) {    // our data structures depend on these fields
         entry = internalRemoveRoute(entry);
         ASSERT(entry != nullptr);    // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
@@ -759,10 +759,10 @@ void IPv4RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
     emit(NF_ROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
 }
 
-void IPv4RoutingTable::multicastRouteChanged(IPv4MulticastRoute *entry, int fieldCode)
+void Ipv4RoutingTable::multicastRouteChanged(Ipv4MulticastRoute *entry, int fieldCode)
 {
-    if (fieldCode == IPv4MulticastRoute::F_ORIGIN || fieldCode == IPv4MulticastRoute::F_ORIGINMASK ||
-        fieldCode == IPv4MulticastRoute::F_MULTICASTGROUP || fieldCode == IPv4MulticastRoute::F_METRIC)    // our data structures depend on these fields
+    if (fieldCode == Ipv4MulticastRoute::F_ORIGIN || fieldCode == Ipv4MulticastRoute::F_ORIGINMASK ||
+        fieldCode == Ipv4MulticastRoute::F_MULTICASTGROUP || fieldCode == Ipv4MulticastRoute::F_METRIC)    // our data structures depend on these fields
     {
         entry = internalRemoveMulticastRoute(entry);
         ASSERT(entry != nullptr);    // failure means inconsistency: route was not found in this routing table
@@ -773,13 +773,13 @@ void IPv4RoutingTable::multicastRouteChanged(IPv4MulticastRoute *entry, int fiel
     emit(NF_MROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
 }
 
-void IPv4RoutingTable::updateNetmaskRoutes()
+void Ipv4RoutingTable::updateNetmaskRoutes()
 {
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k = 0; k < routes.size(); k++) {
         if (routes[k]->getSourceType() == IRoute::IFACENETMASK) {
             auto it = routes.begin() + (k--);    // '--' is necessary because indices shift down
-            IPv4Route *route = *it;
+            Ipv4Route *route = *it;
             routes.erase(it);
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(NF_ROUTE_DELETED, route);
@@ -793,15 +793,15 @@ void IPv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (interfaceNameMatcher.matches(ie->getFullName()) && ie->ipv4Data() && ie->ipv4Data()->getNetmask() != IPv4Address::ALLONES_ADDRESS)
+        if (interfaceNameMatcher.matches(ie->getFullName()) && ie->ipv4Data() && ie->ipv4Data()->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
         {
-            IPv4Route *route = createNewRoute();
+            Ipv4Route *route = createNewRoute();
             route->setSourceType(IRoute::IFACENETMASK);
             route->setSource(ie);
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
-            route->setGateway(IPv4Address());
-            route->setAdminDist(IPv4Route::dDirectlyConnected);
+            route->setGateway(Ipv4Address());
+            route->setAdminDist(Ipv4Route::dDirectlyConnected);
             route->setMetric(ie->ipv4Data()->getMetric());
             route->setInterface(ie);
             route->setRoutingTable(this);
@@ -814,7 +814,7 @@ void IPv4RoutingTable::updateNetmaskRoutes()
     invalidateCache();
 }
 
-bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -848,9 +848,9 @@ bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
     return true;
 }
 
-IPv4Route *IPv4RoutingTable::createNewRoute()
+Ipv4Route *Ipv4RoutingTable::createNewRoute()
 {
-    return new IPv4Route();
+    return new Ipv4Route();
 }
 
 } // namespace inet

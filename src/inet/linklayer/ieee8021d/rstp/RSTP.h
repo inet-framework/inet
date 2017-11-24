@@ -35,7 +35,7 @@ namespace inet {
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
-class INET_API RSTP : public STPBase
+class INET_API Rstp : public StpBase
 {
   protected:
     // kind codes for self messages
@@ -55,8 +55,8 @@ class INET_API RSTP : public STPBase
     cMessage *upgradeTimer = nullptr;
 
   public:
-    RSTP();
-    virtual ~RSTP();
+    Rstp();
+    virtual ~Rstp();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
@@ -99,9 +99,9 @@ class INET_API RSTP : public STPBase
      * Updates port information. Handles port role changes.
      */
     virtual void handleIncomingFrame(Packet *packet);
-    virtual void processBPDU(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId);
-    virtual bool processBetterSource(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId);
-    virtual bool processSameSource(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual void processBPDU(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId);
+    virtual bool processBetterSource(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId);
+    virtual bool processSameSource(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief Prints current data base info
@@ -111,13 +111,13 @@ class INET_API RSTP : public STPBase
     /**
      * @brief Update Interfacedata with the content of the BDPU frame
      */
-    virtual void updateInterfacedata(const Ptr<const BPDU>& frame, unsigned int interfaceId);
+    virtual void updateInterfacedata(const Ptr<const Bpdu>& frame, unsigned int interfaceId);
 
     /**
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
      */
-    virtual CompareResult contestInterfacedata(const Ptr<const BPDU>& msg, unsigned int interfaceId);
+    virtual CompareResult contestInterfacedata(const Ptr<const Bpdu>& msg, unsigned int interfaceId);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
@@ -129,17 +129,17 @@ class INET_API RSTP : public STPBase
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
      */
-    virtual CompareResult compareInterfacedata(unsigned int interfaceId, const Ptr<const BPDU>& msg, int linkCost);
+    virtual CompareResult compareInterfacedata(unsigned int interfaceId, const Ptr<const Bpdu>& msg, int linkCost);
 
     /**
      * @brief Compares two RSTP data
      * @return (<0 if vector better than frame)
      */
     virtual CompareResult compareRSTPData(int rootPriority1, int rootPriority2,
-            MACAddress rootAddress1, MACAddress rootAddress2,
+            MacAddress rootAddress1, MacAddress rootAddress2,
             int rootPathCost1, int rootPathCost2,
             int bridgePriority1, int bridgePriority2,
-            MACAddress bridgeAddress1, MACAddress bridgeAddress2,
+            MacAddress bridgeAddress1, MacAddress bridgeAddress2,
             int portPriority1, int portPriority2,
             int portNum1, int portNum2);
 
@@ -162,12 +162,12 @@ class INET_API RSTP : public STPBase
      * @brief Checks the frame TC flag.
      * Sets TCWhile if the port was forwarding and the flag is true.
      */
-    virtual void checkTC(const Ptr<const BPDU>& frame, int arrivalInterfaceId);
+    virtual void checkTC(const Ptr<const Bpdu>& frame, int arrivalInterfaceId);
 
     /**
      * @brief Handles the switch to backup in one of the ports
      */
-    virtual void handleBackup(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual void handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief schedule next upgrade self-message

@@ -25,9 +25,9 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPVegas);
+Register_Class(TcpVegas);
 
-TCPVegasStateVariables::TCPVegasStateVariables()
+TcpVegasStateVariables::TcpVegasStateVariables()
 {
     ssthresh = 65535;
     v_recoverypoint = 0;
@@ -48,34 +48,34 @@ TCPVegasStateVariables::TCPVegasStateVariables()
     v_rtt_timeout = 1000.0;
 }
 
-TCPVegasStateVariables::~TCPVegasStateVariables()
+TcpVegasStateVariables::~TcpVegasStateVariables()
 {
 }
 
-std::string TCPVegasStateVariables::info() const
+std::string TcpVegasStateVariables::info() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TcpBaseAlgStateVariables::info();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
 
-std::string TCPVegasStateVariables::detailedInfo() const
+std::string TcpVegasStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::detailedInfo();
+    out << TcpBaseAlgStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "baseRTT = " << v_baseRTT << "\n";
     return out.str();
 }
 
-TCPVegas::TCPVegas()
-    : TCPBaseAlg(), state((TCPVegasStateVariables *&)TCPAlgorithm::state)
+TcpVegas::TcpVegas()
+    : TcpBaseAlg(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
 {
 }
 
 // Same as TCPReno
-void TCPVegas::recalculateSlowStartThreshold()
+void TcpVegas::recalculateSlowStartThreshold()
 {
     // RFC 2581, page 4:
     // "When a TCP sender detects segment loss using the retransmission
@@ -97,9 +97,9 @@ void TCPVegas::recalculateSlowStartThreshold()
 }
 
 //Process rexmit timer
-void TCPVegas::processRexmitTimer(TCPEventCode& event)
+void TcpVegas::processRexmitTimer(TcpEventCode& event)
 {
-    TCPBaseAlg::processRexmitTimer(event);
+    TcpBaseAlg::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -120,11 +120,11 @@ void TCPVegas::processRexmitTimer(TCPEventCode& event)
     conn->retransmitOneSegment(true);    //retransmit one segment from snd_una
 }
 
-void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
+void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
 {
-    TCPBaseAlg::receivedDataAck(firstSeqAcked);
+    TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
-    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     if (found) {
         simtime_t currentTime = simTime();
         simtime_t tSent = found->getFirstSentTime();
@@ -276,7 +276,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
         // check 1st and 2nd ack after a rtx
         if (state->v_worried > 0) {
             state->v_worried -= state->snd_mss;
-            const TCPSegmentTransmitInfoList::Item *unaFound = state->regions.get(state->snd_una);
+            const TcpSegmentTransmitInfoList::Item *unaFound = state->regions.get(state->snd_una);
             //bool expired = unaFound && ((currentTime - unaFound->getLastSentTime()) >= state->v_rtt_timeout);
             bool expired = unaFound && ((currentTime - unaFound->getFirstSentTime()) >= state->v_rtt_timeout);
 
@@ -298,14 +298,14 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
     sendData(false);
 }
 
-void TCPVegas::receivedDuplicateAck()
+void TcpVegas::receivedDuplicateAck()
 {
-    TCPBaseAlg::receivedDuplicateAck();
+    TcpBaseAlg::receivedDuplicateAck();
 
     simtime_t currentTime = simTime();
     simtime_t tSent = 0;
     int num_transmits = 0;
-    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
+    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
     if (found) {
         tSent = found->getFirstSentTime();
         num_transmits = found->getTransmitCount();
@@ -364,9 +364,9 @@ void TCPVegas::receivedDuplicateAck()
     sendData(false);
 }
 
-void TCPVegas::dataSent(uint32 fromseq)
+void TcpVegas::dataSent(uint32 fromseq)
 {
-    TCPBaseAlg::dataSent(fromseq);
+    TcpBaseAlg::dataSent(fromseq);
 
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
@@ -378,9 +378,9 @@ void TCPVegas::dataSent(uint32 fromseq)
     state->regions.set(fromseq, state->snd_max, simTime());
 }
 
-void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void TcpVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
-    TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
+    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
 
     state->regions.set(fromseq, toseq, simTime());
 }

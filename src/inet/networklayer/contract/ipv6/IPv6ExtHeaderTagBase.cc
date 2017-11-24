@@ -23,7 +23,7 @@
 
 namespace inet {
 
-void IPv6ExtHeaderTagBase::copy(const IPv6ExtHeaderTagBase& other)
+void Ipv6ExtHeaderTagBase::copy(const Ipv6ExtHeaderTagBase& other)
 {
 #ifdef WITH_IPv6
     for (const auto & elem : other.extensionHeaders)
@@ -31,17 +31,17 @@ void IPv6ExtHeaderTagBase::copy(const IPv6ExtHeaderTagBase& other)
 #endif // ifdef WITH_IPv6
 }
 
-IPv6ExtHeaderTagBase& IPv6ExtHeaderTagBase::operator=(const IPv6ExtHeaderTagBase& other)
+Ipv6ExtHeaderTagBase& Ipv6ExtHeaderTagBase::operator=(const Ipv6ExtHeaderTagBase& other)
 {
     if (this == &other)
         return *this;
     clean();
-    IPv6ExtHeaderTagBase_Base::operator=(other);
+    Ipv6ExtHeaderTagBase_Base::operator=(other);
     copy(other);
     return *this;
 }
 
-void IPv6ExtHeaderTagBase::clean()
+void Ipv6ExtHeaderTagBase::clean()
 {
 #ifdef WITH_IPv6
     while (!extensionHeaders.empty()) {
@@ -52,40 +52,40 @@ void IPv6ExtHeaderTagBase::clean()
 #endif // ifdef WITH_IPv6
 }
 
-IPv6ExtHeaderTagBase::~IPv6ExtHeaderTagBase()
+Ipv6ExtHeaderTagBase::~Ipv6ExtHeaderTagBase()
 {
     clean();
 }
 
-unsigned int IPv6ExtHeaderTagBase::getExtensionHeaderArraySize() const
+unsigned int Ipv6ExtHeaderTagBase::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-void IPv6ExtHeaderTagBase::setExtensionHeaderArraySize(unsigned int size)
+void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(unsigned int size)
 {
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-Ipv6ExtensionHeader *IPv6ExtHeaderTagBase::getMutableExtensionHeader(unsigned int k)
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getMutableExtensionHeader(unsigned int k)
 {
     handleChange();
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
-const Ipv6ExtensionHeader *IPv6ExtHeaderTagBase::getExtensionHeader(unsigned int k) const
+const Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeader(unsigned int k) const
 {
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
-void IPv6ExtHeaderTagBase::setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var)
+void Ipv6ExtHeaderTagBase::setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
-void IPv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
+void Ipv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
 {
 #ifdef WITH_IPv6
     ASSERT(eh);
@@ -101,7 +101,7 @@ void IPv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos
 #endif // ifdef WITH_IPv6
 }
 
-Ipv6ExtensionHeader *IPv6ExtHeaderTagBase::removeFirstExtensionHeader()
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
 {
     if (extensionHeaders.empty())
         return nullptr;

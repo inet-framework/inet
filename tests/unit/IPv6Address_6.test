@@ -10,7 +10,7 @@ using namespace inet;
 
 static void parseAddr(const char *s)
 {
-    IPv6Address a;
+    Ipv6Address a;
     int prefixLen;
     if (!a.tryParseAddrWithPrefix(s,prefixLen))
         EV << "BAD ";

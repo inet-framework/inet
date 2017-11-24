@@ -49,9 +49,9 @@
 
 namespace inet {
 
-Define_Module(MoBANCoordinator);
+Define_Module(MoBanCoordinator);
 
-MoBANCoordinator::MoBANCoordinator() :
+MoBanCoordinator::MoBanCoordinator() :
         speed(0),
         maxSpeed(0),
         logfile(nullptr),
@@ -62,12 +62,12 @@ MoBANCoordinator::MoBANCoordinator() :
         patternLength(0),
         currentPattern(-1),
         markovMatrix(nullptr),
-        postureSelStrategy(MoBANCoordinator::posture_sel_type(-1)),
+        postureSelStrategy(MoBanCoordinator::posture_sel_type(-1)),
         transitions(nullptr)
 {
 }
 
-MoBANCoordinator::~MoBANCoordinator()
+MoBanCoordinator::~MoBanCoordinator()
 {
     delete transitions;
     delete [] mobilityPattern;
@@ -75,7 +75,7 @@ MoBANCoordinator::~MoBANCoordinator()
         delete elem;
 }
 
-void MoBANCoordinator::initialize(int stage)
+void MoBanCoordinator::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
@@ -106,7 +106,7 @@ void MoBANCoordinator::initialize(int stage)
     }
 }
 
-void MoBANCoordinator::setInitialPosition()
+void MoBanCoordinator::setInitialPosition()
 {
 //    lastPosition = selectDestination();
 }
@@ -117,7 +117,7 @@ void MoBANCoordinator::setInitialPosition()
  * variables to make the movement.
  * In the case of using a logged mobility pattern, the new posture and other parameters are obtained from the pattern.
  */
-void MoBANCoordinator::setTargetPosition()
+void MoBanCoordinator::setTargetPosition()
 {
     // select the new posture and set the variable currentPosture as well as the reference points of all nodes within the WBAN.
     if (useMobilityPattern) {
@@ -170,7 +170,7 @@ void MoBANCoordinator::setTargetPosition()
     EV_DEBUG << "Destination: " << targetPosition << " Total Time = " << duration << endl;
 }
 
-void MoBANCoordinator::refreshDisplay() const
+void MoBanCoordinator::refreshDisplay() const
 {
     //show posture name in the graphical interface
     char dis_str[100];
@@ -187,7 +187,7 @@ void MoBANCoordinator::refreshDisplay() const
  * In any case, the next posture is selected considering the current posture and according to the final
  * Markov transition matrix.
  */
-void MoBANCoordinator::selectPosture()
+void MoBanCoordinator::selectPosture()
 {
     int postureID = 0;
 
@@ -220,7 +220,7 @@ void MoBANCoordinator::selectPosture()
  * Select a stay time duration in the specified duration range for the new posture.
  * It is called whenever a new stable posture is selected.
  */
-simtime_t MoBANCoordinator::selectDuration()
+simtime_t MoBanCoordinator::selectDuration()
 {
     return uniform(minDuration, maxDuration);
 }
@@ -230,7 +230,7 @@ simtime_t MoBANCoordinator::selectDuration()
  * It is called whenever a new mobile posture is selected.
  * It is taken into account that all nodes should be inside the area.
  */
-Coord MoBANCoordinator::selectDestination()
+Coord MoBanCoordinator::selectDestination()
 {
     Coord res;
     res = getRandomPosition();
@@ -250,7 +250,7 @@ Coord MoBANCoordinator::selectDestination()
  * It is called whenever a new stable posture is selected.
  * In the case of using a logged mobility pattern, the speed value is retrieved from the pattern.
  */
-double MoBANCoordinator::selectSpeed()
+double MoBanCoordinator::selectSpeed()
 {
     return uniform(currentPosture->getMinSpeed(), currentPosture->getMaxSpeed());
 }
@@ -258,7 +258,7 @@ double MoBANCoordinator::selectSpeed()
 /**
  * Checks if all nodes of the WBAN are inside the simulation environment with the current position.
  */
-bool MoBANCoordinator::isInsideWorld(Coord tPos)
+bool MoBanCoordinator::isInsideWorld(Coord tPos)
 {
     Coord absolutePosition;
 
@@ -274,16 +274,16 @@ bool MoBANCoordinator::isInsideWorld(Coord tPos)
 /**
  * Publishes the reference point and other information of the posture to the blackboard of the belonging nodes.
  */
-void MoBANCoordinator::publishToNodes()
+void MoBanCoordinator::publishToNodes()
 {
     for (unsigned int i = 0; i < localModules.size(); ++i) {
-        MoBANLocal *localModule = localModules[i];
+        MoBanLocal *localModule = localModules[i];
         EV_DEBUG << "Publish data for: " << localModule->getParentModule()->getFullName() << endl;
         localModule->setMoBANParameters(currentPosture->getPs(i), currentPosture->getRadius(i), currentPosture->getSpeed(i));
     }
 }
 
-void MoBANCoordinator::finish()
+void MoBanCoordinator::finish()
 {
     fclose(logfile);
 }
@@ -292,7 +292,7 @@ void MoBANCoordinator::finish()
  * This function reads the input mobility pattern file and make a list of the mobility patterns.
  * It will be called in the initialization phase if the useMobilityPattern parameter is true.
  */
-bool MoBANCoordinator::readMobilityPatternFile()
+bool MoBanCoordinator::readMobilityPatternFile()
 {
     patternLength = 0;
     double x, y, z, s;
@@ -348,7 +348,7 @@ bool MoBANCoordinator::readMobilityPatternFile()
  * and movement velocity  of all nodes in the WBAN.
  * The function will be called in the initialization phase.
  */
-bool MoBANCoordinator::readPostureSpecificationFile()
+bool MoBanCoordinator::readPostureSpecificationFile()
 {
     cXMLElement *xmlPosture = par("postureSpecFile").xmlValue();
     if (xmlPosture == nullptr)
@@ -437,7 +437,7 @@ bool MoBANCoordinator::readPostureSpecificationFile()
  * space-time correlation are required to be simulated.
  * The function will be called in the initialization phase.
  */
-bool MoBANCoordinator::readConfigurationFile()
+bool MoBanCoordinator::readConfigurationFile()
 {
     cXMLElement *xmlConfig = par("configFile").xmlValue();
     if (xmlConfig == nullptr)
@@ -713,12 +713,12 @@ bool MoBANCoordinator::readConfigurationFile()
     return true;
 }
 
-void MoBANCoordinator::collectLocalModules(cModule *module)
+void MoBanCoordinator::collectLocalModules(cModule *module)
 {
     for (cModule::SubmoduleIterator it(module); !it.end(); it++) {
         cModule *submodule = *it;
         collectLocalModules(submodule);
-        MoBANLocal *localModule = dynamic_cast<MoBANLocal *>(submodule);
+        MoBanLocal *localModule = dynamic_cast<MoBanLocal *>(submodule);
         if (localModule && localModule->par("coordinatorIndex").longValue() == getIndex()) {
             localModule->setCoordinator(this);
             localModules.push_back(localModule);
@@ -726,7 +726,7 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
     }
 }
 
-void MoBANCoordinator::computeMaxSpeed()
+void MoBanCoordinator::computeMaxSpeed()
 {
     if (useMobilityPattern)
     {

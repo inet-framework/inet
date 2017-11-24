@@ -24,14 +24,14 @@
 
 namespace inet {
 
-Define_Module(UDPSink);
+Define_Module(UdpSink);
 
-UDPSink::~UDPSink()
+UdpSink::~UdpSink()
 {
     cancelAndDelete(selfMsg);
 }
 
-void UDPSink::initialize(int stage)
+void UdpSink::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
@@ -48,7 +48,7 @@ void UDPSink::initialize(int stage)
     }
 }
 
-void UDPSink::handleMessageWhenUp(cMessage *msg)
+void UdpSink::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         ASSERT(msg == selfMsg);
@@ -78,20 +78,20 @@ void UDPSink::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void UDPSink::refreshDisplay() const
+void UdpSink::refreshDisplay() const
 {
     char buf[50];
     sprintf(buf, "rcvd: %d pks", numReceived);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void UDPSink::finish()
+void UdpSink::finish()
 {
     ApplicationBase::finish();
     EV_INFO << getFullPath() << ": received " << numReceived << " packets\n";
 }
 
-void UDPSink::setSocketOptions()
+void UdpSink::setSocketOptions()
 {
     bool receiveBroadcast = par("receiveBroadcast");
     if (receiveBroadcast)
@@ -110,7 +110,7 @@ void UDPSink::setSocketOptions()
     }
 }
 
-void UDPSink::processStart()
+void UdpSink::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
@@ -122,23 +122,23 @@ void UDPSink::processStart()
     }
 }
 
-void UDPSink::processStop()
+void UdpSink::processStop()
 {
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
     socket.close();
 }
 
-void UDPSink::processPacket(Packet *pk)
+void UdpSink::processPacket(Packet *pk)
 {
-    EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);
     delete pk;
 
     numReceived++;
 }
 
-bool UDPSink::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpSink::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
@@ -148,7 +148,7 @@ bool UDPSink::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPSink::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpSink::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     if (selfMsg)
         cancelEvent(selfMsg);
@@ -156,7 +156,7 @@ bool UDPSink::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void UDPSink::handleNodeCrash()
+void UdpSink::handleNodeCrash()
 {
     if (selfMsg)
         cancelEvent(selfMsg);

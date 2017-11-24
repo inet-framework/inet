@@ -25,18 +25,18 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMSymbol : public ISymbol
+class INET_API Ieee80211OfdmSymbol : public ISymbol
 {
   protected:
-    std::vector<const APSKSymbol *> subcarrierSymbols;
+    std::vector<const ApskSymbol *> subcarrierSymbols;
 
   public:
-    friend std::ostream& operator<<(std::ostream& out, const Ieee80211OFDMSymbol& symbol);
-    Ieee80211OFDMSymbol(const std::vector<const APSKSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
-    Ieee80211OFDMSymbol() { subcarrierSymbols.resize(53, nullptr); } // (48 + 4 + 1), but one of them is skipped.
-    const std::vector<const APSKSymbol *>& getSubCarrierSymbols() const { return subcarrierSymbols; }
+    friend std::ostream& operator<<(std::ostream& out, const Ieee80211OfdmSymbol& symbol);
+    Ieee80211OfdmSymbol(const std::vector<const ApskSymbol *>& subcarrierSymbols) : subcarrierSymbols(subcarrierSymbols) {}
+    Ieee80211OfdmSymbol() { subcarrierSymbols.resize(53, nullptr); } // (48 + 4 + 1), but one of them is skipped.
+    const std::vector<const ApskSymbol *>& getSubCarrierSymbols() const { return subcarrierSymbols; }
     int symbolSize() const { return subcarrierSymbols.size(); }
-    void pushAPSKSymbol(const APSKSymbol *apskSymbol, int subcarrierIndex);
+    void pushAPSKSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex);
     void clearSymbols() { subcarrierSymbols.resize(53, nullptr); }
 };
 } /* namespace physicallayer */

@@ -31,15 +31,15 @@ class INET_API Ieee80211HtCode : public ICode
 {
     protected:
         const IForwardErrorCorrection *forwardErrorCorrection;
-        const Ieee80211HTInterleaving *interleaving;
+        const Ieee80211HtInterleaving *interleaving;
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211HtCode(const IForwardErrorCorrection *forwardErrorCorrection, const Ieee80211HTInterleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211HtCode(const IForwardErrorCorrection *forwardErrorCorrection, const Ieee80211HtInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
         const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
         const AdditiveScrambling *getScrambling() const { return scrambling; }
-        const Ieee80211HTInterleaving *getInterleaving() const { return interleaving; }
+        const Ieee80211HtInterleaving *getInterleaving() const { return interleaving; }
 
         virtual ~Ieee80211HtCode();
 

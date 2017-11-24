@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class INET_API RTPApplication : public cSimpleModule, public ILifecycle
+class INET_API RtpApplication : public cSimpleModule, public ILifecycle
 {
   protected:
     enum SelfMsgKind {
@@ -46,7 +46,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     simtime_t sessionLeaveDelay;    // the delay after the application leaves the session
 
     // state
-    IPv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
+    Ipv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
     uint32 ssrc = 0;
     bool isActiveSession = false;
 
@@ -57,7 +57,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
-    RTPApplication() {}
+    RtpApplication() {}
 };
 
 } // namespace inet

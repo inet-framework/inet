@@ -28,13 +28,13 @@
 
 namespace inet {
 
-class ICMP;
+class Icmp;
 class Ipv4Header;
 
 /**
  * Reassembly buffer for fragmented IPv4 datagrams.
  */
-class INET_API IPv4FragBuf
+class INET_API Ipv4FragBuf
 {
   protected:
     //
@@ -43,8 +43,8 @@ class INET_API IPv4FragBuf
     struct Key
     {
         ushort id = (ushort)-1;
-        IPv4Address src;
-        IPv4Address dest;
+        Ipv4Address src;
+        Ipv4Address dest;
 
         inline bool operator<(const Key& b) const
         {
@@ -72,12 +72,12 @@ class INET_API IPv4FragBuf
     /**
      * Ctor.
      */
-    IPv4FragBuf();
+    Ipv4FragBuf();
 
     /**
      * Dtor.
      */
-    ~IPv4FragBuf();
+    ~Ipv4FragBuf();
 
     /**
      * Takes a fragment and inserts it into the reassembly buffer.
@@ -95,7 +95,7 @@ class INET_API IPv4FragBuf
      * This method should be called more frequently, maybe every
      * 10..30 seconds or so.
      */
-    void purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate);
+    void purgeStaleFragments(Icmp *icmpModule, simtime_t lastupdate);
 };
 
 } // namespace inet

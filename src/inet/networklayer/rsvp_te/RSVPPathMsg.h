@@ -26,25 +26,25 @@ namespace inet {
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPPathMsg : public RSVPPathMsg_Base
+class INET_API RsvpPathMsg : public RsvpPathMsg_Base
 {
   public:
-    RSVPPathMsg(/* const char *name = nullptr, int kind = PATH_MESSAGE */) : RSVPPathMsg_Base(/* name, kind */) {}
-    RSVPPathMsg(const RSVPPathMsg& other) : RSVPPathMsg_Base(other) {}
-    RSVPPathMsg& operator=(const RSVPPathMsg& other) { RSVPPathMsg_Base::operator=(other); return *this; }
-    virtual RSVPPathMsg *dup() const override { return new RSVPPathMsg(*this); }
+    RsvpPathMsg(/* const char *name = nullptr, int kind = PATH_MESSAGE */) : RsvpPathMsg_Base(/* name, kind */) {}
+    RsvpPathMsg(const RsvpPathMsg& other) : RsvpPathMsg_Base(other) {}
+    RsvpPathMsg& operator=(const RsvpPathMsg& other) { RsvpPathMsg_Base::operator=(other); return *this; }
+    virtual RsvpPathMsg *dup() const override { return new RsvpPathMsg(*this); }
 
-    inline IPv4Address getSrcAddress() { return getSender_descriptor().Sender_Template_Object.SrcAddress; }
+    inline Ipv4Address getSrcAddress() { return getSender_descriptor().Sender_Template_Object.SrcAddress; }
     inline int getLspId() const { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
-    inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
-    inline SenderTemplateObj_t& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
-    inline const SenderTemplateObj_t& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj_t& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
-    inline const SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj_t& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
+    inline SenderTemplateObj& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
+    inline const SenderTemplateObj& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
+    inline SenderTspecObj& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
+    inline const SenderTspecObj& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
+    inline void setSenderTspec(const SenderTspecObj& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
 };
 
 /**
@@ -53,17 +53,17 @@ class INET_API RSVPPathMsg : public RSVPPathMsg_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPPathTear : public RSVPPathTear_Base
+class INET_API RsvpPathTear : public RsvpPathTear_Base
 {
   public:
-    RSVPPathTear() : RSVPPathTear_Base() {}
-    RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other) {}
-    RSVPPathTear& operator=(const RSVPPathTear& other) { RSVPPathTear_Base::operator=(other); return *this; }
-    virtual RSVPPathTear *dup() const override { return new RSVPPathTear(*this); }
+    RsvpPathTear() : RsvpPathTear_Base() {}
+    RsvpPathTear(const RsvpPathTear& other) : RsvpPathTear_Base(other) {}
+    RsvpPathTear& operator=(const RsvpPathTear& other) { RsvpPathTear_Base::operator=(other); return *this; }
+    virtual RsvpPathTear *dup() const override { return new RsvpPathTear(*this); }
 
-    inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
-    inline IPv4Address getSrcAddress() { return getSenderTemplate().SrcAddress; }
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+    inline Ipv4Address getSrcAddress() { return getSenderTemplate().SrcAddress; }
     inline int getLspId() const { return getSenderTemplate().Lsp_Id; }
 };
 
@@ -73,24 +73,24 @@ class INET_API RSVPPathTear : public RSVPPathTear_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPPathError : public RSVPPathError_Base
+class INET_API RsvpPathError : public RsvpPathError_Base
 {
   public:
-    RSVPPathError() : RSVPPathError_Base(/* name, kind */) {}
-    RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other) {}
-    RSVPPathError& operator=(const RSVPPathError& other) { RSVPPathError_Base::operator=(other); return *this; }
-    virtual RSVPPathError *dup() const override { return new RSVPPathError(*this); }
+    RsvpPathError() : RsvpPathError_Base(/* name, kind */) {}
+    RsvpPathError(const RsvpPathError& other) : RsvpPathError_Base(other) {}
+    RsvpPathError& operator=(const RsvpPathError& other) { RsvpPathError_Base::operator=(other); return *this; }
+    virtual RsvpPathError *dup() const override { return new RsvpPathError(*this); }
 
-    inline IPv4Address getSrcAddress() { return getSender_descriptor().Sender_Template_Object.SrcAddress; }
+    inline Ipv4Address getSrcAddress() { return getSender_descriptor().Sender_Template_Object.SrcAddress; }
     inline int getLspId() { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
 
-    inline SenderTemplateObj_t& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
-    inline const SenderTemplateObj_t& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj_t& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
-    inline const SenderTspecObj_t& getSenderTspec() const { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj_t& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
+    inline SenderTemplateObj& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
+    inline const SenderTemplateObj& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
+    inline SenderTspecObj& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
+    inline const SenderTspecObj& getSenderTspec() const { return getSender_descriptor().Sender_Tspec_Object; }
+    inline void setSenderTspec(const SenderTspecObj& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
 };
 
 } // namespace inet

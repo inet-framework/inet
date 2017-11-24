@@ -66,7 +66,7 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~IPv4 and ~IPv6.
 //
-simple TCPSrvHostApp like IApp
+simple TcpSrvHostApp like IApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
@@ -75,7 +75,7 @@ simple TCPSrvHostApp like IApp
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/app");
     gates:
-        input socketIn @labels(TCPCommand/up);
-        output socketOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }
 

@@ -32,7 +32,7 @@ namespace inet {
 
 namespace physicallayer {
 
-std::ostream& Ieee80211OFDMEncoder::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMEncoder";
     if (level <= PRINT_LEVEL_TRACE)
@@ -43,7 +43,7 @@ std::ostream& Ieee80211OFDMEncoder::printToStream(std::ostream& stream, int leve
     return stream;
 }
 
-const ITransmissionBitModel *Ieee80211OFDMEncoder::encode(const ITransmissionPacketModel *packetModel) const
+const ITransmissionBitModel *Ieee80211OfdmEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
     auto length = packet->getTotalLength();
@@ -79,7 +79,7 @@ const ITransmissionBitModel *Ieee80211OFDMEncoder::encode(const ITransmissionPac
     return new TransmissionBitModel(encodedBits, forwardErrorCorrection, scrambling, interleaving);
 }
 
-Ieee80211OFDMEncoder::Ieee80211OFDMEncoder(const Ieee80211OfdmCode *code) :
+Ieee80211OfdmEncoder::Ieee80211OfdmEncoder(const Ieee80211OfdmCode *code) :
     convolutionalCoder(nullptr),
     interleaver(nullptr),
     scrambler(nullptr),
@@ -88,12 +88,12 @@ Ieee80211OFDMEncoder::Ieee80211OFDMEncoder(const Ieee80211OfdmCode *code) :
     if (code->getScrambling())
         scrambler = new AdditiveScrambler(code->getScrambling());
     if (code->getInterleaving())
-        interleaver = new Ieee80211OFDMInterleaver(code->getInterleaving());
+        interleaver = new Ieee80211OfdmInterleaver(code->getInterleaving());
     if (code->getConvolutionalCode())
         convolutionalCoder = new ConvolutionalCoder(code->getConvolutionalCode());
 }
 
-Ieee80211OFDMEncoder::~Ieee80211OFDMEncoder()
+Ieee80211OfdmEncoder::~Ieee80211OfdmEncoder()
 {
     delete convolutionalCoder;
     delete interleaver;

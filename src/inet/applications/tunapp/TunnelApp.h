@@ -35,8 +35,8 @@ protected:
     int localPort = -1;
 
     L3Socket l3Socket;
-    UDPSocket serverSocket;
-    UDPSocket clientSocket;
+    UdpSocket serverSocket;
+    UdpSocket clientSocket;
     TunSocket tunSocket;
 
 public:

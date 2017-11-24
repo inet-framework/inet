@@ -195,7 +195,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
             if (!ie)
                 throw cRuntimeError("Error in routing file: missing the `name:' entry");
-            ie->ipv4Data()->setIPAddress(IPv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
+            ie->ipv4Data()->setIPAddress(Ipv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
             continue;
         }
 
@@ -212,7 +212,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "Mask:")) {
             if (!ie)
                 throw cRuntimeError("Error in routing file: missing the `name:' entry");
-            ie->ipv4Data()->setNetmask(IPv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
+            ie->ipv4Data()->setNetmask(Ipv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
             continue;
         }
 
@@ -297,7 +297,7 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;
     while ((token = tokenizer.nextToken()) != nullptr)
-        itf->ipv4Data()->joinMulticastGroup(IPv4Address(token));
+        itf->ipv4Data()->joinMulticastGroup(Ipv4Address(token));
 }
 
 void RoutingTableParser::parseRouting(char *routeFile)
@@ -310,35 +310,35 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // 1st entry: Host
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
-        IPv4Route *e = new IPv4Route();
+        Ipv4Route *e = new Ipv4Route();
         if (strcmp(str, "default:")) {
             // if entry is not the default entry
-            if (!IPv4Address::isWellFormed(str))
+            if (!Ipv4Address::isWellFormed(str))
                 throw cRuntimeError("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IPv4 address", str);
 
-            e->setDestination(IPv4Address(str));
+            e->setDestination(Ipv4Address(str));
         }
 
         // 2nd entry: Gateway
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
         if (!strcmp(str, "*") || !strcmp(str, "0.0.0.0")) {
-            e->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
+            e->setGateway(Ipv4Address::UNSPECIFIED_ADDRESS);
         }
         else {
-            if (!IPv4Address::isWellFormed(str))
+            if (!Ipv4Address::isWellFormed(str))
                 throw cRuntimeError("Syntax error in routing file: `%s' on 2nd column should be `*' or a valid IPv4 address", str);
 
-            e->setGateway(IPv4Address(str));
+            e->setGateway(Ipv4Address(str));
         }
 
         // 3rd entry: Netmask
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
-        if (!IPv4Address::isWellFormed(str))
+        if (!Ipv4Address::isWellFormed(str))
             throw cRuntimeError("Syntax error in routing file: `%s' on 3rd column should be a valid IPv4 address", str);
 
-        e->setNetmask(IPv4Address(str));
+        e->setNetmask(Ipv4Address(str));
 
         // 4th entry: flags
         pos += strcpyword(str, routeFile + pos);

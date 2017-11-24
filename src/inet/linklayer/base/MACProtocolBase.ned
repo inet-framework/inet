@@ -22,7 +22,7 @@ import inet.common.LayeredProtocolBase;
 //
 // Module base for different MAC protocols.
 //
-simple MACProtocolBase extends LayeredProtocolBase
+simple MacProtocolBase extends LayeredProtocolBase
 {
     parameters:
         string interfaceTableModule;

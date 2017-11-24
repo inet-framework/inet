@@ -27,14 +27,14 @@
 
 namespace inet {
 
-class ICMPv6;
+class Icmpv6;
 class Ipv6Header;
 class Ipv6FragmentHeader;
 
 /**
  * Reassembly buffer for fragmented IPv6 datagrams.
  */
-class INET_API IPv6FragBuf
+class INET_API Ipv6FragBuf
 {
   protected:
     //
@@ -43,8 +43,8 @@ class INET_API IPv6FragBuf
     struct Key
     {
         uint32 id;
-        IPv6Address src;
-        IPv6Address dest;
+        Ipv6Address src;
+        Ipv6Address dest;
 
         inline bool operator<(const Key& b) const
         {
@@ -69,24 +69,24 @@ class INET_API IPv6FragBuf
     Buffers bufs;
 
     // needed for TIME_EXCEEDED errors
-    ICMPv6 *icmpModule = nullptr;
+    Icmpv6 *icmpModule = nullptr;
 
   public:
     /**
      * Ctor.
      */
-    IPv6FragBuf();
+    Ipv6FragBuf();
 
     /**
      * Dtor.
      */
-    ~IPv6FragBuf();
+    ~Ipv6FragBuf();
 
     /**
      * Initialize fragmentation buffer. ICMP module is needed for sending
      * TIME_EXCEEDED ICMP message in purgeStaleFragments().
      */
-    void init(ICMPv6 *icmp);
+    void init(Icmpv6 *icmp);
 
     /**
      * Takes a fragment and inserts it into the reassembly buffer.

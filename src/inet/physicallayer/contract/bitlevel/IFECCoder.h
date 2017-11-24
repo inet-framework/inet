@@ -34,7 +34,7 @@ class INET_API IForwardErrorCorrection : public IPrintableObject
     virtual double computeNetBitErrorRate(double grossBitErrorRate) const = 0;
 };
 
-class INET_API IFECCoder : public IPrintableObject
+class INET_API IFecCoder : public IPrintableObject
 {
   public:
     virtual BitVector encode(const BitVector& informationBits) const = 0;

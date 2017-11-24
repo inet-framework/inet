@@ -26,7 +26,7 @@ namespace ieee80211 {
 /**
  * Implements the ARF and AARF rate control algorithms.
  */
-class INET_API AARFRateControl : public RateControlBase
+class INET_API AarfRateControl : public RateControlBase
 {
     protected:
         simtime_t timer = SIMTIME_ZERO;

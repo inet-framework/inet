@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 //
 // Consumes and prints packets received from the ~UDP module.
 //
-simple UDPSink like IApp
+simple UdpSink like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -43,7 +43,7 @@ simple UDPSink like IApp
         @statistic[rcvdPkSeqNo](title="received packet sequence number"; source="appPkSeqNo(rcvdPk)"; record=vector; interpolationmode=none);
 
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 

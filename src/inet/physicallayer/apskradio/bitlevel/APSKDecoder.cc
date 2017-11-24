@@ -23,9 +23,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKDecoder);
+Define_Module(ApskDecoder);
 
-APSKDecoder::APSKDecoder() :
+ApskDecoder::ApskDecoder() :
     code(nullptr),
     descrambler(nullptr),
     fecDecoder(nullptr),
@@ -33,27 +33,27 @@ APSKDecoder::APSKDecoder() :
 {
 }
 
-APSKDecoder::~APSKDecoder()
+ApskDecoder::~ApskDecoder()
 {
     delete code;
 }
 
-void APSKDecoder::initialize(int stage)
+void ApskDecoder::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         descrambler = dynamic_cast<const IScrambler *>(getSubmodule("descrambler"));
-        fecDecoder = dynamic_cast<const IFECCoder *>(getSubmodule("fecDecoder"));
+        fecDecoder = dynamic_cast<const IFecCoder *>(getSubmodule("fecDecoder"));
         deinterleaver = dynamic_cast<const IInterleaver *>(getSubmodule("deinterleaver"));
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const IScrambling *scrambling = descrambler != nullptr ? descrambler->getScrambling() : nullptr;
         const ConvolutionalCode *forwardErrorCorrection = fecDecoder != nullptr ? check_and_cast<const ConvolutionalCode *>(fecDecoder->getForwardErrorCorrection()) : nullptr;
         const IInterleaving *interleaving = deinterleaver != nullptr ? deinterleaver->getInterleaving() : nullptr;
-        code = new APSKCode(forwardErrorCorrection, interleaving, scrambling);
+        code = new ApskCode(forwardErrorCorrection, interleaving, scrambling);
     }
 }
 
-std::ostream& APSKDecoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKDecoder";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -65,7 +65,7 @@ std::ostream& APSKDecoder::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
-const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitModel) const
+const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitModel) const
 {
     bool hasBitError = false;
     BitVector *decodedBits = new BitVector(*bitModel->getBits());

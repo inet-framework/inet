@@ -38,10 +38,10 @@ namespace physicallayer {
  * using the mandatory mode (high PRF).
  */
 // This class was created by porting some C++ code from the IEEE802154A class in MiXiM.
-class INET_API Ieee802154UWBIRTransmitter : public TransmitterBase
+class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
 {
   protected:
-    Ieee802154UWBIRMode cfg;
+    Ieee802154UwbIrMode cfg;
 
   protected:
     virtual void initialize(int stage) override;
@@ -60,7 +60,7 @@ class INET_API Ieee802154UWBIRTransmitter : public TransmitterBase
     virtual ConstMapping *generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
 
   public:
-    Ieee802154UWBIRTransmitter();
+    Ieee802154UwbIrTransmitter();
 
     virtual const ITransmission *createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const override;
 

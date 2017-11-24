@@ -35,9 +35,9 @@
 
 namespace inet {
 
-Define_Module(ICMP);
+Define_Module(Icmp);
 
-void ICMP::initialize(int stage)
+void Icmp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -55,7 +55,7 @@ void ICMP::initialize(int stage)
     }
 }
 
-void ICMP::handleMessage(cMessage *msg)
+void Icmp::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->getArrivalGate();
 
@@ -69,13 +69,13 @@ void ICMP::handleMessage(cMessage *msg)
         throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
-void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code)
+void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
-    IPv4Address origSrcAddr = ipv4Header->getSrcAddress();
-    IPv4Address origDestAddr = ipv4Header->getDestAddress();
+    Ipv4Address origSrcAddr = ipv4Header->getSrcAddress();
+    Ipv4Address origDestAddr = ipv4Header->getDestAddress();
 
     // don't send ICMP error messages in response to broadcast or multicast messages
     if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId)) {
@@ -137,7 +137,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the IPv4 layer
-        errorPacket->ensureTag<L3AddressInd>()->setDestAddress(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorPacket->ensureTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPMessage(errorPacket);
@@ -148,12 +148,12 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     delete packet;
 }
 
-bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
+bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
 {
     if ((addr.getInt() & 1) == 0)
         return false;
 
-    IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+    IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
     if (rt->isLocalBroadcastAddress(addr))
         return true;
 
@@ -175,7 +175,7 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
     }
 }
 
-void ICMP::processICMPMessage(Packet *packet)
+void Icmp::processICMPMessage(Packet *packet)
 {
     if (!verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
@@ -237,22 +237,22 @@ void ICMP::processICMPMessage(Packet *packet)
     }
 }
 
-void ICMP::errorOut(Packet *packet)
+void Icmp::errorOut(Packet *packet)
 {
     delete packet;
 }
 
-void ICMP::processEchoRequest(Packet *request)
+void Icmp::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    const auto& icmpReq = request->popHeader<ICMPEchoRequest>();
+    const auto& icmpReq = request->popHeader<IcmpEchoRequest>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
-    const auto& icmpReply = makeShared<ICMPEchoReply>();
+    const auto& icmpReply = makeShared<IcmpEchoReply>();
     icmpReply->setIdentifier(icmpReq->getIdentifier());
     icmpReply->setSeqNumber(icmpReq->getSeqNumber());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
-    IPv4Address src = addressInd->getSrcAddress().toIPv4();
-    IPv4Address dest = addressInd->getDestAddress().toIPv4();
+    Ipv4Address src = addressInd->getSrcAddress().toIPv4();
+    Ipv4Address dest = addressInd->getDestAddress().toIPv4();
     reply->append(request->peekData());
     insertCrc(icmpReply, reply);
     reply->insertHeader(icmpReply);
@@ -268,13 +268,13 @@ void ICMP::processEchoRequest(Packet *request)
     delete request;
 }
 
-void ICMP::sendToIP(Packet *msg, const IPv4Address& dest)
+void Icmp::sendToIP(Packet *msg, const Ipv4Address& dest)
 {
     msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     sendToIP(msg);
 }
 
-void ICMP::sendToIP(Packet *msg)
+void Icmp::sendToIP(Packet *msg)
 {
     // assumes IPv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
@@ -283,7 +283,7 @@ void ICMP::sendToIP(Packet *msg)
     send(msg, "ipOut");
 }
 
-void ICMP::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", gate->getBaseName())) {
@@ -291,7 +291,7 @@ void ICMP::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
     }
 }
 
-void ICMP::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
+void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)
 {
     icmpHeader->setCrcMode(crcMode);
     switch (crcMode) {
@@ -316,7 +316,7 @@ void ICMP::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
             auto buffer = new uint8_t[bufferLength];
             std::copy(icmpHeaderBytes.begin(), icmpHeaderBytes.end(), buffer);
             std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
-            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
             delete [] buffer;
             icmpHeader->setChksum(crc);
             break;
@@ -326,7 +326,7 @@ void ICMP::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
     }
 }
 
-bool ICMP::verifyCrc(const Packet *packet)
+bool Icmp::verifyCrc(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekHeader<IcmpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     switch (icmpHeader->getCrcMode()) {
@@ -342,7 +342,7 @@ bool ICMP::verifyCrc(const Packet *packet)
             size_t bufferLength = B(dataBytes->getChunkLength()).get();
             auto buffer = new uint8_t[bufferLength];
             dataBytes->copyToBuffer(buffer, bufferLength);
-            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
             delete [] buffer;
             // TODO: delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();

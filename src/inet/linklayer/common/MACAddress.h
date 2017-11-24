@@ -27,13 +27,13 @@ namespace inet {
 #define MAC_ADDRESS_SIZE    6
 #define MAC_ADDRESS_MASK    0xffffffffffffULL
 
-class IPv4Address;
+class Ipv4Address;
 class InterfaceToken;
 
 /**
  * Stores an IEEE 802 MAC address (6 octets = 48 bits).
  */
-class INET_API MACAddress
+class INET_API MacAddress
 {
   private:
     uint64 address;    // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
@@ -54,42 +54,42 @@ class INET_API MACAddress
     };
 
     /** The unspecified MAC address, 00:00:00:00:00:00 */
-    static const MACAddress UNSPECIFIED_ADDRESS;
+    static const MacAddress UNSPECIFIED_ADDRESS;
 
     /** The broadcast MAC address, ff:ff:ff:ff:ff:ff */
-    static const MACAddress BROADCAST_ADDRESS;
+    static const MacAddress BROADCAST_ADDRESS;
 
     /** The special multicast PAUSE MAC address, 01:80:C2:00:00:01 */
-    static const MACAddress MULTICAST_PAUSE_ADDRESS;
+    static const MacAddress MULTICAST_PAUSE_ADDRESS;
 
     /** The spanning tree protocol bridge's multicast address, 01:80:C2:00:00:00 */
-    static const MACAddress STP_MULTICAST_ADDRESS;
+    static const MacAddress STP_MULTICAST_ADDRESS;
 
     /**
      * Default constructor initializes address bytes to zero.
      */
-    MACAddress() { address = 0; }
+    MacAddress() { address = 0; }
 
     /**
      * Initializes the address from the lower 48 bits of the 64-bit argument
      */
-    explicit MACAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
+    explicit MacAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
 
     /**
      * Constructor which accepts a hex string (12 hex digits, may also
      * contain spaces, hyphens and colons)
      */
-    explicit MACAddress(const char *hexstr) { setAddress(hexstr); }
+    explicit MacAddress(const char *hexstr) { setAddress(hexstr); }
 
     /**
      * Copy constructor.
      */
-    MACAddress(const MACAddress& other) { address = other.address; }
+    MacAddress(const MacAddress& other) { address = other.address; }
 
     /**
      * Assignment.
      */
-    MACAddress& operator=(const MACAddress& other) { address = other.address; return *this; }
+    MacAddress& operator=(const MacAddress& other) { address = other.address; return *this; }
 
     /**
      * Returns the address size in bytes, that is, 6.
@@ -163,22 +163,22 @@ class INET_API MACAddress
     /**
      * Returns true if the two addresses are equal.
      */
-    bool equals(const MACAddress& other) const { return address == other.address; }
+    bool equals(const MacAddress& other) const { return address == other.address; }
 
     /**
      * Returns true if the two addresses are equal.
      */
-    bool operator==(const MACAddress& other) const { return address == other.address; }
+    bool operator==(const MacAddress& other) const { return address == other.address; }
 
     /**
      * Returns true if the two addresses are not equal.
      */
-    bool operator!=(const MACAddress& other) const { return address != other.address; }
+    bool operator!=(const MacAddress& other) const { return address != other.address; }
 
     /**
      * Returns -1, 0 or 1 as result of comparison of 2 addresses.
      */
-    int compareTo(const MACAddress& other) const;
+    int compareTo(const MacAddress& other) const;
 
     /**
      * Create interface identifier (IEEE EUI-64) which can be used by IPv6
@@ -190,19 +190,19 @@ class INET_API MACAddress
      * Generates a unique address which begins with 0a:aa and ends in a unique
      * suffix.
      */
-    static MACAddress generateAutoAddress();
+    static MacAddress generateAutoAddress();
 
     /**
      * Form a MAC address for a multicast IPv4 address, see  RFC 1112, section 6.4
      */
-    static MACAddress makeMulticastAddress(IPv4Address addr);
+    static MacAddress makeMulticastAddress(Ipv4Address addr);
 
-    bool operator<(const MACAddress& other) const { return address < other.address; }
+    bool operator<(const MacAddress& other) const { return address < other.address; }
 
-    bool operator>(const MACAddress& other) const { return address > other.address; }
+    bool operator>(const MacAddress& other) const { return address > other.address; }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
+inline std::ostream& operator<<(std::ostream& os, const MacAddress& mac)
 {
     return os << mac.str();
 }

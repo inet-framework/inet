@@ -24,7 +24,7 @@ void NonQoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211Dat
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = (lastSeqNum + 1) % 4096;
-    const MACAddress& address = header->getReceiverAddress();
+    const MacAddress& address = header->getReceiverAddress();
     auto it = lastSentSeqNums.find(address);
     if (it == lastSentSeqNums.end())
         lastSentSeqNums[address] = lastSeqNum;

@@ -68,7 +68,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         const IReception *reception;
         const IInterference *interference;
         const INoise *noise;
-        const ISNIR *snir;
+        const ISnir *snir;
         std::vector<const IReceptionDecision *> receptionDecisions;
         const IReceptionResult *receptionResult;
 
@@ -161,8 +161,8 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) override;
     virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) override;
+    virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir) override;
     virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
 
     virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) override;

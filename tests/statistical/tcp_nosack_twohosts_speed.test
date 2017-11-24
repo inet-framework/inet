@@ -1,7 +1,7 @@
 %description:
 Testing TCP communication speed
     TCP
-    TCP_NSC
+    TcpNsc
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 %#--------------------------------------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 channel C extends DatarateChannel
@@ -76,7 +76,7 @@ network TcpSpeedTest
             parameters:
                 srvTcpType = "TCP_lwIP";
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=70,40");
         }
 }

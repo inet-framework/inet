@@ -1,5 +1,5 @@
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.idealradio.IdealRadioMedium;
 
@@ -18,7 +18,7 @@ network NetIdealRadios
             parameters:
                 @display("p=60,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
             @display("p=140,50");
         }

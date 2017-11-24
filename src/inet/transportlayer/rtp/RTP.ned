@@ -47,7 +47,7 @@ package inet.transportlayer.rtp;
 //         Értesíti az App-ot, hogy véget lett a session-nek és törölte az ~RTPProfile-t.
 //         params: ---
 
-simple RTP
+simple Rtp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -59,11 +59,11 @@ simple RTP
 
     gates:
         input appIn @labels(RTPInterfacePacket/down);
-        input profileIn @labels(RTPInnerPacket);
-        input rtcpIn @labels(RTPInnerPacket);
-        input udpIn @labels(UDPControlInfo/up);
+        input profileIn @labels(RtpInnerPacket);
+        input rtcpIn @labels(RtpInnerPacket);
+        input udpIn @labels(UdpControlInfo/up);
         output appOut @labels(RTPInterfacePacket/up);
-        output profileOut @labels(RTPInnerPacket);
-        output rtcpOut @labels(RTPInnerPacket);
-        output udpOut @labels(UDPControlInfo/down);
+        output profileOut @labels(RtpInnerPacket);
+        output rtcpOut @labels(RtpInnerPacket);
+        output udpOut @labels(UdpControlInfo/down);
 }

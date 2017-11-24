@@ -19,7 +19,7 @@
 
 package inet.linklayer.ideal;
 
-import inet.linklayer.base.MACProtocolBase;
+import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 
 
@@ -34,7 +34,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple IdealMac extends MACProtocolBase like ILinkLayer
+simple IdealMac extends MacProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or

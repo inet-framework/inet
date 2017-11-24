@@ -30,33 +30,33 @@ namespace rtp {
  * The class RTPSenderInfo is used by an RTP end system for storing information
  * about itself. With the stored information it can create a SenderReport.
  */
-class INET_API RTPSenderInfo : public RTPParticipantInfo
+class INET_API RtpSenderInfo : public RtpParticipantInfo
 {
   public:
     /**
      * Default constructor.
      */
-    RTPSenderInfo(uint32 ssrc = 0);
+    RtpSenderInfo(uint32 ssrc = 0);
 
     /**
      * Copy constructor.
      */
-    RTPSenderInfo(const RTPSenderInfo& senderInfo);
+    RtpSenderInfo(const RtpSenderInfo& senderInfo);
 
     /**
      * Destructor.
      */
-    virtual ~RTPSenderInfo();
+    virtual ~RtpSenderInfo();
 
     /**
      * Assignment operator.
      */
-    RTPSenderInfo& operator=(const RTPSenderInfo& senderInfo);
+    RtpSenderInfo& operator=(const RtpSenderInfo& senderInfo);
 
     /**
      * Duplicates this RTPSenderInfo by calling the copy constructor.
      */
-    virtual RTPSenderInfo *dup() const override;
+    virtual RtpSenderInfo *dup() const override;
 
     /**
      * Stores information about this outgoing RTPPacket.
@@ -98,7 +98,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
     virtual void setSequenceNumberBase(uint16 sequenceNumberBase);
 
   private:
-    void copy(const RTPSenderInfo& other);
+    void copy(const RtpSenderInfo& other);
 
   protected:
     /**

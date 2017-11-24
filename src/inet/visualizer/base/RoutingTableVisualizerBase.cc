@@ -26,7 +26,7 @@ namespace inet {
 
 namespace visualizer {
 
-RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const Ipv4Route *route, int nodeModuleId, int nextHopModuleId) :
     ModuleLine(nodeModuleId, nextHopModuleId),
     route(route)
 {
@@ -129,7 +129,7 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
 {
     Enter_Method_Silent();
     if (signal == NF_ROUTE_ADDED || signal == NF_ROUTE_DELETED || signal == NF_ROUTE_CHANGED) {
-        auto routingTable = check_and_cast<IIPv4RoutingTable *>(source);
+        auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode))
             updateRouteVisualizations(routingTable);
@@ -140,7 +140,7 @@ void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t s
         throw cRuntimeError("Unknown signal");
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(IPv4Route *route, int nodeModuleId, int nextHopModuleId)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase::getRouteVisualization(Ipv4Route *route, int nodeModuleId, int nextHopModuleId)
 {
     auto key = std::make_tuple(route, nodeModuleId, nextHopModuleId);
     auto it = routeVisualizations.find(key);
@@ -159,10 +159,10 @@ void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualizati
     routeVisualizations.erase(routeVisualizations.find(key));
 }
 
-std::vector<IPv4Address> RoutingTableVisualizerBase::getDestinations()
+std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
 {
     L3AddressResolver addressResolver;
-    std::vector<IPv4Address> destinations;
+    std::vector<Ipv4Address> destinations;
     for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && destinationFilter.matches(networkNode)) {
@@ -180,7 +180,7 @@ std::vector<IPv4Address> RoutingTableVisualizerBase::getDestinations()
     return destinations;
 }
 
-void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::addRouteVisualizations(IIpv4RoutingTable *routingTable)
 {
     L3AddressResolver addressResolver;
     auto node = getContainingNode(check_and_cast<cModule *>(routingTable));
@@ -204,7 +204,7 @@ void RoutingTableVisualizerBase::addRouteVisualizations(IIPv4RoutingTable *routi
     }
 }
 
-void RoutingTableVisualizerBase::removeRouteVisualizations(IIPv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::removeRouteVisualizations(IIpv4RoutingTable *routingTable)
 {
     auto networkNode = getContainingNode(check_and_cast<cModule *>(routingTable));
     std::vector<const RouteVisualization *> removedRouteVisualizations;
@@ -228,7 +228,7 @@ void RoutingTableVisualizerBase::removeAllRouteVisualizations()
     }
 }
 
-void RoutingTableVisualizerBase::updateRouteVisualizations(IIPv4RoutingTable *routingTable)
+void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *routingTable)
 {
     removeRouteVisualizations(routingTable);
     addRouteVisualizations(routingTable);
@@ -248,7 +248,7 @@ void RoutingTableVisualizerBase::updateAllRouteVisualizations()
     }
 }
 
-std::string RoutingTableVisualizerBase::getRouteVisualizationText(const IPv4Route *route) const
+std::string RoutingTableVisualizerBase::getRouteVisualizationText(const Ipv4Route *route) const
 {
     DirectiveResolver directiveResolver(route);
     return labelFormat.formatString(&directiveResolver);

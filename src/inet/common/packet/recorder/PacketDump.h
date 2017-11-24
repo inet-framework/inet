@@ -31,7 +31,7 @@ class Ipv4Header;
 class Ipv6Header;
 namespace tcp { class TcpHeader; }
 class UdpHeader;
-class ARPPacket;
+class ArpPacket;
 namespace sctp { class SCTPMessage; }
 
 /**
@@ -95,7 +95,7 @@ class INET_API PacketDump
      */
     void dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const char *comment = nullptr);
 
-    void dumpARP(bool l2r, const char *label, const Ptr<const ARPPacket>& arp, const char *comment = nullptr);
+    void dumpARP(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment = nullptr);
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6

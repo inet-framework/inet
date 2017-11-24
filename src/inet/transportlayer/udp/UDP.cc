@@ -217,13 +217,13 @@ void UDP::processCommandFromApp(cMessage *msg)
     int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
     switch (msg->getKind()) {
         case UDP_C_BIND: {
-            UDPBindCommand *ctrl = check_and_cast<UDPBindCommand *>(msg->getControlInfo());
+            UdpBindCommand *ctrl = check_and_cast<UdpBindCommand *>(msg->getControlInfo());
             bind(socketId, msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
             break;
         }
 
         case UDP_C_CONNECT: {
-            UDPConnectCommand *ctrl = check_and_cast<UDPConnectCommand *>(msg->getControlInfo());
+            UdpConnectCommand *ctrl = check_and_cast<UdpConnectCommand *>(msg->getControlInfo());
             connect(socketId, msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
             break;
         }
@@ -238,22 +238,22 @@ void UDP::processCommandFromApp(cMessage *msg)
             return;     // prevent delete of msg
 
         case UDP_C_SETOPTION: {
-            UDPSetOptionCommand *ctrl = check_and_cast<UDPSetOptionCommand *>(msg->getControlInfo());
+            UdpSetOptionCommand *ctrl = check_and_cast<UdpSetOptionCommand *>(msg->getControlInfo());
             SockDesc *sd = getOrCreateSocket(socketId);
 
-            if (auto cmd = dynamic_cast<UDPSetTimeToLiveCommand *>(ctrl))
+            if (auto cmd = dynamic_cast<UdpSetTimeToLiveCommand *>(ctrl))
                 setTimeToLive(sd, cmd->getTtl());
-            else if (auto cmd = dynamic_cast<UDPSetTypeOfServiceCommand *>(ctrl))
+            else if (auto cmd = dynamic_cast<UdpSetTypeOfServiceCommand *>(ctrl))
                 setTypeOfService(sd, cmd->getTos());
-            else if (auto cmd = dynamic_cast<UDPSetBroadcastCommand *>(ctrl))
+            else if (auto cmd = dynamic_cast<UdpSetBroadcastCommand *>(ctrl))
                 setBroadcast(sd, cmd->getBroadcast());
-            else if (auto cmd = dynamic_cast<UDPSetMulticastInterfaceCommand *>(ctrl))
+            else if (auto cmd = dynamic_cast<UdpSetMulticastInterfaceCommand *>(ctrl))
                 setMulticastOutputInterface(sd, cmd->getInterfaceId());
-            else if (auto cmd = dynamic_cast<UDPSetMulticastLoopCommand *>(ctrl))
+            else if (auto cmd = dynamic_cast<UdpSetMulticastLoopCommand *>(ctrl))
                 setMulticastLoop(sd, cmd->getLoop());
-            else if (auto cmd = dynamic_cast<UDPSetReuseAddressCommand *>(ctrl))
+            else if (auto cmd = dynamic_cast<UdpSetReuseAddressCommand *>(ctrl))
                 setReuseAddress(sd, cmd->getReuseAddress());
-            else if (auto cmd = dynamic_cast<UDPJoinMulticastGroupsCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpJoinMulticastGroupsCommand *>(ctrl)) {
                 std::vector<L3Address> addresses;
                 std::vector<int> interfaceIds;
                 for (unsigned int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
@@ -262,46 +262,46 @@ void UDP::processCommandFromApp(cMessage *msg)
                     interfaceIds.push_back(cmd->getInterfaceId(i));
                 joinMulticastGroups(sd, addresses, interfaceIds);
             }
-            else if (auto cmd = dynamic_cast<UDPLeaveMulticastGroupsCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpLeaveMulticastGroupsCommand *>(ctrl)) {
                 std::vector<L3Address> addresses;
                 for (unsigned int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
                     addresses.push_back(cmd->getMulticastAddr(i));
                 leaveMulticastGroups(sd, addresses);
             }
-            else if (auto cmd = dynamic_cast<UDPBlockMulticastSourcesCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpBlockMulticastSourcesCommand *>(ctrl)) {
                 InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
                 for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
                 blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
-            else if (auto cmd = dynamic_cast<UDPUnblockMulticastSourcesCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpUnblockMulticastSourcesCommand *>(ctrl)) {
                 InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
                 for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
                 leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
-            else if (auto cmd = dynamic_cast<UDPJoinMulticastSourcesCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpJoinMulticastSourcesCommand *>(ctrl)) {
                 InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
                 for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
                 joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
-            else if (auto cmd = dynamic_cast<UDPLeaveMulticastSourcesCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpLeaveMulticastSourcesCommand *>(ctrl)) {
                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
                 leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
             }
-            else if (auto cmd = dynamic_cast<UDPSetMulticastSourceFilterCommand *>(ctrl)) {
+            else if (auto cmd = dynamic_cast<UdpSetMulticastSourceFilterCommand *>(ctrl)) {
                 InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<L3Address> sourceList;
                 for (unsigned int i = 0; i < cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
-                setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), (UDPSourceFilterMode)cmd->getFilterMode(), sourceList);
+                setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), (UdpSourceFilterMode)cmd->getFilterMode(), sourceList);
             }
             else
                 throw cRuntimeError("Unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
@@ -466,7 +466,7 @@ void UDP::processICMPv4Error(Packet *packet)
     // extract details from the error message, then try to notify socket that sent bogus packet
 
     if (!icmp)
-        icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
+        icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
         delete packet;
@@ -517,7 +517,7 @@ void UDP::processICMPv6Error(Packet *packet)
 {
 #ifdef WITH_IPv6
     if (!icmpv6)
-        icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
+        icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
         delete packet;
@@ -598,7 +598,7 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
     if (protocol->getId() == Protocol::ipv4.getId()) {
 #ifdef WITH_IPv4
         if (!icmp)
-            icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
+            icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
 #else // ifdef WITH_IPv4
         delete udpPacket;
@@ -607,7 +607,7 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
     else if (protocol->getId() == Protocol::ipv6.getId()) {
 #ifdef WITH_IPv6
         if (!icmpv6)
-            icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
+            icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else // ifdef WITH_IPv6
         delete udpPacket;
@@ -836,7 +836,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
 void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
-    UDPErrorIndication *udpCtrl = new UDPErrorIndication();
+    UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     notifyMsg->setControlInfo(udpCtrl);
     //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
@@ -1126,7 +1126,7 @@ void UDP::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address mult
         sd->deleteMulticastMembership(membership);
 }
 
-void UDP::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
+void UDP::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddress.isMulticast());
@@ -1365,7 +1365,7 @@ uint16_t UDP::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     std::copy(udpHeaderBytes.begin(), udpHeaderBytes.end(), (uint8_t *)buffer + pseudoHeaderLength);
     std::copy(udpDataBytes.begin(), udpDataBytes.end(), (uint8_t *)buffer + pseudoHeaderLength + udpHeaderLength);
     // 2. compute the CRC
-    uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
     delete [] buffer;
     // Excerpt from RFC 768:
     // If the computed  checksum  is zero,  it is transmitted  as all ones (the

@@ -197,7 +197,7 @@ ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
     SequenceNumber startingSequenceNumber = agreement->getStartingSequenceNumber();
     int bufferSize = agreement->getBufferSize();
     Tid tid = agreement->getBlockAckRecord()->getTid();
-    MACAddress originatorAddr = agreement->getBlockAckRecord()->getOriginatorAddress();
+    MacAddress originatorAddr = agreement->getBlockAckRecord()->getOriginatorAddress();
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it == receiveBuffers.end()) {
@@ -212,7 +212,7 @@ ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
 void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
     Tid tid = delba->getTid();
-    MACAddress originatorAddr = delba->getTransmitterAddress();
+    MacAddress originatorAddr = delba->getTransmitterAddress();
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {

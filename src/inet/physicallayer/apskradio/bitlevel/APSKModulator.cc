@@ -25,20 +25,20 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKModulator);
+Define_Module(ApskModulator);
 
-APSKModulator::APSKModulator() :
+ApskModulator::ApskModulator() :
     modulation(nullptr)
 {
 }
 
-void APSKModulator::initialize(int stage)
+void ApskModulator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        modulation = APSKModulationBase::findModulation(par("modulation"));
+        modulation = ApskModulationBase::findModulation(par("modulation"));
 }
 
-std::ostream& APSKModulator::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskModulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKModulator";
     if (level <= PRINT_LEVEL_TRACE)
@@ -46,7 +46,7 @@ std::ostream& APSKModulator::printToStream(std::ostream& stream, int level) cons
     return stream;
 }
 
-const ITransmissionSymbolModel *APSKModulator::modulate(const ITransmissionBitModel *bitModel) const
+const ITransmissionSymbolModel *ApskModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     const BitVector *bits = bitModel->getBits();
     unsigned int codeWordSize = modulation->getCodeWordSize();

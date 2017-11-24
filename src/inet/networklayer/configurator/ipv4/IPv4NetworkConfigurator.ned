@@ -408,10 +408,10 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //        Mandatory parameter attribute that specifies the cost. Valid values are
 //        "infinite" and numbers.
 //
-simple IPv4NetworkConfigurator extends NetworkConfiguratorBase
+simple Ipv4NetworkConfigurator extends NetworkConfiguratorBase
 {
     parameters:
-        @class(IPv4NetworkConfigurator);
+        @class(Ipv4NetworkConfigurator);
         @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")); // XML configuration parameters for IP address assignment and adding manual routes
         bool assignAddresses = default(true); // assign IP addresses to all interfaces in the network

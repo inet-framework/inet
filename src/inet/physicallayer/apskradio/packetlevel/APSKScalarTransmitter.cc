@@ -26,22 +26,22 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKScalarTransmitter);
+Define_Module(ApskScalarTransmitter);
 
-APSKScalarTransmitter::APSKScalarTransmitter() :
+ApskScalarTransmitter::ApskScalarTransmitter() :
     FlatTransmitterBase()
 {
 }
 
-std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskScalarTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKScalarTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto phyHeader = packet->peekHeader<APSKPhyHeader>();
+    auto phyHeader = packet->peekHeader<ApskPhyHeader>();
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);

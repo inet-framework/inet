@@ -54,9 +54,9 @@ IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
 %#
 %postrun-command: grep "IGMPTester: .*Received" test.out > received.out || true
 %contains-regex: received.out
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_IN 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_IN 10.0.0.1>.
 .*
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_EX 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_EX 10.0.0.2>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

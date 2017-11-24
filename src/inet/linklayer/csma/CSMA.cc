@@ -43,11 +43,11 @@ namespace inet {
 
 using namespace physicallayer;
 
-Define_Module(CSMA);
+Define_Module(Csma);
 
-void CSMA::initialize(int stage)
+void Csma::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useMACAcks = par("useMACAcks").boolValue();
         queueLength = par("queueLength");
@@ -136,7 +136,7 @@ void CSMA::initialize(int stage)
     }
 }
 
-void CSMA::finish()
+void Csma::finish()
 {
     recordScalar("nbTxFrames", nbTxFrames);
     recordScalar("nbRxFrames", nbRxFrames);
@@ -155,7 +155,7 @@ void CSMA::finish()
     recordScalar("backoffDurations", backoffValues);
 }
 
-CSMA::~CSMA()
+Csma::~Csma()
 {
     cancelAndDelete(backoffTimer);
     cancelAndDelete(ccaTimer);
@@ -168,13 +168,13 @@ CSMA::~CSMA()
     }
 }
 
-void CSMA::initializeMACAddress()
+void Csma::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -184,7 +184,7 @@ void CSMA::initializeMACAddress()
     }
 }
 
-InterfaceEntry *CSMA::createInterfaceEntry()
+InterfaceEntry *Csma::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -207,13 +207,13 @@ InterfaceEntry *CSMA::createInterfaceEntry()
  * Encapsulates the message to be transmitted and pass it on
  * to the FSM main method for further processing.
  */
-void CSMA::handleUpperPacket(Packet *packet)
+void Csma::handleUpperPacket(Packet *packet)
 {
     //MacPkt*macPkt = encapsMsg(msg);
-    auto macPkt = makeShared<CSMAHeader>();
+    auto macPkt = makeShared<CsmaHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
-    MACAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MacAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << dest << endl;
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
@@ -242,7 +242,7 @@ void CSMA::handleUpperPacket(Packet *packet)
     executeMac(EV_SEND_REQUEST, packet);
 }
 
-void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
+void Csma::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
@@ -304,7 +304,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg)
+void Csma::updateStatusBackoff(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_TIMER_BACKOFF:
@@ -370,24 +370,24 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::flushQueue()
+void Csma::flushQueue()
 {
     // TODO:
     macQueue.clear();
 }
 
-void CSMA::clearQueue()
+void Csma::clearQueue()
 {
     macQueue.clear();
 }
 
-void CSMA::attachSignal(Packet *mac, simtime_t_cref startTime)
+void Csma::attachSignal(Packet *mac, simtime_t_cref startTime)
 {
     simtime_t duration = mac->getBitLength() / bitrate;
     mac->setDuration(duration);
 }
 
-void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
+void Csma::updateStatusCCA(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_TIMER_CCA: {
@@ -490,12 +490,12 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
+void Csma::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
     if (event == EV_FRAME_TRANSMITTED) {
         //    delete msg;
         Packet *packet = macQueue.front();
-        const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
+        const auto& csmaHeader = packet->peekHeader<CsmaHeader>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
@@ -529,7 +529,7 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
+void Csma::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 {
     assert(useMACAcks);
 
@@ -570,7 +570,7 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
+void Csma::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
 {
     if (txAttempts < macMaxFrameRetries) {
         // increment counter
@@ -595,7 +595,7 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
     manageQueue();
 }
 
-void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
+void Csma::updateStatusSIFS(t_mac_event event, cMessage *msg)
 {
     assert(useMACAcks);
 
@@ -632,7 +632,7 @@ void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
+void Csma::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 {
     assert(useMACAcks);
 
@@ -648,7 +648,7 @@ void CSMA::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::updateStatusNotIdle(cMessage *msg)
+void Csma::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
     if (macQueue.size() <= queueLength) {
@@ -672,7 +672,7 @@ void CSMA::updateStatusNotIdle(cMessage *msg)
 /**
  * Updates state machine.
  */
-void CSMA::executeMac(t_mac_event event, cMessage *msg)
+void Csma::executeMac(t_mac_event event, cMessage *msg)
 {
     EV_DETAIL << "In executeMac" << endl;
     if (macState != IDLE_1 && event == EV_SEND_REQUEST) {
@@ -715,7 +715,7 @@ void CSMA::executeMac(t_mac_event event, cMessage *msg)
     }
 }
 
-void CSMA::manageQueue()
+void Csma::manageQueue()
 {
     if (macQueue.size() != 0) {
         EV_DETAIL << "(manageQueue) there are " << macQueue.size() << " packets to send, entering backoff wait state." << endl;
@@ -741,7 +741,7 @@ void CSMA::manageQueue()
     }
 }
 
-void CSMA::updateMacState(t_mac_states newMacState)
+void Csma::updateMacState(t_mac_states newMacState)
 {
     macState = newMacState;
 }
@@ -749,14 +749,14 @@ void CSMA::updateMacState(t_mac_states newMacState)
 /*
  * Called by the FSM machine when an unknown transition is requested.
  */
-void CSMA::fsmError(t_mac_event event, cMessage *msg)
+void Csma::fsmError(t_mac_event event, cMessage *msg)
 {
     EV << "FSM Error ! In state " << macState << ", received unknown event:" << event << "." << endl;
     if (msg != nullptr)
         delete msg;
 }
 
-void CSMA::startTimer(t_mac_timer timer)
+void Csma::startTimer(t_mac_timer timer)
 {
     if (timer == TIMER_BACKOFF) {
         scheduleAt(scheduleBackoff(), backoffTimer);
@@ -783,7 +783,7 @@ void CSMA::startTimer(t_mac_timer timer)
     }
 }
 
-simtime_t CSMA::scheduleBackoff()
+simtime_t Csma::scheduleBackoff()
 {
     simtime_t backoffTime;
 
@@ -828,7 +828,7 @@ simtime_t CSMA::scheduleBackoff()
 /*
  * Binds timers to events and executes FSM.
  */
-void CSMA::handleSelfMessage(cMessage *msg)
+void Csma::handleSelfMessage(cMessage *msg)
 {
     EV_DETAIL << "timer routine." << endl;
     if (msg == backoffTimer)
@@ -849,7 +849,7 @@ void CSMA::handleSelfMessage(cMessage *msg)
  * Compares the address of this Host with the destination address in
  * frame. Generates the corresponding event.
  */
-void CSMA::handleLowerPacket(Packet *packet)
+void Csma::handleLowerPacket(Packet *packet)
 {
     if (packet->hasBitError()) {
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
@@ -859,9 +859,9 @@ void CSMA::handleLowerPacket(Packet *packet)
         delete packet;
         return;
     }
-    const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
-    const MACAddress& src = csmaHeader->getSrcAddr();
-    const MACAddress& dest = csmaHeader->getDestAddr();
+    const auto& csmaHeader = packet->peekHeader<CsmaHeader>();
+    const MacAddress& src = csmaHeader->getSrcAddr();
+    const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
 
     EV_DETAIL << "Received frame name= " << csmaHeader->getName()
@@ -890,7 +890,7 @@ void CSMA::handleLowerPacket(Packet *packet)
 
                 if (ackMessage != nullptr)
                     delete ackMessage;
-                auto csmaHeader = makeShared<CSMAHeader>();
+                auto csmaHeader = makeShared<CsmaHeader>();
                 csmaHeader->setSrcAddr(address);
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));
@@ -923,7 +923,7 @@ void CSMA::handleLowerPacket(Packet *packet)
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
                 Packet *firstPacket = static_cast<Packet *>(macQueue.front());
-                const auto& csmaHeader = firstPacket->peekHeader<CSMAHeader>();
+                const auto& csmaHeader = firstPacket->peekHeader<CsmaHeader>();
                 if (src == csmaHeader->getDestAddr()) {
                     nbRecvdAcks++;
                     executeMac(EV_ACK_RECEIVED, packet);
@@ -951,7 +951,7 @@ void CSMA::handleLowerPacket(Packet *packet)
     }
 }
 
-void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Csma::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {
@@ -964,9 +964,9 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
     }
 }
 
-void CSMA::decapsulate(Packet *packet)
+void Csma::decapsulate(Packet *packet)
 {
-    const auto& csmaHeader = packet->popHeader<CSMAHeader>();
+    const auto& csmaHeader = packet->popHeader<CsmaHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());

@@ -28,19 +28,19 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(Icmpv6Header, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6EchoRequestMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6EchoReplyMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6DestUnreachableMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6PacketTooBigMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6ParamProblemMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Icmpv6TimeExceededMsg, ICMPv6HeaderSerializer);
-Register_Serializer(Ipv6NeighbourSolicitation, ICMPv6HeaderSerializer);
-Register_Serializer(IPv6NeighbourAdvertisement, ICMPv6HeaderSerializer);
-Register_Serializer(IPv6RouterSolicitation, ICMPv6HeaderSerializer);
-Register_Serializer(IPv6RouterAdvertisement, ICMPv6HeaderSerializer);
+Register_Serializer(Icmpv6Header, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6EchoRequestMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6EchoReplyMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6DestUnreachableMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6PacketTooBigMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6ParamProblemMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Icmpv6TimeExceededMsg, Icmpv6HeaderSerializer);
+Register_Serializer(Ipv6NeighbourSolicitation, Icmpv6HeaderSerializer);
+Register_Serializer(Ipv6NeighbourAdvertisement, Icmpv6HeaderSerializer);
+Register_Serializer(Ipv6RouterSolicitation, Icmpv6HeaderSerializer);
+Register_Serializer(Ipv6RouterAdvertisement, Icmpv6HeaderSerializer);
 
-void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& pkt = staticPtrCast<const Icmpv6Header>(chunk);
 
@@ -107,7 +107,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
         }
 
         case ICMPv6_ROUTER_SOL: {
-            auto frame = check_and_cast<const IPv6RouterSolicitation *>(pkt.get());
+            auto frame = check_and_cast<const Ipv6RouterSolicitation *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
@@ -118,7 +118,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
         }
 
         case ICMPv6_ROUTER_AD: {
-            auto frame = check_and_cast<const IPv6RouterAdvertisement *>(pkt.get());
+            auto frame = check_and_cast<const Ipv6RouterAdvertisement *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
@@ -132,10 +132,10 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto icmpv6Header = makeShared<Icmpv6Header>();
-    ICMPv6Type type = (ICMPv6Type)stream.readByte();     // type
+    Icmpv6Type type = (Icmpv6Type)stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
     uint16_t chksum = stream.readUint16Be();
 
@@ -157,7 +157,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         case ICMPv6_DESTINATION_UNREACHABLE: {
             auto destUnreach = makeShared<Icmpv6DestUnreachableMsg>(); icmpv6Header = destUnreach;
             destUnreach->setType(type);
-            destUnreach->setCode((ICMPv6DEST_UN)subcode);
+            destUnreach->setCode((Icmpv6DestUn)subcode);
             stream.readUint32Be();        // unused
             break;
         }
@@ -165,7 +165,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         case ICMPv6_TIME_EXCEEDED: {
             auto timeExceeded = makeShared<Icmpv6TimeExceededMsg>(); icmpv6Header = timeExceeded;
             timeExceeded->setType(type);
-            timeExceeded->setCode((ICMPv6_TIME_EX)subcode);
+            timeExceeded->setCode((Icmpv6TimeEx)subcode);
             stream.readUint32Be();        // unused
             break;
         }
@@ -194,7 +194,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         }
 
         case ICMPv6_NEIGHBOUR_AD: {
-            auto neighbourAd = makeShared<IPv6NeighbourAdvertisement>(); icmpv6Header = neighbourAd;
+            auto neighbourAd = makeShared<Ipv6NeighbourAdvertisement>(); icmpv6Header = neighbourAd;
             neighbourAd->setType(type);
             neighbourAd->setCode(subcode);
             stream.readUint32Be(); // reserved
@@ -204,7 +204,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         }
 
         case ICMPv6_ROUTER_SOL: {
-            auto routerSol = makeShared<IPv6RouterSolicitation>(); icmpv6Header = routerSol;
+            auto routerSol = makeShared<Ipv6RouterSolicitation>(); icmpv6Header = routerSol;
             routerSol->setType(type);
             routerSol->setCode(subcode);
             stream.readUint32Be(); // reserved
@@ -214,7 +214,7 @@ const Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         }
 
         case ICMPv6_ROUTER_AD: {
-            auto routerAd = makeShared<IPv6RouterAdvertisement>(); icmpv6Header = routerAd;
+            auto routerAd = makeShared<Ipv6RouterAdvertisement>(); icmpv6Header = routerAd;
             routerAd->setType(type);
             routerAd->setCode(subcode);
             stream.readUint32Be(); // reserved

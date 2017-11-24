@@ -36,9 +36,9 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(Ipv6Header, IPv6HeaderSerializer);
+Register_Serializer(Ipv6Header, Ipv6HeaderSerializer);
 
-void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ipv6Header = staticPtrCast<const Ipv6Header>(chunk);
     unsigned int i;
@@ -123,7 +123,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
     stream.readBytes(buffer, B(IPv6_HEADER_BYTES));
@@ -134,10 +134,10 @@ const Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
     flowinfo >>= 20;
     dest->setTrafficClass(flowinfo & 0xFF);
 
-    dest->setProtocolId((IPProtocolId)ip6h.ip6_nxt);
+    dest->setProtocolId((IpProtocolId)ip6h.ip6_nxt);
     dest->setHopLimit(ntohs(ip6h.ip6_hlim));
 
-    IPv6Address temp;
+    Ipv6Address temp;
     temp.set(ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[0]),
              ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[1]),
              ntohl(ip6h.ip6_src.__u6_addr.__u6_addr32[2]),

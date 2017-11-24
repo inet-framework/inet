@@ -26,26 +26,26 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKScalarReceiver);
+Define_Module(ApskScalarReceiver);
 
-APSKScalarReceiver::APSKScalarReceiver() :
+ApskScalarReceiver::ApskScalarReceiver() :
     FlatReceiverBase()
 {
 }
 
-std::ostream& APSKScalarReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskScalarReceiver::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKScalarReceiver";
     return FlatReceiverBase::printToStream(stream, level);
 }
 
-bool APSKScalarReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
+bool ApskScalarReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
     auto apskTransmission = dynamic_cast<const APSKScalarTransmission *>(transmission);
     return apskTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
-bool APSKScalarReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+bool ApskScalarReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     auto apksTransmission = dynamic_cast<const APSKScalarTransmission *>(reception->getTransmission());
     return apksTransmission && FlatReceiverBase::computeIsReceptionPossible(listening, reception, part);

@@ -22,7 +22,7 @@
 
 namespace inet {
 
-TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
+TcpSocket *TcpSocketMap::findSocketFor(cMessage *msg)
 {
     int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     auto i = socketMap.find(connId);
@@ -30,13 +30,13 @@ TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
     return (i == socketMap.end()) ? nullptr : i->second;
 }
 
-void TCPSocketMap::addSocket(TCPSocket *socket)
+void TcpSocketMap::addSocket(TcpSocket *socket)
 {
     ASSERT(socketMap.find(socket->getConnectionId()) == socketMap.end());
     socketMap[socket->getConnectionId()] = socket;
 }
 
-TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
+TcpSocket *TcpSocketMap::removeSocket(TcpSocket *socket)
 {
     auto i = socketMap.find(socket->getConnectionId());
     if (i != socketMap.end())
@@ -44,7 +44,7 @@ TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
     return socket;
 }
 
-void TCPSocketMap::deleteSockets()
+void TcpSocketMap::deleteSockets()
 {
     for (auto & elem : socketMap)
         delete elem.second;

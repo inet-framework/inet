@@ -23,7 +23,7 @@ namespace inet {
 
 namespace ospf {
 
-Area::Area(IInterfaceTable *ift, AreaID id) :
+Area::Area(IInterfaceTable *ift, AreaId id) :
     ift(ift),
     areaID(id),
     transitCapability(false),
@@ -64,14 +64,14 @@ void Area::addInterface(Interface *intf)
     associatedInterfaces.push_back(intf);
 }
 
-void Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
+void Area::addAddressRange(Ipv4AddressRange addressRange, bool advertise)
 {
     int addressRangeNum = areaAddressRanges.size();
     bool found = false;
     bool erased = false;
 
     for (int i = 0; i < addressRangeNum; i++) {
-        IPv4AddressRange curRange = areaAddressRanges[i];
+        Ipv4AddressRange curRange = areaAddressRanges[i];
         if (curRange.contains(addressRange)) {    // contains or same
             found = true;
             if (advertiseAddressRanges[curRange] != advertise) {
@@ -157,7 +157,7 @@ std::string Area::detailedInfo() const
     return out.str();
 }
 
-bool Area::containsAddress(IPv4Address address) const
+bool Area::containsAddress(Ipv4Address address) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
@@ -168,7 +168,7 @@ bool Area::containsAddress(IPv4Address address) const
     return false;
 }
 
-bool Area::hasAddressRange(IPv4AddressRange addressRange) const
+bool Area::hasAddressRange(Ipv4AddressRange addressRange) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
@@ -179,13 +179,13 @@ bool Area::hasAddressRange(IPv4AddressRange addressRange) const
     return false;
 }
 
-IPv4AddressRange Area::getContainingAddressRange(IPv4AddressRange addressRange, bool *advertise    /*= nullptr*/) const
+Ipv4AddressRange Area::getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise    /*= nullptr*/) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
         if (areaAddressRanges[i].contains(addressRange)) {
             if (advertise != nullptr) {
-                std::map<IPv4AddressRange, bool>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
+                std::map<Ipv4AddressRange, bool>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
                 if (rangeIt != advertiseAddressRanges.end()) {
                     *advertise = rangeIt->second;
                 }
@@ -215,7 +215,7 @@ Interface *Area::getInterface(unsigned char ifIndex)
     return nullptr;
 }
 
-Interface *Area::getInterface(IPv4Address address)
+Interface *Area::getInterface(Ipv4Address address)
 {
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
@@ -228,7 +228,7 @@ Interface *Area::getInterface(IPv4Address address)
     return nullptr;
 }
 
-bool Area::hasVirtualLink(AreaID withTransitArea) const
+bool Area::hasVirtualLink(AreaId withTransitArea) const
 {
     if ((areaID != BACKBONE_AREAID) || (withTransitArea == BACKBONE_AREAID)) {
         return false;
@@ -245,7 +245,7 @@ bool Area::hasVirtualLink(AreaID withTransitArea) const
     return false;
 }
 
-Interface *Area::findVirtualLink(RouterID routerID)
+Interface *Area::findVirtualLink(RouterId routerID)
 {
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
@@ -258,12 +258,12 @@ Interface *Area::findVirtualLink(RouterID routerID)
     return nullptr;
 }
 
-bool Area::installRouterLSA(const OSPFRouterLSA *lsa)
+bool Area::installRouterLSA(const OspfRouterLsa *lsa)
 {
-    LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
+    LinkStateId linkStateID = lsa->getHeader().getLinkStateID();
     auto lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
-        LSAKeyType lsaKey;
+        LsaKeyType lsaKey;
 
         lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
         lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -272,19 +272,19 @@ bool Area::installRouterLSA(const OSPFRouterLSA *lsa)
         return lsaIt->second->update(lsa);
     }
     else {
-        RouterLSA *lsaCopy = new RouterLSA(*lsa);
+        RouterLsa *lsaCopy = new RouterLsa(*lsa);
         routerLSAsByID[linkStateID] = lsaCopy;
         routerLSAs.push_back(lsaCopy);
         return true;
     }
 }
 
-bool Area::installNetworkLSA(const OSPFNetworkLSA *lsa)
+bool Area::installNetworkLSA(const OspfNetworkLsa *lsa)
 {
-    LinkStateID linkStateID = lsa->getHeader().getLinkStateID();
+    LinkStateId linkStateID = lsa->getHeader().getLinkStateID();
     auto lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
-        LSAKeyType lsaKey;
+        LsaKeyType lsaKey;
 
         lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
         lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -293,23 +293,23 @@ bool Area::installNetworkLSA(const OSPFNetworkLSA *lsa)
         return lsaIt->second->update(lsa);
     }
     else {
-        NetworkLSA *lsaCopy = new NetworkLSA(*lsa);
+        NetworkLsa *lsaCopy = new NetworkLsa(*lsa);
         networkLSAsByID[linkStateID] = lsaCopy;
         networkLSAs.push_back(lsaCopy);
         return true;
     }
 }
 
-bool Area::installSummaryLSA(const OSPFSummaryLSA *lsa)
+bool Area::installSummaryLSA(const OspfSummaryLsa *lsa)
 {
-    LSAKeyType lsaKey;
+    LsaKeyType lsaKey;
 
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
 
     auto lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
-        LSAKeyType lsaKey;
+        LsaKeyType lsaKey;
 
         lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
         lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -318,14 +318,14 @@ bool Area::installSummaryLSA(const OSPFSummaryLSA *lsa)
         return lsaIt->second->update(lsa);
     }
     else {
-        SummaryLSA *lsaCopy = new SummaryLSA(*lsa);
+        SummaryLsa *lsaCopy = new SummaryLsa(*lsa);
         summaryLSAsByID[lsaKey] = lsaCopy;
         summaryLSAs.push_back(lsaCopy);
         return true;
     }
 }
 
-RouterLSA *Area::findRouterLSA(LinkStateID linkStateID)
+RouterLsa *Area::findRouterLSA(LinkStateId linkStateID)
 {
     auto lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
@@ -336,9 +336,9 @@ RouterLSA *Area::findRouterLSA(LinkStateID linkStateID)
     }
 }
 
-const RouterLSA *Area::findRouterLSA(LinkStateID linkStateID) const
+const RouterLsa *Area::findRouterLSA(LinkStateId linkStateID) const
 {
-    std::map<LinkStateID, RouterLSA *>::const_iterator lsaIt = routerLSAsByID.find(linkStateID);
+    std::map<LinkStateId, RouterLsa *>::const_iterator lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -347,7 +347,7 @@ const RouterLSA *Area::findRouterLSA(LinkStateID linkStateID) const
     }
 }
 
-NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID)
+NetworkLsa *Area::findNetworkLSA(LinkStateId linkStateID)
 {
     auto lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
@@ -358,9 +358,9 @@ NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID)
     }
 }
 
-const NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID) const
+const NetworkLsa *Area::findNetworkLSA(LinkStateId linkStateID) const
 {
-    std::map<LinkStateID, NetworkLSA *>::const_iterator lsaIt = networkLSAsByID.find(linkStateID);
+    std::map<LinkStateId, NetworkLsa *>::const_iterator lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -369,7 +369,7 @@ const NetworkLSA *Area::findNetworkLSA(LinkStateID linkStateID) const
     }
 }
 
-SummaryLSA *Area::findSummaryLSA(LSAKeyType lsaKey)
+SummaryLsa *Area::findSummaryLSA(LsaKeyType lsaKey)
 {
     auto lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
@@ -380,9 +380,9 @@ SummaryLSA *Area::findSummaryLSA(LSAKeyType lsaKey)
     }
 }
 
-const SummaryLSA *Area::findSummaryLSA(LSAKeyType lsaKey) const
+const SummaryLsa *Area::findSummaryLSA(LsaKeyType lsaKey) const
 {
-    std::map<LSAKeyType, SummaryLSA *, LSAKeyType_Less>::const_iterator lsaIt = summaryLSAsByID.find(lsaKey);
+    std::map<LsaKeyType, SummaryLsa *, LsaKeyType_Less>::const_iterator lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -398,7 +398,7 @@ void Area::ageDatabase()
     long i;
 
     for (i = 0; i < lsaCount; i++) {
-        RouterLSA *lsa = routerLSAs[i];
+        RouterLsa *lsa = routerLSAs[i];
         unsigned short lsAge = lsa->getHeader().getLsAge();
         bool selfOriginated = (lsa->getHeader().getAdvertisingRouter() == parentRouter->getRouterID());
         bool unreachable = parentRouter->isDestinationUnreachable(lsa);
@@ -426,7 +426,7 @@ void Area::ageDatabase()
                     lsa->incrementInstallTime();
                 }
                 else {
-                    RouterLSA *newLSA = originateRouterLSA();
+                    RouterLsa *newLSA = originateRouterLSA();
 
                     newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
@@ -442,7 +442,7 @@ void Area::ageDatabase()
             lsa->incrementInstallTime();
         }
         if (lsAge == MAX_AGE) {
-            LSAKeyType lsaKey;
+            LsaKeyType lsaKey;
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -457,7 +457,7 @@ void Area::ageDatabase()
                     shouldRebuildRoutingTable = true;
                 }
                 else {
-                    RouterLSA *newLSA = originateRouterLSA();
+                    RouterLsa *newLSA = originateRouterLSA();
                     long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                     newLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
@@ -484,7 +484,7 @@ void Area::ageDatabase()
     for (i = 0; i < lsaCount; i++) {
         unsigned short lsAge = networkLSAs[i]->getHeader().getLsAge();
         bool unreachable = parentRouter->isDestinationUnreachable(networkLSAs[i]);
-        NetworkLSA *lsa = networkLSAs[i];
+        NetworkLsa *lsa = networkLSAs[i];
         Interface *localIntf = getInterface(lsa->getHeader().getLinkStateID());
         bool selfOriginated = false;
 
@@ -519,7 +519,7 @@ void Area::ageDatabase()
                     lsa->incrementInstallTime();
                 }
                 else {
-                    NetworkLSA *newLSA = originateNetworkLSA(localIntf);
+                    NetworkLsa *newLSA = originateNetworkLSA(localIntf);
 
                     if (newLSA != nullptr) {
                         newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
@@ -541,7 +541,7 @@ void Area::ageDatabase()
             lsa->incrementInstallTime();
         }
         if (lsAge == MAX_AGE) {
-            LSAKeyType lsaKey;
+            LsaKeyType lsaKey;
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -556,7 +556,7 @@ void Area::ageDatabase()
                     shouldRebuildRoutingTable = true;
                 }
                 else {
-                    NetworkLSA *newLSA = originateNetworkLSA(localIntf);
+                    NetworkLsa *newLSA = originateNetworkLSA(localIntf);
                     long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                     if (newLSA != nullptr) {
@@ -589,7 +589,7 @@ void Area::ageDatabase()
         unsigned short lsAge = summaryLSAs[i]->getHeader().getLsAge();
         bool selfOriginated = (summaryLSAs[i]->getHeader().getAdvertisingRouter() == parentRouter->getRouterID());
         bool unreachable = parentRouter->isDestinationUnreachable(summaryLSAs[i]);
-        SummaryLSA *lsa = summaryLSAs[i];
+        SummaryLsa *lsa = summaryLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
             lsa->getMutableHeader().setLsAge(lsAge + 1);
@@ -614,7 +614,7 @@ void Area::ageDatabase()
                     lsa->incrementInstallTime();
                 }
                 else {
-                    SummaryLSA *newLSA = originateSummaryLSA(lsa);
+                    SummaryLsa *newLSA = originateSummaryLSA(lsa);
 
                     if (newLSA != nullptr) {
                         newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
@@ -637,7 +637,7 @@ void Area::ageDatabase()
             lsa->incrementInstallTime();
         }
         if (lsAge == MAX_AGE) {
-            LSAKeyType lsaKey;
+            LsaKeyType lsaKey;
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
@@ -652,7 +652,7 @@ void Area::ageDatabase()
                     shouldRebuildRoutingTable = true;
                 }
                 else {
-                    SummaryLSA *newLSA = originateSummaryLSA(lsa);
+                    SummaryLsa *newLSA = originateSummaryLSA(lsa);
                     if (newLSA != nullptr) {
                         long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
@@ -704,7 +704,7 @@ bool Area::hasAnyNeighborInStates(int states) const
     return false;
 }
 
-void Area::removeFromAllRetransmissionLists(LSAKeyType lsaKey)
+void Area::removeFromAllRetransmissionLists(LsaKeyType lsaKey)
 {
     long interfaceCount = associatedInterfaces.size();
     for (long i = 0; i < interfaceCount; i++) {
@@ -712,7 +712,7 @@ void Area::removeFromAllRetransmissionLists(LSAKeyType lsaKey)
     }
 }
 
-bool Area::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
+bool Area::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 {
     long interfaceCount = associatedInterfaces.size();
     for (long i = 0; i < interfaceCount; i++) {
@@ -723,7 +723,7 @@ bool Area::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
     return false;
 }
 
-bool Area::floodLSA(const OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
+bool Area::floodLSA(const OspfLsa *lsa, Interface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
     long interfaceCount = associatedInterfaces.size();
@@ -737,7 +737,7 @@ bool Area::floodLSA(const OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
     return floodedBackOut;
 }
 
-bool Area::isLocalAddress(IPv4Address address) const
+bool Area::isLocalAddress(Ipv4Address address) const
 {
     long interfaceCount = associatedInterfaces.size();
     for (long i = 0; i < interfaceCount; i++) {
@@ -748,21 +748,21 @@ bool Area::isLocalAddress(IPv4Address address) const
     return false;
 }
 
-RouterLSA *Area::originateRouterLSA()
+RouterLsa *Area::originateRouterLSA()
 {
-    RouterLSA *routerLSA = new RouterLSA;
-    OSPFLSAHeader& lsaHeader = routerLSA->getMutableHeader();
+    RouterLsa *routerLSA = new RouterLsa;
+    OspfLsaHeader& lsaHeader = routerLSA->getMutableHeader();
     long interfaceCount = associatedInterfaces.size();
-    OSPFOptions lsOptions;
+    OspfOptions lsOptions;
     long i;
 
     lsaHeader.setLsAge(0);
-    memset(&lsOptions, 0, sizeof(OSPFOptions));
+    memset(&lsOptions, 0, sizeof(OspfOptions));
     lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
     lsaHeader.setLsOptions(lsOptions);
     lsaHeader.setLsType(ROUTERLSA_TYPE);
     lsaHeader.setLinkStateID(parentRouter->getRouterID());
-    lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+    lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
     routerLSA->setB_AreaBorderRouter(parentRouter->getAreaCount() > 1);
@@ -803,7 +803,7 @@ RouterLSA *Area::originateRouterLSA()
                         if (neighbor->getState() == Neighbor::FULL_STATE) {
                             Link link;
                             link.setType(POINTTOPOINT_LINK);
-                            link.setLinkID(IPv4Address(neighbor->getNeighborID()));
+                            link.setLinkID(Ipv4Address(neighbor->getNeighborID()));
                             if (intf->getAddressRange().address != NULL_IPV4ADDRESS) {
                                 link.setLinkData(intf->getAddressRange().address.getInt());
                             }
@@ -916,7 +916,7 @@ RouterLSA *Area::originateRouterLSA()
                     if ((neighbor != nullptr) && (neighbor->getState() == Neighbor::FULL_STATE)) {
                         Link link;
                         link.setType(VIRTUAL_LINK);
-                        link.setLinkID(IPv4Address(neighbor->getNeighborID()));
+                        link.setLinkID(Ipv4Address(neighbor->getNeighborID()));
                         link.setLinkData(intf->getAddressRange().address.getInt());
                         link.setLinkCost(intf->getOutputCost());
                         link.setNumberOfTOS(0);
@@ -950,7 +950,7 @@ RouterLSA *Area::originateRouterLSA()
                         if (neighbor->getState() == Neighbor::FULL_STATE) {
                             Link link;
                             link.setType(POINTTOPOINT_LINK);
-                            link.setLinkID(IPv4Address(neighbor->getNeighborID()));
+                            link.setLinkID(Ipv4Address(neighbor->getNeighborID()));
                             link.setLinkData(intf->getAddressRange().address.getInt());
                             link.setLinkCost(intf->getOutputCost());
                             link.setNumberOfTOS(0);
@@ -987,26 +987,26 @@ RouterLSA *Area::originateRouterLSA()
         routerLSA->setLinks(linkIndex, stubLink);
     }
 
-    routerLSA->setSource(LSATrackingInfo::ORIGINATED);
+    routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
     return routerLSA;
 }
 
-NetworkLSA *Area::originateNetworkLSA(const Interface *intf)
+NetworkLsa *Area::originateNetworkLSA(const Interface *intf)
 {
     if (intf->hasAnyNeighborInStates(Neighbor::FULL_STATE)) {
-        NetworkLSA *networkLSA = new NetworkLSA;
-        OSPFLSAHeader& lsaHeader = networkLSA->getMutableHeader();
+        NetworkLsa *networkLSA = new NetworkLsa;
+        OspfLsaHeader& lsaHeader = networkLSA->getMutableHeader();
         long neighborCount = intf->getNeighborCount();
-        OSPFOptions lsOptions;
+        OspfOptions lsOptions;
 
         lsaHeader.setLsAge(0);
-        memset(&lsOptions, 0, sizeof(OSPFOptions));
+        memset(&lsOptions, 0, sizeof(OspfOptions));
         lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
         lsaHeader.setLsOptions(lsOptions);
         lsaHeader.setLsType(NETWORKLSA_TYPE);
         lsaHeader.setLinkStateID(intf->getAddressRange().address);
-        lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+        lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
         networkLSA->setNetworkMask(intf->getAddressRange().mask);
@@ -1016,12 +1016,12 @@ NetworkLSA *Area::originateNetworkLSA(const Interface *intf)
             if (neighbor->getState() == Neighbor::FULL_STATE) {
                 unsigned short netIndex = networkLSA->getAttachedRoutersArraySize();
                 networkLSA->setAttachedRoutersArraySize(netIndex + 1);
-                networkLSA->setAttachedRouters(netIndex, IPv4Address(neighbor->getNeighborID()));
+                networkLSA->setAttachedRouters(netIndex, Ipv4Address(neighbor->getNeighborID()));
             }
         }
         unsigned short netIndex = networkLSA->getAttachedRoutersArraySize();
         networkLSA->setAttachedRoutersArraySize(netIndex + 1);
-        networkLSA->setAttachedRouters(netIndex, IPv4Address(parentRouter->getRouterID()));
+        networkLSA->setAttachedRouters(netIndex, Ipv4Address(parentRouter->getRouterID()));
 
         return networkLSA;
     }
@@ -1051,27 +1051,27 @@ NetworkLSA *Area::originateNetworkLSA(const Interface *intf)
  * destination address and the router's own routerID) and the resulting Summary LSA's
  * link state ID should be changed to the one returned by this function.
  */
-LinkStateID Area::getUniqueLinkStateID(IPv4AddressRange destination,
+LinkStateId Area::getUniqueLinkStateID(Ipv4AddressRange destination,
         Metric destinationCost,
-        SummaryLSA *& lsaToReoriginate) const
+        SummaryLsa *& lsaToReoriginate) const
 {
     if (lsaToReoriginate != nullptr) {
         delete lsaToReoriginate;
         lsaToReoriginate = nullptr;
     }
 
-    LSAKeyType lsaKey;
+    LsaKeyType lsaKey;
 
     lsaKey.linkStateID = destination.address;
     lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-    const SummaryLSA *foundLSA = findSummaryLSA(lsaKey);
+    const SummaryLsa *foundLSA = findSummaryLSA(lsaKey);
 
     if (foundLSA == nullptr) {
         return lsaKey.linkStateID;
     }
     else {
-        IPv4Address existingMask = foundLSA->getNetworkMask();
+        Ipv4Address existingMask = foundLSA->getNetworkMask();
 
         if (destination.mask == existingMask) {
             return lsaKey.linkStateID;
@@ -1081,7 +1081,7 @@ LinkStateID Area::getUniqueLinkStateID(IPv4AddressRange destination,
                 return lsaKey.linkStateID.makeBroadcastAddress(destination.mask);
             }
             else {
-                SummaryLSA *summaryLSA = new SummaryLSA(*foundLSA);
+                SummaryLsa *summaryLSA = new SummaryLsa(*foundLSA);
 
                 long sequenceNumber = summaryLSA->getHeader().getLsSequenceNumber();
 
@@ -1098,9 +1098,9 @@ LinkStateID Area::getUniqueLinkStateID(IPv4AddressRange destination,
     }
 }
 
-SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
-        const std::map<LSAKeyType, bool, LSAKeyType_Less>& originatedLSAs,
-        SummaryLSA *& lsaToReoriginate)
+SummaryLsa *Area::originateSummaryLSA(const RoutingTableEntry *entry,
+        const std::map<LsaKeyType, bool, LsaKeyType_Less>& originatedLSAs,
+        SummaryLsa *& lsaToReoriginate)
 {
     if (((entry->getDestinationType() & RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
         (entry->getPathType() == RoutingTableEntry::TYPE1_EXTERNAL) ||
@@ -1127,39 +1127,39 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
     if ((entry->getDestinationType() & RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
         RoutingTableEntry *preferredEntry = parentRouter->getPreferredEntry(*(entry->getLinkStateOrigin()), false);
         if ((preferredEntry != nullptr) && (*preferredEntry == *entry) && (externalRoutingCapability)) {
-            SummaryLSA *summaryLSA = new SummaryLSA;
-            OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
-            OSPFOptions lsOptions;
+            SummaryLsa *summaryLSA = new SummaryLsa;
+            OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
+            OspfOptions lsOptions;
 
             lsaHeader.setLsAge(0);
-            memset(&lsOptions, 0, sizeof(OSPFOptions));
+            memset(&lsOptions, 0, sizeof(OspfOptions));
             lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
             lsaHeader.setLsOptions(lsOptions);
             lsaHeader.setLsType(SUMMARYLSA_ASBOUNDARYROUTERS_TYPE);
             lsaHeader.setLinkStateID(entry->getDestination());
-            lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+            lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
             lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
             summaryLSA->setNetworkMask(entry->getNetmask());
             summaryLSA->setRouteCost(entry->getCost());
             summaryLSA->setTosDataArraySize(0);
 
-            summaryLSA->setSource(LSATrackingInfo::ORIGINATED);
+            summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
             return summaryLSA;
         }
     }
     else {    // entry->getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION
         if (entry->getPathType() == RoutingTableEntry::INTERAREA) {
-            IPv4AddressRange destinationRange;
+            Ipv4AddressRange destinationRange;
 
             destinationRange.address = entry->getDestination();
             destinationRange.mask = entry->getNetmask();
 
-            LinkStateID newLinkStateID = getUniqueLinkStateID(destinationRange, entry->getCost(), lsaToReoriginate);
+            LinkStateId newLinkStateID = getUniqueLinkStateID(destinationRange, entry->getCost(), lsaToReoriginate);
 
             if (lsaToReoriginate != nullptr) {
-                LSAKeyType lsaKey;
+                LsaKeyType lsaKey;
 
                 lsaKey.linkStateID = entry->getDestination();
                 lsaKey.advertisingRouter = parentRouter->getRouterID();
@@ -1171,8 +1171,8 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                     return nullptr;
                 }
                 else {
-                    SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                    OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
+                    SummaryLsa *summaryLSA = new SummaryLsa(*(lsaIt->second));
+                    OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                     lsaHeader.setLsAge(0);
                     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1182,44 +1182,44 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                 }
             }
             else {
-                SummaryLSA *summaryLSA = new SummaryLSA;
-                OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
-                OSPFOptions lsOptions;
+                SummaryLsa *summaryLSA = new SummaryLsa;
+                OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
+                OspfOptions lsOptions;
 
                 lsaHeader.setLsAge(0);
-                memset(&lsOptions, 0, sizeof(OSPFOptions));
+                memset(&lsOptions, 0, sizeof(OspfOptions));
                 lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                 lsaHeader.setLsOptions(lsOptions);
                 lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
                 lsaHeader.setLinkStateID(newLinkStateID);
-                lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+                lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
                 lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
                 summaryLSA->setNetworkMask(entry->getNetmask());
                 summaryLSA->setRouteCost(entry->getCost());
                 summaryLSA->setTosDataArraySize(0);
 
-                summaryLSA->setSource(LSATrackingInfo::ORIGINATED);
+                summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                 return summaryLSA;
             }
         }
         else {    // entry->getPathType() == RoutingTableEntry::INTRAAREA
-            IPv4AddressRange destinationAddressRange;
+            Ipv4AddressRange destinationAddressRange;
 
             destinationAddressRange.address = entry->getDestination();
             destinationAddressRange.mask = entry->getNetmask();
 
             bool doAdvertise = false;
-            IPv4AddressRange containingAddressRange = parentRouter->getContainingAddressRange(destinationAddressRange, &doAdvertise);
+            Ipv4AddressRange containingAddressRange = parentRouter->getContainingAddressRange(destinationAddressRange, &doAdvertise);
             if (((entry->getArea() == BACKBONE_AREAID) &&    // the backbone's configured ranges should be ignored
                  (transitCapability)) ||    // when originating Summary LSAs into transit areas
                 (containingAddressRange == NULL_IPV4ADDRESSRANGE))
             {
-                LinkStateID newLinkStateID = getUniqueLinkStateID(destinationAddressRange, entry->getCost(), lsaToReoriginate);
+                LinkStateId newLinkStateID = getUniqueLinkStateID(destinationAddressRange, entry->getCost(), lsaToReoriginate);
 
                 if (lsaToReoriginate != nullptr) {
-                    LSAKeyType lsaKey;
+                    LsaKeyType lsaKey;
 
                     lsaKey.linkStateID = entry->getDestination();
                     lsaKey.advertisingRouter = parentRouter->getRouterID();
@@ -1231,8 +1231,8 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         return nullptr;
                     }
                     else {
-                        SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
+                        SummaryLsa *summaryLSA = new SummaryLsa(*(lsaIt->second));
+                        OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1242,24 +1242,24 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                     }
                 }
                 else {
-                    SummaryLSA *summaryLSA = new SummaryLSA;
-                    OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
-                    OSPFOptions lsOptions;
+                    SummaryLsa *summaryLSA = new SummaryLsa;
+                    OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
+                    OspfOptions lsOptions;
 
                     lsaHeader.setLsAge(0);
-                    memset(&lsOptions, 0, sizeof(OSPFOptions));
+                    memset(&lsOptions, 0, sizeof(OspfOptions));
                     lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                     lsaHeader.setLsOptions(lsOptions);
                     lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
                     lsaHeader.setLinkStateID(newLinkStateID);
-                    lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+                    lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
                     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
                     summaryLSA->setNetworkMask(entry->getNetmask());
                     summaryLSA->setRouteCost(entry->getCost());
                     summaryLSA->setTosDataArraySize(0);
 
-                    summaryLSA->setSource(LSATrackingInfo::ORIGINATED);
+                    summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                     return summaryLSA;
                 }
@@ -1281,14 +1281,14 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         }
                     }
 
-                    LinkStateID newLinkStateID = getUniqueLinkStateID(containingAddressRange, maxRangeCost, lsaToReoriginate);
-                    LSAKeyType lsaKey;
+                    LinkStateId newLinkStateID = getUniqueLinkStateID(containingAddressRange, maxRangeCost, lsaToReoriginate);
+                    LsaKeyType lsaKey;
 
                     if (lsaToReoriginate != nullptr) {
                         lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                        std::map<LSAKeyType, bool, LSAKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
+                        std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
                         if (originatedIt != originatedLSAs.end()) {
                             delete (lsaToReoriginate);
                             lsaToReoriginate = nullptr;
@@ -1305,8 +1305,8 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                             return nullptr;
                         }
 
-                        SummaryLSA *summaryLSA = new SummaryLSA(*(lsaIt->second));
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
+                        SummaryLsa *summaryLSA = new SummaryLsa(*(lsaIt->second));
+                        OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
 
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
@@ -1318,29 +1318,29 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         lsaKey.linkStateID = newLinkStateID;
                         lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                        std::map<LSAKeyType, bool, LSAKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
+                        std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
                         if (originatedIt != originatedLSAs.end()) {
                             return nullptr;
                         }
 
-                        SummaryLSA *summaryLSA = new SummaryLSA;
-                        OSPFLSAHeader& lsaHeader = summaryLSA->getMutableHeader();
-                        OSPFOptions lsOptions;
+                        SummaryLsa *summaryLSA = new SummaryLsa;
+                        OspfLsaHeader& lsaHeader = summaryLSA->getMutableHeader();
+                        OspfOptions lsOptions;
 
                         lsaHeader.setLsAge(0);
-                        memset(&lsOptions, 0, sizeof(OSPFOptions));
+                        memset(&lsOptions, 0, sizeof(OspfOptions));
                         lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
                         lsaHeader.setLsOptions(lsOptions);
                         lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
                         lsaHeader.setLinkStateID(newLinkStateID);
-                        lsaHeader.setAdvertisingRouter(IPv4Address(parentRouter->getRouterID()));
+                        lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
                         summaryLSA->setNetworkMask(entry->getNetmask());
                         summaryLSA->setRouteCost(entry->getCost());
                         summaryLSA->setTosDataArraySize(0);
 
-                        summaryLSA->setSource(LSATrackingInfo::ORIGINATED);
+                        summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
                         return summaryLSA;
                     }
@@ -1352,12 +1352,12 @@ SummaryLSA *Area::originateSummaryLSA(const RoutingTableEntry *entry,
     return nullptr;
 }
 
-SummaryLSA *Area::originateSummaryLSA(const SummaryLSA *summaryLSA)
+SummaryLsa *Area::originateSummaryLSA(const SummaryLsa *summaryLSA)
 {
-    const std::map<LSAKeyType, bool, LSAKeyType_Less> emptyMap;
-    SummaryLSA *dontReoriginate = nullptr;
+    const std::map<LsaKeyType, bool, LsaKeyType_Less> emptyMap;
+    SummaryLsa *dontReoriginate = nullptr;
 
-    const OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
+    const OspfLsaHeader& lsaHeader = summaryLSA->getHeader();
     unsigned long entryCount = parentRouter->getRoutingTableEntryCount();
 
     for (unsigned long i = 0; i < entryCount; i++) {
@@ -1369,20 +1369,20 @@ SummaryLSA *Area::originateSummaryLSA(const SummaryLSA *summaryLSA)
              ((entry->getDestination() == lsaHeader.getLinkStateID()) &&    //FIXME Why not compare network addresses (addr masked with netmask)?
               (entry->getNetmask() == summaryLSA->getNetworkMask()))))
         {
-            SummaryLSA *returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
+            SummaryLsa *returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
             if (dontReoriginate != nullptr) {
                 delete dontReoriginate;
             }
             return returnLSA;
         }
 
-        IPv4Address lsaMask = summaryLSA->getNetworkMask();
+        Ipv4Address lsaMask = summaryLSA->getNetworkMask();
 
         if ((lsaHeader.getLsType() == SUMMARYLSA_NETWORKS_TYPE) &&
             (entry->getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION) &&
             isSameNetwork(entry->getDestination(), entry->getNetmask(), lsaHeader.getLinkStateID(), lsaMask))
         {
-            SummaryLSA *returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
+            SummaryLsa *returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
             if (dontReoriginate != nullptr) {
                 delete dontReoriginate;
             }
@@ -1395,20 +1395,20 @@ SummaryLSA *Area::originateSummaryLSA(const SummaryLSA *summaryLSA)
 
 void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutingTable)
 {
-    RouterID routerID = parentRouter->getRouterID();
+    RouterId routerID = parentRouter->getRouterID();
     bool finished = false;
-    std::vector<OSPFLSA *> treeVertices;
-    OSPFLSA *justAddedVertex;
-    std::vector<OSPFLSA *> candidateVertices;
+    std::vector<OspfLsa *> treeVertices;
+    OspfLsa *justAddedVertex;
+    std::vector<OspfLsa *> candidateVertices;
     unsigned long i, j, k;
     unsigned long lsaCount;
 
     if (spfTreeRoot == nullptr) {
-        RouterLSA *newLSA = originateRouterLSA();
+        RouterLsa *newLSA = originateRouterLSA();
 
         installRouterLSA(newLSA);
 
-        RouterLSA *routerLSA = findRouterLSA(routerID);
+        RouterLsa *routerLSA = findRouterLSA(routerID);
 
         spfTreeRoot = routerLSA;
         floodLSA(newLSA);
@@ -1431,10 +1431,10 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
     justAddedVertex = spfTreeRoot;    // (1)
 
     do {
-        LSAType vertexType = static_cast<LSAType>(justAddedVertex->getHeader().getLsType());
+        LsaType vertexType = static_cast<LsaType>(justAddedVertex->getHeader().getLsType());
 
         if (vertexType == ROUTERLSA_TYPE) {
-            RouterLSA *routerVertex = check_and_cast<RouterLSA *>(justAddedVertex);
+            RouterLsa *routerVertex = check_and_cast<RouterLsa *>(justAddedVertex);
             if (routerVertex->getV_VirtualLinkEndpoint()) {    // (2)
                 transitCapability = true;
             }
@@ -1443,8 +1443,8 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
             for (i = 0; i < linkCount; i++) {
                 const Link& link = routerVertex->getLinks(i);
                 LinkType linkType = static_cast<LinkType>(link.getType());
-                OSPFLSA *joiningVertex;
-                LSAType joiningVertexType;
+                OspfLsa *joiningVertex;
+                LsaType joiningVertexType;
 
                 if (linkType == STUB_LINK) {    // (2) (a)
                     continue;
@@ -1481,7 +1481,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
                 unsigned long linkStateCost = routerVertex->getDistance() + link.getLinkCost();
                 unsigned int candidateCount = candidateVertices.size();
-                OSPFLSA *candidate = nullptr;
+                OspfLsa *candidate = nullptr;
 
                 for (j = 0; j < candidateCount; j++) {
                     if (candidateVertices[j] == joiningVertex) {
@@ -1508,7 +1508,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                 }
                 else {
                     if (joiningVertexType == ROUTERLSA_TYPE) {
-                        RouterLSA *joiningRouterVertex = check_and_cast<RouterLSA *>(joiningVertex);
+                        RouterLsa *joiningRouterVertex = check_and_cast<RouterLsa *>(joiningVertex);
                         joiningRouterVertex->setDistance(linkStateCost);
                         std::vector<NextHop> *newNextHops = calculateNextHops(joiningVertex, justAddedVertex);    // (destination, parent)
                         unsigned int nextHopCount = newNextHops->size();
@@ -1522,7 +1522,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                         candidateVertices.push_back(joiningRouterVertex);
                     }
                     else {
-                        NetworkLSA *joiningNetworkVertex = check_and_cast<NetworkLSA *>(joiningVertex);
+                        NetworkLsa *joiningNetworkVertex = check_and_cast<NetworkLsa *>(joiningVertex);
                         joiningNetworkVertex->setDistance(linkStateCost);
                         std::vector<NextHop> *newNextHops = calculateNextHops(joiningVertex, justAddedVertex);    // (destination, parent)
                         unsigned int nextHopCount = newNextHops->size();
@@ -1540,11 +1540,11 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
         }
 
         if (vertexType == NETWORKLSA_TYPE) {
-            NetworkLSA *networkVertex = check_and_cast<NetworkLSA *>(justAddedVertex);
+            NetworkLsa *networkVertex = check_and_cast<NetworkLsa *>(justAddedVertex);
             unsigned int routerCount = networkVertex->getAttachedRoutersArraySize();
 
             for (i = 0; i < routerCount; i++) {    // (2)
-                RouterLSA *joiningVertex = findRouterLSA(networkVertex->getAttachedRouters(i));
+                RouterLsa *joiningVertex = findRouterLSA(networkVertex->getAttachedRouters(i));
                 if ((joiningVertex == nullptr) ||
                     (joiningVertex->getHeader().getLsAge() == MAX_AGE) ||
                     (!hasLink(joiningVertex, justAddedVertex)))    // (from, to)     (2) (b)
@@ -1567,7 +1567,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
                 unsigned long linkStateCost = networkVertex->getDistance();    // link cost from network to router is always 0
                 unsigned int candidateCount = candidateVertices.size();
-                OSPFLSA *candidate = nullptr;
+                OspfLsa *candidate = nullptr;
 
                 for (j = 0; j < candidateCount; j++) {
                     if (candidateVertices[j] == joiningVertex) {
@@ -1614,7 +1614,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
         else {
             unsigned int candidateCount = candidateVertices.size();
             unsigned long minDistance = LS_INFINITY;
-            OSPFLSA *closestVertex = candidateVertices[0];
+            OspfLsa *closestVertex = candidateVertices[0];
 
             for (i = 0; i < candidateCount; i++) {
                 RoutingInfo *routingInfo = check_and_cast<RoutingInfo *>(candidateVertices[i]);
@@ -1645,10 +1645,10 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
             }
 
             if (closestVertex->getHeader().getLsType() == ROUTERLSA_TYPE) {
-                RouterLSA *routerLSA = check_and_cast<RouterLSA *>(closestVertex);
+                RouterLsa *routerLSA = check_and_cast<RouterLsa *>(closestVertex);
                 if (routerLSA->getB_AreaBorderRouter() || routerLSA->getE_ASBoundaryRouter()) {
                     RoutingTableEntry *entry = new RoutingTableEntry(ift);
-                    RouterID destinationID = routerLSA->getHeader().getLinkStateID();
+                    RouterId destinationID = routerLSA->getHeader().getLinkStateID();
                     unsigned int nextHopCount = routerLSA->getNextHopCount();
                     RoutingTableEntry::RoutingDestinationType destinationType = RoutingTableEntry::NETWORK_DESTINATION;
 
@@ -1681,16 +1681,16 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                     if (backbone != nullptr) {
                         Interface *virtualIntf = backbone->findVirtualLink(destinationID);
                         if ((virtualIntf != nullptr) && (virtualIntf->getTransitAreaID() == areaID)) {
-                            IPv4AddressRange range;
+                            Ipv4AddressRange range;
                             range.address = getInterface(routerLSA->getNextHop(0).ifIndex)->getAddressRange().address;
-                            range.mask = IPv4Address::ALLONES_ADDRESS;
+                            range.mask = Ipv4Address::ALLONES_ADDRESS;
                             virtualIntf->setAddressRange(range);
                             virtualIntf->setIfIndex(ift, routerLSA->getNextHop(0).ifIndex);
                             virtualIntf->setOutputCost(routerLSA->getDistance());
                             Neighbor *virtualNeighbor = virtualIntf->getNeighbor(0);
                             if (virtualNeighbor != nullptr) {
                                 unsigned int linkCount = routerLSA->getLinksArraySize();
-                                RouterLSA *toRouterLSA = dynamic_cast<RouterLSA *>(justAddedVertex);
+                                RouterLsa *toRouterLSA = dynamic_cast<RouterLsa *>(justAddedVertex);
                                 if (toRouterLSA != nullptr) {
                                     for (i = 0; i < linkCount; i++) {
                                         const Link& link = routerLSA->getLinks(i);
@@ -1699,14 +1699,14 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                                             (link.getLinkID() == toRouterLSA->getHeader().getLinkStateID()) &&
                                             (virtualIntf->getState() < Interface::WAITING_STATE))
                                         {
-                                            virtualNeighbor->setAddress(IPv4Address(link.getLinkData()));
+                                            virtualNeighbor->setAddress(Ipv4Address(link.getLinkData()));
                                             virtualIntf->processEvent(Interface::INTERFACE_UP);
                                             break;
                                         }
                                     }
                                 }
                                 else {
-                                    NetworkLSA *toNetworkLSA = dynamic_cast<NetworkLSA *>(justAddedVertex);
+                                    NetworkLsa *toNetworkLSA = dynamic_cast<NetworkLsa *>(justAddedVertex);
                                     if (toNetworkLSA != nullptr) {
                                         for (i = 0; i < linkCount; i++) {
                                             const Link& link = routerLSA->getLinks(i);
@@ -1715,7 +1715,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                                                 (link.getLinkID() == toNetworkLSA->getHeader().getLinkStateID()) &&
                                                 (virtualIntf->getState() < Interface::WAITING_STATE))
                                             {
-                                                virtualNeighbor->setAddress(IPv4Address(link.getLinkData()));
+                                                virtualNeighbor->setAddress(Ipv4Address(link.getLinkData()));
                                                 virtualIntf->processEvent(Interface::INTERFACE_UP);
                                                 break;
                                             }
@@ -1729,19 +1729,19 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
             }
 
             if (closestVertex->getHeader().getLsType() == NETWORKLSA_TYPE) {
-                NetworkLSA *networkLSA = check_and_cast<NetworkLSA *>(closestVertex);
-                IPv4Address destinationID = (networkLSA->getHeader().getLinkStateID() & networkLSA->getNetworkMask());
+                NetworkLsa *networkLSA = check_and_cast<NetworkLsa *>(closestVertex);
+                Ipv4Address destinationID = (networkLSA->getHeader().getLinkStateID() & networkLSA->getNetworkMask());
                 unsigned int nextHopCount = networkLSA->getNextHopCount();
                 bool overWrite = false;
                 RoutingTableEntry *entry = nullptr;
                 unsigned long routeCount = newRoutingTable.size();
-                IPv4Address longestMatch(0u);
+                Ipv4Address longestMatch(0u);
 
                 for (i = 0; i < routeCount; i++) {
                     if (newRoutingTable[i]->getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION) {
                         RoutingTableEntry *routingEntry = newRoutingTable[i];
-                        IPv4Address entryAddress = routingEntry->getDestination();
-                        IPv4Address entryMask = routingEntry->getNetmask();
+                        Ipv4Address entryAddress = routingEntry->getDestination();
+                        Ipv4Address entryMask = routingEntry->getNetmask();
 
                         if ((entryAddress & entryMask) == (destinationID & entryMask)) {
                             if ((destinationID & entryMask) > longestMatch) {
@@ -1752,7 +1752,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                     }
                 }
                 if (entry != nullptr) {
-                    const OSPFLSA *entryOrigin = entry->getLinkStateOrigin();
+                    const OspfLsa *entryOrigin = entry->getLinkStateOrigin();
                     if ((entry->getCost() != networkLSA->getDistance()) ||
                         (entryOrigin->getHeader().getLinkStateID() >= networkLSA->getHeader().getLinkStateID()))
                     {
@@ -1765,7 +1765,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                         entry = new RoutingTableEntry(ift);
                     }
 
-                    entry->setDestination(IPv4Address(destinationID));
+                    entry->setDestination(Ipv4Address(destinationID));
                     entry->setNetmask(networkLSA->getNetworkMask());
                     entry->setLinkStateOrigin(networkLSA);
                     entry->setArea(areaID);
@@ -1789,7 +1789,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
 
     unsigned int treeSize = treeVertices.size();
     for (i = 0; i < treeSize; i++) {
-        RouterLSA *routerVertex = dynamic_cast<RouterLSA *>(treeVertices[i]);
+        RouterLsa *routerVertex = dynamic_cast<RouterLsa *>(treeVertices[i]);
         if (routerVertex == nullptr) {
             continue;
         }
@@ -1839,8 +1839,8 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                 }
                 if (distance == entryCost) {
                     // no const version from check_and_cast
-                    const OSPFLSA *lsOrigin = entry->getLinkStateOrigin();
-                    if (dynamic_cast<const RouterLSA *>(lsOrigin) || dynamic_cast<const NetworkLSA *>(lsOrigin)) {
+                    const OspfLsa *lsOrigin = entry->getLinkStateOrigin();
+                    if (dynamic_cast<const RouterLsa *>(lsOrigin) || dynamic_cast<const NetworkLsa *>(lsOrigin)) {
                         if (lsOrigin->getHeader().getLinkStateID() < routerVertex->getHeader().getLinkStateID()) {
                             entry->setLinkStateOrigin(routerVertex);
                         }
@@ -1863,8 +1863,8 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                 //}
                 entry = new RoutingTableEntry(ift);
 
-                entry->setDestination(IPv4Address(destinationID));
-                entry->setNetmask(IPv4Address(link.getLinkData()));
+                entry->setDestination(Ipv4Address(destinationID));
+                entry->setNetmask(Ipv4Address(link.getLinkData()));
                 entry->setLinkStateOrigin(routerVertex);
                 entry->setArea(areaID);
                 entry->setPathType(RoutingTableEntry::INTRAAREA);
@@ -1884,12 +1884,12 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
     }
 }
 
-std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *parent) const
+std::vector<NextHop> *Area::calculateNextHops(OspfLsa *destination, OspfLsa *parent) const
 {
     std::vector<NextHop> *hops = new std::vector<NextHop>;
     unsigned long i, j;
 
-    RouterLSA *routerLSA = dynamic_cast<RouterLSA *>(parent);
+    RouterLsa *routerLSA = dynamic_cast<RouterLsa *>(parent);
     if (routerLSA != nullptr) {
         if (routerLSA != spfTreeRoot) {
             unsigned int nextHopCount = routerLSA->getNextHopCount();
@@ -1899,11 +1899,11 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
             return hops;
         }
         else {
-            RouterLSA *destinationRouterLSA = dynamic_cast<RouterLSA *>(destination);
+            RouterLsa *destinationRouterLSA = dynamic_cast<RouterLsa *>(destination);
             if (destinationRouterLSA != nullptr) {
                 unsigned long interfaceNum = associatedInterfaces.size();
                 for (i = 0; i < interfaceNum; i++) {
-                    Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->getType();
+                    Interface::OspfInterfaceType intfType = associatedInterfaces[i]->getType();
                     if ((intfType == Interface::POINTTOPOINT) ||
                         ((intfType == Interface::VIRTUAL) &&
                          (associatedInterfaces[i]->getState() > Interface::LOOPBACK_STATE)))
@@ -1924,13 +1924,13 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                         Neighbor *ptmpNeighbor = associatedInterfaces[i]->getNeighborByID(destinationRouterLSA->getHeader().getLinkStateID());
                         if (ptmpNeighbor != nullptr) {
                             unsigned int linkCount = destinationRouterLSA->getLinksArraySize();
-                            IPv4Address rootID = IPv4Address(parentRouter->getRouterID());
+                            Ipv4Address rootID = Ipv4Address(parentRouter->getRouterID());
                             for (j = 0; j < linkCount; j++) {
                                 const Link& link = destinationRouterLSA->getLinks(j);
                                 if (link.getLinkID() == rootID) {
                                     NextHop nextHop;
                                     nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
-                                    nextHop.hopAddress = IPv4Address(link.getLinkData());
+                                    nextHop.hopAddress = Ipv4Address(link.getLinkData());
                                     nextHop.advertisingRouter = destinationRouterLSA->getHeader().getAdvertisingRouter();
                                     hops->push_back(nextHop);
                                 }
@@ -1941,22 +1941,22 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                 }
             }
             else {
-                NetworkLSA *destinationNetworkLSA = dynamic_cast<NetworkLSA *>(destination);
+                NetworkLsa *destinationNetworkLSA = dynamic_cast<NetworkLsa *>(destination);
                 if (destinationNetworkLSA != nullptr) {
-                    IPv4Address networkDesignatedRouter = destinationNetworkLSA->getHeader().getLinkStateID();
+                    Ipv4Address networkDesignatedRouter = destinationNetworkLSA->getHeader().getLinkStateID();
                     unsigned long interfaceNum = associatedInterfaces.size();
                     for (i = 0; i < interfaceNum; i++) {
-                        Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->getType();
+                        Interface::OspfInterfaceType intfType = associatedInterfaces[i]->getType();
                         if (((intfType == Interface::BROADCAST) ||
                              (intfType == Interface::NBMA)) &&
                             (associatedInterfaces[i]->getDesignatedRouter().ipInterfaceAddress == networkDesignatedRouter))
                         {
-                            IPv4AddressRange range = associatedInterfaces[i]->getAddressRange();
+                            Ipv4AddressRange range = associatedInterfaces[i]->getAddressRange();
                             NextHop nextHop;
 
                             nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
                             //nextHop.hopAddress = (range.address & range.mask); //TODO revise it!
-                            nextHop.hopAddress = IPv4Address::UNSPECIFIED_ADDRESS;    //TODO revise it!
+                            nextHop.hopAddress = Ipv4Address::UNSPECIFIED_ADDRESS;    //TODO revise it!
                             nextHop.advertisingRouter = destinationNetworkLSA->getHeader().getAdvertisingRouter();
                             hops->push_back(nextHop);
                         }
@@ -1966,7 +1966,7 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
         }
     }
     else {
-        NetworkLSA *networkLSA = dynamic_cast<NetworkLSA *>(parent);
+        NetworkLsa *networkLSA = dynamic_cast<NetworkLsa *>(parent);
         if (networkLSA != nullptr) {
             if (networkLSA->getParent() != spfTreeRoot) {
                 unsigned int nextHopCount = networkLSA->getNextHopCount();
@@ -1976,11 +1976,11 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                 return hops;
             }
             else {
-                IPv4Address parentLinkStateID = parent->getHeader().getLinkStateID();
+                Ipv4Address parentLinkStateID = parent->getHeader().getLinkStateID();
 
-                RouterLSA *destinationRouterLSA = dynamic_cast<RouterLSA *>(destination);
+                RouterLsa *destinationRouterLSA = dynamic_cast<RouterLsa *>(destination);
                 if (destinationRouterLSA != nullptr) {
-                    RouterID destinationRouterID = destinationRouterLSA->getHeader().getLinkStateID();
+                    RouterId destinationRouterID = destinationRouterLSA->getHeader().getLinkStateID();
                     unsigned int linkCount = destinationRouterLSA->getLinksArraySize();
                     for (i = 0; i < linkCount; i++) {
                         const Link& link = destinationRouterLSA->getLinks(i);
@@ -1989,11 +1989,11 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
                         if (((link.getType() == TRANSIT_LINK) &&
                              (link.getLinkID() == parentLinkStateID)) ||
                             ((link.getType() == STUB_LINK) &&
-                             ((link.getLinkID() & IPv4Address(link.getLinkData())) == (parentLinkStateID & networkLSA->getNetworkMask()))))
+                             ((link.getLinkID() & Ipv4Address(link.getLinkData())) == (parentLinkStateID & networkLSA->getNetworkMask()))))
                         {
                             unsigned long interfaceNum = associatedInterfaces.size();
                             for (j = 0; j < interfaceNum; j++) {
-                                Interface::OSPFInterfaceType intfType = associatedInterfaces[j]->getType();
+                                Interface::OspfInterfaceType intfType = associatedInterfaces[j]->getType();
                                 if (((intfType == Interface::BROADCAST) ||
                                      (intfType == Interface::NBMA)) &&
                                     (associatedInterfaces[j]->getDesignatedRouter().ipInterfaceAddress == parentLinkStateID))
@@ -2017,12 +2017,12 @@ std::vector<NextHop> *Area::calculateNextHops(OSPFLSA *destination, OSPFLSA *par
     return hops;
 }
 
-std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *parent) const
+std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OspfLsa *parent) const
 {
     std::vector<NextHop> *hops = new std::vector<NextHop>;
     unsigned long i;
 
-    RouterLSA *routerLSA = check_and_cast<RouterLSA *>(parent);
+    RouterLsa *routerLSA = check_and_cast<RouterLsa *>(parent);
     if (routerLSA != spfTreeRoot) {
         unsigned int nextHopCount = routerLSA->getNextHopCount();
         for (i = 0; i < nextHopCount; i++) {
@@ -2034,7 +2034,7 @@ std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *
         unsigned long interfaceNum = associatedInterfaces.size();
         for (i = 0; i < interfaceNum; i++) {
             Interface *interface = associatedInterfaces[i];
-            Interface::OSPFInterfaceType intfType = interface->getType();
+            Interface::OspfInterfaceType intfType = interface->getType();
 
             if ((intfType == Interface::POINTTOPOINT) ||
                 ((intfType == Interface::VIRTUAL) &&
@@ -2042,7 +2042,7 @@ std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *
             {
                 Neighbor *neighbor = (interface->getNeighborCount() > 0) ? interface->getNeighbor(0) : nullptr;
                 if (neighbor != nullptr) {
-                    IPv4Address neighborAddress = neighbor->getAddress();
+                    Ipv4Address neighborAddress = neighbor->getAddress();
                     if (((neighborAddress != NULL_IPV4ADDRESS) &&
                          (neighborAddress == destination.getLinkID())) ||
                         ((neighborAddress == NULL_IPV4ADDRESS) &&
@@ -2061,7 +2061,7 @@ std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *
             if ((intfType == Interface::BROADCAST) ||
                 (intfType == Interface::NBMA))
             {
-                if (isSameNetwork(destination.getLinkID(), IPv4Address(destination.getLinkData()), interface->getAddressRange().address, interface->getAddressRange().mask)) {
+                if (isSameNetwork(destination.getLinkID(), Ipv4Address(destination.getLinkData()), interface->getAddressRange().address, interface->getAddressRange().mask)) {
                     NextHop nextHop;
                     nextHop.ifIndex = interface->getIfIndex();
                     // TODO: this has been commented because the linkID is not a real IP address in this case and we don't know the next hop address here, verify
@@ -2121,14 +2121,14 @@ std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OSPFLSA *
     return hops;
 }
 
-bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
+bool Area::hasLink(OspfLsa *fromLSA, OspfLsa *toLSA) const
 {
     unsigned int i;
 
-    RouterLSA *fromRouterLSA = dynamic_cast<RouterLSA *>(fromLSA);
+    RouterLsa *fromRouterLSA = dynamic_cast<RouterLsa *>(fromLSA);
     if (fromRouterLSA != nullptr) {
         unsigned int linkCount = fromRouterLSA->getLinksArraySize();
-        RouterLSA *toRouterLSA = dynamic_cast<RouterLSA *>(toLSA);
+        RouterLsa *toRouterLSA = dynamic_cast<RouterLsa *>(toLSA);
         if (toRouterLSA != nullptr) {
             for (i = 0; i < linkCount; i++) {
                 const Link& link = fromRouterLSA->getLinks(i);
@@ -2143,7 +2143,7 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
             }
         }
         else {
-            NetworkLSA *toNetworkLSA = dynamic_cast<NetworkLSA *>(toLSA);
+            NetworkLsa *toNetworkLSA = dynamic_cast<NetworkLsa *>(toLSA);
             if (toNetworkLSA != nullptr) {
                 for (i = 0; i < linkCount; i++) {
                     const Link& link = fromRouterLSA->getLinks(i);
@@ -2154,7 +2154,7 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
                         return true;
                     }
                     if ((link.getType() == STUB_LINK) &&
-                        ((link.getLinkID() & IPv4Address(link.getLinkData())) == (toNetworkLSA->getHeader().getLinkStateID() & toNetworkLSA->getNetworkMask())))    //FIXME should compare masks?
+                        ((link.getLinkID() & Ipv4Address(link.getLinkData())) == (toNetworkLSA->getHeader().getLinkStateID() & toNetworkLSA->getNetworkMask())))    //FIXME should compare masks?
                     {
                         return true;
                     }
@@ -2163,10 +2163,10 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
         }
     }
     else {
-        NetworkLSA *fromNetworkLSA = dynamic_cast<NetworkLSA *>(fromLSA);
+        NetworkLsa *fromNetworkLSA = dynamic_cast<NetworkLsa *>(fromLSA);
         if (fromNetworkLSA != nullptr) {
             unsigned int routerCount = fromNetworkLSA->getAttachedRoutersArraySize();
-            RouterLSA *toRouterLSA = dynamic_cast<RouterLSA *>(toLSA);
+            RouterLsa *toRouterLSA = dynamic_cast<RouterLsa *>(toLSA);
             if (toRouterLSA != nullptr) {
                 for (i = 0; i < routerCount; i++) {
                     if (fromNetworkLSA->getAttachedRouters(i) == toRouterLSA->getHeader().getLinkStateID()) {
@@ -2186,7 +2186,7 @@ bool Area::hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const
  * note those which are of equal or worse cost than the currentCost.
  */
 bool Area::findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newRoutingTable,
-        const SummaryLSA& summaryLSA,
+        const SummaryLsa& summaryLSA,
         unsigned short currentCost,
         bool& destinationInRoutingTable,
         std::list<RoutingTableEntry *>& sameOrWorseCost) const
@@ -2195,7 +2195,7 @@ bool Area::findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newR
     sameOrWorseCost.clear();
 
     long routeCount = newRoutingTable.size();
-    IPv4AddressRange destination;
+    Ipv4AddressRange destination;
 
     destination.address = summaryLSA.getHeader().getLinkStateID();
     destination.mask = summaryLSA.getNetworkMask();
@@ -2251,11 +2251,11 @@ bool Area::findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newR
  * Returns a new RoutingTableEntry based on the input SummaryLSA, with the input cost
  * and the borderRouterEntry's next hops.
  */
-RoutingTableEntry *Area::createRoutingTableEntryFromSummaryLSA(const SummaryLSA& summaryLSA,
+RoutingTableEntry *Area::createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
         unsigned short entryCost,
         const RoutingTableEntry& borderRouterEntry) const
 {
-    IPv4AddressRange destination;
+    Ipv4AddressRange destination;
 
     destination.address = summaryLSA.getHeader().getLinkStateID();
     destination.mask = summaryLSA.getNetworkMask();
@@ -2269,7 +2269,7 @@ RoutingTableEntry *Area::createRoutingTableEntryFromSummaryLSA(const SummaryLSA&
     }
     else {
         newEntry->setDestination(destination.address);
-        newEntry->setNetmask(IPv4Address::ALLONES_ADDRESS);
+        newEntry->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         newEntry->setDestinationType(RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION);
     }
     newEntry->setArea(areaID);
@@ -2299,12 +2299,12 @@ void Area::calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRouting
     unsigned long lsaCount = summaryLSAs.size();
 
     for (i = 0; i < lsaCount; i++) {
-        SummaryLSA *currentLSA = summaryLSAs[i];
-        const OSPFLSAHeader& currentHeader = currentLSA->getHeader();
+        SummaryLsa *currentLSA = summaryLSAs[i];
+        const OspfLsaHeader& currentHeader = currentLSA->getHeader();
 
         unsigned long routeCost = currentLSA->getRouteCost();
         unsigned short lsAge = currentHeader.getLsAge();
-        RouterID originatingRouter = currentHeader.getAdvertisingRouter();
+        RouterId originatingRouter = currentHeader.getAdvertisingRouter();
         bool selfOriginated = (originatingRouter == parentRouter->getRouterID());
 
         if ((routeCost == LS_INFINITY) || (lsAge == MAX_AGE) || (selfOriginated)) {    // (1) and(2)
@@ -2313,7 +2313,7 @@ void Area::calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRouting
 
         char lsType = currentHeader.getLsType();
         unsigned long routeCount = newRoutingTable.size();
-        IPv4AddressRange destination;
+        Ipv4AddressRange destination;
 
         destination.address = currentHeader.getLinkStateID();
         destination.mask = currentLSA->getNetworkMask();
@@ -2427,12 +2427,12 @@ void Area::recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable)
     unsigned long lsaCount = summaryLSAs.size();
 
     for (i = 0; i < lsaCount; i++) {
-        SummaryLSA *currentLSA = summaryLSAs[i];
-        const OSPFLSAHeader& currentHeader = currentLSA->getHeader();
+        SummaryLsa *currentLSA = summaryLSAs[i];
+        const OspfLsaHeader& currentHeader = currentLSA->getHeader();
 
         unsigned long routeCost = currentLSA->getRouteCost();
         unsigned short lsAge = currentHeader.getLsAge();
-        RouterID originatingRouter = currentHeader.getAdvertisingRouter();
+        RouterId originatingRouter = currentHeader.getAdvertisingRouter();
         bool selfOriginated = (originatingRouter == parentRouter->getRouterID());
 
         if ((routeCost == LS_INFINITY) || (lsAge == MAX_AGE) || (selfOriginated)) {    // (1) and(2)
@@ -2442,7 +2442,7 @@ void Area::recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable)
         unsigned long routeCount = newRoutingTable.size();
         char lsType = currentHeader.getLsType();
         RoutingTableEntry *destinationEntry = nullptr;
-        IPv4AddressRange destination;
+        Ipv4AddressRange destination;
 
         destination.address = currentHeader.getLinkStateID();
         destination.mask = currentLSA->getNetworkMask();

@@ -1,10 +1,10 @@
 %description:
-Test for bug #473: ICMPv6 error messages are delivered to the transport layer protocol
+Test for bug #473: Icmpv6 error messages are delivered to the transport layer protocol
 that initiated the packet causing the error.
 
 NClientsEth example network is used, with one client.
 The client sends an UDP datagram to an unopened port of the
-server. The server generates an Destination Unreachable ICMPv6
+server. The server generates an Destination Unreachable Icmpv6
 error that should be received by the client application in the
 form of an error indication.
 
@@ -45,7 +45,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.eth[*].mac.duplexEnabled = true
 
 %contains: stdout
-ICMPv6 packet: passing it to higher layer
+Icmpv6 packet: passing it to higher layer
 %contains: stdout
 Ignoring UDP error report
 %#--------------------------------------------------------------------------------------------------------------

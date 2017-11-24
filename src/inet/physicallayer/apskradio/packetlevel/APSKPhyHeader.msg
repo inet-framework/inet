@@ -21,7 +21,7 @@ import inet.transportlayer.common.CRC;
 
 namespace inet;
 
-class APSKPhyHeader extends FieldsChunk
+class ApskPhyHeader extends FieldsChunk
 {
     chunkLength = B(6);
     uint16_t lengthField;

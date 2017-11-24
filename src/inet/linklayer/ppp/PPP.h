@@ -35,7 +35,7 @@ class IPassiveQueue;
 /**
  * PPP implementation.
  */
-class INET_API PPP : public MACBase
+class INET_API Ppp : public MacBase
 {
   protected:
     bool sendRawBytes = false;
@@ -77,7 +77,7 @@ class INET_API PPP : public MACBase
     virtual void clearQueue() override;
 
   public:
-    virtual ~PPP();
+    virtual ~Ppp();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

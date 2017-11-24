@@ -19,10 +19,10 @@ package inet.physicallayer.pathloss;
 
 import inet.physicallayer.contract.packetlevel.IPathLoss;
 
-module SUIPathLoss like IPathLoss
+module SuiPathLoss like IPathLoss
 {
     parameters:
-        @class(SUIPathLoss);
+        @class(SuiPathLoss);
         @display("i=block/control");
         double transmitterAntennaHeight @unit(m);
         double receiverAntennaHeight @unit(m);

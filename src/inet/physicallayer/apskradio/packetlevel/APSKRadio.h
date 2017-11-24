@@ -26,17 +26,17 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKRadio : public FlatRadioBase
+class INET_API ApskRadio : public FlatRadioBase
 {
   protected:
-    virtual b computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const APSKModulationBase *modulation) const;
-    virtual const APSKModulationBase *getModulation() const;
+    virtual b computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const ApskModulationBase *modulation) const;
+    virtual const ApskModulationBase *getModulation() const;
 
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
 
   public:
-    APSKRadio();
+    ApskRadio();
 };
 
 } // namespace physicallayer

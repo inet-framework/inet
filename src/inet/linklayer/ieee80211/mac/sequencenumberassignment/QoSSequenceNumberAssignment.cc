@@ -23,7 +23,7 @@ namespace ieee80211 {
 QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming)
 {
     bool isTimePriorityFrame = false; // TODO
-    const MACAddress& address = incoming ? header->getTransmitterAddress() : header->getReceiverAddress();
+    const MacAddress& address = incoming ? header->getTransmitterAddress() : header->getReceiverAddress();
     if (isTimePriorityFrame)
         return TIME_PRIORITY;
     else if (header->getType() != ST_DATA_WITH_QOS || address.isMulticast())
@@ -36,7 +36,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
 {
     CacheType type = getCacheType(header, false);
     int seqNum;
-    MACAddress address = header->getReceiverAddress();
+    MacAddress address = header->getReceiverAddress();
     if (type == TIME_PRIORITY)
     {
         // Error in spec?

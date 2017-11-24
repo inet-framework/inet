@@ -23,25 +23,25 @@
 
 namespace inet {
 
-Define_Module(STPTester);
+Define_Module(StpTester);
 
-STPTester::STPTester()
+StpTester::StpTester()
 {
 }
 
-STPTester::~STPTester()
+StpTester::~StpTester()
 {
     cancelAndDelete(checkTimer);
 }
 
-void STPTester::initialize()
+void StpTester::initialize()
 {
     checkTimer = new cMessage("checktime");
     checkTime = par("checkTime");
     scheduleAt(simTime() + checkTime, checkTimer);
 }
 
-void STPTester::handleMessage(cMessage *msg)
+void StpTester::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         depthFirstSearch();
@@ -62,7 +62,7 @@ void STPTester::handleMessage(cMessage *msg)
     }
 }
 
-void STPTester::depthFirstSearch()
+void StpTester::depthFirstSearch()
 {
     loop = false;
     numOfVisitedNodes = 0;
@@ -88,7 +88,7 @@ void STPTester::depthFirstSearch()
         dfsVisit(graph.getNode(0));
 }
 
-void STPTester::dfsVisit(Topology::Node *node)
+void StpTester::dfsVisit(Topology::Node *node)
 {
     color[node] = GRAY;
 
@@ -121,32 +121,32 @@ void STPTester::dfsVisit(Topology::Node *node)
     numOfVisitedNodes++;
 }
 
-bool STPTester::isLoopFreeGraph()
+bool StpTester::isLoopFreeGraph()
 {
     return !loop;
 }
 
-bool STPTester::isConnectedGraph()
+bool StpTester::isConnectedGraph()
 {
     return numOfNodes == numOfVisitedNodes;
 }
 
-bool STPTester::isTreeGraph()
+bool StpTester::isTreeGraph()
 {
     return !loop && (numOfNodes == numOfVisitedNodes);
 }
 
-int STPTester::getNumOfNodes()
+int StpTester::getNumOfNodes()
 {
     return numOfNodes;
 }
 
-int STPTester::getNumOfVisitedNodes()
+int StpTester::getNumOfVisitedNodes()
 {
     return numOfVisitedNodes;
 }
 
-bool STPTester::isForwarding(Topology::Node *node, unsigned int portNum)
+bool StpTester::isForwarding(Topology::Node *node, unsigned int portNum)
 {
     cModule *tmpIfTable = node->getModule()->getSubmodule("interfaceTable");
     IInterfaceTable *ifTable = dynamic_cast<IInterfaceTable *>(tmpIfTable);

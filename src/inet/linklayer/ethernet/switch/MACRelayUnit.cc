@@ -28,14 +28,14 @@
 
 namespace inet {
 
-Define_Module(MACRelayUnit);
+Define_Module(MacRelayUnit);
 
-void MACRelayUnit::initialize(int stage)
+void MacRelayUnit::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         numProcessedFrames = numDiscardedFrames = 0;
 
-        addressTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
+        addressTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         WATCH(numProcessedFrames);
@@ -48,7 +48,7 @@ void MACRelayUnit::initialize(int stage)
     }
 }
 
-void MACRelayUnit::handleMessage(cMessage *msg)
+void MacRelayUnit::handleMessage(cMessage *msg)
 {
     if (!isOperational) {
         EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
@@ -62,7 +62,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     handleAndDispatchFrame(packet, frame);
 }
 
-void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
+void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     //FIXME : should handle multicast mac addresses correctly
 
@@ -107,7 +107,7 @@ void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
     }
 }
 
-void MACRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
+void MacRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
 {
     packet->clearTags();
     packet->removePoppedChunks();
@@ -127,19 +127,19 @@ void MACRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
     delete packet;
 }
 
-void MACRelayUnit::start()
+void MacRelayUnit::start()
 {
     addressTable->clearTable();
     isOperational = true;
 }
 
-void MACRelayUnit::stop()
+void MacRelayUnit::stop()
 {
     addressTable->clearTable();
     isOperational = false;
 }
 
-bool MACRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool MacRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -165,7 +165,7 @@ bool MACRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage
     return true;
 }
 
-void MACRelayUnit::finish()
+void MacRelayUnit::finish()
 {
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("discarded frames", numDiscardedFrames);

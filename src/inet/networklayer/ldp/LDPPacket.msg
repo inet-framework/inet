@@ -13,14 +13,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
 //
 // LDP message types
 //
-enum LDP_MESSAGE_TYPES
+enum LdpMessageTypes
 {
 
     NOTIFICATION = 10;
@@ -36,51 +36,51 @@ enum LDP_MESSAGE_TYPES
     UNKNOWN = 20;
 }
 
-enum LDP_STATUS_TYPES
+enum LdpStatusTypes
 {
 
     NO_ROUTE = 13;
 }
 
-struct FEC_TLV
+struct FecTlv
 {
-    IPv4Address addr;
+    Ipv4Address addr;
     int length;
 }
 
 //
 // Base class for LDP packets
 //
-class LDPPacket extends FieldsChunk
+class LdpPacket extends FieldsChunk
 {
     int type;
-    IPv4Address senderAddress;
-    IPv4Address receiverAddress;
+    Ipv4Address senderAddress;
+    Ipv4Address receiverAddress;
 }
 
 
 //
 // LDP Label Mapping Message
 //
-class LDPLabelMapping extends LDPPacket
+class LdpLabelMapping extends LdpPacket
 {
-    FEC_TLV fec;
+    FecTlv fec;
     int label;
 }
 
 //
 // LDP Label Request Message
 //
-class LDPLabelRequest extends LDPPacket
+class LdpLabelRequest extends LdpPacket
 {
-    FEC_TLV fec;
+    FecTlv fec;
 }
 
 
 //
 // LDP Hello Message
 //
-class LDPHello extends LDPPacket
+class LdpHello extends LdpPacket
 {
     double holdTime;
     bool tbit;
@@ -90,17 +90,17 @@ class LDPHello extends LDPPacket
 //
 // LDP notification message
 //
-class LDPNotify extends LDPPacket
+class LdpNotify extends LdpPacket
 {
     int status;
-    FEC_TLV fec;
+    FecTlv fec;
 }
 
 //
 // LDP Ini Message
 //
 //# FIXME currently unused
-class LDPIni extends LDPPacket
+class LdpIni extends LdpPacket
 {
     double keepAliveTime;
     bool abit;
@@ -113,7 +113,7 @@ class LDPIni extends LDPPacket
 // LDP Address Message
 //
 //# FIXME currently unused
-class LDPAddress extends LDPPacket
+class LdpAddress extends LdpPacket
 {
     bool isWithdraw;
     string family;

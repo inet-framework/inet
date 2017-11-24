@@ -24,9 +24,9 @@ namespace inet {
 
 namespace rtp {
 
-Register_Class(RTPSenderInfo);
+Register_Class(RtpSenderInfo);
 
-RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
+RtpSenderInfo::RtpSenderInfo(uint32 ssrc) : RtpParticipantInfo(ssrc)
 {
     _startTime = 0.0;
     _clockRate = 0;
@@ -36,27 +36,27 @@ RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
     _bytesSent = 0;
 }
 
-RTPSenderInfo::RTPSenderInfo(const RTPSenderInfo& senderInfo) : RTPParticipantInfo(senderInfo)
+RtpSenderInfo::RtpSenderInfo(const RtpSenderInfo& senderInfo) : RtpParticipantInfo(senderInfo)
 {
     copy(senderInfo);
 }
 
-RTPSenderInfo::~RTPSenderInfo()
+RtpSenderInfo::~RtpSenderInfo()
 {
 }
 
-RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
+RtpSenderInfo& RtpSenderInfo::operator=(const RtpSenderInfo& senderInfo)
 {
     if (this == &senderInfo)
         return *this;
-    RTPParticipantInfo::operator=(senderInfo);
+    RtpParticipantInfo::operator=(senderInfo);
     copy(senderInfo);
     return *this;
 }
 
-void RTPSenderInfo::copy(const RTPSenderInfo& senderInfo)
+void RtpSenderInfo::copy(const RtpSenderInfo& senderInfo)
 {
-    RTPParticipantInfo::operator=(senderInfo);
+    RtpParticipantInfo::operator=(senderInfo);
     _startTime = senderInfo._startTime;
     _clockRate = senderInfo._clockRate;
     _timeStampBase = senderInfo._timeStampBase;
@@ -65,12 +65,12 @@ void RTPSenderInfo::copy(const RTPSenderInfo& senderInfo)
     _bytesSent = senderInfo._bytesSent;
 }
 
-RTPSenderInfo *RTPSenderInfo::dup() const
+RtpSenderInfo *RtpSenderInfo::dup() const
 {
-    return new RTPSenderInfo(*this);
+    return new RtpSenderInfo(*this);
 }
 
-void RTPSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
+void RtpSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
     const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     _packetsSent++;
@@ -79,14 +79,14 @@ void RTPSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTi
     // call corresponding method of superclass
     // for setting _silentIntervals
     // it deletes the packet !!!
-    RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
+    RtpParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-void RTPSenderInfo::processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime)
+void RtpSenderInfo::processReceptionReport(const ReceptionReport *report, simtime_t arrivalTime)
 {
 }
 
-SenderReport *RTPSenderInfo::senderReport(simtime_t now)
+SenderReport *RtpSenderInfo::senderReport(simtime_t now)
 {
     if (isSender()) {
         SenderReport *senderReport = new SenderReport();
@@ -106,22 +106,22 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now)
     }
 }
 
-void RTPSenderInfo::setStartTime(simtime_t startTime)
+void RtpSenderInfo::setStartTime(simtime_t startTime)
 {
     _startTime = startTime;
 }
 
-void RTPSenderInfo::setClockRate(int clockRate)
+void RtpSenderInfo::setClockRate(int clockRate)
 {
     _clockRate = clockRate;
 }
 
-void RTPSenderInfo::setTimeStampBase(uint32 timeStampBase)
+void RtpSenderInfo::setTimeStampBase(uint32 timeStampBase)
 {
     _timeStampBase = timeStampBase;
 }
 
-void RTPSenderInfo::setSequenceNumberBase(uint16 sequenceNumberBase)
+void RtpSenderInfo::setSequenceNumberBase(uint16 sequenceNumberBase)
 {
     _sequenceNumberBase = sequenceNumberBase;
 }

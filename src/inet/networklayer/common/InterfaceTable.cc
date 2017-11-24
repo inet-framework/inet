@@ -178,9 +178,9 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
                 if (ie && ie->ipv4Data()) {
-                    IPv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
-                    IPv4Address netmask = ie->ipv4Data()->getNetmask();
-                    if (IPv4Address::maskedAddrAreEqual(address.toIPv4(), ipv4Addr, netmask))
+                    Ipv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
+                    Ipv4Address netmask = ie->ipv4Data()->getNetmask();
+                    if (Ipv4Address::maskedAddrAreEqual(address.toIPv4(), ipv4Addr, netmask))
                         return address != ipv4Addr;
                 }
             }
@@ -192,9 +192,9 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
                 if (ie && ie->ipv6Data()) {
-                    IPv6InterfaceData *ipv6Data = ie->ipv6Data();
+                    Ipv6InterfaceData *ipv6Data = ie->ipv6Data();
                     for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
-                        const IPv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
+                        const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
                         if (address.toIPv6().matches(advPrefix.prefix, advPrefix.prefixLength))
                             return address != advPrefix.prefix;
                     }

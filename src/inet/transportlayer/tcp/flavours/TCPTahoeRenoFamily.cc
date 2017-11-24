@@ -22,7 +22,7 @@ namespace inet {
 
 namespace tcp {
 
-TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
+TcpTahoeRenoFamilyStateVariables::TcpTahoeRenoFamilyStateVariables()
 {
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window)
@@ -30,33 +30,33 @@ TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
     ssthresh = 0xFFFFFFFF;
 }
 
-void TCPTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
+void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
     sendQueueLimit = newLimit;
     ssthresh = sendQueueLimit;
 }
 
-std::string TCPTahoeRenoFamilyStateVariables::info() const
+std::string TcpTahoeRenoFamilyStateVariables::info() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TcpBaseAlgStateVariables::info();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
 
-std::string TCPTahoeRenoFamilyStateVariables::detailedInfo() const
+std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::detailedInfo();
+    out << TcpBaseAlgStateVariables::detailedInfo();
     out << "ssthresh=" << ssthresh << "\n";
     return out.str();
 }
 
 //---
 
-TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
-    state((TCPTahoeRenoFamilyStateVariables *&)TCPAlgorithm::state)
+TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpBaseAlg(),
+    state((TcpTahoeRenoFamilyStateVariables *&)TcpAlgorithm::state)
 {
 }
 

@@ -17,13 +17,13 @@
 
 package inet.networklayer.arp.generic;
 
-import inet.networklayer.contract.IARP;
+import inet.networklayer.contract.IArp;
 
 
 //
 // TODO
 //
-simple GenericARP like IARP
+simple GenericArp like IArp
 {
     parameters:
         @display("i=block/layer");
@@ -31,6 +31,6 @@ simple GenericARP like IARP
     gates:
         input netwIn @labels(IGenericDatagram); // incoming ARP requests and replies
         output netwOut @labels(IGenericDatagram);  // outgoing ARP requests/replies, and datagrams with resolved next hop
-        input ifIn @labels(ARPPacket,Ieee802Ctrl);
-        output ifOut @labels(ARPPacket,Ieee802Ctrl);
+        input ifIn @labels(ArpPacket,Ieee802Ctrl);
+        output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }

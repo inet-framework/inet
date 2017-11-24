@@ -30,13 +30,13 @@ namespace inet {
 
 namespace tcp {
 
-bool TCPConnection::tryFastRoute(const Ptr<const TcpHeader>& tcpseg)
+bool TcpConnection::tryFastRoute(const Ptr<const TcpHeader>& tcpseg)
 {
     // fast route processing not yet implemented
     return false;
 }
 
-void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void TcpConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(packet, tcpseg);
@@ -86,7 +86,7 @@ void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<const Tc
     }
 }
 
-TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest)
+TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest)
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(packet, tcpseg);
@@ -102,7 +102,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const 
     // Note: this code is organized exactly as RFC 793, section "3.9 Event
     // Processing", subsection "SEGMENT ARRIVES".
     //
-    TCPEventCode event;
+    TcpEventCode event;
 
     if (fsm.getState() == TCP_S_LISTEN) {
         event = processSegmentInListen(packet, tcpseg, src, dest);
@@ -119,7 +119,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const 
     return event;
 }
 
-bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     //TODO must rewrite it
     //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
@@ -135,7 +135,7 @@ bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const
     return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
 }
 
-TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     //
     // RFC 793: first check sequence number
@@ -291,7 +291,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
     uint32 old_snd_una = state->snd_una;
 
-    TCPEventCode event = TCP_E_IGNORE;
+    TcpEventCode event = TCP_E_IGNORE;
 
     if (fsm.getState() == TCP_S_SYN_RCVD) {
         //"
@@ -729,7 +729,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
 //----
 
-TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_DETAIL << "Processing segment in LISTEN\n";
 
@@ -781,7 +781,7 @@ TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<con
         // LISTENing on the port. Note: forking will change our socketId.
         //
         if (state->fork) {
-            TCPConnection *conn = cloneListeningConnection();    // "conn" is the clone which will stay LISTENing, while "this" gets updated with the remote address
+            TcpConnection *conn = cloneListeningConnection();    // "conn" is the clone which will stay LISTENing, while "this" gets updated with the remote address
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
             EV_DETAIL << "Connection forked: this connection got new socketId=" << socketId << ", "
                                                                                            "spinoff keeps LISTENing with socketId=" << conn->socketId << "\n";
@@ -864,7 +864,7 @@ TCPEventCode TCPConnection::processSegmentInListen(Packet *packet, const Ptr<con
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_DETAIL << "Processing segment in SYN_SENT\n";
 
@@ -1073,7 +1073,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg)
+TcpEventCode TcpConnection::processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg)
 {
     EV_DETAIL << "Processing RST in SYN_RCVD\n";
 
@@ -1104,7 +1104,7 @@ TCPEventCode TCPConnection::processRstInSynReceived(const Ptr<const TcpHeader>& 
     return TCP_E_RCV_RST;
 }
 
-bool TCPConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 
@@ -1248,7 +1248,7 @@ bool TCPConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
 
 //----
 
-void TCPConnection::process_TIMEOUT_CONN_ESTAB()
+void TcpConnection::process_TIMEOUT_CONN_ESTAB()
 {
     switch (fsm.getState()) {
         case TCP_S_SYN_RCVD:
@@ -1268,7 +1268,7 @@ void TCPConnection::process_TIMEOUT_CONN_ESTAB()
     }
 }
 
-void TCPConnection::process_TIMEOUT_2MSL()
+void TcpConnection::process_TIMEOUT_2MSL()
 {
     //"
     // If the time-wait timeout expires on a connection delete the TCB,
@@ -1290,7 +1290,7 @@ void TCPConnection::process_TIMEOUT_2MSL()
     }
 }
 
-void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
+void TcpConnection::process_TIMEOUT_FIN_WAIT_2()
 {
     switch (fsm.getState()) {
         case TCP_S_FIN_WAIT_2:
@@ -1305,7 +1305,7 @@ void TCPConnection::process_TIMEOUT_FIN_WAIT_2()
     }
 }
 
-void TCPConnection::startSynRexmitTimer()
+void TcpConnection::startSynRexmitTimer()
 {
     state->syn_rexmit_count = 0;
     state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
@@ -1316,7 +1316,7 @@ void TCPConnection::startSynRexmitTimer()
     scheduleTimeout(synRexmitTimer, state->syn_rexmit_timeout);
 }
 
-void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
+void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 {
     if (++state->syn_rexmit_count > MAX_SYN_REXMIT_COUNT) {
         EV_INFO << "Retransmission count during connection setup exceeds " << MAX_SYN_REXMIT_COUNT << ", giving up\n";

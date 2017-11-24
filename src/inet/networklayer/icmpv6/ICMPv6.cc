@@ -36,9 +36,9 @@
 
 namespace inet {
 
-Define_Module(ICMPv6);
+Define_Module(Icmpv6);
 
-void ICMPv6::initialize(int stage)
+void Icmpv6::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -62,7 +62,7 @@ void ICMPv6::initialize(int stage)
     }
 }
 
-void ICMPv6::handleMessage(cMessage *msg)
+void Icmpv6::handleMessage(cMessage *msg)
 {
     ASSERT(!msg->isSelfMessage());    // no timers in ICMPv6
 
@@ -76,7 +76,7 @@ void ICMPv6::handleMessage(cMessage *msg)
         throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
-void ICMPv6::processICMPv6Message(Packet *packet)
+void Icmpv6::processICMPv6Message(Packet *packet)
 {
     if (!verifyCrc(packet)) {
         // drop packet
@@ -158,7 +158,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
  * The data received in the ICMPv6 Echo Request message MUST be returned
  * entirely and unmodified in the ICMPv6 Echo Reply message.
  */
-void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6EchoRequestMsg>& requestHeader)
+void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6EchoRequestMsg>& requestHeader)
 {
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
@@ -177,7 +177,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
 
     if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        IPv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
+        Ipv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
         addressReq->setSrcAddress(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used
@@ -190,12 +190,12 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     sendToIP(replyPacket);
 }
 
-void ICMPv6::processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg>& reply)
+void Icmpv6::processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg>& reply)
 {
     delete packet;
 }
 
-void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
+void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
@@ -208,14 +208,14 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     Packet *errorMsg;
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
-        errorMsg = createDestUnreachableMsg((ICMPv6DEST_UN)code);
+        errorMsg = createDestUnreachableMsg((Icmpv6DestUn)code);
     //TODO: implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
         errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED)
-        errorMsg = createTimeExceededMsg((ICMPv6_TIME_EX)code);
+        errorMsg = createTimeExceededMsg((Icmpv6TimeEx)code);
     else if (type == ICMPv6_PARAMETER_PROBLEM)
-        errorMsg = createParamProblemMsg((ICMPv6_PARAMETER_PROB)code);
+        errorMsg = createParamProblemMsg((Icmpv6ParameterProb)code);
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
@@ -243,7 +243,7 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->ensureTag<L3AddressInd>()->setSrcAddress(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMsg->ensureTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -254,13 +254,13 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     delete origDatagram;
 }
 
-void ICMPv6::sendToIP(Packet *msg, const IPv6Address& dest)
+void Icmpv6::sendToIP(Packet *msg, const Ipv6Address& dest)
 {
     msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     sendToIP(msg);
 }
 
-void ICMPv6::sendToIP(Packet *msg)
+void Icmpv6::sendToIP(Packet *msg)
 {
     // assumes IPv6ControlInfo is already attached
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
@@ -268,7 +268,7 @@ void ICMPv6::sendToIP(Packet *msg)
     send(msg, "ipv6Out");
 }
 
-Packet *ICMPv6::createDestUnreachableMsg(ICMPv6DEST_UN code)
+Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUn code)
 {
     auto errorMsg = makeShared<Icmpv6DestUnreachableMsg>();
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
@@ -279,7 +279,7 @@ Packet *ICMPv6::createDestUnreachableMsg(ICMPv6DEST_UN code)
     return packet;
 }
 
-Packet *ICMPv6::createPacketTooBigMsg(int mtu)
+Packet *Icmpv6::createPacketTooBigMsg(int mtu)
 {
     auto errorMsg = makeShared<Icmpv6PacketTooBigMsg>();
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
@@ -291,7 +291,7 @@ Packet *ICMPv6::createPacketTooBigMsg(int mtu)
     return packet;
 }
 
-Packet *ICMPv6::createTimeExceededMsg(ICMPv6_TIME_EX code)
+Packet *Icmpv6::createTimeExceededMsg(Icmpv6TimeEx code)
 {
     auto errorMsg = makeShared<Icmpv6TimeExceededMsg>();
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
@@ -302,7 +302,7 @@ Packet *ICMPv6::createTimeExceededMsg(ICMPv6_TIME_EX code)
     return packet;
 }
 
-Packet *ICMPv6::createParamProblemMsg(ICMPv6_PARAMETER_PROB code)
+Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProb code)
 {
     auto errorMsg = makeShared<Icmpv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
@@ -314,7 +314,7 @@ Packet *ICMPv6::createParamProblemMsg(ICMPv6_PARAMETER_PROB code)
     return packet;
 }
 
-bool ICMPv6::validateDatagramPromptingError(Packet *packet)
+bool Icmpv6::validateDatagramPromptingError(Packet *packet)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // don't send ICMP error messages for multicast messages
@@ -336,17 +336,17 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void ICMPv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
+void Icmpv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
 {
 }
 
-bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Icmpv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     //pingMap.clear();
     throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
-void ICMPv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", gate->getBaseName())) {
@@ -354,7 +354,7 @@ void ICMPv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
     }
 }
 
-void ICMPv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
+void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet)
 {
     icmpHeader->setCrcMode(crcMode);
     switch (crcMode) {
@@ -379,7 +379,7 @@ void ICMPv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
             auto buffer = new uint8_t[bufferLength];
             std::copy(icmpHeaderBytes.begin(), icmpHeaderBytes.end(), buffer);
             std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
-            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
             delete [] buffer;
             icmpHeader->setChksum(crc);
             break;
@@ -389,7 +389,7 @@ void ICMPv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
     }
 }
 
-bool ICMPv6::verifyCrc(const Packet *packet)
+bool Icmpv6::verifyCrc(const Packet *packet)
 {
     const auto& icmpHeader = packet->peekHeader<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     switch (icmpHeader->getCrcMode()) {
@@ -405,7 +405,7 @@ bool ICMPv6::verifyCrc(const Packet *packet)
             size_t bufferLength = B(dataBytes->getChunkLength()).get();
             auto buffer = new uint8_t[bufferLength];
             dataBytes->copyToBuffer(buffer, bufferLength);
-            uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
             delete [] buffer;
             // TODO: delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();

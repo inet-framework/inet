@@ -26,10 +26,10 @@
 
 namespace inet {
 
-class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
+class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
 {
   protected:
-    IMACAddressTable *addressTable = nullptr;
+    IMacAddressTable *addressTable = nullptr;
     int numPorts = 0;
     IInterfaceTable *ift = nullptr;
 

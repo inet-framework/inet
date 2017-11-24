@@ -31,7 +31,7 @@ struct UnreachableNode
     unsigned int seqNum;
 };
 
-enum AODVControlPacketType
+enum AodvControlPacketType
 {
     RREQ = 1;
     RREP = 2;
@@ -42,7 +42,7 @@ enum AODVControlPacketType
 //
 // Base packet for AODV Control Packets
 //
-class AODVControlPacket extends FieldsChunk
+class AodvControlPacket extends FieldsChunk
 {
     unsigned int packetType;
 }
@@ -50,7 +50,7 @@ class AODVControlPacket extends FieldsChunk
 //
 // Represents an AODV Route Request
 //
-class AODVRREQ extends AODVControlPacket
+class AodvRreq extends AodvControlPacket
 {
     packetType = RREQ;
     bool joinFlag;
@@ -69,7 +69,7 @@ class AODVRREQ extends AODVControlPacket
 //
 // Represents an AODV Route Reply
 //
-class AODVRREP extends AODVControlPacket
+class AodvRrep extends AodvControlPacket
 {
     packetType = RREP;
     bool repairFlag;
@@ -86,7 +86,7 @@ class AODVRREP extends AODVControlPacket
 //
 // Represents an AODV Route Error
 //
-class AODVRERR extends AODVControlPacket
+class AodvRerr extends AodvControlPacket
 {
     packetType = RERR;
     UnreachableNode unreachableNodes[];
@@ -97,7 +97,7 @@ class AODVRERR extends AODVControlPacket
 //
 // Represents an AODV Route Reply ACK
 //
-class AODVRREPACK extends AODVControlPacket
+class AodvRrepAck extends AodvControlPacket
 {
     packetType = RREPACK;
 }
@@ -105,7 +105,7 @@ class AODVRREPACK extends AODVControlPacket
 //
 // Represents a timer for a Route Reply packet
 //
-message WaitForRREP
+message WaitForRrep
 {
     L3Address destAddr;
     unsigned int lastTTL;

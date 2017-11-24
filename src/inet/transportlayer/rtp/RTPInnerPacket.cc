@@ -23,16 +23,16 @@ namespace inet {
 
 namespace rtp {
 
-Register_Class(RTPInnerPacket);
+Register_Class(RtpInnerPacket);
 
-std::string RTPInnerPacket::info() const
+std::string RtpInnerPacket::info() const
 {
     std::stringstream out;
     out << "RTPInnerPacket: type=" << type;
     return out.str();
 }
 
-void RTPInnerPacket::dump(std::ostream& os) const
+void RtpInnerPacket::dump(std::ostream& os) const
 {
     os << "RTPInnerPacket:" << endl;
     os << "  type = " << type << endl;
@@ -50,20 +50,20 @@ void RTPInnerPacket::dump(std::ostream& os) const
     os << "  sequenceNumberBase = " << sequenceNumberBase << endl;
 }
 
-void RTPInnerPacket::setInitializeProfilePkt(int mtu_par)
+void RtpInnerPacket::setInitializeProfilePkt(int mtu_par)
 {
     type = RTP_INP_INITIALIZE_PROFILE;
     mtu = mtu_par;
 }
 
-void RTPInnerPacket::setProfileInitializedPkt(int rtcpPercentage_par, int port_par)
+void RtpInnerPacket::setProfileInitializedPkt(int rtcpPercentage_par, int port_par)
 {
     type = RTP_INP_PROFILE_INITIALIZED;
     rtcpPercentage = rtcpPercentage_par;
     port = port_par;
 }
 
-void RTPInnerPacket::setInitializeRTCPPkt(const char *commonName_par, int mtu_par, int bandwidth_par, int rtcpPercentage_par, IPv4Address address_par, int port_par)
+void RtpInnerPacket::setInitializeRTCPPkt(const char *commonName_par, int mtu_par, int bandwidth_par, int rtcpPercentage_par, Ipv4Address address_par, int port_par)
 {
     type = RTP_INP_INITIALIZE_RTCP;
     commonName = commonName_par;
@@ -74,13 +74,13 @@ void RTPInnerPacket::setInitializeRTCPPkt(const char *commonName_par, int mtu_pa
     port = port_par;
 }
 
-void RTPInnerPacket::setRtcpInitializedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setRtcpInitializedPkt(uint32 ssrc_par)
 {
     type = RTP_INP_RTCP_INITIALIZED;
     ssrc = ssrc_par;
 }
 
-void RTPInnerPacket::setCreateSenderModulePkt(uint32 ssrc_par, int payloadType_par, const char *fileName_par)
+void RtpInnerPacket::setCreateSenderModulePkt(uint32 ssrc_par, int payloadType_par, const char *fileName_par)
 {
     type = RTP_INP_CREATE_SENDER_MODULE;
     ssrc = ssrc_par;
@@ -88,25 +88,25 @@ void RTPInnerPacket::setCreateSenderModulePkt(uint32 ssrc_par, int payloadType_p
     fileName = fileName_par;
 }
 
-void RTPInnerPacket::setSenderModuleCreatedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setSenderModuleCreatedPkt(uint32 ssrc_par)
 {
     type = RTP_INP_SENDER_MODULE_CREATED;
     ssrc = ssrc_par;
 }
 
-void RTPInnerPacket::setDeleteSenderModulePkt(uint32 ssrc_par)
+void RtpInnerPacket::setDeleteSenderModulePkt(uint32 ssrc_par)
 {
     type = RTP_INP_DELETE_SENDER_MODULE;
     ssrc = ssrc_par;
 }
 
-void RTPInnerPacket::setSenderModuleDeletedPkt(uint32 ssrc_par)
+void RtpInnerPacket::setSenderModuleDeletedPkt(uint32 ssrc_par)
 {
     type = RTP_INP_SENDER_MODULE_DELETED;
     ssrc = ssrc_par;
 }
 
-void RTPInnerPacket::setInitializeSenderModulePkt(uint32 ssrc_par, const char *fileName_par, int mtu_par)
+void RtpInnerPacket::setInitializeSenderModulePkt(uint32 ssrc_par, const char *fileName_par, int mtu_par)
 {
     type = RTP_INP_INITIALIZE_SENDER_MODULE;
     ssrc = ssrc_par;
@@ -114,7 +114,7 @@ void RTPInnerPacket::setInitializeSenderModulePkt(uint32 ssrc_par, const char *f
     mtu = mtu_par;
 }
 
-void RTPInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc_par, int payloadType_par, int clockRate_par, int timeStampBase_par, int sequenceNumberBase_par)
+void RtpInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc_par, int payloadType_par, int clockRate_par, int timeStampBase_par, int sequenceNumberBase_par)
 {
     type = RTP_INP_SENDER_MODULE_INITIALIZED;
     ssrc = ssrc_par;
@@ -124,37 +124,37 @@ void RTPInnerPacket::setSenderModuleInitializedPkt(uint32 ssrc_par, int payloadT
     sequenceNumberBase = sequenceNumberBase_par;
 }
 
-void RTPInnerPacket::setSenderModuleControlPkt(uint32 ssrc_par, RTPSenderControlMessage *msg)
+void RtpInnerPacket::setSenderModuleControlPkt(uint32 ssrc_par, RtpSenderControlMessage *msg)
 {
     type = RTP_INP_SENDER_MODULE_CONTROL;
     ssrc = ssrc_par;
     encapsulate(msg);
 }
 
-void RTPInnerPacket::setSenderModuleStatusPkt(uint32 ssrc_par, RTPSenderStatusMessage *msg)
+void RtpInnerPacket::setSenderModuleStatusPkt(uint32 ssrc_par, RtpSenderStatusMessage *msg)
 {
     type = RTP_INP_SENDER_MODULE_STATUS;
     ssrc = ssrc_par;
     encapsulate(msg);
 }
 
-void RTPInnerPacket::setLeaveSessionPkt()
+void RtpInnerPacket::setLeaveSessionPkt()
 {
     type = RTP_INP_LEAVE_SESSION;
 }
 
-void RTPInnerPacket::setSessionLeftPkt()
+void RtpInnerPacket::setSessionLeftPkt()
 {
     type = RTP_INP_SESSION_LEFT;
 }
 
-void RTPInnerPacket::setDataOutPkt(Packet *packet)
+void RtpInnerPacket::setDataOutPkt(Packet *packet)
 {
     type = RTP_INP_DATA_OUT;
     encapsulate(packet);
 }
 
-void RTPInnerPacket::setDataInPkt(Packet *packet, IPv4Address address_par, int port_par)
+void RtpInnerPacket::setDataInPkt(Packet *packet, Ipv4Address address_par, int port_par)
 {
     type = RTP_INP_DATA_IN;
     address = address_par;

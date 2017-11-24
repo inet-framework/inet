@@ -36,7 +36,7 @@ import inet.applications.contract.IApp;
 // The playout delay, buffer space, the UDP port to listen on, and other input 
 // can be specified in module parameters.
 //
-simple SimpleVoIPReceiver like IApp
+simple SimpleVoipReceiver like IApp
 {
     parameters:
         int localPort;
@@ -65,7 +65,7 @@ simple SimpleVoIPReceiver like IApp
 
         @display("i=block/source");
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 

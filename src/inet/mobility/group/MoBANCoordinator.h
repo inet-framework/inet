@@ -54,7 +54,7 @@
 
 namespace inet {
 
-class MoBANLocal;
+class MoBanLocal;
 
 /**
    *\page mobancpp MoBAN C++ reference
@@ -91,11 +91,11 @@ class MoBANLocal;
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
+class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
 {
   protected:
     /** @brief The mobility modules of the nodes in this WBAN */
-    std::vector<MoBANLocal *> localModules;
+    std::vector<MoBanLocal *> localModules;
 
     /** @brief Currently selected speed for the mobile posture */
     double speed;
@@ -213,8 +213,8 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     void computeMaxSpeed();
 
   public:
-    MoBANCoordinator();
-    ~MoBANCoordinator();
+    MoBanCoordinator();
+    ~MoBanCoordinator();
     virtual double getMaxSpeed() const override { return maxSpeed; }
 };
 

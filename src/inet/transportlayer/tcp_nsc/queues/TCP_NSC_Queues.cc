@@ -27,32 +27,32 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCP_NSC_SendQueue);
+Register_Class(TcpNscSendQueue);
 
-Register_Class(TCP_NSC_ReceiveQueue);
+Register_Class(TcpNscReceiveQueue);
 
-TCP_NSC_SendQueue::TCP_NSC_SendQueue()
+TcpNscSendQueue::TcpNscSendQueue()
 {
 }
 
-TCP_NSC_SendQueue::~TCP_NSC_SendQueue()
+TcpNscSendQueue::~TcpNscSendQueue()
 {
 }
 
-void TCP_NSC_SendQueue::setConnection(TCP_NSC_Connection *connP)
+void TcpNscSendQueue::setConnection(TcpNscConnection *connP)
 {
     dataBuffer.clear();
     connM = connP;
 }
 
-void TCP_NSC_SendQueue::enqueueAppData(Packet *msg)
+void TcpNscSendQueue::enqueueAppData(Packet *msg)
 {
     ASSERT(msg);
     dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
     delete msg;
 }
 
-int TCP_NSC_SendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
+int TcpNscSendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -66,17 +66,17 @@ int TCP_NSC_SendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) con
     return bytesChunk->copyToBuffer((uint8_t*)bufferP, length);
 }
 
-void TCP_NSC_SendQueue::dequeueTcpLayerMsg(int msgLengthP)
+void TcpNscSendQueue::dequeueTcpLayerMsg(int msgLengthP)
 {
     dataBuffer.pop(B(msgLengthP));
 }
 
-ulong TCP_NSC_SendQueue::getBytesAvailable() const
+ulong TcpNscSendQueue::getBytesAvailable() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
+Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -103,23 +103,23 @@ Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpL
     return packet;
 }
 
-void TCP_NSC_SendQueue::discardUpTo(uint32 seqNumP)
+void TcpNscSendQueue::discardUpTo(uint32 seqNumP)
 {
     // nothing to do here
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-TCP_NSC_ReceiveQueue::TCP_NSC_ReceiveQueue()
+TcpNscReceiveQueue::TcpNscReceiveQueue()
 {
 }
 
-TCP_NSC_ReceiveQueue::~TCP_NSC_ReceiveQueue()
+TcpNscReceiveQueue::~TcpNscReceiveQueue()
 {
     // nothing to do here
 }
 
-void TCP_NSC_ReceiveQueue::setConnection(TCP_NSC_Connection *connP)
+void TcpNscReceiveQueue::setConnection(TcpNscConnection *connP)
 {
     ASSERT(connP);
 
@@ -127,19 +127,19 @@ void TCP_NSC_ReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     connM = connP;
 }
 
-void TCP_NSC_ReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
+void TcpNscReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
 {
     ASSERT(packet);
 }
 
-void TCP_NSC_ReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
+void TcpNscReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
     const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
     bytes->markImmutable();
     dataBuffer.push(bytes);
 }
 
-cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
+cPacket *TcpNscReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
@@ -156,22 +156,22 @@ cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TCP_NSC_ReceiveQueue::getAmountOfBufferedBytes() const
+uint32 TcpNscReceiveQueue::getAmountOfBufferedBytes() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-uint32 TCP_NSC_ReceiveQueue::getQueueLength() const
+uint32 TcpNscReceiveQueue::getQueueLength() const
 {
     return B(dataBuffer.getLength()).get();
 }
 
-void TCP_NSC_ReceiveQueue::getQueueStatus() const
+void TcpNscReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
 
-void TCP_NSC_ReceiveQueue::notifyAboutSending(const Packet *packet)
+void TcpNscReceiveQueue::notifyAboutSending(const Packet *packet)
 {
     // nothing to do
 }

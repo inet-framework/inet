@@ -405,7 +405,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
-            const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
+            const ISnir *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
             const IReceiver *receiver = receiverRadio->getReceiver();
             bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
             double packetErrorRate;

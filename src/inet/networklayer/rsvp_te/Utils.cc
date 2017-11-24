@@ -17,12 +17,12 @@
 
 namespace inet {
 
-std::string vectorToString(const IPv4AddressVector& vec)
+std::string vectorToString(const Ipv4AddressVector& vec)
 {
     return vectorToString(vec, ", ");
 }
 
-std::string vectorToString(const IPv4AddressVector& vec, const char *delim)
+std::string vectorToString(const Ipv4AddressVector& vec, const char *delim)
 {
     std::ostringstream stream;
     for (unsigned int i = 0; i < vec.size(); i++) {
@@ -54,12 +54,12 @@ std::string vectorToString(const EroVector& vec, const char *delim)
     return str;
 }
 
-EroVector routeToEro(const IPv4AddressVector& rro)
+EroVector routeToEro(const Ipv4AddressVector& rro)
 {
     EroVector ero;
 
     for (auto & elem : rro) {
-        EroObj_t hop;
+        EroObj hop;
         hop.L = false;
         hop.node = elem;
         ero.push_back(hop);
@@ -83,7 +83,7 @@ void removeDuplicates(std::vector<int>& vec)
     }
 }
 
-int find(const EroVector& ERO, IPv4Address node)
+int find(const EroVector& ERO, Ipv4Address node)
 {
     for (unsigned int i = 0; i < ERO.size(); i++)
         if (ERO[i].node == node)
@@ -102,7 +102,7 @@ bool find(std::vector<int>& vec, int value)
     return false;
 }
 
-bool find(const IPv4AddressVector& vec, IPv4Address addr)
+bool find(const Ipv4AddressVector& vec, Ipv4Address addr)
 {
     for (auto & elem : vec)
         if (elem == addr)

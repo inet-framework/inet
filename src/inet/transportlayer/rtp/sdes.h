@@ -28,7 +28,7 @@ namespace rtp {
  * The class SDESItem is used for storing a source description item
  * (type of description, description string) for an RTP end system.
  */
-class INET_API SDESItem : public cObject
+class INET_API SdesItem : public cObject
 {
   public:
     /**
@@ -36,7 +36,7 @@ class INET_API SDESItem : public cObject
      * as defined in the RFC. In this implementation only SDES_UNDEF
      * and SDES_CNAME are usable.
      */
-    enum SDES_ITEM_TYPE {
+    enum SdesItemType {
         SDES_UNDEF = 0,
         SDES_CNAME = 1,
         SDES_NAME = 2,
@@ -51,32 +51,32 @@ class INET_API SDESItem : public cObject
     /**
      * Default constructor.
      */
-    SDESItem();
+    SdesItem();
 
     /**
      * Constructor which sets the entry.
      */
-    SDESItem(SDES_ITEM_TYPE type, const char *content);
+    SdesItem(SdesItemType type, const char *content);
 
     /**
      * Copy constructor.
      */
-    SDESItem(const SDESItem& sdesItem);
+    SdesItem(const SdesItem& sdesItem);
 
     /**
      * Destructor.
      */
-    virtual ~SDESItem();
+    virtual ~SdesItem();
 
     /**
      * Assignment operator.
      */
-    SDESItem& operator=(const SDESItem& sdesItem);
+    SdesItem& operator=(const SdesItem& sdesItem);
 
     /**
      * Duplicates theis SDESItem by calling the copy constructor.
      */
-    virtual SDESItem *dup() const override;
+    virtual SdesItem *dup() const override;
 
     /**
      * Writes a short info about this SDESItem into the given string.
@@ -91,7 +91,7 @@ class INET_API SDESItem : public cObject
     /**
      * Returns the type of this sdes item.
      */
-    virtual SDES_ITEM_TYPE getType() const;
+    virtual SdesItemType getType() const;
 
     /**
      * Returns the stored sdes string.
@@ -105,14 +105,14 @@ class INET_API SDESItem : public cObject
     virtual int getLength() const;
 
   private:
-    void copy(const SDESItem& other);
+    void copy(const SdesItem& other);
     void clean() {}    //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
 
   protected:
     /**
      * The type of this SDESItem.
      */
-    SDES_ITEM_TYPE _type;
+    SdesItemType _type;
 
     /**
      * The length of this SDESItem.
@@ -129,33 +129,33 @@ class INET_API SDESItem : public cObject
  * The class SDESChunk is used for storing SDESItem objects
  * for one rtp end system.
  */
-class INET_API SDESChunk : public cArray
+class INET_API SdesChunk : public cArray
 {
   public:
     /**
      * Default constructor.
      */
-    SDESChunk(const char *name = nullptr, uint32 ssrc = 0);
+    SdesChunk(const char *name = nullptr, uint32 ssrc = 0);
 
     /**
      * Copy constructor.
      */
-    SDESChunk(const SDESChunk& sdesChunk);
+    SdesChunk(const SdesChunk& sdesChunk);
 
     /**
      * Destructor.
      */
-    virtual ~SDESChunk();
+    virtual ~SdesChunk();
 
     /**
      * Operator equal.
      */
-    SDESChunk& operator=(const SDESChunk& sdesChunk);
+    SdesChunk& operator=(const SdesChunk& sdesChunk);
 
     /**
      * Duplicates this SDESChunk by calling the copy constructor.
      */
-    virtual SDESChunk *dup() const override;
+    virtual SdesChunk *dup() const override;
 
     /**
      * Writes a short info about this SDESChunk into the given string.
@@ -171,7 +171,7 @@ class INET_API SDESChunk : public cArray
      * Adds an SDESItem to this SDESChunk. If there is already an SDESItem
      * of the same type in this SDESChunk it is replaced by the new one.
      */
-    virtual void addSDESItem(SDESItem *item);
+    virtual void addSDESItem(SdesItem *item);
 
     /**
      * Returns the ssrc identifier this SDESChunk is for.
@@ -189,7 +189,7 @@ class INET_API SDESChunk : public cArray
     virtual int getLength() const;
 
   private:
-    void copy(const SDESChunk& other);
+    void copy(const SdesChunk& other);
 
   protected:
     /**

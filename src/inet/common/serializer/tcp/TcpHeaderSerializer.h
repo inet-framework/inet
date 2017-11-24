@@ -29,8 +29,8 @@ namespace serializer {
 class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeOption(MemoryOutputStream& stream, const inet::tcp::TCPOption *option) const;
-    virtual inet::tcp::TCPOption *deserializeOption(MemoryInputStream& stream) const;
+    virtual void serializeOption(MemoryOutputStream& stream, const inet::tcp::TcpOption *option) const;
+    virtual inet::tcp::TcpOption *deserializeOption(MemoryInputStream& stream) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;

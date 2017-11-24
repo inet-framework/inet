@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API _2GFSKModulation : public GFSKModulationBase
+class INET_API _2GfskModulation : public GfskModulationBase
 {
   public:
-    static const _2GFSKModulation singleton;
+    static const _2GfskModulation singleton;
 
   public:
-    _2GFSKModulation();
+    _2GfskModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "2GFSKModulation"; }
 };

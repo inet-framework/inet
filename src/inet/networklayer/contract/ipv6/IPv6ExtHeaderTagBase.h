@@ -29,22 +29,22 @@ class Ipv6ExtensionHeader;
  *
  * See the IPv6ExtHeaderTagBase.msg file for more info.
  */
-class INET_API IPv6ExtHeaderTagBase : public IPv6ExtHeaderTagBase_Base
+class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
 {
   protected:
     typedef std::vector<Ipv6ExtensionHeader *> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
   private:
-    void copy(const IPv6ExtHeaderTagBase& other);
+    void copy(const Ipv6ExtHeaderTagBase& other);
     void clean();
 
   public:
-    IPv6ExtHeaderTagBase() : IPv6ExtHeaderTagBase_Base() { }
-    virtual ~IPv6ExtHeaderTagBase();
-    IPv6ExtHeaderTagBase(const IPv6ExtHeaderTagBase& other) : IPv6ExtHeaderTagBase_Base(other) { copy(other); }
-    IPv6ExtHeaderTagBase& operator=(const IPv6ExtHeaderTagBase& other);
-    virtual IPv6ExtHeaderTagBase *dup() const override { return new IPv6ExtHeaderTagBase(*this); }
+    Ipv6ExtHeaderTagBase() : Ipv6ExtHeaderTagBase_Base() { }
+    virtual ~Ipv6ExtHeaderTagBase();
+    Ipv6ExtHeaderTagBase(const Ipv6ExtHeaderTagBase& other) : Ipv6ExtHeaderTagBase_Base(other) { copy(other); }
+    Ipv6ExtHeaderTagBase& operator=(const Ipv6ExtHeaderTagBase& other);
+    virtual Ipv6ExtHeaderTagBase *dup() const override { return new Ipv6ExtHeaderTagBase(*this); }
 
     /**
      * Returns the number of extension headers in this datagram

@@ -21,23 +21,23 @@ namespace inet {
 
 namespace physicallayer {
 
-IdealSNIR::IdealSNIR(const IReception *reception, const INoise *noise) :
-    SNIRBase(reception, noise)
+IdealSnir::IdealSnir(const IReception *reception, const INoise *noise) :
+    SnirBase(reception, noise)
 {
 }
 
-std::ostream& IdealSNIR::printToStream(std::ostream& stream, int level) const
+std::ostream& IdealSnir::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealSNIR";
     return stream;
 }
 
-double IdealSNIR::getMin() const
+double IdealSnir::getMin() const
 {
     return NaN;
 }
 
-double IdealSNIR::getMax() const
+double IdealSnir::getMax() const
 {
     return NaN;
 }

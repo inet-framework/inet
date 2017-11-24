@@ -81,7 +81,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
         // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.getNode(i)->getModule();
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(mod);
-        IPv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(mod);
+        Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(mod);
 
         // skip non-IPv6 nodes
         if (!rt)
@@ -100,10 +100,10 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
                 continue; // already has one
 
             // add a prefix
-            IPv6Address prefix(0xaaaa0000 + nodeIndex, ie->getInterfaceId() << 16, 0, 0);
+            Ipv6Address prefix(0xaaaa0000 + nodeIndex, ie->getInterfaceId() << 16, 0, 0);
             ASSERT(prefix.isGlobal());
 
-            IPv6InterfaceData::AdvPrefix p;
+            Ipv6InterfaceData::AdvPrefix p;
             p.prefix = prefix;
             p.prefixLength = 64;
             // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
@@ -124,7 +124,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 
             // add a link-local address (tentative) if it doesn't have one
             if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
-                ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+                ie->ipv6Data()->assignAddress(Ipv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
         }
     }
 }
@@ -139,7 +139,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
         if (!isIPNode(node))
             continue;
 
-        IPv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(node->getModule());
+        Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(node->getModule());
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(node->getModule());
 
         // skip non-IPv6 nodes
@@ -187,7 +187,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
  */
 
         numIPNodes++;    // FIXME split into num hosts, num routers
-        IPv6RoutingTable *destRt = L3AddressResolver().findIPv6RoutingTableOf(destNode->getModule());
+        Ipv6RoutingTable *destRt = L3AddressResolver().findIPv6RoutingTableOf(destNode->getModule());
         IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode->getModule());
 
         // skip non-IPv6 nodes
@@ -199,7 +199,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             continue;
 
         // get a list of globally routable prefixes from the dest node
-        std::vector<const IPv6InterfaceData::AdvPrefix *> destPrefixes;
+        std::vector<const Ipv6InterfaceData::AdvPrefix *> destPrefixes;
         for (int x = 0; x < destIft->getNumInterfaces(); x++) {
             InterfaceEntry *destIf = destIft->getInterface(x);
 
@@ -228,7 +228,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             if (atNode->getNumPaths() == 0)
                 continue; // not connected
 
-            IPv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(atNode->getModule());
+            Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(atNode->getModule());
             IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(atNode->getModule());
 
             // skip non-IPv6 nodes
@@ -259,7 +259,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop
-            IPv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6Data()->getLinkLocalAddress();
+            Ipv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6Data()->getLinkLocalAddress();
 
             // traverse through address of each node
             // add to route table

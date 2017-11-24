@@ -29,10 +29,10 @@ namespace inet {
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInterface
 {
   protected:
-    TCPSocket socket;
+    TcpSocket socket;
 
     // statistics
     int numSessions;
@@ -64,7 +64,7 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override { delete status; }
+    virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override { delete status; }
 };
 
 } // namespace inet

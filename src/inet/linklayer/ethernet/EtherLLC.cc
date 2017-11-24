@@ -30,14 +30,14 @@
 
 namespace inet {
 
-Define_Module(EtherLLC);
+Define_Module(EtherLlc);
 
-simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");
-simsignal_t EtherLLC::encapPkSignal = registerSignal("encapPk");
-simsignal_t EtherLLC::decapPkSignal = registerSignal("decapPk");
-simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
+simsignal_t EtherLlc::dsapSignal = registerSignal("dsap");
+simsignal_t EtherLlc::encapPkSignal = registerSignal("encapPk");
+simsignal_t EtherLlc::decapPkSignal = registerSignal("decapPk");
+simsignal_t EtherLlc::pauseSentSignal = registerSignal("pauseSent");
 
-void EtherLLC::initialize(int stage)
+void EtherLlc::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -63,7 +63,7 @@ void EtherLLC::initialize(int stage)
     }
 }
 
-void EtherLLC::handleMessage(cMessage *msg)
+void EtherLlc::handleMessage(cMessage *msg)
 {
     if (!isUp) {
         EV << "EtherLLC is down -- discarding message\n";
@@ -104,7 +104,7 @@ void EtherLLC::handleMessage(cMessage *msg)
     }
 }
 
-void EtherLLC::refreshDisplay() const
+void EtherLlc::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalPassedUp, totalFromHigherLayer);
@@ -116,7 +116,7 @@ void EtherLLC::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void EtherLLC::processPacketFromHigherLayer(Packet *packet)
+void EtherLlc::processPacketFromHigherLayer(Packet *packet)
 {
     if (packet->getByteLength() > (MAX_ETHERNET_DATA_BYTES - ETHER_LLC_HEADER_LENGTH))
         throw cRuntimeError("packet from higher layer (%d bytes) plus LLC header exceeds maximum Ethernet payload length (%d)", (int)(packet->getByteLength()), MAX_ETHERNET_DATA_BYTES);
@@ -150,7 +150,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
     send(packet, "lowerLayerOut");
 }
 
-void EtherLLC::processFrameFromMAC(Packet *packet)
+void EtherLlc::processFrameFromMAC(Packet *packet)
 {
     // decapsulate it and pass up to higher layer
 
@@ -199,13 +199,13 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
     send(packet, "upperLayerOut", port);
 }
 
-int EtherLLC::findPortForSAP(int dsap)
+int EtherLlc::findPortForSAP(int dsap)
 {
     auto it = dsapToPort.find(dsap);
     return (it == dsapToPort.end()) ? -1 : it->second;
 }
 
-void EtherLLC::handleRegisterSAP(cMessage *msg)
+void EtherLlc::handleRegisterSAP(cMessage *msg)
 {
     int port = msg->getArrivalGate()->getIndex();
     Ieee802RegisterDsapCommand *etherctrl = dynamic_cast<Ieee802RegisterDsapCommand *>(msg->getControlInfo());
@@ -224,7 +224,7 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
     delete msg;
 }
 
-void EtherLLC::handleDeregisterSAP(cMessage *msg)
+void EtherLlc::handleDeregisterSAP(cMessage *msg)
 {
     Ieee802DeregisterDsapCommand *etherctrl = dynamic_cast<Ieee802DeregisterDsapCommand *>(msg->getControlInfo());
     if (!etherctrl)
@@ -243,12 +243,12 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
     delete msg;
 }
 
-void EtherLLC::handleSendPause(cMessage *msg)
+void EtherLlc::handleSendPause(cMessage *msg)
 {
     Ieee802PauseCommand *etherctrl = dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802PauseCommand controlinfo", msg->getName());
-    MACAddress dest = etherctrl->getDestinationAddress();
+    MacAddress dest = etherctrl->getDestinationAddress();
     int pauseUnits = etherctrl->getPauseUnits();
     delete msg;
 
@@ -262,7 +262,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     const auto& hdr = makeShared<EthernetMacHeader>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
-        dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
+        dest = MacAddress::MULTICAST_PAUSE_ADDRESS;
     hdr->setDest(dest);
     packet->insertHeader(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
@@ -276,7 +276,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     emit(pauseSentSignal, pauseUnits);
 }
 
-bool EtherLLC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherLlc::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -294,14 +294,14 @@ bool EtherLLC::handleOperationStage(LifecycleOperation *operation, int stage, ID
     return true;
 }
 
-void EtherLLC::start()
+void EtherLlc::start()
 {
     dsapToPort.clear();
     dsapsRegistered = dsapToPort.size();
     isUp = true;
 }
 
-void EtherLLC::stop()
+void EtherLlc::stop()
 {
     dsapToPort.clear();
     dsapsRegistered = dsapToPort.size();

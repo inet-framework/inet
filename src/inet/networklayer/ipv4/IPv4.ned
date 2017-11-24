@@ -112,8 +112,8 @@ simple IPv4
         @statistic[packetDropNoRouteFound](title="packet drop: no route found"; source=packetDropReasonIsNoRouteFound(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UdpHeader);
-        output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UdpHeader);
-        input queueIn @labels(Ipv4Header,ARPPacket,Ieee802Ctrl);
-        output queueOut @labels(Ipv4Header,ARPPacket,Ieee802Ctrl);
+        input transportIn @labels(Ipv4ControlInfo/down,TCPSegment,UdpHeader);
+        output transportOut @labels(Ipv4ControlInfo/up,TCPSegment,UdpHeader);
+        input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
+        output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
 }

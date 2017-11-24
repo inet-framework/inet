@@ -18,7 +18,7 @@ enum StateKind
     ROUTER_IF_STATE = 0x04,
 };
 
-class INET_API TestIGMP : public IGMPv2, public IScriptable
+class INET_API TestIGMP : public Igmpv2, public IScriptable
 {
   private:
      std::ofstream out;
@@ -29,22 +29,22 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
 //     IGMPRouterGroupState st2;
 //     IGMPRouterState currentRouterGroupState;
   protected:
-    typedef IPv4InterfaceData::IPv4AddressVector IPv4AddressVector;
+    typedef Ipv4InterfaceData::Ipv4AddressVector Ipv4AddressVector;
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void configureInterface(InterfaceEntry *ie) override;
-    virtual void processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& igmp) override;
+    virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
     virtual void processQueryTimer(cMessage *msg) override;
     virtual void processLeaveTimer(cMessage *msg) override;
     virtual void processRexmtTimer(cMessage *msg) override;
     virtual void processCommand(const cXMLElement &node) override;
-    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest) override;
+    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest) override;
   private:
-    void dumpMulticastGroups(const char* name, const char *ifname, IPv4AddressVector groups);
-    void startEvent(const char *event, int stateMask, InterfaceEntry *ie, const IPv4Address *group = NULL);
-    void endEvent(int stateMask, InterfaceEntry *ie, const IPv4Address *group = NULL);
-    void printStates(int stateMask, InterfaceEntry *ie, const IPv4Address *group);
+    void dumpMulticastGroups(const char* name, const char *ifname, Ipv4AddressVector groups);
+    void startEvent(const char *event, int stateMask, InterfaceEntry *ie, const Ipv4Address *group = NULL);
+    void endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *group = NULL);
+    void printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address *group);
 };
 
 Define_Module(TestIGMP);
@@ -63,57 +63,57 @@ void TestIGMP::initialize(int stage)
         }
     }
 
-    IGMPv2::initialize(stage);
+    Igmpv2::initialize(stage);
 }
 
 void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    const IPv4MulticastGroupInfo *info;
+    const Ipv4MulticastGroupInfo *info;
     if (signalID == NF_IPv4_MCAST_JOIN)
     {
-        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
+        info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-        IGMPv2::receiveSignal(source, signalID, obj, details);
+        Igmpv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
     else if (signalID == NF_IPv4_MCAST_LEAVE)
     {
-        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
+        info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-        IGMPv2::receiveSignal(source, signalID, obj, details);
+        Igmpv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
     else
     {
-        IGMPv2::receiveSignal(source, signalID, obj, details);
+        Igmpv2::receiveSignal(source, signalID, obj, details);
     }
 }
 
 void TestIGMP::configureInterface(InterfaceEntry *ie)
 {
     startEvent("configure interface", ROUTER_IF_STATE, ie);
-    IGMPv2::configureInterface(ie);
+    Igmpv2::configureInterface(ie);
     endEvent(ROUTER_IF_STATE, ie);
 }
 
 
-void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& igmp)
+void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
-    IPv4Address group = IPv4Address::UNSPECIFIED_ADDRESS;
+    Ipv4Address group = Ipv4Address::UNSPECIFIED_ADDRESS;
     switch (igmp->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
-            group = packet->peekHeader<IGMPQuery>()->getGroupAddress();
+            group = packet->peekHeader<IgmpQuery>()->getGroupAddress();
             break;
         case IGMPV1_MEMBERSHIP_REPORT:
-            group = packet->peekHeader<IGMPv1Report>()->getGroupAddress();
+            group = packet->peekHeader<Igmpv1Report>()->getGroupAddress();
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
-            group = packet->peekHeader<IGMPv2Report>()->getGroupAddress();
+            group = packet->peekHeader<Igmpv2Report>()->getGroupAddress();
             break;
         case IGMPV2_LEAVE_GROUP:
-            group = packet->peekHeader<IGMPv2Leave>()->getGroupAddress();
+            group = packet->peekHeader<Igmpv2Leave>()->getGroupAddress();
             break;
     }
     int stateMask = 0;
@@ -127,30 +127,30 @@ void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IGMPMessage>& 
     {
         case IGMP_MEMBERSHIP_QUERY:
             startEvent("query received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
             startEvent("report received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_LEAVE_GROUP:
             startEvent("leave received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         default:
-            IGMPv2::processIgmpMessage(packet, igmp);
+            Igmpv2::processIgmpMessage(packet, igmp);
             break;
     }
 }
 
 void TestIGMP::processHostGroupTimer(cMessage *msg)
 {
-    IGMPHostTimerContext *ctx = (IGMPHostTimerContext*)msg->getContextPointer();
+    IgmpHostTimerContext *ctx = (IgmpHostTimerContext*)msg->getContextPointer();
     startEvent("timer expired", HOST_GROUP_STATE, ctx->ie, &ctx->hostGroup->groupAddr);
-    IGMPv2::processHostGroupTimer(msg);
+    Igmpv2::processHostGroupTimer(msg);
     endEvent(HOST_GROUP_STATE, ctx->ie, &ctx->hostGroup->groupAddr);
 }
 
@@ -161,33 +161,33 @@ void TestIGMP::processQueryTimer(cMessage *msg)
     const char *event = routerData && routerData->igmpRouterState == IGMP_RS_QUERIER ? "gen. query timer expired" :
                                                                                        "other querier present timer expired";
     startEvent(event, ROUTER_IF_STATE, ie);
-    IGMPv2::processQueryTimer(msg);
+    Igmpv2::processQueryTimer(msg);
     endEvent(ROUTER_IF_STATE, ie);
 }
 
 void TestIGMP::processLeaveTimer(cMessage *msg)
 {
-    IGMPRouterTimerContext *ctx = (IGMPRouterTimerContext*)msg->getContextPointer();
+    IgmpRouterTimerContext *ctx = (IgmpRouterTimerContext*)msg->getContextPointer();
     InterfaceEntry *ie = ctx->ie;
-    IPv4Address group = ctx->routerGroup->groupAddr;
+    Ipv4Address group = ctx->routerGroup->groupAddr;
     startEvent("timer expired", ROUTER_GROUP_STATE, ie, &group);
-    IGMPv2::processLeaveTimer(msg);
+    Igmpv2::processLeaveTimer(msg);
     endEvent(ROUTER_GROUP_STATE, ie, &group);
 }
 
 void TestIGMP::processRexmtTimer(cMessage *msg)
 {
-    IGMPRouterTimerContext *ctx = (IGMPRouterTimerContext*)msg->getContextPointer();
+    IgmpRouterTimerContext *ctx = (IgmpRouterTimerContext*)msg->getContextPointer();
     startEvent("rexmt timer expired", ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
-    IGMPv2::processRexmtTimer(msg);
+    Igmpv2::processRexmtTimer(msg);
     endEvent(ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
 }
 
-void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest)
+void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
 {
     if (out.is_open())
     {
-        const auto& igmp = CHK(msg->peekHeader<IGMPMessage>());
+        const auto& igmp = CHK(msg->peekHeader<IgmpMessage>());
         switch (igmp->getType())
         {
             case IGMP_MEMBERSHIP_QUERY:
@@ -199,7 +199,7 @@ void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest
                 out << "send leave"; break;
         }
     }
-    IGMPv2::sendToIP(msg, ie, dest);
+    Igmpv2::sendToIP(msg, ie, dest);
 }
 
 void TestIGMP::processCommand(const cXMLElement &node)
@@ -213,12 +213,12 @@ void TestIGMP::processCommand(const cXMLElement &node)
   if (!strcmp(tag, "join"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->joinMulticastGroup(IPv4Address(group));
+    ie->ipv4Data()->joinMulticastGroup(Ipv4Address(group));
   }
   else if (!strcmp(tag, "leave"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->leaveMulticastGroup(IPv4Address(group));
+    ie->ipv4Data()->leaveMulticastGroup(Ipv4Address(group));
   }
   else if (!strcmp(tag, "dump"))
   {
@@ -227,7 +227,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
     {
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
-        IPv4AddressVector joinedGroups;
+        Ipv4AddressVector joinedGroups;
         const int count = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
         for (int i = 0; i < count; ++i)
             joinedGroups.push_back(ie->ipv4Data()->getJoinedMulticastGroup(i));
@@ -237,7 +237,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
     {
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
-        IPv4AddressVector reportedGroups;
+        Ipv4AddressVector reportedGroups;
         const int count = ie->ipv4Data()->getNumOfReportedMulticastGroups();
         for (int i = 0; i < count; ++i)
             reportedGroups.push_back(ie->ipv4Data()->getReportedMulticastGroup(i));
@@ -258,7 +258,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
       if (!strcmp(what,"query"))
       {
           const char *groupAttr = node.getAttribute("group");
-          IPv4Address group = groupAttr ? IPv4Address(groupAttr) : IPv4Address::UNSPECIFIED_ADDRESS;
+          Ipv4Address group = groupAttr ? Ipv4Address(groupAttr) : Ipv4Address::UNSPECIFIED_ADDRESS;
           const char *maxRespTimeAttr = node.getAttribute("maxRespTime");
           double maxRespTime = maxRespTimeAttr ? atof(maxRespTimeAttr) : queryResponseInterval;
           sendQuery(ie, group, maxRespTime);
@@ -266,7 +266,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
   }
 }
 
-void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie, const IPv4Address *group)
+void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
     if (out.is_open())
     {
@@ -279,7 +279,7 @@ void TestIGMP::startEvent(const char * event, int stateMask, InterfaceEntry *ie,
     }
 }
 
-void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const IPv4Address *group)
+void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
     if (out.is_open())
     {
@@ -290,7 +290,7 @@ void TestIGMP::endEvent(int stateMask, InterfaceEntry *ie, const IPv4Address *gr
     }
 }
 
-void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const IPv4Address *group)
+void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const Ipv4Address *group)
 {
     if (stateMask & ROUTER_IF_STATE)
     {
@@ -343,7 +343,7 @@ void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const IPv4Address 
     }
 }
 
-void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, IPv4AddressVector groups)
+void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, Ipv4AddressVector groups)
 {
   if (!out.is_open())
       return;
@@ -351,7 +351,7 @@ void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, IPv4Add
   out << "t=" << simTime() << " " << node->getFullName() << "/" << ifname << ": " << name << " = <";
 
   sort(groups.begin(), groups.end());
-  for (IPv4AddressVector::iterator it = groups.begin(); it != groups.end(); ++it)
+  for (Ipv4AddressVector::iterator it = groups.begin(); it != groups.end(); ++it)
       out << (it == groups.begin()?"":",") << *it;
   out << ">\n";
 }

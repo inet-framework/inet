@@ -108,12 +108,12 @@ void TcpHeader::parsimUnpack(cCommBuffer *b)
     int i, n;
     b->unpack(n);
     for (i = 0; i < n; i++) {
-        TCPOption *opt = check_and_cast<TCPOption*>(b->unpackObject());
+        TcpOption *opt = check_and_cast<TcpOption*>(b->unpackObject());
         headerOptionList.push_back(opt);
     }
 }
 
-void TcpHeader::addHeaderOption(TCPOption *option)
+void TcpHeader::addHeaderOption(TcpOption *option)
 {
     handleChange();
     headerOptionList.push_back(option);
@@ -131,7 +131,7 @@ unsigned int TcpHeader::getHeaderOptionArraySize() const
     return headerOptionList.size();
 }
 
-void TcpHeader::setHeaderOption(unsigned int k, TCPOption *headerOption)
+void TcpHeader::setHeaderOption(unsigned int k, TcpOption *headerOption)
 {
     throw cRuntimeError(this, "setHeaderOption() not supported, use addHeaderOption()");
 }

@@ -43,7 +43,7 @@ package inet.linklayer.ppp;
 //
 // @see ~PPPInterface, ~IOutputQueue, ~PPPFrame
 //
-simple PPP
+simple Ppp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

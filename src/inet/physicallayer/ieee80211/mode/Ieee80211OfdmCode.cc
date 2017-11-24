@@ -22,7 +22,7 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode* convolutionalCode, const Ieee80211OFDMInterleaving* interleaving, const AdditiveScrambling* scrambling) :
+Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode* convolutionalCode, const Ieee80211OfdmInterleaving* interleaving, const AdditiveScrambling* scrambling) :
         convolutionalCode(convolutionalCode),
         interleaving(interleaving),
         scrambling(scrambling)
@@ -45,10 +45,10 @@ const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalC
 const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4(3,4);
 
 // Interleavings
-const Ieee80211OFDMInterleaving Ieee80211OfdmCompliantCodes::ofdmBPSKInterleaving(NUMBER_OF_OFDM_DATA_SUBCARRIERS, 1);
-const Ieee80211OFDMInterleaving Ieee80211OfdmCompliantCodes::ofdmQPSKInterleaving(2 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 2);
-const Ieee80211OFDMInterleaving Ieee80211OfdmCompliantCodes::ofdmQAM16Interleaving(4 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 4);
-const Ieee80211OFDMInterleaving Ieee80211OfdmCompliantCodes::ofdmQAM64Interleaving(6 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 6);
+const Ieee80211OfdmInterleaving Ieee80211OfdmCompliantCodes::ofdmBPSKInterleaving(NUMBER_OF_OFDM_DATA_SUBCARRIERS, 1);
+const Ieee80211OfdmInterleaving Ieee80211OfdmCompliantCodes::ofdmQPSKInterleaving(2 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 2);
+const Ieee80211OfdmInterleaving Ieee80211OfdmCompliantCodes::ofdmQAM16Interleaving(4 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 4);
+const Ieee80211OfdmInterleaving Ieee80211OfdmCompliantCodes::ofdmQAM64Interleaving(6 * NUMBER_OF_OFDM_DATA_SUBCARRIERS, 6);
 
 // Scrambler
 const AdditiveScrambling Ieee80211OfdmCompliantCodes::ofdmScrambling("1011101", "0001001");

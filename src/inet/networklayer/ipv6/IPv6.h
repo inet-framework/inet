@@ -57,7 +57,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
         Packet *packet = nullptr;
         const InterfaceEntry *inIE = nullptr;
         const InterfaceEntry *outIE = nullptr;
-        IPv6Address nextHopAddr;
+        Ipv6Address nextHopAddr;
         const IHook::Type hookType = (IHook::Type)-1;
     };
 
@@ -71,15 +71,15 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     };
 
     IInterfaceTable *ift = nullptr;
-    IPv6RoutingTable *rt = nullptr;
-    IPv6NeighbourDiscovery *nd = nullptr;
-    ICMPv6 *icmp = nullptr;
+    Ipv6RoutingTable *rt = nullptr;
+    Ipv6NeighbourDiscovery *nd = nullptr;
+    Icmpv6 *icmp = nullptr;
 
-    IPv6Tunneling *tunneling = nullptr;
+    Ipv6Tunneling *tunneling = nullptr;
 
     // working vars
     unsigned int curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
-    IPv6FragBuf fragbuf;    // fragmentation reassembly buffer
+    Ipv6FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
@@ -102,14 +102,14 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
         Packet *packet = nullptr;
         const Ipv6Header *ipv6Header = nullptr;
         const InterfaceEntry *ie = nullptr;
-        MACAddress macAddr;
+        MacAddress macAddr;
         bool fromHL = false;
       public:
-        ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
+        ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const InterfaceEntry *ie, MacAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
         const InterfaceEntry *getIE() { return ie; }
-        const IPv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
-        const MACAddress& getMACAddress() { return macAddr; }
+        const Ipv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
+        const MacAddress& getMACAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
@@ -131,7 +131,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      */
     virtual void encapsulate(Packet *transportPacket);
 
-    virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr);
+    virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -140,7 +140,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cPacket *msg);
-    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress);
+    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress);
 
     /**
      * Handle incoming ICMP messages.
@@ -153,8 +153,8 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL);
-    virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, IPv6Address nextHop, bool fromHL);
+    virtual void routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL);
+    virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, Ipv6Address nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
@@ -165,7 +165,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
      */
-    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIE, const MACAddress& nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIE, const MacAddress& nextHopAddr, bool fromHL);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -181,9 +181,9 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Last hoplimit check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MACAddress& macAddr);
+    virtual void sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr);
 
-    void sendIcmpError(Packet *origPacket, ICMPv6Type type, int code);
+    void sendIcmpError(Packet *origPacket, Icmpv6Type type, int code);
 
     // NetFilter functions:
 
@@ -244,7 +244,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Determines the correct interface for the specified destination address.
      * The nextHop and interfaceId are output parameter.
      */
-    bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
+    bool determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop, int& interfaceId,
             Packet *packet, bool fromHL);
 
 #ifdef WITH_xMIPv6

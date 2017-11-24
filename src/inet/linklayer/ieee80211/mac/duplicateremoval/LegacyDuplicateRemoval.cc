@@ -24,11 +24,11 @@ namespace ieee80211 {
 bool LegacyDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
-    const MACAddress& address = header->getTransmitterAddress();
+    const MacAddress& address = header->getTransmitterAddress();
     SequenceControlField seqVal(header);
     auto it = lastSeenSeqNumCache.find(address);
     if (it == lastSeenSeqNumCache.end())
-        lastSeenSeqNumCache.insert(std::pair<MACAddress, SequenceControlField>(address, seqVal));
+        lastSeenSeqNumCache.insert(std::pair<MacAddress, SequenceControlField>(address, seqVal));
     else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && header->getRetry())
         return true;
     else

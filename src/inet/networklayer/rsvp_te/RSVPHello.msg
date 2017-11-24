@@ -15,14 +15,14 @@
 
 import inet.common.INETDefs;
 import inet.linklayer.base.MacHeaderBase;
-import inet.networklayer.rsvp_te.RSVPPacket;
+import inet.networklayer.rsvp_te.RsvpPacket;
 
 namespace inet;
 
 //
 // FIXME missing documentation
 //
-class RSVPHelloMsg extends RSVPMessage
+class RsvpHelloMsg extends RsvpMessage
 {
     @customize;
     bool request;

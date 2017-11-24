@@ -30,12 +30,12 @@ cplusplus {{
 
 namespace inet;
 
-enum GPSRForwardingMode {
+enum GpsrForwardingMode {
     GPSR_GREEDY_ROUTING = 1;
     GPSR_PERIMETER_ROUTING = 2;
 };
 
-enum GPSRPlanarizationMode {
+enum GpsrPlanarizationMode {
     GPSR_GG_PLANARIZATION = 0;
     GPSR_RNG_PLANARIZATION = 1;
 };
@@ -44,7 +44,7 @@ enum GPSRPlanarizationMode {
 // The GPSR beacon packet is sent periodically by all GPSR routers to notify
 // the neighbors about the router's address and position.
 //
-class GPSRBeacon extends FieldsChunk
+class GpsrBeacon extends FieldsChunk
 {
     L3Address address;
     Coord position;
@@ -56,8 +56,8 @@ class GPSRBeacon extends FieldsChunk
 // For more information, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
-class GPSROption extends TLVOptionBase {
-    GPSRForwardingMode routingMode = (GPSRForwardingMode)-1;
+class GpsrOption extends TlvOptionBase {
+    GpsrForwardingMode routingMode = (GpsrForwardingMode)-1;
     Coord destinationPosition;               // D
     Coord perimeterRoutingStartPosition;     // Lp
     Coord perimeterRoutingForwardPosition;   // Lf

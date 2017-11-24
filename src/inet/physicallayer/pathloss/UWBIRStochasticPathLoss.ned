@@ -19,7 +19,7 @@ package inet.physicallayer.pathloss;
 
 import inet.physicallayer.contract.packetlevel.IPathLoss;
 
-module UWBIRStochasticPathLoss like IPathLoss
+module UwbIrStochasticPathLoss like IPathLoss
 {
     parameters:
         double PL0;
@@ -28,6 +28,6 @@ module UWBIRStochasticPathLoss like IPathLoss
         double sigmaGamma;
         double sigmaSigma;
         bool shadowing;
-        @class(UWBIRStochasticPathLoss);
+        @class(UwbIrStochasticPathLoss);
         @display("i=block/control");
 }

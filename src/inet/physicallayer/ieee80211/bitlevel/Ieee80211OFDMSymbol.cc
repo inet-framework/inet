@@ -21,14 +21,14 @@ namespace inet {
 
 namespace physicallayer {
 
-void Ieee80211OFDMSymbol::pushAPSKSymbol(const APSKSymbol *apskSymbol, int subcarrierIndex)
+void Ieee80211OfdmSymbol::pushAPSKSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex)
 {
     if (subcarrierIndex >= 53)
         throw cRuntimeError("Out of range with subcarrierIndex = %d", subcarrierIndex);
     subcarrierSymbols[subcarrierIndex] = apskSymbol;
 }
 
-std::ostream& operator<<(std::ostream& out, const Ieee80211OFDMSymbol& symbol)
+std::ostream& operator<<(std::ostream& out, const Ieee80211OfdmSymbol& symbol)
 {
     if (symbol.subcarrierSymbols[0])
         out << *symbol.subcarrierSymbols[0];

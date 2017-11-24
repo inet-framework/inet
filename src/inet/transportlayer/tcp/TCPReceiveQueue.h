@@ -33,7 +33,7 @@
 
 namespace inet {
 
-class TCPCommand;
+class TcpCommand;
 
 namespace tcp {
 
@@ -44,10 +44,10 @@ class TcpHeader;
  *
  * @see TCPSendQueue
  */
-class INET_API TCPReceiveQueue : public cObject
+class INET_API TcpReceiveQueue : public cObject
 {
   protected:
-    TCPConnection *conn = nullptr;    // the connection that owns this queue
+    TcpConnection *conn = nullptr;    // the connection that owns this queue
     uint32 rcv_nxt = 0;
     ReorderBuffer reorderBuffer;
 
@@ -65,19 +65,19 @@ class INET_API TCPReceiveQueue : public cObject
     /**
      * Ctor.
      */
-    TCPReceiveQueue();
+    TcpReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPReceiveQueue();
+    virtual ~TcpReceiveQueue();
 
     virtual ReorderBuffer& getReorderBuffer() { return reorderBuffer; }
 
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
+    virtual void setConnection(TcpConnection *_conn) { conn = _conn; }
 
     /**
      * Set initial receive sequence number.

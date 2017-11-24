@@ -28,7 +28,7 @@ import inet.networklayer.contract.IIPv6Tunneling;
 //
 // @see IPv6, IPv6NeighbourDiscovery, ICMPv6
 //
-simple IPv6Tunneling like IIPv6Tunneling
+simple Ipv6Tunneling like IIPv6Tunneling
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

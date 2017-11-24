@@ -28,14 +28,14 @@ namespace serializer {
 /**
  * Converts between Icmpv6Header and binary (network byte order) ICMPv6 header.
  */
-class INET_API ICMPv6HeaderSerializer : public FieldsChunkSerializer
+class INET_API Icmpv6HeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    ICMPv6HeaderSerializer() : FieldsChunkSerializer() {}
+    Icmpv6HeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

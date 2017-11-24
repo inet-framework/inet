@@ -49,7 +49,7 @@ package inet.networklayer.mpls;
 // inherit the L2's QoS. This implementation follows a generic approach; it
 // assumes no information of QoS from the link layer.
 //
-simple MPLS
+simple Mpls
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

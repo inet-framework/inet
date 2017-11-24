@@ -26,7 +26,7 @@ import inet.transportlayer.contract.ITCP;
 //
 // Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
-simple TCPSpoof like ITCP
+simple TcpSpoof like ITCP
 {
     parameters:
         string srcAddress = default("");  // local address; may be left empty ("")
@@ -41,9 +41,9 @@ simple TCPSpoof like ITCP
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input appIn @labels(TCPCommand/down); // Not used!
-        output appOut @labels(TCPCommand/up); // Not used!
-        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
-        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up); // Not used!
+        input appIn @labels(TcpCommand/down); // Not used!
+        output appOut @labels(TcpCommand/up); // Not used!
+        output ipOut @labels(TCPSegment,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
+        input ipIn @labels(TCPSegment,Ipv4ControlInfo/up,Ipv6ControlInfo/up); // Not used!
 }
 

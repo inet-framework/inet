@@ -22,7 +22,7 @@ import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEtherMAC;
-import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherLlc;
 import inet.linklayer.ethernet.EtherQoSQueue;
 
 
@@ -61,7 +61,7 @@ module EtherHost
                 registerSAP = true;
                 @display("p=310,58,col");
         }
-        llc: EtherLLC {
+        llc: EtherLlc {
             parameters:
                 @display("p=215,118");
             gates:

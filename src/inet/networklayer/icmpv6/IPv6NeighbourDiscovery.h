@@ -32,11 +32,11 @@
 namespace inet {
 
 //Forward declarations:
-class ICMPv6;
+class Icmpv6;
 class IInterfaceTable;
 class InterfaceEntry;
 class Ipv6Header;
-class IPv6RoutingTable;
+class Ipv6RoutingTable;
 
 #ifdef WITH_xMIPv6
 class xMIPv6;
@@ -45,17 +45,17 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for IPv6.
  */
-class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
+class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;
-    typedef IPv6NeighbourCache::Key Key;    //for convenience
-    typedef IPv6NeighbourCache::Neighbour Neighbour;    // for convenience
-    typedef IPv6NeighbourCache::DefaultRouterList DefaultRouterList;    // for convenience
+    typedef Ipv6NeighbourCache::Key Key;    //for convenience
+    typedef Ipv6NeighbourCache::Neighbour Neighbour;    // for convenience
+    typedef Ipv6NeighbourCache::DefaultRouterList DefaultRouterList;    // for convenience
 
   public:
-    IPv6NeighbourDiscovery();
-    virtual ~IPv6NeighbourDiscovery();
+    Ipv6NeighbourDiscovery();
+    virtual ~Ipv6NeighbourDiscovery();
 
   private:
     static simsignal_t startDADSignal;
@@ -77,7 +77,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      * Unreachability Detection procedure to start in the
      * IPv6NeighbourDiscovery module.
      */
-    const MACAddress& resolveNeighbour(const IPv6Address& nextHop, int interfaceId);
+    const MacAddress& resolveNeighbour(const Ipv6Address& nextHop, int interfaceId);
 
     /**
      * Public method, it can be invoked from the IPv6 module or any other
@@ -88,7 +88,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      * Neighbour Unreachability Detection procedure if it is currently
      * running.
      */
-    virtual void reachabilityConfirmed(const IPv6Address& neighbour, int interfaceId);
+    virtual void reachabilityConfirmed(const Ipv6Address& neighbour, int interfaceId);
 
   protected:
 
@@ -96,35 +96,35 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     cQueue pendingQueue;
 
     IInterfaceTable *ift = nullptr;
-    IPv6RoutingTable *rt6 = nullptr;
-    ICMPv6 *icmpv6 = nullptr;
+    Ipv6RoutingTable *rt6 = nullptr;
+    Icmpv6 *icmpv6 = nullptr;
 
 #ifdef WITH_xMIPv6
     xMIPv6 *mipv6 = nullptr;    // in case the node has MIP support
 #endif /* WITH_xMIPv6 */
 
-    IPv6NeighbourCache neighbourCache;
-    typedef std::set<cMessage *> RATimerList;    //FIXME add comparator for stable fingerprints!
+    Ipv6NeighbourCache neighbourCache;
+    typedef std::set<cMessage *> RaTimerList;    //FIXME add comparator for stable fingerprints!
 
     // stores information about a pending Duplicate Address Detection for
     // an interface
-    struct DADEntry
+    struct DadEntry
     {
         int interfaceId;    // interface on which DAD is performed
-        IPv6Address address;    // link-local address subject to DAD
+        Ipv6Address address;    // link-local address subject to DAD
         int numNSSent;    // number of DAD solicitations sent since start of sim
         cMessage *timeoutMsg;    // the message to cancel when NA is received
     };
-    typedef std::set<DADEntry *> DADList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
+    typedef std::set<DadEntry *> DadList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
 
     //stores information about Router Discovery for an interface
-    struct RDEntry
+    struct RdEntry
     {
         int interfaceId;    //interface on which Router Discovery is performed
         unsigned int numRSSent;    //number of Router Solicitations sent since start of sim
         cMessage *timeoutMsg;    //the message to cancel when RA is received
     };
-    typedef std::set<RDEntry *> RDList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
+    typedef std::set<RdEntry *> RdList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
 
     //An entry that stores information for an Advertising Interface
     struct AdvIfEntry
@@ -137,13 +137,13 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     typedef std::set<AdvIfEntry *> AdvIfList;    //FIXME why ptrs are stored?    //FIXME add comparator for stable fingerprints!
 
     //List of periodic RA msgs(used only for router interfaces)
-    RATimerList raTimerList;
+    RaTimerList raTimerList;
 
     //List of pending Duplicate Address Detections
-    DADList dadList;
+    DadList dadList;
 
     //List of pending Router & Prefix Discoveries
-    RDList rdList;
+    RdList rdList;
 
     //List of Advertising Interfaces
     AdvIfList advIfList;
@@ -151,18 +151,18 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 #ifdef WITH_xMIPv6
     // An entry that stores information for configuring the global unicast
     // address, after DAD was succesfully performed
-    struct DADGlobalEntry
+    struct DadGlobalEntry
     {
         bool hFlag;    // home network flag from RA
         simtime_t validLifetime;    // valid lifetime of the received prefix
         simtime_t preferredLifetime;    // preferred lifetime of the received prefix
-        IPv6Address addr;    // the address with scope > link local that the interface will get
+        Ipv6Address addr;    // the address with scope > link local that the interface will get
 
         //bool returnedHome; // MIPv6-related: whether we returned home after a visit in a foreign network
-        IPv6Address CoA;    // MIPv6-related: the old CoA, in case we returned home
+        Ipv6Address CoA;    // MIPv6-related: the old CoA, in case we returned home
     };
-    typedef std::map<InterfaceEntry *, DADGlobalEntry> DADGlobalList;    //FIXME add comparator for stable fingerprints!
-    DADGlobalList dadGlobalList;
+    typedef std::map<InterfaceEntry *, DadGlobalEntry> DadGlobalList;    //FIXME add comparator for stable fingerprints!
+    DadGlobalList dadGlobalList;
 #endif /* WITH_xMIPv6 */
 
   protected:
@@ -175,8 +175,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual void finish() override;
 
     virtual void processIPv6Datagram(Packet *packet);
-    virtual IPv6NeighbourDiscovery::AdvIfEntry *fetchAdvIfEntry(InterfaceEntry *ie);
-    virtual IPv6NeighbourDiscovery::RDEntry *fetchRDEntry(InterfaceEntry *ie);
+    virtual Ipv6NeighbourDiscovery::AdvIfEntry *fetchAdvIfEntry(InterfaceEntry *ie);
+    virtual Ipv6NeighbourDiscovery::RdEntry *fetchRDEntry(InterfaceEntry *ie);
     /************************End of Miscellaneous Stuff********************/
 
     /**
@@ -188,10 +188,10 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  destination address to be onlink and simply return any available
      *  interface.
      */
-    virtual IPv6Address determineNextHop(const IPv6Address& destAddr, int& outIfID);
+    virtual Ipv6Address determineNextHop(const Ipv6Address& destAddr, int& outIfID);
     virtual void initiateNeighbourUnreachabilityDetection(Neighbour *neighbour);
     virtual void processNUDTimeout(cMessage *timeoutMsg);
-    virtual IPv6Address selectDefaultRouter(int& outIfID);
+    virtual Ipv6Address selectDefaultRouter(int& outIfID);
     /**
      *  RFC 2461: Section 6.3.5
      *  Whenever the invalidation timer expires for a Prefix List entry, that
@@ -200,7 +200,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  existing Neighbor Cache entry, Neighbor Unreachability Detection will
      *  perform any needed recovery.
      */
-    virtual void timeoutPrefixEntry(const IPv6Address& destPrefix, int prefixLength);
+    virtual void timeoutPrefixEntry(const Ipv6Address& destPrefix, int prefixLength);
     /**
      *  RFC 2461: Section 6.3.5
      *  Whenever the Lifetime of an entry in the Default Router List expires,
@@ -209,7 +209,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  that all entries using the router perform next-hop determination
      *  again rather than continue sending traffic to the (deleted) router.
      */
-    virtual void timeoutDefaultRouter(const IPv6Address& addr, int interfaceID);
+    virtual void timeoutDefaultRouter(const Ipv6Address& addr, int interfaceID);
     /**
      *  This method attempts to resolve the given neighbour's link-layer address.
      *  The source address of the packet prompting address resolution is also
@@ -218,7 +218,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  which is needed for addr resolution and access to the corresponding
      *  nce.
      */
-    virtual void initiateAddressResolution(const IPv6Address& dgSrcAddr,
+    virtual void initiateAddressResolution(const Ipv6Address& dgSrcAddr,
             Neighbour *nce);
     /**
      *  Resends a NS packet to the address intended for address resolution.
@@ -234,8 +234,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  Create control info and assigns it to a msg. Returns a copy of the
      *  msg with the control info.
      */
-    virtual void sendPacketToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
-            const IPv6Address& srcAddr, int interfaceId);
+    virtual void sendPacketToIPv6Module(cMessage *msg, const Ipv6Address& destAddr,
+            const Ipv6Address& srcAddr, int interfaceId);
 
     /**
      *  Send off any queued packets within the Neighbour Discovery module
@@ -247,7 +247,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  Initiating DAD means to send off a Neighbour Solicitation with its
      *  target address set as this node's tentative link-local address.
      */
-    virtual void initiateDAD(const IPv6Address& tentativeAddr, InterfaceEntry *ie);
+    virtual void initiateDAD(const Ipv6Address& tentativeAddr, InterfaceEntry *ie);
 
     /**
      *  Sends a scheduled DAD NS packet. If number of sends is equals or more
@@ -260,7 +260,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      * Permanently assign the given address for the given interface entry.
      * To be called after successful DAD.
      */
-    virtual void makeTentativeAddressPermanent(const IPv6Address& tentativeAddr, InterfaceEntry *ie);
+    virtual void makeTentativeAddressPermanent(const Ipv6Address& tentativeAddr, InterfaceEntry *ie);
 
     /************Address Autoconfiguration Stuff***************************/
     /**
@@ -295,28 +295,28 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      */
     virtual void cancelRouterDiscovery(InterfaceEntry *ie);
     virtual void processRDTimeout(cMessage *msg);
-    virtual void processRSPacket(Packet *packet, const IPv6RouterSolicitation *rs);
-    virtual bool validateRSPacket(Packet *packet, const IPv6RouterSolicitation *rs);
+    virtual void processRSPacket(Packet *packet, const Ipv6RouterSolicitation *rs);
+    virtual bool validateRSPacket(Packet *packet, const Ipv6RouterSolicitation *rs);
     /************End of Router Solicitation Stuff**************************/
 
     /************Router Advertisment Stuff*********************************/
-    virtual void createAndSendRAPacket(const IPv6Address& destAddr,
+    virtual void createAndSendRAPacket(const Ipv6Address& destAddr,
             InterfaceEntry *ie);
-    virtual void processRAPacket(Packet *packet, const IPv6RouterAdvertisement *ra);
-    virtual void processRAForRouterUpdates(Packet *packet, const IPv6RouterAdvertisement *ra);
+    virtual void processRAPacket(Packet *packet, const Ipv6RouterAdvertisement *ra);
+    virtual void processRAForRouterUpdates(Packet *packet, const Ipv6RouterAdvertisement *ra);
     //RFC 2461: Section 6.3.4
     /*Note: Implementations can choose to process the on-link aspects of the
        prefixes separately from the address autoconfiguration aspects of the
        prefixes by, e.g., passing a copy of each valid Router Advertisement message
        to both an "on-link" and an "addrconf" function. Each function can then
        operate independently on the prefixes that have the appropriate flag set.*/
-    virtual void processRAPrefixInfo(const IPv6RouterAdvertisement *ra, InterfaceEntry *ie);
+    virtual void processRAPrefixInfo(const Ipv6RouterAdvertisement *ra, InterfaceEntry *ie);
 
 #ifndef WITH_xMIPv6
-    virtual void processRAPrefixInfoForAddrAutoConf(const IPv6NDPrefixInformation& prefixInfo,
+    virtual void processRAPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
             InterfaceEntry *ie);
 #else /* WITH_xMIPv6 */
-    virtual void processRAPrefixInfoForAddrAutoConf(const IPv6NDPrefixInformation& prefixInfo,
+    virtual void processRAPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo,
             InterfaceEntry *ie, bool hFlag = false);    // overloaded method - 3.9.07 CB
 #endif /* WITH_xMIPv6 */
 
@@ -335,12 +335,12 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual void resetRATimer(InterfaceEntry *ie);
     virtual void sendPeriodicRA(cMessage *msg);
     virtual void sendSolicitedRA(cMessage *msg);
-    virtual bool validateRAPacket(Packet *packet, const IPv6RouterAdvertisement *ra);
+    virtual bool validateRAPacket(Packet *packet, const Ipv6RouterAdvertisement *ra);
     /************End of Router Advertisement Stuff*************************/
 
     /************Neighbour Solicitaton Stuff*******************************/
-    virtual void createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
-            const IPv6Address& dgSrcAddr, InterfaceEntry *ie);
+    virtual void createAndSendNSPacket(const Ipv6Address& nsTargetAddr, const Ipv6Address& dgDestAddr,
+            const Ipv6Address& dgSrcAddr, InterfaceEntry *ie);
     virtual void processNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns);
     virtual bool validateNSPacket(Packet *packet, const Ipv6NeighbourSolicitation *ns);
     virtual void processNSForTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns);
@@ -351,8 +351,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     /************Neighbour Advertisment Stuff)*****************************/
 
 #ifdef WITH_xMIPv6
-    IPv6NeighbourAdvertisement *createAndSendNAPacket(Ipv6NeighbourSolicitation *ns,
-            const IPv6Address& nsSrcAddr, const IPv6Address& nsDestAddr, InterfaceEntry *ie);
+    Ipv6NeighbourAdvertisement *createAndSendNAPacket(Ipv6NeighbourSolicitation *ns,
+            const Ipv6Address& nsSrcAddr, const Ipv6Address& nsDestAddr, InterfaceEntry *ie);
 #endif /* WITH_xMIPv6 */
 
     virtual void sendSolicitedNA(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie);
@@ -368,15 +368,15 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
   protected:    // update 12.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    virtual void processNAPacket(Packet *packet, const IPv6NeighbourAdvertisement *na);
-    virtual bool validateNAPacket(Packet *packet, const IPv6NeighbourAdvertisement *na);
-    virtual void processNAForIncompleteNCEState(const IPv6NeighbourAdvertisement *na, IPv6NeighbourCache::Neighbour *nce);
-    virtual void processNAForOtherNCEStates(const IPv6NeighbourAdvertisement *na, IPv6NeighbourCache::Neighbour *nce);
+    virtual void processNAPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
+    virtual bool validateNAPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);
+    virtual void processNAForIncompleteNCEState(const Ipv6NeighbourAdvertisement *na, Ipv6NeighbourCache::Neighbour *nce);
+    virtual void processNAForOtherNCEStates(const Ipv6NeighbourAdvertisement *na, Ipv6NeighbourCache::Neighbour *nce);
     /************End Of Neighbour Advertisement Stuff**********************/
 
     /************Redirect Message Stuff************************************/
     virtual void createAndSendRedirectPacket(InterfaceEntry *ie);
-    virtual void processRedirectPacket(const IPv6Redirect *redirect);
+    virtual void processRedirectPacket(const Ipv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 
 #ifdef WITH_xMIPv6

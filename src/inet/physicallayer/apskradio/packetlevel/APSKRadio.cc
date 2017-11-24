@@ -27,49 +27,49 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKRadio);
+Define_Module(ApskRadio);
 
-APSKRadio::APSKRadio() :
+ApskRadio::ApskRadio() :
     FlatRadioBase()
 {
 }
 
-b APSKRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const APSKModulationBase *modulation) const
+b ApskRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const ApskModulationBase *modulation) const
 {
     int modulationCodeWordSize = modulation->getCodeWordSize();
     int encodedCodeWordSize = forwardErrorCorrection == nullptr ? modulationCodeWordSize : modulationCodeWordSize * forwardErrorCorrection->getCodeRatePuncturingK();
     return b((encodedCodeWordSize - b(length).get() % encodedCodeWordSize) % encodedCodeWordSize);
 }
 
-const APSKModulationBase *APSKRadio::getModulation() const
+const ApskModulationBase *ApskRadio::getModulation() const
 {
-    const APSKModulationBase *modulation = nullptr;
+    const ApskModulationBase *modulation = nullptr;
     // TODO: const ConvolutionalCode *forwardErrorCorrection = nullptr;
-    auto phyHeader = makeShared<APSKPhyHeader>();
+    auto phyHeader = makeShared<ApskPhyHeader>();
     b headerLength = phyHeader->getChunkLength();
 
     // KLUDGE:
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
-        modulation = check_and_cast<const APSKModulationBase *>(flatTransmitter->getModulation());
+        modulation = check_and_cast<const ApskModulationBase *>(flatTransmitter->getModulation());
     }
     // KLUDGE:
-    else if (auto layeredTransmitter = dynamic_cast<const APSKLayeredTransmitter *>(transmitter)) {
+    else if (auto layeredTransmitter = dynamic_cast<const ApskLayeredTransmitter *>(transmitter)) {
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
             // const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
             // TODO: forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
         }
-        modulation = check_and_cast<const APSKModulationBase *>(layeredTransmitter->getModulator()->getModulation());
+        modulation = check_and_cast<const ApskModulationBase *>(layeredTransmitter->getModulator()->getModulation());
     }
     //FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
     ASSERT(modulation != nullptr);
     return modulation;
 }
 
-void APSKRadio::encapsulate(Packet *packet) const
+void ApskRadio::encapsulate(Packet *packet) const
 {
-    auto phyHeader = makeShared<APSKPhyHeader>();
+    auto phyHeader = makeShared<ApskPhyHeader>();
     phyHeader->setCrc(0);
     phyHeader->setCrcMode(CRC_DISABLED);
     phyHeader->setLengthField(packet->getByteLength());
@@ -85,9 +85,9 @@ void APSKRadio::encapsulate(Packet *packet) const
         packet->insertTrailer(makeShared<BitCountChunk>(paddingLength));
 }
 
-void APSKRadio::decapsulate(Packet *packet) const
+void ApskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popHeader<APSKPhyHeader>();
+    const auto& phyHeader = packet->popHeader<ApskPhyHeader>();
     b headerLength = phyHeader->getChunkLength();
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();

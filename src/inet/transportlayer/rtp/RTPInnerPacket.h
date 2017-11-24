@@ -28,13 +28,13 @@ namespace rtp {
 /**
  * This class is used for communication between submodules of the RTP layer module.
  */
-class INET_API RTPInnerPacket : public RTPInnerPacket_Base
+class INET_API RtpInnerPacket : public RtpInnerPacket_Base
 {
   public:
-    RTPInnerPacket(const char *name = nullptr, int kind = 0) : RTPInnerPacket_Base(name, kind) {}
-    RTPInnerPacket(const RTPInnerPacket& other) : RTPInnerPacket_Base(other) {}
-    RTPInnerPacket& operator=(const RTPInnerPacket& other) { RTPInnerPacket_Base::operator=(other); return *this; }
-    virtual RTPInnerPacket *dup() const override { return new RTPInnerPacket(*this); }
+    RtpInnerPacket(const char *name = nullptr, int kind = 0) : RtpInnerPacket_Base(name, kind) {}
+    RtpInnerPacket(const RtpInnerPacket& other) : RtpInnerPacket_Base(other) {}
+    RtpInnerPacket& operator=(const RtpInnerPacket& other) { RtpInnerPacket_Base::operator=(other); return *this; }
+    virtual RtpInnerPacket *dup() const override { return new RtpInnerPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTPInnerPacket_Base
     /**
@@ -65,7 +65,7 @@ class INET_API RTPInnerPacket : public RTPInnerPacket_Base
      * information for starting the rtp session.
      */
     virtual void setInitializeRTCPPkt(const char *commonName, int mtu, int bandwidth,
-            int rtcpPercentage, IPv4Address address, int port);
+            int rtcpPercentage, Ipv4Address address, int port);
 
     /**
      * Called by the rtcp module after it has waited for half an rtcp interval
@@ -84,8 +84,8 @@ class INET_API RTPInnerPacket : public RTPInnerPacket_Base
     virtual void setSenderModuleInitializedPkt(uint32 ssrc, int payloadType, int clockRate,
             int timeStampBase, int sequenceNumberBase);
 
-    virtual void setSenderModuleControlPkt(uint32 ssrc, RTPSenderControlMessage *msg);
-    virtual void setSenderModuleStatusPkt(uint32 ssrc, RTPSenderStatusMessage *msg);
+    virtual void setSenderModuleControlPkt(uint32 ssrc, RtpSenderControlMessage *msg);
+    virtual void setSenderModuleStatusPkt(uint32 ssrc, RtpSenderStatusMessage *msg);
 
     /**
      * Called by the rtp module to inform the rtcp module that the session
@@ -109,7 +109,7 @@ class INET_API RTPInnerPacket : public RTPInnerPacket_Base
      * Capsulates the incoming RTPPacket into this RTPInnerPacket to transport
      * it within the rtp layer.
      */
-    virtual void setDataInPkt(Packet *packet, IPv4Address address, int port);
+    virtual void setDataInPkt(Packet *packet, Ipv4Address address, int port);
 
     /**
      * Returns the maximum transmission unit stored in this RTPInnerPacket.

@@ -9,7 +9,7 @@ Test formLinkLocalAddress()
 
 using namespace inet;
 
-#define P(X)  EV << #X << "-->" << IPv6Address::formLinkLocalAddress(X) << "\n"
+#define P(X)  EV << #X << "-->" << Ipv6Address::formLinkLocalAddress(X) << "\n"
 
 %activity:
 P(InterfaceToken(1,2,64));

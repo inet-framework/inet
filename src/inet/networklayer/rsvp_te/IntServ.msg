@@ -19,12 +19,12 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
 cplusplus {{
-typedef std::vector<struct EroObj_t> EroVector;
+typedef std::vector<struct EroObj> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
 
@@ -36,11 +36,11 @@ class FlowDescriptorVector { @existingClass; }
 //
 // Intserv/RSVP: Session Structure
 //
-struct SessionObj_t
+struct SessionObj
 {
     int Tunnel_Id;
     int Extended_Tunnel_Id;
-    IPv4Address DestAddress;
+    Ipv4Address DestAddress;
     int setupPri;
     int holdingPri;
 }
@@ -48,18 +48,18 @@ struct SessionObj_t
 //
 // Intserv/RSVP: RSVP HOP Structure
 //
-struct RsvpHopObj_t
+struct RsvpHopObj
 {
-    IPv4Address Next_Hop_Address;
-    IPv4Address Logical_Interface_Handle;
+    Ipv4Address Next_Hop_Address;
+    Ipv4Address Logical_Interface_Handle;
 }
 
 //
 // Intserv/RSVP: Sender Template Structure
 //
-struct SenderTemplateObj_t
+struct SenderTemplateObj
 {
-    IPv4Address SrcAddress;
+    Ipv4Address SrcAddress;
     int Lsp_Id = -1;
 }
 
@@ -67,7 +67,7 @@ struct SenderTemplateObj_t
 //
 // Intserv/RSVP: Sender Tspec Structure
 //
-struct SenderTspecObj_t
+struct SenderTspecObj
 {
     double req_bandwidth = 0;
 }
@@ -75,21 +75,21 @@ struct SenderTspecObj_t
 //
 // Intserv/RSVP: Sender Tspec Structure
 //
-struct FlowSpecObj_t extends SenderTspecObj_t
+struct FlowSpecObj extends SenderTspecObj
 {
 }
 
 //
 // Intserv/RSVP: Sender Template Structure
 //
-struct FilterSpecObj_t extends SenderTemplateObj_t
+struct FilterSpecObj extends SenderTemplateObj
 {
 }
 
 //
 // Intserv/RSVP: Label Request Object Structure
 //
-struct LabelRequestObj_t
+struct LabelRequestObj
 {
     // request;
     int prot;
@@ -100,17 +100,17 @@ struct LabelRequestObj_t
 //
 struct SenderDescriptor_t
 {
-    SenderTemplateObj_t Sender_Template_Object;
-    SenderTspecObj_t Sender_Tspec_Object;
+    SenderTemplateObj Sender_Template_Object;
+    SenderTspecObj Sender_Tspec_Object;
 }
 
 //
 // Intserv/RSVP: Explicit Routing Object Structure
 //
-struct EroObj_t
+struct EroObj
 {
     bool L = false;
-    IPv4Address node;
+    Ipv4Address node;
 }
 
 //
@@ -118,8 +118,8 @@ struct EroObj_t
 //
 struct FlowDescriptor_t
 {
-    FlowSpecObj_t Flowspec_Object;
-    FilterSpecObj_t Filter_Spec_Object;
-    IPv4AddressVector RRO;
+    FlowSpecObj Flowspec_Object;
+    FilterSpecObj Filter_Spec_Object;
+    Ipv4AddressVector RRO;
     int label;
 }

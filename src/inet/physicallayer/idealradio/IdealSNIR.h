@@ -24,10 +24,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IdealSNIR : public SNIRBase
+class INET_API IdealSnir : public SnirBase
 {
   public:
-    IdealSNIR(const IReception *reception, const INoise *noise);
+    IdealSnir(const IReception *reception, const INoise *noise);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

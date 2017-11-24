@@ -20,9 +20,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(SUIPathLoss);
+Define_Module(SuiPathLoss);
 
-SUIPathLoss::SUIPathLoss() :
+SuiPathLoss::SuiPathLoss() :
     ht(m(0)),
     hr(m(0)),
     a(0),
@@ -33,7 +33,7 @@ SUIPathLoss::SUIPathLoss() :
 {
 }
 
-void SUIPathLoss::initialize(int stage)
+void SuiPathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         ht = m(par("transmitterAntennaHeight"));
@@ -70,7 +70,7 @@ void SUIPathLoss::initialize(int stage)
     }
 }
 
-std::ostream& SUIPathLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "SUIPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
@@ -79,7 +79,7 @@ std::ostream& SUIPathLoss::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
-double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double SuiPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m R = distance;
     m R0 = m(100.0);

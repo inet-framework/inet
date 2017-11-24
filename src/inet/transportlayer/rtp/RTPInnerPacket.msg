@@ -18,9 +18,9 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
-import inet.transportlayer.rtp.RTPSenderControlMessage;
-import inet.transportlayer.rtp.RTPSenderStatusMessage;
+import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.transportlayer.rtp.RtpSenderControlMessage;
+import inet.transportlayer.rtp.RtpSenderStatusMessage;
 
 cplusplus {{
 #include "inet/transportlayer/rtp/RTPPacket.h"
@@ -32,7 +32,7 @@ namespace inet::rtp;
 // This enumeration is a list of all possibly types of
 // an ~RTPInnerPacket.
 //
-enum RTP_INP_TYPE
+enum RtpInpType
 {
     RTP_INP_UNDEF = 0;
     RTP_INP_INITIALIZE_PROFILE = 1;
@@ -56,12 +56,12 @@ enum RTP_INP_TYPE
 //
 // This class is used for communication between submodules of the RTP layer module.
 //
-packet RTPInnerPacket
+packet RtpInnerPacket
 {
     @customize;  // see the generated C++ header for more info
 
     // The type of this ~RTPInnerPacket.
-    RTP_INP_TYPE type = RTP_INP_UNDEF;
+    RtpInpType type = RTP_INP_UNDEF;
 
     // The CNAME
     string commonName;
@@ -76,7 +76,7 @@ packet RTPInnerPacket
     int rtcpPercentage;
 
     // The IPv4 address
-    IPv4Address address = IPv4Address::UNSPECIFIED_ADDRESS;
+    Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS;
 
     // The port number
     int port = PORT_UNDEF;

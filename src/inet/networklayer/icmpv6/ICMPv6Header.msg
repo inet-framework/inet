@@ -30,7 +30,8 @@ enum Icmpv6Constants {
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg
 //
-enum ICMPv6Type
+
+enum Icmpv6Type
 {
 
     ICMPv6_UNSPECIFIED = 0;
@@ -61,7 +62,7 @@ enum ICMPv6Type
 //
 // ICMPv6 "codes" for type ICMPv6_DESTINATION_UNREACHABLE
 //
-enum ICMPv6DEST_UN
+enum Icmpv6DestUn
 {
 
     NO_ROUTE_TO_DEST = 0;
@@ -75,7 +76,7 @@ enum ICMPv6DEST_UN
 //
 // ICMPv6 "codes" for type ICMPv6_TIME_EXCEEDED
 //
-enum ICMPv6_TIME_EX
+enum Icmpv6TimeEx
 {
 
     ND_HOP_LIMIT_EXCEEDED = 0;
@@ -85,7 +86,7 @@ enum ICMPv6_TIME_EX
 //
 // ICMPv6 "codes" for type ICMPv6_PARAMETER_PROBLEM
 //
-enum ICMPv6_PARAMETER_PROB
+enum Icmpv6ParameterProb
 {
 
     ERROREOUS_HDR_FIELD = 0;
@@ -106,7 +107,7 @@ enum ICMPv6_PARAMETER_PROB
 class Icmpv6Header extends FieldsChunk
 {
     chunkLength = B(ICMPv6_HEADER_BYTES);
-    ICMPv6Type type;     // 1 byte
+    Icmpv6Type type;     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
     CrcMode crcMode = (CrcMode)-1;
@@ -120,7 +121,7 @@ class Icmpv6Header extends FieldsChunk
 class Icmpv6DestUnreachableMsg extends Icmpv6Header
 {
     type = ICMPv6_DESTINATION_UNREACHABLE;
-    ICMPv6DEST_UN code;
+    Icmpv6DestUn code;
     // unused 4 bytes
 }
 
@@ -134,13 +135,13 @@ class Icmpv6PacketTooBigMsg extends Icmpv6Header
 class Icmpv6TimeExceededMsg extends Icmpv6Header
 {
     type = ICMPv6_TIME_EXCEEDED;
-    ICMPv6_TIME_EX code;
+    Icmpv6TimeEx code;
 }
 
 class Icmpv6ParamProblemMsg extends Icmpv6Header
 {
     type = ICMPv6_PARAMETER_PROBLEM;
-    ICMPv6_PARAMETER_PROB code;
+    Icmpv6ParameterProb code;
 }
 
 //

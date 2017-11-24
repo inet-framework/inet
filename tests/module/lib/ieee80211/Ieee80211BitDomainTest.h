@@ -33,7 +33,7 @@ class INET_API Ieee80211BitDomainTest : public cSimpleModule
 {
     protected:
         AdditiveScramblerModule *scrambler;
-        Ieee80211OFDMInterleaverModule *interleaver;
+        Ieee80211OfdmInterleaverModule *interleaver;
         ConvolutionalCoderModule *convCoder;
         std::ifstream *fileStream;
         const char *testType;

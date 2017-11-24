@@ -17,7 +17,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.common.IPProtocolId;   //FIXME remove it, unused
+import inet.networklayer.common.IpProtocolId;   //FIXME remove it, unused
 import inet.networklayer.common.L3Address;
 
 namespace inet;
@@ -28,7 +28,7 @@ namespace inet;
 //
 // @see ~UDPControlInfo, ~UDPStatusInd, ~UDP
 //
-enum UDPCommandCode
+enum UdpCommandCode
 {
     UDP_C_DATA = 0;      // send()/sendTo(); see ~UDPSendCommand
     UDP_C_BIND = 1;      // bind(); see ~UDPBindCommand
@@ -44,7 +44,7 @@ enum UDPCommandCode
 //
 // @see ~UDPControlInfo, ~UDPCommandCode, ~UDP
 //
-enum UDPStatusInd
+enum UdpStatusInd
 {
     UDP_I_DATA = 0;  // ~UDP attaches ~UDPIndication to received data packet
     UDP_I_ERROR = 1; // ~UDP attaches ~UDPIndication to received data packet
@@ -57,7 +57,7 @@ enum UDPStatusInd
 //
 // @see ~UDPCommandCode
 //
-class UDPControlInfo extends cObject
+class UdpControlInfo extends cObject
 {
 }
 
@@ -71,7 +71,7 @@ class UDPControlInfo extends cObject
 //
 // @see ~UDPCommandCode
 //
-class UDPBindCommand extends UDPControlInfo
+class UdpBindCommand extends UdpControlInfo
 {
     L3Address localAddr;
     int localPort = -1;
@@ -87,7 +87,7 @@ class UDPBindCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode
 //
-class UDPConnectCommand extends UDPControlInfo
+class UdpConnectCommand extends UdpControlInfo
 {
     L3Address remoteAddr;
     int remotePort = -1;
@@ -112,7 +112,7 @@ class UDPConnectCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode
 //
-class UDPCloseCommand extends UDPControlInfo
+class UdpCloseCommand extends UdpControlInfo
 {
 }
 
@@ -131,14 +131,14 @@ class UDPCloseCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode
 //
-class UDPErrorIndication extends UDPControlInfo
+class UdpErrorIndication extends UdpControlInfo
 {
 }
 
 //
 // Base class for UDP socket option control info classes.
 //
-class UDPSetOptionCommand extends UDPControlInfo
+class UdpSetOptionCommand extends UdpControlInfo
 {
 }
 
@@ -150,7 +150,7 @@ class UDPSetOptionCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode
 //
-class UDPSetTimeToLiveCommand extends UDPSetOptionCommand
+class UdpSetTimeToLiveCommand extends UdpSetOptionCommand
 {
     int ttl;
 }
@@ -165,7 +165,7 @@ class UDPSetTimeToLiveCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPSetTypeOfServiceCommand extends UDPSetOptionCommand
+class UdpSetTypeOfServiceCommand extends UdpSetOptionCommand
 {
     char tos;  // ToS byte for IPv4/IPv6
 }
@@ -177,7 +177,7 @@ class UDPSetTypeOfServiceCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPSetBroadcastCommand extends UDPSetOptionCommand
+class UdpSetBroadcastCommand extends UdpSetOptionCommand
 {
     bool broadcast;
 }
@@ -189,7 +189,7 @@ class UDPSetBroadcastCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPSetMulticastInterfaceCommand extends UDPSetOptionCommand
+class UdpSetMulticastInterfaceCommand extends UdpSetOptionCommand
 {
     int interfaceId;
 }
@@ -203,7 +203,7 @@ class UDPSetMulticastInterfaceCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPSetMulticastLoopCommand extends UDPSetOptionCommand
+class UdpSetMulticastLoopCommand extends UdpSetOptionCommand
 {
     bool loop;
 }
@@ -217,7 +217,7 @@ class UDPSetMulticastLoopCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPSetReuseAddressCommand extends UDPSetOptionCommand
+class UdpSetReuseAddressCommand extends UdpSetOptionCommand
 {
     bool reuseAddress;
 }
@@ -233,7 +233,7 @@ class UDPSetReuseAddressCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
+class UdpJoinMulticastGroupsCommand extends UdpSetOptionCommand
 {
     L3Address multicastAddr[];
     int interfaceId[];
@@ -246,7 +246,7 @@ class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 //
 // @see ~UDPCommandCode
 //
-class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
+class UdpLeaveMulticastGroupsCommand extends UdpSetOptionCommand
 {
     L3Address multicastAddr[];
 }
@@ -256,7 +256,7 @@ class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 // specific sources after joining a multicast group.
 //
 // see IP_BLOCK_SOURCE socket option
-class UDPBlockMulticastSourcesCommand extends UDPSetOptionCommand
+class UdpBlockMulticastSourcesCommand extends UdpSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
@@ -268,7 +268,7 @@ class UDPBlockMulticastSourcesCommand extends UDPSetOptionCommand
 // a previously blocked source.
 //
 // see IP_UNBLOCK_SOURCE socket option
-class UDPUnblockMulticastSourcesCommand extends UDPSetOptionCommand
+class UdpUnblockMulticastSourcesCommand extends UdpSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
@@ -280,7 +280,7 @@ class UDPUnblockMulticastSourcesCommand extends UDPSetOptionCommand
 // only for the selected sources.
 //
 // see IP_ADD_SOURCE_MEMBERSHIP socket option
-class UDPJoinMulticastSourcesCommand extends UDPSetOptionCommand
+class UdpJoinMulticastSourcesCommand extends UdpSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
@@ -292,14 +292,14 @@ class UDPJoinMulticastSourcesCommand extends UDPSetOptionCommand
 // for the selected sources.
 //
 // see IP_DROP_SOURCE_MEMBERSHIP socket option
-class UDPLeaveMulticastSourcesCommand extends UDPSetOptionCommand
+class UdpLeaveMulticastSourcesCommand extends UdpSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
     L3Address sourceList[];
 }
 
-enum UDPSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOURCES = 2; }
+enum UdpSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOURCES = 2; }
 
 //
 // Control info for letting an UDP socket to specify the excluded/included
@@ -308,11 +308,11 @@ enum UDPSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOUR
 // Unlike Block/Unblock/Join/LeaveMulticastSource commands, this method is
 // not incremental.
 //
-class UDPSetMulticastSourceFilterCommand extends UDPSetOptionCommand
+class UdpSetMulticastSourceFilterCommand extends UdpSetOptionCommand
 {
     int interfaceId;
     L3Address multicastAddr;
-    UDPSourceFilterMode filterMode;
+    UdpSourceFilterMode filterMode;
     L3Address sourceList[];
 }
 

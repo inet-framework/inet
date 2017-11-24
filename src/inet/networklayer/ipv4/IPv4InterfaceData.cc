@@ -26,18 +26,18 @@
 
 namespace inet {
 
-Register_Abstract_Class(IPv4MulticastGroupInfo);
-Register_Abstract_Class(IPv4MulticastGroupSourceInfo);
+Register_Abstract_Class(Ipv4MulticastGroupInfo);
+Register_Abstract_Class(Ipv4MulticastGroupSourceInfo);
 
-const IPv4MulticastSourceList IPv4MulticastSourceList::ALL_SOURCES(MCAST_EXCLUDE_SOURCES, IPv4AddressVector());
+const Ipv4MulticastSourceList Ipv4MulticastSourceList::ALL_SOURCES(MCAST_EXCLUDE_SOURCES, Ipv4AddressVector());
 
-bool IPv4MulticastSourceList::contains(IPv4Address source)
+bool Ipv4MulticastSourceList::contains(Ipv4Address source)
 {
     return (filterMode == MCAST_INCLUDE_SOURCES && find(sources.begin(), sources.end(), source) != sources.end()) ||
            (filterMode == MCAST_EXCLUDE_SOURCES && find(sources.begin(), sources.end(), source) == sources.end());
 }
 
-bool IPv4MulticastSourceList::add(IPv4Address source)
+bool Ipv4MulticastSourceList::add(Ipv4Address source)
 {
     size_t oldSize = sources.size();
     if (filterMode == MCAST_INCLUDE_SOURCES) {
@@ -51,7 +51,7 @@ bool IPv4MulticastSourceList::add(IPv4Address source)
     return sources.size() != oldSize;
 }
 
-bool IPv4MulticastSourceList::remove(IPv4Address source)
+bool Ipv4MulticastSourceList::remove(Ipv4Address source)
 {
     size_t oldSize = sources.size();
     if (filterMode == MCAST_INCLUDE_SOURCES) {
@@ -65,7 +65,7 @@ bool IPv4MulticastSourceList::remove(IPv4Address source)
     return sources.size() != oldSize;
 }
 
-std::string IPv4MulticastSourceList::info() const
+std::string Ipv4MulticastSourceList::info() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "I" : "E");
@@ -74,7 +74,7 @@ std::string IPv4MulticastSourceList::info() const
     return out.str();
 }
 
-std::string IPv4MulticastSourceList::detailedInfo() const
+std::string Ipv4MulticastSourceList::detailedInfo() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "INCLUDE(" : "EXCLUDE(");
@@ -84,14 +84,14 @@ std::string IPv4MulticastSourceList::detailedInfo() const
     return out.str();
 }
 
-IPv4InterfaceData::HostMulticastData::~HostMulticastData()
+Ipv4InterfaceData::HostMulticastData::~HostMulticastData()
 {
     for (auto & elem : joinedMulticastGroups)
         delete (elem);
     joinedMulticastGroups.clear();
 }
 
-std::string IPv4InterfaceData::HostMulticastData::info()
+std::string Ipv4InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;
     if (!joinedMulticastGroups.empty()) {
@@ -105,7 +105,7 @@ std::string IPv4InterfaceData::HostMulticastData::info()
     return out.str();
 }
 
-std::string IPv4InterfaceData::HostMulticastData::detailedInfo()
+std::string Ipv4InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
@@ -117,14 +117,14 @@ std::string IPv4InterfaceData::HostMulticastData::detailedInfo()
     return out.str();
 }
 
-IPv4InterfaceData::RouterMulticastData::~RouterMulticastData()
+Ipv4InterfaceData::RouterMulticastData::~RouterMulticastData()
 {
     for (auto & elem : reportedMulticastGroups)
         delete elem;
     reportedMulticastGroups.clear();
 }
 
-std::string IPv4InterfaceData::RouterMulticastData::info()
+std::string Ipv4InterfaceData::RouterMulticastData::info()
 {
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
@@ -140,7 +140,7 @@ std::string IPv4InterfaceData::RouterMulticastData::info()
     return out.str();
 }
 
-std::string IPv4InterfaceData::RouterMulticastData::detailedInfo()
+std::string Ipv4InterfaceData::RouterMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "TTL Threshold: " << multicastTtlThreshold << "\n";
@@ -153,21 +153,21 @@ std::string IPv4InterfaceData::RouterMulticastData::detailedInfo()
     return out.str();
 }
 
-IPv4InterfaceData::IPv4InterfaceData()
+Ipv4InterfaceData::Ipv4InterfaceData()
 {
-    netmask = IPv4Address::ALLONES_ADDRESS;
+    netmask = Ipv4Address::ALLONES_ADDRESS;
     metric = 0;
     hostData = nullptr;
     routerData = nullptr;
 }
 
-IPv4InterfaceData::~IPv4InterfaceData()
+Ipv4InterfaceData::~Ipv4InterfaceData()
 {
     delete hostData;
     delete routerData;
 }
 
-std::string IPv4InterfaceData::info() const
+std::string Ipv4InterfaceData::info() const
 {
     std::stringstream out;
     out << "IPv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
@@ -179,7 +179,7 @@ std::string IPv4InterfaceData::info() const
     return out.str();
 }
 
-std::string IPv4InterfaceData::detailedInfo() const
+std::string Ipv4InterfaceData::detailedInfo() const
 {
     std::stringstream out;
     out << "inet addr:" << getIPAddress() << "\tMask: " << getNetmask() << "\n";
@@ -191,7 +191,7 @@ std::string IPv4InterfaceData::detailedInfo() const
     return out.str();
 }
 
-bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const
+bool Ipv4InterfaceData::isMemberOfMulticastGroup(const Ipv4Address& multicastAddress) const
 {
     HostMulticastGroupVector groups = getHostData()->joinedMulticastGroups;
     for (HostMulticastGroupVector::const_iterator it = groups.begin(); it != groups.end(); ++it)
@@ -202,25 +202,25 @@ bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address& multicastAdd
 }
 
 // XXX deprecated
-void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
+void Ipv4InterfaceData::joinMulticastGroup(const Ipv4Address& multicastAddress)
 {
-    IPv4AddressVector empty;
+    Ipv4AddressVector empty;
     changeMulticastGroupMembership(multicastAddress, MCAST_INCLUDE_SOURCES, empty, MCAST_EXCLUDE_SOURCES, empty);
 }
 
 // XXX deprecated
-void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
+void Ipv4InterfaceData::leaveMulticastGroup(const Ipv4Address& multicastAddress)
 {
-    IPv4AddressVector empty;
+    Ipv4AddressVector empty;
     changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, empty, MCAST_INCLUDE_SOURCES, empty);
 }
 
 /**
  * This method is called by sockets to register their multicast group membership changes in the interface.
  */
-void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddress,
-        McastSourceFilterMode oldFilterMode, const IPv4AddressVector& oldSourceList,
-        McastSourceFilterMode newFilterMode, const IPv4AddressVector& newSourceList)
+void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddress,
+        McastSourceFilterMode oldFilterMode, const Ipv4AddressVector& oldSourceList,
+        McastSourceFilterMode newFilterMode, const Ipv4AddressVector& newSourceList)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv4InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
@@ -233,7 +233,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
         entry = data->joinedMulticastGroups.back();
     }
 
-    std::map<IPv4Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
+    std::map<Ipv4Address, int> *counts = oldFilterMode == MCAST_INCLUDE_SOURCES ? &entry->includeCounts : &entry->excludeCounts;
     for (const auto & elem : oldSourceList) {
         auto count = counts->find(elem);
         if (count == counts->end())
@@ -267,7 +267,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
 
         cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
         if (m) {
-            IPv4MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
+            Ipv4MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
             m->emit(NF_IPv4_MCAST_CHANGE, &info);
         }
 
@@ -275,7 +275,7 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
         if (oldFilterMode != newFilterMode && oldSourceList.empty() && newSourceList.empty()) {
             cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
             if (m) {
-                IPv4MulticastGroupInfo info2(ownerp, multicastAddress);
+                Ipv4MulticastGroupInfo info2(ownerp, multicastAddress);
                 m->emit(newFilterMode == MCAST_EXCLUDE_SOURCES ? NF_IPv4_MCAST_JOIN : NF_IPv4_MCAST_LEAVE, &info2);
             }
         }
@@ -292,12 +292,12 @@ void IPv4InterfaceData::changeMulticastGroupMembership(IPv4Address multicastAddr
  * according to RFC3376 3.2.
  * Returns true if filterMode or sourceList has been changed.
  */
-bool IPv4InterfaceData::HostMulticastGroupData::updateSourceList()
+bool Ipv4InterfaceData::HostMulticastGroupData::updateSourceList()
 {
     // Filter mode is EXCLUDE if any of the sockets are in EXCLUDE mode, otherwise INCLUDE
     McastSourceFilterMode filterMode = numOfExcludeModeSockets == 0 ? MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
 
-    IPv4AddressVector sourceList;
+    Ipv4AddressVector sourceList;
     if (numOfExcludeModeSockets == 0) {
         // If all socket is in INCLUDE mode, then the sourceList is the union of included sources
         for (auto & elem : includeCounts)
@@ -321,7 +321,7 @@ bool IPv4InterfaceData::HostMulticastGroupData::updateSourceList()
         return false;
 }
 
-IPv4InterfaceData::RouterMulticastGroupData *IPv4InterfaceData::findRouterGroupData(IPv4Address multicastAddress) const
+Ipv4InterfaceData::RouterMulticastGroupData *Ipv4InterfaceData::findRouterGroupData(Ipv4Address multicastAddress) const
 {
     ASSERT(multicastAddress.isMulticast());
     const RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
@@ -332,7 +332,7 @@ IPv4InterfaceData::RouterMulticastGroupData *IPv4InterfaceData::findRouterGroupD
     return nullptr;
 }
 
-bool IPv4InterfaceData::removeRouterGroupData(IPv4Address multicastAddress)
+bool Ipv4InterfaceData::removeRouterGroupData(Ipv4Address multicastAddress)
 {
     ASSERT(multicastAddress.isMulticast());
     RouterMulticastGroupVector& entries = getRouterData()->reportedMulticastGroups;
@@ -345,19 +345,19 @@ bool IPv4InterfaceData::removeRouterGroupData(IPv4Address multicastAddress)
     return false;
 }
 
-bool IPv4InterfaceData::hasMulticastListener(IPv4Address multicastAddress) const
+bool Ipv4InterfaceData::hasMulticastListener(Ipv4Address multicastAddress) const
 {
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     return groupData && !groupData->sourceList.isEmpty();
 }
 
-bool IPv4InterfaceData::hasMulticastListener(IPv4Address multicastAddress, IPv4Address sourceAddress) const
+bool Ipv4InterfaceData::hasMulticastListener(Ipv4Address multicastAddress, Ipv4Address sourceAddress) const
 {
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     return groupData && !groupData->sourceList.contains(sourceAddress);
 }
 
-void IPv4InterfaceData::addMulticastListener(const IPv4Address& multicastAddress)
+void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
@@ -367,17 +367,17 @@ void IPv4InterfaceData::addMulticastListener(const IPv4Address& multicastAddress
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
-        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
         check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
     }
 
     if (!groupData->sourceList.containsAll()) {
-        groupData->sourceList = IPv4MulticastSourceList::ALL_SOURCES;
+        groupData->sourceList = Ipv4MulticastSourceList::ALL_SOURCES;
         changed1(F_MULTICAST_LISTENERS);
     }
 }
 
-void IPv4InterfaceData::addMulticastListener(IPv4Address multicastAddress, IPv4Address sourceAddress)
+void Ipv4InterfaceData::addMulticastListener(Ipv4Address multicastAddress, Ipv4Address sourceAddress)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
@@ -387,7 +387,7 @@ void IPv4InterfaceData::addMulticastListener(IPv4Address multicastAddress, IPv4A
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
-        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
         check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
     }
 
@@ -397,7 +397,7 @@ void IPv4InterfaceData::addMulticastListener(IPv4Address multicastAddress, IPv4A
     }
 }
 
-void IPv4InterfaceData::removeMulticastListener(const IPv4Address& multicastAddress)
+void Ipv4InterfaceData::removeMulticastListener(const Ipv4Address& multicastAddress)
 {
     RouterMulticastGroupVector& multicastGroups = getRouterData()->reportedMulticastGroups;
 
@@ -412,12 +412,12 @@ void IPv4InterfaceData::removeMulticastListener(const IPv4Address& multicastAddr
         multicastGroups.erase(multicastGroups.begin() + i);
         changed1(F_MULTICAST_LISTENERS);
 
-        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
         check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
     }
 }
 
-void IPv4InterfaceData::removeMulticastListener(IPv4Address multicastAddress, IPv4Address sourceAddress)
+void Ipv4InterfaceData::removeMulticastListener(Ipv4Address multicastAddress, Ipv4Address sourceAddress)
 {
     RouterMulticastGroupVector& multicastGroups = getRouterData()->reportedMulticastGroups;
 
@@ -433,14 +433,14 @@ void IPv4InterfaceData::removeMulticastListener(IPv4Address multicastAddress, IP
             delete multicastGroups[i];
             multicastGroups.erase(multicastGroups.begin() + i);
 
-            IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+            Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
             check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
         }
         changed1(F_MULTICAST_LISTENERS);
     }
 }
 
-void IPv4InterfaceData::setMulticastListeners(IPv4Address multicastAddress, McastSourceFilterMode filterMode, const IPv4AddressVector& sourceList)
+void Ipv4InterfaceData::setMulticastListeners(Ipv4Address multicastAddress, McastSourceFilterMode filterMode, const Ipv4AddressVector& sourceList)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv4InterfaceData::setMulticastListeners(): multicast address expected, received %s.", multicastAddress.str().c_str());
@@ -463,7 +463,7 @@ void IPv4InterfaceData::setMulticastListeners(IPv4Address multicastAddress, Mcas
     }
 }
 
-IPv4InterfaceData::HostMulticastGroupData *IPv4InterfaceData::findHostGroupData(IPv4Address multicastAddress)
+Ipv4InterfaceData::HostMulticastGroupData *Ipv4InterfaceData::findHostGroupData(Ipv4Address multicastAddress)
 {
     ASSERT(multicastAddress.isMulticast());
     HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;
@@ -474,7 +474,7 @@ IPv4InterfaceData::HostMulticastGroupData *IPv4InterfaceData::findHostGroupData(
     return nullptr;
 }
 
-bool IPv4InterfaceData::removeHostGroupData(IPv4Address multicastAddress)
+bool Ipv4InterfaceData::removeHostGroupData(Ipv4Address multicastAddress)
 {
     ASSERT(multicastAddress.isMulticast());
     HostMulticastGroupVector& entries = getHostData()->joinedMulticastGroups;

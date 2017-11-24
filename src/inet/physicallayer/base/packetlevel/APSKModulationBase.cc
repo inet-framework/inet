@@ -29,14 +29,14 @@ namespace inet {
 
 namespace physicallayer {
 
-APSKModulationBase::APSKModulationBase(const std::vector<APSKSymbol> *constellation) :
+ApskModulationBase::ApskModulationBase(const std::vector<ApskSymbol> *constellation) :
     constellation(constellation),
     codeWordSize(log2(constellation->size())),
     constellationSize(constellation->size())
 {
 }
 
-std::ostream& APSKModulationBase::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskModulationBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", constellationSize = " << constellationSize
@@ -44,29 +44,29 @@ std::ostream& APSKModulationBase::printToStream(std::ostream& stream, int level)
     return stream;
 }
 
-const APSKModulationBase *APSKModulationBase::findModulation(const char *modulation)
+const ApskModulationBase *ApskModulationBase::findModulation(const char *modulation)
 {
     if (!strcmp("BPSK", modulation))
-        return &BPSKModulation::singleton;
+        return &BpskModulation::singleton;
     else if (!strcmp("QPSK", modulation))
-        return &QPSKModulation::singleton;
+        return &QpskModulation::singleton;
     else if (!strcmp("QAM-16", modulation))
-        return &QAM16Modulation::singleton;
+        return &Qam16Modulation::singleton;
     else if (!strcmp("QAM-64", modulation))
-        return &QAM64Modulation::singleton;
+        return &Qam64Modulation::singleton;
     else if (!strcmp("QAM-256", modulation))
-        return &QAM256Modulation::singleton;
+        return &Qam256Modulation::singleton;
     else if (!strncmp("MQAM-", modulation, 5))
-        return new MQAMModulation(atoi(modulation + 5));
+        return new MqamModulation(atoi(modulation + 5));
     else if (!strncmp("MPSK-", modulation, 5))
-        return new MPSKModulation(atoi(modulation + 5));
+        return new MpskModulation(atoi(modulation + 5));
     else if (!strcmp(modulation, "DSSS-OQPSK-16"))
-        return new DSSSOQPSK16Modulation();
+        return new DsssOqpsk16Modulation();
     else
         throw cRuntimeError("Unknown modulation = %s", modulation);
 }
 
-const APSKSymbol *APSKModulationBase::mapToConstellationDiagram(const ShortBitVector& symbol) const
+const ApskSymbol *ApskModulationBase::mapToConstellationDiagram(const ShortBitVector& symbol) const
 {
     unsigned int decimalSymbol = symbol.toDecimal();
     if (decimalSymbol >= constellationSize)
@@ -74,7 +74,7 @@ const APSKSymbol *APSKModulationBase::mapToConstellationDiagram(const ShortBitVe
     return &constellation->at(decimalSymbol);
 }
 
-ShortBitVector APSKModulationBase::demapToBitRepresentation(const APSKSymbol *symbol) const
+ShortBitVector ApskModulationBase::demapToBitRepresentation(const ApskSymbol *symbol) const
 {
     // TODO: Complete implementation: http://eprints.soton.ac.uk/354719/1/tvt-hanzo-2272640-proof.pdf
     double symbolQ = symbol->real();
@@ -82,7 +82,7 @@ ShortBitVector APSKModulationBase::demapToBitRepresentation(const APSKSymbol *sy
     double minDist = DBL_MAX;
     int nearestNeighborIndex = -1;
     for (unsigned int i = 0; i < constellationSize; i++) {
-        const APSKSymbol *constellationSymbol = &constellation->at(i);
+        const ApskSymbol *constellationSymbol = &constellation->at(i);
         double cQ = constellationSymbol->real();
         double cI = constellationSymbol->imag();
         double dist = (symbolQ - cQ) * (symbolQ - cQ) + (symbolI - cI) * (symbolI - cI);

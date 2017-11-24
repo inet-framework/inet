@@ -25,7 +25,7 @@
 namespace inet {
 
 class IInterfaceTable;
-class IIPv4RoutingTable;
+class IIpv4RoutingTable;
 
 /**
  * Configures IPv4 addresses and routing tables for a "flat" network,
@@ -42,8 +42,8 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
       public:
         bool isIPNode = false;
         IInterfaceTable *ift = nullptr;
-        IIPv4RoutingTable *rt = nullptr;
-        IPv4Address address;
+        IIpv4RoutingTable *rt = nullptr;
+        Ipv4Address address;
         bool usesDefaultRoute = false;
         bool ipForwardEnabled = false;
     };

@@ -20,10 +20,10 @@
 package inet.routing.pim;
 
 import inet.routing.contract.IPIMRouting;
-import inet.routing.pim.modes.PIMDM;
-import inet.routing.pim.modes.PIMSM;
-import inet.routing.pim.tables.PIMInterfaceTable;
-import inet.routing.pim.tables.PIMNeighborTable;
+import inet.routing.pim.modes.PimDm;
+import inet.routing.pim.modes.PimSm;
+import inet.routing.pim.tables.PimInterfaceTable;
+import inet.routing.pim.tables.PimNeighborTable;
 
 module PIMRouting like IPIMRouting
 {
@@ -41,27 +41,27 @@ module PIMRouting like IPIMRouting
         output networkLayerOut;
 
     submodules:
-        pimSplitter: PIMSplitter {
+        pimSplitter: PimSplitter {
             parameters:
                 @display("p=69,95");
         }
 
-        pimDM: PIMDM {
+        pimDM: PimDm {
             parameters:
                 @display("p=165,142");
         }
 
-        pimSM: PIMSM {
+        pimSM: PimSm {
             parameters:
                 @display("p=165,56");
         }
 
-        pimInterfaceTable: PIMInterfaceTable {
+        pimInterfaceTable: PimInterfaceTable {
             parameters:
                 @display("p=268,56");
         }
 
-        pimNeighborTable: PIMNeighborTable {
+        pimNeighborTable: PimNeighborTable {
             parameters:
                 @display("p=268,142");
         }

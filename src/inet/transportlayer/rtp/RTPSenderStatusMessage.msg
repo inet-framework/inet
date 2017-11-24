@@ -29,7 +29,7 @@ namespace inet::rtp;
 // If a message must provide more information than just a string, a new class
 // defining this parameter can derived.
 //
-enum RTPSenderStatus
+enum RtpSenderStatus
 {
     RTP_SENDER_STATUS_PLAYING = 1;
     RTP_SENDER_STATUS_FINISHED = 2;
@@ -37,8 +37,8 @@ enum RTPSenderStatus
     RTP_SENDER_STATUS_PAUSED = 4;
 }
 
-packet RTPSenderStatusMessage
+packet RtpSenderStatusMessage
 {
-    RTPSenderStatus status;
+    RtpSenderStatus status;
     uint32 timeStamp;
 };

@@ -41,7 +41,7 @@ class INET_API TcpTestClient : public cSimpleModule
 
     int ctr;
 
-    TCPSocket socket;
+    TcpSocket socket;
 
     // statistics
     int64_t rcvdBytes;

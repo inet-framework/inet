@@ -22,9 +22,9 @@
 
 namespace inet {
 
-simsignal_t TCPAppBase::connectSignal = registerSignal("connect");
+simsignal_t TcpAppBase::connectSignal = registerSignal("connect");
 
-void TCPAppBase::initialize(int stage)
+void TcpAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -49,7 +49,7 @@ void TCPAppBase::initialize(int stage)
     }
 }
 
-void TCPAppBase::handleMessage(cMessage *msg)
+void TcpAppBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleTimer(msg);
@@ -57,7 +57,7 @@ void TCPAppBase::handleMessage(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void TCPAppBase::connect()
+void TcpAppBase::connect()
 {
     // we need a new connId if this is not the first connection
     socket.renewSocket();
@@ -81,14 +81,14 @@ void TCPAppBase::connect()
     }
 }
 
-void TCPAppBase::close()
+void TcpAppBase::close()
 {
     EV_INFO << "issuing CLOSE command\n";
     socket.close();
     emit(connectSignal, -1L);
 }
 
-void TCPAppBase::sendPacket(cPacket *msg)
+void TcpAppBase::sendPacket(cPacket *msg)
 {
     int numBytes = msg->getByteLength();
     emit(sentPkSignal, msg);
@@ -98,18 +98,18 @@ void TCPAppBase::sendPacket(cPacket *msg)
     bytesSent += numBytes;
 }
 
-void TCPAppBase::refreshDisplay() const
+void TcpAppBase::refreshDisplay() const
 {
-    getDisplayString().setTagArg("t", 0, TCPSocket::stateName(socket.getState()));
+    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
 }
 
-void TCPAppBase::socketEstablished(int, void *)
+void TcpAppBase::socketEstablished(int, void *)
 {
     // *redefine* to perform or schedule first sending
     EV_INFO << "connected\n";
 }
 
-void TCPAppBase::socketDataArrived(int, void *, Packet *msg, bool)
+void TcpAppBase::socketDataArrived(int, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -118,29 +118,29 @@ void TCPAppBase::socketDataArrived(int, void *, Packet *msg, bool)
     delete msg;
 }
 
-void TCPAppBase::socketPeerClosed(int, void *)
+void TcpAppBase::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
-    if (socket.getState() == TCPSocket::PEER_CLOSED) {
+    if (socket.getState() == TcpSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well\n";
         close();
     }
 }
 
-void TCPAppBase::socketClosed(int, void *)
+void TcpAppBase::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
 }
 
-void TCPAppBase::socketFailure(int, void *, int code)
+void TcpAppBase::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
     numBroken++;
 }
 
-void TCPAppBase::finish()
+void TcpAppBase::finish()
 {
     std::string modulePath = getFullPath();
 

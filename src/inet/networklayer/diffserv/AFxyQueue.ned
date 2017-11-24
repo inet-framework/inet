@@ -18,8 +18,8 @@
 
 package inet.networklayer.diffserv;
 
-import inet.common.queue.FIFOQueue;
-import inet.common.queue.REDDropper;
+import inet.common.queue.FifoQueue;
+import inet.common.queue.RedDropper;
 
 
 //
@@ -64,10 +64,10 @@ module AFxyQueue
         input afx3In;
         output out;
     submodules:
-        fifoQueue: FIFOQueue {
+        fifoQueue: FifoQueue {
             @display("p=251,102");
         }
-        redDropper: REDDropper {
+        redDropper: RedDropper {
             numGates = 3;
             wq = wq;
             minths = string(afx1Minth) + " " + string(afx2Minth) + " " + string(afx3Minth);

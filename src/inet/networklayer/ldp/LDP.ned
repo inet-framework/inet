@@ -34,7 +34,7 @@ package inet.networklayer.ldp;
 //
 // @author Andras Varga, Vojta Janota
 //
-simple LDP      //FIXME like IApp
+simple Ldp      //FIXME like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -47,8 +47,8 @@ simple LDP      //FIXME like IApp
         @display("i=block/control");
     gates:
         //FIXME use socketIn/socketOut gates instead of tcpIn/Out, udpIn/Out
-        input tcpIn @labels(TCPCommand/up);
-        input udpIn @labels(UDPControlInfo/up);
-        output tcpOut @labels(TCPCommand/down);
-        output udpOut @labels(UDPControlInfo/down);
+        input tcpIn @labels(TcpCommand/up);
+        input udpIn @labels(UdpControlInfo/up);
+        output tcpOut @labels(TcpCommand/down);
+        output udpOut @labels(UdpControlInfo/down);
 }

@@ -278,7 +278,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     /** @name Reception */
     //@{
-    virtual bool isRadioMacAddress(const IRadio *radio, const MACAddress address) const;
+    virtual bool isRadioMacAddress(const IRadio *radio, const MacAddress address) const;
 
     /**
      * Returns true if the radio can potentially receive the transmission
@@ -346,7 +346,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IInterference *getInterference(const IRadio *receiver, const ITransmission *transmission) const override;
     virtual const IInterference *getInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const;
     virtual const INoise *getNoise(const IRadio *receiver, const ITransmission *transmission) const override;
-    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
+    virtual const ISnir *getSNIR(const IRadio *receiver, const ITransmission *transmission) const override;
 
     virtual bool isReceptionPossible(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
     virtual bool isReceptionAttempted(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const override;

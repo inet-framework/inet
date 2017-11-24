@@ -1,5 +1,5 @@
 %description:
-Test TCPReceiveQueue class
+Test TcpReceiveQueue class
 - segments out of order
 - overlapped segments
 - sequence number turn out zero
@@ -12,8 +12,8 @@ Test TCPReceiveQueue class
 using namespace ::inet::tcp;
 
 %activity:
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *q = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *q = &rcvQueue;
 
 q->init(1000);
 

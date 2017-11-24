@@ -31,11 +31,11 @@ namespace tcp {
 /**
  * State variables for TCPVegas.
  */
-class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
+class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
 {
   public:
-    TCPVegasStateVariables();
-    ~TCPVegasStateVariables();
+    TcpVegasStateVariables();
+    ~TcpVegasStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
@@ -52,7 +52,7 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
     simtime_t v_sa;    // average for vegas fine-grained timeout
     simtime_t v_sd;    // deviation for vegas fine-grained timeout
 
-    TCPSegmentTransmitInfoList regions;
+    TcpSegmentTransmitInfoList regions;
 
     uint32 ssthresh;    ///< slow start threshold
 
@@ -62,26 +62,26 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
     uint32 v_worried;    // pkts a to retransmit due to vegas fine-grained timeout
 };
 
-class INET_API TCPVegas : public TCPBaseAlg
+class INET_API TcpVegas : public TcpBaseAlg
 {
   protected:
-    TCPVegasStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpVegasStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() override
+    virtual TcpStateVariables *createStateVariables() override
     {
-        return new TCPVegasStateVariables();
+        return new TcpVegasStateVariables();
     }
 
     /** Utility function to recalculate ssthresh */
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event) override;
+    virtual void processRexmitTimer(TcpEventCode& event) override;
 
   public:
     /** Ctor */
-    TCPVegas();
+    TcpVegas();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32 firstSeqAcked) override;

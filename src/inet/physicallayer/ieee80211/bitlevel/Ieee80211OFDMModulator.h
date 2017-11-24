@@ -29,11 +29,11 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMModulator : public IModulator
+class INET_API Ieee80211OfdmModulator : public IModulator
 {
   public:
-    static const APSKSymbol negativePilotSubcarrier;
-    static const APSKSymbol positivePilotSubcarrier;
+    static const ApskSymbol negativePilotSubcarrier;
+    static const ApskSymbol positivePilotSubcarrier;
 
   protected:
     const Ieee80211OfdmModulation *subcarrierModulation;
@@ -42,10 +42,10 @@ class INET_API Ieee80211OFDMModulator : public IModulator
 
   protected:
     int getSubcarrierIndex(int ofdmSymbolIndex) const;
-    void insertPilotSubcarriers(Ieee80211OFDMSymbol *ofdmSymbol, int symbolID) const;
+    void insertPilotSubcarriers(Ieee80211OfdmSymbol *ofdmSymbol, int symbolID) const;
 
   public:
-    Ieee80211OFDMModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset);
+    Ieee80211OfdmModulator(const Ieee80211OfdmModulation *subcarrierModulation, unsigned int polarityVectorOffset);
 
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const override;
     const Ieee80211OfdmModulation *getModulation() const override { return subcarrierModulation; }

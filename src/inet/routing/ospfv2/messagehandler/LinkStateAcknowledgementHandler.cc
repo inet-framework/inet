@@ -33,16 +33,16 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *i
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
-        const auto& lsAckPacket = packet->peekHeader<OSPFLinkStateAcknowledgementPacket>();
+        const auto& lsAckPacket = packet->peekHeader<OspfLinkStateAcknowledgementPacket>();
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
         EV_DETAIL << "  Processing packet contents:\n";
 
         for (int i = 0; i < lsaCount; i++) {
-            const OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
-            OSPFLSA *lsaOnRetransmissionList;
-            LSAKeyType lsaKey;
+            const OspfLsaHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
+            OspfLsa *lsaOnRetransmissionList;
+            LsaKeyType lsaKey;
 
             EV_DETAIL << "    " << lsaHeader << "\n";
 

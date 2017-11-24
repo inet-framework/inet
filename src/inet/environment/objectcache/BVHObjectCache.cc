@@ -22,9 +22,9 @@ namespace inet {
 
 namespace physicalenvironment {
 
-Define_Module(BVHObjectCache);
+Define_Module(BvhObjectCache);
 
-BVHObjectCache::BVHObjectCache() :
+BvhObjectCache::BvhObjectCache() :
     physicalEnvironment(nullptr),
     leafCapacity(0),
     axisOrder(nullptr),
@@ -32,12 +32,12 @@ BVHObjectCache::BVHObjectCache() :
 {
 }
 
-BVHObjectCache::~BVHObjectCache()
+BvhObjectCache::~BvhObjectCache()
 {
     delete bvhTree;
 }
 
-void BVHObjectCache::initialize(int stage)
+void BvhObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
@@ -52,7 +52,7 @@ void BVHObjectCache::initialize(int stage)
     }
 }
 
-bool BVHObjectCache::insertObject(const IPhysicalObject *object)
+bool BvhObjectCache::insertObject(const IPhysicalObject *object)
 {
     if (bvhTree) {
         delete bvhTree;
@@ -62,10 +62,10 @@ bool BVHObjectCache::insertObject(const IPhysicalObject *object)
     return true;
 }
 
-void BVHObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
+void BvhObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     if (!bvhTree)
-        bvhTree = new BVHTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, BVHTree::Axis(axisOrder), leafCapacity);
+        bvhTree = new BvhTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, BvhTree::Axis(axisOrder), leafCapacity);
     bvhTree->lineSegmentQuery(lineSegment, visitor);
 }
 

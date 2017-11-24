@@ -29,10 +29,10 @@ namespace inet {
 /**
  * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.
  */
-class INET_API PIMInterface : public cObject
+class INET_API PimInterface : public cObject
 {
   public:
-    enum PIMMode {
+    enum PimMode {
         DenseMode = 1,
         SparseMode = 2
     };
@@ -41,24 +41,24 @@ class INET_API PIMInterface : public cObject
     InterfaceEntry *ie;
 
     // parameters
-    PIMMode mode;
+    PimMode mode;
     bool stateRefreshFlag;
 
     // state
-    IPv4Address drAddress;
+    Ipv4Address drAddress;
 
   public:
-    PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
+    PimInterface(InterfaceEntry *ie, PimMode mode, bool stateRefreshFlag)
         : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
     virtual std::string info() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }
-    PIMMode getMode() const { return mode; }
+    PimMode getMode() const { return mode; }
     bool getSR() const { return stateRefreshFlag; }
 
-    IPv4Address getDRAddress() const { return drAddress; }
-    void setDRAddress(IPv4Address address) { drAddress = address; }
+    Ipv4Address getDRAddress() const { return drAddress; }
+    void setDRAddress(Ipv4Address address) { drAddress = address; }
 };
 
 /**
@@ -66,19 +66,19 @@ class INET_API PIMInterface : public cObject
  * When interfaces are added to/deleted from the InterfaceTable, then the corresponding
  * PIMInterface entry is added/deleted automatically.
  */
-class INET_API PIMInterfaceTable : public cSimpleModule, protected cListener
+class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
 {
   protected:
-    typedef std::vector<PIMInterface *> PIMInterfaceVector;
+    typedef std::vector<PimInterface *> PimInterfaceVector;
 
-    PIMInterfaceVector pimInterfaces;
+    PimInterfaceVector pimInterfaces;
 
   public:
-    virtual ~PIMInterfaceTable();
+    virtual ~PimInterfaceTable();
 
     virtual int getNumInterfaces() { return pimInterfaces.size(); }
-    virtual PIMInterface *getInterface(int k) { return pimInterfaces[k]; }
-    virtual PIMInterface *getInterfaceById(int interfaceId);
+    virtual PimInterface *getInterface(int k) { return pimInterfaces[k]; }
+    virtual PimInterface *getInterfaceById(int interfaceId);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -87,8 +87,8 @@ class INET_API PIMInterfaceTable : public cSimpleModule, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void configureInterfaces(cXMLElement *config);
-    virtual PIMInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
-    virtual PIMInterfaceVector::iterator findInterface(InterfaceEntry *ie);
+    virtual PimInterface *createInterface(InterfaceEntry *ie, cXMLElement *config);
+    virtual PimInterfaceVector::iterator findInterface(InterfaceEntry *ie);
     virtual void addInterface(InterfaceEntry *ie);
     virtual void removeInterface(InterfaceEntry *ie);
 };

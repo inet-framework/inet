@@ -32,19 +32,19 @@
 
 namespace inet {
 
-Define_Module(PPP);
+Define_Module(Ppp);
 
-simsignal_t PPP::txStateSignal = registerSignal("txState");
-simsignal_t PPP::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t Ppp::txStateSignal = registerSignal("txState");
+simsignal_t Ppp::rxPkOkSignal = registerSignal("rxPkOk");
 
-PPP::~PPP()
+Ppp::~Ppp()
 {
     cancelAndDelete(endTransmissionEvent);
 }
 
-void PPP::initialize(int stage)
+void Ppp::initialize(int stage)
 {
-    MACBase::initialize(stage);
+    MacBase::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
@@ -100,7 +100,7 @@ void PPP::initialize(int stage)
     }
 }
 
-InterfaceEntry *PPP::createInterfaceEntry()
+InterfaceEntry *Ppp::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -125,9 +125,9 @@ InterfaceEntry *PPP::createInterfaceEntry()
     return e;
 }
 
-void PPP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    MACBase::receiveSignal(source, signalID, obj, details);
+    MacBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID != POST_MODEL_CHANGE)
         return;
@@ -149,7 +149,7 @@ void PPP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     }
 }
 
-void PPP::refreshOutGateConnection(bool connected)
+void Ppp::refreshOutGateConnection(bool connected)
 {
     Enter_Method_Silent();
 
@@ -202,7 +202,7 @@ void PPP::refreshOutGateConnection(bool connected)
         queueModule->requestPacket();
 }
 
-void PPP::startTransmitting(cPacket *msg)
+void Ppp::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     Packet *pppFrame = encapsulate(msg);
@@ -232,7 +232,7 @@ void PPP::startTransmitting(cPacket *msg)
     numSent++;
 }
 
-void PPP::handleMessage(cMessage *msg)
+void Ppp::handleMessage(cMessage *msg)
 {
     if (!isOperational) {
         handleMessageWhenDown(msg);
@@ -328,7 +328,7 @@ void PPP::handleMessage(cMessage *msg)
     }
 }
 
-void PPP::refreshDisplay() const
+void Ppp::refreshDisplay() const
 {
     std::ostringstream buf;
     const char *color = "";
@@ -363,7 +363,7 @@ void PPP::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-Packet *PPP::encapsulate(cPacket *msg)
+Packet *Ppp::encapsulate(cPacket *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();
@@ -377,7 +377,7 @@ Packet *PPP::encapsulate(cPacket *msg)
     return packet;
 }
 
-cPacket *PPP::decapsulate(Packet *packet)
+cPacket *Ppp::decapsulate(Packet *packet)
 {
     const auto& pppHeader = packet->popHeader<PppHeader>();
     const auto& pppTrailer = packet->popTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
@@ -392,7 +392,7 @@ cPacket *PPP::decapsulate(Packet *packet)
     return packet;
 }
 
-void PPP::flushQueue()
+void Ppp::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (queueModule) {
@@ -417,7 +417,7 @@ void PPP::flushQueue()
     }
 }
 
-void PPP::clearQueue()
+void Ppp::clearQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (queueModule) {

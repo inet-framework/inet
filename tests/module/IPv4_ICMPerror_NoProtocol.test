@@ -1,12 +1,12 @@
 %description:
-Test for bug #463: IPv4: missing ICMP error 
+Test for bug #463: IPv4: missing Icmp error 
 that initiated the packet causing the error.
 
 NClients example network is used, with one client.
 Server doesn't have any UDP app ==> doesn't have UDP layer.
 
 The client sends an UDP datagram to the server.
-The server generates an Destination Unreachable ICMP error
+The server generates an Destination Unreachable Icmp error
 that should be received by the client application in the
 form of an error indication.
 
@@ -52,7 +52,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Transport protocol ID=17 not connected, discarding packet
-sending ICMP error ICMP-error-#1-type3-code2
+sending Icmp error Icmp-error-#1-type3-code2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

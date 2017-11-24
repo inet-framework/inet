@@ -19,7 +19,7 @@
 
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet::rtp;
 
@@ -33,14 +33,14 @@ namespace inet::rtp;
 // sa RTPReceiverInformation
 // sa RTPSenderInformation
 //
-class RTPParticipantInfo extends cNamedObject
+class RtpParticipantInfo extends cNamedObject
 {
     @customize;  // see the generated C++ header for more info
 
     abstract uint32 ssrc;
 
     // Used for storing the ip address of this endsystem.
-    IPv4Address address = IPv4Address::UNSPECIFIED_ADDRESS;
+    Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS;
 
     // Used for storing the port for ~RTP by this endsystem.
     int RTPPort = PORT_UNDEF;

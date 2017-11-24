@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKPhyHeaderSerializer : public ChunkSerializer
+class INET_API ApskPhyHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk, b offset, b length) const;

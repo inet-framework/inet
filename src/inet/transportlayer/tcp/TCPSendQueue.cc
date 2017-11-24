@@ -21,31 +21,31 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPSendQueue);
+Register_Class(TcpSendQueue);
 
-TCPSendQueue::TCPSendQueue()
+TcpSendQueue::TcpSendQueue()
 {
 }
 
-TCPSendQueue::~TCPSendQueue()
+TcpSendQueue::~TcpSendQueue()
 {
 }
 
-void TCPSendQueue::init(uint32 startSeq)
+void TcpSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
     dataBuffer.clear();          // clear dataBuffer
 }
 
-std::string TCPSendQueue::str() const
+std::string TcpSendQueue::str() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << ")" << dataBuffer;
     return out.str();
 }
 
-void TCPSendQueue::enqueueAppData(Packet *msg)
+void TcpSendQueue::enqueueAppData(Packet *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
@@ -55,17 +55,17 @@ void TCPSendQueue::enqueueAppData(Packet *msg)
     delete msg;
 }
 
-uint32 TCPSendQueue::getBufferStartSeq()
+uint32 TcpSendQueue::getBufferStartSeq()
 {
     return begin;
 }
 
-uint32 TCPSendQueue::getBufferEndSeq()
+uint32 TcpSendQueue::getBufferEndSeq()
 {
     return end;
 }
 
-Packet *TCPSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
 
@@ -81,7 +81,7 @@ Packet *TCPSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
     return packet;
 }
 
-void TCPSendQueue::discardUpTo(uint32 seqNum)
+void TcpSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
 

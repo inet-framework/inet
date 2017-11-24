@@ -28,7 +28,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class INET_API BVHObjectCache : public IObjectCache, public cModule
+class INET_API BvhObjectCache : public IObjectCache, public cModule
 {
   protected:
     /** @name Parameters */
@@ -40,7 +40,7 @@ class INET_API BVHObjectCache : public IObjectCache, public cModule
 
     /** @name Cache */
     //@{
-    mutable BVHTree *bvhTree;
+    mutable BvhTree *bvhTree;
     mutable std::vector<const IPhysicalObject *> objects;
     //@}
 
@@ -51,8 +51,8 @@ class INET_API BVHObjectCache : public IObjectCache, public cModule
     virtual bool insertObject(const IPhysicalObject *object);
 
   public:
-    BVHObjectCache();
-    virtual ~BVHObjectCache();
+    BvhObjectCache();
+    virtual ~BvhObjectCache();
 
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };

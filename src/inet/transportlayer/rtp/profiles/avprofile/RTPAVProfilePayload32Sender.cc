@@ -28,24 +28,24 @@ namespace inet {
 
 namespace rtp {
 
-Define_Module(RTPAVProfilePayload32Sender);
+Define_Module(RtpAvProfilePayload32Sender);
 
-void RTPAVProfilePayload32Sender::initialize()
+void RtpAvProfilePayload32Sender::initialize()
 {
-    RTPPayloadSender::initialize();
+    RtpPayloadSender::initialize();
 
     _clockRate = 90000;
     _payloadType = 32;
 }
 
-void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
+void RtpAvProfilePayload32Sender::initializeSenderModule(RtpInnerPacket *rinpIn)
 {
     EV_TRACE << "initializeSenderModule Enter" << endl;
     char line[100];
     char unit[100];
     char description[100];
 
-    RTPPayloadSender::initializeSenderModule(rinpIn);
+    RtpPayloadSender::initializeSenderModule(rinpIn);
 
     // first line: fps unit description
     _inputFileStream.get(line, 100, '\n');
@@ -74,7 +74,7 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     EV_TRACE << "initializeSenderModule Exit" << endl;
 }
 
-bool RTPAVProfilePayload32Sender::sendPacket()
+bool RtpAvProfilePayload32Sender::sendPacket()
 {
     EV_TRACE << "sendPacket() " << endl;
     // read next frame line
@@ -120,7 +120,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
         while (bytesRemaining > 0) {
             Packet *packet = new Packet("RTPPacket");
             const auto& rtpHeader = makeShared<RtpHeader>();
-            const auto& mpegHeader = makeShared<RTPMpegHeader>();
+            const auto& mpegHeader = makeShared<RtpMpegHeader>();
             const auto& mpegPayload = makeShared<ByteCountChunk>();
 
             // the only mpeg information we know is the picture type
@@ -160,7 +160,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             packet->insertTrailer(mpegHeader);
             packet->insertTrailer(mpegPayload);
 
-            RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");
+            RtpInnerPacket *rinpOut = new RtpInnerPacket("dataOut()");
             rinpOut->setDataOutPkt(packet);
 
             send(rinpOut, "profileOut");

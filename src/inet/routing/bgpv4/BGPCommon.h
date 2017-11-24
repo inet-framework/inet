@@ -27,7 +27,7 @@
 namespace inet {
 
 //Forward declarations:
-class TCPSocket;
+class TcpSocket;
 
 namespace bgp {
 
@@ -48,20 +48,20 @@ const unsigned char NEW_SESSION_ESTABLISHED = 92;
 const unsigned char ASLOOP_NO_DETECTED = 93;
 const unsigned char ASLOOP_DETECTED = 94;
 
-typedef IPv4Address NextHop;
-typedef unsigned short ASID;
-typedef unsigned long SessionID;
+typedef Ipv4Address NextHop;
+typedef unsigned short AsId;
+typedef unsigned long SessionId;
 
 struct SessionInfo
 {
-    SessionID sessionID = 0;
-    BGPSessionType sessionType = INCOMPLETE;
-    ASID ASValue = 0;
-    IPv4Address routerID;
-    IPv4Address peerAddr;
+    SessionId sessionID = 0;
+    BgpSessionType sessionType = INCOMPLETE;
+    AsId ASValue = 0;
+    Ipv4Address routerID;
+    Ipv4Address peerAddr;
     InterfaceEntry *linkIntf = nullptr;
-    TCPSocket *socket = nullptr;
-    TCPSocket *socketListen = nullptr;
+    TcpSocket *socket = nullptr;
+    TcpSocket *socketListen = nullptr;
     bool sessionEstablished = false;
 };
 

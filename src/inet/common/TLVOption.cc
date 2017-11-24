@@ -22,15 +22,15 @@
 
 namespace inet {
 
-Register_Class(TLVOptions);
+Register_Class(TlvOptions);
 
-void TLVOptions::copy(const TLVOptions& other)
+void TlvOptions::copy(const TlvOptions& other)
 {
     for (auto opt: other.optionVector)
         optionVector.push_back(opt->dup());
 }
 
-int TLVOptions::getLength() const
+int TlvOptions::getLength() const
 {
     int length = 0;
     for (auto opt: optionVector)
@@ -38,7 +38,7 @@ int TLVOptions::getLength() const
     return length;
 }
 
-void TLVOptions::add(TLVOptionBase *opt, int atPos)
+void TlvOptions::add(TlvOptionBase *opt, int atPos)
 {
     ASSERT(opt->getLength() >= 1);
     if (atPos == -1)
@@ -47,7 +47,7 @@ void TLVOptions::add(TLVOptionBase *opt, int atPos)
         optionVector.insert(optionVector.begin() + atPos, opt);
 }
 
-TLVOptionBase *TLVOptions::remove(TLVOptionBase *option)
+TlvOptionBase *TlvOptions::remove(TlvOptionBase *option)
 {
     for (auto it = optionVector.begin(); it != optionVector.end(); ++it)
         if ((*it) == option) {
@@ -57,7 +57,7 @@ TLVOptionBase *TLVOptions::remove(TLVOptionBase *option)
     return nullptr;
 }
 
-void TLVOptions::deleteOptionByType(int type, bool firstOnly)
+void TlvOptions::deleteOptionByType(int type, bool firstOnly)
 {
     auto it = optionVector.begin();
     while (it != optionVector.end()) {
@@ -72,14 +72,14 @@ void TLVOptions::deleteOptionByType(int type, bool firstOnly)
     }
 }
 
-void TLVOptions::clear()
+void TlvOptions::clear()
 {
     for (auto opt: optionVector)
         delete opt;
     optionVector.clear();
 }
 
-int TLVOptions::findByType(short int type, int firstPos) const
+int TlvOptions::findByType(short int type, int firstPos) const
 {
     for (unsigned int pos=firstPos; pos < optionVector.size(); pos++)
         if (optionVector[pos]->getType() == type)
@@ -87,22 +87,22 @@ int TLVOptions::findByType(short int type, int firstPos) const
     return -1;
 }
 
-void TLVOptions::parsimPack(cCommBuffer *b) const
+void TlvOptions::parsimPack(cCommBuffer *b) const
 {
-    TLVOptions_Base::parsimPack(b);
+    TlvOptions_Base::parsimPack(b);
     int s = (int)optionVector.size();
     doParsimPacking(b, s);
     for (auto opt: optionVector)
         b->packObject(opt);
 }
 
-void TLVOptions::parsimUnpack(cCommBuffer *b)
+void TlvOptions::parsimUnpack(cCommBuffer *b)
 {
-    TLVOptions_Base::parsimUnpack(b);
+    TlvOptions_Base::parsimUnpack(b);
     int s;
     doParsimUnpacking(b, s);
     for (int i = 0; i < s; i++)
-        optionVector.push_back(check_and_cast<TLVOptionBase *>(b->unpackObject()));
+        optionVector.push_back(check_and_cast<TlvOptionBase *>(b->unpackObject()));
 }
 
 } // namespace inet

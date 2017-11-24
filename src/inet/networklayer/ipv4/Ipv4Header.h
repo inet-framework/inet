@@ -75,22 +75,22 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TLVOptionBase& getMutableOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options.getMutableTlvOption(k))); }
-    virtual const TLVOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TLVOptionBase *>(&(options.getTlvOption(k))); }
+    virtual TlvOptionBase& getMutableOption(unsigned int k) { return *check_and_cast<TlvOptionBase *>(&(options.getMutableTlvOption(k))); }
+    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>(&(options.getTlvOption(k))); }
 
     /**
      * Returns the TLVOptionBase of the specified type,
      * or nullptr. If index is 0, then the first, if 1 then the
      * second option is returned.
      */
-    virtual TLVOptionBase *findMutableOptionByType(short int optionType, int index = 0);
-    virtual const TLVOptionBase *findOptionByType(short int optionType, int index = 0) const;
+    virtual TlvOptionBase *findMutableOptionByType(short int optionType, int index = 0);
+    virtual const TlvOptionBase *findOptionByType(short int optionType, int index = 0) const;
 
     /**
      * Adds an TLVOptionBase to the datagram.
      * default atPos means add to the end.
      */
-    virtual void addOption(TLVOptionBase *opt, int atPos = -1);
+    virtual void addOption(TlvOptionBase *opt, int atPos = -1);
 
     /**
      * Calculates the length of the IPv6 header plus the extension
@@ -104,7 +104,7 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv4()); }
     virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

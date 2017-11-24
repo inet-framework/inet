@@ -229,7 +229,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
             const auto& icmpHeader = packet->popHeader<IcmpHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
-                const auto& echoReply = CHK(dynamicPtrCast<const ICMPEchoReply>(icmpHeader));
+                const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
@@ -364,11 +364,11 @@ void PingApp::sendPingRequest()
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            const auto& request = makeShared<ICMPEchoRequest>();
+            const auto& request = makeShared<IcmpEchoRequest>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             outPacket->append(payload);
-            ICMP::insertCrc(crcMode, request, outPacket);
+            Icmp::insertCrc(crcMode, request, outPacket);
             outPacket->insertHeader(request);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
@@ -382,7 +382,7 @@ void PingApp::sendPingRequest()
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             outPacket->append(payload);
-            ICMPv6::insertCrc(crcMode, request, outPacket);
+            Icmpv6::insertCrc(crcMode, request, outPacket);
             outPacket->insertHeader(request);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
@@ -525,7 +525,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
                 if (ie && !ie->isLoopback()) {
 #ifdef WITH_IPv4
                     if (ie->ipv4Data()) {
-                        IPv4Address address = ie->ipv4Data()->getIPAddress();
+                        Ipv4Address address = ie->ipv4Data()->getIPAddress();
                         if (!address.isUnspecified())
                             result.push_back(L3Address(address));
                     }
@@ -533,7 +533,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
 #ifdef WITH_IPv6
                     if (ie->ipv6Data()) {
                         for (int k = 0; k < ie->ipv6Data()->getNumAddresses(); k++) {
-                            IPv6Address address = ie->ipv6Data()->getAddress(k);
+                            Ipv6Address address = ie->ipv6Data()->getAddress(k);
                             if (!address.isUnspecified() && address.isGlobal())
                                 result.push_back(L3Address(address));
                         }

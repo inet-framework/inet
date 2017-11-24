@@ -29,16 +29,16 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Phase-shift_keying#Quadrature_phase-shift_keying_.28QPSK.29
  */
-class INET_API QPSKModulation : public MQAMModulationBase
+class INET_API QpskModulation : public MqamModulationBase
 {
   public:
-    static const QPSKModulation singleton;
+    static const QpskModulation singleton;
 
   protected:
-    static const std::vector<APSKSymbol> constellation;
+    static const std::vector<ApskSymbol> constellation;
 
   public:
-    QPSKModulation();
+    QpskModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "QPSKModulation"; }
 };

@@ -31,10 +31,10 @@ namespace inet {
  *
  * @see GenericAppMsg, TCPAppBase
  */
-class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
+class INET_API TcpGenericSrvApp : public cSimpleModule, public ILifecycle
 {
   protected:
-    TCPSocket socket;
+    TcpSocket socket;
     simtime_t delay;
     simtime_t maxMsgDelay;
 

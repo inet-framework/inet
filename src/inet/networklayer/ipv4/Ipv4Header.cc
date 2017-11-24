@@ -28,19 +28,19 @@ int Ipv4Header::getTotalLengthField() const
     return totalLengthField;
 }
 
-TLVOptionBase *Ipv4Header::findMutableOptionByType(short int optionType, int index)
+TlvOptionBase *Ipv4Header::findMutableOptionByType(short int optionType, int index)
 {
     int i = options.findByType(optionType, index);
     return i >= 0 ? &getMutableOption(i) : nullptr;
 }
 
-const TLVOptionBase *Ipv4Header::findOptionByType(short int optionType, int index) const
+const TlvOptionBase *Ipv4Header::findOptionByType(short int optionType, int index) const
 {
     int i = options.findByType(optionType, index);
     return i >= 0 ? &getOption(i) : nullptr;
 }
 
-void Ipv4Header::addOption(TLVOptionBase *opt, int atPos)
+void Ipv4Header::addOption(TlvOptionBase *opt, int atPos)
 {
     options.add(opt, atPos);
 }

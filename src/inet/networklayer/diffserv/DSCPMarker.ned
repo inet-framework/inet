@@ -26,7 +26,7 @@ package inet.networklayer.diffserv;
 // Packets arrived at gate in[i] are marked with the ith value. If there are fewer
 // dscp values given than input gates, then the last one is repeated.
 //
-simple DSCPMarker
+simple DscpMarker
 {
     parameters:
         string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used

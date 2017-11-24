@@ -23,15 +23,15 @@ namespace inet {
 
 namespace tcp {
 
-Define_Module(TCPSpoof);
+Define_Module(TcpSpoof);
 
-void TCPSpoof::initialize()
+void TcpSpoof::initialize()
 {
     simtime_t t = par("t").doubleValue();
     scheduleAt(t, new cMessage("timer"));
 }
 
-void TCPSpoof::handleMessage(cMessage *msg)
+void TcpSpoof::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
         throw cRuntimeError("Does not process incoming messages");
@@ -40,7 +40,7 @@ void TCPSpoof::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void TCPSpoof::sendSpoofPacket()
+void TcpSpoof::sendSpoofPacket()
 {
     Packet *packet = new Packet("spoof");
     const auto& tcpseg = makeShared<TcpHeader>();
@@ -65,7 +65,7 @@ void TCPSpoof::sendSpoofPacket()
     sendToIP(packet, srcAddr, destAddr);
 }
 
-void TCPSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
+void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 {
     EV_INFO << "Sending: ";
     //printSegmentBrief(tcpseg);
@@ -82,7 +82,7 @@ void TCPSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
     send(pk, "ipOut");
 }
 
-unsigned long TCPSpoof::chooseInitialSeqNum()
+unsigned long TcpSpoof::chooseInitialSeqNum()
 {
     // choose an initial send sequence number in the same way as TCP does
     return (unsigned long)SIMTIME_DBL(fmod(simTime() * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;

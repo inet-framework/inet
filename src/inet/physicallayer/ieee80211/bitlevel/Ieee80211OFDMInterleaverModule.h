@@ -24,10 +24,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IInterleaver
+class INET_API Ieee80211OfdmInterleaverModule : public cSimpleModule, public IInterleaver
 {
   protected:
-    const Ieee80211OFDMInterleaver *interleaver = nullptr;
+    const Ieee80211OfdmInterleaver *interleaver = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -35,12 +35,12 @@ class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IIn
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages."); }
 
   public:
-    virtual ~Ieee80211OFDMInterleaverModule();
+    virtual ~Ieee80211OfdmInterleaverModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual BitVector interleave(const BitVector& bits) const override { return interleaver->interleave(bits); }
     virtual BitVector deinterleave(const BitVector& bits) const override { return interleaver->deinterleave(bits); }
-    virtual const Ieee80211OFDMInterleaving *getInterleaving() const override { return interleaver->getInterleaving(); }
+    virtual const Ieee80211OfdmInterleaving *getInterleaving() const override { return interleaver->getInterleaving(); }
 };
 } /* namespace physicallayer */
 } /* namespace inet */

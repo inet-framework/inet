@@ -5149,10 +5149,10 @@ yyreduce:
     {
     if (strcmp((yyvsp[-15].string), "AF_INET") == 0) {
         (yyval.expression) = new PacketDrillExpression(EXPR_SOCKET_ADDRESS_IPV4);
-        (yyval.expression)->setIp(new L3Address(IPv4Address()));
+        (yyval.expression)->setIp(new L3Address(Ipv4Address()));
     } else if (strcmp((yyvsp[-15].string), "AF_INET6") == 0) {
         (yyval.expression) = new PacketDrillExpression(EXPR_SOCKET_ADDRESS_IPV6);
-        (yyval.expression)->setIp(new L3Address(IPv6Address()));
+        (yyval.expression)->setIp(new L3Address(Ipv6Address()));
     }
 }
 #line 5159 "parser.cc" /* yacc.c:1646  */

@@ -25,11 +25,11 @@ cplusplus {{
 
 namespace inet;
 
-class MACAddress
+class MacAddress
 {
     @existingClass;
     @opaque;
     @tostring(.str());
-    @fromstring(MACAddress($));
+    @fromstring(MacAddress($));
 }
 

@@ -62,7 +62,7 @@ void Ieee80211BerTableErrorModel::initialize(int stage)
     }
 }
 
-double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const ITransmission *transmission = snir->getReception()->getTransmission();
@@ -73,13 +73,13 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISNIR *snir, IR
     return berTableFile->getPer(bitrate, minSNIR, B(dataLength).get());
 }
 
-double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;
 }
 
-double Ieee80211BerTableErrorModel::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211BerTableErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;

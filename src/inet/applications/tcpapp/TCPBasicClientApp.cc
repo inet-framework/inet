@@ -27,16 +27,16 @@ namespace inet {
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 
-Define_Module(TCPBasicClientApp);
+Define_Module(TcpBasicClientApp);
 
-TCPBasicClientApp::~TCPBasicClientApp()
+TcpBasicClientApp::~TcpBasicClientApp()
 {
     cancelAndDelete(timeoutMsg);
 }
 
-void TCPBasicClientApp::initialize(int stage)
+void TcpBasicClientApp::initialize(int stage)
 {
-    TCPAppBase::initialize(stage);
+    TcpAppBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numRequestsToSend = 0;
         earlySend = false;    // TBD make it parameter
@@ -59,12 +59,12 @@ void TCPBasicClientApp::initialize(int stage)
     }
 }
 
-bool TCPBasicClientApp::isNodeUp()
+bool TcpBasicClientApp::isNodeUp()
 {
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -80,7 +80,7 @@ bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
-            if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
+            if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
                 close();
             // TODO: wait until socket is closed
         }
@@ -94,7 +94,7 @@ bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
     return true;
 }
 
-void TCPBasicClientApp::sendRequest()
+void TcpBasicClientApp::sendRequest()
 {
     long requestLength = par("requestLength");
     long replyLength = par("replyLength");
@@ -117,7 +117,7 @@ void TCPBasicClientApp::sendRequest()
     sendPacket(packet);
 }
 
-void TCPBasicClientApp::handleTimer(cMessage *msg)
+void TcpBasicClientApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
@@ -142,9 +142,9 @@ void TCPBasicClientApp::handleTimer(cMessage *msg)
     }
 }
 
-void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
+void TcpBasicClientApp::socketEstablished(int connId, void *ptr)
 {
-    TCPAppBase::socketEstablished(connId, ptr);
+    TcpAppBase::socketEstablished(connId, ptr);
 
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession").longValue();
@@ -158,7 +158,7 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     numRequestsToSend--;
 }
 
-void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
+void TcpBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
 {
     cancelEvent(timeoutMsg);
 
@@ -172,9 +172,9 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
     }
 }
 
-void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
+void TcpBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
 {
-    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (numRequestsToSend > 0) {
         EV_INFO << "reply arrived\n";
@@ -184,15 +184,15 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bo
             rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
-    else if (socket.getState() != TCPSocket::LOCALLY_CLOSED) {
+    else if (socket.getState() != TcpSocket::LOCALLY_CLOSED) {
         EV_INFO << "reply to last request arrived, closing session\n";
         close();
     }
 }
 
-void TCPBasicClientApp::socketClosed(int connId, void *ptr)
+void TcpBasicClientApp::socketClosed(int connId, void *ptr)
 {
-    TCPAppBase::socketClosed(connId, ptr);
+    TcpAppBase::socketClosed(connId, ptr);
 
     // start another session after a delay
     if (timeoutMsg) {
@@ -201,9 +201,9 @@ void TCPBasicClientApp::socketClosed(int connId, void *ptr)
     }
 }
 
-void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
+void TcpBasicClientApp::socketFailure(int connId, void *ptr, int code)
 {
-    TCPAppBase::socketFailure(connId, ptr, code);
+    TcpAppBase::socketFailure(connId, ptr, code);
 
     // reconnect after a delay
     if (timeoutMsg) {

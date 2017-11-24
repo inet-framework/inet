@@ -18,7 +18,7 @@
 package inet.node.aodv;
 
 import inet.node.inet.WirelessHost;
-import inet.routing.aodv.AODVRouting;
+import inet.routing.aodv.AodvRouting;
 
 
 //
@@ -45,7 +45,7 @@ module AODVRouter extends WirelessHost
         forwarding = true;
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
     submodules:
-        aodv: AODVRouting {
+        aodv: AodvRouting {
             @display("p=700,300");
         }
     connections:

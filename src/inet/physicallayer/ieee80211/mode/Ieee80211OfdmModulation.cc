@@ -25,7 +25,7 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211OfdmModulation::Ieee80211OfdmModulation(const APSKModulationBase* subcarrierModulation) :
+Ieee80211OfdmModulation::Ieee80211OfdmModulation(const ApskModulationBase* subcarrierModulation) :
         subcarrierModulation(subcarrierModulation)
 {
 }
@@ -39,11 +39,11 @@ std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int l
 }
 
 // Modulations
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qbpskModulation(&QBPSKModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::bpskModulation(&BPSKModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qpskModulation(&QPSKModulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam16Modulation(&QAM16Modulation::singleton);
-const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam64Modulation(&QAM64Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qbpskModulation(&QbpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::bpskModulation(&BpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qpskModulation(&QpskModulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam16Modulation(&Qam16Modulation::singleton);
+const Ieee80211OfdmModulation Ieee80211OfdmCompliantModulations::qam64Modulation(&Qam64Modulation::singleton);
 
 } /* namespace physicallayer */
 } /* namespace inet */

@@ -30,15 +30,15 @@
 namespace inet {
 using namespace std;
 
-Define_Module(PIMSplitter);
+Define_Module(PimSplitter);
 
-void PIMSplitter::initialize(int stage)
+void PimSplitter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        pimIft = getModuleFromPar<PIMInterfaceTable>(par("pimInterfaceTableModule"), this);
+        pimIft = getModuleFromPar<PimInterfaceTable>(par("pimInterfaceTableModule"), this);
 
         ipIn = gate("ipIn");
         ipOut = gate("ipOut");
@@ -51,7 +51,7 @@ void PIMSplitter::initialize(int stage)
         registerProtocol(Protocol::pim, gate("ipOut"));
 }
 
-void PIMSplitter::handleMessage(cMessage *msg)
+void PimSplitter::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->getArrivalGate();
 
@@ -78,16 +78,16 @@ void PIMSplitter::handleMessage(cMessage *msg)
         throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
 }
 
-void PIMSplitter::processPIMPacket(Packet *pkt)
+void PimSplitter::processPIMPacket(Packet *pkt)
 {
-    const auto& pimPkt = pkt->peekHeader<PIMPacket>();
+    const auto& pimPkt = pkt->peekHeader<PimPacket>();
     (void)pimPkt;       // unused variable
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 
     EV_INFO << "Received packet on interface '" << ie->getInterfaceName() << "'" << endl;
 
-    PIMInterface *pimInt = pimIft->getInterfaceById(ie->getInterfaceId());
+    PimInterface *pimInt = pimIft->getInterfaceById(ie->getInterfaceId());
     if (!pimInt) {
         EV_WARN << "PIM is not enabled on interface '" << ie->getInterfaceName() << "', dropping packet." << endl;
         delete pkt;
@@ -95,12 +95,12 @@ void PIMSplitter::processPIMPacket(Packet *pkt)
     }
 
     switch (pimInt->getMode()) {
-        case PIMInterface::DenseMode:
+        case PimInterface::DenseMode:
             EV_INFO << "Sending packet to PIMDM.\n";
             send(pkt, pimDMOut);
             break;
 
-        case PIMInterface::SparseMode:
+        case PimInterface::SparseMode:
             EV_INFO << "Sending packet to PIMSM.\n";
             send(pkt, pimSMOut);
             break;

@@ -25,21 +25,21 @@
 
 namespace inet {
 
-Define_Module(TCPEchoApp);
+Define_Module(TcpEchoApp);
 
-Define_Module(TCPEchoAppThread);
+Define_Module(TcpEchoAppThread);
 
-TCPEchoApp::TCPEchoApp()
+TcpEchoApp::TcpEchoApp()
 {
 }
 
-TCPEchoApp::~TCPEchoApp()
+TcpEchoApp::~TcpEchoApp()
 {
 }
 
-void TCPEchoApp::initialize(int stage)
+void TcpEchoApp::initialize(int stage)
 {
-    TCPSrvHostApp::initialize(stage);
+    TcpSrvHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("echoDelay");
@@ -51,7 +51,7 @@ void TCPEchoApp::initialize(int stage)
     }
 }
 
-void TCPEchoApp::sendDown(cMessage *msg)
+void TcpEchoApp::sendDown(cMessage *msg)
 {
     if (msg->isPacket()) {
         cPacket *pk = static_cast<cPacket *>(msg);
@@ -64,7 +64,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
     send(msg, "socketOut");
 }
 
-void TCPEchoApp::refreshDisplay() const
+void TcpEchoApp::refreshDisplay() const
 {
     char buf[160];
     sprintf(buf, "threads: %d\nrcvd: %ld bytes\nsent: %ld bytes", socketMap.size(), bytesRcvd, bytesSent);
@@ -72,17 +72,17 @@ void TCPEchoApp::refreshDisplay() const
 }
 
 
-void TCPEchoApp::finish()
+void TcpEchoApp::finish()
 {
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
 
-void TCPEchoAppThread::established()
+void TcpEchoAppThread::established()
 {
 }
 
-void TCPEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
+void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
     echoAppModule->emit(rcvdPkSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
@@ -120,7 +120,7 @@ void TCPEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
   /*
    * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
    */
-void TCPEchoAppThread::timerExpired(cMessage *timer)
+void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
     cPacket *pkt = PK(timer);
     pkt->setContextPointer(nullptr);

@@ -91,8 +91,8 @@ class INET_API Ipv6Header : public Ipv6Header_Base
      * second extension is returned. (The datagram might
      * contain two Destination Options extension.)
      */
-    virtual Ipv6ExtensionHeader *findMutableExtensionHeaderByType(IPProtocolId extensionType, int index = 0);
-    virtual const Ipv6ExtensionHeader *findExtensionHeaderByType(IPProtocolId extensionType, int index = 0) const;
+    virtual Ipv6ExtensionHeader *findMutableExtensionHeaderByType(IpProtocolId extensionType, int index = 0);
+    virtual const Ipv6ExtensionHeader *findExtensionHeaderByType(IpProtocolId extensionType, int index = 0) const;
 
     /**
      * Adds an extension header to the datagram.
@@ -127,14 +127,14 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     /**
      * Removes and returns the first extension header with the given type.
      */
-    virtual Ipv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
+    virtual Ipv6ExtensionHeader *removeExtensionHeader(IpProtocolId extensionType);
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
     virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader&);

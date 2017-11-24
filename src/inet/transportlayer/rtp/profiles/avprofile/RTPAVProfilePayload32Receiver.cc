@@ -30,7 +30,7 @@ namespace inet {
 
 namespace rtp {
 
-Define_Module(RTPAVProfilePayload32Receiver);
+Define_Module(RtpAvProfilePayload32Receiver);
 
 int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
 {
@@ -41,21 +41,21 @@ int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
     return h1->getSequenceNumber() - h2->getSequenceNumber();
 }
 
-RTPAVProfilePayload32Receiver::~RTPAVProfilePayload32Receiver()
+RtpAvProfilePayload32Receiver::~RtpAvProfilePayload32Receiver()
 {
     delete _queue;
 }
 
-void RTPAVProfilePayload32Receiver::initialize()
+void RtpAvProfilePayload32Receiver::initialize()
 {
-    RTPPayloadReceiver::initialize();
+    RtpPayloadReceiver::initialize();
     _payloadType = 32;
     _queue = new cQueue("IncomingQueue", &compareRTPPacketsBySequenceNumber);
     _lowestAllowedTimeStamp = 0;
     _highestSequenceNumber = 0;
 }
 
-void RTPAVProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
+void RtpAvProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
 {
     const auto& rtpHeader = rtpPacket->peekHeader<RtpHeader>();
     // the first packet sets the lowest allowed time stamp
@@ -110,7 +110,7 @@ void RTPAVProfilePayload32Receiver::processRtpPacket(Packet *rtpPacket)
                 Packet *qPacket = check_and_cast<Packet *>(_queue->pop());
                 const auto& qRtpHeader = qPacket->popHeader<RtpHeader>();
                 (void)qRtpHeader;       // unused variable
-                const auto& mpegPacket = qPacket->peekHeader<RTPMpegHeader>();
+                const auto& mpegPacket = qPacket->peekHeader<RtpMpegHeader>();
                 if (pictureType == 0)
                     pictureType = mpegPacket->getPictureType();
                 frameSize = frameSize + mpegPacket->getPayloadLength();

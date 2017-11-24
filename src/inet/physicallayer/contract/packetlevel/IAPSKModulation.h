@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API IAPSKModulation : public IModulation
+class INET_API IApskModulation : public IModulation
 {
   public:
     virtual unsigned int getCodeWordSize() const = 0;

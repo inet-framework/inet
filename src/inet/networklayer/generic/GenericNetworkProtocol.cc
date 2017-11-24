@@ -66,7 +66,7 @@ void GenericNetworkProtocol::initialize(int stage)
 
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<GenericRoutingTable>(par("routingTableModule"), this);
-        arp = getModuleFromPar<IARP>(par("arpModule"), this);
+        arp = getModuleFromPar<IArp>(par("arpModule"), this);
 
         defaultHopLimit = par("hopLimit");
         numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
@@ -563,8 +563,8 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
     }
 
     // send out datagram to NIC, with control info attached
-    MACAddress nextHopMAC = arp->resolveL3Address(nextHop, ie);
-    if (nextHopMAC == MACAddress::UNSPECIFIED_ADDRESS) {
+    MacAddress nextHopMAC = arp->resolveL3Address(nextHop, ie);
+    if (nextHopMAC == MacAddress::UNSPECIFIED_ADDRESS) {
         throw cRuntimeError("ARP couldn't resolve the '%s' address", nextHop.str().c_str());
     }
     else {

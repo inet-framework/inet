@@ -39,7 +39,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211MgmtAP like IIeee80211Mgmt
+simple Ieee80211MgmtAp like IIeee80211Mgmt
 {
     parameters:
         string ssid = default("SSID");

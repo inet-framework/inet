@@ -25,35 +25,35 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMDecoderModule);
+Define_Module(Ieee80211OfdmDecoderModule);
 
-void Ieee80211OFDMDecoderModule::initialize(int stage)
+void Ieee80211OfdmDecoderModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         descrambler = dynamic_cast<const IScrambler *>(getSubmodule("descrambler"));
-        convolutionalDecoder = dynamic_cast<const IFECCoder *>(getSubmodule("fecDecoder"));
+        convolutionalDecoder = dynamic_cast<const IFecCoder *>(getSubmodule("fecDecoder"));
         deinterleaver = dynamic_cast<const IInterleaver *>(getSubmodule("deinterleaver"));
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const ConvolutionalCode *convolutionalCode = convolutionalDecoder ? dynamic_cast<const ConvolutionalCode *>(convolutionalDecoder->getForwardErrorCorrection()) : nullptr;
-        const Ieee80211OFDMInterleaving *interleaving = deinterleaver ? dynamic_cast<const Ieee80211OFDMInterleaving *>(deinterleaver->getInterleaving()) : nullptr;
+        const Ieee80211OfdmInterleaving *interleaving = deinterleaver ? dynamic_cast<const Ieee80211OfdmInterleaving *>(deinterleaver->getInterleaving()) : nullptr;
         const AdditiveScrambling *scrambling = descrambler ? dynamic_cast<const AdditiveScrambling *>(descrambler->getScrambling()) : nullptr;
         code = new Ieee80211OfdmCode(convolutionalCode, interleaving, scrambling);
-        ofdmDecoder = new Ieee80211OFDMDecoder(code);
+        ofdmDecoder = new Ieee80211OfdmDecoder(code);
     }
 }
 
-std::ostream& Ieee80211OFDMDecoderModule::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDecoderModule::printToStream(std::ostream& stream, int level) const
 {
     return ofdmDecoder->printToStream(stream, level);
 }
 
-const IReceptionPacketModel *Ieee80211OFDMDecoderModule::decode(const IReceptionBitModel *bitModel) const
+const IReceptionPacketModel *Ieee80211OfdmDecoderModule::decode(const IReceptionBitModel *bitModel) const
 {
     return ofdmDecoder->decode(bitModel);
 }
 
-Ieee80211OFDMDecoderModule::~Ieee80211OFDMDecoderModule()
+Ieee80211OfdmDecoderModule::~Ieee80211OfdmDecoderModule()
 {
     delete code;
     delete ofdmDecoder;

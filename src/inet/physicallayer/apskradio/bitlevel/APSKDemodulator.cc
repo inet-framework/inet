@@ -27,20 +27,20 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKDemodulator);
+Define_Module(ApskDemodulator);
 
-APSKDemodulator::APSKDemodulator() :
+ApskDemodulator::ApskDemodulator() :
     modulation(nullptr)
 {
 }
 
-void APSKDemodulator::initialize(int stage)
+void ApskDemodulator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        modulation = APSKModulationBase::findModulation(par("modulation"));
+        modulation = ApskModulationBase::findModulation(par("modulation"));
 }
 
-std::ostream& APSKDemodulator::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDemodulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKDemodulator";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -48,12 +48,12 @@ std::ostream& APSKDemodulator::printToStream(std::ostream& stream, int level) co
     return stream;
 }
 
-const IReceptionBitModel *APSKDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
+const IReceptionBitModel *ApskDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
     BitVector *bits = new BitVector();
     for (auto & symbols_i : *symbols) {
-        const APSKSymbol *symbol = dynamic_cast<const APSKSymbol *>(symbols_i);
+        const ApskSymbol *symbol = dynamic_cast<const ApskSymbol *>(symbols_i);
         ShortBitVector symbolBits = modulation->demapToBitRepresentation(symbol);
         for (unsigned int j = 0; j < symbolBits.getSize(); j++)
             bits->appendBit(symbolBits.getBit(j));

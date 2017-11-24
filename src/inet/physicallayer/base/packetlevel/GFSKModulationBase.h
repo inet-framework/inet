@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API GFSKModulationBase : public IModulation
+class INET_API GfskModulationBase : public IModulation
 {
   protected:
     unsigned int constellationSize;
 
   public:
-    GFSKModulationBase(unsigned int constellationSize);
+    GfskModulationBase(unsigned int constellationSize);
 
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }

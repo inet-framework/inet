@@ -6,7 +6,7 @@
 using namespace inet;
 using namespace inet::tcp;
 
-void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
+void enqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes)
 {
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
@@ -19,7 +19,7 @@ void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << " --> " << sq->str() <<"\n";
 }
 
-void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
+void tryenqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes)
 {
     EV << "SQ:" << "enqueue(\"" << msgname << "\", " << numBytes << "):";
 
@@ -37,7 +37,7 @@ void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes)
     EV << " --> " << sq->str() <<"\n";
 }
 
-Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq)
+Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32 fromSeq, uint32 toSeq)
 {
     EV << "SQ:" << "createSegmentWithBytes(" << fromSeq << ", " << toSeq << "):";
 
@@ -65,7 +65,7 @@ Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq)
     return pk;
 }
 
-void discardUpTo(TCPSendQueue *sq, uint32 seqNum)
+void discardUpTo(TcpSendQueue *sq, uint32 seqNum)
 {
     EV << "SQ:" << "discardUpTo(" << seqNum << "): ";
     sq->discardUpTo(seqNum);
@@ -75,7 +75,7 @@ void discardUpTo(TCPSendQueue *sq, uint32 seqNum)
 
 //////////////////////////////////////////////////////////////
 
-void insertSegment(TCPReceiveQueue *rq, Packet *tcpseg)
+void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekHeader<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
@@ -86,7 +86,7 @@ void insertSegment(TCPReceiveQueue *rq, Packet *tcpseg)
     EV << " --> " << rq->str() <<"\n";
 }
 
-void tryinsertSegment(TCPReceiveQueue *rq, Packet *tcpseg)
+void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekHeader<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
@@ -102,7 +102,7 @@ void tryinsertSegment(TCPReceiveQueue *rq, Packet *tcpseg)
     EV << " --> " << rq->str() <<"\n";
 }
 
-void extractBytesUpTo(TCPReceiveQueue *rq, uint32 seq)
+void extractBytesUpTo(TcpReceiveQueue *rq, uint32 seq)
 {
     EV << "RQ:" << "extractUpTo(" << seq << "): <";
     cPacket *msg;
@@ -116,7 +116,7 @@ void extractBytesUpTo(TCPReceiveQueue *rq, uint32 seq)
 
 /////////////////////////////////////////////////////////////////////////
 
-void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
+void insertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
 {
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
 
@@ -134,7 +134,7 @@ void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
     EV << " --> " << q->str() <<"\n";
 }
 
-void tryinsertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end)
+void tryinsertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end)
 {
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
 

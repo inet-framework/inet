@@ -18,7 +18,7 @@
 
 package inet.networklayer.arp.ipv4;
 
-import inet.networklayer.contract.IARP;
+import inet.networklayer.contract.IArp;
 
 
 //
@@ -43,7 +43,7 @@ import inet.networklayer.contract.IARP;
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.
 //
-simple ARP like IARP
+simple Arp like IArp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -55,17 +55,17 @@ simple ARP like IARP
         @display("i=block/layer");
         @signal[sentReq](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedARPResolution](type=IARP::Notification);
-        @signal[completedARPResolution](type=IARP::Notification);
-        @signal[failedARPResolution](type=IARP::Notification);
+        @signal[initiatedARPResolution](type=IArp::Notification);
+        @signal[completedARPResolution](type=IArp::Notification);
+        @signal[failedARPResolution](type=IArp::Notification);
         @statistic[sentReq](title="ARP request sent"; record=count,vector);
         @statistic[sentReply](title="ARP replies sent"; record=count,vector);
         @statistic[initiatedARPResolution](title="ARP initiated resolutions"; record=count);
         @statistic[completedARPResolution](title="ARP completed resolutions"; record=count);
         @statistic[failedARPResolution](title="ARP failed resolutions"; record=count);
     gates:
-        input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
-        output netwOut @labels(ARPPacket+Ieee802Ctrl,Ipv4Header+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
-        input ifIn @labels(ARPPacket,Ieee802Ctrl);
-        output ifOut @labels(ARPPacket,Ieee802Ctrl);
+        input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
+        output netwOut @labels(ArpPacket+Ieee802Ctrl,Ipv4Header+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
+        input ifIn @labels(ArpPacket,Ieee802Ctrl);
+        output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }

@@ -30,12 +30,12 @@ Define_Module(LMacLayer)
 
 #define myId    (getParentModule()->getParentModule()->getIndex())
 
-const MACAddress LMacLayer::LMAC_NO_RECEIVER = MACAddress(-2);
-const MACAddress LMacLayer::LMAC_FREE_SLOT = MACAddress::BROADCAST_ADDRESS;
+const MacAddress LMacLayer::LMAC_NO_RECEIVER = MacAddress(-2);
+const MacAddress LMacLayer::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
 void LMacLayer::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         queueLength = par("queueLength");
         slotDuration = par("slotDuration");
@@ -124,7 +124,7 @@ void LMacLayer::initializeMACAddress()
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -285,7 +285,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
                 const auto& lmacHeader = mac->peekHeader<LMacHeader>();
-                const MACAddress& dest = lmacHeader->getDestAddr();
+                const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
@@ -342,7 +342,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -391,7 +391,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
                 const auto& lmacHeader = mac->peekHeader<LMacHeader>();
-                const MACAddress& dest = lmacHeader->getDestAddr();
+                const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
                 bool collision = false;
@@ -549,7 +549,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {

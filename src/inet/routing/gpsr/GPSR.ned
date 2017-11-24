@@ -26,7 +26,7 @@ package inet.routing.gpsr;
 // For more information on the routing algorithm, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
-simple GPSR
+simple Gpsr
 {
     parameters:
         // properties

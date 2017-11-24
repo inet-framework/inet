@@ -40,10 +40,10 @@ bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& h
     return !header->getReceiverAddress().isMulticast();
 }
 
-std::map<MACAddress, std::vector<Packet *>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
+std::map<MacAddress, std::vector<Packet *>> OriginatorQoSAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
 {
     auto outstandingFrames = inProgressFrames->getOutstandingFrames();
-    std::map<MACAddress, std::vector<Packet *>> outstandingFramesPerReceiver;
+    std::map<MacAddress, std::vector<Packet *>> outstandingFramesPerReceiver;
     for (auto frame : outstandingFrames)
         outstandingFramesPerReceiver[frame->peekHeader<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
     return outstandingFramesPerReceiver;
@@ -85,7 +85,7 @@ bool OriginatorQoSAckPolicy::isBlockAckReqNeeded(InProgressFrames* inProgressFra
 }
 
 // FIXME
-std::tuple<MACAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const
+std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const
 {
     auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
     for (auto outstandingFrames : outstandingFramesPerReceiver) {
@@ -95,13 +95,13 @@ std::tuple<MACAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlock
                 if (it->second.size() > largestOutstandingFrames->second.size())
                     largestOutstandingFrames = it;
             }
-            MACAddress receiverAddress = largestOutstandingFrames->first;
+            MacAddress receiverAddress = largestOutstandingFrames->first;
             SequenceNumber startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
             Tid tid = largestOutstandingFrames->second.at(0)->peekHeader<Ieee80211DataHeader>()->getTid();
             return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
         }
     }
-    return std::make_tuple(MACAddress::UNSPECIFIED_ADDRESS, -1, -1);
+    return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, -1, -1);
 }
 
 AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const

@@ -25,7 +25,7 @@ namespace inet {
 
 namespace tcp {
 
-void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
+void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
 {
     ASSERT(seqLess(beg, end));
     ASSERT(regions.empty() || (seqLE(regions.front().beg, beg) && seqLE(beg, regions.back().end)));
@@ -73,7 +73,7 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
     }
 }
 
-const TCPSegmentTransmitInfoList::Item *TCPSegmentTransmitInfoList::get(uint32_t seq) const
+const TcpSegmentTransmitInfoList::Item *TcpSegmentTransmitInfoList::get(uint32_t seq) const
 {
     for (const auto & elem : regions) {
         if (seqLess(seq, elem.beg))
@@ -84,7 +84,7 @@ const TCPSegmentTransmitInfoList::Item *TCPSegmentTransmitInfoList::get(uint32_t
     return nullptr;
 }
 
-void TCPSegmentTransmitInfoList::clearTo(uint32_t endseq)
+void TcpSegmentTransmitInfoList::clearTo(uint32_t endseq)
 {
     while (!regions.empty() && seqLE(regions.front().end, endseq))
         regions.pop_front();

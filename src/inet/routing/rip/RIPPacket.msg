@@ -31,7 +31,7 @@ const int RIP_RTE_SIZE = 20;
 //
 // RIP commands
 //
-enum RIPCommand {
+enum RipCommand {
     RIP_REQUEST  = 1;
     RIP_RESPONSE = 2;
 }
@@ -39,7 +39,7 @@ enum RIPCommand {
 //
 // Address Family constants
 //
-enum RIP_AF {
+enum RipAf {
     RIP_AF_NONE = 0;
     RIP_AF_INET = 2;
     // RIP_AF_AUTH = 0xFFFF;
@@ -50,9 +50,9 @@ enum RIP_AF {
 //
 // see RFC 2453 3.6 and 4
 //
-struct RIPEntry
+struct RipEntry
 {
-    RIP_AF addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
+    RipAf addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
     L3Address address;                // destination address
     int prefixLength;               // prefix length of the destination
@@ -65,9 +65,9 @@ struct RIPEntry
 //
 // note: Authentication entry is not allowed
 //
-class RIPPacket extends FieldsChunk
+class RipPacket extends FieldsChunk
 {
-    RIPCommand command;
+    RipCommand command;
     // version is fixed: 2
-    RIPEntry entry[];
+    RipEntry entry[];
 }

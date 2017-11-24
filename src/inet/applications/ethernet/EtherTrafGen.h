@@ -42,7 +42,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     cPar *packetLength = nullptr;
     int ssap = -1;
     int dsap = -1;
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     NodeStatus *nodeStatus = nullptr;
 
     // self messages
@@ -65,7 +65,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
 
-    virtual MACAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMACAddress();
 
     virtual void sendBurstPackets();
     virtual void receivePacket(cPacket *msg);

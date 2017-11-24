@@ -21,13 +21,13 @@ namespace inet {
 
 namespace physicallayer {
 
-SNIRBase::SNIRBase(const IReception *reception, const INoise *noise) :
+SnirBase::SnirBase(const IReception *reception, const INoise *noise) :
     reception(reception),
     noise(noise)
 {
 }
 
-std::ostream& SNIRBase::printToStream(std::ostream& stream, int level) const
+std::ostream& SnirBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", reception = " << printObjectToString(reception, level + 1) 

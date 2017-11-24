@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMErrorModel : public Ieee80211NistErrorModel, public ILayeredErrorModel
+class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public ILayeredErrorModel
 {
   protected:
     double signalSymbolErrorRate;
@@ -37,14 +37,14 @@ class INET_API Ieee80211OFDMErrorModel : public Ieee80211NistErrorModel, public 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    Ieee80211OFDMSymbol *corruptOFDMSymbol(const Ieee80211OFDMSymbol *symbol, double ser, int constellationSize, const std::vector<APSKSymbol> *constellation) const;
+    Ieee80211OfdmSymbol *corruptOFDMSymbol(const Ieee80211OfdmSymbol *symbol, double ser, int constellationSize, const std::vector<ApskSymbol> *constellation) const;
     void corruptBits(BitVector *bits, double ber, int begin, int end) const;
 
   public:
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
+    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
 

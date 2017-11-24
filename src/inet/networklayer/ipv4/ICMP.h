@@ -35,7 +35,7 @@ class Ipv4Header;
 /**
  * ICMP module.
  */
-class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols;    // where to send up packets
@@ -44,9 +44,9 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);
     virtual void processEchoRequest(Packet *);
-    virtual void sendToIP(Packet *, const IPv4Address& dest);
+    virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
-    virtual bool possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId);
+    virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
   public:
@@ -56,7 +56,7 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
      * to broadcast or multicast packets -- in that case it will simply delete the packet.
      * Kludge: if inputInterfaceId cannot be determined, pass in -1.
      */
-    virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
     static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
     void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
     bool verifyCrc(const Packet *packet);

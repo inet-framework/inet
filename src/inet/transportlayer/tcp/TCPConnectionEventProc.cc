@@ -33,9 +33,9 @@ namespace tcp {
 // Event processing code
 //
 
-void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
+    TcpOpenCommand *openCmd = check_and_cast<TcpOpenCommand *>(tcpCommand);
     L3Address localAddr, remoteAddr;
     int localPort, remotePort;
 
@@ -77,9 +77,9 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
     delete msg;
 }
 
-void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
+    TcpOpenCommand *openCmd = check_and_cast<TcpOpenCommand *>(tcpCommand);
     L3Address localAddr;
     int localPort;
 
@@ -109,9 +109,9 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     delete msg;
 }
 
-void TCPConnection::process_ACCEPT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    TCPAcceptCommand *acceptCommand = check_and_cast<TCPAcceptCommand *>(tcpCommand);
+    TcpAcceptCommand *acceptCommand = check_and_cast<TcpAcceptCommand *>(tcpCommand);
     listeningSocketId = -1;
     sendEstabIndicationToApp();
     sendAvailableDataToApp();
@@ -119,7 +119,7 @@ void TCPConnection::process_ACCEPT(TCPEventCode& event, TCPCommand *tcpCommand, 
     delete msg;
 }
 
-void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
@@ -166,7 +166,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
         state->queueUpdate = false;
 }
 
-void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     if (isToBeAccepted())
         throw cRuntimeError("READ without ACCEPT");
@@ -180,7 +180,7 @@ void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCom
     }
 }
 
-void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     delete tcpCommand;
     delete msg;
@@ -240,7 +240,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     }
 }
 
-void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     delete tcpCommand;
     delete msg;
@@ -269,14 +269,14 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     }
 }
 
-void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     delete tcpCommand;    // but reuse msg for reply
 
     if (fsm.getState() == TCP_S_INIT)
         throw cRuntimeError("Error processing command STATUS: connection not open");
 
-    TCPStatusInfo *statusInfo = new TCPStatusInfo();
+    TcpStatusInfo *statusInfo = new TcpStatusInfo();
 
     statusInfo->setState(fsm.getState());
     statusInfo->setStateName(stateName(fsm.getState()));
@@ -306,7 +306,7 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
     sendToApp(msg);
 }
 
-void TCPConnection::process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+void TcpConnection::process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     if (state == nullptr)
         throw cRuntimeError("Called process_QUEUE_BYTES_LIMIT on uninitialized TCPConnection!");

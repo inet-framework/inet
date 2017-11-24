@@ -24,16 +24,16 @@
 
 namespace inet {
 
-Define_Module(SimpleVoIPReceiver);
+Define_Module(SimpleVoipReceiver);
 
-simsignal_t SimpleVoIPReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-simsignal_t SimpleVoIPReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
-simsignal_t SimpleVoIPReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-simsignal_t SimpleVoIPReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-simsignal_t SimpleVoIPReceiver::mosSignal = registerSignal("VoIPMosSignal");
-simsignal_t SimpleVoIPReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
+simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
+simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
+simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
+simsignal_t SimpleVoipReceiver::mosSignal = registerSignal("VoIPMosSignal");
+simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
-void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoIPPacket *pk)
+void SimpleVoipReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoipPacket *pk)
 {
     status = ACTIVE;
     talkspurtID = pk->getTalkspurtID();
@@ -44,32 +44,32 @@ void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoIPPacket *p
     addPacket(pk);
 }
 
-bool SimpleVoIPReceiver::TalkspurtInfo::checkPacket(const SimpleVoIPPacket *pk)
+bool SimpleVoipReceiver::TalkspurtInfo::checkPacket(const SimpleVoipPacket *pk)
 {
     return talkspurtID == pk->getTalkspurtID()
            && talkspurtNumPackets == pk->getTalkspurtNumPackets()
            && voiceDuration == pk->getVoiceDuration();
 }
 
-void SimpleVoIPReceiver::TalkspurtInfo::addPacket(const SimpleVoIPPacket *pk)
+void SimpleVoipReceiver::TalkspurtInfo::addPacket(const SimpleVoipPacket *pk)
 {
-    VoIPPacketInfo packet;
+    VoipPacketInfo packet;
     packet.packetID = pk->getPacketID();
     packet.creationTime = pk->getVoipTimestamp();
     packet.arrivalTime = simTime();
     packets.push_back(packet);
 }
 
-SimpleVoIPReceiver::SimpleVoIPReceiver()
+SimpleVoipReceiver::SimpleVoipReceiver()
 {
 }
 
-SimpleVoIPReceiver::~SimpleVoIPReceiver()
+SimpleVoipReceiver::~SimpleVoipReceiver()
 {
     cancelAndDelete(selfTalkspurtFinished);
 }
 
-void SimpleVoIPReceiver::initialize(int stage)
+void SimpleVoipReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -103,15 +103,15 @@ void SimpleVoIPReceiver::initialize(int stage)
     }
 }
 
-void SimpleVoIPReceiver::startTalkspurt(Packet *packet)
+void SimpleVoipReceiver::startTalkspurt(Packet *packet)
 {
-    const auto& voice = packet->peekHeader<SimpleVoIPPacket>();
+    const auto& voice = packet->peekHeader<SimpleVoipPacket>();
     currentTalkspurt.startTalkspurt(voice.get());
     simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - voice->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
     scheduleAt(endTime, selfTalkspurtFinished);
 }
 
-void SimpleVoIPReceiver::handleMessage(cMessage *msg)
+void SimpleVoipReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         // selfTalkspurtFinished
@@ -126,7 +126,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-    const auto& voice = packet->peekHeader<SimpleVoIPPacket>();
+    const auto& voice = packet->peekHeader<SimpleVoipPacket>();
 
     if (currentTalkspurt.status == TalkspurtInfo::EMPTY) {
         // first talkspurt
@@ -161,12 +161,12 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
+void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 {
     ASSERT(!currentTalkspurt.packets.empty());
     ASSERT(currentTalkspurt.isActive());
 
-    VoIPPacketInfo firstPacket = currentTalkspurt.packets.front();
+    VoipPacketInfo firstPacket = currentTalkspurt.packets.front();
 
     simtime_t firstPlayoutTime = firstPacket.arrivalTime + playoutDelay;
     simtime_t mouthToEarDelay = firstPlayoutTime - firstPacket.creationTime;
@@ -288,7 +288,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 // described in ETSI technical report ETR 250, and then standardized by the ITU as G.107.
 // The objective of the model was to determine a quality rating that incorporated the
 // "mouth to ear" characteristics of a speech path.
-double SimpleVoIPReceiver::eModel(double delay, double lossRate)
+double SimpleVoipReceiver::eModel(double delay, double lossRate)
 {
     static const double alpha3 = 177.3;    //ms
     double delayms = 1000.0 * delay;
@@ -323,7 +323,7 @@ double SimpleVoIPReceiver::eModel(double delay, double lossRate)
     return mos;
 }
 
-void SimpleVoIPReceiver::finish()
+void SimpleVoipReceiver::finish()
 {
     // evaluate last talkspurt
     cancelEvent(selfTalkspurtFinished);

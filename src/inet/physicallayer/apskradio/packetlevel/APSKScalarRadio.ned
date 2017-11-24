@@ -26,7 +26,7 @@ package inet.physicallayer.apskradio.packetlevel;
 // See also ~APSKScalarRadioMedium, ~ScalarAnalogModel, ~APSKScalarTransmitter,
 // and ~APSKScalarReceiver.
 //
-module APSKScalarRadio extends APSKRadio
+module APSKScalarRadio extends ApskRadio
 {
     parameters:
         transmitterType = default("APSKScalarTransmitter");

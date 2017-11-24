@@ -35,7 +35,7 @@ import inet.linklayer.contract.ISpanningTree;
 //
 // @see L2NetworkConfigurator, InterfaceTable
 //
-simple STP like ISpanningTree
+simple Stp like ISpanningTree
 {
     parameters:
 

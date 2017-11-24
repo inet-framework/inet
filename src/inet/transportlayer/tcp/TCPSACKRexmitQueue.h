@@ -30,10 +30,10 @@ namespace tcp {
 /**
  * Retransmission data for SACK.
  */
-class INET_API TCPSACKRexmitQueue
+class INET_API TcpSackRexmitQueue
 {
   public:
-    TCPConnection *conn;    // the connection that owns this queue
+    TcpConnection *conn;    // the connection that owns this queue
 
     struct Region
     {
@@ -53,17 +53,17 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Ctor
      */
-    TCPSACKRexmitQueue();
+    TcpSackRexmitQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPSACKRexmitQueue();
+    virtual ~TcpSackRexmitQueue();
 
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
+    virtual void setConnection(TcpConnection *_conn) { conn = _conn; }
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first

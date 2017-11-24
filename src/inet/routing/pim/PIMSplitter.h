@@ -36,11 +36,11 @@ namespace inet {
  * Packets received from the PIM modules are simply forwarded to the
  * network layer.
  */
-class INET_API PIMSplitter : public cSimpleModule
+class INET_API PimSplitter : public cSimpleModule
 {
   private:
     IInterfaceTable *ift = nullptr;
-    PIMInterfaceTable *pimIft = nullptr;
+    PimInterfaceTable *pimIft = nullptr;
 
     cGate *ipIn = nullptr;
     cGate *ipOut = nullptr;

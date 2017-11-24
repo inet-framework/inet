@@ -45,8 +45,8 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
   protected:
     virtual void initialize(int stage) override;
 
-    virtual osg::Node *createConnectionEndNode(tcp::TCPConnection *connectionVisualization) const;
-    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const override;
+    virtual osg::Node *createConnectionEndNode(tcp::TcpConnection *connectionVisualization) const;
+    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
 
@@ -55,7 +55,7 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const override { return nullptr; }
+    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override { return nullptr; }
 
 #endif // ifdef WITH_OSG
 };

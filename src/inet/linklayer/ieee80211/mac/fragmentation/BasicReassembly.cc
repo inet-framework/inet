@@ -79,7 +79,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         return nullptr;
 }
 
-void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber)
+void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
     Key key;
     key.macAddress = address;

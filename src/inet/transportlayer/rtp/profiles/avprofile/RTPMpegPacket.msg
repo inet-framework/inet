@@ -35,7 +35,7 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet::rtp;
 
-class RTPMpegHeader extends FieldsChunk
+class RtpMpegHeader extends FieldsChunk
 {
     chunkLength = B(4);
     int headerLength = 4;

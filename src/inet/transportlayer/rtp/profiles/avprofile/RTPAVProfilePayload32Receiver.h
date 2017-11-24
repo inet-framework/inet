@@ -39,13 +39,13 @@ namespace rtp {
  * an mpeg file but a sim file, which can be played with a modified
  * mpeg player.
  */
-class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
+class INET_API RtpAvProfilePayload32Receiver : public RtpPayloadReceiver
 {
   protected:
     /**
      * Destructor.
      */
-    virtual ~RTPAVProfilePayload32Receiver();
+    virtual ~RtpAvProfilePayload32Receiver();
 
     /**
      * Calls the method of the superclass RTPPayloadReceiver and sets the

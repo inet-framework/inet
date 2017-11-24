@@ -23,18 +23,18 @@ namespace physicallayer {
 
 const double k = 1 / sqrt(10);
 
-const std::vector<APSKSymbol> QAM16Modulation::constellation = {
-    k * APSKSymbol(-3, -3), k * APSKSymbol(3, -3), k * APSKSymbol(-1, -3),
-    k * APSKSymbol(1, -3), k * APSKSymbol(-3, 3), k * APSKSymbol(3, 3),
-    k * APSKSymbol(-1, 3), k * APSKSymbol(1, 3), k * APSKSymbol(-3, -1),
-    k * APSKSymbol(3, -1), k * APSKSymbol(-1, -1), k * APSKSymbol(1, -1),
-    k * APSKSymbol(-3, 1), k * APSKSymbol(3, 1), k * APSKSymbol(-1, 1),
-    k * APSKSymbol(1, 1)
+const std::vector<ApskSymbol> Qam16Modulation::constellation = {
+    k * ApskSymbol(-3, -3), k * ApskSymbol(3, -3), k * ApskSymbol(-1, -3),
+    k * ApskSymbol(1, -3), k * ApskSymbol(-3, 3), k * ApskSymbol(3, 3),
+    k * ApskSymbol(-1, 3), k * ApskSymbol(1, 3), k * ApskSymbol(-3, -1),
+    k * ApskSymbol(3, -1), k * ApskSymbol(-1, -1), k * ApskSymbol(1, -1),
+    k * ApskSymbol(-3, 1), k * ApskSymbol(3, 1), k * ApskSymbol(-1, 1),
+    k * ApskSymbol(1, 1)
 };
 
-const QAM16Modulation QAM16Modulation::singleton;
+const Qam16Modulation Qam16Modulation::singleton;
 
-QAM16Modulation::QAM16Modulation() : MQAMModulationBase(&constellation)
+Qam16Modulation::Qam16Modulation() : MqamModulationBase(&constellation)
 {
 }
 

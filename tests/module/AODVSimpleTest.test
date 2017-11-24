@@ -4,7 +4,7 @@ between the sender and the receiver.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.common.lifecycle.LifecycleController;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AODVRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -19,7 +19,7 @@ network AODVTest
             parameters:
                 @display("p=50,50");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;

@@ -30,7 +30,7 @@ namespace rtp {
  * For for information about the rtp audio/video profile consult
  * rfc 1890.
  */
-class INET_API RTPAVProfile : public RTPProfile
+class INET_API RtpAvProfile : public RtpProfile
 {
   protected:
     /**

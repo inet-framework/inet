@@ -62,7 +62,7 @@ struct nsc_iphdr
     /*The options start here. */
 } __attribute__((packed));
 
-TCP_NSC_Connection::TCP_NSC_Connection()
+TcpNscConnection::TcpNscConnection()
     :
     connIdM(-1),
     pNscSocketM(nullptr),
@@ -77,13 +77,13 @@ TCP_NSC_Connection::TCP_NSC_Connection()
 {
 }
 
-TCP_NSC_Connection::~TCP_NSC_Connection()
+TcpNscConnection::~TcpNscConnection()
 {
     delete receiveQueueM;
     delete sendQueueM;
 }
 
-void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
+void TcpNscConnection::connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(!pNscSocketM);
     pNscSocketM = stackP.new_tcp_socket();
@@ -104,7 +104,7 @@ void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, Soc
     struct sockaddr_in sockAddr;
     size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr *)&sockAddr, &sockAddrLen);
-    nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
+    nscSockPairP.localM.ipAddrM.set(Ipv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
 /*
     // TODO: getpeername generate an assert!!!
@@ -114,7 +114,7 @@ void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, Soc
  */
 }
 
-void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
+void TcpNscConnection::listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(nscSockPairP.localM.portM != PORT_UNDEF);
     ASSERT(!pNscSocketM);
@@ -138,19 +138,19 @@ void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, Sock
     size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr *)&sockAddr, &sockAddrLen);
 
-    nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
+    nscSockPairP.localM.ipAddrM.set(Ipv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
     nscSockPairP.remoteM.ipAddrM = L3Address();
     nscSockPairP.remoteM.portM = PORT_UNDEF;
 }
 
-void TCP_NSC_Connection::send(Packet *msgP)
+void TcpNscConnection::send(Packet *msgP)
 {
     ASSERT(sendQueueM);
     sendQueueM->enqueueAppData(msgP);
 }
 
-void TCP_NSC_Connection::do_SEND()
+void TcpNscConnection::do_SEND()
 {
     if (pNscSocketM) {
         ASSERT(sendQueueM);
@@ -183,7 +183,7 @@ void TCP_NSC_Connection::do_SEND()
             pNscSocketM->disconnect();
             cMessage *msg = new cMessage("CLOSED");
             msg->setKind(TCP_I_CLOSED);
-            TCPCommand *ind = new TCPCommand();
+            TcpCommand *ind = new TcpCommand();
             msg->setControlInfo(ind);
             msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
             msg->ensureTag<SocketInd>()->setSocketId(connIdM);
@@ -193,12 +193,12 @@ void TCP_NSC_Connection::do_SEND()
     }
 }
 
-void TCP_NSC_Connection::close()
+void TcpNscConnection::close()
 {
     onCloseM = true;
 }
 
-void TCP_NSC_Connection::abort()
+void TcpNscConnection::abort()
 {
     sendQueueM->dequeueTcpLayerMsg(sendQueueM->getBytesAvailable());
     close();

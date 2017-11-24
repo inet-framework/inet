@@ -29,10 +29,10 @@ namespace inet {
 namespace physicallayer {
 
 // This class was created by porting some C++ code from the DeciderUWBIRED class in MiXiM.
-class INET_API Ieee802154UWBIRReceiver : public ReceiverBase
+class INET_API Ieee802154UwbIrReceiver : public ReceiverBase
 {
   protected:
-    Ieee802154UWBIRMode cfg;
+    Ieee802154UwbIrMode cfg;
 
   protected:
     virtual void initialize(int stage) override;
@@ -41,14 +41,14 @@ class INET_API Ieee802154UWBIRReceiver : public ReceiverBase
     virtual std::pair<double, double> integrateWindow(simtime_t_cref pNow, simtime_t_cref burst, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
   public:
-    Ieee802154UWBIRReceiver();
+    Ieee802154UwbIrReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const override;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 };
 
 } // namespace physicallayer

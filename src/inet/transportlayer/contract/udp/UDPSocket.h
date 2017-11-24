@@ -60,7 +60,7 @@ namespace inet {
  * USPSocket provides some help for this with the belongsToSocket() and
  * belongsToAnyUDPSocket() methods.
  */
-class INET_API UDPSocket
+class INET_API UdpSocket
 {
   protected:
     int sockId;
@@ -74,12 +74,12 @@ class INET_API UDPSocket
      * Constructor. The getSocketId() method returns a valid Id right after
      * constructor call.
      */
-    UDPSocket();
+    UdpSocket();
 
     /**
      * Destructor
      */
-    ~UDPSocket() {}
+    ~UdpSocket() {}
 
     /**
      * Returns the internal socket Id.
@@ -218,7 +218,7 @@ class INET_API UDPSocket
      * then all UDP packets arriving to the given multicast group will be passed up except
      * those that arrive from the specified sources.
      */
-    void setMulticastSourceFilter(int interfaceId, const L3Address& multicastAddr, UDPSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
+    void setMulticastSourceFilter(int interfaceId, const L3Address& multicastAddr, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
 
     /**
      * Sends a data packet to the given address and port.

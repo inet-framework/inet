@@ -29,26 +29,26 @@ namespace inet {
 namespace rtp {
 
 //Forward declarations:
-class RTCPByePacket;
-class RTCPCompoundPacket;
-class RTCPReceiverReportPacket;
-class RTCPSDESPacket;
-class RTCPSenderReportPacket;
-class RTPInnerPacket;
-class RTPPacket;
-class RTPParticipantInfo;
-class RTPSenderInfo;
+class RtcpByePacket;
+class RtcpCompoundPacket;
+class RtcpReceiverReportPacket;
+class RtcpSdesPacket;
+class RtcpSenderReportPacket;
+class RtpInnerPacket;
+class RtpPacket;
+class RtpParticipantInfo;
+class RtpSenderInfo;
 
 /**
  * The class RTCP is responsible for creating, receiving and
  * processing of rtcp packets. It also keeps track of this and other
  * RTP end systems.
  */
-class INET_API RTCP : public cSimpleModule, public ILifecycle
+class INET_API Rtcp : public cSimpleModule, public ILifecycle
 {
   public:
-    RTCP();
-    virtual ~RTCP();
+    Rtcp();
+    virtual ~Rtcp();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
@@ -81,29 +81,29 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Initializes the rtcp module when the session is started.
      */
-    virtual void handleInitializeRTCP(RTPInnerPacket *rinp);
+    virtual void handleInitializeRTCP(RtpInnerPacket *rinp);
 
     /**
      * Stores information about the new transmission.
      */
-    virtual void handleSenderModuleInitialized(RTPInnerPacket *rinp);
+    virtual void handleSenderModuleInitialized(RtpInnerPacket *rinp);
 
     /**
      * Stores information about an outgoing RTP data packet.
      */
-    virtual void handleDataOut(RTPInnerPacket *packet);
+    virtual void handleDataOut(RtpInnerPacket *packet);
 
     /**
      * Stores information about an outgoing RTP data packet.
      */
-    virtual void handleDataIn(RTPInnerPacket *rinp);
+    virtual void handleDataIn(RtpInnerPacket *rinp);
 
     /**
      * Makes the rtcp module send an RTCPByePacket in the next
      * RTCPCompoundPacket to tell other participants in the RTP
      * session that this end system leaves.
      */
-    virtual void handleLeaveSession(RTPInnerPacket *rinp);
+    virtual void handleLeaveSession(RtpInnerPacket *rinp);
 
     /**
      * Called when the socket layer has finished a connect.
@@ -145,23 +145,23 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Extracts information of a received RTPPacket.
      */
-    virtual void processIncomingRTPPacket(Packet *packet, IPv4Address address, int port);
+    virtual void processIncomingRTPPacket(Packet *packet, Ipv4Address address, int port);
 
     /**
      * Extracts information of a received RTCPCompoundPacket.
      */
-    virtual void processIncomingRTCPPacket(Packet *packet, IPv4Address address, int port);
-    void processIncomingRTCPSenderReportPacket(const Ptr<const RTCPSenderReportPacket>& rtcpSenderReportPacket, IPv4Address address, int port);
-    void processIncomingRTCPReceiverReportPacket(const Ptr<const RTCPReceiverReportPacket>& rtcpReceiverReportPacket, IPv4Address address, int port);
-    void processIncomingRTCPSDESPacket(const Ptr<const RTCPSDESPacket>& rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime);
-    void processIncomingRTCPByePacket(const Ptr<const RTCPByePacket>& rtcpByePacket, IPv4Address address, int port);
+    virtual void processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int port);
+    void processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderReportPacket>& rtcpSenderReportPacket, Ipv4Address address, int port);
+    void processIncomingRTCPReceiverReportPacket(const Ptr<const RtcpReceiverReportPacket>& rtcpReceiverReportPacket, Ipv4Address address, int port);
+    void processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSDESPacket, Ipv4Address address, int port, simtime_t arrivalTime);
+    void processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByePacket, Ipv4Address address, int port);
 
     /**
      * Returns the RTPParticipantInfo object used for storing information
      * about the RTP end system with this ssrc identifier.
      * Returns nullptr if this end system is unknown.
      */
-    virtual RTPParticipantInfo *findParticipantInfo(uint32 ssrc);
+    virtual RtpParticipantInfo *findParticipantInfo(uint32 ssrc);
 
     /**
      * Recalculates the average size of an RTCPCompoundPacket when
@@ -188,7 +188,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * The destination address.
      */
-    IPv4Address _destinationAddress;
+    Ipv4Address _destinationAddress;
 
     /**
      * The rtcp port.
@@ -208,7 +208,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * The RTPSenderInfo about this end system.
      */
-    RTPSenderInfo *_senderInfo = nullptr;
+    RtpSenderInfo *_senderInfo = nullptr;
 
     /**
      * Information about all known RTP end system participating in
@@ -219,7 +219,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * The UDP socket for sending/receiving rtcp packets.
      */
-    UDPSocket _udpSocket;
+    UdpSocket _udpSocket;
 
     /**
      * The number of packets this rtcp module has

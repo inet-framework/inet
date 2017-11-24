@@ -181,7 +181,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
 L3Address L3AddressResolver::routerIdOf(cModule *host)
 {
 #ifdef WITH_IPv4
-    IIPv4RoutingTable *rt = routingTableOf(host);
+    IIpv4RoutingTable *rt = routingTableOf(host);
     return L3Address(rt->getRouterId());
 #else // ifdef WITH_IPv4
     throw cRuntimeError("INET was compiled without IPv4 support");
@@ -293,14 +293,14 @@ bool L3AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *
         return false; // IPv6 netmask not supported yet
 
     bool ret = false;
-    IPv6Address::Scope retScope = IPv6Address::UNSPECIFIED;
+    Ipv6Address::Scope retScope = Ipv6Address::UNSPECIFIED;
 
-    for (int i = 0; i < ift->getNumInterfaces() && retScope != IPv6Address::GLOBAL; i++) {
+    for (int i = 0; i < ift->getNumInterfaces() && retScope != Ipv6Address::GLOBAL; i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (!ie->ipv6Data() || ie->isLoopback())
             continue;
-        IPv6Address curAddr = ie->ipv6Data()->getPreferredAddress();
-        IPv6Address::Scope curScope = curAddr.getScope();
+        Ipv6Address curAddr = ie->ipv6Data()->getPreferredAddress();
+        Ipv6Address::Scope curScope = curAddr.getScope();
         if (curScope > retScope) {
             retAddr = curAddr;
             retScope = curScope;
@@ -368,7 +368,7 @@ bool L3AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *
     if (netmask)
         return false; // IPv6 netmask not supported yet
     if (ie->ipv6Data()) {
-        IPv6Address addr = ie->ipv6Data()->getPreferredAddress();
+        Ipv6Address addr = ie->ipv6Data()->getPreferredAddress();
         if (!addr.isUnspecified()) {
             ret.set(addr);
             return true;
@@ -382,7 +382,7 @@ bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *
 {
 #ifdef WITH_IPv4
     if (ie->ipv4Data()) {
-        IPv4Address addr = ie->ipv4Data()->getIPAddress();
+        Ipv4Address addr = ie->ipv4Data()->getIPAddress();
         if (!addr.isUnspecified()) {
             ret.set(netmask ? ie->ipv4Data()->getNetmask() : addr);
             return true;
@@ -431,19 +431,19 @@ IInterfaceTable *L3AddressResolver::interfaceTableOf(cModule *host)
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
-IIPv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
+IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
 {
-    IIPv4RoutingTable *mod = findIPv4RoutingTableOf(host);
+    IIpv4RoutingTable *mod = findIPv4RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("L3AddressResolver: IIPv4RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
 
-IPv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
+Ipv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
 {
     // find IPv6RoutingTable
-    IPv6RoutingTable *mod = findIPv6RoutingTableOf(host);
+    Ipv6RoutingTable *mod = findIPv6RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("L3AddressResolver: IPv6RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
@@ -455,19 +455,19 @@ IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
     return dynamic_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
 }
 
-IIPv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
+IIpv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
-    return dynamic_cast<IIPv4RoutingTable *>(host->getModuleByPath(".ipv4.routingTable"));
+    return dynamic_cast<IIpv4RoutingTable *>(host->getModuleByPath(".ipv4.routingTable"));
 #else // ifdef WITH_IPv4
     return nullptr;
 #endif // ifdef WITH_IPv4
 }
 
-IPv6RoutingTable *L3AddressResolver::findIPv6RoutingTableOf(cModule *host)
+Ipv6RoutingTable *L3AddressResolver::findIPv6RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv6
-    return dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".ipv6.routingTable"));
+    return dynamic_cast<Ipv6RoutingTable *>(host->getModuleByPath(".ipv6.routingTable"));
 #else // ifdef WITH_IPv6
     return nullptr;
 #endif // ifdef WITH_IPv6

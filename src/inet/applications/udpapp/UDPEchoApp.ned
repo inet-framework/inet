@@ -25,7 +25,7 @@ import inet.applications.contract.IApp;
 // Note: when used together with ~UDPBasicApp, ~UDPBasicApp's "received packet
 // lifetime" statistic will record round-trip times.
 //
-simple UDPEchoApp like IApp
+simple UdpEchoApp like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -34,6 +34,6 @@ simple UDPEchoApp like IApp
         @signal[pk](type=cPacket);
         @statistic[echoedPk](title="packets echoed"; source=pk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }

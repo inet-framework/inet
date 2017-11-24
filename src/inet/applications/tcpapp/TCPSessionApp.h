@@ -29,7 +29,7 @@ namespace inet {
 /**
  * Single-connection TCP application.
  */
-class INET_API TCPSessionApp : public TCPAppBase
+class INET_API TcpSessionApp : public TcpAppBase
 {
   protected:
     // parameters
@@ -73,8 +73,8 @@ class INET_API TCPSessionApp : public TCPAppBase
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
 
   public:
-    TCPSessionApp() {}
-    virtual ~TCPSessionApp();
+    TcpSessionApp() {}
+    virtual ~TcpSessionApp();
 };
 
 } // namespace inet

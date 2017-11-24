@@ -26,16 +26,16 @@ namespace inet {
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPResvMsg : public RSVPResvMsg_Base
+class INET_API RsvpResvMsg : public RsvpResvMsg_Base
 {
   public:
-    RSVPResvMsg() : RSVPResvMsg_Base() {}
-    RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other) {}
-    RSVPResvMsg& operator=(const RSVPResvMsg& other) { RSVPResvMsg_Base::operator=(other); return *this; }
-    virtual RSVPResvMsg *dup() const override { return new RSVPResvMsg(*this); }
+    RsvpResvMsg() : RsvpResvMsg_Base() {}
+    RsvpResvMsg(const RsvpResvMsg& other) : RsvpResvMsg_Base(other) {}
+    RsvpResvMsg& operator=(const RsvpResvMsg& other) { RsvpResvMsg_Base::operator=(other); return *this; }
+    virtual RsvpResvMsg *dup() const override { return new RsvpResvMsg(*this); }
 
-    inline IPv4Address getNHOP() const { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() const { return getHop().Logical_Interface_Handle; }
+    inline Ipv4Address getNHOP() const { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() const { return getHop().Logical_Interface_Handle; }
 };
 
 /**
@@ -44,16 +44,16 @@ class INET_API RSVPResvMsg : public RSVPResvMsg_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPResvTear : public RSVPResvTear_Base
+class INET_API RsvpResvTear : public RsvpResvTear_Base
 {
   public:
-    RSVPResvTear(/* const char *name = nullptr, int kind = RTEAR_MESSAGE */) : RSVPResvTear_Base(/* name, kind */) {}
-    RSVPResvTear(const RSVPResvTear& other) : RSVPResvTear_Base(other) {}
-    RSVPResvTear& operator=(const RSVPResvTear& other) { RSVPResvTear_Base::operator=(other); return *this; }
-    virtual RSVPResvTear *dup() const override { return new RSVPResvTear(*this); }
+    RsvpResvTear(/* const char *name = nullptr, int kind = RTEAR_MESSAGE */) : RsvpResvTear_Base(/* name, kind */) {}
+    RsvpResvTear(const RsvpResvTear& other) : RsvpResvTear_Base(other) {}
+    RsvpResvTear& operator=(const RsvpResvTear& other) { RsvpResvTear_Base::operator=(other); return *this; }
+    virtual RsvpResvTear *dup() const override { return new RsvpResvTear(*this); }
 
-    inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
 };
 
 /**
@@ -62,16 +62,16 @@ class INET_API RSVPResvTear : public RSVPResvTear_Base
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPResvError : public RSVPResvError_Base
+class INET_API RsvpResvError : public RsvpResvError_Base
 {
   public:
-    RSVPResvError(/* const char *name = nullptr, int kind = RERROR_MESSAGE */) : RSVPResvError_Base(/* name, kind */) {}
-    RSVPResvError(const RSVPResvError& other) : RSVPResvError_Base(other) {}
-    RSVPResvError& operator=(const RSVPResvError& other) { RSVPResvError_Base::operator=(other); return *this; }
-    virtual RSVPResvError *dup() const override { return new RSVPResvError(*this); }
+    RsvpResvError(/* const char *name = nullptr, int kind = RERROR_MESSAGE */) : RsvpResvError_Base(/* name, kind */) {}
+    RsvpResvError(const RsvpResvError& other) : RsvpResvError_Base(other) {}
+    RsvpResvError& operator=(const RsvpResvError& other) { RsvpResvError_Base::operator=(other); return *this; }
+    virtual RsvpResvError *dup() const override { return new RsvpResvError(*this); }
 
-    inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
-    inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
 };
 
 } // namespace inet

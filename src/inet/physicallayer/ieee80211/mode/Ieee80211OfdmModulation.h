@@ -26,12 +26,12 @@ namespace physicallayer {
 class INET_API Ieee80211OfdmModulation : public IModulation
 {
     protected:
-        const APSKModulationBase *subcarrierModulation;
+        const ApskModulationBase *subcarrierModulation;
 
     public:
-        Ieee80211OfdmModulation(const APSKModulationBase *subcarrierModulation);
+        Ieee80211OfdmModulation(const ApskModulationBase *subcarrierModulation);
 
-        const APSKModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
+        const ApskModulationBase *getSubcarrierModulation() const { return subcarrierModulation; }
         virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
         virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
 

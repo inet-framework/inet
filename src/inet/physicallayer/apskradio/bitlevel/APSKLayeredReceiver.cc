@@ -36,9 +36,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKLayeredReceiver);
+Define_Module(ApskLayeredReceiver);
 
-APSKLayeredReceiver::APSKLayeredReceiver() :
+ApskLayeredReceiver::ApskLayeredReceiver() :
     levelOfDetail((LevelOfDetail) - 1),
     errorModel(nullptr),
     decoder(nullptr),
@@ -53,7 +53,7 @@ APSKLayeredReceiver::APSKLayeredReceiver() :
 {
 }
 
-void APSKLayeredReceiver::initialize(int stage)
+void ApskLayeredReceiver::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         errorModel = dynamic_cast<ILayeredErrorModel *>(getSubmodule("errorModel"));
@@ -87,13 +87,13 @@ void APSKLayeredReceiver::initialize(int stage)
     }
 }
 
-const IReceptionAnalogModel *APSKLayeredReceiver::createAnalogModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     // TODO: interference + receptionAnalogModel;
     return nullptr;
 }
 
-std::ostream& APSKLayeredReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -112,7 +112,7 @@ std::ostream& APSKLayeredReceiver::printToStream(std::ostream& stream, int level
     return stream;
 }
 
-const IReceptionSampleModel *APSKLayeredReceiver::createSampleModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionAnalogModel *analogModel) const
+const IReceptionSampleModel *ApskLayeredReceiver::createSampleModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const
 {
     if (levelOfDetail == SAMPLE_DOMAIN)
         return errorModel->computeSampleModel(transmission, snir);
@@ -122,7 +122,7 @@ const IReceptionSampleModel *APSKLayeredReceiver::createSampleModel(const Layere
         return nullptr;
 }
 
-const IReceptionSymbolModel *APSKLayeredReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSampleModel *sampleModel) const
+const IReceptionSymbolModel *ApskLayeredReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN)
         return errorModel->computeSymbolModel(transmission, snir);
@@ -132,7 +132,7 @@ const IReceptionSymbolModel *APSKLayeredReceiver::createSymbolModel(const Layere
         return nullptr;
 }
 
-const IReceptionBitModel *APSKLayeredReceiver::createBitModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSymbolModel *symbolModel) const
+const IReceptionBitModel *ApskLayeredReceiver::createBitModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const
 {
     if (levelOfDetail == BIT_DOMAIN)
         return errorModel->computeBitModel(transmission, snir);
@@ -142,7 +142,7 @@ const IReceptionBitModel *APSKLayeredReceiver::createBitModel(const LayeredTrans
         return nullptr;
 }
 
-const IReceptionPacketModel *APSKLayeredReceiver::createPacketModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionBitModel *bitModel) const
+const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const
 {
     if (levelOfDetail == PACKET_DOMAIN)
         return errorModel->computePacketModel(transmission, snir);
@@ -152,7 +152,7 @@ const IReceptionPacketModel *APSKLayeredReceiver::createPacketModel(const Layere
         return nullptr;
 }
 
-const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
+const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
@@ -168,13 +168,13 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
-const IListening *APSKLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, carrierFrequency, bandwidth);
 }
 
 // TODO: copy
-const IListeningDecision *APSKLayeredReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
+const IListeningDecision *ApskLayeredReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     const IRadio *receiver = listening->getReceiver();
     const IRadioMedium *radioMedium = receiver->getMedium();
@@ -190,7 +190,7 @@ const IListeningDecision *APSKLayeredReceiver::computeListeningDecision(const IL
 
 // TODO: this is not purely functional, see interface comment
 // TODO: copy
-bool APSKLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
+bool ApskLayeredReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);

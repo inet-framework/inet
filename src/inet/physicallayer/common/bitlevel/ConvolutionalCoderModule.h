@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFECCoder
+class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
 {
   protected:
     ConvolutionalCoder *convolutionalCoder;

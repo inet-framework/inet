@@ -27,7 +27,7 @@ namespace inet {
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
-class INET_API TelnetApp : public TCPAppBase, public ILifecycle
+class INET_API TelnetApp : public TcpAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg = nullptr;

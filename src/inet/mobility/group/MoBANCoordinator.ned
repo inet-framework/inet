@@ -54,12 +54,12 @@ import inet.mobility.base.MovingMobilityBase;
 // The absolute position of the reference point of each belonging node is calculated by adding the current position of the logical center
 // by the reference point of that node in the selected posture. The coordinator publish the position of the reference point as well as
 // the speed and the radius of the local movement of nodes.
-simple MoBANCoordinator extends MovingMobilityBase
+simple MoBanCoordinator extends MovingMobilityBase
 {
     parameters:
         xml postureSpecFile;        // The input file that includes the specification of all postures
         xml configFile;             // The configuration file for setting probability vectors, distributions and correlations
         bool useMobilityPattern;    // Set if the logged mobility pattern is used.
         string mobilityPatternFile; // The input file for mobility pattern if it is going to be used.
-        @class(MoBANCoordinator);
+        @class(MoBanCoordinator);
 }

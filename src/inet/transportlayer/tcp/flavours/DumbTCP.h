@@ -29,7 +29,7 @@ namespace tcp {
 /**
  * State variables for DumbTCP.
  */
-class INET_API DumbTCPStateVariables : public TCPStateVariables
+class INET_API DumbTcpStateVariables : public TcpStateVariables
 {
   public:
     //...
@@ -42,25 +42,25 @@ class INET_API DumbTCPStateVariables : public TCPStateVariables
  * timeout calculation, delayed acks, silly window avoidance,
  * congestion control, etc.
  */
-class INET_API DumbTCP : public TCPAlgorithm
+class INET_API DumbTcp : public TcpAlgorithm
 {
   protected:
-    DumbTCPStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    DumbTcpStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     cMessage *rexmitTimer;    // retransmission timer
 
   protected:
     /** Creates and returns a DumbTCPStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() override
+    virtual TcpStateVariables *createStateVariables() override
     {
-        return new DumbTCPStateVariables();
+        return new DumbTcpStateVariables();
     }
 
   public:
     /** Ctor */
-    DumbTCP();
+    DumbTcp();
 
-    virtual ~DumbTCP();
+    virtual ~DumbTcp();
 
     virtual void initialize() override;
 
@@ -68,7 +68,7 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual void connectionClosed() override;
 
-    virtual void processTimer(cMessage *timer, TCPEventCode& event) override;
+    virtual void processTimer(cMessage *timer, TcpEventCode& event) override;
 
     virtual void sendCommandInvoked() override;
 

@@ -1,7 +1,7 @@
 %description:
 Testing Ethernet communication on EtherHub with 100MBps, with disconnecting and reconnecting some hosts.
 Simulation has 5 pairs of hosts that communicate with each other.
-All hosts use EtherMAC implementation with half duplex mode.
+All hosts use EtherMac implementation with half duplex mode.
 All hosts have same ethernet configurations.
 All hosts send requests and also reply to requests sent to them.
 

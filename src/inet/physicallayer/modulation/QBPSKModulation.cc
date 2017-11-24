@@ -21,22 +21,22 @@ namespace inet {
 
 namespace physicallayer {
 
-const std::vector<APSKSymbol> QBPSKModulation::constellation = {
-    APSKSymbol(0, -1), APSKSymbol(0, 1)
+const std::vector<ApskSymbol> QbpskModulation::constellation = {
+    ApskSymbol(0, -1), ApskSymbol(0, 1)
 };
 
-const QBPSKModulation QBPSKModulation::singleton;
+const QbpskModulation QbpskModulation::singleton;
 
-QBPSKModulation::QBPSKModulation() : MQAMModulationBase(&constellation)
+QbpskModulation::QbpskModulation() : MqamModulationBase(&constellation)
 {
 }
 
-double QBPSKModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const // TODO: Review
+double QbpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const // TODO: Review
 {
     return 0.5 * erfc(sqrt(snir * bandwidth.get() / bitrate.get()));
 }
 
-double QBPSKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double QbpskModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://en.wikipedia.org/wiki/Phase-shift_keying#Bit_error_rate
     return calculateSER(snir, bandwidth, bitrate);

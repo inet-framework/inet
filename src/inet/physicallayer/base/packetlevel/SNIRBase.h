@@ -26,14 +26,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API SNIRBase : public virtual ISNIR
+class INET_API SnirBase : public virtual ISnir
 {
   protected:
     const IReception *reception;
     const INoise *noise;
 
   public:
-    SNIRBase(const IReception *reception, const INoise *noise);
+    SnirBase(const IReception *reception, const INoise *noise);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IReception *getReception() const override { return reception; }

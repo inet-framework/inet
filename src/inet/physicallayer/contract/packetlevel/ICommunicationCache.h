@@ -91,8 +91,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) = 0;
     virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) = 0;
+    virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir) = 0;
     virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
 
     virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) = 0;

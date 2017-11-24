@@ -21,16 +21,16 @@ namespace inet {
 
 namespace bgp {
 
-Register_Class(BGPUpdateMessage)
+Register_Class(BgpUpdateMessage)
 
-void BGPUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
+void BgpUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
 {
     unsigned short delta_size = size - getWithdrawnRoutesArraySize();
     unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
     setChunkLength(getChunkLength() + B(delta_bytes));
 }
 
-unsigned short BGPUpdateMessage::computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs)
+unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs)
 {
     unsigned short nb_path_attr = 2 + pathAttrs.getAsPathArraySize()
         + pathAttrs.getLocalPrefArraySize()
@@ -50,21 +50,21 @@ unsigned short BGPUpdateMessage::computePathAttributesBytes(const BGPUpdatePathA
     return contentBytes;
 }
 
-void BGPUpdateMessage::setPathAttributeList(const BGPUpdatePathAttributeList& pathAttrs)
+void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pathAttrs)
 {
     unsigned int old_bytes = getPathAttributeListArraySize() == 0 ? 0 : computePathAttributesBytes(getPathAttributeList(0));
     unsigned int delta_bytes = computePathAttributesBytes(pathAttrs) - old_bytes;
 
     setPathAttributeListArraySize(1);
-    BGPUpdateMessage_Base::setPathAttributeList(0, pathAttrs);
+    BgpUpdateMessage_Base::setPathAttributeList(0, pathAttrs);
 
     setChunkLength(getChunkLength() + B(delta_bytes));
 }
 
-void BGPUpdateMessage::setNLRI(const BGPUpdateNLRI& NLRI_var)
+void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
 {
     setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + IPv4Address (4))
-    BGPUpdateMessage_Base::NLRI = NLRI_var;
+    BgpUpdateMessage_Base::NLRI = NLRI_var;
 }
 
 } // namespace bgp

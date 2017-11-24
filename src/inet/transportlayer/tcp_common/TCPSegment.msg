@@ -28,7 +28,7 @@ cplusplus {{
 namespace inet {
 namespace tcp {
 class Sack;
-class TCPOption;
+class TcpOption;
 }
 }
 
@@ -52,7 +52,7 @@ enum TcpConstants {
 //
 // Note: Options not yet implemented should stay commented out
 //
-enum TCPOptionNumbers
+enum TcpOptionNumbers
 {
     TCPOPTION_END_OF_OPTION_LIST = 0;                   // RFC 793, LENGTH: 1 Byte
     TCPOPTION_NO_OPERATION = 1;                         // RFC 793, LENGTH: 1 Byte
@@ -104,52 +104,52 @@ class Sack extends SackItem
 }
 
 // Header Options (optional):
-class TCPOption extends cObject
+class TcpOption extends cObject
 {
-    TCPOptionNumbers kind = (TCPOptionNumbers)-1;  // option kind
+    TcpOptionNumbers kind = (TcpOptionNumbers)-1;  // option kind
     unsigned short length = 1;                    // option length
 }
 
-class TCPOptionEnd extends TCPOption
+class TcpOptionEnd extends TcpOption
 {
     kind = TCPOPTION_END_OF_OPTION_LIST;
     length = 1;
 }
 
-class TCPOptionNop extends TCPOption
+class TcpOptionNop extends TcpOption
 {
     kind = TCPOPTION_NO_OPERATION;
     length = 1;
 }
 
-class TCPOptionMaxSegmentSize extends TCPOption
+class TcpOptionMaxSegmentSize extends TcpOption
 {
     kind = TCPOPTION_MAXIMUM_SEGMENT_SIZE;
     length = 4;
     uint16_t maxSegmentSize;   // uint16_t
 }
 
-class TCPOptionWindowScale extends TCPOption
+class TcpOptionWindowScale extends TcpOption
 {
     kind = TCPOPTION_WINDOW_SCALE;
     length = 3;
     unsigned short windowScale;   // uint8_t
 }
 
-class TCPOptionSackPermitted extends TCPOption
+class TcpOptionSackPermitted extends TcpOption
 {
     kind = TCPOPTION_SACK_PERMITTED;
     length = 2;
 }
 
-class TCPOptionSack extends TCPOption
+class TcpOptionSack extends TcpOption
 {
     kind = TCPOPTION_SACK;
     length = 2;     // 2 + getSackArraySize() * 8
     SackItem sackItem[];
 }
 
-class TCPOptionTimestamp extends TCPOption
+class TcpOptionTimestamp extends TcpOption
 {
     kind = TCPOPTION_TIMESTAMP;
     length = 10;
@@ -157,9 +157,9 @@ class TCPOptionTimestamp extends TCPOption
     uint32_t   echoedTimestamp;
 }
 
-class TCPOptionUnknown extends TCPOption
+class TcpOptionUnknown extends TcpOption
 {
-    kind = (TCPOptionNumbers)-1;
+    kind = (TcpOptionNumbers)-1;
     uint8_t bytes[];
 }
 
@@ -227,6 +227,6 @@ class TcpHeader extends TransportHeaderBase
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
-    abstract TCPOption *headerOption[];
+    abstract TcpOption *headerOption[];
 }
 

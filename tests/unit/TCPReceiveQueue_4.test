@@ -10,8 +10,8 @@ Test TCPVirtualDataRcvQueue class
 using namespace ::inet::tcp;
 
 %activity:
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *q = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *q = &rcvQueue;
 
 q->init(1000);
 EV << q->info() <<"\n";

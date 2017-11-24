@@ -21,7 +21,7 @@
 
 namespace inet {
 
-TCPSocket::TCPSocket()
+TcpSocket::TcpSocket()
 {
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
@@ -35,7 +35,7 @@ TCPSocket::TCPSocket()
     gateToTcp = nullptr;
 }
 
-TCPSocket::TCPSocket(cMessage *msg)
+TcpSocket::TcpSocket(cMessage *msg)
 {
     connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
@@ -46,7 +46,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     gateToTcp = nullptr;
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
-        TCPAvailableInfo *availableInfo = check_and_cast<TCPAvailableInfo *>(msg->getControlInfo());
+        TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
         localAddr = availableInfo->getLocalAddr();
         remoteAddr = availableInfo->getRemoteAddr();
         localPrt = availableInfo->getLocalPort();
@@ -58,7 +58,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         // However, for convenience we extract TCPConnectInfo already here, so that
         // remote address/port can be read already after the ctor call.
 
-        TCPConnectInfo *connectInfo = check_and_cast<TCPConnectInfo *>(msg->getControlInfo());
+        TcpConnectInfo *connectInfo = check_and_cast<TcpConnectInfo *>(msg->getControlInfo());
         localAddr = connectInfo->getLocalAddr();
         remoteAddr = connectInfo->getRemoteAddr();
         localPrt = connectInfo->getLocalPort();
@@ -66,13 +66,13 @@ TCPSocket::TCPSocket(cMessage *msg)
     }
 }
 
-TCPSocket::~TCPSocket()
+TcpSocket::~TcpSocket()
 {
     if (cb)
         cb->socketDeleted(connId, yourPtr);
 }
 
-const char *TCPSocket::stateName(int state)
+const char *TcpSocket::stateName(int state)
 {
 #define CASE(x)    case x: \
         s = #x; break
@@ -92,7 +92,7 @@ const char *TCPSocket::stateName(int state)
 #undef CASE
 }
 
-void TCPSocket::sendToTCP(cMessage *msg, int connId)
+void TcpSocket::sendToTCP(cMessage *msg, int connId)
 {
     if (!gateToTcp)
         throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
@@ -102,7 +102,7 @@ void TCPSocket::sendToTCP(cMessage *msg, int connId)
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
-void TCPSocket::bind(int lPort)
+void TcpSocket::bind(int lPort)
 {
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("TCPSocket::bind(): socket already bound");
@@ -114,7 +114,7 @@ void TCPSocket::bind(int lPort)
     sockstate = BOUND;
 }
 
-void TCPSocket::bind(L3Address lAddr, int lPort)
+void TcpSocket::bind(L3Address lAddr, int lPort)
 {
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("TCPSocket::bind(): socket already bound");
@@ -128,7 +128,7 @@ void TCPSocket::bind(L3Address lAddr, int lPort)
     sockstate = BOUND;
 }
 
-void TCPSocket::listen(bool fork)
+void TcpSocket::listen(bool fork)
 {
     if (sockstate != BOUND)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TCPSocket: must call bind() before listen()"
@@ -136,7 +136,7 @@ void TCPSocket::listen(bool fork)
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
-    TCPOpenCommand *openCmd = new TCPOpenCommand();
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setFork(fork);
@@ -147,15 +147,15 @@ void TCPSocket::listen(bool fork)
     sockstate = LISTENING;
 }
 
-void TCPSocket::accept(int socketId)
+void TcpSocket::accept(int socketId)
 {
     cMessage *msg = new cMessage("ACCEPT", TCP_C_ACCEPT);
-    TCPAcceptCommand *acceptCmd = new TCPAcceptCommand();
+    TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
     msg->setControlInfo(acceptCmd);
     sendToTCP(msg, socketId);
 }
 
-void TCPSocket::connect(L3Address remoteAddress, int remotePort)
+void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
         throw cRuntimeError("TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
@@ -168,7 +168,7 @@ void TCPSocket::connect(L3Address remoteAddress, int remotePort)
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
 
-    TCPOpenCommand *openCmd = new TCPOpenCommand();
+    TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
     openCmd->setRemoteAddr(remoteAddr);
@@ -180,7 +180,7 @@ void TCPSocket::connect(L3Address remoteAddress, int remotePort)
     sockstate = CONNECTING;
 }
 
-void TCPSocket::send(cMessage *msg)
+void TcpSocket::send(cMessage *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
         throw cRuntimeError("TCPSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
@@ -189,43 +189,43 @@ void TCPSocket::send(cMessage *msg)
     sendToTCP(msg);
 }
 
-void TCPSocket::sendCommand(cMessage *msg)
+void TcpSocket::sendCommand(cMessage *msg)
 {
     sendToTCP(msg);
 }
 
-void TCPSocket::close()
+void TcpSocket::close()
 {
     if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
         throw cRuntimeError("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
-    TCPCommand *cmd = new TCPCommand();
+    TcpCommand *cmd = new TcpCommand();
     msg->setControlInfo(cmd);
     sendToTCP(msg);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
-void TCPSocket::abort()
+void TcpSocket::abort()
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
         cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
-        TCPCommand *cmd = new TCPCommand();
+        TcpCommand *cmd = new TcpCommand();
         msg->setControlInfo(cmd);
         sendToTCP(msg);
     }
     sockstate = CLOSED;
 }
 
-void TCPSocket::requestStatus()
+void TcpSocket::requestStatus()
 {
     cMessage *msg = new cMessage("STATUS", TCP_C_STATUS);
-    TCPCommand *cmd = new TCPCommand();
+    TcpCommand *cmd = new TcpCommand();
     msg->setControlInfo(cmd);
     sendToTCP(msg);
 }
 
-void TCPSocket::renewSocket()
+void TcpSocket::renewSocket()
 {
     connId = getEnvir()->getUniqueNumber();
     remoteAddr = localAddr = L3Address();
@@ -233,29 +233,29 @@ void TCPSocket::renewSocket()
     sockstate = NOT_BOUND;
 }
 
-bool TCPSocket::belongsToSocket(cMessage *msg)
+bool TcpSocket::belongsToSocket(cMessage *msg)
 {
     return msg->getMandatoryTag<SocketInd>()->getSocketId() == connId;
 }
 
-bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
+bool TcpSocket::belongsToAnyTCPSocket(cMessage *msg)
 {
-    return dynamic_cast<TCPCommand *>(msg->getControlInfo());
+    return dynamic_cast<TcpCommand *>(msg->getControlInfo());
 }
 
-void TCPSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
+void TcpSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
 {
     cb = callback;
     yourPtr = yourPointer;
 }
 
-void TCPSocket::processMessage(cMessage *msg)
+void TcpSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
 
-    TCPStatusInfo *status;
-    TCPAvailableInfo *availableInfo;
-    TCPConnectInfo *connectInfo;
+    TcpStatusInfo *status;
+    TcpAvailableInfo *availableInfo;
+    TcpConnectInfo *connectInfo;
 
     switch (msg->getKind()) {
         case TCP_I_DATA:
@@ -275,7 +275,7 @@ void TCPSocket::processMessage(cMessage *msg)
             break;
 
         case TCP_I_AVAILABLE:
-            availableInfo = check_and_cast<TCPAvailableInfo *>(msg->getControlInfo());
+            availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
             // TODO: implement non-auto accept support, by accepting using the callback interface
             accept(availableInfo->getNewSocketId());
 
@@ -292,7 +292,7 @@ void TCPSocket::processMessage(cMessage *msg)
             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
             // want to create a new TCPSocket object via new TCPSocket(msg).
             sockstate = CONNECTED;
-            connectInfo = check_and_cast<TCPConnectInfo *>(msg->getControlInfo());
+            connectInfo = check_and_cast<TcpConnectInfo *>(msg->getControlInfo());
             localAddr = connectInfo->getLocalAddr();
             remoteAddr = connectInfo->getRemoteAddr();
             localPrt = connectInfo->getLocalPort();
@@ -334,7 +334,7 @@ void TCPSocket::processMessage(cMessage *msg)
             break;
 
         case TCP_I_STATUS:
-            status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
+            status = check_and_cast<TcpStatusInfo *>(msg->removeControlInfo());
             delete msg;
 
             if (cb)

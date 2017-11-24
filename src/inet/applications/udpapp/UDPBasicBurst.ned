@@ -100,7 +100,7 @@ import inet.applications.contract.IApp;
 //  - rcvdPk: statistics of not dropped, not out-of-order packets.
 //  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
 //
-simple UDPBasicBurst like IApp
+simple UdpBasicBurst like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -129,7 +129,7 @@ simple UDPBasicBurst like IApp
         @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @display("i=block/app");
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 

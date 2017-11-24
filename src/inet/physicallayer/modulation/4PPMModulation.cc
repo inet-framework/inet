@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-const _4PPMModulation _4PPMModulation::singleton;
+const _4PpmModulation _4PpmModulation::singleton;
 
-_4PPMModulation::_4PPMModulation() :
-    PPMModulationBase(2)
+_4PpmModulation::_4PpmModulation() :
+    PpmModulationBase(2)
 {
 }
 

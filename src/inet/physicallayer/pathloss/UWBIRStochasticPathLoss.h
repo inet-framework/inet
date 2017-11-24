@@ -48,7 +48,7 @@ namespace physicallayer {
  * @ingroup ieee802154a
  * @ingroup analogueModels
  */
-class INET_API UWBIRStochasticPathLoss : public PathLossBase
+class INET_API UwbIrStochasticPathLoss : public PathLossBase
 {
   protected:
     static const Hz fc; // mandatory band 3, center frequency
@@ -76,7 +76,7 @@ class INET_API UWBIRStochasticPathLoss : public PathLossBase
     virtual double simtruncnormal(double mean, double stddev, double a, int rng) const;
 
   public:
-    UWBIRStochasticPathLoss();
+    UwbIrStochasticPathLoss();
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const override { return m(NaN); }

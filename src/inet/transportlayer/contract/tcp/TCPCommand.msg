@@ -17,7 +17,7 @@
 
 
 import inet.common.INETDefs;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 
 namespace inet;
@@ -68,7 +68,7 @@ enum TcpStatusInd
 //
 // Currently not in use.
 //
-enum TCPErrorCode
+enum TcpErrorCode
 {
 }
 
@@ -87,7 +87,7 @@ enum TCPErrorCode
 //
 // @see ~TcpCommandCode, ~TcpStatusInd, ~TCPOpenCommand, ~TCPStatusInfo, ~ITCP
 //
-class TCPCommand extends cObject
+class TcpCommand extends cObject
 {
     int userId = -1;   // id than can be freely used by the app
 }
@@ -96,9 +96,9 @@ class TCPCommand extends cObject
 //
 // Currently not in use.
 //
-class TCPErrorInfo extends TCPCommand
+class TcpErrorInfo extends TcpCommand
 {
-    TCPErrorCode errorCode;
+    TcpErrorCode errorCode;
     string messageText;
 }
 
@@ -126,7 +126,7 @@ class TCPErrorInfo extends TCPCommand
 //
 // @see ~TcpCommandCode, ~ITCP
 //
-class TCPOpenCommand extends TCPCommand
+class TcpOpenCommand extends TcpCommand
 {
     L3Address localAddr; // may be left empty
     L3Address remoteAddr;// required for active open
@@ -140,7 +140,7 @@ class TCPOpenCommand extends TCPCommand
 //
 // Control info to be used to accept an available connection.
 //
-class TCPAcceptCommand extends TCPCommand
+class TcpAcceptCommand extends TcpCommand
 {
 }
 
@@ -158,7 +158,7 @@ class TCPAcceptCommand extends TCPCommand
 //
 // @see ~TcpCommandCode, ~ITCP
 //
-class TCPAvailableInfo extends TCPCommand
+class TcpAvailableInfo extends TcpCommand
 {
     L3Address localAddr;
     L3Address remoteAddr;
@@ -174,7 +174,7 @@ class TCPAvailableInfo extends TCPCommand
 //
 // @see ~TcpCommandCode, ~ITCP
 //
-class TCPConnectInfo extends TCPCommand
+class TcpConnectInfo extends TcpCommand
 {
     L3Address localAddr;
     L3Address remoteAddr;
@@ -190,7 +190,7 @@ class TCPConnectInfo extends TCPCommand
 //
 // @see ~TcpStatusInd, ~TcpCommandCode, ~ITCP
 //
-class TCPStatusInfo extends TCPCommand
+class TcpStatusInfo extends TcpCommand
 {
     int state;
     string stateName;

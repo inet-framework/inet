@@ -31,10 +31,10 @@ namespace inet {
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoIPSender : public cSimpleModule, public ILifecycle
+class INET_API SimpleVoipSender : public cSimpleModule, public ILifecycle
 {
   private:
-    UDPSocket socket;
+    UdpSocket socket;
 
     // parameters
     simtime_t stopTime;
@@ -66,8 +66,8 @@ class INET_API SimpleVoIPSender : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    virtual ~SimpleVoIPSender();
-    SimpleVoIPSender();
+    virtual ~SimpleVoipSender();
+    SimpleVoipSender();
 };
 
 } // namespace inet

@@ -34,13 +34,13 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
+class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
 {
   public:
     /** Describes a STA */
-    struct STAInfo
+    struct StaInfo
     {
-        MACAddress address;
+        MacAddress address;
         int authSeqExpected;    // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX association should expire after a while if STA is silent?
@@ -48,21 +48,21 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
 
     class NotificationInfoSta : public cObject
     {
-        MACAddress apAddress;
-        MACAddress staAddress;
+        MacAddress apAddress;
+        MacAddress staAddress;
 
       public:
-        void setApAddress(const MACAddress& a) { apAddress = a; }
-        void setStaAddress(const MACAddress& a) { staAddress = a; }
-        const MACAddress& getApAddress() const { return apAddress; }
-        const MACAddress& getStaAddress() const { return staAddress; }
+        void setApAddress(const MacAddress& a) { apAddress = a; }
+        void setStaAddress(const MacAddress& a) { staAddress = a; }
+        const MacAddress& getApAddress() const { return apAddress; }
+        const MacAddress& getStaAddress() const { return staAddress; }
     };
 
-    struct MAC_compare
+    struct MacCompare
     {
-        bool operator()(const MACAddress& u1, const MACAddress& u2) const { return u1.compareTo(u2) < 0; }
+        bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
-    typedef std::map<MACAddress, STAInfo, MAC_compare> STAList;
+    typedef std::map<MacAddress, StaInfo, MacCompare> StaList;
 
   protected:
     // configuration
@@ -73,12 +73,12 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     Ieee80211SupportedRatesElement supportedRates;
 
     // state
-    STAList staList;    ///< list of STAs
+    StaList staList;    ///< list of STAs
     cMessage *beaconTimer = nullptr;
 
   public:
-    Ieee80211MgmtAP() {}
-    virtual ~Ieee80211MgmtAP();
+    Ieee80211MgmtAp() {}
+    virtual ~Ieee80211MgmtAp();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -94,10 +94,10 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
-    virtual STAInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
+    virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
 
     /** Utility function: set fields in the given frame and send it out to the address */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MACAddress& destAddr);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();
@@ -116,9 +116,9 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     virtual void handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
     //@}
 
-    void sendAssocNotification(const MACAddress& addr);
+    void sendAssocNotification(const MacAddress& addr);
 
-    void sendDisAssocNotification(const MACAddress& addr);
+    void sendDisAssocNotification(const MacAddress& addr);
 
     /** lifecycle support */
     //@{

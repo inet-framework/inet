@@ -34,9 +34,9 @@
 
 namespace inet {
 
-const double EtherMACBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
+const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
-const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr = {
+const EtherMacBase::EtherDescr EtherMacBase::nullEtherDescr = {
     0.0,
     0.0,
     0,
@@ -48,7 +48,7 @@ const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr = {
     0.0
 };
 
-const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
+const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     {
         ETHERNET_TXRATE,
         0.5 / ETHERNET_TXRATE,
@@ -117,22 +117,22 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
-simsignal_t EtherMACBase::txPkSignal = registerSignal("txPk");
-simsignal_t EtherMACBase::rxPkOkSignal = registerSignal("rxPkOk");
-simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
-simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
+simsignal_t EtherMacBase::txPkSignal = registerSignal("txPk");
+simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
+simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
+simsignal_t EtherMacBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
 
-simsignal_t EtherMACBase::transmitStateSignal = registerSignal("transmitState");
-simsignal_t EtherMACBase::receiveStateSignal = registerSignal("receiveState");
+simsignal_t EtherMacBase::transmitStateSignal = registerSignal("transmitState");
+simsignal_t EtherMacBase::receiveStateSignal = registerSignal("receiveState");
 
-EtherMACBase::EtherMACBase()
+EtherMacBase::EtherMacBase()
 {
     lastTxFinishTime = -1.0;    // never equals to current simtime
     curEtherDescr = &nullEtherDescr;
 }
 
-EtherMACBase::~EtherMACBase()
+EtherMacBase::~EtherMacBase()
 {
     delete curTxFrame;
 
@@ -141,9 +141,9 @@ EtherMACBase::~EtherMACBase()
     cancelAndDelete(endPauseMsg);
 }
 
-void EtherMACBase::initialize(int stage)
+void EtherMacBase::initialize(int stage)
 {
-    MACBase::initialize(stage);
+    MacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
@@ -183,7 +183,7 @@ void EtherMACBase::initialize(int stage)
     }
 }
 
-void EtherMACBase::initializeQueueModule()
+void EtherMacBase::initializeQueueModule()
 {
     if (par("queueModule").stringValue()[0]) {
         cModule *module = getModuleFromPar<cModule>(par("queueModule"), this);
@@ -206,13 +206,13 @@ void EtherMACBase::initializeQueueModule()
     }
 }
 
-void EtherMACBase::initializeMACAddress()
+void EtherMacBase::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -222,7 +222,7 @@ void EtherMACBase::initializeMACAddress()
     }
 }
 
-void EtherMACBase::initializeFlags()
+void EtherMacBase::initializeFlags()
 {
     sendRawBytes = par("sendRawBytes");
     duplexMode = true;
@@ -250,7 +250,7 @@ void EtherMACBase::initializeFlags()
     WATCH(frameBursting);
 }
 
-void EtherMACBase::initializeStatistics()
+void EtherMacBase::initializeStatistics()
 {
     numFramesSent = numFramesReceivedOK = numBytesSent = numBytesReceivedOK = 0;
     numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
@@ -271,7 +271,7 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesSent);
 }
 
-InterfaceEntry *EtherMACBase::createInterfaceEntry()
+InterfaceEntry *EtherMacBase::createInterfaceEntry()
 {
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
@@ -292,7 +292,7 @@ InterfaceEntry *EtherMACBase::createInterfaceEntry()
     return interfaceEntry;
 }
 
-bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -314,14 +314,14 @@ bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage
             processConnectDisconnect();
         }
     }
-    return MACBase::handleOperationStage(operation, stage, doneCallback);
+    return MacBase::handleOperationStage(operation, stage, doneCallback);
 }
 
-void EtherMACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 
-    MACBase::receiveSignal(source, signalID, obj, details);
+    MacBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID != POST_MODEL_CHANGE)
         return;
@@ -345,7 +345,7 @@ void EtherMACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
 }
 
-void EtherMACBase::processConnectDisconnect()
+void EtherMacBase::processConnectDisconnect()
 {
     if (!connected) {
         cancelEvent(endTxMsg);
@@ -383,14 +383,14 @@ void EtherMACBase::processConnectDisconnect()
     }
 }
 
-void EtherMACBase::encapsulate(Packet *frame)
+void EtherMacBase::encapsulate(Packet *frame)
 {
     auto phyHeader = makeShared<EthernetPhyHeader>();
     phyHeader->setSrcMacFullDuplex(duplexMode);
     frame->insertHeader(phyHeader);
 }
 
-void EtherMACBase::decapsulate(Packet *packet)
+void EtherMacBase::decapsulate(Packet *packet)
 {
     auto phyHeader = packet->popHeader<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
@@ -399,7 +399,7 @@ void EtherMACBase::decapsulate(Packet *packet)
 }
 
 //FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
-bool EtherMACBase::verifyCrcAndLength(Packet *packet)
+bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
@@ -439,7 +439,7 @@ bool EtherMACBase::verifyCrcAndLength(Packet *packet)
     return true;
 }
 
-void EtherMACBase::flushQueue()
+void EtherMacBase::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue.innerQueue) {
@@ -463,7 +463,7 @@ void EtherMACBase::flushQueue()
     }
 }
 
-void EtherMACBase::clearQueue()
+void EtherMacBase::clearQueue()
 {
     if (txQueue.innerQueue)
         txQueue.innerQueue->clear();
@@ -471,7 +471,7 @@ void EtherMACBase::clearQueue()
         txQueue.extQueue->clear(); // clear request count
 }
 
-void EtherMACBase::refreshConnection()
+void EtherMacBase::refreshConnection()
 {
     Enter_Method_Silent();
 
@@ -482,7 +482,7 @@ void EtherMACBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
+bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were
@@ -509,7 +509,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     if (!isPause && (promiscuous || frame->getDest().isMulticast()))
         return false;
 
-    if (isPause && frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
+    if (isPause && frame->getDest().equals(MacAddress::MULTICAST_PAUSE_ADDRESS))
         return false;
 
     EV_WARN << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
@@ -521,7 +521,7 @@ bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     return true;
 }
 
-void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
+void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     // When the connected channels change at runtime, we'll receive
     // two separate notifications (one for the rx channel and one for the tx one),
@@ -589,7 +589,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
     }
 }
 
-void EtherMACBase::printParameters()
+void EtherMacBase::printParameters()
 {
     // Dump parameters
     EV_DETAIL << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
@@ -602,7 +602,7 @@ void EtherMACBase::printParameters()
               << endl;
 }
 
-void EtherMACBase::getNextFrameFromQueue()
+void EtherMacBase::getNextFrameFromQueue()
 {
     ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
@@ -615,7 +615,7 @@ void EtherMACBase::getNextFrameFromQueue()
     }
 }
 
-void EtherMACBase::requestNextFrameFromExtQueue()
+void EtherMacBase::requestNextFrameFromExtQueue()
 {
     ASSERT(nullptr == curTxFrame);
     if (txQueue.extQueue) {
@@ -624,7 +624,7 @@ void EtherMACBase::requestNextFrameFromExtQueue()
     }
 }
 
-void EtherMACBase::finish()
+void EtherMacBase::finish()
 {
     if (!disabled) {
         simtime_t t = simTime();
@@ -640,7 +640,7 @@ void EtherMACBase::finish()
     }
 }
 
-void EtherMACBase::refreshDisplay() const
+void EtherMacBase::refreshDisplay() const
 {
     // icon coloring
     const char *color;
@@ -666,7 +666,7 @@ void EtherMACBase::refreshDisplay() const
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
 }
 
-int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)
+int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
 {
     Packet *ap = static_cast<Packet *>(a);
     Packet *bp = static_cast<Packet *>(b);

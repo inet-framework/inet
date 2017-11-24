@@ -31,12 +31,12 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKEncoder : public IEncoder, public cSimpleModule
+class INET_API ApskEncoder : public IEncoder, public cSimpleModule
 {
   protected:
-    const APSKCode *code;
+    const ApskCode *code;
     const IScrambler *scrambler;
-    const IFECCoder *fecEncoder;
+    const IFecCoder *fecEncoder;
     const IInterleaver *interleaver;
 
   protected:
@@ -44,11 +44,11 @@ class INET_API APSKEncoder : public IEncoder, public cSimpleModule
     virtual void initialize(int stage) override;
 
   public:
-    APSKEncoder();
-    virtual ~APSKEncoder();
+    ApskEncoder();
+    virtual ~ApskEncoder();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const APSKCode *getCode() const override { return code; }
+    virtual const ApskCode *getCode() const override { return code; }
     virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const override;
 };
 

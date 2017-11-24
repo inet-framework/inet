@@ -26,16 +26,16 @@ namespace inet {
 
 namespace rtp {
 
-Define_Module(RTPPayloadReceiver);
+Define_Module(RtpPayloadReceiver);
 
-simsignal_t RTPPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
+simsignal_t RtpPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
 
-RTPPayloadReceiver::~RTPPayloadReceiver()
+RtpPayloadReceiver::~RtpPayloadReceiver()
 {
     closeOutputFile();
 }
 
-void RTPPayloadReceiver::initialize()
+void RtpPayloadReceiver::initialize()
 {
     const char *fileName = par("outputFileName");
     const char *logFileName = par("outputLogFileName");
@@ -49,9 +49,9 @@ void RTPPayloadReceiver::initialize()
     }
 }
 
-void RTPPayloadReceiver::handleMessage(cMessage *msg)
+void RtpPayloadReceiver::handleMessage(cMessage *msg)
 {
-    RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
+    RtpInnerPacket *rinp = check_and_cast<RtpInnerPacket *>(msg);
     if (rinp->getType() == RTP_INP_DATA_IN) {
         auto packet = check_and_cast<Packet *>(rinp->decapsulate());
         processRtpPacket(packet);
@@ -63,18 +63,18 @@ void RTPPayloadReceiver::handleMessage(cMessage *msg)
     }
 }
 
-void RTPPayloadReceiver::processRtpPacket(Packet *packet)
+void RtpPayloadReceiver::processRtpPacket(Packet *packet)
 {
     const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     emit(_rcvdPkRtpTimestampSignal, (double)(rtpHeader->getTimeStamp()));
 }
 
-void RTPPayloadReceiver::openOutputFile(const char *fileName)
+void RtpPayloadReceiver::openOutputFile(const char *fileName)
 {
     _outputFileStream.open(fileName);
 }
 
-void RTPPayloadReceiver::closeOutputFile()
+void RtpPayloadReceiver::closeOutputFile()
 {
     if (_outputFileStream.is_open())
         _outputFileStream.close();

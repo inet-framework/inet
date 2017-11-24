@@ -30,12 +30,12 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMDecoderModule : public cSimpleModule, public IDecoder
+class INET_API Ieee80211OfdmDecoderModule : public cSimpleModule, public IDecoder
 {
   protected:
-    const Ieee80211OFDMDecoder *ofdmDecoder = nullptr;
+    const Ieee80211OfdmDecoder *ofdmDecoder = nullptr;
     const IScrambler *descrambler = nullptr;
-    const IFECCoder *convolutionalDecoder = nullptr;
+    const IFecCoder *convolutionalDecoder = nullptr;
     const IInterleaver *deinterleaver = nullptr;
     const Ieee80211OfdmCode *code = nullptr;
 
@@ -45,7 +45,7 @@ class INET_API Ieee80211OFDMDecoderModule : public cSimpleModule, public IDecode
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
-    virtual ~Ieee80211OFDMDecoderModule();
+    virtual ~Ieee80211OfdmDecoderModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const Ieee80211OfdmCode *getCode() const { return code; }

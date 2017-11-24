@@ -28,17 +28,17 @@ namespace inet {
 /**
  * Describes a DHCP lease.
  */
-class INET_API DHCPLease
+class INET_API DhcpLease
 {
   public:
     long xid = -1;
-    IPv4Address ip;
-    MACAddress mac;
-    IPv4Address gateway;
-    IPv4Address subnetMask;
-    IPv4Address dns;
-    IPv4Address ntp;
-    IPv4Address serverId;
+    Ipv4Address ip;
+    MacAddress mac;
+    Ipv4Address gateway;
+    Ipv4Address subnetMask;
+    Ipv4Address dns;
+    Ipv4Address ntp;
+    Ipv4Address serverId;
     std::string hostName;
     simtime_t leaseTime;
     simtime_t renewalTime;
@@ -46,7 +46,7 @@ class INET_API DHCPLease
     bool leased = false;
 };
 
-inline std::ostream& operator<<(std::ostream& os, DHCPLease obj)
+inline std::ostream& operator<<(std::ostream& os, DhcpLease obj)
 {
     os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
        << " to " << obj.mac;

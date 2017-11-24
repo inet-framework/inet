@@ -61,7 +61,7 @@ void ProbabilisticBroadcast::handleUpperPacket(Packet *packet)
 
 void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 {
-    MACAddress macSrcAddr;
+    MacAddress macSrcAddr;
     auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(packet->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     packet->removePoppedChunks();
     auto macAddressInd = packet->getMandatoryTag<MacAddressInd>();
@@ -91,7 +91,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
         // Unknown message. Insert message in queue with random backoff broadcast delay.
         // Because we got the message from lower layer, we need to create and add a new
         // control info with the MAC destination address = broadcast address.
-        setDownControlInfo(packet, MACAddress::BROADCAST_ADDRESS);
+        setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         // before inserting message, update source address (for this hop, not the initial source)
         macHeader->setSrcAddr(myNetwAddr);
         macHeader->markImmutable();
@@ -136,7 +136,7 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
                 auto packetCopy = packet->dup();
                 auto macHeaderCopy = packetCopy->peekHeader<ProbabilisticBroadcastHeader>();;
                 // control info is not duplicated with the message, so we have to re-create one here.
-                setDownControlInfo(packetCopy, MACAddress::BROADCAST_ADDRESS);
+                setDownControlInfo(packetCopy, MacAddress::BROADCAST_ADDRESS);
                 // it the copy that is re-inserted into the queue so update the container accordingly
                 msgDesc->pkt = packetCopy;
                 // increment nbBcast field of the descriptor because at this point, it is sure that
@@ -297,7 +297,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     pkt->markImmutable();
     packet->pushHeader(pkt);
 
-    setDownControlInfo(packet, MACAddress::BROADCAST_ADDRESS);
+    setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
 }
 
 void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSender)
@@ -347,7 +347,7 @@ void ProbabilisticBroadcast::decapsulate(Packet *packet)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
+void ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);

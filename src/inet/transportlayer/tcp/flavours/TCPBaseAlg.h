@@ -30,10 +30,10 @@ namespace tcp {
 /**
  * State variables for TCPBaseAlg.
  */
-class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
+class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
 {
   public:
-    TCPBaseAlgStateVariables();
+    TcpBaseAlgStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
@@ -102,10 +102,10 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
  * and not touched after that. Subclasses may redefine any of the virtual
  * functions here to add their congestion control code.
  */
-class INET_API TCPBaseAlg : public TCPAlgorithm
+class INET_API TcpBaseAlg : public TcpAlgorithm
 {
   protected:
-    TCPBaseAlgStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpBaseAlgStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
@@ -123,10 +123,10 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
     //@{
-    virtual void processRexmitTimer(TCPEventCode& event);
-    virtual void processPersistTimer(TCPEventCode& event);
-    virtual void processDelayedAckTimer(TCPEventCode& event);
-    virtual void processKeepAliveTimer(TCPEventCode& event);
+    virtual void processRexmitTimer(TcpEventCode& event);
+    virtual void processPersistTimer(TcpEventCode& event);
+    virtual void processDelayedAckTimer(TcpEventCode& event);
+    virtual void processKeepAliveTimer(TcpEventCode& event);
     //@}
 
     /**
@@ -159,12 +159,12 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     /**
      * Ctor.
      */
-    TCPBaseAlg();
+    TcpBaseAlg();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPBaseAlg();
+    virtual ~TcpBaseAlg();
 
     /**
      * Create timers, etc.
@@ -178,7 +178,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.
      */
-    virtual void processTimer(cMessage *timer, TCPEventCode& event) override;
+    virtual void processTimer(cMessage *timer, TcpEventCode& event) override;
 
     virtual void sendCommandInvoked() override;
 

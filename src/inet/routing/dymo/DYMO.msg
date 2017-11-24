@@ -28,11 +28,11 @@ cplusplus {{
 namespace inet::dymo;
 
 // TODO: metric types are defined in a separate [RFC 6551]
-enum DYMOMetricType {
+enum DymoMetricType {
     HOP_COUNT = 3;    // Hop Count has Metric Type assignment 3
 };
 
-class DYMOSequenceNumber
+class DymoSequenceNumber
 {
     @existingClass;
     @opaque;
@@ -55,39 +55,39 @@ class AddressBlock extends cObject
     bool hasMetric;
     double metric;
     bool hasMetricType;
-    DYMOMetricType metricType = (DYMOMetricType)-1;
+    DymoMetricType metricType = (DymoMetricType)-1;
     bool hasSequenceNumber;
-    DYMOSequenceNumber sequenceNumber = 0;
+    DymoSequenceNumber sequenceNumber = 0;
 }
 
 //
 // DYMO timer messages
 //
 
-message RREQTimer {
+message RreqTimer {
     L3Address target;
 }
 
-message RREQWaitRREPTimer extends RREQTimer {
+message RreqWaitRrepTimer extends RreqTimer {
     int retryCount;
 }
 
-message RREQBackoffTimer extends RREQTimer {
+message RreqBackoffTimer extends RreqTimer {
     int retryCount;
 }
 
-message RREQHolddownTimer extends RREQTimer {
+message RreqHolddownTimer extends RreqTimer {
 }
 
 //
 // DYMO packets
 //
 
-class DYMOPacket extends FieldsChunk {
+class DymoPacket extends FieldsChunk {
     int hopLimit;
 }
 
-class RteMsg extends DYMOPacket {
+class RteMsg extends DymoPacket {
     int hopCount;
     AddressBlock originatorNode;
     AddressBlock targetNode;
@@ -109,12 +109,12 @@ class RREP extends RteMsg {
 //
 // DYMO RREP ACK packet
 //
-class RREP_ACK extends DYMOPacket {
+class RrepAck extends DymoPacket {
 }
 
 //
 // DYMO RERR packet
 //
-class RERR extends DYMOPacket {
+class RERR extends DymoPacket {
     AddressBlock unreachableNode[];
 }

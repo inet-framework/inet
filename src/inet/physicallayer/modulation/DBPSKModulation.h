@@ -24,13 +24,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DBPSKModulation : public DPSKModulationBase
+class INET_API DbpskModulation : public DpskModulationBase
 {
   public:
-    static const DBPSKModulation singleton;
+    static const DbpskModulation singleton;
 
   public:
-    DBPSKModulation();
+    DbpskModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "DBPSKModulation"; }
 };

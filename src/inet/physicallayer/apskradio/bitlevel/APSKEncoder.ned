@@ -18,7 +18,7 @@
 package inet.physicallayer.apskradio.bitlevel;
 
 import inet.physicallayer.contract.bitlevel.IEncoder;
-import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IFecCoder;
 import inet.physicallayer.contract.bitlevel.IInterleaver;
 import inet.physicallayer.contract.bitlevel.IScrambler;
 
@@ -29,20 +29,20 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 //
 // See also ~APSKDecoder, ~APSKLayeredReceiver.
 //
-module APSKEncoder like IEncoder
+module ApskEncoder like IEncoder
 {
     parameters:
         string scramblerType = default("");
         string fecType = default("");
         string interleaverType = default("");
         @display("i=block/blackboard");
-        @class(APSKEncoder);
+        @class(ApskEncoder);
 
     submodules:
         scrambler: <scramblerType> like IScrambler if scramblerType != "" {
             @display("p=100,50");
         }
-        fecEncoder: <fecType> like IFECCoder if fecType != "" {
+        fecEncoder: <fecType> like IFecCoder if fecType != "" {
             @display("p=100,150");
         }
         interleaver: <interleaverType> like IInterleaver if interleaverType != "" {

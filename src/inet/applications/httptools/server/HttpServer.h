@@ -37,17 +37,17 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
+class INET_API HttpServer : public HttpServerBase, public TcpSocket::CallbackInterface
 {
   protected:
     struct SockData
     {
-        TCPSocket *socket = nullptr;    // A reference to the socket object.
+        TcpSocket *socket = nullptr;    // A reference to the socket object.
         ChunkQueue queue;       // incoming queue for slices
     };
 
-    TCPSocket listensocket;
-    TCPSocketMap sockCollection;
+    TcpSocket listensocket;
+    TcpSocketMap sockCollection;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 

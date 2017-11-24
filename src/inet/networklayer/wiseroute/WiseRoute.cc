@@ -50,7 +50,7 @@ void WiseRoute::initialize(int stage)
 {
     NetworkProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        arp = getModuleFromPar<IARP>(par("arpModule"), this);
+        arp = getModuleFromPar<IArp>(par("arpModule"), this);
         headerLength = par("headerLength");
         rssiThreshold = par("rssiThreshold").doubleValue();
         rssiThreshold = math::dBm2mW(rssiThreshold);
@@ -118,7 +118,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         pkt->markImmutable();
         auto packet = new Packet("route-flood", ROUTE_FLOOD);
         packet->append(pkt);
-        setDownControlInfo(packet, MACAddress::BROADCAST_ADDRESS);
+        setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         sendDown(packet);
         nbFloodsSent++;
         nbRouteFloodsSent++;
@@ -172,7 +172,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 p->append(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
-                setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
+                setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
                 delete packet;
@@ -201,7 +201,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 p->append(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
-                setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
+                setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
                 nbUnicastFloodForwarded++;
@@ -216,7 +216,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 wiseRouteHeader->setDestinationAddress(nextHop);
                 pCtrlInfo = packet->removeControlInfo();
-                MACAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr);    //FIXME interface entry pointer needed
+                MacAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr);    //FIXME interface entry pointer needed
                 if (nextHopMacAddr.isUnspecified())
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
@@ -241,7 +241,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
 {
     L3Address finalDestAddr;
     L3Address nextHopAddr;
-    MACAddress nextHopMacAddr;
+    MacAddress nextHopMacAddr;
     auto pkt = makeShared<WiseRouteHeader>();
 
     pkt->setChunkLength(B(headerLength));
@@ -262,7 +262,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
@@ -271,7 +271,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     pkt->setDestinationAddress(nextHopAddr);
     if (nextHopAddr.isBroadcast()) {
         // it's a flood.
-        nextHopMacAddr = MACAddress::BROADCAST_ADDRESS;
+        nextHopMacAddr = MacAddress::BROADCAST_ADDRESS;
         pkt->setIsFlood(1);
         nbFloodsSent++;
         // record flood in flood table
@@ -396,7 +396,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
+void WiseRoute::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);

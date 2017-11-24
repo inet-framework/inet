@@ -32,7 +32,7 @@ namespace inet {
 
 namespace ospf {
 
-class INET_API RoutingTableEntry : public IPv4Route
+class INET_API RoutingTableEntry : public Ipv4Route
 {
   public:
     enum RoutingPathType {
@@ -52,12 +52,12 @@ class INET_API RoutingTableEntry : public IPv4Route
   private:
     IInterfaceTable *ift = nullptr;
     RoutingDestinationType destinationType = 0;
-    OSPFOptions optionalCapabilities;
-    AreaID area;
+    OspfOptions optionalCapabilities;
+    AreaId area;
     RoutingPathType pathType = (RoutingPathType)-1;
     Metric cost = 0;
     Metric type2Cost = 0;
-    const OSPFLSA *linkStateOrigin = nullptr;
+    const OspfLsa *linkStateOrigin = nullptr;
     std::vector<NextHop> nextHops;
     // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
     // IPv4Route::gateway is nextHops[0].hopAddress
@@ -72,18 +72,18 @@ class INET_API RoutingTableEntry : public IPv4Route
 
     void setDestinationType(RoutingDestinationType type) { destinationType = type; }
     RoutingDestinationType getDestinationType() const { return destinationType; }
-    void setOptionalCapabilities(OSPFOptions options) { optionalCapabilities = options; }
-    OSPFOptions getOptionalCapabilities() const { return optionalCapabilities; }
-    void setArea(AreaID source) { area = source; }
-    AreaID getArea() const { return area; }
+    void setOptionalCapabilities(OspfOptions options) { optionalCapabilities = options; }
+    OspfOptions getOptionalCapabilities() const { return optionalCapabilities; }
+    void setArea(AreaId source) { area = source; }
+    AreaId getArea() const { return area; }
     void setPathType(RoutingPathType type);
     RoutingPathType getPathType() const { return pathType; }
     void setCost(Metric pathCost);
     Metric getCost() const { return cost; }
     void setType2Cost(Metric pathCost);
     Metric getType2Cost() const { return type2Cost; }
-    void setLinkStateOrigin(const OSPFLSA *lsa) { linkStateOrigin = lsa; }
-    const OSPFLSA *getLinkStateOrigin() const { return linkStateOrigin; }
+    void setLinkStateOrigin(const OspfLsa *lsa) { linkStateOrigin = lsa; }
+    const OspfLsa *getLinkStateOrigin() const { return linkStateOrigin; }
     void addNextHop(NextHop hop);
     void clearNextHops() { nextHops.clear(); }
     unsigned int getNextHopCount() const { return nextHops.size(); }

@@ -100,7 +100,7 @@ package inet.networklayer.ipv4;
 // parameter to false. When disabled, then no IGMP message
 // is generated, and incoming IGMP messages are ignored.
 //
-simple IGMPv3 like IIGMP
+simple Igmpv3 like IIGMP
 {
     parameters:
         bool enabled = default(true);
@@ -120,10 +120,10 @@ simple IGMPv3 like IIGMP
         @display("i=block/cogwheel");
 
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);  // delivered IGMP packets
-        output ipOut @labels(IPv4ControlInfo/down); // to ~IPv4
+        input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
+        output ipOut @labels(Ipv4ControlInfo/down); // to ~IPv4
 
-        input routerIn @labels(IPv4ControlInfo/up);
-        output routerOut @labels(IPv4ControlInfo/down);
+        input routerIn @labels(Ipv4ControlInfo/up);
+        output routerOut @labels(Ipv4ControlInfo/down);
 }
 

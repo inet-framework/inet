@@ -36,16 +36,16 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API IPv4NodeConfigurator : public cSimpleModule, public ILifecycle
+class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle
 {
   protected:
     NodeStatus *nodeStatus;
     IInterfaceTable *interfaceTable;
-    IIPv4RoutingTable *routingTable;
-    IPv4NetworkConfigurator *networkConfigurator;
+    IIpv4RoutingTable *routingTable;
+    Ipv4NetworkConfigurator *networkConfigurator;
 
   public:
-    IPv4NodeConfigurator();
+    Ipv4NodeConfigurator();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

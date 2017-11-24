@@ -214,8 +214,8 @@ simple TCP like ITCP
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
     gates:
-        input appIn @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output appOut @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
+        input appIn @labels(TcpCommand/down);
+        input ipIn @labels(TCPSegment,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        output appOut @labels(TcpCommand/up);
+        output ipOut @labels(TCPSegment,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }

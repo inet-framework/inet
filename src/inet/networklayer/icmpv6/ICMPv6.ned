@@ -29,7 +29,7 @@ package inet.networklayer.icmpv6;
 // @see ~IPv6, ~IPv6RoutingTable, ~IPv6NeighbourDiscovery
 //#FIXME gate descriptions needed...
 //
-simple ICMPv6
+simple Icmpv6
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

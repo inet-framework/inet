@@ -23,14 +23,14 @@ namespace inet {
 
 namespace physicallayer {
 
-ScalarSNIR::ScalarSNIR(const IReception *reception, const INoise *noise) :
-    SNIRBase(reception, noise),
+ScalarSnir::ScalarSnir(const IReception *reception, const INoise *noise) :
+    SnirBase(reception, noise),
     minSNIR(NaN),
     maxSNIR(NaN)
 {
 }
 
-std::ostream& ScalarSNIR::printToStream(std::ostream& stream, int level) const
+std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarSNIR";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -38,28 +38,28 @@ std::ostream& ScalarSNIR::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
-double ScalarSNIR::computeMin() const
+double ScalarSnir::computeMin() const
 {
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
-double ScalarSNIR::computeMax() const
+double ScalarSnir::computeMax() const
 {
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     return unit(scalarSignalAnalogModel->getPower() / scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime())).get();
 }
 
-double ScalarSNIR::getMin() const
+double ScalarSnir::getMin() const
 {
     if (std::isnan(minSNIR))
         minSNIR = computeMin();
     return minSNIR;
 }
 
-double ScalarSNIR::getMax() const
+double ScalarSnir::getMax() const
 {
     if (std::isnan(maxSNIR))
         maxSNIR = computeMax();

@@ -30,7 +30,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKLayeredTransmitter : public TransmitterBase
+class INET_API ApskLayeredTransmitter : public TransmitterBase
 {
   public:
     enum LevelOfDetail {
@@ -61,7 +61,7 @@ class INET_API APSKLayeredTransmitter : public TransmitterBase
     virtual const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const;
 
   public:
-    APSKLayeredTransmitter();
+    ApskLayeredTransmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IEncoder *getEncoder() const { return encoder; }

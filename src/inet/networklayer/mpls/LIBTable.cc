@@ -19,9 +19,9 @@
 
 namespace inet {
 
-Define_Module(LIBTable);
+Define_Module(LibTable);
 
-void LIBTable::initialize(int stage)
+void LibTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -35,12 +35,12 @@ void LIBTable::initialize(int stage)
     }
 }
 
-void LIBTable::handleMessage(cMessage *)
+void LibTable::handleMessage(cMessage *)
 {
     ASSERT(false);
 }
 
-bool LIBTable::resolveLabel(std::string inInterface, int inLabel,
+bool LibTable::resolveLabel(std::string inInterface, int inLabel,
         LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     bool any = (inInterface.length() == 0);
@@ -61,11 +61,11 @@ bool LIBTable::resolveLabel(std::string inInterface, int inLabel,
     return false;
 }
 
-int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
+int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
         std::string outInterface, int color)
 {
     if (inLabel == -1) {
-        LIBEntry newItem;
+        LibEntry newItem;
         newItem.inLabel = ++maxLabel;
         newItem.inInterface = inInterface;
         newItem.outLabel = outLabel;
@@ -90,7 +90,7 @@ int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
     }
 }
 
-void LIBTable::removeLibEntry(int inLabel)
+void LibTable::removeLibEntry(int inLabel)
 {
     for (unsigned int i = 0; i < lib.size(); i++) {
         if (lib[i].inLabel != inLabel)
@@ -102,7 +102,7 @@ void LIBTable::removeLibEntry(int inLabel)
     ASSERT(false);
 }
 
-void LIBTable::readTableFromXML(const cXMLElement *libtable)
+void LibTable::readTableFromXML(const cXMLElement *libtable)
 {
     using namespace xmlutils;
 
@@ -115,7 +115,7 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
 
         checkTags(&entry, "inLabel inInterface outLabel outInterface color");
 
-        LIBEntry newItem;
+        LibEntry newItem;
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");
         newItem.inInterface = getParameterStrValue(&entry, "inInterface");
         newItem.outInterface = getParameterStrValue(&entry, "outInterface");
@@ -160,7 +160,7 @@ void LIBTable::readTableFromXML(const cXMLElement *libtable)
     }
 }
 
-LabelOpVector LIBTable::pushLabel(int label)
+LabelOpVector LibTable::pushLabel(int label)
 {
     LabelOpVector vec;
     LabelOp lop;
@@ -170,7 +170,7 @@ LabelOpVector LIBTable::pushLabel(int label)
     return vec;
 }
 
-LabelOpVector LIBTable::swapLabel(int label)
+LabelOpVector LibTable::swapLabel(int label)
 {
     LabelOpVector vec;
     LabelOp lop;
@@ -180,7 +180,7 @@ LabelOpVector LIBTable::swapLabel(int label)
     return vec;
 }
 
-LabelOpVector LIBTable::popLabel()
+LabelOpVector LibTable::popLabel()
 {
     LabelOpVector vec;
     LabelOp lop;
@@ -220,7 +220,7 @@ std::ostream& operator<<(std::ostream& os, const LabelOpVector& label)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib)
+std::ostream& operator<<(std::ostream& os, const LibTable::LibEntry& lib)
 {
     os << "inLabel:" << lib.inLabel;
     os << "    inInterface:" << lib.inInterface;

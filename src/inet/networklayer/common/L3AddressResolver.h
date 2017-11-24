@@ -30,8 +30,8 @@ namespace inet {
 // Forward declarations:
 class IInterfaceTable;
 class InterfaceEntry;
-class IIPv4RoutingTable;
-class IPv6RoutingTable;
+class IIpv4RoutingTable;
+class Ipv6RoutingTable;
 class GenericRoutingTable;
 
 #define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MODULEPATH | ADDR_MODULEID)
@@ -165,14 +165,14 @@ class INET_API L3AddressResolver
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IIPv4RoutingTable *routingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *routingTableOf(cModule *host);
 
     /**
      * The function tries to look up the IPv6RoutingTable module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IPv6RoutingTable *routingTable6Of(cModule *host);
+    virtual Ipv6RoutingTable *routingTable6Of(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
@@ -182,12 +182,12 @@ class INET_API L3AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIPv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual IPv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
+    virtual Ipv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.

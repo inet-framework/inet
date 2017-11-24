@@ -34,8 +34,8 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
     neighbor->changeState(newState, currentState);
 
     if ((oldState == Neighbor::FULL_STATE) || (nextState == Neighbor::FULL_STATE)) {
-        RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
-        RouterLSA *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
+        RouterId routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
+        RouterLsa *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
         if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -45,7 +45,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
                 routerLSA->incrementInstallTime();
             }
             else {
-                RouterLSA *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
+                RouterLsa *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
                 newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -56,7 +56,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
         }
 
         if (neighbor->getInterface()->getState() == Interface::DESIGNATED_ROUTER_STATE) {
-            NetworkLSA *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
+            NetworkLsa *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != nullptr) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
@@ -66,7 +66,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
                     networkLSA->incrementInstallTime();
                 }
                 else {
-                    NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
+                    NetworkLsa *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != nullptr) {
                         newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);

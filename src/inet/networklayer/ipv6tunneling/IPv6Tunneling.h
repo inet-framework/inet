@@ -36,12 +36,12 @@ namespace inet {
 // Foreign declarations:
 class IInterfaceTable;
 class Ipv6Header;
-class IPv6RoutingTable;
+class Ipv6RoutingTable;
 
 /**
  * Management of IP tunnels.
  */
-class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
+class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
 {
   public:
     enum TunnelType {
@@ -56,13 +56,13 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
 
   protected:
     IInterfaceTable *ift = nullptr;
-    IPv6RoutingTable *rt = nullptr;
+    Ipv6RoutingTable *rt = nullptr;
 
     struct Tunnel
     {
-        Tunnel(const IPv6Address& entry = IPv6Address::UNSPECIFIED_ADDRESS,
-                const IPv6Address& exit = IPv6Address::UNSPECIFIED_ADDRESS,
-                const IPv6Address& destTrigger = IPv6Address::UNSPECIFIED_ADDRESS);
+        Tunnel(const Ipv6Address& entry = Ipv6Address::UNSPECIFIED_ADDRESS,
+                const Ipv6Address& exit = Ipv6Address::UNSPECIFIED_ADDRESS,
+                const Ipv6Address& destTrigger = Ipv6Address::UNSPECIFIED_ADDRESS);
         //~Tunnel();
 
         bool operator==(const Tunnel& rhs)
@@ -71,10 +71,10 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
         }
 
         // entry point of tunnel
-        IPv6Address entry;
+        Ipv6Address entry;
 
         // exit point of tunnel
-        IPv6Address exit;
+        Ipv6Address exit;
 
         // hoplimit (0 for default)
         int hopLimit = 0;
@@ -101,7 +101,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
         // packets with a certain destination get forwarded
         // if it's value is the unspecified address, this is a normal tunnel over which
         // (nearly) everything will get routed
-        IPv6Address destTrigger;
+        Ipv6Address destTrigger;
 
         bool isTriggerPrefix = false;
     };
@@ -129,7 +129,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     int noOfNonSplitTunnels = 0;
 
   public:
-    IPv6Tunneling();
+    Ipv6Tunneling();
     //virtual ~IPv6Tunneling();
 
     /**
@@ -151,8 +151,8 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
      * is determined by first parameter.
      * Returns virtual interface index.
      */
-    int createTunnel(TunnelType tunnelType, const IPv6Address& src, const IPv6Address& dest,
-            const IPv6Address& destTrigger = IPv6Address::UNSPECIFIED_ADDRESS);
+    int createTunnel(TunnelType tunnelType, const Ipv6Address& src, const Ipv6Address& dest,
+            const Ipv6Address& destTrigger = Ipv6Address::UNSPECIFIED_ADDRESS);
 
     /**
      * Creates a pseudo-tunnel for use with either Type 2 Routing Header or Home Address Option
@@ -165,32 +165,32 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     /**
      * Remove tunnel and the associated entries from destination cache
      */
-    bool destroyTunnel(const IPv6Address& src, const IPv6Address& dest, const IPv6Address& destTrigger);
+    bool destroyTunnel(const Ipv6Address& src, const Ipv6Address& dest, const Ipv6Address& destTrigger);
 
     /**
      * Remove all tunnels with provided entry point.
      */
-    void destroyTunnels(const IPv6Address& entry);
+    void destroyTunnels(const Ipv6Address& entry);
 
     /**
      * Remove the tunnel with the provided entry and exit point.
      */
-    void destroyTunnel(const IPv6Address& entry, const IPv6Address& exit);
+    void destroyTunnel(const Ipv6Address& entry, const Ipv6Address& exit);
 
     /**
      * Remove the tunnel with the provided exit point and trigger.
      */
-    void destroyTunnelForExitAndTrigger(const IPv6Address& exit, const IPv6Address& trigger);
+    void destroyTunnelForExitAndTrigger(const Ipv6Address& exit, const Ipv6Address& trigger);
 
     /**
      * Remove the tunnel with the provided entry point and trigger.
      */
-    void destroyTunnelForEntryAndTrigger(const IPv6Address& entry, const IPv6Address& trigger);
+    void destroyTunnelForEntryAndTrigger(const Ipv6Address& entry, const Ipv6Address& trigger);
 
     /**
      * Remove the tunnel with the provided destination trigger.
      */
-    void destroyTunnelFromTrigger(const IPv6Address& trigger);
+    void destroyTunnelFromTrigger(const Ipv6Address& trigger);
 
     /**
      * Returns the virtual interface identifier for the tunnel which has the provided
@@ -200,13 +200,13 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
      * tunnels are found, a prefix matching on the non-split tunnels is then performed.
      * In case both searches do not return a search hit, a value of -1 is returned.
      */
-    int getVIfIndexForDest(const IPv6Address& destAddress);
+    int getVIfIndexForDest(const Ipv6Address& destAddress);
 
     /**
      * This method is equivalent for getVIfIndexForDest() except that it
      * only searches for either "normal" or mobility tunnels
      */
-    virtual int getVIfIndexForDest(const IPv6Address& destAddress, TunnelType tunnelType);
+    virtual int getVIfIndexForDest(const Ipv6Address& destAddress, TunnelType tunnelType);
 
     /**
      * This method is equivalent for getVIfIndexForDest() except that it
@@ -217,7 +217,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     /**
      * Check if there exists a tunnel with exit equal to the provided address.
      */
-    bool isTunnelExit(const IPv6Address& exit);    // 11.9.07 - CB
+    bool isTunnelExit(const Ipv6Address& exit);    // 11.9.07 - CB
 
     /**
      * Returns the type of the tunnels: non-split, split, T2RH, ...
@@ -228,7 +228,7 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
     /**
      * Returns the vIfIndex of tunnel if found, 0 otherwise.
      */
-    int findTunnel(const IPv6Address& src, const IPv6Address& dest, const IPv6Address& destTrigger) const;
+    int findTunnel(const Ipv6Address& src, const Ipv6Address& dest, const Ipv6Address& destTrigger) const;
 
     /**
      * Encapsulate a datagram with tunnel headers.
@@ -243,21 +243,21 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
      */
     void decapsulateDatagram(Packet *packet);
 
-    friend std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun);
+    friend std::ostream& operator<<(std::ostream& os, const Ipv6Tunneling::Tunnel& tun);
 
   private:
     /**
      * Search through all tunnels and locate one entry which is anything but a non-split tunnel
      * and has a destination trigger for the provided address.
      */
-    int lookupTunnels(const IPv6Address& dest);
+    int lookupTunnels(const Ipv6Address& dest);
 
     /**
      * Search through all tunnels and locate one entry which is a non-split tunnel
      * (later on this could be exteded to searching for a tunnel that has a prefix
      *  matching the provided address).
      */
-    int doPrefixMatch(const IPv6Address& dest);
+    int doPrefixMatch(const Ipv6Address& dest);
 
     /**
      * Reset the vIfIndex to its starting value if no tunnels exist anymore.

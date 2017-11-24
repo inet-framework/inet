@@ -27,10 +27,10 @@ namespace inet {
 /**
  * Example server thread, to be used with TCPSrvHostApp.
  */
-class INET_API TCPGenericSrvThread : public TCPServerThreadBase
+class INET_API TcpGenericSrvThread : public TcpServerThreadBase
 {
   public:
-    TCPGenericSrvThread() {}
+    TcpGenericSrvThread() {}
 
     virtual void established() override;
     virtual void dataArrived(Packet *msg, bool urgent) override;

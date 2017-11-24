@@ -96,7 +96,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     tRouteTable routeTable;
     tFloodTable floodTable;
 
-    IARP *arp = nullptr;
+    IArp *arp = nullptr;
 
     /**
      * @brief Length of the NetwPkt header
@@ -195,7 +195,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
      * @param pMsg      The message where the "control info" shall be attached.
      * @param pDestAddr The MAC address of the message receiver.
      */
-    virtual void setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
+    virtual void setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr);
 };
 
 } // namespace inet

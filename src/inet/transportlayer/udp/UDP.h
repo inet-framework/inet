@@ -34,10 +34,10 @@
 namespace inet {
 
 class IInterfaceTable;
-class IPv4ControlInfo;
-class IPv6ControlInfo;
-class ICMP;
-class ICMPv6;
+class Ipv4ControlInfo;
+class Ipv6ControlInfo;
+class Icmp;
+class Icmpv6;
 class UdpHeader;
 class InterfaceEntry;
 
@@ -72,7 +72,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     {
         L3Address multicastAddress;
         int interfaceId = -1;    // -1 = all
-        UDPSourceFilterMode filterMode = (UDPSourceFilterMode)0;
+        UdpSourceFilterMode filterMode = (UdpSourceFilterMode)0;
         std::vector<L3Address> sourceList;
 
         bool isSourceAllowed(L3Address sourceAddr);
@@ -122,8 +122,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     // other state vars
     ushort lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
     IInterfaceTable *ift = nullptr;
-    ICMP *icmp = nullptr;
-    ICMPv6 *icmpv6 = nullptr;
+    Icmp *icmp = nullptr;
+    Icmpv6 *icmpv6 = nullptr;
 
     // statistics
     int numSent = 0;
@@ -157,7 +157,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
     virtual void joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
     virtual void leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
-    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
+    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
 
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& multicastAddr);
 

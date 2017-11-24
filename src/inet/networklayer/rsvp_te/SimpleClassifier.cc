@@ -35,12 +35,12 @@ void SimpleClassifier::initialize(int stage)
         WATCH_VECTOR(bindings);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
-        lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
+        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
 
-        rsvp = getModuleFromPar<RSVP>(par("rsvpModule"), this);
+        rsvp = getModuleFromPar<Rsvp>(par("rsvpModule"), this);
 
         readTableFromXML(par("config").xmlValue());
     }
@@ -89,7 +89,7 @@ bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std:
 
 // IRSVPClassifier implementation (method invoked by RSVP)
 
-void SimpleClassifier::bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel)
+void SimpleClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
 {
     for (auto & elem : bindings) {
         if (elem.session != session)
@@ -140,11 +140,11 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
         EV_INFO << "binding to a given label" << endl;
 
-        FECEntry newFec;
+        FecEntry newFec;
 
         newFec.id = fecid;
         newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
+        newFec.src = getParameterIPAddressValue(fec, "source", Ipv4Address());
 
         newFec.inLabel = getParameterIntValue(fec, "label");
 
@@ -163,11 +163,11 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
 
         EV_INFO << "binding to a given path" << endl;
 
-        FECEntry newFec;
+        FecEntry newFec;
 
         newFec.id = fecid;
         newFec.dest = getParameterIPAddressValue(fec, "destination");
-        newFec.src = getParameterIPAddressValue(fec, "source", IPv4Address());
+        newFec.src = getParameterIPAddressValue(fec, "source", Ipv4Address());
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
         newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();
@@ -197,7 +197,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
     }
 }
 
-std::vector<SimpleClassifier::FECEntry>::iterator SimpleClassifier::findFEC(int fecid)
+std::vector<SimpleClassifier::FecEntry>::iterator SimpleClassifier::findFEC(int fecid)
 {
     auto it = bindings.begin();
     for ( ; it != bindings.end(); it++) {
@@ -207,7 +207,7 @@ std::vector<SimpleClassifier::FECEntry>::iterator SimpleClassifier::findFEC(int 
     return it;
 }
 
-std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FECEntry& fec)
+std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FecEntry& fec)
 {
     os << "id:" << fec.id;
     os << "    dest:" << fec.dest;

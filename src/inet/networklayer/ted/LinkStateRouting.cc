@@ -44,9 +44,9 @@ void LinkStateRouting::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        tedmod = getModuleFromPar<TED>(par("tedModule"), this);
+        tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
 
-        IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
         // listen for TED modifications
@@ -75,11 +75,11 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     if (msg == announceMsg) {
         delete announceMsg;
         announceMsg = nullptr;
-        sendToPeers(tedmod->ted, true, IPv4Address());
+        sendToPeers(tedmod->ted, true, Ipv4Address());
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from IPv4: " << msg << endl;
-        IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+        Ipv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
         processLINK_STATE_MESSAGE(check_and_cast<Packet *>(msg), sender);
     }
     else
@@ -95,14 +95,14 @@ void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, c
 
     EV_INFO << "TED changed\n";
 
-    const TEDChangeInfo *d = check_and_cast<const TEDChangeInfo *>(obj);
+    const TedChangeInfo *d = check_and_cast<const TedChangeInfo *>(obj);
 
     unsigned int k = d->getTedLinkIndicesArraySize();
 
     ASSERT(k > 0);
 
     // build linkinfo list
-    std::vector<TELinkStateInfo> links;
+    std::vector<TeLinkStateInfo> links;
     for (unsigned int i = 0; i < k; i++) {
         unsigned int index = d->getTedLinkIndices(i);
 
@@ -110,15 +110,15 @@ void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, c
         links.push_back(tedmod->ted[index]);
     }
 
-    sendToPeers(links, false, IPv4Address());
+    sendToPeers(links, false, Ipv4Address());
 }
 
-void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, IPv4Address sender)
+void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
 {
     EV_INFO << "received LINK_STATE message from " << sender << endl;
 
     const auto& msg = pk->peekHeader<LinkStateMsg>();
-    TELinkStateInfoVector forward;
+    TeLinkStateInfoVector forward;
 
     unsigned int n = msg->getLinkInfoArraySize();
 
@@ -126,9 +126,9 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, IPv4Address sender)
 
     // loop through every link in the message
     for (unsigned int i = 0; i < n; i++) {
-        const TELinkStateInfo& link = msg->getLinkInfo(i);
+        const TeLinkStateInfo& link = msg->getLinkInfo(i);
 
-        TELinkStateInfo *match;
+        TeLinkStateInfo *match;
 
         // process link if we haven't seen this already and timestamp is newer
         if (tedmod->checkLinkValidity(link, match)) {
@@ -174,7 +174,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, IPv4Address sender)
     delete pk;
 }
 
-void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer)
+void LinkStateRouting::sendToPeers(const std::vector<TeLinkStateInfo>& list, bool req, Ipv4Address exceptPeer)
 {
     EV_INFO << "sending LINK_STATE message to peers" << endl;
 
@@ -197,7 +197,7 @@ void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, boo
     }
 }
 
-void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo>& list, bool req)
+void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStateInfo>& list, bool req)
 {
     EV_INFO << "sending LINK_STATE message to " << peer << endl;
 
@@ -217,7 +217,7 @@ void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStat
     sendToIP(pk, peer);
 }
 
-void LinkStateRouting::sendToIP(Packet *msg, IPv4Address destAddr)
+void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = TED_TRAFFIC;
 

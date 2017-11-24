@@ -32,7 +32,7 @@ class INET_API ScalarAnalogModelBase : public AnalogModelBase
   public:
     virtual W computeReceptionPower(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
+    virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer

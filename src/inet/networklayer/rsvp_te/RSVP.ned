@@ -96,7 +96,7 @@ package inet.networklayer.rsvp_te;
 // RSVP-TE communicates with the following components in the system:
 // ~TED, ~MPLS, and may receive commands from ~ScenarioManager.
 //
-simple RSVP
+simple Rsvp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -109,10 +109,10 @@ simple RSVP
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");
-        @signal[NF_TED_CHANGED](type=TEDChangeInfo);
+        @signal[NF_TED_CHANGED](type=TedChangeInfo);
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down);
         input mplsSwitchIn;
         input appIn;
 }

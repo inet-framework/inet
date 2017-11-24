@@ -43,7 +43,7 @@ class Ieee80211MacHeader;
  * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
  * IRx, ITx, IContention and other interface classes).
  */
-class INET_API Ieee80211Mac : public MACProtocolBase
+class INET_API Ieee80211Mac : public MacProtocolBase
 {
   protected:
     FcsMode fcsMode;
@@ -75,7 +75,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
     void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual InterfaceEntry *createInterfaceEntry() override;
-    virtual const MACAddress& isInterfaceRegistered();
+    virtual const MacAddress& isInterfaceRegistered();
 
     virtual void handleMessageWhenUp(cMessage *message) override;
 
@@ -106,7 +106,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual ~Ieee80211Mac();
 
     virtual FcsMode getFcsMode() const { return fcsMode; }
-    virtual const MACAddress& getAddress() const { return mib->address; }
+    virtual const MacAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);

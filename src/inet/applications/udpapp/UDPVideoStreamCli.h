@@ -34,12 +34,12 @@ namespace inet {
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UDPVideoStreamCli : public ApplicationBase
+class INET_API UdpVideoStreamCli : public ApplicationBase
 {
   protected:
 
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfMsg = nullptr;
 
   protected:
@@ -57,8 +57,8 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     virtual void handleNodeCrash() override;
 
   public:
-    UDPVideoStreamCli() { }
-    virtual ~UDPVideoStreamCli() { cancelAndDelete(selfMsg); }
+    UdpVideoStreamCli() { }
+    virtual ~UdpVideoStreamCli() { cancelAndDelete(selfMsg); }
 };
 
 } // namespace inet

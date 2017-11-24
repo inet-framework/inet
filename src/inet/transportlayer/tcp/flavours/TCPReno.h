@@ -29,31 +29,31 @@ namespace tcp {
 /**
  * State variables for TCPReno.
  */
-typedef TCPTahoeRenoFamilyStateVariables TCPRenoStateVariables;
+typedef TcpTahoeRenoFamilyStateVariables TcpRenoStateVariables;
 
 /**
  * Implements TCP Reno.
  */
-class INET_API TCPReno : public TCPTahoeRenoFamily
+class INET_API TcpReno : public TcpTahoeRenoFamily
 {
   protected:
-    TCPRenoStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    TcpRenoStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPRenoStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() override
+    virtual TcpStateVariables *createStateVariables() override
     {
-        return new TCPRenoStateVariables();
+        return new TcpRenoStateVariables();
     }
 
     /** Utility function to recalculate ssthresh */
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event) override;
+    virtual void processRexmitTimer(TcpEventCode& event) override;
 
   public:
     /** Ctor */
-    TCPReno();
+    TcpReno();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32 firstSeqAcked) override;

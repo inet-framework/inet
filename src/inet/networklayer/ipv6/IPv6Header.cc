@@ -68,7 +68,7 @@ const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(unsigned int k) const
     return extensionHeaders[k];
 }
 
-Ipv6ExtensionHeader *Ipv6Header::findMutableExtensionHeaderByType(IPProtocolId extensionType, int index)
+Ipv6ExtensionHeader *Ipv6Header::findMutableExtensionHeaderByType(IpProtocolId extensionType, int index)
 {
     for (auto & elem : extensionHeaders)
         if ((elem)->getExtensionType() == extensionType) {
@@ -80,7 +80,7 @@ Ipv6ExtensionHeader *Ipv6Header::findMutableExtensionHeaderByType(IPProtocolId e
     return nullptr;
 }
 
-const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IPProtocolId extensionType, int index) const
+const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId extensionType, int index) const
 {
     for (const auto & elem : extensionHeaders)
         if ((elem)->getExtensionType() == extensionType) {
@@ -210,7 +210,7 @@ Ipv6ExtensionHeader *Ipv6Header::removeFirstExtensionHeader()
     return eh;
 }
 
-Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IPProtocolId extensionType)
+Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IpProtocolId extensionType)
 {
     handleChange();
     for (unsigned int i = 0; i < extensionHeaders.size(); i++) {

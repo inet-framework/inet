@@ -42,7 +42,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Received packet: \(inet::Packet\)UDPBasicAppData-0 .* DSCP=53
+Received packet: \(inet::Packet\)UDPBasicAppData-0 .* Dscp=53
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

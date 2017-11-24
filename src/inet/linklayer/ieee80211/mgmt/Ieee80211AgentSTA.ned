@@ -25,7 +25,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211AgentSTA
+simple Ieee80211AgentSta
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

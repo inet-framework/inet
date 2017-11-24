@@ -46,11 +46,11 @@ namespace inet {
 // KLUDGE: implement position registry protocol instead of using a global variable
 // KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
 // KLUDGE: we should rather add these fields as header extensions
-class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
+class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
 {
   private:
     // GPSR parameters
-    GPSRPlanarizationMode planarizationMode = (GPSRPlanarizationMode)-1;
+    GpsrPlanarizationMode planarizationMode = (GpsrPlanarizationMode)-1;
     const char *interfaces = nullptr;
     simtime_t beaconInterval;
     simtime_t maxJitter;
@@ -76,8 +76,8 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     PositionTable neighborPositionTable;
 
   public:
-    GPSR();
-    virtual ~GPSR();
+    Gpsr();
+    virtual ~Gpsr();
 
   protected:
     // module interface
@@ -103,22 +103,22 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processUDPPacket(Packet *packet);
 
     // handling beacons
-    const Ptr<GPSRBeacon> createBeacon();
-    void sendBeacon(const Ptr<GPSRBeacon>& beacon, double delay);
+    const Ptr<GpsrBeacon> createBeacon();
+    void sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay);
     void processBeacon(Packet *packet);
 
     // handling packets
-    GPSROption *createGpsrOption(L3Address destination);
-    int computeOptionLength(GPSROption *gpsrOption);
+    GpsrOption *createGpsrOption(L3Address destination);
+    int computeOptionLength(GpsrOption *gpsrOption);
     void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader);
 
     // returns nullptr if not found
-    GPSROption *findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
-    const GPSROption *findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
+    GpsrOption *findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
+    const GpsrOption *findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // throws an error when not found
-    GPSROption *getMutableGpsrOptionFromNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
-    const GPSROption *getGpsrOptionFromNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
+    GpsrOption *getMutableGpsrOptionFromNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
+    const GpsrOption *getGpsrOptionFromNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // configuration
     bool isNodeUp() const;

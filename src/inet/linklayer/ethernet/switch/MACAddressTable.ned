@@ -15,7 +15,7 @@
 
 package inet.linklayer.ethernet.switch;
 
-import inet.linklayer.contract.IMACAddressTable;
+import inet.linklayer.contract.IMacAddressTable;
 
 //
 // This module handles the mapping between ports and MAC addresses.
@@ -25,7 +25,7 @@ import inet.linklayer.contract.IMACAddressTable;
 // If needed, address tables can be pre-loaded from text files at the beginning
 // of the simulation; this controlled by the addressTableFile module parameter.
 //
-simple MACAddressTable like IMACAddressTable
+simple MacAddressTable like IMacAddressTable
 {
     parameters:
         @display("i=block/table2");

@@ -21,22 +21,22 @@ namespace inet {
 
 namespace physicallayer {
 
-DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise) :
-    SNIRBase(reception, noise),
+DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const DimensionalNoise *noise) :
+    SnirBase(reception, noise),
     minSNIR(NaN),
     maxSNIR(NaN)
 {
 }
 
-std::ostream& DimensionalSNIR::printToStream(std::ostream& stream, int level) const
+std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalSNIR";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", minSNIR = " << minSNIR;
-    return SNIRBase::printToStream(stream, level);
+    return SnirBase::printToStream(stream, level);
 }
 
-double DimensionalSNIR::computeMin() const
+double DimensionalSnir::computeMin() const
 {
     // TODO: factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
@@ -72,7 +72,7 @@ double DimensionalSNIR::computeMin() const
     return minSNIR;
 }
 
-double DimensionalSNIR::computeMax() const
+double DimensionalSnir::computeMax() const
 {
     // TODO: factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
@@ -108,14 +108,14 @@ double DimensionalSNIR::computeMax() const
     return maxSNIR;
 }
 
-double DimensionalSNIR::getMin() const
+double DimensionalSnir::getMin() const
 {
     if (std::isnan(minSNIR))
         minSNIR = computeMin();
     return minSNIR;
 }
 
-double DimensionalSNIR::getMax() const
+double DimensionalSnir::getMax() const
 {
     if (std::isnan(maxSNIR))
         maxSNIR = computeMax();

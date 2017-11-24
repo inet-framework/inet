@@ -27,7 +27,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 //    there is little performance change but below which there is a
 //    noticeable drop."
 //
-simple AARFRateControl like IRateControl
+simple AarfRateControl like IRateControl
 {
     parameters:
         double initialRate @unit("bps") = default(-1bps); // -1 means fastest mandatory rate

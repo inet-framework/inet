@@ -78,12 +78,12 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         Descriptor() {}
     };
 
-    typedef std::pair<int, int> IDPair;
-    typedef std::map<IDPair, Descriptor> IDPairToDescriptorMap;
+    typedef std::pair<int, int> IdPair;
+    typedef std::map<IdPair, Descriptor> IdPairToDescriptorMap;
     typedef std::vector<MatrixEntry *> MatrixEntryPtrVector;
 
     MatrixEntryPtrVector matrixEntries;
-    IDPairToDescriptorMap idPairToDescriptorMap;
+    IdPairToDescriptorMap idPairToDescriptorMap;
 
     IInterfaceTable *ift = nullptr;
     cModule *host = nullptr;

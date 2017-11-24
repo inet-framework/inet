@@ -21,22 +21,22 @@ namespace inet {
 
 namespace physicallayer {
 
-MFSKModulation::MFSKModulation(unsigned int codeWordSize) :
+MfskModulation::MfskModulation(unsigned int codeWordSize) :
     codeWordSize(codeWordSize)
 {
 }
 
-std::ostream& MFSKModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MfskModulation::printToStream(std::ostream& stream, int level) const
 {
     return stream << "MFSKModulaiton";
 }
 
-double MFSKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double MfskModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     throw cRuntimeError("Not implemented yet");
 }
 
-double MFSKModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
+double MfskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     throw cRuntimeError("Not implemented yet");
 }

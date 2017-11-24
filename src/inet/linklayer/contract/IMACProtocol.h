@@ -22,10 +22,10 @@
 
 namespace inet {
 
-class INET_API IMACProtocol
+class INET_API IMacProtocol
 {
   public:
-    virtual ~IMACProtocol() {}
+    virtual ~IMacProtocol() {}
 };
 
 } // namespace inet

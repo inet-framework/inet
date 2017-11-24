@@ -55,7 +55,7 @@ class INET_API IAnalogModel : public IPrintableObject
      * Returns the signal to noise and interference ratio. This function never
      * returns nullptr.
      */
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
+    virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const = 0;
 };
 
 } // namespace physicallayer

@@ -75,7 +75,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     unsigned int optionsLength = 0;
     if (numOptions > 0) {
         for (unsigned short i = 0; i < numOptions; i++) {
-            const TCPOption *option = tcpHeader->getHeaderOption(i);
+            const TcpOption *option = tcpHeader->getHeaderOption(i);
             serializeOption(stream, option);
             optionsLength += option->getLength();
         }
@@ -85,16 +85,16 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     ASSERT(tcpHeader->getHeaderLength() == TCP_HEADER_OCTETS + optionsLength);
 }
 
-void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPOption *option) const
+void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpOption *option) const
 {
-    TCPOptionNumbers kind = option->getKind();
+    TcpOptionNumbers kind = option->getKind();
     unsigned short length = option->getLength();    // length >= 1
 
     stream.writeByte(kind);
     if (length > 1)
         stream.writeByte(length);
 
-    auto *opt = dynamic_cast<const TCPOptionUnknown *>(option);
+    auto *opt = dynamic_cast<const TcpOptionUnknown *>(option);
     if (opt) {
         unsigned int datalen = opt->getBytesArraySize();
         ASSERT(length == 2 + datalen);
@@ -105,37 +105,37 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
 
     switch (kind) {
         case TCPOPTION_END_OF_OPTION_LIST:    // EOL
-            check_and_cast<const TCPOptionEnd *>(option);
+            check_and_cast<const TcpOptionEnd *>(option);
             ASSERT(length == 1);
             break;
 
         case TCPOPTION_NO_OPERATION:    // NOP
-            check_and_cast<const TCPOptionNop *>(option);
+            check_and_cast<const TcpOptionNop *>(option);
             ASSERT(length == 1);
             break;
 
         case TCPOPTION_MAXIMUM_SEGMENT_SIZE: {
-            auto *opt = check_and_cast<const TCPOptionMaxSegmentSize *>(option);
+            auto *opt = check_and_cast<const TcpOptionMaxSegmentSize *>(option);
             ASSERT(length == 4);
             stream.writeUint16Be(opt->getMaxSegmentSize());
             break;
         }
 
         case TCPOPTION_WINDOW_SCALE: {
-            auto *opt = check_and_cast<const TCPOptionWindowScale *>(option);
+            auto *opt = check_and_cast<const TcpOptionWindowScale *>(option);
             ASSERT(length == 3);
             stream.writeByte(opt->getWindowScale());
             break;
         }
 
         case TCPOPTION_SACK_PERMITTED: {
-            auto *opt = check_and_cast<const TCPOptionSackPermitted *>(option); (void)opt; // UNUSED
+            auto *opt = check_and_cast<const TcpOptionSackPermitted *>(option); (void)opt; // UNUSED
             ASSERT(length == 2);
             break;
         }
 
         case TCPOPTION_SACK: {
-            auto *opt = check_and_cast<const TCPOptionSack *>(option);
+            auto *opt = check_and_cast<const TcpOptionSack *>(option);
             ASSERT(length == 2 + opt->getSackItemArraySize() * 8);
             for (unsigned int i = 0; i < opt->getSackItemArraySize(); i++) {
                 SackItem si = opt->getSackItem(i);
@@ -146,7 +146,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
         }
 
         case TCPOPTION_TIMESTAMP: {
-            auto *opt = check_and_cast<const TCPOptionTimestamp *>(option);
+            auto *opt = check_and_cast<const TcpOptionTimestamp *>(option);
             ASSERT(length == 10);
             stream.writeUint32Be(opt->getSenderTimestamp());
             stream.writeUint32Be(opt->getEchoedTimestamp());
@@ -191,7 +191,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 
     if (headerLength > TCP_HEADER_OCTETS) {
         while (stream.getPosition() - position < B(headerLength)) {
-            TCPOption *option = deserializeOption(stream);
+            TcpOption *option = deserializeOption(stream);
             tcpHeader->addHeaderOption(option);
         }
     }
@@ -201,22 +201,22 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     return tcpHeader;
 }
 
-TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) const
+TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
-    TCPOptionNumbers kind = (TCPOptionNumbers)stream.readByte();
+    TcpOptionNumbers kind = (TcpOptionNumbers)stream.readByte();
     unsigned char length = 0;
 
     switch (kind) {
         case TCPOPTION_END_OF_OPTION_LIST:    // EOL
-            return new TCPOptionEnd();
+            return new TcpOptionEnd();
 
         case TCPOPTION_NO_OPERATION:    // NOP
-            return new TCPOptionNop();
+            return new TcpOptionNop();
 
         case TCPOPTION_MAXIMUM_SEGMENT_SIZE:
             length = stream.readByte();
             if (length == 4) {
-                auto *option = new TCPOptionMaxSegmentSize();
+                auto *option = new TcpOptionMaxSegmentSize();
                 option->setLength(length);
                 option->setMaxSegmentSize(stream.readUint16Be());
                 return option;
@@ -226,7 +226,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
         case TCPOPTION_WINDOW_SCALE:
             length = stream.readByte();
             if (length == 3) {
-                auto *option = new TCPOptionWindowScale();
+                auto *option = new TcpOptionWindowScale();
                 option->setLength(length);
                 option->setWindowScale(stream.readByte());
                 return option;
@@ -236,7 +236,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
         case TCPOPTION_SACK_PERMITTED:
             length = stream.readByte();
             if (length == 2) {
-                auto *option = new TCPOptionSackPermitted();
+                auto *option = new TcpOptionSackPermitted();
                 option->setLength(length);
                 return option;
             }
@@ -245,7 +245,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
         case TCPOPTION_SACK:
             length = stream.readByte();
             if (length > 2 && (length % 8) == 2) {
-                auto *option = new TCPOptionSack();
+                auto *option = new TcpOptionSack();
                 option->setLength(length);
                 option->setSackItemArraySize(length / 8);
                 unsigned int count = 0;
@@ -262,7 +262,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
         case TCPOPTION_TIMESTAMP:
             length = stream.readByte();
             if (length == 10) {
-                auto *option = new TCPOptionTimestamp();
+                auto *option = new TcpOptionTimestamp();
                 option->setLength(length);
                 option->setSenderTimestamp(stream.readUint32Be());
                 option->setEchoedTimestamp(stream.readUint32Be());
@@ -275,7 +275,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
             break;
     }    // switch
 
-    auto *option = new TCPOptionUnknown();
+    auto *option = new TcpOptionUnknown();
     option->setKind(kind);
     option->setLength(length);
     if (length > 2)

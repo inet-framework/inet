@@ -23,25 +23,25 @@ namespace physicallayer {
 
 const double k = 1 / sqrt(42);
 
-const std::vector<APSKSymbol> QAM64Modulation::constellation = {
-    k * APSKSymbol(-7, -7), k * APSKSymbol(7, -7), k * APSKSymbol(-1, -7), k * APSKSymbol(1, -7), k * APSKSymbol(-5, -7),
-    k * APSKSymbol(5, -7), k * APSKSymbol(-3, -7), k * APSKSymbol(3, -7), k * APSKSymbol(-7, 7), k * APSKSymbol(7, 7),
-    k * APSKSymbol(-1, 7), k * APSKSymbol(1, 7), k * APSKSymbol(-5, 7), k * APSKSymbol(5, 7), k * APSKSymbol(-3, 7),
-    k * APSKSymbol(3, 7), k * APSKSymbol(-7, -1), k * APSKSymbol(7, -1), k * APSKSymbol(-1, -1), k * APSKSymbol(1, -1),
-    k * APSKSymbol(-5, -1), k * APSKSymbol(5, -1), k * APSKSymbol(-3, -1), k * APSKSymbol(3, -1), k * APSKSymbol(-7, 1),
-    k * APSKSymbol(7, 1), k * APSKSymbol(-1, 1), k * APSKSymbol(1, 1), k * APSKSymbol(-5, 1), k * APSKSymbol(5, 1),
-    k * APSKSymbol(-3, 1), k * APSKSymbol(3, 1), k * APSKSymbol(-7, -5), k * APSKSymbol(7, -5), k * APSKSymbol(-1, -5),
-    k * APSKSymbol(1, -5), k * APSKSymbol(-5, -5), k * APSKSymbol(5, -5), k * APSKSymbol(-3, -5), k * APSKSymbol(3, -5),
-    k * APSKSymbol(-7, 5), k * APSKSymbol(7, 5), k * APSKSymbol(-1, 5), k * APSKSymbol(1, 5), k * APSKSymbol(-5, 5),
-    k * APSKSymbol(5, 5), k * APSKSymbol(-3, 5), k * APSKSymbol(3, 5), k * APSKSymbol(-7, -3), k * APSKSymbol(7, -3),
-    k * APSKSymbol(-1, -3), k * APSKSymbol(1, -3), k * APSKSymbol(-5, -3), k * APSKSymbol(5, -3), k * APSKSymbol(-3, -3),
-    k * APSKSymbol(3, -3), k * APSKSymbol(-7, 3), k * APSKSymbol(7, 3), k * APSKSymbol(-1, 3), k * APSKSymbol(1, 3),
-    k * APSKSymbol(-5, 3), k * APSKSymbol(5, 3), k * APSKSymbol(-3, 3), k * APSKSymbol(3, 3)
+const std::vector<ApskSymbol> Qam64Modulation::constellation = {
+    k * ApskSymbol(-7, -7), k * ApskSymbol(7, -7), k * ApskSymbol(-1, -7), k * ApskSymbol(1, -7), k * ApskSymbol(-5, -7),
+    k * ApskSymbol(5, -7), k * ApskSymbol(-3, -7), k * ApskSymbol(3, -7), k * ApskSymbol(-7, 7), k * ApskSymbol(7, 7),
+    k * ApskSymbol(-1, 7), k * ApskSymbol(1, 7), k * ApskSymbol(-5, 7), k * ApskSymbol(5, 7), k * ApskSymbol(-3, 7),
+    k * ApskSymbol(3, 7), k * ApskSymbol(-7, -1), k * ApskSymbol(7, -1), k * ApskSymbol(-1, -1), k * ApskSymbol(1, -1),
+    k * ApskSymbol(-5, -1), k * ApskSymbol(5, -1), k * ApskSymbol(-3, -1), k * ApskSymbol(3, -1), k * ApskSymbol(-7, 1),
+    k * ApskSymbol(7, 1), k * ApskSymbol(-1, 1), k * ApskSymbol(1, 1), k * ApskSymbol(-5, 1), k * ApskSymbol(5, 1),
+    k * ApskSymbol(-3, 1), k * ApskSymbol(3, 1), k * ApskSymbol(-7, -5), k * ApskSymbol(7, -5), k * ApskSymbol(-1, -5),
+    k * ApskSymbol(1, -5), k * ApskSymbol(-5, -5), k * ApskSymbol(5, -5), k * ApskSymbol(-3, -5), k * ApskSymbol(3, -5),
+    k * ApskSymbol(-7, 5), k * ApskSymbol(7, 5), k * ApskSymbol(-1, 5), k * ApskSymbol(1, 5), k * ApskSymbol(-5, 5),
+    k * ApskSymbol(5, 5), k * ApskSymbol(-3, 5), k * ApskSymbol(3, 5), k * ApskSymbol(-7, -3), k * ApskSymbol(7, -3),
+    k * ApskSymbol(-1, -3), k * ApskSymbol(1, -3), k * ApskSymbol(-5, -3), k * ApskSymbol(5, -3), k * ApskSymbol(-3, -3),
+    k * ApskSymbol(3, -3), k * ApskSymbol(-7, 3), k * ApskSymbol(7, 3), k * ApskSymbol(-1, 3), k * ApskSymbol(1, 3),
+    k * ApskSymbol(-5, 3), k * ApskSymbol(5, 3), k * ApskSymbol(-3, 3), k * ApskSymbol(3, 3)
 };
 
-const QAM64Modulation QAM64Modulation::singleton;
+const Qam64Modulation Qam64Modulation::singleton;
 
-QAM64Modulation::QAM64Modulation() : MQAMModulationBase(&constellation)
+Qam64Modulation::Qam64Modulation() : MqamModulationBase(&constellation)
 {
 }
 

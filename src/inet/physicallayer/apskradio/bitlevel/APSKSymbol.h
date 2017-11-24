@@ -26,13 +26,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKSymbol : public std::complex<double>, public ISymbol
+class INET_API ApskSymbol : public std::complex<double>, public ISymbol
 {
   public:
-    APSKSymbol() : std::complex<double>() {}
-    APSKSymbol(const double& r) : std::complex<double>(r) {}
-    APSKSymbol(const double& q, const double& i) : std::complex<double>(q, i) {}
-    APSKSymbol(const std::complex<double>& w) : std::complex<double>(w) {}
+    ApskSymbol() : std::complex<double>() {}
+    ApskSymbol(const double& r) : std::complex<double>(r) {}
+    ApskSymbol(const double& q, const double& i) : std::complex<double>(q, i) {}
+    ApskSymbol(const std::complex<double>& w) : std::complex<double>(w) {}
 };
 
 } // namespace physicallayer

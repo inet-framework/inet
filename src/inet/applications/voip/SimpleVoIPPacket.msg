@@ -24,7 +24,7 @@ namespace inet;
 //
 // Represents a voice packet used by SimpleVoIPSender / SimpleVoIPReceiver 
 //
-class SimpleVoIPPacket extends FieldsChunk
+class SimpleVoipPacket extends FieldsChunk
 {
     unsigned int talkspurtID;          // identifies the talkspurt
     unsigned int talkspurtNumPackets;  // number of all packets of current talkspurt

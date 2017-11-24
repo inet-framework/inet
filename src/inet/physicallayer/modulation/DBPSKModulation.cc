@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-const DBPSKModulation DBPSKModulation::singleton;
+const DbpskModulation DbpskModulation::singleton;
 
-DBPSKModulation::DBPSKModulation() :
-    DPSKModulationBase(2)
+DbpskModulation::DbpskModulation() :
+    DpskModulationBase(2)
 {
 }
 

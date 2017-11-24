@@ -55,7 +55,7 @@ Ieee80211Mac::~Ieee80211Mac()
 
 void Ieee80211Mac::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
@@ -71,7 +71,7 @@ void Ieee80211Mac::initialize(int stage)
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // change module parameter from "auto" to concrete address
-            par("address").setStringValue(MACAddress::generateAutoAddress().str().c_str());
+            par("address").setStringValue(MacAddress::generateAutoAddress().str().c_str());
             addressString = par("address");
         }
         mib->address.setAddress(addressString);
@@ -100,13 +100,13 @@ void Ieee80211Mac::initialize(int stage)
     }
 }
 
-const MACAddress& Ieee80211Mac::isInterfaceRegistered()
+const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 {
     // if (!par("multiMac").boolValue())
     //    return MACAddress::UNSPECIFIED_ADDRESS;
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
-        return MACAddress::UNSPECIFIED_ADDRESS;
+        return MacAddress::UNSPECIFIED_ADDRESS;
     cModule *interfaceModule = findModuleUnderContainingNode(this);
     if (!interfaceModule)
         throw cRuntimeError("NIC module not found in the host");
@@ -114,7 +114,7 @@ const MACAddress& Ieee80211Mac::isInterfaceRegistered()
     InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
-    return MACAddress::UNSPECIFIED_ADDRESS;
+    return MacAddress::UNSPECIFIED_ADDRESS;
 }
 
 InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
@@ -334,7 +334,7 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 {
     Enter_Method("sendUp(\"%s\")", msg->getName());
     take(msg);
-    MACProtocolBase::sendUp(msg);
+    MacProtocolBase::sendUp(msg);
 }
 
 void Ieee80211Mac::sendUpFrame(Packet *frame)
@@ -393,7 +393,7 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     if (!doneCallback)
         return true;    // do nothing when called from initialize()
 
-    bool ret = MACProtocolBase::handleNodeStart(doneCallback);
+    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     return ret;
 }
@@ -401,7 +401,7 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
 // FIXME
 bool Ieee80211Mac::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    bool ret = MACProtocolBase::handleNodeStart(doneCallback);
+    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
     handleNodeCrash();
     return ret;
 }

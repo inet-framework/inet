@@ -27,7 +27,7 @@ import inet.networklayer.contract.IRoutingTable;
 //
 // @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
 //
-simple IPv6RoutingTable like IRoutingTable
+simple Ipv6RoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -38,9 +38,9 @@ simple IPv6RoutingTable like IRoutingTable
         bool isRouter = default(this.forwarding);
         bool multicastForwarding = default(false);
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
-        @signal[NF_ROUTE_ADDED](type=IPv6Route);
-        @signal[NF_ROUTE_CHANGED](type=IPv6Route);
-        @signal[NF_ROUTE_DELETED](type=IPv6Route);
+        @signal[NF_ROUTE_ADDED](type=Ipv6Route);
+        @signal[NF_ROUTE_CHANGED](type=Ipv6Route);
+        @signal[NF_ROUTE_DELETED](type=Ipv6Route);
         @signal[NF_MROUTE_ADDED](type=IPv6MulticastRoute);
         @signal[NF_MROUTE_DELETED](type=IPv6MulticastRoute);
         @signal[NF_MROUTE_CHANGED](type=IPv6MulticastRoute);

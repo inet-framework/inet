@@ -74,7 +74,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
 
     IInterfaceTable *interfaceTable;
     GenericRoutingTable *routingTable;
-    IARP *arp;
+    IArp *arp;
 
     // config
     int defaultHopLimit;

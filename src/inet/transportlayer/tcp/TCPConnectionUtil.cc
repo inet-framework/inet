@@ -45,7 +45,7 @@ namespace tcp {
 // helper functions
 //
 
-const char *TCPConnection::stateName(int state)
+const char *TcpConnection::stateName(int state)
 {
 #define CASE(x)    case x: \
         s = #x + 6; break
@@ -68,7 +68,7 @@ const char *TCPConnection::stateName(int state)
 #undef CASE
 }
 
-const char *TCPConnection::eventName(int event)
+const char *TcpConnection::eventName(int event)
 {
 #define CASE(x)    case x: \
         s = #x + 6; break
@@ -98,7 +98,7 @@ const char *TCPConnection::eventName(int event)
 #undef CASE
 }
 
-const char *TCPConnection::indicationName(int code)
+const char *TcpConnection::indicationName(int code)
 {
 #define CASE(x)    case x: \
         s = #x + 6; break
@@ -120,7 +120,7 @@ const char *TCPConnection::indicationName(int code)
 #undef CASE
 }
 
-const char *TCPConnection::optionName(int option)
+const char *TcpConnection::optionName(int option)
 {
     switch (option) {
         case TCPOPTION_END_OF_OPTION_LIST:
@@ -149,7 +149,7 @@ const char *TCPConnection::optionName(int option)
     }
 }
 
-void TCPConnection::printConnBrief() const
+void TcpConnection::printConnBrief() const
 {
     EV_DETAIL << "Connection "
               << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort
@@ -158,7 +158,7 @@ void TCPConnection::printConnBrief() const
               << "\n";
 }
 
-void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
@@ -194,7 +194,7 @@ void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
         EV_INFO << "options ";
 
         for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
-            const TCPOption *option = tcpseg->getHeaderOption(i);
+            const TcpOption *option = tcpseg->getHeaderOption(i);
             short kind = option->getKind();
             EV_INFO << optionName(kind) << " ";
         }
@@ -202,25 +202,25 @@ void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
     EV_INFO << "\n";
 }
 
-TCPConnection *TCPConnection::cloneListeningConnection()
+TcpConnection *TcpConnection::cloneListeningConnection()
 {
-    TCPConnection *conn = new TCPConnection(tcpMain, socketId);
+    TcpConnection *conn = new TcpConnection(tcpMain, socketId);
 
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
-    conn->sendQueue = check_and_cast<TCPSendQueue *>(inet::utils::createOne(sendQueueClass));
+    conn->sendQueue = check_and_cast<TcpSendQueue *>(inet::utils::createOne(sendQueueClass));
     conn->sendQueue->setConnection(conn);
 
     const char *receiveQueueClass = receiveQueue->getClassName();
-    conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
+    conn->receiveQueue = check_and_cast<TcpReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
     conn->receiveQueue->setConnection(conn);
 
     // create SACK retransmit queue
-    conn->rexmitQueue = new TCPSACKRexmitQueue();
+    conn->rexmitQueue = new TcpSackRexmitQueue();
     conn->rexmitQueue->setConnection(conn);
 
     const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
-    conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
+    conn->tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
     conn->tcpAlgorithm->setConnection(conn);
 
     conn->state = conn->tcpAlgorithm->getStateVariables();
@@ -237,7 +237,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     return conn;
 }
 
-void TCPConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
+void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 {
     // record seq (only if we do send data) and ackno
     if (sndNxtVector && packet->getByteLength() > B(tcpseg->getChunkLength()).get())
@@ -270,7 +270,7 @@ void TCPConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     tcpMain->send(packet, "ipOut");
 }
 
-void TCPConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
+void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
@@ -286,30 +286,30 @@ void TCPConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 
-void TCPConnection::signalConnectionTimeout()
+void TcpConnection::signalConnectionTimeout()
 {
     sendIndicationToApp(TCP_I_TIMED_OUT);
 }
 
-void TCPConnection::sendIndicationToApp(int code, const int id)
+void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
     cMessage *msg = new cMessage(indicationName(code));
     msg->setKind(code);
-    TCPCommand *ind = new TCPCommand();
+    TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
     msg->ensureTag<SocketInd>()->setSocketId(socketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
 
-void TCPConnection::sendAvailableIndicationToApp()
+void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
     cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
     msg->setKind(TCP_I_AVAILABLE);
 
-    TCPAvailableInfo *ind = new TCPAvailableInfo();
+    TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
@@ -321,13 +321,13 @@ void TCPConnection::sendAvailableIndicationToApp()
     sendToApp(msg);
 }
 
-void TCPConnection::sendEstabIndicationToApp()
+void TcpConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
     cMessage *msg = new cMessage(indicationName(TCP_I_ESTABLISHED));
     msg->setKind(TCP_I_ESTABLISHED);
 
-    TCPConnectInfo *ind = new TCPConnectInfo();
+    TcpConnectInfo *ind = new TcpConnectInfo();
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
@@ -337,12 +337,12 @@ void TCPConnection::sendEstabIndicationToApp()
     sendToApp(msg);
 }
 
-void TCPConnection::sendToApp(cMessage *msg)
+void TcpConnection::sendToApp(cMessage *msg)
 {
     tcpMain->send(msg, "appOut");
 }
 
-void TCPConnection::sendAvailableDataToApp()
+void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
         cMessage *msg = nullptr;
@@ -350,7 +350,7 @@ void TCPConnection::sendAvailableDataToApp()
         if (tcpMain->useDataNotification) {
             msg = new cMessage("Data Notification");
             msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
-            TCPCommand *cmd = new TCPCommand();
+            TcpCommand *cmd = new TcpCommand();
             msg->ensureTag<SocketInd>()->setSocketId(socketId);
             msg->setControlInfo(cmd);
             sendToApp(msg);
@@ -364,7 +364,7 @@ void TCPConnection::sendAvailableDataToApp()
     }
 }
 
-void TCPConnection::initConnection(TCPOpenCommand *openCmd)
+void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 {
     // create send queue
     sendQueue = tcpMain->createSendQueue();
@@ -375,7 +375,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     receiveQueue->setConnection(this);
 
     // create SACK retransmit queue
-    rexmitQueue = new TCPSACKRexmitQueue();
+    rexmitQueue = new TcpSackRexmitQueue();
     rexmitQueue->setConnection(this);
 
     // create algorithm
@@ -384,7 +384,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     if (!tcpAlgorithmClass || !tcpAlgorithmClass[0])
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
 
-    tcpAlgorithm = check_and_cast<TCPAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
+    tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
     tcpAlgorithm->setConnection(this);
 
     // create state block
@@ -393,7 +393,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     tcpAlgorithm->initialize();
 }
 
-void TCPConnection::configureStateVariables()
+void TcpConnection::configureStateVariables()
 {
     long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
     state->ws_support = tcpMain->par("windowScalingSupport");    // if set, this means that current host supports WS (RFC 1323)
@@ -430,7 +430,7 @@ void TCPConnection::configureStateVariables()
     }
 }
 
-void TCPConnection::selectInitialSeqNum()
+void TcpConnection::selectInitialSeqNum()
 {
     // set the initial send sequence number
     state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
@@ -441,7 +441,7 @@ void TCPConnection::selectInitialSeqNum()
     rexmitQueue->init(state->iss + 1);    // + 1 is for SYN
 }
 
-bool TCPConnection::isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeader>& tcpseg) const
+bool TcpConnection::isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeader>& tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
@@ -493,7 +493,7 @@ bool TCPConnection::isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeade
     return ret;
 }
 
-void TCPConnection::sendSyn()
+void TcpConnection::sendSyn()
 {
     if (remoteAddr.isUnspecified() || remotePort == -1)
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: foreign socket unspecified");
@@ -518,7 +518,7 @@ void TCPConnection::sendSyn()
     sendToIP(fp, tcpseg);
 }
 
-void TCPConnection::sendSynAck()
+void TcpConnection::sendSynAck()
 {
     // create segment
     const auto& tcpseg = makeShared<TcpHeader>();
@@ -543,12 +543,12 @@ void TCPConnection::sendSynAck()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendRst(uint32 seqNo)
+void TcpConnection::sendRst(uint32 seqNo)
 {
     sendRst(seqNo, localAddr, remoteAddr, localPort, remotePort);
 }
 
-void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     const auto& tcpseg = makeShared<TcpHeader>();
 
@@ -566,7 +566,7 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
     sendToIP(fp, tcpseg, src, dest);
 }
 
-void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     const auto& tcpseg = makeShared<TcpHeader>();
 
@@ -590,7 +590,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
         tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendAck()
+void TcpConnection::sendAck()
 {
     const auto& tcpseg = makeShared<TcpHeader>();
 
@@ -610,7 +610,7 @@ void TCPConnection::sendAck()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendFin()
+void TcpConnection::sendFin()
 {
     const auto& tcpseg = makeShared<TcpHeader>();
 
@@ -630,7 +630,7 @@ void TCPConnection::sendFin()
     tcpAlgorithm->ackSent();
 }
 
-void TCPConnection::sendSegment(uint32 bytes)
+void TcpConnection::sendSegment(uint32 bytes)
 {
     if (state->sack_enabled && state->afterRto) {
         // check rexmitQ and try to forward snd_nxt before sending new data
@@ -713,7 +713,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     }
 }
 
-bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
+bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
@@ -822,7 +822,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     return true;
 }
 
-bool TCPConnection::sendProbe()
+bool TcpConnection::sendProbe()
 {
     // we'll start sending from snd_max
     state->snd_nxt = state->snd_max;
@@ -853,7 +853,7 @@ bool TCPConnection::sendProbe()
     return true;
 }
 
-void TCPConnection::retransmitOneSegment(bool called_at_rto)
+void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
     uint32 old_snd_nxt = state->snd_nxt;
 
@@ -900,7 +900,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
     }
 }
 
-void TCPConnection::retransmitData()
+void TcpConnection::retransmitData()
 {
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
@@ -938,12 +938,12 @@ void TCPConnection::retransmitData()
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
-void TCPConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
+void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
 {
     EV_INFO << "TCP Header Option(s) received:\n";
 
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
-        const TCPOption *option = tcpseg->getHeaderOption(i);
+        const TcpOption *option = tcpseg->getHeaderOption(i);
         short kind = option->getKind();
         short length = option->getLength();
         bool ok = true;
@@ -960,23 +960,23 @@ void TCPConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
                 break;
 
             case TCPOPTION_MAXIMUM_SEGMENT_SIZE:    // MSS=2
-                ok = processMSSOption(tcpseg, *check_and_cast<const TCPOptionMaxSegmentSize *>(option));
+                ok = processMSSOption(tcpseg, *check_and_cast<const TcpOptionMaxSegmentSize *>(option));
                 break;
 
             case TCPOPTION_WINDOW_SCALE:    // WS=3
-                ok = processWSOption(tcpseg, *check_and_cast<const TCPOptionWindowScale *>(option));
+                ok = processWSOption(tcpseg, *check_and_cast<const TcpOptionWindowScale *>(option));
                 break;
 
             case TCPOPTION_SACK_PERMITTED:    // SACK_PERMITTED=4
-                ok = processSACKPermittedOption(tcpseg, *check_and_cast<const TCPOptionSackPermitted *>(option));
+                ok = processSACKPermittedOption(tcpseg, *check_and_cast<const TcpOptionSackPermitted *>(option));
                 break;
 
             case TCPOPTION_SACK:    // SACK=5
-                ok = processSACKOption(tcpseg, *check_and_cast<const TCPOptionSack *>(option));
+                ok = processSACKOption(tcpseg, *check_and_cast<const TcpOptionSack *>(option));
                 break;
 
             case TCPOPTION_TIMESTAMP:    // TS=8
-                ok = processTSOption(tcpseg, *check_and_cast<const TCPOptionTimestamp *>(option));
+                ok = processTSOption(tcpseg, *check_and_cast<const TcpOptionTimestamp *>(option));
                 break;
 
             // TODO add new TCPOptions here once they are implemented
@@ -990,7 +990,7 @@ void TCPConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
     }
 }
 
-bool TCPConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option)
+bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionMaxSegmentSize& option)
 {
     if (option.getLength() != 4) {
         EV_ERROR << "ERROR: MSS option length incorrect\n";
@@ -1025,7 +1025,7 @@ bool TCPConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const T
     return true;
 }
 
-bool TCPConnection::processWSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionWindowScale& option)
+bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionWindowScale& option)
 {
     if (option.getLength() != 3) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1050,7 +1050,7 @@ bool TCPConnection::processWSOption(const Ptr<const TcpHeader>& tcpseg, const TC
     return true;
 }
 
-bool TCPConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionTimestamp& option)
+bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionTimestamp& option)
 {
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1098,7 +1098,7 @@ bool TCPConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const TC
     return true;
 }
 
-bool TCPConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSackPermitted& option)
+bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSackPermitted& option)
 {
     if (option.getLength() != 2) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1116,7 +1116,7 @@ bool TCPConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpse
     return true;
 }
 
-TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
+TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
 {
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
@@ -1125,7 +1125,7 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     {
         // MSS header option
         if (state->snd_mss > 0) {
-            TCPOptionMaxSegmentSize *option = new TCPOptionMaxSegmentSize();
+            TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
             option->setMaxSegmentSize(state->snd_mss);
             tcpseg->addHeaderOption(option);
             EV_INFO << "TCP Header Option MSS(=" << state->snd_mss << ") sent\n";
@@ -1136,7 +1136,7 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             // 1 padding byte
-            tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+            tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
 
             // Update WS variables
             if (state->ws_manual_scale > -1) {
@@ -1151,7 +1151,7 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
                 }
             }
 
-            TCPOptionWindowScale *option = new TCPOptionWindowScale();
+            TcpOptionWindowScale *option = new TcpOptionWindowScale();
             option->setWindowScale(state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
@@ -1165,11 +1165,11 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         {
             if (!state->ts_support) {    // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
             }
 
-            tcpseg->addHeaderOption(new TCPOptionSackPermitted());
+            tcpseg->addHeaderOption(new TcpOptionSackPermitted());
 
             // Update SACK variables
             state->snd_sack_perm = true;
@@ -1183,11 +1183,11 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         {
             if (!state->sack_support) {    // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
             }
 
-            TCPOptionTimestamp *option = new TCPOptionTimestamp();
+            TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
@@ -1218,11 +1218,11 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         if (state->ts_enabled) {    // Is TS enabled?
             if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) {    // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TCPOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
             }
 
-            TCPOptionTimestamp *option = new TCPOptionTimestamp();
+            TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
             // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
@@ -1276,29 +1276,29 @@ TcpHeader TCPConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     return *tcpseg;
 }
 
-uint32 TCPConnection::getTSval(const Ptr<const TcpHeader>& tcpseg) const
+uint32 TcpConnection::getTSval(const Ptr<const TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
-        const TCPOption *option = tcpseg->getHeaderOption(i);
+        const TcpOption *option = tcpseg->getHeaderOption(i);
         if (option->getKind() == TCPOPTION_TIMESTAMP)
-            return check_and_cast<const TCPOptionTimestamp *>(option)->getSenderTimestamp();
+            return check_and_cast<const TcpOptionTimestamp *>(option)->getSenderTimestamp();
     }
 
     return 0;
 }
 
-uint32 TCPConnection::getTSecr(const Ptr<const TcpHeader>& tcpseg) const
+uint32 TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
-        const TCPOption *option = tcpseg->getHeaderOption(i);
+        const TcpOption *option = tcpseg->getHeaderOption(i);
         if (option->getKind() == TCPOPTION_TIMESTAMP)
-            return check_and_cast<const TCPOptionTimestamp *>(option)->getEchoedTimestamp();
+            return check_and_cast<const TcpOptionTimestamp *>(option)->getEchoedTimestamp();
     }
 
     return 0;
 }
 
-void TCPConnection::updateRcvQueueVars()
+void TcpConnection::updateRcvQueueVars()
 {
     // update receive queue related state variables
     state->freeRcvBuffer = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
@@ -1311,7 +1311,7 @@ void TCPConnection::updateRcvQueueVars()
 //    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
 
-unsigned short TCPConnection::updateRcvWnd()
+unsigned short TcpConnection::updateRcvWnd()
 {
     uint32 win = 0;
 
@@ -1360,7 +1360,7 @@ unsigned short TCPConnection::updateRcvWnd()
     return (unsigned short)scaled_rcv_wnd;
 }
 
-void TCPConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways)
+void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlways)
 {
     uint32 true_window = tcpseg->getWindow();
     // RFC 1323, page 10:
@@ -1388,7 +1388,7 @@ void TCPConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpseg, bool doAlw
     }
 }
 
-void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow)
+void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     ASSERT(state->limited_transmit_enabled);
 
@@ -1465,7 +1465,7 @@ void TCPConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32 congestionWi
     }
 }
 
-uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
+uint32 TcpConnection::convertSimtimeToTS(simtime_t simtime)
 {
     ASSERT(SimTime::getScaleExp() <= -3);
 
@@ -1473,7 +1473,7 @@ uint32 TCPConnection::convertSimtimeToTS(simtime_t simtime)
     return timestamp;
 }
 
-simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
+simtime_t TcpConnection::convertTSToSimtime(uint32 timestamp)
 {
     ASSERT(SimTime::getScaleExp() <= -3);
 
@@ -1481,7 +1481,7 @@ simtime_t TCPConnection::convertTSToSimtime(uint32 timestamp)
     return simtime;
 }
 
-bool TCPConnection::isSendQueueEmpty()
+bool TcpConnection::isSendQueueEmpty()
 {
     return sendQueue->getBytesAvailable(state->snd_nxt) == 0;
 }

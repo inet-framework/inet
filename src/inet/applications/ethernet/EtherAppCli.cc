@@ -148,9 +148,9 @@ void EtherAppCli::cancelNextPacket()
         cancelEvent(timerMsg);
 }
 
-MACAddress EtherAppCli::resolveDestMACAddress()
+MacAddress EtherAppCli::resolveDestMACAddress()
 {
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
         // try as mac address first, then as a module

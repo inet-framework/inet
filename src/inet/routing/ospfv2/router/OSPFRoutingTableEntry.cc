@@ -27,7 +27,7 @@ RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     area(BACKBONE_AREAID),
     pathType(RoutingTableEntry::INTRAAREA)
 {
-    setNetmask(IPv4Address::ALLONES_ADDRESS);
+    setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setSourceType(IRoute::OSPF);
 }
 

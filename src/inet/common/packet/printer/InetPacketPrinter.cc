@@ -170,14 +170,14 @@ void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3
 {
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {
-            const auto& echoRq = CHK(dynamicPtrCast<const ICMPEchoRequest>(icmpHeader));
+            const auto& echoRq = CHK(dynamicPtrCast<const IcmpEchoRequest>(icmpHeader));
             os << "ping " << srcAddr << " to " << destAddr
                << " id=" << echoRq->getIdentifier() << " seq=" << echoRq->getSeqNumber();
             break;
         }
 
         case ICMP_ECHO_REPLY: {
-            const auto& echoReply = CHK(dynamicPtrCast<const ICMPEchoReply>(icmpHeader));
+            const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
             os << "pong " << srcAddr << " to " << destAddr
                << " id=" << echoReply->getIdentifier() << " seq=" << echoReply->getSeqNumber();
             break;

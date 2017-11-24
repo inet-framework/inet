@@ -17,7 +17,7 @@ package inet.node.wireless;
 
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IMACAddressTable;
+import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMACRelayUnit;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
@@ -72,7 +72,7 @@ module AccessPoint
             parameters:
                 @display("p=100,300;is=s");
         }
-        macTable: <macTableType> like IMACAddressTable {
+        macTable: <macTableType> like IMacAddressTable {
             parameters:
                 @display("p=100,400;is=s");
         }

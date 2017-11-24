@@ -13,11 +13,11 @@ moduleinterface IRTPPayloadReceiver
         string outputLogFileName;   // use an empty string to disable this logging
 
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPPayloadReceiver like IRTPPayloadReceiver
+simple RtpPayloadReceiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
@@ -26,8 +26,8 @@ simple RTPPayloadReceiver like IRTPPayloadReceiver
         @statistic[rcvdPkRtpTimestamp](title="received packet RTP timestamp"; record=vector);
 
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
 simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
@@ -37,19 +37,19 @@ simple RTPAVProfilePayload10Receiver like IRTPPayloadReceiver
         string outputLogFileName = default("outputLogLoss%d.log");
 
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload32Receiver like IRTPPayloadReceiver
+simple RtpAvProfilePayload32Receiver like IRTPPayloadReceiver
 {
     parameters:
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
 
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
 simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
@@ -59,8 +59,8 @@ simple RTPAVProfileSampleBasedAudioReceiver like IRTPPayloadReceiver
         string outputLogFileName = default("outputLogLoss%d.log");
 
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
 

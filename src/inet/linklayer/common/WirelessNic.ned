@@ -17,7 +17,7 @@
 
 package inet.linklayer.common;
 
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.contract.IMacProtocol;
 import inet.linklayer.contract.IWirelessNic;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
@@ -41,7 +41,7 @@ module WirelessNic like IWirelessNic
         classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
                 @display("p=80,70");
         }
-        mac: <macType> like IMACProtocol {
+        mac: <macType> like IMacProtocol {
                 @display("p=150,100");
         }
         radio: <radioType> like IRadio {

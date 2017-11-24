@@ -31,15 +31,15 @@
 
 namespace inet {
 
-Register_Class(IPv4Route);
-Register_Class(IPv4MulticastRoute);
+Register_Class(Ipv4Route);
+Register_Class(Ipv4MulticastRoute);
 
-IPv4Route::~IPv4Route()
+Ipv4Route::~Ipv4Route()
 {
     delete protocolData;
 }
 
-std::string IPv4Route::info() const
+std::string Ipv4Route::info() const
 {
     std::stringstream out;
 
@@ -71,42 +71,42 @@ std::string IPv4Route::info() const
     out << " " << IRoute::sourceTypeName(sourceType);
 
 #ifdef WITH_AODV
-    if (dynamic_cast<AODVRouteData *>(protocolData)) {
-        AODVRouteData *data = (AODVRouteData *)protocolData;
+    if (dynamic_cast<AodvRouteData *>(protocolData)) {
+        AodvRouteData *data = (AodvRouteData *)protocolData;
         out << data;
     }
 #endif // ifdef WITH_AODV
     return out.str();
 }
 
-std::string IPv4Route::detailedInfo() const
+std::string Ipv4Route::detailedInfo() const
 {
     return std::string();
 }
 
-bool IPv4Route::equals(const IPv4Route& route) const
+bool Ipv4Route::equals(const Ipv4Route& route) const
 {
     return rt == route.rt && dest == route.dest && netmask == route.netmask && gateway == route.gateway &&
            interfacePtr == route.interfacePtr && sourceType == route.sourceType && metric == route.metric;
 }
 
-const char *IPv4Route::getInterfaceName() const
+const char *Ipv4Route::getInterfaceName() const
 {
     return interfacePtr ? interfacePtr->getInterfaceName() : "";
 }
 
-void IPv4Route::changed(int fieldCode)
+void Ipv4Route::changed(int fieldCode)
 {
     if (rt)
         rt->routeChanged(this, fieldCode);
 }
 
-IRoutingTable *IPv4Route::getRoutingTableAsGeneric() const
+IRoutingTable *Ipv4Route::getRoutingTableAsGeneric() const
 {
     return getRoutingTable();
 }
 
-IPv4MulticastRoute::~IPv4MulticastRoute()
+Ipv4MulticastRoute::~Ipv4MulticastRoute()
 {
     delete inInterface;
     for (auto & elem : outInterfaces)
@@ -114,7 +114,7 @@ IPv4MulticastRoute::~IPv4MulticastRoute()
     outInterfaces.clear();
 }
 
-std::string IPv4MulticastRoute::info() const
+std::string Ipv4MulticastRoute::info() const
 {
     std::stringstream out;
 
@@ -155,12 +155,12 @@ std::string IPv4MulticastRoute::info() const
     return out.str();
 }
 
-std::string IPv4MulticastRoute::detailedInfo() const
+std::string Ipv4MulticastRoute::detailedInfo() const
 {
     return info();
 }
 
-void IPv4MulticastRoute::setInInterface(InInterface *_inInterface)
+void Ipv4MulticastRoute::setInInterface(InInterface *_inInterface)
 {
     if (inInterface != _inInterface) {
         delete inInterface;
@@ -169,7 +169,7 @@ void IPv4MulticastRoute::setInInterface(InInterface *_inInterface)
     }
 }
 
-void IPv4MulticastRoute::clearOutInterfaces()
+void Ipv4MulticastRoute::clearOutInterfaces()
 {
     if (!outInterfaces.empty()) {
         for (auto & elem : outInterfaces)
@@ -179,12 +179,12 @@ void IPv4MulticastRoute::clearOutInterfaces()
     }
 }
 
-IRoutingTable *IPv4MulticastRoute::getRoutingTableAsGeneric() const
+IRoutingTable *Ipv4MulticastRoute::getRoutingTableAsGeneric() const
 {
     return getRoutingTable();
 }
 
-void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
+void Ipv4MulticastRoute::addOutInterface(OutInterface *outInterface)
 {
     ASSERT(outInterface);
 
@@ -202,7 +202,7 @@ void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     changed(F_OUT);
 }
 
-bool IPv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
+bool Ipv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
 {
     for (auto it = outInterfaces.begin(); it != outInterfaces.end(); ++it) {
         if ((*it)->getInterface() == ie) {
@@ -215,7 +215,7 @@ bool IPv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
     return false;
 }
 
-void IPv4MulticastRoute::removeOutInterface(unsigned int i)
+void Ipv4MulticastRoute::removeOutInterface(unsigned int i)
 {
     OutInterface *outInterface = outInterfaces.at(i);
     delete outInterface;
@@ -223,7 +223,7 @@ void IPv4MulticastRoute::removeOutInterface(unsigned int i)
     changed(F_OUT);
 }
 
-void IPv4MulticastRoute::changed(int fieldCode)
+void Ipv4MulticastRoute::changed(int fieldCode)
 {
     if (rt)
         rt->multicastRouteChanged(this, fieldCode);

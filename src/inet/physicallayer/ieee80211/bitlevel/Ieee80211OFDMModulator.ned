@@ -35,11 +35,11 @@ import inet.physicallayer.contract.bitlevel.IModulator;
 // constellation mapping.
 //
 //
-simple Ieee80211OFDMModulator like IModulator
+simple Ieee80211OfdmModulator like IModulator
 {
     parameters:
         string subcarrierModulation;
         int pilotSubcarrierPolarityVectorOffset;
         @display("i=block/mac");
-        @class(Ieee80211OFDMModulatorModule);
+        @class(Ieee80211OfdmModulatorModule);
 }

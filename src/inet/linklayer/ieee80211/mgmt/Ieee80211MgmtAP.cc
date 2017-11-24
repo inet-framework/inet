@@ -35,23 +35,23 @@ namespace ieee80211 {
 
 using namespace physicallayer;
 
-Define_Module(Ieee80211MgmtAP);
-Register_Class(Ieee80211MgmtAP::NotificationInfoSta);
+Define_Module(Ieee80211MgmtAp);
+Register_Class(Ieee80211MgmtAp::NotificationInfoSta);
 
-static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
+static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAp::StaInfo& sta)
 {
     os << "address:" << sta.address;
     return os;
 }
 
-Ieee80211MgmtAP::~Ieee80211MgmtAP()
+Ieee80211MgmtAp::~Ieee80211MgmtAp()
 {
     cancelAndDelete(beaconTimer);
 }
 
-void Ieee80211MgmtAP::initialize(int stage)
+void Ieee80211MgmtAp::initialize(int stage)
 {
-    Ieee80211MgmtAPBase::initialize(stage);
+    Ieee80211MgmtApBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // read params and init vars
@@ -82,7 +82,7 @@ void Ieee80211MgmtAP::initialize(int stage)
     }
 }
 
-void Ieee80211MgmtAP::handleTimer(cMessage *msg)
+void Ieee80211MgmtAp::handleTimer(cMessage *msg)
 {
     if (msg == beaconTimer) {
         sendBeacon();
@@ -93,12 +93,12 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
+void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
 {
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == Ieee80211Radio::radioChannelChangedSignal) {
@@ -107,13 +107,13 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
 }
 
-Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header)
+Ieee80211MgmtAp::StaInfo *Ieee80211MgmtAp::lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header)
 {
     auto it = staList.find(header->getTransmitterAddress());
     return it == staList.end() ? nullptr : &(it->second);
 }
 
-void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MACAddress& destAddr)
+void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr)
 {
     auto packet = new Packet(name);
     packet->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
@@ -123,7 +123,7 @@ void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211M
     sendDown(packet);
 }
 
-void Ieee80211MgmtAP::sendBeacon()
+void Ieee80211MgmtAp::sendBeacon()
 {
     EV << "Sending beacon\n";
     const auto& body = makeShared<Ieee80211BeaconFrame>();
@@ -132,19 +132,19 @@ void Ieee80211MgmtAP::sendBeacon()
     body->setBeaconInterval(beaconInterval);
     body->setChannelNumber(channelNumber);
     body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
-    sendManagementFrame("Beacon", body, ST_BEACON, MACAddress::BROADCAST_ADDRESS);
+    sendManagementFrame("Beacon", body, ST_BEACON, MacAddress::BROADCAST_ADDRESS);
 }
 
-void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     const auto& requestBody = packet->peekData<Ieee80211AuthenticationFrame>();
     int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Processing Authentication frame, seqNum=" << frameAuthSeq << "\n";
 
     // create STA entry if needed
-    STAInfo *sta = lookupSenderSTA(header);
+    StaInfo *sta = lookupSenderSTA(header);
     if (!sta) {
-        MACAddress staAddress = header->getTransmitterAddress();
+        MacAddress staAddress = header->getTransmitterAddress();
         sta = &staList[staAddress];    // this implicitly creates a new entry
         sta->address = staAddress;
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
@@ -205,11 +205,11 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     }
 }
 
-void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Processing Deauthentication frame\n";
 
-    STAInfo *sta = lookupSenderSTA(header);
+    StaInfo *sta = lookupSenderSTA(header);
     delete packet;
 
     if (sta) {
@@ -221,12 +221,12 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
     }
 }
 
-void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Processing AssociationRequest frame\n";
 
     // "11.3.2 AP association procedures"
-    STAInfo *sta = lookupSenderSTA(header);
+    StaInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
@@ -252,17 +252,17 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Processing ReassociationRequest frame\n";
 
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
-    STAInfo *sta = lookupSenderSTA(header);
+    StaInfo *sta = lookupSenderSTA(header);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
@@ -286,14 +286,14 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);
 }
 
-void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
-    STAInfo *sta = lookupSenderSTA(header);
+    StaInfo *sta = lookupSenderSTA(header);
     delete packet;
 
     if (sta) {
@@ -303,12 +303,12 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<const 
     }
 }
 
-void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Processing ProbeRequest frame\n";
 
@@ -319,7 +319,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
         return;
     }
 
-    MACAddress staAddress = header->getTransmitterAddress();
+    MacAddress staAddress = header->getTransmitterAddress();
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
@@ -332,12 +332,12 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 
-void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
+void Ieee80211MgmtAp::handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::sendAssocNotification(const MACAddress& addr)
+void Ieee80211MgmtAp::sendAssocNotification(const MacAddress& addr)
 {
     NotificationInfoSta notif;
     notif.setApAddress(mib->address);
@@ -345,7 +345,7 @@ void Ieee80211MgmtAP::sendAssocNotification(const MACAddress& addr)
     emit(NF_L2_AP_ASSOCIATED, &notif);
 }
 
-void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress& addr)
+void Ieee80211MgmtAp::sendDisAssocNotification(const MacAddress& addr)
 {
     NotificationInfoSta notif;
     notif.setApAddress(mib->address);
@@ -353,17 +353,17 @@ void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress& addr)
     emit(NF_L2_AP_DISASSOCIATED, &notif);
 }
 
-void Ieee80211MgmtAP::start()
+void Ieee80211MgmtAp::start()
 {
-    Ieee80211MgmtAPBase::start();
+    Ieee80211MgmtApBase::start();
     scheduleAt(simTime() + uniform(0, beaconInterval), beaconTimer);
 }
 
-void Ieee80211MgmtAP::stop()
+void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
     staList.clear();
-    Ieee80211MgmtAPBase::stop();
+    Ieee80211MgmtApBase::stop();
 }
 
 } // namespace ieee80211

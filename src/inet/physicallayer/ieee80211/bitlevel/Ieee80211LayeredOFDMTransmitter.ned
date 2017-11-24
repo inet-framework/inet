@@ -73,7 +73,7 @@ import inet.physicallayer.contract.bitlevel.IPulseShaper;
 // (e.g. BPSK).
 //
 //
-module Ieee80211LayeredOFDMTransmitter like ITransmitter
+module Ieee80211LayeredOfdmTransmitter like ITransmitter
 {
     parameters:
         bool isCompliant = default(true);
@@ -88,7 +88,7 @@ module Ieee80211LayeredOFDMTransmitter like ITransmitter
         double power @unit(W);
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        @class(Ieee80211LayeredOFDMTransmitter);
+        @class(Ieee80211LayeredOfdmTransmitter);
 
         @display("i=block/tx");
     submodules:

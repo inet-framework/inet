@@ -29,12 +29,12 @@ namespace inet {
 /**
  * Consumes and prints packets received from the UDP module. See NED for more info.
  */
-class INET_API UDPSink : public ApplicationBase
+class INET_API UdpSink : public ApplicationBase
 {
   protected:
     enum SelfMsgKinds { START = 1, STOP };
 
-    UDPSocket socket;
+    UdpSocket socket;
     int localPort = -1;
     L3Address multicastGroup;
     simtime_t startTime;
@@ -44,8 +44,8 @@ class INET_API UDPSink : public ApplicationBase
     int numReceived = 0;
 
   public:
-    UDPSink() {}
-    virtual ~UDPSink();
+    UdpSink() {}
+    virtual ~UdpSink();
 
   protected:
     virtual void processPacket(Packet *msg);

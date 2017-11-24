@@ -34,23 +34,23 @@ namespace tcp {
 /**
  * Send queue that manages actual bytes.
  */
-class INET_API TCP_NSC_SendQueue : public cObject
+class INET_API TcpNscSendQueue : public cObject
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_SendQueue();
+    TcpNscSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_SendQueue();
+    virtual ~TcpNscSendQueue();
 
     /**
      * set connection queue, and initialise queue variables.
      */
-    virtual void setConnection(TCP_NSC_Connection *connP);
+    virtual void setConnection(TcpNscConnection *connP);
 
     /**
      * Called on SEND app command, it inserts in the queue the data the user
@@ -105,30 +105,30 @@ class INET_API TCP_NSC_SendQueue : public cObject
     virtual void discardUpTo(uint32 seqNumP);
 
   protected:
-    TCP_NSC_Connection *connM = nullptr;
+    TcpNscConnection *connM = nullptr;
     ChunkQueue dataBuffer;
 };
 
 /**
  * Receive queue that manages actual bytes.
  */
-class INET_API TCP_NSC_ReceiveQueue : public cObject
+class INET_API TcpNscReceiveQueue : public cObject
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_ReceiveQueue();
+    TcpNscReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_ReceiveQueue();
+    virtual ~TcpNscReceiveQueue();
 
     /**
      * Add a connection queue.
      */
-    virtual void setConnection(TCP_NSC_Connection *connP);
+    virtual void setConnection(TcpNscConnection *connP);
 
     /**
      * Called when a TCP segment arrives. The segment
@@ -181,7 +181,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
 
   protected:
     ChunkQueue dataBuffer;      // fifo dataBuffer
-    TCP_NSC_Connection *connM = nullptr;
+    TcpNscConnection *connM = nullptr;
 };
 
 } // namespace tcp

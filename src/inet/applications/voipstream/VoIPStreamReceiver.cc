@@ -26,20 +26,20 @@
 
 namespace inet {
 
-Define_Module(VoIPStreamReceiver);
+Define_Module(VoipStreamReceiver);
 
-simsignal_t VoIPStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
-simsignal_t VoIPStreamReceiver::lostPacketsSignal = registerSignal("lostPackets");
-simsignal_t VoIPStreamReceiver::packetHasVoiceSignal = registerSignal("packetHasVoice");
-simsignal_t VoIPStreamReceiver::connStateSignal = registerSignal("connState");
-simsignal_t VoIPStreamReceiver::delaySignal = registerSignal("delay");
+simsignal_t VoipStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
+simsignal_t VoipStreamReceiver::lostPacketsSignal = registerSignal("lostPackets");
+simsignal_t VoipStreamReceiver::packetHasVoiceSignal = registerSignal("packetHasVoice");
+simsignal_t VoipStreamReceiver::connStateSignal = registerSignal("connState");
+simsignal_t VoipStreamReceiver::delaySignal = registerSignal("delay");
 
-VoIPStreamReceiver::~VoIPStreamReceiver()
+VoipStreamReceiver::~VoipStreamReceiver()
 {
     closeConnection();
 }
 
-void VoIPStreamReceiver::initialize(int stage)
+void VoipStreamReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -70,7 +70,7 @@ void VoIPStreamReceiver::initialize(int stage)
     }
 }
 
-void VoIPStreamReceiver::handleMessage(cMessage *msg)
+void VoipStreamReceiver::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == UDP_I_ERROR) {
         delete msg;
@@ -78,7 +78,7 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
     }
 
     Packet *pk = check_and_cast<Packet *>(msg);
-    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
+    const auto& vp = pk->peekHeader<VoipStreamPacket>();
     bool ok = true;
     if (curConn.offline)
         createConnection(pk);
@@ -100,12 +100,12 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void VoIPStreamReceiver::Connection::openAudio(const char *fileName)
+void VoipStreamReceiver::Connection::openAudio(const char *fileName)
 {
     outFile.open(fileName, sampleRate, 8 * av_get_bytes_per_sample(decCtx->sample_fmt));
 }
 
-void VoIPStreamReceiver::Connection::writeLostSamples(int sampleCount)
+void VoipStreamReceiver::Connection::writeLostSamples(int sampleCount)
 {
     int pktBytes = sampleCount * av_get_bytes_per_sample(decCtx->sample_fmt);
     if (outFile.isOpen()) {
@@ -115,7 +115,7 @@ void VoIPStreamReceiver::Connection::writeLostSamples(int sampleCount)
     }
 }
 
-void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
+void VoipStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
 {
     AVPacket avpkt;
     av_init_packet(&avpkt);
@@ -137,16 +137,16 @@ void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
         outFile.write(decodedFrame.data[0], decodedFrame.linesize[0]);
 }
 
-void VoIPStreamReceiver::Connection::closeAudio()
+void VoipStreamReceiver::Connection::closeAudio()
 {
     outFile.close();
 }
 
-void VoIPStreamReceiver::createConnection(Packet *pk)
+void VoipStreamReceiver::createConnection(Packet *pk)
 {
     ASSERT(curConn.offline);
 
-    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
+    const auto& vp = pk->peekHeader<VoipStreamPacket>();
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<L4PortInd>();
 
@@ -157,7 +157,7 @@ void VoIPStreamReceiver::createConnection(Packet *pk)
     curConn.seqNo = vp->getSeqNo() - 1;
     curConn.timeStamp = vp->getTimeStamp();
     curConn.ssrc = vp->getSsrc();
-    curConn.codec = (enum AVCodecID)(vp->getCodec());
+    curConn.codec = (enum AvCodecId)(vp->getCodec());
     curConn.sampleBits = vp->getSampleBits();
     curConn.sampleRate = vp->getSampleRate();
     curConn.transmitBitrate = vp->getTransmitBitrate();
@@ -183,11 +183,11 @@ void VoIPStreamReceiver::createConnection(Packet *pk)
     emit(connStateSignal, 1);
 }
 
-void VoIPStreamReceiver::checkSourceAndParameters(Packet *pk)
+void VoipStreamReceiver::checkSourceAndParameters(Packet *pk)
 {
     ASSERT(!curConn.offline);
 
-    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
+    const auto& vp = pk->peekHeader<VoipStreamPacket>();
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
@@ -209,7 +209,7 @@ void VoIPStreamReceiver::checkSourceAndParameters(Packet *pk)
         throw cRuntimeError("Cannot change voice encoding parameters a during session");
 }
 
-void VoIPStreamReceiver::closeConnection()
+void VoipStreamReceiver::closeConnection()
 {
     if (!curConn.offline) {
         curConn.offline = true;
@@ -220,9 +220,9 @@ void VoIPStreamReceiver::closeConnection()
     }
 }
 
-void VoIPStreamReceiver::decodePacket(Packet *pk)
+void VoipStreamReceiver::decodePacket(Packet *pk)
 {
-    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
+    const auto& vp = pk->peekHeader<VoipStreamPacket>();
     switch (vp->getType()) {
         case VOICE:
             emit(packetHasVoiceSignal, 1);
@@ -258,13 +258,13 @@ void VoIPStreamReceiver::decodePacket(Packet *pk)
     FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
 }
 
-void VoIPStreamReceiver::finish()
+void VoipStreamReceiver::finish()
 {
     EV_TRACE << "Sink finish()" << endl;
     closeConnection();
 }
 
-bool VoIPStreamReceiver::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool VoipStreamReceiver::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());

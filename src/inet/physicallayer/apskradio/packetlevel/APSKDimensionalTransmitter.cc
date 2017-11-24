@@ -25,30 +25,30 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKDimensionalTransmitter);
+Define_Module(ApskDimensionalTransmitter);
 
-APSKDimensionalTransmitter::APSKDimensionalTransmitter() :
+ApskDimensionalTransmitter::ApskDimensionalTransmitter() :
     DimensionalTransmitterBase(),
     FlatTransmitterBase()
 {
 }
 
-void APSKDimensionalTransmitter::initialize(int stage)
+void ApskDimensionalTransmitter::initialize(int stage)
 {
     FlatTransmitterBase::initialize(stage);
     DimensionalTransmitterBase::initialize(stage);
 }
 
-std::ostream& APSKDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKDimensionalTransmitter";
     FlatTransmitterBase::printToStream(stream, level);
     return DimensionalTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto phyHeader = packet->peekHeader<APSKPhyHeader>();
+    auto phyHeader = packet->peekHeader<ApskPhyHeader>();
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);

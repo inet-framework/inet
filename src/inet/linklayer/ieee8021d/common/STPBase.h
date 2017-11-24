@@ -29,7 +29,7 @@ namespace inet {
 /**
  * Base class for STP and RSTP.
  */
-class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListener
+class INET_API StpBase : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
     bool visualize = false;    // if true it visualize the spanning tree
@@ -37,19 +37,19 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
     unsigned int numPorts = 0;    // number of ports
 
     unsigned int bridgePriority = 0;    // bridge's priority
-    MACAddress bridgeAddress;    // bridge's MAC address
+    MacAddress bridgeAddress;    // bridge's MAC address
 
     simtime_t maxAge;
     simtime_t helloTime;
     simtime_t forwardDelay;
 
     cModule *switchModule = nullptr;
-    IMACAddressTable *macTable = nullptr;
+    IMacAddressTable *macTable = nullptr;
     IInterfaceTable *ifTable = nullptr;
     InterfaceEntry *ie = nullptr;
 
   public:
-    STPBase();
+    StpBase();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 
@@ -83,7 +83,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      * @return The port's Ieee8021dInterfaceData, or throws error if it doesn't exist.
      */
     Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId);
-    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const { return const_cast<STPBase *>(this)->getPortInterfaceData(interfaceId); }
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const { return const_cast<StpBase *>(this)->getPortInterfaceData(interfaceId); }
 
     /**
      * @brief Gets InterfaceEntry for interface ID.

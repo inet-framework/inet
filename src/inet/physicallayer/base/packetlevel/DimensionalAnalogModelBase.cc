@@ -144,11 +144,11 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 
-const ISNIR *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISnir *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    return new DimensionalSNIR(dimensionalReception, dimensionalNoise);
+    return new DimensionalSnir(dimensionalReception, dimensionalNoise);
 }
 
 } // namespace physicallayer

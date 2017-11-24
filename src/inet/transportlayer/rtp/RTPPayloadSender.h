@@ -27,7 +27,7 @@ namespace inet {
 namespace rtp {
 
 //Forward declarations:
-class RTPInnerPacket;
+class RtpInnerPacket;
 
 /**
  * The class RTPPayloadSender is the base class for all modules creating
@@ -35,18 +35,18 @@ class RTPInnerPacket;
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
  */
-class INET_API RTPPayloadSender : public cSimpleModule
+class INET_API RtpPayloadSender : public cSimpleModule
 {
   public:
     /**
      * Constructor.
      */
-    RTPPayloadSender();
+    RtpPayloadSender();
 
     /**
      * Destructor. Calls closeSourceFile.
      */
-    virtual ~RTPPayloadSender();
+    virtual ~RtpPayloadSender();
 
   protected:
     /**
@@ -70,7 +70,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
      * received its initialization message from profile module.
      * It returns an RTP_INP_SENDER_MODULE_INITIALIZED message which
      */
-    virtual void initializeSenderModule(RTPInnerPacket *);
+    virtual void initializeSenderModule(RtpInnerPacket *);
 
     /**
      * This method is called by initializeSenderModule and opens the

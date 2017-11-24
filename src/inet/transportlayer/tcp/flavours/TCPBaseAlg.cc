@@ -48,7 +48,7 @@ namespace tcp {
 #define MIN_PERSIST_TIMEOUT    5   //  5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 
-TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
+TcpBaseAlgStateVariables::TcpBaseAlgStateVariables()
 {
     rexmit_count = 0;
     rexmit_timeout = 3.0;
@@ -75,19 +75,19 @@ TCPBaseAlgStateVariables::TCPBaseAlgStateVariables()
     firstPartialACK = false;
 }
 
-std::string TCPBaseAlgStateVariables::info() const
+std::string TcpBaseAlgStateVariables::info() const
 {
     std::stringstream out;
-    out << TCPStateVariables::info();
+    out << TcpStateVariables::info();
     out << " snd_cwnd=" << snd_cwnd;
     out << " rto=" << rexmit_timeout;
     return out.str();
 }
 
-std::string TCPBaseAlgStateVariables::detailedInfo() const
+std::string TcpBaseAlgStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TCPStateVariables::detailedInfo();
+    out << TcpStateVariables::detailedInfo();
     out << "snd_cwnd=" << snd_cwnd << "\n";
     out << "rto=" << rexmit_timeout << "\n";
     out << "persist_timeout=" << persist_timeout << "\n";
@@ -95,14 +95,14 @@ std::string TCPBaseAlgStateVariables::detailedInfo() const
     return out.str();
 }
 
-TCPBaseAlg::TCPBaseAlg() : TCPAlgorithm(),
-    state((TCPBaseAlgStateVariables *&)TCPAlgorithm::state)
+TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
+    state((TcpBaseAlgStateVariables *&)TcpAlgorithm::state)
 {
     rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = nullptr;
     cwndVector = ssthreshVector = rttVector = srttVector = rttvarVector = rtoVector = numRtosVector = nullptr;
 }
 
-TCPBaseAlg::~TCPBaseAlg()
+TcpBaseAlg::~TcpBaseAlg()
 {
     // Note: don't delete "state" here, it'll be deleted from TCPConnection
 
@@ -126,9 +126,9 @@ TCPBaseAlg::~TCPBaseAlg()
     delete numRtosVector;
 }
 
-void TCPBaseAlg::initialize()
+void TcpBaseAlg::initialize()
 {
-    TCPAlgorithm::initialize();
+    TcpAlgorithm::initialize();
 
     rexmitTimer = new cMessage("REXMIT");
     persistTimer = new cMessage("PERSIST");
@@ -151,7 +151,7 @@ void TCPBaseAlg::initialize()
     }
 }
 
-void TCPBaseAlg::established(bool active)
+void TcpBaseAlg::established(bool active)
 {
     // initialize cwnd (we may learn SMSS during connection setup)
 
@@ -206,7 +206,7 @@ void TCPBaseAlg::established(bool active)
     }
 }
 
-void TCPBaseAlg::connectionClosed()
+void TcpBaseAlg::connectionClosed()
 {
     cancelEvent(rexmitTimer);
     cancelEvent(persistTimer);
@@ -214,7 +214,7 @@ void TCPBaseAlg::connectionClosed()
     cancelEvent(keepAliveTimer);
 }
 
-void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
+void TcpBaseAlg::processTimer(cMessage *timer, TcpEventCode& event)
 {
     if (timer == rexmitTimer)
         processRexmitTimer(event);
@@ -228,7 +228,7 @@ void TCPBaseAlg::processTimer(cMessage *timer, TCPEventCode& event)
         throw cRuntimeError(timer, "unrecognized timer");
 }
 
-void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
+void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
 {
     EV_DETAIL << "TCB: " << state->info() << "\n";
 
@@ -306,7 +306,7 @@ void TCPBaseAlg::processRexmitTimer(TCPEventCode& event)
     //
 }
 
-void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
+void TcpBaseAlg::processPersistTimer(TcpEventCode& event)
 {
     // setup and restart the PERSIST timer
     // FIXME Calculation of PERSIST timer is not as simple as done here!
@@ -334,13 +334,13 @@ void TCPBaseAlg::processPersistTimer(TCPEventCode& event)
     conn->sendProbe();
 }
 
-void TCPBaseAlg::processDelayedAckTimer(TCPEventCode& event)
+void TcpBaseAlg::processDelayedAckTimer(TcpEventCode& event)
 {
     state->ack_now = true;
     conn->sendAck();
 }
 
-void TCPBaseAlg::processKeepAliveTimer(TCPEventCode& event)
+void TcpBaseAlg::processKeepAliveTimer(TcpEventCode& event)
 {
     // TBD
     // RFC 1122, page 102:
@@ -356,7 +356,7 @@ void TCPBaseAlg::processKeepAliveTimer(TCPEventCode& event)
     // packets."
 }
 
-void TCPBaseAlg::startRexmitTimer()
+void TcpBaseAlg::startRexmitTimer()
 {
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
@@ -366,7 +366,7 @@ void TCPBaseAlg::startRexmitTimer()
     conn->scheduleTimeout(rexmitTimer, state->rexmit_timeout);
 }
 
-void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
+void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
 {
     //
     // Jacobson's algorithm for estimating RTT and adaptively setting RTO.
@@ -414,7 +414,7 @@ void TCPBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
         rtoVector->record(rto);
 }
 
-void TCPBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
+void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
     ASSERT(state->ts_enabled);
 
@@ -426,7 +426,7 @@ void TCPBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
     rttMeasurementComplete(tSent, tAcked);
 }
 
-bool TCPBaseAlg::sendData(bool sendCommandInvoked)
+bool TcpBaseAlg::sendData(bool sendCommandInvoked)
 {
     //
     // Nagle's algorithm: when a TCP connection has outstanding data that has not
@@ -474,20 +474,20 @@ bool TCPBaseAlg::sendData(bool sendCommandInvoked)
     return conn->sendData(fullSegmentsOnly, state->snd_cwnd);
 }
 
-void TCPBaseAlg::sendCommandInvoked()
+void TcpBaseAlg::sendCommandInvoked()
 {
     // try sending
     sendData(true);
 }
 
-void TCPBaseAlg::receivedOutOfOrderSegment()
+void TcpBaseAlg::receivedOutOfOrderSegment()
 {
     state->ack_now = true;
     EV_INFO << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
 }
 
-void TCPBaseAlg::receiveSeqChanged()
+void TcpBaseAlg::receiveSeqChanged()
 {
     // If we send a data segment already (with the updated seqNo) there is no need to send an additional ACK
     if (state->full_sized_segment_counter == 0 && !state->ack_now && state->last_ack_sent == state->rcv_nxt && !delayedAckTimer->isScheduled()) {    // ackSent?
@@ -526,7 +526,7 @@ void TCPBaseAlg::receiveSeqChanged()
     }
 }
 
-void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
+void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 {
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked
@@ -608,7 +608,7 @@ void TCPBaseAlg::receivedDataAck(uint32 firstSeqAcked)
     //
 }
 
-void TCPBaseAlg::receivedDuplicateAck()
+void TcpBaseAlg::receivedDuplicateAck()
 {
     EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 
@@ -625,7 +625,7 @@ void TCPBaseAlg::receivedDuplicateAck()
     //
 }
 
-void TCPBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
+void TcpBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
 {
     // Note: In this case no immediate ACK will be send because not mentioned
     // in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
@@ -636,7 +636,7 @@ void TCPBaseAlg::receivedAckForDataNotYetSent(uint32 seq)
     conn->sendAck();
 }
 
-void TCPBaseAlg::ackSent()
+void TcpBaseAlg::ackSent()
 {
     state->full_sized_segment_counter = 0;    // reset counter
     state->ack_now = false;    // reset flag
@@ -646,7 +646,7 @@ void TCPBaseAlg::ackSent()
         cancelEvent(delayedAckTimer);
 }
 
-void TCPBaseAlg::dataSent(uint32 fromseq)
+void TcpBaseAlg::dataSent(uint32 fromseq)
 {
     // if retransmission timer not running, schedule it
     if (!rexmitTimer->isScheduled()) {
@@ -667,11 +667,11 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
     state->time_last_data_sent = simTime();
 }
 
-void TCPBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void TcpBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
 }
 
-void TCPBaseAlg::restartRexmitTimer()
+void TcpBaseAlg::restartRexmitTimer()
 {
     if (rexmitTimer->isScheduled())
         cancelEvent(rexmitTimer);

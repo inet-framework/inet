@@ -23,14 +23,14 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPNewReno);
+Register_Class(TcpNewReno);
 
-TCPNewReno::TCPNewReno() : TCPTahoeRenoFamily(),
-    state((TCPNewRenoStateVariables *&)TCPAlgorithm::state)
+TcpNewReno::TcpNewReno() : TcpTahoeRenoFamily(),
+    state((TcpNewRenoStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TCPNewReno::recalculateSlowStartThreshold()
+void TcpNewReno::recalculateSlowStartThreshold()
 {
     // RFC 2581, page 4:
     // "When a TCP sender detects segment loss using the retransmission
@@ -52,9 +52,9 @@ void TCPNewReno::recalculateSlowStartThreshold()
         ssthreshVector->record(state->ssthresh);
 }
 
-void TCPNewReno::processRexmitTimer(TCPEventCode& event)
+void TcpNewReno::processRexmitTimer(TcpEventCode& event)
 {
-    TCPTahoeRenoFamily::processRexmitTimer(event);
+    TcpTahoeRenoFamily::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -96,9 +96,9 @@ void TCPNewReno::processRexmitTimer(TCPEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
+void TcpNewReno::receivedDataAck(uint32 firstSeqAcked)
 {
-    TCPTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
     // RFC 3782, page 5:
     // "5) When an ACK arrives that acknowledges new data, this ACK could be
@@ -263,9 +263,9 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
     sendData(false);
 }
 
-void TCPNewReno::receivedDuplicateAck()
+void TcpNewReno::receivedDuplicateAck()
 {
-    TCPTahoeRenoFamily::receivedDuplicateAck();
+    TcpTahoeRenoFamily::receivedDuplicateAck();
 
     if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         if (!state->lossRecovery) {

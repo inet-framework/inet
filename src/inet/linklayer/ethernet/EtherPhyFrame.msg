@@ -17,7 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 cplusplus {{
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -25,7 +25,7 @@ cplusplus {{
 
 namespace inet;
 
-enum SAPCode;
+enum SapCode;
 
 //
 // Abstract base class for various Ethernet traffic types:

@@ -18,7 +18,7 @@
 package inet.networklayer.wiseroute;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.arp.generic.GenericARP;
+import inet.networklayer.arp.generic.GenericArp;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
@@ -40,7 +40,7 @@ module WiseRouteNetworkLayer like INetworkLayer
         output transportOut @labels(ITransportPacket/up);
 
     submodules:
-        arp: GenericARP {
+        arp: GenericArp {
             parameters:
 	            @display("p=100,300");
         }

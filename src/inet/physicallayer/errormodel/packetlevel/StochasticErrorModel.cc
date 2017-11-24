@@ -50,7 +50,7 @@ std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int leve
     return stream;
 }
 
-double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const IReception *reception = snir->getReception();
@@ -78,7 +78,7 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
     }
 }
 
-double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     if (!std::isnan(bitErrorRate)) {
@@ -94,7 +94,7 @@ double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal
     }
 }
 
-double StochasticErrorModel::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return symbolErrorRate;

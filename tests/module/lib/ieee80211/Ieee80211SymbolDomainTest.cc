@@ -29,14 +29,14 @@ void Ieee80211SymbolDomainTest::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        ieee80211OFDMSignalEncoder = getModuleFromPar<Ieee80211OFDMEncoderModule>(par("ieee80211OFDMSignalEncoderModule"), this);
-        ieee80211OFDMDataEncoder = getModuleFromPar<Ieee80211OFDMEncoderModule>(par("ieee80211OFDMDataEncoderModule"), this);
-        ieee80211OFDMSignalModulator = getModuleFromPar<Ieee80211OFDMModulatorModule>(par("ieee80211OFDMSignalModulatorModule"), this);
-        ieee80211OFDMDataModulator = getModuleFromPar<Ieee80211OFDMModulatorModule>(par("ieee80211OFDMDataModulatorModule"), this);
-        ieee80211OFDMSignalDemodulator = getModuleFromPar<Ieee80211OFDMDemodulatorModule>(par("ieee80211OFDMSignalDemodulatorModule"), this);
-        ieee80211OFDMDataDemodulator = getModuleFromPar<Ieee80211OFDMDemodulatorModule>(par("ieee80211OFDMDataDemodulatorModule"), this);
-        ieee80211OFDMSignalDecoder = getModuleFromPar<Ieee80211OFDMDecoderModule>(par("ieee80211OFDMSignalDecoderModule"), this);
-        ieee80211OFDMDataDecoder = getModuleFromPar<Ieee80211OFDMDecoderModule>(par("ieee80211OFDMDataDecoderModule"), this);
+        ieee80211OFDMSignalEncoder = getModuleFromPar<Ieee80211OfdmEncoderModule>(par("ieee80211OFDMSignalEncoderModule"), this);
+        ieee80211OFDMDataEncoder = getModuleFromPar<Ieee80211OfdmEncoderModule>(par("ieee80211OFDMDataEncoderModule"), this);
+        ieee80211OFDMSignalModulator = getModuleFromPar<Ieee80211OfdmModulatorModule>(par("ieee80211OFDMSignalModulatorModule"), this);
+        ieee80211OFDMDataModulator = getModuleFromPar<Ieee80211OfdmModulatorModule>(par("ieee80211OFDMDataModulatorModule"), this);
+        ieee80211OFDMSignalDemodulator = getModuleFromPar<Ieee80211OfdmDemodulatorModule>(par("ieee80211OFDMSignalDemodulatorModule"), this);
+        ieee80211OFDMDataDemodulator = getModuleFromPar<Ieee80211OfdmDemodulatorModule>(par("ieee80211OFDMDataDemodulatorModule"), this);
+        ieee80211OFDMSignalDecoder = getModuleFromPar<Ieee80211OfdmDecoderModule>(par("ieee80211OFDMSignalDecoderModule"), this);
+        ieee80211OFDMDataDecoder = getModuleFromPar<Ieee80211OfdmDecoderModule>(par("ieee80211OFDMDataDecoderModule"), this);
         parseInput(par("testFile").stringValue());
     }
     else if (stage == INITSTAGE_LAST)

@@ -332,13 +332,13 @@ void CommunicationCacheBase::removeCachedNoise(const IRadio *receiver, const ITr
         cacheEntry->noise = nullptr;
 }
 
-const ISNIR *CommunicationCacheBase::getCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
+const ISnir *CommunicationCacheBase::getCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->snir : nullptr;
 }
 
-void CommunicationCacheBase::setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir)
+void CommunicationCacheBase::setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)

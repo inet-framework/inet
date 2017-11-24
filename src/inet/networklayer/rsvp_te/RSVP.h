@@ -31,22 +31,22 @@
 namespace inet {
 
 class SimpleClassifier;
-class IIPv4RoutingTable;
+class IIpv4RoutingTable;
 class IInterfaceTable;
-class TED;
-class LIBTable;
+class Ted;
+class LibTable;
 
 /**
  * TODO documentation
  */
-class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycle
+class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycle
 {
   protected:
 
     struct traffic_path_t
     {
-        SenderTemplateObj_t sender;
-        SenderTspecObj_t tspec;
+        SenderTemplateObj sender;
+        SenderTspecObj tspec;
 
         EroVector ERO;
         simtime_t max_delay;
@@ -58,7 +58,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     struct traffic_session_t
     {
-        SessionObj_t sobj;
+        SessionObj sobj;
 
         std::vector<traffic_path_t> paths;
     };
@@ -68,25 +68,25 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     /**
      * Path State Block (PSB) structure
      */
-    struct PathStateBlock_t
+    struct PathStateBlock
     {
         // SESSION object structure
-        SessionObj_t Session_Object;
+        SessionObj Session_Object;
 
         // SENDER_TEMPLATE structure
-        SenderTemplateObj_t Sender_Template_Object;
+        SenderTemplateObj Sender_Template_Object;
 
         // SENDER_TSPEC structure
-        SenderTspecObj_t Sender_Tspec_Object;
+        SenderTspecObj Sender_Tspec_Object;
 
         // Previous Hop IPv4 address from PHOP object
-        IPv4Address Previous_Hop_Address;
+        Ipv4Address Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
         //IPv4Address LIH;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
-        IPv4Address OutInterface;
+        Ipv4Address OutInterface;
 
         // this must be part of PSB to allow refreshing
         EroVector ERO;
@@ -105,21 +105,21 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
         int handler;
     };
 
-    typedef std::vector<PathStateBlock_t> PSBVector;
+    typedef std::vector<PathStateBlock> PsbVector;
 
     /**
      * Reservation State Block (RSB) structure
      */
-    struct ResvStateBlock_t
+    struct ResvStateBlock
     {
         // SESSION object structure
-        SessionObj_t Session_Object;
+        SessionObj Session_Object;
 
         // Next Hop IPv4 address from PHOP object
-        IPv4Address Next_Hop_Address;
+        Ipv4Address Next_Hop_Address;
 
         // Outgoing Interface on which reservation is to be made or has been made
-        IPv4Address OI;
+        Ipv4Address OI;
 
         // Flows description
         FlowDescriptorVector FlowDescriptor;
@@ -131,7 +131,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
         //int style;
 
         // FLOWSPEC structure
-        FlowSpecObj_t Flowspec_Object;
+        FlowSpecObj Flowspec_Object;
 
         // RSB unique identifier
         int id;
@@ -142,14 +142,14 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
         RsbTimeoutMsg *timeoutMsg;
     };
 
-    typedef std::vector<ResvStateBlock_t> RSBVector;
+    typedef std::vector<ResvStateBlock> RsbVector;
 
     /**
      * RSVP Hello State structure
      */
-    struct HelloState_t
+    struct HelloState
     {
-        IPv4Address peer;
+        Ipv4Address peer;
 
         int srcInstance;
         int dstInstance;
@@ -165,29 +165,29 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
         bool ok;
     };
 
-    typedef std::vector<HelloState_t> HelloVector;
+    typedef std::vector<HelloState> HelloVector;
 
     simtime_t helloInterval;
     simtime_t helloTimeout;
     simtime_t retryInterval;
 
   protected:
-    TED *tedmod = nullptr;
-    IIPv4RoutingTable *rt = nullptr;
+    Ted *tedmod = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    LIBTable *lt = nullptr;
+    LibTable *lt = nullptr;
 
-    IRSVPClassifier *rpct = nullptr;
+    IRsvpClassifier *rpct = nullptr;
 
     int maxPsbId = 0;
     int maxRsbId = 0;
 
     int maxSrcInstance = 0;
 
-    IPv4Address routerId;
+    Ipv4Address routerId;
 
-    PSBVector PSBList;
-    RSBVector RSBList;
+    PsbVector PSBList;
+    RsbVector RSBList;
     HelloVector HelloList;
 
   protected:
@@ -207,67 +207,67 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual void processPathTearMsg(Packet *pk);
     virtual void processPathErrMsg(Packet *pk);
 
-    virtual PathStateBlock_t *createPSB(const Ptr<RSVPPathMsg>& msg);
-    virtual PathStateBlock_t *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
-    virtual void removePSB(PathStateBlock_t *psb);
-    virtual ResvStateBlock_t *createRSB(const Ptr<const RSVPResvMsg>& msg);
-    virtual ResvStateBlock_t *createEgressRSB(PathStateBlock_t *psb);
-    virtual void updateRSB(ResvStateBlock_t *rsb, const RSVPResvMsg *msg);
-    virtual void removeRSB(ResvStateBlock_t *rsb);
-    virtual void removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index);
+    virtual PathStateBlock *createPSB(const Ptr<RsvpPathMsg>& msg);
+    virtual PathStateBlock *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
+    virtual void removePSB(PathStateBlock *psb);
+    virtual ResvStateBlock *createRSB(const Ptr<const RsvpResvMsg>& msg);
+    virtual ResvStateBlock *createEgressRSB(PathStateBlock *psb);
+    virtual void updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg);
+    virtual void removeRSB(ResvStateBlock *rsb);
+    virtual void removeRsbFilter(ResvStateBlock *rsb, unsigned int index);
 
-    virtual void refreshPath(PathStateBlock_t *psbEle);
-    virtual void refreshResv(ResvStateBlock_t *rsbEle);
-    virtual void refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP);
-    virtual void commitResv(ResvStateBlock_t *rsb);
+    virtual void refreshPath(PathStateBlock *psbEle);
+    virtual void refreshResv(ResvStateBlock *rsbEle);
+    virtual void refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP);
+    virtual void commitResv(ResvStateBlock *rsb);
 
-    virtual void scheduleRefreshTimer(PathStateBlock_t *psbEle, simtime_t delay);
-    virtual void scheduleTimeout(PathStateBlock_t *psbEle);
-    virtual void scheduleRefreshTimer(ResvStateBlock_t *rsbEle, simtime_t delay);
-    virtual void scheduleCommitTimer(ResvStateBlock_t *rsbEle);
-    virtual void scheduleTimeout(ResvStateBlock_t *rsbEle);
+    virtual void scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay);
+    virtual void scheduleTimeout(PathStateBlock *psbEle);
+    virtual void scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay);
+    virtual void scheduleCommitTimer(ResvStateBlock *rsbEle);
+    virtual void scheduleTimeout(ResvStateBlock *rsbEle);
 
-    virtual void sendPathErrorMessage(PathStateBlock_t *psb, int errCode);
-    virtual void sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPv4Address nextHop, int errCode);
-    virtual void sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPv4Address LIH, IPv4Address NHOP, bool force);
-    virtual void sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay);
+    virtual void sendPathErrorMessage(PathStateBlock *psb, int errCode);
+    virtual void sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, SenderTspecObj tspec, Ipv4Address nextHop, int errCode);
+    virtual void sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, const SenderTemplateObj& sender, Ipv4Address LIH, Ipv4Address NHOP, bool force);
+    virtual void sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simtime_t delay);
 
     virtual void setupHello();
-    virtual void startHello(IPv4Address peer, simtime_t delay);
-    virtual void removeHello(HelloState_t *h);
+    virtual void startHello(Ipv4Address peer, simtime_t delay);
+    virtual void removeHello(HelloState *h);
 
-    virtual void recoveryEvent(IPv4Address peer);
+    virtual void recoveryEvent(Ipv4Address peer);
 
-    virtual bool allocateResource(IPv4Address OI, const SessionObj_t& session, double bandwidth);
-    virtual void preempt(IPv4Address OI, int priority, double bandwidth);
-    virtual bool doCACCheck(const SessionObj_t& session, const SenderTspecObj_t& tspec, IPv4Address OI);
+    virtual bool allocateResource(Ipv4Address OI, const SessionObj& session, double bandwidth);
+    virtual void preempt(Ipv4Address OI, int priority, double bandwidth);
+    virtual bool doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, Ipv4Address OI);
     virtual void announceLinkChange(int tedlinkindex);
 
-    virtual void sendToIP(cMessage *msg, IPv4Address destAddr);
+    virtual void sendToIP(cMessage *msg, Ipv4Address destAddr);
 
-    virtual bool evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4Address& OI);
+    virtual bool evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ipv4Address& OI);
 
-    virtual PathStateBlock_t *findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
-    virtual ResvStateBlock_t *findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
+    virtual PathStateBlock *findPSB(const SessionObj& session, const SenderTemplateObj& sender);
+    virtual ResvStateBlock *findRSB(const SessionObj& session, const SenderTemplateObj& sender, unsigned int& index);
 
-    virtual PathStateBlock_t *findPsbById(int id);
-    virtual ResvStateBlock_t *findRsbById(int id);
+    virtual PathStateBlock *findPsbById(int id);
+    virtual ResvStateBlock *findRsbById(int id);
 
-    std::vector<traffic_session_t>::iterator findSession(const SessionObj_t& session);
-    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj_t& sender);
+    std::vector<traffic_session_t>::iterator findSession(const SessionObj& session);
+    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj& sender);
 
-    virtual HelloState_t *findHello(IPv4Address peer);
+    virtual HelloState *findHello(Ipv4Address peer);
 
-    virtual void print(const RSVPPathMsg *p);
-    virtual void print(const RSVPResvMsg *r);
+    virtual void print(const RsvpPathMsg *p);
+    virtual void print(const RsvpResvMsg *r);
 
     virtual void readTrafficFromXML(const cXMLElement *traffic);
     virtual void readTrafficSessionFromXML(const cXMLElement *session);
     virtual EroVector readTrafficRouteFromXML(const cXMLElement *route);
 
-    virtual void createPath(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual void createPath(const SessionObj& session, const SenderTemplateObj& sender);
 
-    virtual void pathProblem(PathStateBlock_t *psb);
+    virtual void pathProblem(PathStateBlock *psb);
 
     virtual void addSession(const cXMLElement& node);
     virtual void delSession(const cXMLElement& node);
@@ -276,11 +276,11 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     friend class SimpleClassifier;
 
-    virtual int getInLabel(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual int getInLabel(const SessionObj& session, const SenderTemplateObj& sender);
 
   public:
-    RSVP();
-    virtual ~RSVP();
+    Rsvp();
+    virtual ~Rsvp();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -294,18 +294,18 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual void processCommand(const cXMLElement& node) override;
 };
 
-bool operator==(const SessionObj_t& a, const SessionObj_t& b);
-bool operator!=(const SessionObj_t& a, const SessionObj_t& b);
+bool operator==(const SessionObj& a, const SessionObj& b);
+bool operator!=(const SessionObj& a, const SessionObj& b);
 
-bool operator==(const FilterSpecObj_t& a, const FilterSpecObj_t& b);
-bool operator!=(const FilterSpecObj_t& a, const FilterSpecObj_t& b);
+bool operator==(const FilterSpecObj& a, const FilterSpecObj& b);
+bool operator!=(const FilterSpecObj& a, const FilterSpecObj& b);
 
-bool operator==(const SenderTemplateObj_t& a, const SenderTemplateObj_t& b);
-bool operator!=(const SenderTemplateObj_t& a, const SenderTemplateObj_t& b);
+bool operator==(const SenderTemplateObj& a, const SenderTemplateObj& b);
+bool operator!=(const SenderTemplateObj& a, const SenderTemplateObj& b);
 
-std::ostream& operator<<(std::ostream& os, const SessionObj_t& a);
-std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a);
-std::ostream& operator<<(std::ostream& os, const FlowSpecObj_t& a);
+std::ostream& operator<<(std::ostream& os, const SessionObj& a);
+std::ostream& operator<<(std::ostream& os, const SenderTemplateObj& a);
+std::ostream& operator<<(std::ostream& os, const FlowSpecObj& a);
 
 } // namespace inet
 

@@ -24,14 +24,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMRadio : public FlatRadioBase
+class INET_API Ieee80211OfdmRadio : public FlatRadioBase
 {
   protected:
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
 
   public:
-    Ieee80211OFDMRadio();
+    Ieee80211OfdmRadio();
 };
 
 } // namespace physicallayer

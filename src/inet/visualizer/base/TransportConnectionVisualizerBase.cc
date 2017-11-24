@@ -120,7 +120,7 @@ void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsig
 #ifdef WITH_TCP_INET
     Enter_Method_Silent();
     if (signal == inet::tcp::TCP::tcpConnectionAddedSignal) {
-        auto tcpConnection = check_and_cast<inet::tcp::TCPConnection *>(object);
+        auto tcpConnection = check_and_cast<inet::tcp::TcpConnection *>(object);
         L3AddressResolver resolver;
         auto source = resolver.findHostWithAddress(tcpConnection->localAddr);
         auto destination = resolver.findHostWithAddress(tcpConnection->remoteAddr);

@@ -22,20 +22,20 @@ import inet.common.INETDefs;
 
 namespace inet;
 
-class TLVOptionBase extends cObject
+class TlvOptionBase extends cObject
 {
     short type = -1;
     short length = 0;   // total length of option
 }
 
-class TLVOptionRaw extends TLVOptionBase
+class TlvOptionRaw extends TlvOptionBase
 {
     char bytes[];
 }
 
-class TLVOptions extends cObject
+class TlvOptions extends cObject
 {
     @customize;
-    abstract TLVOptionBase tlvOption[];
+    abstract TlvOptionBase tlvOption[];
 }
 

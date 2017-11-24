@@ -46,7 +46,7 @@ namespace httptools {
  * @see HttpBrowserBase
  * @see HttpBrowserDirect
  */
-class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackInterface
+class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::CallbackInterface
 {
   protected:
     /*
@@ -59,12 +59,12 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     struct SockData
     {
         HttpRequestQueue messageQueue;    // Queue of pending messages.
-        TCPSocket *socket = nullptr;    // A reference to the socket object.
+        TcpSocket *socket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
         ChunkQueue queue;       // incoming queue for slices
     };
 
-    TCPSocketMap sockCollection;    // List of active sockets
+    TcpSocketMap sockCollection;    // List of active sockets
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
 
@@ -135,7 +135,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * Socket status arrived handler.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override;
+    virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override;
 
     virtual void socketDeleted(int connId, void *yourPtr) override;
 

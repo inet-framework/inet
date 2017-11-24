@@ -24,14 +24,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMInterleaving : public IInterleaving
+class INET_API Ieee80211OfdmInterleaving : public IInterleaving
 {
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
 
   public:
-    Ieee80211OFDMInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier);
+    Ieee80211OfdmInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

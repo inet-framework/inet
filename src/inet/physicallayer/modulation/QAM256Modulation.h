@@ -30,16 +30,16 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Quadrature_amplitude_modulation
  */
-class INET_API QAM256Modulation : public MQAMModulationBase
+class INET_API Qam256Modulation : public MqamModulationBase
 {
   public:
-    static const QAM256Modulation singleton;
+    static const Qam256Modulation singleton;
 
   protected:
-    static const std::vector<APSKSymbol> constellation;
+    static const std::vector<ApskSymbol> constellation;
 
   public:
-    QAM256Modulation();
+    Qam256Modulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "QAM256Modulation"; }
 };

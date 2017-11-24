@@ -89,11 +89,11 @@ State of group '225.0.0.1' on interface 'eth0' has changed:
 %#
 %postrun-command: grep "IGMPTester: Received" test.out > received.out || true
 %contains: received.out
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_EX 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.1>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_IN 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_IN 10.0.0.1>.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

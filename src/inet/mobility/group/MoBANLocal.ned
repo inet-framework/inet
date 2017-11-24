@@ -49,9 +49,9 @@ import inet.mobility.base.MovingMobilityBase;
 // The current implementation uses the Random Walk Mobility Model (RWMM) for individual (local) movement with a sphere around the node, with given speed
 // and sphere radius of the current posture. The reference point of the node it the current posture, the sphere radius, and the speed is given by the
 // corresponding coordinator. RWMM determines the location of node at ant time relative to the given reference point.
-simple MoBANLocal extends MovingMobilityBase
+simple MoBanLocal extends MovingMobilityBase
 {
     parameters:
         int coordinatorIndex; // The index of the belonging coordinator module
-        @class(MoBANLocal);
+        @class(MoBanLocal);
 }

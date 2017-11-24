@@ -27,13 +27,13 @@ namespace inet {
 
 namespace rtp {
 
-Define_Module(RTPProfile);
+Define_Module(RtpProfile);
 
-RTPProfile::RTPProfile()
+RtpProfile::RtpProfile()
 {
 }
 
-void RTPProfile::initialize()
+void RtpProfile::initialize()
 {
     EV_TRACE << "initialize() Enter" << endl;
     _profileName = "Profile";
@@ -47,13 +47,13 @@ void RTPProfile::initialize()
     EV_TRACE << "initialize() Exit" << endl;
 }
 
-RTPProfile::~RTPProfile()
+RtpProfile::~RtpProfile()
 {
     for (auto & elem : _ssrcGates)
         delete elem.second;
 }
 
-void RTPProfile::handleMessage(cMessage *msg)
+void RtpProfile::handleMessage(cMessage *msg)
 {
     if (msg->getArrivalGateId() == findGate("rtpIn")) {
         handleMessageFromRTP(msg);
@@ -71,11 +71,11 @@ void RTPProfile::handleMessage(cMessage *msg)
     }
 }
 
-void RTPProfile::handleMessageFromRTP(cMessage *msg)
+void RtpProfile::handleMessageFromRTP(cMessage *msg)
 {
     EV_TRACE << "handleMessageFromRTP Enter " << endl;
 
-    RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
+    RtpInnerPacket *rinpIn = check_and_cast<RtpInnerPacket *>(msg);
 
     switch (rinpIn->getType()) {
         case RTP_INP_INITIALIZE_PROFILE:
@@ -106,9 +106,9 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg)
     EV_TRACE << "handleMessageFromRTP Exit " << endl;
 }
 
-void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
+void RtpProfile::handleMessageFromPayloadSender(cMessage *msg)
 {
-    RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
+    RtpInnerPacket *rinpIn = check_and_cast<RtpInnerPacket *>(msg);
 
     switch (rinpIn->getType()) {
         case RTP_INP_DATA_OUT:
@@ -129,24 +129,24 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
     }
 }
 
-void RTPProfile::handleMessageFromPayloadReceiver(cMessage *msg)
+void RtpProfile::handleMessageFromPayloadReceiver(cMessage *msg)
 {
     // currently payload receiver modules don't send messages
     delete msg;
 }
 
-void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
+void RtpProfile::initializeProfile(RtpInnerPacket *rinp)
 {
     EV_TRACE << "initializeProfile Enter" << endl;
     _mtu = rinp->getMTU();
     delete rinp;
-    RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
+    RtpInnerPacket *rinpOut = new RtpInnerPacket("profileInitialized()");
     rinpOut->setProfileInitializedPkt(_rtcpPercentage, _preferredPort);
     send(rinpOut, "rtpOut");
     EV_TRACE << "initializeProfile Exit" << endl;
 }
 
-void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
+void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
 {
     EV_TRACE << "createSenderModule Enter" << endl;
     int ssrc = rinp->getSsrc();
@@ -161,7 +161,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     if (moduleType == nullptr)
         throw cRuntimeError("RTPProfile: payload sender module '%s' not found", moduleName);
 
-    RTPPayloadSender *rtpPayloadSender = check_and_cast<RTPPayloadSender *>(moduleType->create(moduleName, this));
+    RtpPayloadSender *rtpPayloadSender = check_and_cast<RtpPayloadSender *>(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
 
     gate("payloadSenderOut")->connectTo(rtpPayloadSender->gate("profileIn"));
@@ -170,11 +170,11 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     rtpPayloadSender->callInitialize();
     rtpPayloadSender->scheduleStart(simTime());
 
-    RTPInnerPacket *rinpOut1 = new RTPInnerPacket("senderModuleCreated()");
+    RtpInnerPacket *rinpOut1 = new RtpInnerPacket("senderModuleCreated()");
     rinpOut1->setSenderModuleCreatedPkt(ssrc);
     send(rinpOut1, "rtpOut");
 
-    RTPInnerPacket *rinpOut2 = new RTPInnerPacket("initializeSenderModule()");
+    RtpInnerPacket *rinpOut2 = new RtpInnerPacket("initializeSenderModule()");
     rinpOut2->setInitializeSenderModulePkt(ssrc, rinp->getFileName(), _mtu);
     send(rinpOut2, "payloadSenderOut");
 
@@ -182,24 +182,24 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     EV_TRACE << "createSenderModule Exit" << endl;
 }
 
-void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
+void RtpProfile::deleteSenderModule(RtpInnerPacket *rinpIn)
 {
     cModule *senderModule = gate("payloadSenderOut")->getNextGate()->getOwnerModule();
     senderModule->deleteModule();
 
-    RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleDeleted()");
+    RtpInnerPacket *rinpOut = new RtpInnerPacket("senderModuleDeleted()");
     rinpOut->setSenderModuleDeletedPkt(rinpIn->getSsrc());
     delete rinpIn;
 
     send(rinpOut, "rtpOut");
 }
 
-void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
+void RtpProfile::senderModuleControl(RtpInnerPacket *rinp)
 {
     send(rinp, "payloadSenderOut");
 }
 
-void RTPProfile::dataIn(RTPInnerPacket *rinp)
+void RtpProfile::dataIn(RtpInnerPacket *rinp)
 {
     EV_TRACE << "dataIn(RTPInnerPacket *rinp) Enter" << endl;
     processIncomingPacket(rinp);
@@ -209,7 +209,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
 
     uint32 ssrc = rtpHeader->getSsrc();
 
-    SSRCGate *ssrcGate = findSSRCGate(ssrc);
+    SsrcGate *ssrcGate = findSSRCGate(ssrc);
 
     if (!ssrcGate) {
         ssrcGate = newSSRCGate(ssrc);
@@ -222,8 +222,8 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
         if (moduleType == nullptr)
             throw cRuntimeError("Receiver module type %s not found", payloadReceiverName);
         else {
-            RTPPayloadReceiver *receiverModule =
-                check_and_cast<RTPPayloadReceiver *>(moduleType->create(payloadReceiverName, this));
+            RtpPayloadReceiver *receiverModule =
+                check_and_cast<RtpPayloadReceiver *>(moduleType->create(payloadReceiverName, this));
             if (_autoOutputFileNames) {
                 char outputFileName[100];
                 sprintf(outputFileName, "id%i.sim", receiverModule->getId());
@@ -246,35 +246,35 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     EV_TRACE << "dataIn(RTPInnerPacket *rinp) Exit" << endl;
 }
 
-void RTPProfile::dataOut(RTPInnerPacket *rinp)
+void RtpProfile::dataOut(RtpInnerPacket *rinp)
 {
     processOutgoingPacket(rinp);
     send(rinp, "rtpOut");
 }
 
-void RTPProfile::senderModuleInitialized(RTPInnerPacket *rinp)
+void RtpProfile::senderModuleInitialized(RtpInnerPacket *rinp)
 {
     EV_TRACE << "senderModuleInitialized" << endl;
     send(rinp, "rtpOut");
 }
 
-void RTPProfile::senderModuleStatus(RTPInnerPacket *rinp)
+void RtpProfile::senderModuleStatus(RtpInnerPacket *rinp)
 {
     EV_TRACE << "senderModuleStatus" << endl;
     send(rinp, "rtpOut");
 }
 
-void RTPProfile::processIncomingPacket(RTPInnerPacket *rinp)
+void RtpProfile::processIncomingPacket(RtpInnerPacket *rinp)
 {
     // do nothing with the packet
 }
 
-void RTPProfile::processOutgoingPacket(RTPInnerPacket *rinp)
+void RtpProfile::processOutgoingPacket(RtpInnerPacket *rinp)
 {
     // do nothing with the packet
 }
 
-RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
+RtpProfile::SsrcGate *RtpProfile::findSSRCGate(uint32 ssrc)
 {
     auto objectIndex = _ssrcGates.find(ssrc);
     if (objectIndex == _ssrcGates.end())
@@ -282,9 +282,9 @@ RTPProfile::SSRCGate *RTPProfile::findSSRCGate(uint32 ssrc)
     return objectIndex->second;
 }
 
-RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
+RtpProfile::SsrcGate *RtpProfile::newSSRCGate(uint32 ssrc)
 {
-    SSRCGate *ssrcGate = new SSRCGate(ssrc);
+    SsrcGate *ssrcGate = new SsrcGate(ssrc);
     bool assigned = false;
     int receiverGateId = findGate("payloadReceiverOut", 0);
     for (int i = receiverGateId; i < receiverGateId + _maxReceivers && !assigned; i++) {

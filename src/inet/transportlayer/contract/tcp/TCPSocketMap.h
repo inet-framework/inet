@@ -30,22 +30,22 @@ namespace inet {
  * Small utility class for managing a large number of TCPSocket objects.
  */
 //TBD: need for lookup could be eliminated by adding a void *yourPtr into TCPConnection and TCPCommand
-class INET_API TCPSocketMap
+class INET_API TcpSocketMap
 {
   protected:
-    typedef std::map<int, TCPSocket *> SocketMap;
+    typedef std::map<int, TcpSocket *> SocketMap;
     SocketMap socketMap;
 
   public:
     /**
      * Constructor.
      */
-    TCPSocketMap() {}
+    TcpSocketMap() {}
 
     /**
      * Destructor. Does NOT delete the TCPSocket objects.
      */
-    ~TCPSocketMap() {}
+    ~TcpSocketMap() {}
 
     /**
      * Finds the socket (by connId) for the given message. The message
@@ -54,18 +54,18 @@ class INET_API TCPSocketMap
      * not found, and throws an error if the message doesn't contain
      * a TCPCommand.
      */
-    TCPSocket *findSocketFor(cMessage *msg);
+    TcpSocket *findSocketFor(cMessage *msg);
 
     /**
      * Registers the given socket. Should not be called multiple times
      * for one socket object.
      */
-    void addSocket(TCPSocket *socket);
+    void addSocket(TcpSocket *socket);
 
     /**
      * Removes the given socket from the data structure.
      */
-    TCPSocket *removeSocket(TCPSocket *socket);
+    TcpSocket *removeSocket(TcpSocket *socket);
 
     /**
      * Returns the number of sockets stored.

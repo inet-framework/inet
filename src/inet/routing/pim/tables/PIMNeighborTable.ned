@@ -22,10 +22,10 @@ package inet.routing.pim.tables;
 //
 // The PIMNeighborTable module contains information about neighboring PIM routers.
 //
-simple PIMNeighborTable
+simple PimNeighborTable
 {
       @display("i=block/table");
-      @signal[NF_PIM_NEIGHBOR_ADDED](type=PIMNeighbor);
-    @signal[NF_PIM_NEIGHBOR_DELETED](type=PIMNeighbor);
-    @signal[NF_PIM_NEIGHBOR_CHANGED](type=PIMNeighbor);
+      @signal[NF_PIM_NEIGHBOR_ADDED](type=PimNeighbor);
+    @signal[NF_PIM_NEIGHBOR_DELETED](type=PimNeighbor);
+    @signal[NF_PIM_NEIGHBOR_CHANGED](type=PimNeighbor);
 }

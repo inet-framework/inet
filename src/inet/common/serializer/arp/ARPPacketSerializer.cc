@@ -23,27 +23,27 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(ARPPacket, ARPPacketSerializer);
+Register_Serializer(ArpPacket, ArpPacketSerializer);
 
-MACAddress ARPPacketSerializer::readMACAddress(MemoryInputStream& stream, unsigned int size) const
+MacAddress ArpPacketSerializer::readMACAddress(MemoryInputStream& stream, unsigned int size) const
 {
     b curpos = stream.getPosition();
-    MACAddress address = stream.readMACAddress();
+    MacAddress address = stream.readMACAddress();
     stream.seek(curpos + B(size));
     return address;
 }
 
-IPv4Address ARPPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsigned int size) const
+Ipv4Address ArpPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsigned int size) const
 {
     b curpos = stream.getPosition();
-    IPv4Address address = stream.readIPv4Address();
+    Ipv4Address address = stream.readIPv4Address();
     stream.seek(curpos + B(size));
     return address;
 }
 
-void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void ArpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    const auto& arpPacket = staticPtrCast<const ARPPacket>(chunk);
+    const auto& arpPacket = staticPtrCast<const ArpPacket>(chunk);
     stream.writeUint16Be(1); //ethernet
     stream.writeUint16Be(ETHERTYPE_IPv4);
     stream.writeByte(ETHER_ADDR_LEN);
@@ -55,16 +55,16 @@ void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeIPv4Address(arpPacket->getDestIPAddress());
 }
 
-const Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ArpPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto arpPacket = makeShared<ARPPacket>();
+    auto arpPacket = makeShared<ArpPacket>();
     if (stream.readUint16Be() != 1)
         arpPacket->markIncorrect();
     if (stream.readUint16Be() != ETHERTYPE_IPv4)
         arpPacket->markIncorrect();
     uint8_t macAddressLength = stream.readByte();     //ar_hln
     uint8_t ipAddressLength = stream.readByte();     //ar_pln
-    arpPacket->setOpcode((ARPOpcode)stream.readUint16Be());   // arphdr->ar_op
+    arpPacket->setOpcode((ArpOpcode)stream.readUint16Be());   // arphdr->ar_op
     arpPacket->setSrcMACAddress(readMACAddress(stream, macAddressLength));
     arpPacket->setSrcIPAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
     arpPacket->setDestMACAddress(readMACAddress(stream, macAddressLength));

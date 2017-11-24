@@ -61,7 +61,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
     else {
         EV_DEBUG << "Message received: " << msg->getName() << endl;
 
-        TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
+        TcpCommand *ind = dynamic_cast<TcpCommand *>(msg->getControlInfo());
         if (!ind) {
             EV_DEBUG << "No control info for the message" << endl;
         }
@@ -71,7 +71,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
-        TCPSocket *socket = sockCollection.findSocketFor(msg);
+        TcpSocket *socket = sockCollection.findSocketFor(msg);
         if (socket == nullptr) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
@@ -162,7 +162,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 
     // Get the socket and associated data structure.
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
     if (sockdata->messageQueue.empty()) {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
         socket->close();
@@ -190,7 +190,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
 
     sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
 
@@ -206,7 +206,7 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool
     // Message deleted in handler - do not delete here!
 }
 
-void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status)
+void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status)
 {
     // This is obviously not used at the present time.
     EV_INFO << "SOCKET STATUS ARRIVED. Socket: " << connId << endl;
@@ -221,10 +221,10 @@ void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
 
     // close the connection (if not already closed)
-    if (socket->getState() == TCPSocket::PEER_CLOSED) {
+    if (socket->getState() == TcpSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
         socket->close();
     }
@@ -240,7 +240,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
 }
@@ -261,7 +261,7 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
         EV_WARN << "Connection refused!\n";
 
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
 }
@@ -274,7 +274,7 @@ void HttpBrowser::socketDeleted(int connId, void *yourPtr)
 
     SockData *sockdata = (SockData *)yourPtr;
     // TODO: socket is already deleted, no?
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
     ASSERT(connId == socket->getConnectionId());
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {
@@ -305,7 +305,7 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     EV_DEBUG << "Submitting to socket. Module: " << moduleName << ", port: " << connectPort << ". Total messages: " << queue.size() << endl;
 
     // Create and initialize the socket
-    TCPSocket *socket = new TCPSocket();
+    TcpSocket *socket = new TcpSocket();
     socket->setOutputGate(gate("socketOut"));
     sockCollection.addSocket(socket);
 

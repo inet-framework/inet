@@ -28,7 +28,7 @@ import inet.applications.contract.IApp;
 //
 // @see DHCPServer, DHCPMessage
 //
-simple DHCPClient like IApp
+simple DhcpClient like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -37,8 +37,8 @@ simple DHCPClient like IApp
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 
 

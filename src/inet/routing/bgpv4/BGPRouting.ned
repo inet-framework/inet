@@ -51,7 +51,7 @@ import inet.routing.contract.IBGPRouting;
 //
 // @author Helene Lageber
 //
-simple BGPRouting like IBGPRouting
+simple BgpRouting like IBGPRouting
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

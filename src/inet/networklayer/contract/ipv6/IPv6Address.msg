@@ -25,7 +25,7 @@ cplusplus {{
 
 namespace inet;
 
-class IPv6Address
+class Ipv6Address
 {
     @existingClass;
     //FIXME @tostring, ...

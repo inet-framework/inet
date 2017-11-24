@@ -52,7 +52,7 @@ class INET_API Interface
         INTERFACE_DOWN = 8
     };
 
-    enum OSPFInterfaceType {
+    enum OspfInterfaceType {
         UNKNOWN_TYPE = 0,
         POINTTOPOINT = 1,
         BROADCAST = 2,
@@ -72,14 +72,14 @@ class INET_API Interface
     };
 
   private:
-    OSPFInterfaceType interfaceType;
+    OspfInterfaceType interfaceType;
     InterfaceState *state;
     InterfaceState *previousState;
     int ifIndex;
     unsigned short mtu;
-    IPv4AddressRange interfaceAddressRange;
-    AreaID areaID;
-    AreaID transitAreaID;
+    Ipv4AddressRange interfaceAddressRange;
+    AreaId areaID;
+    AreaId transitAreaID;
     short helloInterval;
     short pollInterval;
     short routerDeadInterval;
@@ -88,12 +88,12 @@ class INET_API Interface
     cMessage *helloTimer;
     cMessage *waitTimer;
     cMessage *acknowledgementTimer;
-    std::map<RouterID, Neighbor *> neighboringRoutersByID;
-    std::map<IPv4Address, Neighbor *> neighboringRoutersByAddress;
+    std::map<RouterId, Neighbor *> neighboringRoutersByID;
+    std::map<Ipv4Address, Neighbor *> neighboringRoutersByAddress;
     std::vector<Neighbor *> neighboringRouters;
-    std::map<IPv4Address, std::list<OSPFLSAHeader> > delayedAcknowledgements;
-    DesignatedRouterID designatedRouter;
-    DesignatedRouterID backupDesignatedRouter;
+    std::map<Ipv4Address, std::list<OspfLsaHeader> > delayedAcknowledgements;
+    DesignatedRouterId designatedRouter;
+    DesignatedRouterId backupDesignatedRouter;
     Metric interfaceOutputCost;
     short retransmissionInterval;
     short acknowledgementDelay;
@@ -107,38 +107,38 @@ class INET_API Interface
     void changeState(InterfaceState *newState, InterfaceState *currentState);
 
   public:
-    Interface(OSPFInterfaceType ifType = UNKNOWN_TYPE);
+    Interface(OspfInterfaceType ifType = UNKNOWN_TYPE);
     virtual ~Interface();
 
     void processEvent(InterfaceEventType event);
     void reset();
-    void sendHelloPacket(IPv4Address destination, short ttl = 1);
-    void sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Address destination);
-    Neighbor *getNeighborByID(RouterID neighborID);
-    Neighbor *getNeighborByAddress(IPv4Address address);
+    void sendHelloPacket(Ipv4Address destination, short ttl = 1);
+    void sendLSAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination);
+    Neighbor *getNeighborByID(RouterId neighborID);
+    Neighbor *getNeighborByAddress(Ipv4Address address);
     void addNeighbor(Neighbor *neighbor);
     InterfaceStateType getState() const;
     static const char *getStateString(InterfaceStateType stateType);
     bool hasAnyNeighborInStates(int states) const;
-    void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
-    bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool floodLSA(const OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
-    void addDelayedAcknowledgement(const OSPFLSAHeader& lsaHeader);
+    void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
+    bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
+    bool floodLSA(const OspfLsa *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    void addDelayedAcknowledgement(const OspfLsaHeader& lsaHeader);
     void sendDelayedAcknowledgements();
     void ageTransmittedLSALists();
 
-    Packet *createUpdatePacket(const OSPFLSA *lsa);
+    Packet *createUpdatePacket(const OspfLsa *lsa);
 
-    void setType(OSPFInterfaceType ifType) { interfaceType = ifType; }
-    OSPFInterfaceType getType() const { return interfaceType; }
+    void setType(OspfInterfaceType ifType) { interfaceType = ifType; }
+    OspfInterfaceType getType() const { return interfaceType; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
     void setMTU(unsigned short ifMTU) { mtu = ifMTU; }
     unsigned short getMTU() const { return mtu; }
-    void setAreaID(AreaID areaId) { areaID = areaId; }
-    AreaID getAreaID() const { return areaID; }
-    void setTransitAreaID(AreaID areaId) { transitAreaID = areaId; }
-    AreaID getTransitAreaID() const { return transitAreaID; }
+    void setAreaID(AreaId areaId) { areaID = areaId; }
+    AreaId getAreaID() const { return areaID; }
+    void setTransitAreaID(AreaId areaId) { transitAreaID = areaId; }
+    AreaId getTransitAreaID() const { return transitAreaID; }
     void setOutputCost(Metric cost) { interfaceOutputCost = cost; }
     Metric getOutputCost() const { return interfaceOutputCost; }
     void setRetransmissionInterval(short interval) { retransmissionInterval = interval; }
@@ -159,14 +159,14 @@ class INET_API Interface
     AuthenticationType getAuthenticationType() const { return authenticationType; }
     void setAuthenticationKey(AuthenticationKeyType key) { authenticationKey = key; }
     AuthenticationKeyType getAuthenticationKey() const { return authenticationKey; }
-    void setAddressRange(IPv4AddressRange range) { interfaceAddressRange = range; }
-    IPv4AddressRange getAddressRange() const { return interfaceAddressRange; }
+    void setAddressRange(Ipv4AddressRange range) { interfaceAddressRange = range; }
+    Ipv4AddressRange getAddressRange() const { return interfaceAddressRange; }
 
     cMessage *getHelloTimer() { return helloTimer; }
     cMessage *getWaitTimer() { return waitTimer; }
     cMessage *getAcknowledgementTimer() { return acknowledgementTimer; }
-    DesignatedRouterID getDesignatedRouter() const { return designatedRouter; }
-    DesignatedRouterID getBackupDesignatedRouter() const { return backupDesignatedRouter; }
+    DesignatedRouterId getDesignatedRouter() const { return designatedRouter; }
+    DesignatedRouterId getBackupDesignatedRouter() const { return backupDesignatedRouter; }
     unsigned long getNeighborCount() const { return neighboringRouters.size(); }
     Neighbor *getNeighbor(unsigned long i) { return neighboringRouters[i]; }
     const Neighbor *getNeighbor(unsigned long i) const { return neighboringRouters[i]; }

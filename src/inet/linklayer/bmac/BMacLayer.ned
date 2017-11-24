@@ -32,8 +32,8 @@ package inet.linklayer.bmac;
 //*
 //**************************************************************************/
 
-import inet.linklayer.base.MACProtocolBase;
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.base.MacProtocolBase;
+import inet.linklayer.contract.IMacProtocol;
 
 
 //
@@ -41,7 +41,7 @@ import inet.linklayer.contract.IMACProtocol;
 // LPL).
 // See C++ documentation for details.
 //
-simple BMacLayer extends MACProtocolBase like IMACProtocol
+simple BMacLayer extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or

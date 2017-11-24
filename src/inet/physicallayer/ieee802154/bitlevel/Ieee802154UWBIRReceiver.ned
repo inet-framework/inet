@@ -19,8 +19,8 @@ package inet.physicallayer.ieee802154.bitlevel;
 
 import inet.physicallayer.contract.packetlevel.IReceiver;
 
-module Ieee802154UWBIRReceiver like IReceiver
+module Ieee802154UwbIrReceiver like IReceiver
 {
     parameters:
-        @class(Ieee802154UWBIRReceiver);
+        @class(Ieee802154UwbIrReceiver);
 }

@@ -97,10 +97,10 @@ void QoSAckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader
     }
 }
 
-std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> QoSAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
+std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QoSAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
     printAckStatuses();
-    MACAddress receiverAddr = blockAck->getTransmitterAddress();
+    MacAddress receiverAddr = blockAck->getTransmitterAddress();
     std::set<QoSKey> ackedFrames;
     // Table 8-16—BlockAckReq frame variant encoding
     if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {

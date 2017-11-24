@@ -24,12 +24,12 @@ namespace inet {
 
 using namespace physicalenvironment;
 
-bool BVHTree::isLeaf() const
+bool BvhTree::isLeaf() const
 {
     return objects.size() != 0;
 }
 
-BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
+BvhTree::BvhTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
 {
     this->left = nullptr;
     this->right = nullptr;
@@ -40,7 +40,7 @@ BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector
     buildHierarchy(objects, start, end, axis);
 }
 
-void BVHTree::buildHierarchy(std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
+void BvhTree::buildHierarchy(std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
 {
     if (end - start + 1 <= leafCapacity)
     {
@@ -57,13 +57,13 @@ void BVHTree::buildHierarchy(std::vector<const IPhysicalObject*>& objects, unsig
         axis.getNextAxis();
         Coord boundingMin, boundingMax;
         computeBoundingBox(boundingMin, boundingMax, objects, start, (start + end) / 2);
-        left = new BVHTree(boundingMin, boundingMax, objects, start, (start + end) / 2, axis, leafCapacity);
+        left = new BvhTree(boundingMin, boundingMax, objects, start, (start + end) / 2, axis, leafCapacity);
         computeBoundingBox(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end);
-        right = new BVHTree(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end, axis, leafCapacity);
+        right = new BvhTree(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end, axis, leafCapacity);
     }
 }
 
-void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end) const
+void BvhTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const IPhysicalObject*>& objects, unsigned int start, unsigned int end) const
 {
     double xMin = std::numeric_limits<double>::max();
     double yMin = xMin;
@@ -96,7 +96,7 @@ void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::ve
     boundingMax = Coord(xMax, yMax, zMax);
 }
 
-bool BVHTree::intersectWithLineSegment(const LineSegment& lineSegment) const
+bool BvhTree::intersectWithLineSegment(const LineSegment& lineSegment) const
 {
     Coord size = Coord(boundingMax.x - boundingMin.x, boundingMax.y - boundingMin.y, boundingMax.z - boundingMin.z);
     Coord p0 = lineSegment.getPoint1() - center;
@@ -107,7 +107,7 @@ bool BVHTree::intersectWithLineSegment(const LineSegment& lineSegment) const
     return cuboid.computeIntersection(translatedLineSegment, intersection1, intersection2, normal1, normal2);
 }
 
-void BVHTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *visitor) const
+void BvhTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *visitor) const
 {
     if (isLeaf())
     {
@@ -122,7 +122,7 @@ void BVHTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *v
     }
 }
 
-BVHTree::~BVHTree()
+BvhTree::~BvhTree()
 {
     delete left;
     delete right;

@@ -23,7 +23,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211HTInterleaving : public IInterleaving
+class INET_API Ieee80211HtInterleaving : public IInterleaving
 {
     protected:
         // Let numberOfCodedBitsPerSpatialStreams.at(i) denote the number of coded bits for the ith spatial
@@ -34,7 +34,7 @@ class INET_API Ieee80211HTInterleaving : public IInterleaving
 
     public:
         virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211HTInterleaving"; }
-        Ieee80211HTInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
+        Ieee80211HtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
 };
 
 } /* namespace physicallayer */

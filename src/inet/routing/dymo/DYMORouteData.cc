@@ -23,7 +23,7 @@ namespace inet {
 
 namespace dymo {
 
-DYMORouteData::DYMORouteData()
+DymoRouteData::DymoRouteData()
 {
     isBroken = false;
     sequenceNumber = 0;

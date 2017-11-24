@@ -28,7 +28,7 @@ namespace inet {
 
 namespace tcp {
 
-class INET_API TCPSegmentTransmitInfoList
+class INET_API TcpSegmentTransmitInfoList
 {
   public:
     class Item
@@ -48,10 +48,10 @@ class INET_API TCPSegmentTransmitInfoList
         simtime_t getLastSentTime() const { return lastSentTime; }
         int getTransmitCount() const { return transmitCount; }
 
-        friend class TCPSegmentTransmitInfoList;
+        friend class TcpSegmentTransmitInfoList;
     };
-    typedef std::list<Item> TCPSegmentTransmitInfoItems;
-    TCPSegmentTransmitInfoItems regions;    // region[i].end == region[i+1].beg
+    typedef std::list<Item> TcpSegmentTransmitInfoItems;
+    TcpSegmentTransmitInfoItems regions;    // region[i].end == region[i+1].beg
 
   public:
     void set(uint32_t beg, uint32_t end, simtime_t sentTime);    // [beg,end)

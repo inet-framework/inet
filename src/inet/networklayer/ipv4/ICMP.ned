@@ -38,7 +38,7 @@ package inet.networklayer.ipv4;
 // date: 2.5.00, 9.5.00, 20.5.00, 9.6.00
 // redesign: Andras Varga 1.3.2004
 //
-simple ICMP
+simple Icmp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -48,7 +48,7 @@ simple ICMP
     gates:
         input transportIn;
         output transportOut;
-        input ipIn @labels(IPv4ControlInfo/up);  // delivered ICMP packets
-        output ipOut @labels(IPv4ControlInfo/down);  // towards network
+        input ipIn @labels(Ipv4ControlInfo/up);  // delivered ICMP packets
+        output ipOut @labels(Ipv4ControlInfo/down);  // towards network
 }
 

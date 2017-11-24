@@ -29,7 +29,7 @@ namespace inet;
 //
 // @author Daniel Willkomm
 //
-class CSMAHeader extends MacHeaderBase
+class CsmaHeader extends MacHeaderBase
 {
     long       sequenceId; // Sequence Number to detect duplicate messages
 }

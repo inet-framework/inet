@@ -22,9 +22,9 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
-Define_Module(AARFRateControl);
+Define_Module(AarfRateControl);
 
-void AARFRateControl::initialize(int stage)
+void AarfRateControl::initialize(int stage)
 {
     RateControlBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -46,17 +46,17 @@ void AARFRateControl::initialize(int stage)
     }
 }
 
-void AARFRateControl::handleMessage(cMessage* msg)
+void AarfRateControl::handleMessage(cMessage* msg)
 {
     throw cRuntimeError("This module doesn't handle self messages");
 }
 
-void AARFRateControl::updateDisplayString()
+void AarfRateControl::updateDisplayString()
 {
     getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
-void AARFRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
+void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
     increaseRateIfTimerIsExpired();
 
@@ -98,23 +98,23 @@ void AARFRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
 
 }
 
-void AARFRateControl::multiplyIncreaseThreshold(double factor)
+void AarfRateControl::multiplyIncreaseThreshold(double factor)
 {
     if (increaseThreshold * factor <= maxIncreaseThreshold)
         increaseThreshold *= factor;
 }
 
-void AARFRateControl::resetIncreaseThreshdold()
+void AarfRateControl::resetIncreaseThreshdold()
 {
     increaseThreshold = par("increaseThreshold");
 }
 
-void AARFRateControl::resetTimer()
+void AarfRateControl::resetTimer()
 {
     timer = simTime();
 }
 
-void AARFRateControl::increaseRateIfTimerIsExpired()
+void AarfRateControl::increaseRateIfTimerIsExpired()
 {
     if (simTime() - timer >= interval)
     {
@@ -126,11 +126,11 @@ void AARFRateControl::increaseRateIfTimerIsExpired()
     }
 }
 
-void AARFRateControl::frameReceived(Packet *frame)
+void AarfRateControl::frameReceived(Packet *frame)
 {
 }
 
-const IIeee80211Mode* AARFRateControl::getRate()
+const IIeee80211Mode* AarfRateControl::getRate()
 {
     Enter_Method_Silent("getRate()");
     increaseRateIfTimerIsExpired();

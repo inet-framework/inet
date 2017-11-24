@@ -106,7 +106,7 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     std::copy(tcpHeaderBytes.begin(), tcpHeaderBytes.end(), (uint8_t *)buffer + pseudoHeaderLength);
     std::copy(tcpDataBytes.begin(), tcpDataBytes.end(), (uint8_t *)buffer + pseudoHeaderLength + tcpHeaderLength);
     // 2. compute the CRC
-    uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
     delete [] buffer;
     return crc;
 }

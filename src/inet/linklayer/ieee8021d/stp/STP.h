@@ -37,11 +37,11 @@ namespace inet {
 /**
  * Implements the Spanning Tree Protocol. See the NED file for details.
  */
-class INET_API STP : public STPBase
+class INET_API Stp : public StpBase
 {
   public:
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
-    enum BDPUType { CONFIG_BDPU = 0, TCN_BPDU = 1 };
+    enum BdpuType { CONFIG_BDPU = 0, TCN_BPDU = 1 };
 
   protected:
     static const double tickInterval;    // interval between two ticks
@@ -52,7 +52,7 @@ class INET_API STP : public STPBase
     // Discovered values
     unsigned int rootPathCost = 0;
     unsigned int rootPriority = 0;
-    MACAddress rootAddress;
+    MacAddress rootAddress;
 
     simtime_t currentMaxAge;
     simtime_t currentFwdDelay;
@@ -69,19 +69,19 @@ class INET_API STP : public STPBase
     cMessage *tick = nullptr;
 
   public:
-    STP();
-    virtual ~STP();
+    Stp();
+    virtual ~Stp();
 
     /*
      * Bridge Protocol Data Unit handling
      */
-    void handleBPDU(Packet *packet, const Ptr<const BPDU>& bpdu);
+    void handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu);
     virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
      */
-    void handleTCN(Packet *packet, const Ptr<const BPDU>& tcn);
+    void handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn);
     virtual void handleMessage(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -89,7 +89,7 @@ class INET_API STP : public STPBase
     /*
      * Send BPDU with specified parameters (portNum, TCA flag, etc.)
      */
-    void generateBPDU(int interfaceId, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
+    void generateBPDU(int interfaceId, const MacAddress& address = MacAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
 
     /*
      * Send hello BDPUs on all ports (only for root switches)
@@ -107,14 +107,14 @@ class INET_API STP : public STPBase
      * Invokes: superiorID(), superiorPort()
      */
     int comparePorts(Ieee8021dInterfaceData *portA, Ieee8021dInterfaceData *portB);
-    int compareBridgeIDs(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress);
+    int compareBridgeIDs(unsigned int aPriority, MacAddress aAddress, unsigned int bPriority, MacAddress bAddress);
     int comparePortIDs(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum);
 
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu);
-    void setSuperiorBPDU(int interfaceId, const Ptr<const BPDU>& bpdu);
+    bool isSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu);
+    void setSuperiorBPDU(int interfaceId, const Ptr<const Bpdu>& bpdu);
 
     void handleTick();
 
@@ -153,7 +153,7 @@ class INET_API STP : public STPBase
     friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortRole r);
     friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortState s);
     friend inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p);
-    friend inline std::ostream& operator<<(std::ostream& os, STP i);
+    friend inline std::ostream& operator<<(std::ostream& os, Stp i);
 
     // for lifecycle:
 
@@ -232,7 +232,7 @@ inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p)
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, STP i)
+inline std::ostream& operator<<(std::ostream& os, Stp i)
 {
     os << "RootID Priority: " << i.rootPriority << " \n";
     os << "  Address: " << i.rootAddress << " \n";

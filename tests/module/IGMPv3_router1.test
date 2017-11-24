@@ -34,10 +34,10 @@ network=TestIGMPNetwork
 %#
 %postrun-command: grep "IGMPTester: Received" test.out > received.out || true
 %contains-regex: received.out
-IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=<unspec>, sourceList=,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=<unspec>, sourceList=,.*>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

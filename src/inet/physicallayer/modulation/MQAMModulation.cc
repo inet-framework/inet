@@ -22,11 +22,11 @@ namespace inet {
 namespace physicallayer {
 
 // http://www.gaussianwaves.com/2012/10/constructing-a-rectangular-constellation-for-16-qam/
-static std::vector<APSKSymbol> *createConstellation(unsigned int codeWordSize)
+static std::vector<ApskSymbol> *createConstellation(unsigned int codeWordSize)
 {
     if (codeWordSize % 2 != 0)
         throw cRuntimeError("Odd code word size is not supported");
-    auto symbols = new std::vector<APSKSymbol>();
+    auto symbols = new std::vector<ApskSymbol>();
     double normalizationFactor = 1 / sqrt(2 * (pow(2, codeWordSize) - 1) / 3);
     unsigned int constellationSize = pow(2, codeWordSize);
     unsigned int mask = pow(2, (codeWordSize / 2)) - 1;
@@ -37,24 +37,24 @@ static std::vector<APSKSymbol> *createConstellation(unsigned int codeWordSize)
         unsigned int grayRow = (row >> 1) ^ row;
         double x = -mask + 2 * grayColumn;
         double y = -mask + 2 * grayRow;
-        symbols->push_back(normalizationFactor * APSKSymbol(x, y));
+        symbols->push_back(normalizationFactor * ApskSymbol(x, y));
     }
     return symbols;
 }
 
-MQAMModulation::MQAMModulation(unsigned int codeWordSize) : MQAMModulationBase(createConstellation(codeWordSize))
+MqamModulation::MqamModulation(unsigned int codeWordSize) : MqamModulationBase(createConstellation(codeWordSize))
 {
 }
 
-MQAMModulation::~MQAMModulation()
+MqamModulation::~MqamModulation()
 {
     delete constellation;
 }
 
-std::ostream& MQAMModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MqamModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "MQAMModulation";
-    return APSKModulationBase::printToStream(stream, level);
+    return ApskModulationBase::printToStream(stream, level);
 }
 
 } // namespace physicallayer

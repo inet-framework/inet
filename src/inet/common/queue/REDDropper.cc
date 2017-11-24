@@ -22,9 +22,9 @@
 
 namespace inet {
 
-Define_Module(REDDropper);
+Define_Module(RedDropper);
 
-REDDropper::~REDDropper()
+RedDropper::~RedDropper()
 {
     delete[] minths;
     delete[] maxths;
@@ -34,7 +34,7 @@ REDDropper::~REDDropper()
     q_time = 0;
 }
 
-void REDDropper::initialize()
+void RedDropper::initialize()
 {
     AlgorithmicDropperBase::initialize();
 
@@ -76,7 +76,7 @@ void REDDropper::initialize()
     }
 }
 
-bool REDDropper::shouldDrop(cPacket *packet)
+bool RedDropper::shouldDrop(cPacket *packet)
 {
     const int i = packet->getArrivalGate()->getIndex();
     ASSERT(i >= 0 && i < numGates);
@@ -128,7 +128,7 @@ bool REDDropper::shouldDrop(cPacket *packet)
     return false;
 }
 
-void REDDropper::sendOut(cPacket *packet)
+void RedDropper::sendOut(cPacket *packet)
 {
     AlgorithmicDropperBase::sendOut(packet);
     // TD: Set the time stamp q_time when the queue gets empty.

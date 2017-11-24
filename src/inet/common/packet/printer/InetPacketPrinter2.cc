@@ -67,14 +67,14 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 
   protected:
 #ifdef WITH_IPv4
-    std::string formatARPPacket(const ARPPacket *packet) const;
+    std::string formatARPPacket(const ArpPacket *packet) const;
     std::string formatICMPPacket(const IcmpHeader *packet) const;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IEEE80211
     std::string formatIeee80211Frame(const ieee80211::Ieee80211MacHeader *packet) const;
 #endif // ifdef WITH_IEEE80211
 #ifdef WITH_RIP
-    std::string formatRIPPacket(const RIPPacket *packet) const;
+    std::string formatRIPPacket(const RipPacket *packet) const;
 #endif // ifdef WITH_RIP
 #ifdef WITH_RADIO
     std::string formatSignal(const Signal *packet) const;
@@ -184,7 +184,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         else if (const auto ipv4Header = dynamic_cast<const IcmpHeader *>(chunk)) {
             out << formatICMPPacket(ipv4Header);
         }
-        else if (const auto arp = dynamic_cast<const ARPPacket *>(chunk)) {
+        else if (const auto arp = dynamic_cast<const ArpPacket *>(chunk)) {
             out << formatARPPacket(arp);
         }
 #endif // ifdef WITH_IPv4
@@ -194,7 +194,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
         }
 #endif // ifdef WITH_IEEE80211
 #ifdef WITH_RIP
-        else if (const auto rip = dynamic_cast<const RIPPacket *>(chunk)) {
+        else if (const auto rip = dynamic_cast<const RipPacket *>(chunk)) {
             out << formatRIPPacket(rip);
         }
 #endif // ifdef WITH_RIP
@@ -214,7 +214,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
 }
 
 #ifdef WITH_IPv4
-std::string InetPacketPrinter2::formatARPPacket(const ARPPacket *packet) const
+std::string InetPacketPrinter2::formatARPPacket(const ArpPacket *packet) const
 {
     std::ostringstream os;
     switch (packet->getOpcode()) {
@@ -456,13 +456,13 @@ std::string InetPacketPrinter2::formatICMPPacket(const IcmpHeader *icmpHeader) c
     switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST:
             os << "ICMP echo request " << srcAddr << " to " << destAddr;
-            if (auto echo = dynamic_cast<const ICMPEchoRequest *>(icmpHeader))
+            if (auto echo = dynamic_cast<const IcmpEchoRequest *>(icmpHeader))
                 os << " id=" << echo->getIdentifier() << ", seq=" << echo->getSeqNumber();
             break;
 
         case ICMP_ECHO_REPLY:
             os << "ICMP echo reply " << srcAddr << " to " << destAddr;
-            if (auto echo = dynamic_cast<const ICMPEchoReply *>(icmpHeader))
+            if (auto echo = dynamic_cast<const IcmpEchoReply *>(icmpHeader))
                 os << " id=" << echo->getIdentifier() << ", seq=" << echo->getSeqNumber();
             break;
 
@@ -484,7 +484,7 @@ std::string InetPacketPrinter2::formatICMPPacket(const IcmpHeader *icmpHeader) c
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_RIP
-std::string InetPacketPrinter2::formatRIPPacket(const RIPPacket *packet) const
+std::string InetPacketPrinter2::formatRIPPacket(const RipPacket *packet) const
 {
     std::ostringstream os;
     os << "RIP: ";
@@ -503,7 +503,7 @@ std::string InetPacketPrinter2::formatRIPPacket(const RIPPacket *packet) const
     }
     unsigned int size = packet->getEntryArraySize();
     for (unsigned int i = 0; i < size; ++i) {
-        const RIPEntry& entry = packet->getEntry(i);
+        const RipEntry& entry = packet->getEntry(i);
         if (i > 0)
             os << "; ";
         if (i > 2) {

@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-PPMModulationBase::PPMModulationBase(unsigned int numberOfPulses) :
+PpmModulationBase::PpmModulationBase(unsigned int numberOfPulses) :
     numberOfPulses(numberOfPulses)
 {
 }

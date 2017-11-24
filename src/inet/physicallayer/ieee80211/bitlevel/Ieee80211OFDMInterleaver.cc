@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-std::ostream& Ieee80211OFDMInterleaver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmInterleaver::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211Interleaver";
     if (level <= PRINT_LEVEL_TRACE)
@@ -29,7 +29,7 @@ std::ostream& Ieee80211OFDMInterleaver::printToStream(std::ostream& stream, int 
     return stream;
 }
 
-BitVector Ieee80211OFDMInterleaver::interleave(const BitVector& deinterleavedBits) const
+BitVector Ieee80211OfdmInterleaver::interleave(const BitVector& deinterleavedBits) const
 {
     if (deinterleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("deinterleavedBits length = %d must be a multiple of numberOfCodedBitsPerSymbol = %d", deinterleavedBits.getSize(), numberOfCodedBitsPerSymbol);
@@ -52,7 +52,7 @@ BitVector Ieee80211OFDMInterleaver::interleave(const BitVector& deinterleavedBit
     return interleavedBits;
 }
 
-BitVector Ieee80211OFDMInterleaver::deinterleave(const BitVector& interleavedBits) const
+BitVector Ieee80211OfdmInterleaver::deinterleave(const BitVector& interleavedBits) const
 {
     if (interleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("interleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
@@ -74,7 +74,7 @@ BitVector Ieee80211OFDMInterleaver::deinterleave(const BitVector& interleavedBit
     return deinterleavedBits;
 }
 
-Ieee80211OFDMInterleaver::Ieee80211OFDMInterleaver(const Ieee80211OFDMInterleaving *interleaving) : interleaving(interleaving)
+Ieee80211OfdmInterleaver::Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleaving *interleaving) : interleaving(interleaving)
 {
     numberOfCodedBitsPerSubcarrier = interleaving->getNumberOfCodedBitsPerSubcarrier();
     numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();

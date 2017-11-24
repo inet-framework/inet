@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-const DQPSKModulation DQPSKModulation::singleton;
+const DqpskModulation DqpskModulation::singleton;
 
-DQPSKModulation::DQPSKModulation() :
-    DPSKModulationBase(4)
+DqpskModulation::DqpskModulation() :
+    DpskModulationBase(4)
 {
 }
 

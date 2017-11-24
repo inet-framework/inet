@@ -32,23 +32,23 @@ EXECUTE_ON_STARTUP(
         cEnum * e = cEnum::find("inet::ChooseDestAddrMode");
         if (!e)
             enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
-        e->insert(UDPBasicBurst::ONCE, "once");
-        e->insert(UDPBasicBurst::PER_BURST, "perBurst");
-        e->insert(UDPBasicBurst::PER_SEND, "perSend");
+        e->insert(UdpBasicBurst::ONCE, "once");
+        e->insert(UdpBasicBurst::PER_BURST, "perBurst");
+        e->insert(UdpBasicBurst::PER_SEND, "perSend");
         );
 
-Define_Module(UDPBasicBurst);
+Define_Module(UdpBasicBurst);
 
-int UDPBasicBurst::counter;
+int UdpBasicBurst::counter;
 
-simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
+simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
 
-UDPBasicBurst::~UDPBasicBurst()
+UdpBasicBurst::~UdpBasicBurst()
 {
     cancelAndDelete(timerNext);
 }
 
-void UDPBasicBurst::initialize(int stage)
+void UdpBasicBurst::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
@@ -92,7 +92,7 @@ void UDPBasicBurst::initialize(int stage)
     }
 }
 
-L3Address UDPBasicBurst::chooseDestAddr()
+L3Address UdpBasicBurst::chooseDestAddr()
 {
     if (destAddresses.size() == 1)
         return destAddresses[0];
@@ -101,7 +101,7 @@ L3Address UDPBasicBurst::chooseDestAddr()
     return destAddresses[k];
 }
 
-Packet *UDPBasicBurst::createPacket()
+Packet *UdpBasicBurst::createPacket()
 {
     char msgName[32];
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
@@ -118,7 +118,7 @@ Packet *UDPBasicBurst::createPacket()
     return pk;
 }
 
-void UDPBasicBurst::processStart()
+void UdpBasicBurst::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
@@ -132,7 +132,7 @@ void UDPBasicBurst::processStart()
 
     while ((token = tokenizer.nextToken()) != nullptr) {
         if (strstr(token, "Broadcast") != nullptr)
-            destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
+            destAddresses.push_back(Ipv4Address::ALLONES_ADDRESS);
         else {
             L3Address addr = L3AddressResolver().resolve(token);
             if (excludeLocalDestAddresses && ift && ift->isLocalAddress(addr))
@@ -158,7 +158,7 @@ void UDPBasicBurst::processStart()
     processSend();
 }
 
-void UDPBasicBurst::processSend()
+void UdpBasicBurst::processSend()
 {
     if (stopTime < SIMTIME_ZERO || simTime() < stopTime) {
         // send and reschedule next sending
@@ -167,12 +167,12 @@ void UDPBasicBurst::processSend()
     }
 }
 
-void UDPBasicBurst::processStop()
+void UdpBasicBurst::processStop()
 {
     socket.close();
 }
 
-void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
+void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
@@ -205,14 +205,14 @@ void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void UDPBasicBurst::refreshDisplay() const
+void UdpBasicBurst::refreshDisplay() const
 {
     char buf[100];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void UDPBasicBurst::processPacket(cPacket *pk)
+void UdpBasicBurst::processPacket(cPacket *pk)
 {
     if (pk->getKind() == UDP_I_ERROR) {
         EV_WARN << "UDP error received\n";
@@ -227,7 +227,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
         auto it = sourceSequence.find(moduleId);
         if (it != sourceSequence.end()) {
             if (it->second >= msgId) {
-                EV_DEBUG << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+                EV_DEBUG << "Out of order packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
                 emit(outOfOrderPkSignal, pk);
                 delete pk;
                 numDuplicated++;
@@ -242,7 +242,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
 
     if (delayLimit > 0) {
         if (simTime() - pk->getTimestamp() > delayLimit) {
-            EV_DEBUG << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+            EV_DEBUG << "Old packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
             PacketDropDetails details;
             details.setReason(CONGESTION);
             emit(packetDropSignal, pk, &details);
@@ -252,13 +252,13 @@ void UDPBasicBurst::processPacket(cPacket *pk)
         }
     }
 
-    EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);
     numReceived++;
     delete pk;
 }
 
-void UDPBasicBurst::generateBurst()
+void UdpBasicBurst::generateBurst()
 {
     simtime_t now = simTime();
 
@@ -309,7 +309,7 @@ void UDPBasicBurst::generateBurst()
     scheduleAt(nextPkt, timerNext);
 }
 
-void UDPBasicBurst::finish()
+void UdpBasicBurst::finish()
 {
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
@@ -317,7 +317,7 @@ void UDPBasicBurst::finish()
     ApplicationBase::finish();
 }
 
-bool UDPBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
 
@@ -329,7 +329,7 @@ bool UDPBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicBurst::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpBasicBurst::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     if (timerNext)
         cancelEvent(timerNext);
@@ -338,7 +338,7 @@ bool UDPBasicBurst::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void UDPBasicBurst::handleNodeCrash()
+void UdpBasicBurst::handleNodeCrash()
 {
     if (timerNext)
         cancelEvent(timerNext);

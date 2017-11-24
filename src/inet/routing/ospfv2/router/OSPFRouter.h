@@ -43,13 +43,13 @@ class INET_API Router
 {
   private:
     IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;
-    RouterID routerID;    ///< The router ID assigned by the IP layer.
-    std::map<AreaID, Area *> areasByID;    ///< A map of the contained areas with the AreaID as key.
+    IIpv4RoutingTable *rt;
+    RouterId routerID;    ///< The router ID assigned by the IP layer.
+    std::map<AreaId, Area *> areasByID;    ///< A map of the contained areas with the AreaID as key.
     std::vector<Area *> areas;    ///< A list of the contained areas.
-    std::map<LSAKeyType, ASExternalLSA *, LSAKeyType_Less> asExternalLSAsByID;    ///< A map of the ASExternalLSAs advertised by this router.
-    std::vector<ASExternalLSA *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
-    std::map<IPv4Address, OSPFASExternalLSAContents> externalRoutes;    ///< A map of the external route advertised by this router.
+    std::map<LsaKeyType, AsExternalLsa *, LsaKeyType_Less> asExternalLSAsByID;    ///< A map of the ASExternalLSAs advertised by this router.
+    std::vector<AsExternalLsa *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
+    std::map<Ipv4Address, OspfAsExternalLsaContents> externalRoutes;    ///< A map of the external route advertised by this router.
     cMessage *ageTimer;    ///< Database age timer - fires every second.
     std::vector<RoutingTableEntry *> routingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
     MessageHandler *messageHandler;    ///< The message dispatcher class.
@@ -60,7 +60,7 @@ class INET_API Router
      * Constructor.
      * Initializes internal variables, adds a MessageHandler and starts the Database Age timer.
      */
-    Router(RouterID id, cSimpleModule *containingModule, IInterfaceTable *ift, IIPv4RoutingTable *rt);
+    Router(RouterId id, cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
 
     /**
      * Destructor.
@@ -68,8 +68,8 @@ class INET_API Router
      */
     virtual ~Router();
 
-    void setRouterID(RouterID id) { routerID = id; }
-    RouterID getRouterID() const { return routerID; }
+    void setRouterID(RouterId id) { routerID = id; }
+    RouterId getRouterID() const { return routerID; }
     void setRFC1583Compatibility(bool compatibility) { rfc1583Compatibility = compatibility; }
     bool getRFC1583Compatibility() const { return rfc1583Compatibility; }
     unsigned long getAreaCount() const { return areas.size(); }
@@ -77,8 +77,8 @@ class INET_API Router
     MessageHandler *getMessageHandler() { return messageHandler; }
 
     unsigned long getASExternalLSACount() const { return asExternalLSAs.size(); }
-    ASExternalLSA *getASExternalLSA(unsigned long i) { return asExternalLSAs[i]; }
-    const ASExternalLSA *getASExternalLSA(unsigned long i) const { return asExternalLSAs[i]; }
+    AsExternalLsa *getASExternalLSA(unsigned long i) { return asExternalLSAs[i]; }
+    const AsExternalLsa *getASExternalLSA(unsigned long i) const { return asExternalLSAs[i]; }
     bool getASBoundaryRouter() const { return externalRoutes.size() > 0; }
 
     unsigned long getRoutingTableEntryCount() const { return routingTable.size(); }
@@ -102,14 +102,14 @@ class INET_API Router
      * nullptr otherwise.
      * @param areaID [in] The Area identifier.
      */
-    Area *getAreaByID(AreaID areaID);
+    Area *getAreaByID(AreaId areaID);
 
     /**
      * Returns the Area pointer from the Area list which contains the input IPv4 address,
      * nullptr if there's no such area connected to the Router.
      * @param address [in] The IPv4 address whose containing Area we're looking for.
      */
-    Area *getAreaByAddr(IPv4Address address);
+    Area *getAreaByAddr(Ipv4Address address);
 
     /**
      * Returns the pointer of the physical Interface identified by the input interface index,
@@ -126,7 +126,7 @@ class INET_API Router
      * @param areaID [in] Identifies the input Router, Network and Summary LSA's Area.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool installLSA(const OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID);
+    bool installLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID);
 
     /**
      * Find the LSA identified by the input lsaKey in the database.
@@ -136,7 +136,7 @@ class INET_API Router
      *                     identified by this parameter.
      * @return The pointer to the LSA if it was found, nullptr otherwise.
      */
-    OSPFLSA *findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
+    OspfLsa *findLSA(LsaType lsaType, LsaKeyType lsaKey, AreaId areaID);
 
     /**
      * Ages the LSAs in the Router's database.
@@ -157,14 +157,14 @@ class INET_API Router
      * the input lsaKey.
      * @param lsaKey [in] Identifies the LSAs to remove from the retransmission lists.
      */
-    void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
+    void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
 
     /**
      * Returns true if there's at least one LSA on any Neighbor's retransmission list
      * identified by the input lsaKey, false otherwise.
      * @param lsaKey [in] Identifies the LSAs to look for on the retransmission lists.
      */
-    bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
+    bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
 
     /**
      * Floods out the input lsa on a set of Interfaces.
@@ -175,27 +175,27 @@ class INET_API Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(const OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input IPv4 address falls into any of the Router's Areas' configured
      * IPv4 address ranges, false otherwise.
      * @param address [in] The IPv4 address to look for.
      */
-    bool isLocalAddress(IPv4Address address) const;
+    bool isLocalAddress(Ipv4Address address) const;
 
     /**
      * Returns true if one of the Router's Areas the same IPv4 address range configured as the
      * input IPv4 address range, false otherwise.
      * @param addressRange [in] The IPv4 address range to look for.
      */
-    bool hasAddressRange(const IPv4AddressRange& addressRange) const;
+    bool hasAddressRange(const Ipv4AddressRange& addressRange) const;
 
     /**
      * Returns true if the destination described by the input lsa is in the routing table, false otherwise.
      * @param lsa [in] The LSA which describes the destination to look for.
      */
-    bool isDestinationUnreachable(OSPFLSA *lsa) const;
+    bool isDestinationUnreachable(OspfLsa *lsa) const;
 
     /**
      * Do a lookup in either the input OSPF routing table, or if it's nullptr then in the Router's own routing table.
@@ -204,7 +204,7 @@ class INET_API Router
      * @param table       [in] The routing table to do the lookup in.
      * @return The RoutingTableEntry describing the input destination if there's one, false otherwise.
      */
-    RoutingTableEntry *lookup(IPv4Address destination, std::vector<RoutingTableEntry *> *table = nullptr) const;
+    RoutingTableEntry *lookup(Ipv4Address destination, std::vector<RoutingTableEntry *> *table = nullptr) const;
 
     /**
      * Rebuilds the routing table from scratch(based on the LSA database).
@@ -221,7 +221,7 @@ class INET_API Router
      * @return The containing preconfigured address range if found,
      *         NULL_IPV4ADDRESSRANGE otherwise.
      */
-    IPv4AddressRange getContainingAddressRange(const IPv4AddressRange& addressRange, bool *advertise = nullptr) const;
+    Ipv4AddressRange getContainingAddressRange(const Ipv4AddressRange& addressRange, bool *advertise = nullptr) const;
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
@@ -230,7 +230,7 @@ class INET_API Router
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
      */
-    void updateExternalRoute(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void updateExternalRoute(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex);
 
     /**
      * Add an AS External Route in IPRoutingTable
@@ -238,14 +238,14 @@ class INET_API Router
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
      */
-    void addExternalRouteInIPTable(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void addExternalRouteInIPTable(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex);
 
     /**
      * Removes an AS External Route from the database.
      * @param networkAddress [in] The network address of the external route which
      *                            needs to be removed.
      */
-    void removeExternalRoute(IPv4Address networkAddress);
+    void removeExternalRoute(Ipv4Address networkAddress);
 
     /**
      * Selects the preferred routing table entry for the input LSA(which is either
@@ -265,7 +265,7 @@ class INET_API Router
      * @sa RFC2328 Section 16.4. points(1) through(3)
      * @sa Area::originateSummaryLSA
      */
-    RoutingTableEntry *getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = nullptr);
+    RoutingTableEntry *getPreferredEntry(const OspfLsa& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = nullptr);
 
   private:
     /**
@@ -275,28 +275,28 @@ class INET_API Router
      * @param lsa [in] The LSA to install. It will be copied into the database.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool installASExternalLSA(const OSPFASExternalLSA *lsa);
+    bool installASExternalLSA(const OspfAsExternalLsa *lsa);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
      * @return The pointer to the AS External LSA if it was found, nullptr otherwise.
      */
-    ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey);
+    AsExternalLsa *findASExternalLSA(LsaKeyType lsaKey);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
      * @return The const pointer to the AS External LSA if it was found, nullptr otherwise.
      */
-    const ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey) const;
+    const AsExternalLsa *findASExternalLSA(LsaKeyType lsaKey) const;
 
     /**
      * Originates a new AS External LSA based on the input lsa.
      * @param lsa [in] The LSA whose contents should be copied into the newly originated LSA.
      * @return The newly originated LSA.
      */
-    ASExternalLSA *originateASExternalLSA(ASExternalLSA *lsa);
+    AsExternalLsa *originateASExternalLSA(AsExternalLsa *lsa);
 
     /**
      * Generates a unique LinkStateID for a given destination. This may require the
@@ -313,9 +313,9 @@ class INET_API Router
      * @sa RFC2328 Appendix E.
      * @sa Area::getUniqueLinkStateID
      */
-    LinkStateID getUniqueLinkStateID(const IPv4AddressRange& destination,
+    LinkStateId getUniqueLinkStateID(const Ipv4AddressRange& destination,
             Metric destinationCost,
-            ASExternalLSA *& lsaToReoriginate,
+            AsExternalLsa *& lsaToReoriginate,
             bool externalMetricIsType2 = false) const;
 
     /**
@@ -343,7 +343,7 @@ class INET_API Router
      * @param inRoutingTable [in] The routing table to look in.
      * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
      */
-    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, RouterID routerID) const;
+    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, RouterId routerID) const;
 
     /**
      * Returns an std::vector of routes leading to the AS Boundary Router
@@ -353,7 +353,7 @@ class INET_API Router
      * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
      */
     std::vector<RoutingTableEntry *>
-    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, RouterID routerID) const;
+    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, RouterId routerID) const;
 
     /**
      * Prunes the input std::vector of RoutingTableEntries according to the RFC2328

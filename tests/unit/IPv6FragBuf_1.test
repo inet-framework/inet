@@ -1,5 +1,5 @@
 %description:
-Test the IPv6 fragmentation reassembly buffer (IPv6FragBuf class)
+Test the IPv6 fragmentation reassembly buffer (Ipv6FragBuf class)
 Adapted from IPFragBuf_1.test.
 
 %includes:
@@ -26,12 +26,12 @@ struct Frag
 
 typedef std::vector<Frag> FragVector;
 
-bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
+bool insertFragment(Ipv6FragBuf& fragbuf, Frag& f)
 {
     Packet *pk = new Packet("IPv6");
     const auto& frag = makeShared<Ipv6Header>();
-    frag->setSrcAddress(IPv6Address(0,0,0,f.src));
-    frag->setDestAddress(IPv6Address(0,0,0,f.dest));
+    frag->setSrcAddress(Ipv6Address(0,0,0,f.src));
+    frag->setDestAddress(Ipv6Address(0,0,0,f.dest));
     Ipv6FragmentHeader *fh = new Ipv6FragmentHeader();
     fh->setIdentification(f.id);
     fh->setFragmentOffset(f.offset);
@@ -81,7 +81,7 @@ for (int j=0; j<v.size(); j++)
 EV << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
-IPv6FragBuf fragbuf1;
+Ipv6FragBuf fragbuf1;
 int i, num;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf1, v[i]))
@@ -89,7 +89,7 @@ for (i=0, num=0; i<v.size(); i++)
 EV << "assembled in original order: " << num << "\n";
 
 // try assemble fragments in reverse order
-IPv6FragBuf fragbuf2;
+Ipv6FragBuf fragbuf2;
 for (i=v.size()-1, num=0; i>=0; i--)
     if (insertFragment(fragbuf2, v[i]))
         num++;
@@ -104,7 +104,7 @@ for (i=0; i<100000; i++)
 }
 
 // try assemble shuffled fragments
-IPv6FragBuf fragbuf3;
+Ipv6FragBuf fragbuf3;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf3, v[i]))
         num++;

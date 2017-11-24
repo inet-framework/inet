@@ -70,9 +70,9 @@ const INoise *IdealAnalogModel::computeNoise(const IListening *listening, const 
     return new IdealNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
 }
 
-const ISNIR *IdealAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISnir *IdealAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
-    return new IdealSNIR(reception, noise);
+    return new IdealSnir(reception, noise);
 }
 
 } // namespace physicallayer

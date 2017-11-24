@@ -67,11 +67,11 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        TCPSocket *socket = sockCollection.findSocketFor(msg);
+        TcpSocket *socket = sockCollection.findSocketFor(msg);
         if (!socket) {
             EV_DEBUG << "No socket found for the message. Create a new one" << endl;
             // new connection -- create new socket object and server process
-            socket = new TCPSocket(msg);
+            socket = new TcpSocket(msg);
             socket->setOutputGate(gate("socketOut"));
             sockCollection.addSocket(socket);
 
@@ -98,7 +98,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
         return;
     }
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
 
     // Should be a HttpReplyMessage
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
@@ -124,10 +124,10 @@ void HttpServer::socketPeerClosed(int connId, void *yourPtr)
         return;
     }
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
 
     // close the connection (if not already closed)
-    if (socket->getState() == TCPSocket::PEER_CLOSED) {
+    if (socket->getState() == TcpSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
         socket->close();    // Call the close method to properly dispose of the socket.
     }
@@ -143,7 +143,7 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
     }
     // Cleanup
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
 }
@@ -160,7 +160,7 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
         return;
     }
     SockData *sockdata = (SockData *)yourPtr;
-    TCPSocket *socket = sockdata->socket;
+    TcpSocket *socket = sockdata->socket;
 
     if (code == TCP_I_CONNECTION_RESET)
         EV_WARN << "Connection reset!\n";

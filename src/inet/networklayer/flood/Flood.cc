@@ -165,7 +165,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 auto newFloodHeader = dMsg->removeHeader<FloodHeader>();
                 newFloodHeader->setTtl(newFloodHeader->getTtl() - 1);
                 dMsg->insertHeader(newFloodHeader);
-                setDownControlInfo(dMsg, MACAddress::BROADCAST_ADDRESS);
+                setDownControlInfo(dMsg, MacAddress::BROADCAST_ADDRESS);
                 sendDown(dMsg);
                 nbDataPacketsForwarded++;
             }
@@ -195,7 +195,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 cObject *const pCtrlInfo = packetCopy->removeControlInfo();
                 if (pCtrlInfo != nullptr)
                     delete pCtrlInfo;
-                setDownControlInfo(packetCopy, MACAddress::BROADCAST_ADDRESS);
+                setDownControlInfo(packetCopy, MacAddress::BROADCAST_ADDRESS);
                 sendDown(packetCopy);
                 nbDataPacketsForwarded++;
                 delete packet;
@@ -312,7 +312,7 @@ void Flood::encapsulate(Packet *appPkt)
        << " -> set destMac=L2BROADCAST" << endl;
 
     //encapsulate the application packet
-    setDownControlInfo(appPkt, MACAddress::BROADCAST_ADDRESS);
+    setDownControlInfo(appPkt, MacAddress::BROADCAST_ADDRESS);
 
     pkt->markImmutable();
     appPkt->pushHeader(pkt);
@@ -322,7 +322,7 @@ void Flood::encapsulate(Packet *appPkt)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
+void Flood::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);

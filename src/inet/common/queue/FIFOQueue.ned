@@ -27,7 +27,7 @@ package inet.common.queue;
 // The C++ class implements the IQueueAccess and IPassiveQueue
 // interfaces.
 //
-simple FIFOQueue
+simple FifoQueue
 {
     parameters:
         string queueName = default("l2queue"); // name of the cQueue object, used in the 'q' tag of the display string

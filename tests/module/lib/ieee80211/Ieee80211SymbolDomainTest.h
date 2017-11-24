@@ -32,14 +32,14 @@ namespace inet {
 class INET_API Ieee80211SymbolDomainTest : public cSimpleModule
 {
     protected:
-        Ieee80211OFDMEncoderModule *ieee80211OFDMSignalEncoder;
-        Ieee80211OFDMEncoderModule *ieee80211OFDMDataEncoder;
-        Ieee80211OFDMModulatorModule *ieee80211OFDMSignalModulator;
-        Ieee80211OFDMModulatorModule *ieee80211OFDMDataModulator;
-        Ieee80211OFDMDemodulatorModule *ieee80211OFDMSignalDemodulator;
-        Ieee80211OFDMDemodulatorModule *ieee80211OFDMDataDemodulator;
-        Ieee80211OFDMDecoderModule *ieee80211OFDMSignalDecoder;
-        Ieee80211OFDMDecoderModule *ieee80211OFDMDataDecoder;
+        Ieee80211OfdmEncoderModule *ieee80211OFDMSignalEncoder;
+        Ieee80211OfdmEncoderModule *ieee80211OFDMDataEncoder;
+        Ieee80211OfdmModulatorModule *ieee80211OFDMSignalModulator;
+        Ieee80211OfdmModulatorModule *ieee80211OFDMDataModulator;
+        Ieee80211OfdmDemodulatorModule *ieee80211OFDMSignalDemodulator;
+        Ieee80211OfdmDemodulatorModule *ieee80211OFDMDataDemodulator;
+        Ieee80211OfdmDecoderModule *ieee80211OFDMSignalDecoder;
+        Ieee80211OfdmDecoderModule *ieee80211OFDMDataDecoder;
         BitVector input;
 
     protected:

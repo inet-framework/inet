@@ -35,7 +35,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKLayeredReceiver : public SNIRReceiverBase
+class INET_API ApskLayeredReceiver : public SnirReceiverBase
 {
   public:
     enum LevelOfDetail {
@@ -61,14 +61,14 @@ class INET_API APSKLayeredReceiver : public SNIRReceiverBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const IReceptionAnalogModel *createAnalogModel(const LayeredTransmission *transmission, const ISNIR *snir) const;
-    virtual const IReceptionSampleModel *createSampleModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionAnalogModel *analogModel) const;
-    virtual const IReceptionSymbolModel *createSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSampleModel *sampleModel) const;
-    virtual const IReceptionBitModel *createBitModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSymbolModel *symbolModel) const;
-    virtual const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionBitModel *bitModel) const;
+    virtual const IReceptionAnalogModel *createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const;
+    virtual const IReceptionSampleModel *createSampleModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionAnalogModel *analogModel) const;
+    virtual const IReceptionSymbolModel *createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSampleModel *sampleModel) const;
+    virtual const IReceptionBitModel *createBitModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionSymbolModel *symbolModel) const;
+    virtual const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISnir *snir, const IReceptionBitModel *bitModel) const;
 
   public:
-    APSKLayeredReceiver();
+    ApskLayeredReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IDecoder *getDecoder() const { return decoder; }
@@ -78,7 +78,7 @@ class INET_API APSKLayeredReceiver : public SNIRReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };
 
 } // namespace physicallayer

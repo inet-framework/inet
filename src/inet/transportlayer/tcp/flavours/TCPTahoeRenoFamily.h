@@ -29,10 +29,10 @@ namespace tcp {
 /**
  * State variables for TCPTahoeRenoFamily.
  */
-class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariables
+class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariables
 {
   public:
-    TCPTahoeRenoFamilyStateVariables();
+    TcpTahoeRenoFamilyStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
     virtual void setSendQueueLimit(uint32 newLimit);
@@ -44,14 +44,14 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
  * Provides utility functions to implement TCPTahoe, TCPReno and TCPNewReno.
  * (TCPVegas should inherit from TCPBaseAlg instead of this one.)
  */
-class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
+class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
 {
   protected:
-    TCPTahoeRenoFamilyStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpTahoeRenoFamilyStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
   public:
     /** Ctor */
-    TCPTahoeRenoFamily();
+    TcpTahoeRenoFamily();
 };
 
 } // namespace tcp

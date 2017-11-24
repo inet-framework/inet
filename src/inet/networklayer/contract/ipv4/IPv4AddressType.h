@@ -26,25 +26,25 @@
 
 namespace inet {
 
-class INET_API IPv4AddressType : public IL3AddressType
+class INET_API Ipv4AddressType : public IL3AddressType
 {
   public:
-    static IPv4AddressType INSTANCE;
-    static const IPv4Address ALL_RIP_ROUTERS_MCAST;
+    static Ipv4AddressType INSTANCE;
+    static const Ipv4Address ALL_RIP_ROUTERS_MCAST;
 
   public:
-    IPv4AddressType() {}
-    virtual ~IPv4AddressType() {}
+    Ipv4AddressType() {}
+    virtual ~Ipv4AddressType() {}
 
     virtual int getAddressBitLength() const override { return 32; }
     virtual int getMaxPrefixLength() const override { return 32; }
-    virtual L3Address getUnspecifiedAddress() const override { return IPv4Address::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getBroadcastAddress() const override { return IPv4Address::ALLONES_ADDRESS; }
-    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return IPv4Address::LL_MANET_ROUTERS; }
+    virtual L3Address getUnspecifiedAddress() const override { return Ipv4Address::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const override { return Ipv4Address::ALLONES_ADDRESS; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return Ipv4Address::LL_MANET_ROUTERS; }
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ALL_RIP_ROUTERS_MCAST; }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::ipv4; }
 
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return IPv4Address::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return Ipv4Address::UNSPECIFIED_ADDRESS; }
 };
 
 } // namespace inet

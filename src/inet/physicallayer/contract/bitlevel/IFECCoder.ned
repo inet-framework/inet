@@ -17,7 +17,7 @@
 
 package inet.physicallayer.contract.bitlevel;
 
-moduleinterface IFECCoder
+moduleinterface IFecCoder
 {
     parameters:
         @display("i=block/segm");

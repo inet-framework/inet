@@ -28,13 +28,13 @@
 namespace inet {
 
 class InterfaceEntry;
-class IPv6RoutingTable;
+class Ipv6RoutingTable;
 
 /**
  * Represents a route in the route table. Routes with sourceType=ROUTER_ADVERTISEMENT represent
  * on-link prefixes advertised by routers.
  */
-class INET_API IPv6Route : public cObject, public IRoute
+class INET_API Ipv6Route : public cObject, public IRoute
 {
   public:
     /** Cisco like administrative distances (includes IPv4 protocols)*/
@@ -57,12 +57,12 @@ class INET_API IPv6Route : public cObject, public IRoute
     };
 
   protected:
-    IPv6RoutingTable *_rt;    // TODO introduce IIPv6RoutingTable
-    IPv6Address _destPrefix;
+    Ipv6RoutingTable *_rt;    // TODO introduce IIPv6RoutingTable
+    Ipv6Address _destPrefix;
     short _prefixLength;
     SourceType _sourceType;
     InterfaceEntry *_interfacePtr;
-    IPv6Address _nextHop;    // unspecified means "direct"
+    Ipv6Address _nextHop;    // unspecified means "direct"
     simtime_t _expiryTime;    // if route is an advertised prefix: prefix lifetime
     int _metric;
     unsigned int _adminDist;
@@ -77,7 +77,7 @@ class INET_API IPv6Route : public cObject, public IRoute
      * Constructor. The destination prefix and the route source is passed
      * to the constructor and cannot be changed afterwards.
      */
-    IPv6Route(IPv6Address destPrefix, int prefixLength, SourceType sourceType)
+    Ipv6Route(Ipv6Address destPrefix, int prefixLength, SourceType sourceType)
     {
         _rt = nullptr;
         _destPrefix = destPrefix;
@@ -91,24 +91,24 @@ class INET_API IPv6Route : public cObject, public IRoute
         _protocolData = nullptr;
     }
 
-    virtual ~IPv6Route() { delete _protocolData; }
+    virtual ~Ipv6Route() { delete _protocolData; }
 
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
     /** To be called by the routing table when this route is added or removed from it */
-    virtual void setRoutingTable(IPv6RoutingTable *rt) { _rt = rt; }
-    IPv6RoutingTable *getRoutingTable() const { return _rt; }
+    virtual void setRoutingTable(Ipv6RoutingTable *rt) { _rt = rt; }
+    Ipv6RoutingTable *getRoutingTable() const { return _rt; }
 
-    void setNextHop(const IPv6Address& nextHop) { if (_nextHop != nextHop) { _nextHop = nextHop; changed(F_NEXTHOP); } }
+    void setNextHop(const Ipv6Address& nextHop) { if (_nextHop != nextHop) { _nextHop = nextHop; changed(F_NEXTHOP); } }
     void setExpiryTime(simtime_t expiryTime) { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME); } }
     void setMetric(int metric) override { if (_metric != metric) { _metric = metric; changed(F_METRIC); } }
     void setAdminDist(unsigned int adminDist) { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
 
-    const IPv6Address& getDestPrefix() const { return _destPrefix; }
+    const Ipv6Address& getDestPrefix() const { return _destPrefix; }
     virtual int getPrefixLength() const override { return _prefixLength; }
     virtual SourceType getSourceType() const override { return _sourceType; }
-    const IPv6Address& getNextHop() const { return _nextHop; }
+    const Ipv6Address& getNextHop() const { return _nextHop; }
     simtime_t getExpiryTime() const { return _expiryTime; }
     virtual int getMetric() const override { return _metric; }
     unsigned int getAdminDist() const { return _adminDist; }

@@ -18,9 +18,9 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
-import inet.transportlayer.rtp.RTPSenderControlMessage;
-import inet.transportlayer.rtp.RTPSenderStatusMessage;
+import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.transportlayer.rtp.RtpSenderControlMessage;
+import inet.transportlayer.rtp.RtpSenderStatusMessage;
 
 namespace inet::rtp;
 
@@ -28,7 +28,7 @@ namespace inet::rtp;
 // An enumeration to distinguish the different functions of the
 // RTPInterfacePacket.
 //
-enum RTP_IFP_TYPE
+enum RtpIfpType
 {
     RTP_IFP_ENTER_SESSION = 1;
     RTP_IFP_SESSION_ENTERED = 2;
@@ -48,75 +48,75 @@ enum RTP_IFP_TYPE
 // rtp session, transmission of files and feedback about the success of the
 // operations.
 
-message RTPControlMsg
+message RtpControlMsg
 {
 };
 
 // base class
-class RTPControlInfo extends cObject
+class RtpControlInfo extends cObject
 {
-    RTP_IFP_TYPE type;
+    RtpIfpType type;
 };
 
 // base class
-class RTPSessionControlInfo extends RTPControlInfo
+class RtpSessionControlInfo extends RtpControlInfo
 {
     uint32 ssrc;
 };
 
 
 // App to ~RTP
-class RTPCIEnterSession extends RTPControlInfo
+class RtpCiEnterSession extends RtpControlInfo
 {
     type = RTP_IFP_ENTER_SESSION;
     string commonName;
     string profileName;
     int bandwidth;
-    IPv4Address destinationAddress;
+    Ipv4Address destinationAddress;
     int port;
 };
 
 // ~RTP to App
-class RTPCISessionEntered extends RTPSessionControlInfo
+class RtpCiSessionEntered extends RtpSessionControlInfo
 {
     type = RTP_IFP_SESSION_ENTERED;
 };
 
 // App to ~RTP
-class RTPCISenderControl extends RTPSessionControlInfo
+class RtpCiSenderControl extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_CONTROL;
     // from ~RTPSenderControlMessage:
-    RTPSenderControlMessageCommands command;
+    RtpSenderControlMessageCommands command;
     float commandParameter1;
     float commandParameter2;
 }
 
 // ~RTP to App
-class RTPCISenderStatus extends RTPSessionControlInfo
+class RtpCiSenderStatus extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_STATUS;
     // from ~RTPSenderStatusMessage:
-    RTPSenderStatus status;
+    RtpSenderStatus status;
     uint32 timeStamp;
 };
 
 // App to ~RTP
-class RTPCILeaveSession extends RTPControlInfo
+class RtpCiLeaveSession extends RtpControlInfo
 {
     type = RTP_IFP_LEAVE_SESSION;
     // TODO do I need any sesson identifier?
 };
 
 // ~RTP to App
-class RTPCISessionLeft extends RTPControlInfo
+class RtpCiSessionLeft extends RtpControlInfo
 {
     type = RTP_IFP_SESSION_LEFT;
     // TODO do I need any sesson identifier?
 };
 
 // App to ~RTP
-class RTPCICreateSenderModule extends RTPSessionControlInfo
+class RtpCiCreateSenderModule extends RtpSessionControlInfo
 {
     type = RTP_IFP_CREATE_SENDER_MODULE;
     int payloadType;
@@ -124,19 +124,19 @@ class RTPCICreateSenderModule extends RTPSessionControlInfo
 };
 
 // ~RTP to App
-class RTPCISenderModuleCreated extends RTPSessionControlInfo
+class RtpCiSenderModuleCreated extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_CREATED;
 };
 
 // App to ~RTP
-class RTPCIDeleteSenderModule extends RTPSessionControlInfo
+class RtpCiDeleteSenderModule extends RtpSessionControlInfo
 {
     type = RTP_IFP_DELETE_SENDER_MODULE;
 };
 
 // ~RTP to App
-class RTPCISenderModuleDeleted extends RTPSessionControlInfo
+class RtpCiSenderModuleDeleted extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_DELETED;
 };

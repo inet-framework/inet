@@ -43,7 +43,7 @@ void MpduGen::initialize(int stage)
 void MpduGen::processPacket(cPacket *pk)
 {
     emit(rcvdPkSignal, pk);
-    EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
 }

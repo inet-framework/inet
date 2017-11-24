@@ -29,16 +29,16 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Phase-shift_keying#Binary_phase-shift_keying_.28BPSK.29
  */
-class INET_API BPSKModulation : public MQAMModulationBase
+class INET_API BpskModulation : public MqamModulationBase
 {
   public:
-    static const BPSKModulation singleton;
+    static const BpskModulation singleton;
 
   protected:
-    static const std::vector<APSKSymbol> constellation;
+    static const std::vector<ApskSymbol> constellation;
 
   public:
-    BPSKModulation();
+    BpskModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "BPSKModulation"; }
 

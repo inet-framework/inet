@@ -116,9 +116,9 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
     return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
 }
 
-const ISNIR *ScalarAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
+const ISnir *ScalarAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
-    return new ScalarSNIR(reception, noise);
+    return new ScalarSnir(reception, noise);
 }
 
 } // namespace physicallayer

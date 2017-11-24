@@ -24,31 +24,31 @@ namespace inet {
 
 namespace rtp {
 
-Register_Class(RTPReceiverInfo);
+Register_Class(RtpReceiverInfo);
 
-RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
+RtpReceiverInfo::RtpReceiverInfo(uint32 ssrc) : RtpParticipantInfo(ssrc)
 {
 }
 
-RTPReceiverInfo::RTPReceiverInfo(const RTPReceiverInfo& receiverInfo) : RTPParticipantInfo(receiverInfo)
+RtpReceiverInfo::RtpReceiverInfo(const RtpReceiverInfo& receiverInfo) : RtpParticipantInfo(receiverInfo)
 {
     copy(receiverInfo);
 }
 
-RTPReceiverInfo::~RTPReceiverInfo()
+RtpReceiverInfo::~RtpReceiverInfo()
 {
 }
 
-RTPReceiverInfo& RTPReceiverInfo::operator=(const RTPReceiverInfo& receiverInfo)
+RtpReceiverInfo& RtpReceiverInfo::operator=(const RtpReceiverInfo& receiverInfo)
 {
     if (this == &receiverInfo)
         return *this;
-    RTPParticipantInfo::operator=(receiverInfo);
+    RtpParticipantInfo::operator=(receiverInfo);
     copy(receiverInfo);
     return *this;
 }
 
-void RTPReceiverInfo::copy(const RTPReceiverInfo& receiverInfo)
+void RtpReceiverInfo::copy(const RtpReceiverInfo& receiverInfo)
 {
     _sequenceNumberBase = receiverInfo._sequenceNumberBase;
     _highestSequenceNumber = receiverInfo._highestSequenceNumber;
@@ -72,12 +72,12 @@ void RTPReceiverInfo::copy(const RTPReceiverInfo& receiverInfo)
     _itemsReceived = receiverInfo._itemsReceived;
 }
 
-RTPReceiverInfo *RTPReceiverInfo::dup() const
+RtpReceiverInfo *RtpReceiverInfo::dup() const
 {
-    return new RTPReceiverInfo(*this);
+    return new RtpReceiverInfo(*this);
 }
 
-void RTPReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
+void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
     const auto& rtpHeader = packet->peekHeader<RtpHeader>();
     // this endsystem sends, it isn't inactive
@@ -132,10 +132,10 @@ void RTPReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrival
         _lastPacketArrivalTime = arrivalTime;
     }
 
-    RTPParticipantInfo::processRTPPacket(packet, id, arrivalTime);
+    RtpParticipantInfo::processRTPPacket(packet, id, arrivalTime);
 }
 
-void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
+void RtpReceiverInfo::processSenderReport(SenderReport *report, simtime_t arrivalTime)
 {
     _lastSenderReportArrivalTime = arrivalTime;
     if (_lastSenderReportRTPTimeStamp == 0) {
@@ -155,14 +155,14 @@ void RTPReceiverInfo::processSenderReport(SenderReport *report, simtime_t arriva
     delete report;
 }
 
-void RTPReceiverInfo::processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime)
+void RtpReceiverInfo::processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime)
 {
-    RTPParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
+    RtpParticipantInfo::processSDESChunk(sdesChunk, arrivalTime);
     _itemsReceived++;
     _inactiveIntervals = 0;
 }
 
-ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
+ReceptionReport *RtpReceiverInfo::receptionReport(simtime_t now)
 {
     if (isSender()) {
         ReceptionReport *receptionReport = new ReceptionReport();
@@ -202,7 +202,7 @@ ReceptionReport *RTPReceiverInfo::receptionReport(simtime_t now)
         return nullptr;
 }
 
-void RTPReceiverInfo::nextInterval(simtime_t now)
+void RtpReceiverInfo::nextInterval(simtime_t now)
 {
     _inactiveIntervals++;
     if (_inactiveIntervals == MAX_INACTIVE_INTERVALS) {
@@ -210,20 +210,20 @@ void RTPReceiverInfo::nextInterval(simtime_t now)
     }
     _highestSequenceNumberPrior = _highestSequenceNumber + _sequenceNumberCycles;
     _packetsReceivedPrior = _packetsReceived;
-    RTPParticipantInfo::nextInterval(now);
+    RtpParticipantInfo::nextInterval(now);
 }
 
-bool RTPReceiverInfo::isActive()
+bool RtpReceiverInfo::isActive()
 {
     return _inactiveIntervals < MAX_INACTIVE_INTERVALS;
 }
 
-bool RTPReceiverInfo::isValid()
+bool RtpReceiverInfo::isValid()
 {
     return _itemsReceived >= MAX_INACTIVE_INTERVALS;
 }
 
-bool RTPReceiverInfo::toBeDeleted(simtime_t now)
+bool RtpReceiverInfo::toBeDeleted(simtime_t now)
 {
     // an RTP system should be removed from the list of known systems
     // when it hasn't been validated and hasn't been active for

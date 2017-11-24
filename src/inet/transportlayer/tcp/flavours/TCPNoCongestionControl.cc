@@ -22,24 +22,24 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPNoCongestionControl);
+Register_Class(TcpNoCongestionControl);
 
-TCPNoCongestionControl::TCPNoCongestionControl() : TCPBaseAlg(),
-    state((TCPNoCongestionControlStateVariables *&)TCPAlgorithm::state)
+TcpNoCongestionControl::TcpNoCongestionControl() : TcpBaseAlg(),
+    state((TcpNoCongestionControlStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TCPNoCongestionControl::initialize()
+void TcpNoCongestionControl::initialize()
 {
-    TCPBaseAlg::initialize();
+    TcpBaseAlg::initialize();
 
     // set congestion window to a practically infinite value
     state->snd_cwnd = 0x7fffffff;
 }
 
-void TCPNoCongestionControl::processRexmitTimer(TCPEventCode& event)
+void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)
 {
-    TCPBaseAlg::processRexmitTimer(event);
+    TcpBaseAlg::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -48,9 +48,9 @@ void TCPNoCongestionControl::processRexmitTimer(TCPEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
+void TcpNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
 {
-    TCPBaseAlg::receivedDataAck(firstSeqAcked);
+    TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
     // ack may have freed up some room in the window, try sending
     sendData(false);

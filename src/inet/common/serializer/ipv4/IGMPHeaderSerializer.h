@@ -28,14 +28,14 @@ namespace serializer {
 /**
  * Converts between IGMPMessage and binary (network byte order) IGMP message.
  */
-class INET_API IGMPHeaderSerializer : public FieldsChunkSerializer
+class INET_API IgmpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    IGMPHeaderSerializer() : FieldsChunkSerializer() {}
+    IgmpHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

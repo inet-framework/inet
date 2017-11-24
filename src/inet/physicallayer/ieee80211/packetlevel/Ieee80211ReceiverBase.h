@@ -41,7 +41,7 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
     Ieee80211ReceiverBase();
     virtual ~Ieee80211ReceiverBase();
 
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

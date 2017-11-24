@@ -36,20 +36,20 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     class INET_API RouteVisualization : public LineManager::ModuleLine {
       public:
         mutable int numRoutes = 1;
-        const IPv4Route *route = nullptr;
+        const Ipv4Route *route = nullptr;
 
       public:
-        RouteVisualization(const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
+        RouteVisualization(const Ipv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteVisualization() {}
     };
 
     class DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
-        const IPv4Route *route = nullptr;
+        const Ipv4Route *route = nullptr;
         std::string result;
 
       public:
-        DirectiveResolver(const IPv4Route *route) : route(route) { }
+        DirectiveResolver(const Ipv4Route *route) : route(route) { }
 
         virtual const char *resolveDirective(char directive) override;
     };
@@ -76,7 +76,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     LineManager *lineManager = nullptr;
 
-    std::map<std::tuple<const IPv4Route *, int, int>, const RouteVisualization *> routeVisualizations;
+    std::map<std::tuple<const Ipv4Route *, int, int>, const RouteVisualization *> routeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
@@ -85,20 +85,20 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const = 0;
-    virtual const RouteVisualization *getRouteVisualization(IPv4Route *route, int nodeModuleId, int nextHopModuleId);
+    virtual const RouteVisualization *createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const = 0;
+    virtual const RouteVisualization *getRouteVisualization(Ipv4Route *route, int nodeModuleId, int nextHopModuleId);
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization);
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization);
 
-    virtual std::vector<IPv4Address> getDestinations();
+    virtual std::vector<Ipv4Address> getDestinations();
 
-    virtual void addRouteVisualizations(IIPv4RoutingTable *routingTable);
-    virtual void removeRouteVisualizations(IIPv4RoutingTable *routingTable);
+    virtual void addRouteVisualizations(IIpv4RoutingTable *routingTable);
+    virtual void removeRouteVisualizations(IIpv4RoutingTable *routingTable);
     virtual void removeAllRouteVisualizations();
-    virtual void updateRouteVisualizations(IIPv4RoutingTable *routingTable);
+    virtual void updateRouteVisualizations(IIpv4RoutingTable *routingTable);
     virtual void updateAllRouteVisualizations();
 
-    virtual std::string getRouteVisualizationText(const IPv4Route *route) const;
+    virtual std::string getRouteVisualizationText(const Ipv4Route *route) const;
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const = 0;
 
   public:

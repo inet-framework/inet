@@ -19,8 +19,8 @@
 package inet.networklayer.ipv4;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.contract.IARP;
-import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
+import inet.networklayer.contract.IArp;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
 
 
@@ -50,17 +50,17 @@ module IPv4NetworkLayer like INetworkLayer
     gates:
         input ifIn @labels(INetworkHeader);
         output ifOut @labels(INetworkHeader);
-        input transportIn @labels(IPv4ControlInfo/down);
-        output transportOut @labels(IPv4ControlInfo/up);
+        input transportIn @labels(Ipv4ControlInfo/down);
+        output transportOut @labels(Ipv4ControlInfo/up);
         input igmpIn;
         output igmpOut;
 
     submodules:
-        configurator: IPv4NodeConfigurator {
+        configurator: Ipv4NodeConfigurator {
             parameters:
                 @display("p=100,100;is=s");
         }
-        routingTable: IPv4RoutingTable {
+        routingTable: Ipv4RoutingTable {
             parameters:
                 @display("p=100,200;is=s");
         }
@@ -72,7 +72,7 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,200");
         }
-        icmp: ICMP {
+        icmp: Icmp {
             parameters:
                 @display("p=600,200");
         }
@@ -85,7 +85,7 @@ module IPv4NetworkLayer like INetworkLayer
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=450,400;q=queue");
         }
-        arp: <arpType> like IARP {
+        arp: <arpType> like IArp {
             parameters:
                 @display("p=300,400;q=pendingQueue");
         }

@@ -74,44 +74,44 @@ struct AuthenticationKeyType
     char bytes[8];
 };
 
-struct IPv4AddressRange
+struct Ipv4AddressRange
 {
-    IPv4Address address;
-    IPv4Address mask;
-    IPv4AddressRange() : address(), mask() {}
-    IPv4AddressRange(IPv4Address addressPar, IPv4Address maskPar) : address(addressPar), mask(maskPar) {}
+    Ipv4Address address;
+    Ipv4Address mask;
+    Ipv4AddressRange() : address(), mask() {}
+    Ipv4AddressRange(Ipv4Address addressPar, Ipv4Address maskPar) : address(addressPar), mask(maskPar) {}
 
-    bool operator<(const IPv4AddressRange& other) const
+    bool operator<(const Ipv4AddressRange& other) const
     {
         return (mask > other.mask) || ((mask == other.mask) && (address < other.address));
     }
 
-    bool operator==(const IPv4AddressRange& other) const
+    bool operator==(const Ipv4AddressRange& other) const
     {
         return (address == other.address) && (mask == other.mask);
     }
 
-    bool contains(const IPv4Address& other) const
+    bool contains(const Ipv4Address& other) const
     {
-        return IPv4Address::maskedAddrAreEqual(address, other, mask);
+        return Ipv4Address::maskedAddrAreEqual(address, other, mask);
     }
 
-    bool contains(const IPv4AddressRange& other) const
+    bool contains(const Ipv4AddressRange& other) const
     {
-        return IPv4Address::maskedAddrAreEqual(address, other.address, mask) && (mask <= other.mask);
+        return Ipv4Address::maskedAddrAreEqual(address, other.address, mask) && (mask <= other.mask);
     }
 
-    bool containsRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const
+    bool containsRange(const Ipv4Address& otherAddress, const Ipv4Address& otherMask) const
     {
-        return IPv4Address::maskedAddrAreEqual(address, otherAddress, mask) && (mask <= otherMask);
+        return Ipv4Address::maskedAddrAreEqual(address, otherAddress, mask) && (mask <= otherMask);
     }
 
-    bool containedByRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const
+    bool containedByRange(const Ipv4Address& otherAddress, const Ipv4Address& otherMask) const
     {
-        return IPv4Address::maskedAddrAreEqual(otherAddress, address, otherMask) && (otherMask <= mask);
+        return Ipv4Address::maskedAddrAreEqual(otherAddress, address, otherMask) && (otherMask <= mask);
     }
 
-    bool operator!=(IPv4AddressRange other) const
+    bool operator!=(Ipv4AddressRange other) const
     {
         return !operator==(other);
     }
@@ -119,7 +119,7 @@ struct IPv4AddressRange
     std::string str() const;
 };
 
-inline std::string IPv4AddressRange::str() const
+inline std::string Ipv4AddressRange::str() const
 {
     std::string str(address.str(false));
     str += "/";
@@ -130,84 +130,84 @@ inline std::string IPv4AddressRange::str() const
 struct HostRouteParameters
 {
     unsigned char ifIndex;
-    IPv4Address address;
+    Ipv4Address address;
     Metric linkCost;
 };
 
-typedef IPv4Address RouterID;
-typedef IPv4Address AreaID;
-typedef IPv4Address LinkStateID;
+typedef Ipv4Address RouterId;
+typedef Ipv4Address AreaId;
+typedef Ipv4Address LinkStateId;
 
-struct LSAKeyType
+struct LsaKeyType
 {
-    LinkStateID linkStateID;
-    RouterID advertisingRouter;
+    LinkStateId linkStateID;
+    RouterId advertisingRouter;
 };
 
-class LSAKeyType_Less : public std::binary_function<LSAKeyType, LSAKeyType, bool>
+class LsaKeyType_Less : public std::binary_function<LsaKeyType, LsaKeyType, bool>
 {
   public:
-    bool operator()(LSAKeyType leftKey, LSAKeyType rightKey) const;
+    bool operator()(LsaKeyType leftKey, LsaKeyType rightKey) const;
 };
 
-struct DesignatedRouterID
+struct DesignatedRouterId
 {
-    RouterID routerID;
-    IPv4Address ipInterfaceAddress;
+    RouterId routerID;
+    Ipv4Address ipInterfaceAddress;
 };
 
-const RouterID NULL_ROUTERID(0, 0, 0, 0);
-const AreaID BACKBONE_AREAID(0, 0, 0, 0);
-const LinkStateID NULL_LINKSTATEID(0, 0, 0, 0);
-const IPv4Address NULL_IPV4ADDRESS(0, 0, 0, 0);
-const IPv4AddressRange NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0));
-const DesignatedRouterID NULL_DESIGNATEDROUTERID = {
-    IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)
+const RouterId NULL_ROUTERID(0, 0, 0, 0);
+const AreaId BACKBONE_AREAID(0, 0, 0, 0);
+const LinkStateId NULL_LINKSTATEID(0, 0, 0, 0);
+const Ipv4Address NULL_IPV4ADDRESS(0, 0, 0, 0);
+const Ipv4AddressRange NULL_IPV4ADDRESSRANGE(Ipv4Address(0, 0, 0, 0), Ipv4Address(0, 0, 0, 0));
+const DesignatedRouterId NULL_DESIGNATEDROUTERID = {
+    Ipv4Address(0, 0, 0, 0), Ipv4Address(0, 0, 0, 0)
 };
 
-inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
+inline Ipv4Address operator&(Ipv4Address address, Ipv4Address mask)
 {
-    IPv4Address maskedAddress;
+    Ipv4Address maskedAddress;
     maskedAddress.set(address.getInt() & mask.getInt());
     return maskedAddress;
 }
 
-inline IPv4Address operator|(IPv4Address address, IPv4Address match)
+inline Ipv4Address operator|(Ipv4Address address, Ipv4Address match)
 {
-    IPv4Address matchAddress;
+    Ipv4Address matchAddress;
     matchAddress.set(address.getInt() | match.getInt());
     return matchAddress;
 }
 
-inline bool isSameNetwork(IPv4Address address1, IPv4Address mask1, IPv4Address address2, IPv4Address mask2)
+inline bool isSameNetwork(Ipv4Address address1, Ipv4Address mask1, Ipv4Address address2, Ipv4Address mask2)
 {
     return (mask1 == mask2) && ((address1 & mask1) == (address2 & mask2));
 }
 
-inline bool operator==(DesignatedRouterID leftID, DesignatedRouterID rightID)
+inline bool operator==(DesignatedRouterId leftID, DesignatedRouterId rightID)
 {
     return leftID.routerID == rightID.routerID &&
            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress;
 }
 
-inline bool operator!=(DesignatedRouterID leftID, DesignatedRouterID rightID)
+inline bool operator!=(DesignatedRouterId leftID, DesignatedRouterId rightID)
 {
     return !(leftID == rightID);
 }
 
-inline bool LSAKeyType_Less::operator()(LSAKeyType leftKey, LSAKeyType rightKey) const
+inline bool LsaKeyType_Less::operator()(LsaKeyType leftKey, LsaKeyType rightKey) const
 {
     return (leftKey.linkStateID < rightKey.linkStateID) ||
            ((leftKey.linkStateID == rightKey.linkStateID) &&
             (leftKey.advertisingRouter < rightKey.advertisingRouter));
 }
 
-inline IPv4Address ipv4AddressFromAddressString(const char *charForm)
+inline Ipv4Address ipv4AddressFromAddressString(const char *charForm)
 {
     return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4).toIPv4();
 }
 
-inline IPv4Address ipv4NetmaskFromAddressString(const char *charForm)
+inline Ipv4Address ipv4NetmaskFromAddressString(const char *charForm)
 {
     return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4 | L3AddressResolver::ADDR_MASK).toIPv4();
 }

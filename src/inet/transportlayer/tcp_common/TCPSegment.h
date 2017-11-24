@@ -60,7 +60,7 @@ class INET_API Sack : public Sack_Base
 class INET_API TcpHeader : public TcpHeader_Base
 {
   protected:
-    typedef std::vector<TCPOption *> OptionList;
+    typedef std::vector<TcpOption *> OptionList;
     OptionList headerOptionList;
 
   private:
@@ -96,15 +96,15 @@ class INET_API TcpHeader : public TcpHeader_Base
     virtual unsigned int getHeaderOptionArraySize() const override;
 
     /** Returns the kth TCP options in this TCP segment */
-    virtual TCPOption *getMutableHeaderOption(unsigned int k) override  { handleChange(); return headerOptionList.at(k); }
+    virtual TcpOption *getMutableHeaderOption(unsigned int k) override  { handleChange(); return headerOptionList.at(k); }
 
-    virtual const TCPOption *getHeaderOption(unsigned int k) const override  { return headerOptionList.at(k); }
+    virtual const TcpOption *getHeaderOption(unsigned int k) const override  { return headerOptionList.at(k); }
 
     /** Generated but unused method, should not be called. */
-    virtual void setHeaderOption(unsigned int k, TCPOption* headerOption) override;
+    virtual void setHeaderOption(unsigned int k, TcpOption* headerOption) override;
 
     /** Adds a TCP option to the TCP segment */
-    virtual void addHeaderOption(TCPOption *headerOption);
+    virtual void addHeaderOption(TcpOption *headerOption);
 
     /** Drops all TCP options of the TCP segment */
     virtual void dropHeaderOptions();

@@ -139,27 +139,27 @@ double Ieee80211YansErrorModel::getFecQamBer(double snr, uint32_t nbits, Hz sign
     return pms;
 }
 
-double Ieee80211YansErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase* subcarrierModulation, const ConvolutionalCode* convolutionalCode, unsigned int bitLength, bps grossBitrate, Hz bandwidth, double snr) const
+double Ieee80211YansErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase* subcarrierModulation, const ConvolutionalCode* convolutionalCode, unsigned int bitLength, bps grossBitrate, Hz bandwidth, double snr) const
 {
-    if (subcarrierModulation == &BPSKModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, bandwidth, grossBitrate, 10, 11);
         else
             return getFecBpskBer(snr, bitLength, bandwidth, grossBitrate, 5, 8 );
     }
-    else if (subcarrierModulation == &QPSKModulation::singleton) {
+    else if (subcarrierModulation == &QpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 4, 10, 11, 0 );
         else
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 4, 5, 8, 31);
     }
-    else if (subcarrierModulation == &QAM16Modulation::singleton) {
+    else if (subcarrierModulation == &Qam16Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 16, 10, 11, 0);
         else
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 16, 5, 8, 31);
     }
-    else if (subcarrierModulation == &QAM64Modulation::singleton) {
+    else if (subcarrierModulation == &Qam64Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 64, 6, 1, 16);
         else

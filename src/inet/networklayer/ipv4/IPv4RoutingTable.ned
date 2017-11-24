@@ -46,7 +46,7 @@ import inet.networklayer.contract.IRoutingTable;
 // @see ~InterfaceTable
 // @author: Jochen Reber, Andras Varga
 //
-simple IPv4RoutingTable like IRoutingTable
+simple Ipv4RoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -59,10 +59,10 @@ simple IPv4RoutingTable like IRoutingTable
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
         string routingFile = default("");  // routing table file name
         @display("i=block/table");
-        @signal[NF_ROUTE_ADDED](type=IPv4Route);
-        @signal[NF_ROUTE_DELETED](type=IPv4Route);
-        @signal[NF_ROUTE_CHANGED](type=IPv4Route);
-        @signal[NF_MROUTE_ADDED](type=IPv4MulticastRoute);
-        @signal[NF_MROUTE_DELETED](type=IPv4MulticastRoute);
-        @signal[NF_MROUTE_CHANGED](type=IPv4MulticastRoute);
+        @signal[NF_ROUTE_ADDED](type=Ipv4Route);
+        @signal[NF_ROUTE_DELETED](type=Ipv4Route);
+        @signal[NF_ROUTE_CHANGED](type=Ipv4Route);
+        @signal[NF_MROUTE_ADDED](type=Ipv4MulticastRoute);
+        @signal[NF_MROUTE_DELETED](type=Ipv4MulticastRoute);
+        @signal[NF_MROUTE_CHANGED](type=Ipv4MulticastRoute);
 }

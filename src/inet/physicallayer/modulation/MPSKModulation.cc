@@ -21,40 +21,40 @@ namespace inet {
 
 namespace physicallayer {
 
-static std::vector<APSKSymbol> *createConstellation(unsigned int codeWordSize)
+static std::vector<ApskSymbol> *createConstellation(unsigned int codeWordSize)
 {
-    auto symbols = new std::vector<APSKSymbol>();
+    auto symbols = new std::vector<ApskSymbol>();
     unsigned int constellationSize = pow(2, codeWordSize);
     for (unsigned int i = 0; i < constellationSize; i++) {
         unsigned int gray = (i >> 1) ^ i;
         double alpha = 2 * M_PI * gray / constellationSize;
-        symbols->push_back(APSKSymbol(cos(alpha), sin(alpha)));
+        symbols->push_back(ApskSymbol(cos(alpha), sin(alpha)));
     }
     return symbols;
 }
 
-MPSKModulation::MPSKModulation(unsigned int codeWordSize) : APSKModulationBase(createConstellation(codeWordSize))
+MpskModulation::MpskModulation(unsigned int codeWordSize) : ApskModulationBase(createConstellation(codeWordSize))
 {
 }
 
-MPSKModulation::~MPSKModulation()
+MpskModulation::~MpskModulation()
 {
     delete constellation;
 }
 
-std::ostream& MPSKModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MpskModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "MPSKModulaiton";
-    return APSKModulationBase::printToStream(stream, level);
+    return ApskModulationBase::printToStream(stream, level);
 }
 
-double MPSKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double MpskModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://www.dsplog.com/2008/05/18/bit-error-rate-for-16psk-modulation-using-gray-mapping/
     return erfc(sqrt(snir) * sin(M_PI / constellationSize)) / codeWordSize;
 }
 
-double MPSKModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
+double MpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://www.dsplog.com/2008/03/18/symbol-error-rate-for-16psk/
     return erfc(sqrt(snir) * sin(M_PI / constellationSize));

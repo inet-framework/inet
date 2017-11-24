@@ -14,9 +14,9 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.rsvp_te.IntServ;
-import inet.networklayer.rsvp_te.RSVPPacket;
+import inet.networklayer.rsvp_te.RsvpPacket;
 
 cplusplus {{
 #include "inet/networklayer/rsvp_te/RSVPPacket.h"
@@ -27,11 +27,11 @@ namespace inet;
 //
 // FIXME missing documentation
 //
-class RSVPPathMsg extends RSVPPacket
+class RsvpPathMsg extends RsvpPacket
 {
     @customize;
-    RsvpHopObj_t hop;
-    LabelRequestObj_t label_request;
+    RsvpHopObj hop;
+    LabelRequestObj label_request;
     SenderDescriptor_t sender_descriptor;
     EroVector ERO;
     int color;
@@ -42,11 +42,11 @@ class RSVPPathMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-class RSVPPathTear extends RSVPPacket
+class RsvpPathTear extends RsvpPacket
 {
     @customize;
-    RsvpHopObj_t hop;
-    SenderTemplateObj_t senderTemplate;
+    RsvpHopObj hop;
+    SenderTemplateObj senderTemplate;
     bool force;
     rsvpKind = PTEAR_MESSAGE;
 }
@@ -55,10 +55,10 @@ class RSVPPathTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-class RSVPPathError extends RSVPPacket
+class RsvpPathError extends RsvpPacket
 {
     @customize;
-    IPv4Address errorNode;
+    Ipv4Address errorNode;
     int errorCode;
     SenderDescriptor_t sender_descriptor;
 

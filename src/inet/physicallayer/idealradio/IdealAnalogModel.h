@@ -33,7 +33,7 @@ class INET_API IdealAnalogModel : public cModule, public IAnalogModel
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const override;
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const override;
-    virtual const ISNIR *computeSNIR(const IReception *reception, const INoise *noise) const override;
+    virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
 } // namespace physicallayer

@@ -37,9 +37,9 @@ namespace inet {
 namespace tcp {
 
 // Forward declarations:
-class TCPConnection;
-class TCPSendQueue;
-class TCPReceiveQueue;
+class TcpConnection;
+class TcpSendQueue;
+class TcpReceiveQueue;
 
 /**
  * Implements the TCP protocol. This section describes the internal
@@ -130,8 +130,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     };
 
   protected:
-    typedef std::map<AppConnKey, TCPConnection *> TcpAppConnMap;
-    typedef std::map<SockPair, TCPConnection *> TcpConnMap;
+    typedef std::map<AppConnKey, TcpConnection *> TcpAppConnMap;
+    typedef std::map<SockPair, TcpConnection *> TcpConnMap;
     TcpCrcInsertion crcInsertion;
 
     TcpAppConnMap tcpAppConnMap;
@@ -142,13 +142,13 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
   protected:
     /** Factory method; may be overriden for customizing TCP */
-    virtual TCPConnection *createConnection(int socketId);
+    virtual TcpConnection *createConnection(int socketId);
 
     // utility methods
-    virtual TCPConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
-    virtual TCPConnection *findConnForApp(int socketId);
+    virtual TcpConnection *findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual TcpConnection *findConnForApp(int socketId);
     virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual void removeConnection(TCPConnection *conn);
+    virtual void removeConnection(TcpConnection *conn);
     virtual void refreshDisplay() const override;
 
   public:
@@ -176,19 +176,19 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
      * To be called from TCPConnection when a new connection gets created,
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
-    virtual void addSockPair(TCPConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+    virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     /**
      * To be called from TCPConnection when socket pair (key for TcpConnMap) changes
      * (e.g. becomes fully qualified).
      */
-    virtual void updateSockPair(TCPConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+    virtual void updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     /**
      * Update conn's socket pair, and register newConn (which'll keep LISTENing).
      * Also, conn will get a new socketId (and newConn will live on with its old socketId).
      */
-    virtual void addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+    virtual void addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     /**
      * To be called from TCPConnection: reserves an ephemeral port for the connection.
@@ -198,12 +198,12 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCPSendQueue *createSendQueue();
+    virtual TcpSendQueue *createSendQueue();
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCPReceiveQueue *createReceiveQueue();
+    virtual TcpReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

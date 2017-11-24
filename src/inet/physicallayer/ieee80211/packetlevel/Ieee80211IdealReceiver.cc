@@ -49,7 +49,7 @@ std::ostream& Ieee80211IdealReceiver::printToStream(std::ostream& stream, int le
     return IdealReceiver::printToStream(stream, level);
 }
 
-const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
+const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = IdealReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);

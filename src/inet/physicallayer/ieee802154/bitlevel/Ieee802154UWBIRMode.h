@@ -30,7 +30,7 @@ namespace inet {
 namespace physicallayer {
 
 // This class was created by porting some C++ code from the IEEE802154A class in MiXiM.
-class INET_API Ieee802154UWBIRMode
+class INET_API Ieee802154UwbIrMode
 {
   public:
     /**@brief Total triangular pulse peak energy in mW (0 dBm / 50 MHz over 500 MHz) */
@@ -46,10 +46,10 @@ class INET_API Ieee802154UWBIRMode
     static const int maxS = 20000;
     static short s_array[maxS];
     static int last_s;
-    static const Ieee802154UWBIRMode cfg_mandatory_4M;
-    static const Ieee802154UWBIRMode cfg_mandatory_16M;
+    static const Ieee802154UwbIrMode cfg_mandatory_4M;
+    static const Ieee802154UwbIrMode cfg_mandatory_16M;
 
-    enum UWBPRF
+    enum UwbPrf
     {
         PRF_OFF, NOMINAL_4_M, NOMINAL_16_M, NOMINAL_64_M
     };
@@ -59,7 +59,7 @@ class INET_API Ieee802154UWBIRMode
         NON_RANGING, ALL_RANGING, PHY_HEADER_ONLY
     };
 
-    enum UWBPreambleSymbolRepetitions
+    enum UwbPreambleSymbolRepetitions
     {
         PSR_SHORT = 16, PSR_DEFAULT = 64, PSR_MEDIUM = 1024, PSR_LONG = 4096
     };
@@ -70,9 +70,9 @@ class INET_API Ieee802154UWBIRMode
     };
 
     int channel;
-    UWBPRF prf;
+    UwbPrf prf;
     Ranging ranging;
-    UWBPreambleSymbolRepetitions NSync;
+    UwbPreambleSymbolRepetitions NSync;
     int CLength;
     int spreadingdL; // spreading deltaL
     int Ncpb;

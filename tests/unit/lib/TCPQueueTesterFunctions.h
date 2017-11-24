@@ -9,21 +9,21 @@ using namespace tcp;
 
 // TCPSendQueue:
 
-void enqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes);
-void tryenqueue(TCPSendQueue *sq, const char *msgname, ulong numBytes);
-Packet *createSegmentWithBytes(TCPSendQueue *sq, uint32 fromSeq, uint32 toSeq);
-void discardUpTo(TCPSendQueue *sq, uint32 seqNum);
+void enqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
+void tryenqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
+Packet *createSegmentWithBytes(TcpSendQueue *sq, uint32 fromSeq, uint32 toSeq);
+void discardUpTo(TcpSendQueue *sq, uint32 seqNum);
 
 //////////////////////////////////////////////////////////////
 
 // TCPReceiveQueue:
 
-void insertSegment(TCPReceiveQueue *rq, Packet *tcpseg);
-void tryinsertSegment(TCPReceiveQueue *rq, Packet *tcpseg);
-void extractBytesUpTo(TCPReceiveQueue *rq, uint32 seq);
+void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg);
+void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg);
+void extractBytesUpTo(TcpReceiveQueue *rq, uint32 seq);
 
-void insertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end);
-void tryinsertSegment(TCPReceiveQueue *q, uint32 beg, uint32 end);
+void insertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end);
+void tryinsertSegment(TcpReceiveQueue *q, uint32 beg, uint32 end);
 
 /////////////////////////////////////////////////////////////////////////
 

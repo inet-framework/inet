@@ -87,9 +87,9 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
 
     // internal
     cMessage *expungeTimer;
-    DYMOSequenceNumber sequenceNumber;
-    std::map<L3Address, DYMOSequenceNumber> targetAddressToSequenceNumber;
-    std::map<L3Address, RREQTimer *> targetAddressToRREQTimer;
+    DymoSequenceNumber sequenceNumber;
+    std::map<L3Address, DymoSequenceNumber> targetAddressToSequenceNumber;
+    std::map<L3Address, RreqTimer *> targetAddressToRREQTimer;
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
@@ -128,28 +128,28 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void eraseRREQTimer(const L3Address& target);
 
     // handling RREQ wait RREP timer
-    RREQWaitRREPTimer *createRREQWaitRREPTimer(const L3Address& target, int retryCount);
-    void scheduleRREQWaitRREPTimer(RREQWaitRREPTimer *message);
-    void processRREQWaitRREPTimer(RREQWaitRREPTimer *message);
+    RreqWaitRrepTimer *createRREQWaitRREPTimer(const L3Address& target, int retryCount);
+    void scheduleRREQWaitRREPTimer(RreqWaitRrepTimer *message);
+    void processRREQWaitRREPTimer(RreqWaitRrepTimer *message);
 
     // handling RREQ backoff timer
-    RREQBackoffTimer *createRREQBackoffTimer(const L3Address& target, int retryCount);
-    void scheduleRREQBackoffTimer(RREQBackoffTimer *message);
-    void processRREQBackoffTimer(RREQBackoffTimer *message);
+    RreqBackoffTimer *createRREQBackoffTimer(const L3Address& target, int retryCount);
+    void scheduleRREQBackoffTimer(RreqBackoffTimer *message);
+    void processRREQBackoffTimer(RreqBackoffTimer *message);
     simtime_t computeRREQBackoffTime(int retryCount);
 
     // handling RREQ holddown timer
-    RREQHolddownTimer *createRREQHolddownTimer(const L3Address& target);
-    void scheduleRREQHolddownTimer(RREQHolddownTimer *message);
-    void processRREQHolddownTimer(RREQHolddownTimer *message);
+    RreqHolddownTimer *createRREQHolddownTimer(const L3Address& target);
+    void scheduleRREQHolddownTimer(RreqHolddownTimer *message);
+    void processRREQHolddownTimer(RreqHolddownTimer *message);
 
     // handling UDP packets
     void sendUDPPacket(cPacket *packet, double delay);
     void processUDPPacket(Packet *packet);
 
     // handling DYMO packets
-    void sendDYMOPacket(const Ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
-    void processDYMOPacket(Packet *packet, const Ptr<const DYMOPacket>& dymoPacket);
+    void sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void processDYMOPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
 
     // handling RteMsg packets
     bool permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg);
@@ -182,7 +182,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoutes(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
     void updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock, IRoute *route);
-    int getLinkCost(const InterfaceEntry *interfaceEntry, DYMOMetricType metricType);
+    int getLinkCost(const InterfaceEntry *interfaceEntry, DymoMetricType metricType);
     bool isLoopFree(const Ptr<const RteMsg>& rteMsg, IRoute *route);
 
     // handling expunge timer
@@ -190,7 +190,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void scheduleExpungeTimer();
     void expungeRoutes();
     simtime_t getNextExpungeTime();
-    DYMORouteState getRouteState(DYMORouteData *routeData);
+    DymoRouteState getRouteState(DymoRouteData *routeData);
 
     // configuration
     bool isNodeUp();

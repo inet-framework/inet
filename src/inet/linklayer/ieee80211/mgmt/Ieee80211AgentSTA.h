@@ -38,11 +38,11 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
+class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener
 {
   protected:
     InterfaceEntry *myIface = nullptr;
-    MACAddress prevAP;
+    MacAddress prevAP;
     bool activeScan = false;
     std::vector<int> channelsToScan;
     simtime_t probeDelay;
@@ -59,7 +59,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     static simsignal_t dropConfirmSignal;
 
   public:
-    Ieee80211AgentSTA() {}
+    Ieee80211AgentSta() {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -83,11 +83,11 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     /** Sending of Request primitives */
     //@{
     virtual void sendScanRequest();
-    virtual void sendAuthenticateRequest(const MACAddress& address);
-    virtual void sendDeauthenticateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode);
-    virtual void sendAssociateRequest(const MACAddress& address);
-    virtual void sendReassociateRequest(const MACAddress& address);
-    virtual void sendDisassociateRequest(const MACAddress& address, Ieee80211ReasonCode reasonCode);
+    virtual void sendAuthenticateRequest(const MacAddress& address);
+    virtual void sendDeauthenticateRequest(const MacAddress& address, Ieee80211ReasonCode reasonCode);
+    virtual void sendAssociateRequest(const MacAddress& address);
+    virtual void sendReassociateRequest(const MacAddress& address);
+    virtual void sendDisassociateRequest(const MacAddress& address, Ieee80211ReasonCode reasonCode);
     //@}
 
     /** Processing Confirm primitives */

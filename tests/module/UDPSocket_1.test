@@ -1,5 +1,5 @@
 %description:
-Tests UDPSocket method calls:
+Tests UdpSocket method calls:
 
 1. Socket options can be set before the bind() or connect() call.
 2. connect() can be called more than once.
@@ -24,7 +24,7 @@ Define_Module(TestApp);
 
 void TestApp::activity()
 {
-  UDPSocket s;
+  UdpSocket s;
   s.setOutputGate(gate("socketOut"));
   s.setMulticastLoop(false);
   s.connect(L3Address("10.0.0.1"), 1000);
@@ -63,10 +63,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.client.app[0].cmdenv-log-level=TRACE
 
 %contains: stdout
-C:(TestApp)SimpleTestNetwork.client.app[0]: UDPSocket: Send (omnetpp::cMessage)SetMulticastLoop  control info: (inet::UDPSetMulticastLoopCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UDPSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UDPConnectCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UDPSocket: Send (omnetpp::cMessage)BIND  control info: (inet::UDPBindCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UDPSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UDPConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)SetMulticastLoop  control info: (inet::UdpSetMulticastLoopCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UdpConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)BIND  control info: (inet::UdpBindCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UdpConnectCommand)
 
 %contains-regex: stdout
 C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 localPort=1025

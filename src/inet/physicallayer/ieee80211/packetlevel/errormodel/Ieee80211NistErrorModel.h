@@ -49,7 +49,7 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
     double getFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
     double getFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
 
-    virtual double getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const;
+    virtual double getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const;
     virtual double getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const;
 
     virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int headerBitLength, double snr) const override;

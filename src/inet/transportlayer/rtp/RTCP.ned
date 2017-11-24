@@ -3,7 +3,7 @@ package inet.transportlayer.rtp;
 //
 // RTCP end system.
 //
-simple RTCP
+simple Rtcp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -13,8 +13,8 @@ simple RTCP
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
 
     gates:
-        input rtpIn @labels(RTPInnerPacket);
-        input udpIn @labels(UDPControlInfo/up);
-        output rtpOut @labels(RTPInnerPacket);
-        output udpOut @labels(UDPControlInfo/down);
+        input rtpIn @labels(RtpInnerPacket);
+        input udpIn @labels(UdpControlInfo/up);
+        output rtpOut @labels(RtpInnerPacket);
+        output udpOut @labels(UdpControlInfo/down);
 }

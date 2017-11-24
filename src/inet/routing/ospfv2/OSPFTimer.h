@@ -24,7 +24,7 @@ namespace inet {
 
 namespace ospf {
 
-enum OSPFTimerType {
+enum OspfTimerType {
     INTERFACE_HELLO_TIMER = 0,
     INTERFACE_WAIT_TIMER = 1,
     INTERFACE_ACKNOWLEDGEMENT_TIMER = 3,

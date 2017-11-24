@@ -31,7 +31,7 @@ namespace inet {
 
 #define RIP_INFINITE_METRIC    16
 
-struct RIPRoute : public cObject
+struct RipRoute : public cObject
 {
     enum RouteType {
         RIP_ROUTE_RTE,    // route learned from a RIPEntry
@@ -55,7 +55,7 @@ struct RIPRoute : public cObject
     simtime_t lastUpdateTime;    // time of the last change, only for RTE routes
 
   public:
-    RIPRoute(IRoute *route, RouteType type, int metric, uint16 tag);
+    RipRoute(IRoute *route, RouteType type, int metric, uint16 tag);
     virtual std::string info() const override;
 
     RouteType getType() const { return type; }
@@ -86,7 +86,7 @@ struct RIPRoute : public cObject
  * Enumerated parameter to control how the RIPRouting module
  * advertises the routes to its neighbors.
  */
-enum RIPMode {
+enum RipMode {
     NO_RIP,    // no RIP messages sent
     NO_SPLIT_HORIZON,    // every route is sent to the neighbor
     SPLIT_HORIZON,    // do not send routes to the neighbor it was learnt from
@@ -100,13 +100,13 @@ enum RIPMode {
  * are used by network layer protocols only. Therefore
  * RIPRouting manages its own table of these entries.
  */
-struct RIPInterfaceEntry
+struct RipInterfaceEntry
 {
     const InterfaceEntry *ie = nullptr;    // the associated interface entry
     int metric = 0;    // metric of this interface
-    RIPMode mode = NO_RIP;    // RIP mode of this interface
+    RipMode mode = NO_RIP;    // RIP mode of this interface
 
-    RIPInterfaceEntry(const InterfaceEntry *ie);
+    RipInterfaceEntry(const InterfaceEntry *ie);
     void configure(cXMLElement *config);
 };
 
@@ -133,11 +133,11 @@ struct RIPInterfaceEntry
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API RIPRouting : public cSimpleModule, protected cListener, public ILifecycle
+class INET_API RipRouting : public cSimpleModule, protected cListener, public ILifecycle
 {
     enum Mode { RIPv2, RIPng };
-    typedef std::vector<RIPInterfaceEntry> InterfaceVector;
-    typedef std::vector<RIPRoute *> RouteVector;
+    typedef std::vector<RipInterfaceEntry> InterfaceVector;
+    typedef std::vector<RipRoute *> RouteVector;
     // environment
     cModule *host = nullptr;    // the host module that owns this module
     IInterfaceTable *ift = nullptr;    // interface table of the host
@@ -146,7 +146,7 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     // state
     InterfaceVector ripInterfaces;    // interfaces on which RIP is used
     RouteVector ripRoutes;    // all advertised routes (imported or learned)
-    UDPSocket socket;    // bound to the RIP port (see udpPort parameter)
+    UdpSocket socket;    // bound to the RIP port (see udpPort parameter)
     cMessage *updateTimer = nullptr;    // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer = nullptr;    // scheduled when there are pending changes
     cMessage *startupTimer = nullptr;    // timer for delayed startup
@@ -168,15 +168,15 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     static simsignal_t numRoutesSignal;
 
   public:
-    RIPRouting();
-    ~RIPRouting();
+    RipRouting();
+    ~RipRouting();
 
   private:
-    RIPInterfaceEntry *findInterfaceById(int interfaceId);
-    RIPRoute *findRoute(const L3Address& destAddress, int prefixLength);
-    RIPRoute *findRoute(const L3Address& destination, int prefixLength, RIPRoute::RouteType type);
-    RIPRoute *findRoute(const IRoute *route);
-    RIPRoute *findRoute(const InterfaceEntry *ie, RIPRoute::RouteType type);
+    RipInterfaceEntry *findInterfaceById(int interfaceId);
+    RipRoute *findRoute(const L3Address& destAddress, int prefixLength);
+    RipRoute *findRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type);
+    RipRoute *findRoute(const IRoute *route);
+    RipRoute *findRoute(const InterfaceEntry *ie, RipRoute::RouteType type);
     void addInterface(const InterfaceEntry *ie, cXMLElement *config);
     void deleteInterface(const InterfaceEntry *ie);
     void invalidateRoutes(const InterfaceEntry *ie);
@@ -200,22 +200,22 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
 
     virtual void configureInterfaces(cXMLElement *config);
     virtual void configureInitialRoutes();
-    virtual RIPRoute *importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
-    virtual void sendRIPRequest(const RIPInterfaceEntry& ripInterface);
+    virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
+    virtual void sendRIPRequest(const RipInterfaceEntry& ripInterface);
 
     virtual void processRequest(Packet *pk);
     virtual void processUpdate(bool triggered);
-    virtual void sendRoutes(const L3Address& address, int port, const RIPInterfaceEntry& ripInterface, bool changedOnly);
+    virtual void sendRoutes(const L3Address& address, int port, const RipInterfaceEntry& ripInterface, bool changedOnly);
 
     virtual void processResponse(Packet *pk);
     virtual bool isValidResponse(Packet *packet);
     virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
-    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
+    virtual void updateRoute(RipRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
 
     virtual void triggerUpdate();
-    virtual RIPRoute *checkRouteIsExpired(RIPRoute *route);
-    virtual void invalidateRoute(RIPRoute *route);
-    virtual void purgeRoute(RIPRoute *route);
+    virtual RipRoute *checkRouteIsExpired(RipRoute *route);
+    virtual void invalidateRoute(RipRoute *route);
+    virtual void purgeRoute(RipRoute *route);
 
     virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface);
 };

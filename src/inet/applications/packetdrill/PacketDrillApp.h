@@ -40,7 +40,7 @@ namespace inet {
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
-class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
+class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
 {
     public:
         PacketDrillApp();
@@ -85,8 +85,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int protocol;
         int tcpConnId;
         int sctpAssocId;
-        UDPSocket udpSocket;
-        TCPSocket tcpSocket;
+        UdpSocket udpSocket;
+        TcpSocket tcpSocket;
         SCTPSocket sctpSocket;
         PacketDrill *pd;
         bool msgArrived;

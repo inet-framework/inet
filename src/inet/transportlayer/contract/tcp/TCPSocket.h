@@ -26,7 +26,7 @@
 
 namespace inet {
 
-class TCPStatusInfo;
+class TcpStatusInfo;
 
 /**
  * TCPSocket is a convenience class, to make it easier to manage TCP connections
@@ -122,7 +122,7 @@ class TCPStatusInfo;
  *
  * @see TCPSocketMap
  */
-class INET_API TCPSocket
+class INET_API TcpSocket
 {
   public:
     /**
@@ -139,12 +139,12 @@ class INET_API TCPSocket
       public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketAvailable(int connId, void *yourPtr, TCPAvailableInfo *availableInfo) {}
+        virtual void socketAvailable(int connId, void *yourPtr, TcpAvailableInfo *availableInfo) {}
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
         virtual void socketClosed(int connId, void *yourPtr) {}
         virtual void socketFailure(int connId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+        virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) { delete status; }
         virtual void socketDeleted(int connId, void *yourPtr) {}
     };
 
@@ -177,19 +177,19 @@ class INET_API TCPSocket
      * Constructor. The getConnectionId() method returns a valid Id right after
      * constructor call.
      */
-    TCPSocket();
+    TcpSocket();
 
     /**
      * Constructor, to be used with forked sockets (see listen()).
      * The new connId will be picked up from the message: it should have
      * arrived from TCP and contain TCPCommmand control info.
      */
-    TCPSocket(cMessage *msg);
+    TcpSocket(cMessage *msg);
 
     /**
      * Destructor
      */
-    ~TCPSocket();
+    ~TcpSocket();
 
     /**
      * Returns the internal connection Id. TCP uses the (gate index, connId) pair

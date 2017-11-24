@@ -32,8 +32,8 @@ namespace ospf {
 struct NextHop
 {
     int ifIndex;
-    IPv4Address hopAddress;
-    RouterID advertisingRouter;
+    Ipv4Address hopAddress;
+    RouterId advertisingRouter;
 };
 
 class INET_API RoutingInfo
@@ -41,7 +41,7 @@ class INET_API RoutingInfo
   private:
     std::vector<NextHop> nextHops;
     unsigned long distance;
-    OSPFLSA *parent;
+    OspfLsa *parent;
 
   public:
     RoutingInfo() : distance(0), parent(nullptr) {}
@@ -54,11 +54,11 @@ class INET_API RoutingInfo
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
     void setDistance(unsigned long d) { distance = d; }
     unsigned long getDistance() const { return distance; }
-    void setParent(OSPFLSA *p) { parent = p; }
-    OSPFLSA *getParent() const { return parent; }
+    void setParent(OspfLsa *p) { parent = p; }
+    OspfLsa *getParent() const { return parent; }
 };
 
-class INET_API LSATrackingInfo
+class INET_API LsaTrackingInfo
 {
   public:
     enum InstallSource {
@@ -71,8 +71,8 @@ class INET_API LSATrackingInfo
     unsigned long installTime;
 
   public:
-    LSATrackingInfo() : source(FLOODED), installTime(0) {}
-    LSATrackingInfo(const LSATrackingInfo& info) : source(info.source), installTime(info.installTime) {}
+    LsaTrackingInfo() : source(FLOODED), installTime(0) {}
+    LsaTrackingInfo(const LsaTrackingInfo& info) : source(info.source), installTime(info.installTime) {}
 
     void setSource(InstallSource installSource) { source = installSource; }
     InstallSource getSource() const { return source; }
@@ -81,95 +81,95 @@ class INET_API LSATrackingInfo
     unsigned long getInstallTime() const { return installTime; }
 };
 
-class INET_API RouterLSA : public OSPFRouterLSA,
+class INET_API RouterLsa : public OspfRouterLsa,
     public RoutingInfo,
-    public LSATrackingInfo
+    public LsaTrackingInfo
 {
   public:
-    RouterLSA() : OSPFRouterLSA(), RoutingInfo(), LSATrackingInfo() {}
-    RouterLSA(const OSPFRouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
-    RouterLSA(const RouterLSA& lsa) : OSPFRouterLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
-    virtual ~RouterLSA() {}
+    RouterLsa() : OspfRouterLsa(), RoutingInfo(), LsaTrackingInfo() {}
+    RouterLsa(const OspfRouterLsa& lsa) : OspfRouterLsa(lsa), RoutingInfo(), LsaTrackingInfo() {}
+    RouterLsa(const RouterLsa& lsa) : OspfRouterLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa) {}
+    virtual ~RouterLsa() {}
 
     bool validateLSChecksum() const { return true; }    // not implemented
 
-    bool update(const OSPFRouterLSA *lsa);
-    bool differsFrom(const OSPFRouterLSA *routerLSA) const;
+    bool update(const OspfRouterLsa *lsa);
+    bool differsFrom(const OspfRouterLsa *routerLSA) const;
 };
 
-class INET_API NetworkLSA : public OSPFNetworkLSA,
+class INET_API NetworkLsa : public OspfNetworkLsa,
     public RoutingInfo,
-    public LSATrackingInfo
+    public LsaTrackingInfo
 {
   public:
-    NetworkLSA() : OSPFNetworkLSA(), RoutingInfo(), LSATrackingInfo() {}
-    NetworkLSA(const OSPFNetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(), LSATrackingInfo() {}
-    NetworkLSA(const NetworkLSA& lsa) : OSPFNetworkLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa) {}
-    virtual ~NetworkLSA() {}
+    NetworkLsa() : OspfNetworkLsa(), RoutingInfo(), LsaTrackingInfo() {}
+    NetworkLsa(const OspfNetworkLsa& lsa) : OspfNetworkLsa(lsa), RoutingInfo(), LsaTrackingInfo() {}
+    NetworkLsa(const NetworkLsa& lsa) : OspfNetworkLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa) {}
+    virtual ~NetworkLsa() {}
 
     bool validateLSChecksum() const { return true; }    // not implemented
 
-    bool update(const OSPFNetworkLSA *lsa);
-    bool differsFrom(const OSPFNetworkLSA *networkLSA) const;
+    bool update(const OspfNetworkLsa *lsa);
+    bool differsFrom(const OspfNetworkLsa *networkLSA) const;
 };
 
-class INET_API SummaryLSA : public OSPFSummaryLSA,
+class INET_API SummaryLsa : public OspfSummaryLsa,
     public RoutingInfo,
-    public LSATrackingInfo
+    public LsaTrackingInfo
 {
   protected:
     bool purgeable;
 
   public:
-    SummaryLSA() : OSPFSummaryLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-    SummaryLSA(const OSPFSummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-    SummaryLSA(const SummaryLSA& lsa) : OSPFSummaryLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
-    virtual ~SummaryLSA() {}
+    SummaryLsa() : OspfSummaryLsa(), RoutingInfo(), LsaTrackingInfo(), purgeable(false) {}
+    SummaryLsa(const OspfSummaryLsa& lsa) : OspfSummaryLsa(lsa), RoutingInfo(), LsaTrackingInfo(), purgeable(false) {}
+    SummaryLsa(const SummaryLsa& lsa) : OspfSummaryLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa), purgeable(lsa.purgeable) {}
+    virtual ~SummaryLsa() {}
 
     bool getPurgeable() const { return purgeable; }
     void setPurgeable(bool purge = true) { purgeable = purge; }
 
     bool validateLSChecksum() const { return true; }    // not implemented
 
-    bool update(const OSPFSummaryLSA *lsa);
-    bool differsFrom(const OSPFSummaryLSA *summaryLSA) const;
+    bool update(const OspfSummaryLsa *lsa);
+    bool differsFrom(const OspfSummaryLsa *summaryLSA) const;
 };
 
-class INET_API ASExternalLSA : public OSPFASExternalLSA,
+class INET_API AsExternalLsa : public OspfAsExternalLsa,
     public RoutingInfo,
-    public LSATrackingInfo
+    public LsaTrackingInfo
 {
   protected:
     bool purgeable;
 
   public:
-    ASExternalLSA() : OSPFASExternalLSA(), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-    ASExternalLSA(const OSPFASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(), LSATrackingInfo(), purgeable(false) {}
-    ASExternalLSA(const ASExternalLSA& lsa) : OSPFASExternalLSA(lsa), RoutingInfo(lsa), LSATrackingInfo(lsa), purgeable(lsa.purgeable) {}
-    virtual ~ASExternalLSA() {}
+    AsExternalLsa() : OspfAsExternalLsa(), RoutingInfo(), LsaTrackingInfo(), purgeable(false) {}
+    AsExternalLsa(const OspfAsExternalLsa& lsa) : OspfAsExternalLsa(lsa), RoutingInfo(), LsaTrackingInfo(), purgeable(false) {}
+    AsExternalLsa(const AsExternalLsa& lsa) : OspfAsExternalLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa), purgeable(lsa.purgeable) {}
+    virtual ~AsExternalLsa() {}
 
     bool getPurgeable() const { return purgeable; }
     void setPurgeable(bool purge = true) { purgeable = purge; }
 
     bool validateLSChecksum() const { return true; }    // not implemented
 
-    bool update(const OSPFASExternalLSA *lsa);
-    bool differsFrom(const OSPFASExternalLSA *asExternalLSA) const;
+    bool update(const OspfAsExternalLsa *lsa);
+    bool differsFrom(const OspfAsExternalLsa *asExternalLSA) const;
 };
 
 /**
  * Returns true if leftLSA is older than rightLSA.
  */
-bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA);
+bool operator<(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA);
 
 /**
  * Returns true if leftLSA is the same age as rightLSA.
  */
-bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA);
+bool operator==(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA);
 
-bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions);
+bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions);
 
-inline bool operator!=(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
+inline bool operator!=(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
 {
     return !(leftOptions == rightOptions);
 }
@@ -186,20 +186,20 @@ inline bool operator!=(const NextHop& leftHop, const NextHop& rightHop)
     return !(leftHop == rightHop);
 }
 
-unsigned int calculateLSASize(const OSPFRouterLSA *routerLSA);
-unsigned int calculateLSASize(const OSPFNetworkLSA *networkLSA);
-unsigned int calculateLSASize(const OSPFSummaryLSA *summaryLSA);
-unsigned int calculateLSASize(const OSPFASExternalLSA *asExternalLSA);
+unsigned int calculateLSASize(const OspfRouterLsa *routerLSA);
+unsigned int calculateLSASize(const OspfNetworkLsa *networkLSA);
+unsigned int calculateLSASize(const OspfSummaryLsa *summaryLSA);
+unsigned int calculateLSASize(const OspfAsExternalLsa *asExternalLSA);
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsa);
-inline std::ostream& operator<<(std::ostream& ostr, const OSPFLSA& lsa) { ostr << lsa.getHeader(); return ostr; }
-std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa);
-std::ostream& operator<<(std::ostream& ostr, const TOSData& tos);
+std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsa);
+inline std::ostream& operator<<(std::ostream& ostr, const OspfLsa& lsa) { ostr << lsa.getHeader(); return ostr; }
+std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa);
+std::ostream& operator<<(std::ostream& ostr, const TosData& tos);
 std::ostream& operator<<(std::ostream& ostr, const Link& link);
-std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa);
-std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
-std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
-std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
+std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa);
+std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa);
+std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos);
+std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa);
 
 } // namespace ospf
 

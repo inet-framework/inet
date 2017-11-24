@@ -28,10 +28,10 @@ import inet.physicallayer.base.packetlevel.NarrowbandReceiverBase;
 // See also ~APSKDimensionalTransmitter, ~APSKDimensionalRadio,
 // ~APSKDimensionalRadioMedium, and ~DimensionalAnalogModel.
 //
-module APSKDimensionalReceiver extends NarrowbandReceiverBase
+module ApskDimensionalReceiver extends NarrowbandReceiverBase
 {
     parameters:
         modulation = default("BPSK");
         errorModelType = default("APSKErrorModel");
-        @class(APSKDimensionalReceiver);
+        @class(ApskDimensionalReceiver);
 }

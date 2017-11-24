@@ -34,7 +34,7 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
 {
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

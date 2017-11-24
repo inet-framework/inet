@@ -92,7 +92,7 @@ void InProgressFrames::dropFrame(Packet *packet)
     droppedFrames.push_back(packet);
 }
 
-void InProgressFrames::dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
+void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
     for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
         auto frame = *it;

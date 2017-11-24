@@ -18,7 +18,7 @@
 package inet.physicallayer.ieee80211.bitlevel;
 
 import inet.physicallayer.contract.bitlevel.IEncoder;
-import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IFecCoder;
 import inet.physicallayer.contract.bitlevel.IInterleaver;
 import inet.physicallayer.contract.bitlevel.IScrambler;
 
@@ -33,17 +33,17 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 //       - Block interleaver (18.3.5.7 Data interleaving) @see ~Ieee80211OFDMInterleaver
 //
 //
-module Ieee80211OFDMEncoder like IEncoder
+module Ieee80211OfdmEncoder like IEncoder
 {
     parameters:
         string fecType = default("");
         string scramblerType = default("");
         string interleaverType = default("");
         @display("i=block/blackboard");
-        @class(Ieee80211OFDMEncoderModule);
+        @class(Ieee80211OfdmEncoderModule);
 
     submodules:
-        fecEncoder: <fecType> like IFECCoder if fecType != "" {
+        fecEncoder: <fecType> like IFecCoder if fecType != "" {
             @display("p=66,156");
         }
         scrambler: <scramblerType> like IScrambler if scramblerType != "" {

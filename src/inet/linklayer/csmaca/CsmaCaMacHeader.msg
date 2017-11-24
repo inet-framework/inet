@@ -17,14 +17,14 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
 class CsmaCaMacHeader extends FieldsChunk
 {
-    MACAddress transmitterAddress;
-    MACAddress receiverAddress;
+    MacAddress transmitterAddress;
+    MacAddress receiverAddress;
 }
 
 class CsmaCaMacAckHeader extends CsmaCaMacHeader

@@ -21,12 +21,12 @@ namespace inet {
 
 namespace physicallayer {
 
-MQAMModulationBase::MQAMModulationBase(const std::vector<APSKSymbol> *constellation) :
-    APSKModulationBase(constellation)
+MqamModulationBase::MqamModulationBase(const std::vector<ApskSymbol> *constellation) :
+    ApskModulationBase(constellation)
 {
 }
 
-double MQAMModulationBase::calculateSER(double snir, Hz bandwidth, bps bitrate) const
+double MqamModulationBase::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     // http://en.wikipedia.org/wiki/Eb/N0
     double EbN0 = snir * bandwidth.get() / bitrate.get();
@@ -36,7 +36,7 @@ double MQAMModulationBase::calculateSER(double snir, Hz bandwidth, bps bitrate) 
     return 1 - (1 - Psc) * (1 - Psc);
 }
 
-double MQAMModulationBase::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double MqamModulationBase::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     double EbN0 = snir * bandwidth.get() / bitrate.get();
     // http://en.wikipedia.org/wiki/Quadrature_amplitude_modulation#Rectangular_QAM

@@ -20,14 +20,14 @@ import inet.common.INETDefs;
 
 namespace inet::bgp;
 
-enum BGPSessionType
+enum BgpSessionType
 {
     IGP = 0;
     EGP = 1;
     INCOMPLETE = 2;
 }
 
-enum BGPPathSegmentType
+enum BgpPathSegmentType
 {
     AS_SET = 1;
     AS_SEQUENCE = 2;

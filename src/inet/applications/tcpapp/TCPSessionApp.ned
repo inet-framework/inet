@@ -81,7 +81,7 @@ import inet.applications.contract.IApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-simple TCPSessionApp like IApp
+simple TcpSessionApp like IApp
 {
     parameters:
         string localAddress = default("");
@@ -103,6 +103,6 @@ simple TCPSessionApp like IApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input socketIn @labels(TCPCommand/up);
-        output socketOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }

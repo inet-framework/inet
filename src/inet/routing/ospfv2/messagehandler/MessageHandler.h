@@ -51,19 +51,19 @@ class INET_API MessageHandler : public IMessageHandler
 
     void processPacket(Packet *packet, Interface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
 
-    void sendPacket(Packet *packet, IPv4Address destination, int outputIfIndex, short ttl = 1);
+    void sendPacket(Packet *packet, Ipv4Address destination, int outputIfIndex, short ttl = 1);
     void clearTimer(cMessage *timer);
     void startTimer(cMessage *timer, simtime_t delay);
 
     void printEvent(const char *eventString, const Interface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
-    void printHelloPacket(const OSPFHelloPacket *helloPacket, IPv4Address destination, int outputIfIndex) const;
-    void printDatabaseDescriptionPacket(const OSPFDatabaseDescriptionPacket *ddPacket, IPv4Address destination, int outputIfIndex) const;
-    void printLinkStateRequestPacket(const OSPFLinkStateRequestPacket *requestPacket, IPv4Address destination, int outputIfIndex) const;
-    void printLinkStateUpdatePacket(const OSPFLinkStateUpdatePacket *updatePacket, IPv4Address destination, int outputIfIndex) const;
-    void printLinkStateAcknowledgementPacket(const OSPFLinkStateAcknowledgementPacket *ackPacket, IPv4Address destination, int outputIfIndex) const;
+    void printHelloPacket(const OspfHelloPacket *helloPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printDatabaseDescriptionPacket(const OspfDatabaseDescriptionPacket *ddPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateRequestPacket(const OspfLinkStateRequestPacket *requestPacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateUpdatePacket(const OspfLinkStateUpdatePacket *updatePacket, Ipv4Address destination, int outputIfIndex) const;
+    void printLinkStateAcknowledgementPacket(const OspfLinkStateAcknowledgementPacket *ackPacket, Ipv4Address destination, int outputIfIndex) const;
 
     // Authentication not implemented
-    bool authenticatePacket(const OSPFPacket *packet) { return true; }
+    bool authenticatePacket(const OspfPacket *packet) { return true; }
 };
 
 } // namespace ospf

@@ -75,9 +75,9 @@ void IPv4::initialize(int stage)
         QueueBase::initialize();
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
-        arp = getModuleFromPar<IARP>(par("arpModule"), this);
-        icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        arp = getModuleFromPar<IArp>(par("arpModule"), this);
+        icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
 
         transportInGateBaseId = gateBaseId("transportIn");
 
@@ -106,8 +106,8 @@ void IPv4::initialize(int stage)
 
         pendingPackets.clear();
         cModule *arpModule = check_and_cast<cModule *>(arp);
-        arpModule->subscribe(IARP::completedARPResolutionSignal, this);
-        arpModule->subscribe(IARP::failedARPResolutionSignal, this);
+        arpModule->subscribe(IArp::completedARPResolutionSignal, this);
+        arpModule->subscribe(IArp::failedARPResolutionSignal, this);
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -211,7 +211,7 @@ bool IPv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
                 // 1. fill in the data
                 ipv4HeaderBytes->copyToBuffer(buffer, bufferLength);
                 // 2. compute the CRC
-                auto computedCrc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+                auto computedCrc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
                 delete [] buffer;
                 return computedCrc == 0;
             }
@@ -235,10 +235,10 @@ const InterfaceEntry *IPv4::getDestInterface(cPacket *packet)
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
-IPv4Address IPv4::getNextHop(cPacket *packet)
+Ipv4Address IPv4::getNextHop(cPacket *packet)
 {
     auto tag = packet->getTag<NextHopAddressReq>();
-    return tag != nullptr ? tag->getNextHopAddress().toIPv4() : IPv4Address::UNSPECIFIED_ADDRESS;
+    return tag != nullptr ? tag->getNextHopAddress().toIPv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
 void IPv4::handleIncomingDatagram(Packet *packet)
@@ -301,11 +301,11 @@ Packet *IPv4::prepareForForwarding(Packet *packet) const
 void IPv4::preroutingFinish(Packet *packet)
 {
     const InterfaceEntry *fromIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
-    IPv4Address nextHopAddr = getNextHop(packet);
+    Ipv4Address nextHopAddr = getNextHop(packet);
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     ASSERT(ipv4Header);
-    IPv4Address destAddr = ipv4Header->getDestAddress();
+    Ipv4Address destAddr = ipv4Header->getDestAddress();
 
     // route packet
 
@@ -350,7 +350,7 @@ void IPv4::preroutingFinish(Packet *packet)
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
                 auto packetCopy = prepareForForwarding(packet->dup());
                 packetCopy->ensureTag<InterfaceReq>()->setInterfaceId(broadcastIE->getInterfaceId());
-                packetCopy->ensureTag<NextHopAddressReq>()->setNextHopAddress(IPv4Address::ALLONES_ADDRESS);
+                packetCopy->ensureTag<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
                 fragmentPostRouting(packetCopy);
             }
 
@@ -392,7 +392,7 @@ void IPv4::handlePacketFromHL(Packet *packet)
     encapsulate(packet);
 
     // TODO:
-    L3Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
+    L3Address nextHopAddr(Ipv4Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet);
 }
@@ -400,7 +400,7 @@ void IPv4::handlePacketFromHL(Packet *packet)
 void IPv4::datagramLocalOut(Packet *packet)
 {
     const InterfaceEntry *destIE = getDestInterface(packet);
-    IPv4Address requestedNextHopAddress = getNextHop(packet);
+    Ipv4Address requestedNextHopAddress = getNextHop(packet);
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     bool multicastLoop = false;
@@ -410,7 +410,7 @@ void IPv4::datagramLocalOut(Packet *packet)
     }
 
     // send
-    IPv4Address destAddr = ipv4Header->getDestAddress();
+    Ipv4Address destAddr = ipv4Header->getDestAddress();
 
     EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
@@ -484,7 +484,7 @@ const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const
         EV_DETAIL << "multicast packet routed by socket option via output interface " << ie->getInterfaceName() << "\n";
     }
     if (!ie) {
-        IPv4Route *route = rt->findBestMatchingRoute(ipv4Header->getDestAddress());
+        Ipv4Route *route = rt->findBestMatchingRoute(ipv4Header->getDestAddress());
         if (route)
             ie = route->getInterface();
         if (ie)
@@ -507,10 +507,10 @@ void IPv4::routeUnicastPacket(Packet *packet)
 {
     const InterfaceEntry *fromIE = getSourceInterface(packet);
     const InterfaceEntry *destIE = getDestInterface(packet);
-    IPv4Address nextHopAddress = getNextHop(packet);
+    Ipv4Address nextHopAddress = getNextHop(packet);
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
-    IPv4Address destAddr = ipv4Header->getDestAddress();
+    Ipv4Address destAddr = ipv4Header->getDestAddress();
     EV_INFO << "Routing " << packet << " with destination = " << destAddr << ", ";
 
     // if output port was explicitly requested, use that, otherwise use IPv4 routing
@@ -523,7 +523,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
         // special case ICMP reply
         else if (destIE->isBroadcast()) {
             // if the interface is broadcast we must search the next hop
-            const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
+            const Ipv4Route *re = rt->findBestMatchingRoute(destAddr);
             if (re && re->getInterface() == destIE) {
                 packet->ensureTag<NextHopAddressReq>()->setNextHopAddress(re->getGateway());
             }
@@ -531,7 +531,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
     }
     else {
         // use IPv4 routing (lookup in routing table)
-        const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
+        const Ipv4Route *re = rt->findBestMatchingRoute(destAddr);
         if (re) {
             destIE = re->getInterface();
             packet->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
@@ -573,7 +573,7 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet)
     // and mapped to the broadcast MAC address.
     if (destIE != nullptr) {
         packet->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());    //FIXME KLUDGE is it needed?
-        packet->ensureTag<NextHopAddressReq>()->setNextHopAddress(IPv4Address::ALLONES_ADDRESS);
+        packet->ensureTag<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
         fragmentPostRouting(packet);
     }
     else if (forceBroadcast) {
@@ -582,7 +582,7 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet)
             const InterfaceEntry *ie = ift->getInterface(i);
             auto packetCopy = packet->dup();
             packetCopy->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-            packetCopy->ensureTag<NextHopAddressReq>()->setNextHopAddress(IPv4Address::ALLONES_ADDRESS);
+            packetCopy->ensureTag<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
             fragmentPostRouting(packetCopy);
         }
         delete packet;
@@ -605,8 +605,8 @@ void IPv4::forwardMulticastPacket(Packet *packet)
 {
     const InterfaceEntry *fromIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
-    const IPv4Address& srcAddr = ipv4Header->getSrcAddress();
-    const IPv4Address& destAddr = ipv4Header->getDestAddress();
+    const Ipv4Address& srcAddr = ipv4Header->getSrcAddress();
+    const Ipv4Address& destAddr = ipv4Header->getDestAddress();
     ASSERT(destAddr.isMulticast());
     ASSERT(!destAddr.isLinkLocalMulticast());
 
@@ -614,7 +614,7 @@ void IPv4::forwardMulticastPacket(Packet *packet)
 
     numMulticast++;
 
-    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+    const Ipv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route) {
         EV_WARN << "Multicast route does not exist, try to add.\n";
         // TODO: no need to emit fromIE when tags will be used in place of control infos
@@ -658,7 +658,7 @@ void IPv4::forwardMulticastPacket(Packet *packet)
         numForwarded++;
         // copy original datagram for multiple destinations
         for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++) {
-            IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+            Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
             const InterfaceEntry *destIE = outInterface->getInterface();
             if (destIE != fromIE && outInterface->isEnabled()) {
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
@@ -782,12 +782,12 @@ void IPv4::fragmentPostRouting(Packet *packet)
 void IPv4::fragmentAndSend(Packet *packet)
 {
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
-    IPv4Address nextHopAddr = getNextHop(packet);
+    Ipv4Address nextHopAddr = getNextHop(packet);
     if (nextHopAddr.isUnspecified()) {
-        IPv4InterfaceData *ipv4Data = destIE->ipv4Data();
+        Ipv4InterfaceData *ipv4Data = destIE->ipv4Data();
         const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
-        IPv4Address destAddress = ipv4Header->getDestAddress();
-        if (IPv4Address::maskedAddrAreEqual(destAddress, ipv4Data->getIPAddress(), ipv4Data->getNetmask()))
+        Ipv4Address destAddress = ipv4Header->getDestAddress();
+        if (Ipv4Address::maskedAddrAreEqual(destAddress, ipv4Data->getIPAddress(), ipv4Data->getNetmask()))
             nextHopAddr = destAddress;
         else if (useProxyARP) {
             nextHopAddr = destAddress;
@@ -810,7 +810,7 @@ void IPv4::fragmentAndSend(Packet *packet)
         // 1. fill in the data
         std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
         // 2. compute the CRC
-        uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+        uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
         delete [] buffer;
         ipv4Header->setCrc(crc);
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
@@ -911,11 +911,11 @@ void IPv4::encapsulate(Packet *transportPacket)
     const auto& ipv4Header = makeShared<Ipv4Header>();
 
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
-    IPv4Address src = l3AddressReq->getSrcAddress().toIPv4();
-    IPv4Address dest = l3AddressReq->getDestAddress().toIPv4();
+    Ipv4Address src = l3AddressReq->getSrcAddress().toIPv4();
+    Ipv4Address dest = l3AddressReq->getDestAddress().toIPv4();
     delete l3AddressReq;
 
-    ipv4Header->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
@@ -993,12 +993,12 @@ void IPv4::sendDatagramToOutput(Packet *packet)
 {
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
     auto nextHopAddressReq = packet->removeMandatoryTag<NextHopAddressReq>();
-    IPv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIPv4();
+    Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIPv4();
     delete nextHopAddressReq;
     if (!ie->isBroadcast() || ie->getMacAddress().isUnspecified()) // we can't do ARP
         sendPacketToNIC(packet);
     else {
-        MACAddress nextHopMacAddr = resolveNextHopMacAddress(packet, nextHopAddr, ie);
+        MacAddress nextHopMacAddr = resolveNextHopMacAddress(packet, nextHopAddr, ie);
         if (nextHopMacAddr.isUnspecified()) {
             EV_INFO << "Pending " << packet << " to ARP resolution.\n";
             pendingPackets[nextHopAddr].insert(packet);
@@ -1011,7 +1011,7 @@ void IPv4::sendDatagramToOutput(Packet *packet)
     }
 }
 
-void IPv4::arpResolutionCompleted(IARP::Notification *entry)
+void IPv4::arpResolutionCompleted(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::IPv4)
         return;
@@ -1032,7 +1032,7 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
     }
 }
 
-void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
+void IPv4::arpResolutionTimedOut(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::IPv4)
         return;
@@ -1051,15 +1051,15 @@ void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
     }
 }
 
-MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE)
+MacAddress IPv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE)
 {
     if (nextHopAddr.isLimitedBroadcastAddress() || nextHopAddr == destIE->ipv4Data()->getNetworkBroadcastAddress()) {
         EV_DETAIL << "destination address is broadcast, sending packet to broadcast MAC address\n";
-        return MACAddress::BROADCAST_ADDRESS;
+        return MacAddress::BROADCAST_ADDRESS;
     }
 
     if (nextHopAddr.isMulticast()) {
-        MACAddress macAddr = MACAddress::makeMulticastAddress(nextHopAddr);
+        MacAddress macAddr = MacAddress::makeMulticastAddress(nextHopAddr);
         EV_DETAIL << "destination address is multicast, sending packet to MAC address " << macAddr << "\n";
         return macAddr;
     }
@@ -1334,15 +1334,15 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 {
     Enter_Method_Silent();
 
-    if (signalID == IARP::completedARPResolutionSignal) {
-        arpResolutionCompleted(check_and_cast<IARP::Notification *>(obj));
+    if (signalID == IArp::completedARPResolutionSignal) {
+        arpResolutionCompleted(check_and_cast<IArp::Notification *>(obj));
     }
-    if (signalID == IARP::failedARPResolutionSignal) {
-        arpResolutionTimedOut(check_and_cast<IARP::Notification *>(obj));
+    if (signalID == IArp::failedARPResolutionSignal) {
+        arpResolutionTimedOut(check_and_cast<IArp::Notification *>(obj));
     }
 }
 
-void IPv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, ICMPType type, ICMPCode code)
+void IPv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
 {
     icmp->sendErrorMessage(origPacket, inputInterfaceId, type, code);
 }

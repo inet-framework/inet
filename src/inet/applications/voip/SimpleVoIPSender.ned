@@ -44,7 +44,7 @@ import inet.applications.contract.IApp;
 //
 // @authors: Adriano, Zoltan Bojthe
 //
-simple SimpleVoIPSender like IApp
+simple SimpleVoipSender like IApp
 {
     parameters:
         int localPort = default(-1);
@@ -59,6 +59,6 @@ simple SimpleVoIPSender like IApp
 
         @display("i=block/source");
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }

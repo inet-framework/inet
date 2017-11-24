@@ -38,7 +38,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-simple TCPGenericSrvApp like IApp
+simple TcpGenericSrvApp like IApp
 {
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
@@ -51,7 +51,7 @@ simple TCPGenericSrvApp like IApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input socketIn @labels(TCPCommand/up);
-        output socketOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }
 

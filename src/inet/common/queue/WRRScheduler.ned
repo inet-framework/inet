@@ -33,7 +33,7 @@ package inet.common.queue;
 // therefore it can be used as the queue component of a NIC,
 // and as the input of another scheduler.
 //
-simple WRRScheduler
+simple WrrScheduler
 {
     parameters:
         string weights;

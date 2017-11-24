@@ -42,7 +42,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~UDPVideoStreamCli
 //
-simple UDPVideoStreamSvr like IApp
+simple UdpVideoStreamSvr like IApp
 {
     parameters:
         int localPort; // port to listen on
@@ -55,7 +55,7 @@ simple UDPVideoStreamSvr like IApp
         @statistic[reqStreamBytes](title="requested stream bytes"; record=count,sum,vector; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 

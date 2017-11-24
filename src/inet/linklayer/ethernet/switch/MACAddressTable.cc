@@ -21,22 +21,22 @@ namespace inet {
 
 #define MAX_LINE    100
 
-Define_Module(MACAddressTable);
+Define_Module(MacAddressTable);
 
-std::ostream& operator<<(std::ostream& os, const MACAddressTable::AddressEntry& entry)
+std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& entry)
 {
     os << "{VID=" << entry.vid << ", port=" << entry.portno << ", insertionTime=" << entry.insertionTime << "}";
     return os;
 }
 
-MACAddressTable::MACAddressTable()
+MacAddressTable::MacAddressTable()
 {
     addressTable = new AddressTable();
     // Set addressTable for VLAN ID 0
     vlanAddressTable[0] = addressTable;
 }
 
-void MACAddressTable::initialize()
+void MacAddressTable::initialize()
 {
     agingTime = par("agingTime");
     lastPurge = SIMTIME_ZERO;
@@ -75,7 +75,7 @@ static char *fgetline(FILE *fp)
     return line;
 }
 
-void MACAddressTable::handleMessage(cMessage *)
+void MacAddressTable::handleMessage(cMessage *)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
@@ -86,7 +86,7 @@ void MACAddressTable::handleMessage(cMessage *)
  * or nullptr pointer if it is not found
  */
 
-MACAddressTable::AddressTable *MACAddressTable::getTableForVid(unsigned int vid)
+MacAddressTable::AddressTable *MacAddressTable::getTableForVid(unsigned int vid)
 {
     if (vid == 0)
         return addressTable;
@@ -103,7 +103,7 @@ MACAddressTable::AddressTable *MACAddressTable::getTableForVid(unsigned int vid)
  * returns false if not found
  */
 
-int MACAddressTable::getPortForAddress(const MACAddress& address, unsigned int vid)
+int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int vid)
 {
     Enter_Method("MACAddressTable::getPortForAddress()");
 
@@ -132,7 +132,7 @@ int MACAddressTable::getPortForAddress(const MACAddress& address, unsigned int v
  * True if refreshed. False if it is new.
  */
 
-bool MACAddressTable::updateTableWithAddress(int portno, const MACAddress& address, unsigned int vid)
+bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid)
 {
     Enter_Method("MACAddressTable::updateTableWithAddress()");
     if (address.isBroadcast())
@@ -177,7 +177,7 @@ bool MACAddressTable::updateTableWithAddress(int portno, const MACAddress& addre
  * Clears portno MAC cache.
  */
 
-void MACAddressTable::flush(int portno)
+void MacAddressTable::flush(int portno)
 {
     Enter_Method("MACAddressTable::flush():  Clearing gate %d cache", portno);
     for (auto & elem : vlanAddressTable) {
@@ -194,7 +194,7 @@ void MACAddressTable::flush(int portno)
  * Prints verbose information
  */
 
-void MACAddressTable::printState()
+void MacAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
     EV << "VLAN ID    MAC    Port    Inserted" << endl;
@@ -205,7 +205,7 @@ void MACAddressTable::printState()
     }
 }
 
-void MACAddressTable::copyTable(int portA, int portB)
+void MacAddressTable::copyTable(int portA, int portB)
 {
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
@@ -216,7 +216,7 @@ void MACAddressTable::copyTable(int portA, int portB)
     }
 }
 
-void MACAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
+void MacAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
 {
     AddressTable *table = getTableForVid(vid);
     if (table == nullptr)
@@ -233,7 +233,7 @@ void MACAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
     }
 }
 
-void MACAddressTable::removeAgedEntriesFromAllVlans()
+void MacAddressTable::removeAgedEntriesFromAllVlans()
 {
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
@@ -250,7 +250,7 @@ void MACAddressTable::removeAgedEntriesFromAllVlans()
     }
 }
 
-void MACAddressTable::removeAgedEntriesIfNeeded()
+void MacAddressTable::removeAgedEntriesIfNeeded()
 {
     simtime_t now = simTime();
 
@@ -260,7 +260,7 @@ void MACAddressTable::removeAgedEntriesIfNeeded()
     lastPurge = simTime();
 }
 
-void MACAddressTable::readAddressTable(const char *fileName)
+void MacAddressTable::readAddressTable(const char *fileName)
 {
     FILE *fp = fopen(fileName, "r");
     if (fp == nullptr)
@@ -308,12 +308,12 @@ void MACAddressTable::readAddressTable(const char *fileName)
             vlanAddressTable[entry.vid] = table;
         }
 
-        (*table)[MACAddress(hexaddress)] = entry;
+        (*table)[MacAddress(hexaddress)] = entry;
     }
     fclose(fp);
 }
 
-void MACAddressTable::clearTable()
+void MacAddressTable::clearTable()
 {
     for (auto & elem : vlanAddressTable)
         delete elem.second;
@@ -322,18 +322,18 @@ void MACAddressTable::clearTable()
     addressTable = nullptr;
 }
 
-MACAddressTable::~MACAddressTable()
+MacAddressTable::~MacAddressTable()
 {
     for (auto & elem : vlanAddressTable)
         delete elem.second;
 }
 
-void MACAddressTable::setAgingTime(simtime_t agingTime)
+void MacAddressTable::setAgingTime(simtime_t agingTime)
 {
     this->agingTime = agingTime;
 }
 
-void MACAddressTable::resetDefaultAging()
+void MacAddressTable::resetDefaultAging()
 {
     agingTime = par("agingTime");
 }

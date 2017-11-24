@@ -22,25 +22,25 @@
 
 namespace inet {
 
-class INET_API PIMHello : public PIMHello_Base
+class INET_API PimHello : public PimHello_Base
 {
   protected:
     HelloOption **options_var;    // array ptr
     unsigned int options_arraysize;
 
   private:
-    void copy(const PIMHello& other);
+    void copy(const PimHello& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const PIMHello&);
+    bool operator==(const PimHello&);
 
   public:
-    PIMHello();
-    PIMHello(const PIMHello& other);
-    virtual ~PIMHello();
-    PIMHello& operator=(const PIMHello& other);
-    virtual PIMHello *dup() const override { return new PIMHello(*this); }
+    PimHello();
+    PimHello(const PimHello& other);
+    virtual ~PimHello();
+    PimHello& operator=(const PimHello& other);
+    virtual PimHello *dup() const override { return new PimHello(*this); }
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 

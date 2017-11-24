@@ -21,15 +21,15 @@ package inet.networklayer.contract;
 //
 // TODO
 //
-moduleinterface IARP
+moduleinterface IArp
 {
     parameters:
         @display("i=block/layer");
-        @signal[initiatedARPResolution](type=IARP::Notification);
-        @signal[completedARPResolution](type=IARP::Notification);
-        @signal[failedARPResolution](type=IARP::Notification);
+        @signal[initiatedARPResolution](type=IArp::Notification);
+        @signal[completedARPResolution](type=IArp::Notification);
+        @signal[failedARPResolution](type=IArp::Notification);
     gates:
-        input ifIn @labels(ARPPacket,Ieee802Ctrl);
-        output ifOut @labels(ARPPacket,Ieee802Ctrl);
+        input ifIn @labels(ArpPacket,Ieee802Ctrl);
+        output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
 

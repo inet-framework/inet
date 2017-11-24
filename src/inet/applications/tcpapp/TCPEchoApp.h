@@ -30,7 +30,7 @@ namespace inet {
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TCPEchoApp : public TCPSrvHostApp
+class INET_API TcpEchoApp : public TcpSrvHostApp
 {
   protected:
     simtime_t delay;
@@ -48,16 +48,16 @@ class INET_API TCPEchoApp : public TCPSrvHostApp
     virtual void refreshDisplay() const override;
 
   public:
-    TCPEchoApp();
-    ~TCPEchoApp();
+    TcpEchoApp();
+    ~TcpEchoApp();
 
-    friend class TCPEchoAppThread;
+    friend class TcpEchoAppThread;
 };
 
-class INET_API TCPEchoAppThread : public TCPServerThreadBase
+class INET_API TcpEchoAppThread : public TcpServerThreadBase
 {
   protected:
-    TCPEchoApp *echoAppModule = nullptr;
+    TcpEchoApp *echoAppModule = nullptr;
 
   public:
     /**
@@ -75,7 +75,7 @@ class INET_API TCPEchoAppThread : public TCPServerThreadBase
      */
     virtual void timerExpired(cMessage *timer) override;
 
-    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TCPEchoApp *>(hostmod); }
+    virtual void init(TcpSrvHostApp *hostmodule, TcpSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
 };
 
 } // namespace inet

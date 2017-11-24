@@ -1,7 +1,7 @@
 %description:
 
-Test shutdown and startup operations on EtherAppCli/EtherAppSrv/EtherLLC modules.
-The EtherSwitch, EtherMAC modules tested, too.
+Test shutdown and startup operations on EtherAppCli/EtherAppSrv/EtherLlc modules.
+The EtherSwitch, EtherMac modules tested, too.
 
 sender[0] and recip start at down
 

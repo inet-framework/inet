@@ -33,7 +33,7 @@ import inet.applications.contract.IApp;
 // completes (i.e. in the OMNeT++ finish() function). Only one voice session
 // ("call") may be underway at a time.
 //
-simple VoIPStreamReceiver like IApp
+simple VoipStreamReceiver like IApp
 {
     parameters:
         int localPort;
@@ -56,7 +56,7 @@ simple VoIPStreamReceiver like IApp
         @statistic[numSessions](title="total number of sessions"; source="sum(connState+1)/2"; record=last);
         @display("i=block/arrival");
     gates:
-        input socketIn @labels(UDPControlInfo/up);
-        output socketOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
 

@@ -24,7 +24,7 @@ namespace inet;
 //
 // DiffServ code points.
 //
-enum DSCP
+enum Dscp
 {
     // Best Effort
     DSCP_BE = 0;

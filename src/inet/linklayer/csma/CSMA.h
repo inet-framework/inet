@@ -45,11 +45,11 @@ namespace inet {
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class INET_API CSMA : public MACProtocolBase, public IMACProtocol
+class INET_API Csma : public MacProtocolBase, public IMacProtocol
 {
   public:
-    CSMA()
-        : MACProtocolBase()
+    Csma()
+        : MacProtocolBase()
         , nbTxFrames(0)
         , nbRxFrames(0)
         , nbMissedAcks(0)
@@ -91,7 +91,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
         , SeqNrChild()
     {}
 
-    virtual ~CSMA();
+    virtual ~Csma();
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int) override;
@@ -209,7 +209,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     t_mac_status status;
 
     /** @brief The MAC address of the interface. */
-    MACAddress address;
+    MacAddress address;
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;
@@ -323,18 +323,18 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
 
     //sequence number for sending, map for the general case with more senders
     //also in initialisation phase multiple potential parents
-    std::map<MACAddress, unsigned long> SeqNrParent;    //parent -> sequence number
+    std::map<MacAddress, unsigned long> SeqNrParent;    //parent -> sequence number
 
     //sequence numbers for receiving
-    std::map<MACAddress, unsigned long> SeqNrChild;    //child -> sequence number
+    std::map<MacAddress, unsigned long> SeqNrChild;    //child -> sequence number
 
   private:
     /** @brief Copy constructor is not allowed.
      */
-    CSMA(const CSMA&);
+    Csma(const Csma&);
     /** @brief Assignment operator is not allowed.
      */
-    CSMA& operator=(const CSMA&);
+    Csma& operator=(const Csma&);
 };
 
 } // namespace inet

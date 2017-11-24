@@ -53,7 +53,7 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
 
     virtual bool isNodeUp();
     void registerDSAP(int dsap);
-    void sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap);
+    void sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap);
 };
 
 } // namespace inet

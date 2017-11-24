@@ -37,7 +37,7 @@ import inet.transportlayer.contract.ITCP;
 // The NSC sets the wmem_max, rmem_max, tcp_rmem, tcp_wmem parameters to this value
 // on linux TCP implementations. For details, you can see the NSC documentation.
 //
-simple TCP_NSC like ITCP
+simple TcpNsc like ITCP
 {
     parameters:
         // full library name of the tcp stack implementation

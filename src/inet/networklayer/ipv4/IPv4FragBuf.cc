@@ -25,11 +25,11 @@
 
 namespace inet {
 
-IPv4FragBuf::IPv4FragBuf()
+Ipv4FragBuf::Ipv4FragBuf()
 {
 }
 
-IPv4FragBuf::~IPv4FragBuf()
+Ipv4FragBuf::~Ipv4FragBuf()
 {
     for (auto i = bufs.begin(); i != bufs.end(); ) {
         delete i->second.packet;
@@ -37,7 +37,7 @@ IPv4FragBuf::~IPv4FragBuf()
     bufs.clear();
 }
 
-Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
+Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     // find datagram buffer
@@ -103,7 +103,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     }
 }
 
-void IPv4FragBuf::purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate)
+void Ipv4FragBuf::purgeStaleFragments(Icmp *icmpModule, simtime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...

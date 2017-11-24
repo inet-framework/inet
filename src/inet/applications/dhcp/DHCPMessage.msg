@@ -19,18 +19,18 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv4.IPv4Address;
-import inet.linklayer.common.MACAddress;
+import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
-enum DHCPOpcode
+enum DhcpOpcode
 {
     BOOTREQUEST = 1;
     BOOTREPLY = 2;
 }
 
-enum DHCPMessageType
+enum DhcpMessageType
 {
     DHCPDISCOVER = 1;
     DHCPOFFER = 2;
@@ -42,7 +42,7 @@ enum DHCPMessageType
     DHCPINFORM = 8;
 }
 
-enum DHCPOptionCode
+enum DhcpOptionCode
 {
     DHCP_MSG_TYPE = 53;
     CLIENT_ID = 61;
@@ -68,18 +68,18 @@ enum DHCPOptionCode
 //
 // @see DHCPMessage, DHCPClient, DHCPServer
 //
-class DHCPOptions extends cObject
+class DhcpOptions extends cObject
 {
-    DHCPMessageType messageType; // to convey the type of the DHCP message
+    DhcpMessageType messageType; // to convey the type of the DHCP message
     string hostName; // name of the client
     int parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters
-    MACAddress clientIdentifier; // used by DHCP clients to specify their unique identifier
-    IPv4Address requestedIp; // used in a client request (DHCPDISCOVER) to allow the client to request that a particular IP address be assigned
-    IPv4Address subnetMask; // client's subnet mask
-    IPv4Address router[]; // IP addresses for routers on the client's subnet
-    IPv4Address dns[]; // list of DNSs available to the client
-    IPv4Address ntp[]; // list of IP addresses indicating NTP servers available to the client
-    IPv4Address serverIdentifier; // client use this field as the destination address for any unicast DHCP messages to the server
+    MacAddress clientIdentifier; // used by DHCP clients to specify their unique identifier
+    Ipv4Address requestedIp; // used in a client request (DHCPDISCOVER) to allow the client to request that a particular IP address be assigned
+    Ipv4Address subnetMask; // client's subnet mask
+    Ipv4Address router[]; // IP addresses for routers on the client's subnet
+    Ipv4Address dns[]; // list of DNSs available to the client
+    Ipv4Address ntp[]; // list of IP addresses indicating NTP servers available to the client
+    Ipv4Address serverIdentifier; // client use this field as the destination address for any unicast DHCP messages to the server
     simtime_t renewalTime; // time interval (T1) from address assignment until the client transitions to the RENEWING state
     simtime_t rebindingTime; // time interval (T2) from address assignment until the client transitions to the REBINDING state
     simtime_t leaseTime; // request for lease time (client), offered lease time (server)
@@ -91,21 +91,21 @@ class DHCPOptions extends cObject
 //
 // @see DHCPClient, DHCPServer
 //
-class DHCPMessage extends FieldsChunk
+class DhcpMessage extends FieldsChunk
 {
-    DHCPOpcode op; // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
+    DhcpOpcode op; // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
     int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)
     int hops; // client sets to zero, optionally used by relay agents when booting via a relay agent
     unsigned int xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
     int secs; // filled in by client, seconds elapsed since client began address acquisition or renewal process
     bool broadcast; // the broadcast bit in the flags field
-    IPv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests
-    IPv4Address yiaddr; // 'your' (client) IP address
-    IPv4Address giaddr; // relay agent IP address, used in booting via a relay agent
-    MACAddress chaddr; // client hardware address (MAC)
+    Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests
+    Ipv4Address yiaddr; // 'your' (client) IP address
+    Ipv4Address giaddr; // relay agent IP address, used in booting via a relay agent
+    MacAddress chaddr; // client hardware address (MAC)
     string sname; // optional server host name
     string file; // boot file name (unused in the simulation)
-    DHCPOptions options; // holds DHCP options
+    DhcpOptions options; // holds DHCP options
 }
 

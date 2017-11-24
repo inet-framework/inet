@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-const _2GFSKModulation _2GFSKModulation::singleton;
+const _2GfskModulation _2GfskModulation::singleton;
 
-_2GFSKModulation::_2GFSKModulation() :
-    GFSKModulationBase(2)
+_2GfskModulation::_2GfskModulation() :
+    GfskModulationBase(2)
 {
 }
 

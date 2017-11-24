@@ -27,7 +27,7 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
 }
 
-double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     auto transmission = snir->getReception()->getTransmission();
@@ -53,13 +53,13 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadio
     }
 }
 
-double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;
 }
 
-double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;

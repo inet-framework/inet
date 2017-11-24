@@ -45,11 +45,11 @@ extern "C" {
 
 namespace inet {
 
-class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
+class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
-    VoIPStreamReceiver() {}
-    ~VoIPStreamReceiver();
+    VoipStreamReceiver() {}
+    ~VoipStreamReceiver();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
@@ -68,7 +68,7 @@ class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     {
       public:
         Connection() {}
-        void addAudioStream(enum AVCodecID codec_id);
+        void addAudioStream(enum AvCodecId codec_id);
         void openAudio(const char *fileName);
         void writeAudioFrame(uint8_t *buf, int len);
         void writeLostSamples(int sampleCount);
@@ -79,7 +79,7 @@ class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
         uint16_t seqNo = 0;
         uint32_t timeStamp = 0;
         uint32_t ssrc = 0;
-        enum AVCodecID codec = AV_CODEC_ID_NONE;
+        enum AvCodecId codec = AV_CODEC_ID_NONE;
         short sampleBits = 0;
         int sampleRate = 0;
         int samplesPerPacket = 0;
@@ -102,7 +102,7 @@ class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     simtime_t playoutDelay;
     const char *resultFile = nullptr;
 
-    UDPSocket socket;
+    UdpSocket socket;
 
     Connection curConn;
 

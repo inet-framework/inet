@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Implements the LLC sub-layer of the Datalink Layer in Ethernet networks
  */
-class INET_API EtherLLC : public cSimpleModule, public ILifecycle
+class INET_API EtherLlc : public cSimpleModule, public ILifecycle
 {
   protected:
     int seqNum;

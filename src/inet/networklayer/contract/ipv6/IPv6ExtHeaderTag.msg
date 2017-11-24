@@ -17,7 +17,7 @@
 
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv6.IPv6ExtHeaderTagBase;
+import inet.networklayer.contract.ipv6.Ipv6ExtHeaderTagBase;
 
 cplusplus {{
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
@@ -25,10 +25,10 @@ cplusplus {{
 
 namespace inet;
 
-class IPv6ExtHeaderReq extends IPv6ExtHeaderTagBase
+class Ipv6ExtHeaderReq extends Ipv6ExtHeaderTagBase
 {
 }
 
-class IPv6ExtHeaderInd extends IPv6ExtHeaderTagBase
+class Ipv6ExtHeaderInd extends Ipv6ExtHeaderTagBase
 {
 }

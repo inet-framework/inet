@@ -24,23 +24,23 @@
 
 namespace inet {
 
-class INET_API MACAddressType : public IL3AddressType
+class INET_API MacAddressType : public IL3AddressType
 {
   public:
-    static MACAddressType INSTANCE;
+    static MacAddressType INSTANCE;
 
   public:
-    MACAddressType() {}
-    virtual ~MACAddressType() {}
+    MacAddressType() {}
+    virtual ~MacAddressType() {}
 
     virtual int getAddressBitLength() const override { return 48; }
     virtual int getMaxPrefixLength() const override { return 0; }
-    virtual L3Address getUnspecifiedAddress() const override { return MACAddress::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getBroadcastAddress() const override { return MACAddress::BROADCAST_ADDRESS; }
-    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MACAddress(-109); }    // TODO: constant
-    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MACAddress(-9); }    // TODO: constant
+    virtual L3Address getUnspecifiedAddress() const override { return MacAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const override { return MacAddress::BROADCAST_ADDRESS; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MacAddress(-109); }    // TODO: constant
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MacAddress(-9); }    // TODO: constant
     virtual const Protocol *getNetworkProtocol() const override { throw cRuntimeError("address is MACAddress, unknown L3 protocol"); }
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MACAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MacAddress::UNSPECIFIED_ADDRESS; }
 };
 
 } // namespace inet

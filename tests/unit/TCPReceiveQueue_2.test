@@ -1,5 +1,5 @@
 %description:
-Test TCPSendQueue, TCPReceiveQueue classes
+Test TcpSendQueue, TcpReceiveQueue classes
 Similar to TCPReceiveQueue_1.test, but sequence number is turn out zero.
 
 %includes:
@@ -10,14 +10,14 @@ Similar to TCPReceiveQueue_1.test, but sequence number is turn out zero.
 using namespace ::inet::tcp;
 
 %activity:
-TCPSendQueue sendQueue;
-TCPSendQueue *sq = &sendQueue;
+TcpSendQueue sendQueue;
+TcpSendQueue *sq = &sendQueue;
 
 sq->init(4294967000);
 EV << sq->info() <<"\n";
 
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *rq = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *rq = &rcvQueue;
 
 rq->init(4294967000);
 EV << rq->info() <<"\n";

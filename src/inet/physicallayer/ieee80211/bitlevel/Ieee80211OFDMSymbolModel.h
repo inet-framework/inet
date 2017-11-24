@@ -25,18 +25,18 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMTransmissionSymbolModel : public TransmissionSymbolModel
+class INET_API Ieee80211OfdmTransmissionSymbolModel : public TransmissionSymbolModel
 {
   public:
-    Ieee80211OFDMTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation);
-    virtual ~Ieee80211OFDMTransmissionSymbolModel();
+    Ieee80211OfdmTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation);
+    virtual ~Ieee80211OfdmTransmissionSymbolModel();
 };
 
-class INET_API Ieee80211OFDMReceptionSymbolModel : public ReceptionSymbolModel
+class INET_API Ieee80211OfdmReceptionSymbolModel : public ReceptionSymbolModel
 {
   public:
-    Ieee80211OFDMReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
-    virtual ~Ieee80211OFDMReceptionSymbolModel();
+    Ieee80211OfdmReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols);
+    virtual ~Ieee80211OfdmReceptionSymbolModel();
 };
 } /* namespace physicallayer */
 } /* namespace inet */

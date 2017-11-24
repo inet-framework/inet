@@ -27,14 +27,14 @@ namespace serializer {
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
-class INET_API IPv6HeaderSerializer : public FieldsChunkSerializer
+class INET_API Ipv6HeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    IPv6HeaderSerializer() : FieldsChunkSerializer() {}
+    Ipv6HeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

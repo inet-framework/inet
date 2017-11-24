@@ -24,17 +24,17 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKLayeredErrorModel : public LayeredErrorModelBase
+class INET_API ApskLayeredErrorModel : public LayeredErrorModelBase
 {
   public:
-    APSKLayeredErrorModel();
+    ApskLayeredErrorModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
-    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const override;
+    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
+    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
 };
 
 } // namespace physicallayer

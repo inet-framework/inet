@@ -9,35 +9,35 @@ package inet.transportlayer.rtp;
 moduleinterface IRTPPayloadSender
 {
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPPayloadSender like IRTPPayloadSender
+simple RtpPayloadSender like IRTPPayloadSender
 {
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
 simple RTPAVProfilePayload10Sender like IRTPPayloadSender
 {
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload32Sender like IRTPPayloadSender
+simple RtpAvProfilePayload32Sender like IRTPPayloadSender
 {
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 
 simple RTPAVProfileSampleBasedAudioSender like IRTPPayloadSender
 {
     gates:
-        input profileIn @labels(RTPInnerPacket);
-        output profileOut @labels(RTPInnerPacket);
+        input profileIn @labels(RtpInnerPacket);
+        output profileOut @labels(RtpInnerPacket);
 }
 

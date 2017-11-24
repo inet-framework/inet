@@ -46,7 +46,7 @@ Define_Module(ExtInterface);
 
 void ExtInterface::initialize(int stage)
 {
-    MACBase::initialize(stage);
+    MacBase::initialize(stage);
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {

@@ -25,20 +25,20 @@
 
 namespace inet {
 
-Register_Abstract_Class(IPv6MulticastGroupInfo);
+Register_Abstract_Class(Ipv6MulticastGroupInfo);
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
-std::string IPv6InterfaceData::HostMulticastData::info()
+std::string Ipv6InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;
     if (!joinedMulticastGroups.empty() &&
-        (joinedMulticastGroups[0] != IPv6Address::ALL_NODES_1 || joinedMulticastGroups.size() > 1))
+        (joinedMulticastGroups[0] != Ipv6Address::ALL_NODES_1 || joinedMulticastGroups.size() > 1))
     {
         out << "\tmcastgrps:";
         bool addComma = false;
         for (auto & elem : joinedMulticastGroups) {
-            if (elem != IPv6Address::ALL_NODES_1) {
+            if (elem != Ipv6Address::ALL_NODES_1) {
                 out << (addComma ? "," : "") << elem;
                 addComma = true;
             }
@@ -47,7 +47,7 @@ std::string IPv6InterfaceData::HostMulticastData::info()
     return out.str();
 }
 
-std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
+std::string Ipv6InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
@@ -57,7 +57,7 @@ std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
     return out.str();
 }
 
-std::string IPv6InterfaceData::RouterMulticastData::info()
+std::string Ipv6InterfaceData::RouterMulticastData::info()
 {
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
@@ -68,7 +68,7 @@ std::string IPv6InterfaceData::RouterMulticastData::info()
     return out.str();
 }
 
-std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
+std::string Ipv6InterfaceData::RouterMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Multicast Listeners:";
@@ -78,7 +78,7 @@ std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
     return out.str();
 }
 
-IPv6InterfaceData::IPv6InterfaceData()
+Ipv6InterfaceData::Ipv6InterfaceData()
 {
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();
@@ -145,20 +145,20 @@ IPv6InterfaceData::IPv6InterfaceData()
 #endif // if USE_MOBILITY
 }
 
-IPv6InterfaceData::~IPv6InterfaceData()
+Ipv6InterfaceData::~Ipv6InterfaceData()
 {
     delete hostMcastData;
     delete routerMcastData;
 }
 
-std::string IPv6InterfaceData::info() const
+std::string Ipv6InterfaceData::info() const
 {
     // FIXME FIXME FIXME FIXME info() should never print a newline
     std::ostringstream os;
     os << "IPv6:{" << endl;
     for (int i = 0; i < getNumAddresses(); i++) {
         os << (i ? "\t            , " : "\tAddrs:") << getAddress(i)
-           << "(" << IPv6Address::scopeName(getAddress(i).getScope())
+           << "(" << Ipv6Address::scopeName(getAddress(i).getScope())
            << (isTentativeAddress(i) ? " tent" : "") << ") "
 
             #ifdef WITH_xMIPv6
@@ -232,16 +232,16 @@ std::string IPv6InterfaceData::info() const
     return os.str();
 }
 
-std::string IPv6InterfaceData::detailedInfo() const
+std::string Ipv6InterfaceData::detailedInfo() const
 {
     return info();    // TBD this could be improved: multi-line text, etc
 }
 
 #ifndef WITH_xMIPv6
-void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
+void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
         simtime_t expiryTime, simtime_t prefExpiryTime)
 #else /* WITH_xMIPv6 */
-void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
+void Ipv6InterfaceData::assignAddress(const Ipv6Address& addr, bool tentative,
         simtime_t expiryTime, simtime_t prefExpiryTime, bool hFlag)
 #endif /* WITH_xMIPv6 */
 {
@@ -266,7 +266,7 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
     changed1(F_IP_ADDRESS);
 }
 
-void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
+void Ipv6InterfaceData::updateMatchingAddressExpiryTimes(const Ipv6Address& prefix, int length,
         simtime_t expiryTime, simtime_t prefExpiryTime)
 {
     for (auto & elem : addresses) {
@@ -278,7 +278,7 @@ void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& pref
     choosePreferredAddress();
 }
 
-int IPv6InterfaceData::findAddress(const IPv6Address& addr) const
+int Ipv6InterfaceData::findAddress(const Ipv6Address& addr) const
 {
     for (AddressDataVector::const_iterator it = addresses.begin(); it != addresses.end(); it++)
         if (it->address == addr)
@@ -287,37 +287,37 @@ int IPv6InterfaceData::findAddress(const IPv6Address& addr) const
     return -1;
 }
 
-const IPv6Address& IPv6InterfaceData::getAddress(int i) const
+const Ipv6Address& Ipv6InterfaceData::getAddress(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
     return addresses[i].address;
 }
 
-bool IPv6InterfaceData::isTentativeAddress(int i) const
+bool Ipv6InterfaceData::isTentativeAddress(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
     return addresses[i].tentative;
 }
 
 #ifdef WITH_xMIPv6
-IPv6InterfaceData::AddressType IPv6InterfaceData::getAddressType(int i) const
+Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(int i) const
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
     return addresses[i].addrType;
 }
 
-IPv6InterfaceData::AddressType IPv6InterfaceData::getAddressType(const IPv6Address& addr) const
+Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(const Ipv6Address& addr) const
 {
     return getAddressType(findAddress(addr));
 }
 
 #endif /* WITH_xMIPv6 */
-bool IPv6InterfaceData::hasAddress(const IPv6Address& addr) const
+bool Ipv6InterfaceData::hasAddress(const Ipv6Address& addr) const
 {
     return findAddress(addr) != -1;
 }
 
-bool IPv6InterfaceData::matchesSolicitedNodeMulticastAddress(const IPv6Address& solNodeAddr) const
+bool Ipv6InterfaceData::matchesSolicitedNodeMulticastAddress(const Ipv6Address& solNodeAddr) const
 {
     for (const auto & elem : addresses)
         if (elem.address.formSolicitedNodeMulticastAddress() == solNodeAddr)
@@ -326,13 +326,13 @@ bool IPv6InterfaceData::matchesSolicitedNodeMulticastAddress(const IPv6Address& 
     return false;
 }
 
-bool IPv6InterfaceData::isTentativeAddress(const IPv6Address& addr) const
+bool Ipv6InterfaceData::isTentativeAddress(const Ipv6Address& addr) const
 {
     int k = findAddress(addr);
     return k != -1 && addresses[k].tentative;
 }
 
-void IPv6InterfaceData::permanentlyAssign(const IPv6Address& addr)
+void Ipv6InterfaceData::permanentlyAssign(const Ipv6Address& addr)
 {
     int k = findAddress(addr);
     ASSERT(k != -1);
@@ -341,7 +341,7 @@ void IPv6InterfaceData::permanentlyAssign(const IPv6Address& addr)
 }
 
 #ifdef WITH_xMIPv6
-void IPv6InterfaceData::tentativelyAssign(int i)
+void Ipv6InterfaceData::tentativelyAssign(int i)
 {
     ASSERT(i >= 0 && i < (int)addresses.size());
     addresses[i].tentative = true;
@@ -350,16 +350,16 @@ void IPv6InterfaceData::tentativelyAssign(int i)
 
 #endif /* WITH_xMIPv6 */
 
-const IPv6Address& IPv6InterfaceData::getLinkLocalAddress() const
+const Ipv6Address& Ipv6InterfaceData::getLinkLocalAddress() const
 {
     for (const auto & elem : addresses)
         if (elem.address.isLinkLocal()) // FIXME and valid
             return elem.address;
 
-    return IPv6Address::UNSPECIFIED_ADDRESS;
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
-void IPv6InterfaceData::removeAddress(const IPv6Address& address)
+void Ipv6InterfaceData::removeAddress(const Ipv6Address& address)
 {
     int k = findAddress(address);
     ASSERT(k != -1);
@@ -368,7 +368,7 @@ void IPv6InterfaceData::removeAddress(const IPv6Address& address)
     changed1(F_IP_ADDRESS);
 }
 
-bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
+bool Ipv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
 {
     // This method is used in choosePreferredAddress().
     // sort() produces increasing order, so "better" addresses should
@@ -388,11 +388,11 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
     return (a.expiryTime == SIMTIME_ZERO && b.expiryTime != SIMTIME_ZERO) || a.expiryTime > b.expiryTime;    // longer expiry time is better
 }
 
-void IPv6InterfaceData::choosePreferredAddress()
+void Ipv6InterfaceData::choosePreferredAddress()
 {
     // do we have addresses?
     if (addresses.size() == 0) {
-        preferredAddr = IPv6Address();
+        preferredAddr = Ipv6Address();
         return;
     }
 
@@ -411,21 +411,21 @@ void IPv6InterfaceData::choosePreferredAddress()
             return;
         }
     }
-    preferredAddr = IPv6Address::UNSPECIFIED_ADDRESS;
+    preferredAddr = Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
-void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
+void Ipv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
 {
     rtrVars.advPrefixList.push_back(advPrefix);
 }
 
-const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::getAdvPrefix(int i) const
+const Ipv6InterfaceData::AdvPrefix& Ipv6InterfaceData::getAdvPrefix(int i) const
 {
     ASSERT(i >= 0 && i < (int)rtrVars.advPrefixList.size());
     return rtrVars.advPrefixList[i];
 }
 
-void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
+void Ipv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
 {
     ASSERT(i >= 0 && i < (int)rtrVars.advPrefixList.size());
     ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
@@ -433,35 +433,35 @@ void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
     rtrVars.advPrefixList[i] = advPrefix;
 }
 
-void IPv6InterfaceData::removeAdvPrefix(int i)
+void Ipv6InterfaceData::removeAdvPrefix(int i)
 {
     ASSERT(i >= 0 && i < (int)rtrVars.advPrefixList.size());
     rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin() + i);
 }
 
-simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
+simtime_t Ipv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
         double MAX_RANDOM_FACTOR, uint baseReachableTime)
 {
     return RNGCONTEXT uniform(MIN_RANDOM_FACTOR, MAX_RANDOM_FACTOR) * baseReachableTime;
 }
 
-simtime_t IPv6InterfaceData::generateReachableTime()
+simtime_t Ipv6InterfaceData::generateReachableTime()
 {
     return RNGCONTEXT uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
-bool IPv6InterfaceData::isMemberOfMulticastGroup(const IPv6Address& multicastAddress) const
+bool Ipv6InterfaceData::isMemberOfMulticastGroup(const Ipv6Address& multicastAddress) const
 {
-    const IPv6AddressVector& multicastGroups = getJoinedMulticastGroups();
+    const Ipv6AddressVector& multicastGroups = getJoinedMulticastGroups();
     return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
 }
 
-void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
+void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv6InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
-    IPv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
+    Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
 
     std::vector<int>& refCounts = getHostData()->refCounts;
     for (int i = 0; i < (int)multicastGroups.size(); ++i) {
@@ -478,17 +478,17 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
 
     cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
     if (m) {
-        IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+        Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
         m->emit(NF_IPv6_MCAST_JOIN, &info);
     }
 }
 
-void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
+void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv6InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
-    IPv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
+    Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int>& refCounts = getHostData()->refCounts;
     for (int i = 0; i < (int)multicastGroups.size(); ++i) {
         if (multicastGroups[i] == multicastAddress) {
@@ -500,7 +500,7 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
 
                 cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
                 if (m) {
-                    IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+                    Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
                     m->emit(NF_IPv6_MCAST_LEAVE, &info);
                 }
             }
@@ -508,13 +508,13 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
     }
 }
 
-bool IPv6InterfaceData::hasMulticastListener(const IPv6Address& multicastAddress) const
+bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress) const
 {
-    const IPv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
+    const Ipv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
     return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
 }
 
-void IPv6InterfaceData::addMulticastListener(const IPv6Address& multicastAddress)
+void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("IPv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
@@ -525,9 +525,9 @@ void IPv6InterfaceData::addMulticastListener(const IPv6Address& multicastAddress
     }
 }
 
-void IPv6InterfaceData::removeMulticastListener(const IPv6Address& multicastAddress)
+void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddress)
 {
-    IPv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
+    Ipv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
 
     int n = multicastGroups.size();
     int i;
@@ -544,41 +544,41 @@ void IPv6InterfaceData::removeMulticastListener(const IPv6Address& multicastAddr
 #ifdef WITH_xMIPv6
 //#############    Additional function definitions added by Zarrar Yousaf @ CNI UNI Dortmund 23.05.07######
 
-const IPv6Address& IPv6InterfaceData::getGlobalAddress(AddressType type) const
+const Ipv6Address& Ipv6InterfaceData::getGlobalAddress(AddressType type) const
 {
     for (const auto & elem : addresses)
         if (elem.address.isGlobal() && elem.addrType == type) // FIXME and valid, 25.9.07 - CB
             return elem.address;
 
-    return IPv6Address::UNSPECIFIED_ADDRESS;
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
 // =======Zarrar Yousaf @ CNI UNI Dortmund 08.07.07; ==============================
 
-const IPv6Address IPv6InterfaceData::autoConfRouterGlobalScopeAddress(int i)    // removed return-by-reference - CB
+const Ipv6Address Ipv6InterfaceData::autoConfRouterGlobalScopeAddress(int i)    // removed return-by-reference - CB
 {
     AdvPrefix& p = rtrVars.advPrefixList[i];
-    IPv6Address prefix = p.prefix;
+    Ipv6Address prefix = p.prefix;
     short length = p.prefixLength;
-    IPv6Address linkLocalAddr = getLinkLocalAddress();
-    IPv6Address globalAddress = linkLocalAddr.setPrefix(prefix, length);    //the global address gets autoconfigured, given its prefix, which during initialisation is supplied by the FlatnetworkConfigurator6
+    Ipv6Address linkLocalAddr = getLinkLocalAddress();
+    Ipv6Address globalAddress = linkLocalAddr.setPrefix(prefix, length);    //the global address gets autoconfigured, given its prefix, which during initialisation is supplied by the FlatnetworkConfigurator6
     p.rtrAddress = globalAddress;    //the newly formed global address from the respective adv prefix is stored in the AdvPrefix list, which will be used later by the RA prefix info option
     return globalAddress;
 }
 
-void IPv6InterfaceData::autoConfRouterGlobalScopeAddress(AdvPrefix& p)
+void Ipv6InterfaceData::autoConfRouterGlobalScopeAddress(AdvPrefix& p)
 {
-    IPv6Address prefix = p.prefix;
+    Ipv6Address prefix = p.prefix;
     short length = p.prefixLength;
-    IPv6Address linkLocalAddr = getLinkLocalAddress();
-    IPv6Address globalAddress = linkLocalAddr.setPrefix(prefix, length);    //the global address gets autoconfigured, given its prefix, which during initialisation is supplied by the FlatnetworkConfigurator6
+    Ipv6Address linkLocalAddr = getLinkLocalAddress();
+    Ipv6Address globalAddress = linkLocalAddr.setPrefix(prefix, length);    //the global address gets autoconfigured, given its prefix, which during initialisation is supplied by the FlatnetworkConfigurator6
     p.rtrAddress = globalAddress;    //the newly formed global address from the respective adv prefix is stored in the AdvPrefix list, which will be used later by the RA prefix info option
 }
 
-void IPv6InterfaceData::deduceAdvPrefix()
+void Ipv6InterfaceData::deduceAdvPrefix()
 {
     for (int i = 0; i < getNumAdvPrefixes(); i++) {
-        IPv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
+        Ipv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
         /*IPv6Address globalAddr = */
         autoConfRouterGlobalScopeAddress(p);
         assignAddress(p.rtrAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
@@ -589,9 +589,9 @@ void IPv6InterfaceData::deduceAdvPrefix()
  * This method traverses the address list and searches for a specific address.
  * The element is removed and returned.
  */
-IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type)
+Ipv6Address Ipv6InterfaceData::removeAddress(Ipv6InterfaceData::AddressType type)
 {
-    IPv6Address addr;
+    Ipv6Address addr;
 
     for (auto it = addresses.begin(); it != addresses.end(); ++it) {    // 24.9.07 - CB
         if ((*it).addrType == type) {
@@ -608,14 +608,14 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
     return addr;
 }
 
-std::ostream& operator<<(std::ostream& os, const IPv6InterfaceData::HomeNetworkInfo& homeNetInfo)
+std::ostream& operator<<(std::ostream& os, const Ipv6InterfaceData::HomeNetworkInfo& homeNetInfo)
 {
     os << "HoA of MN:" << homeNetInfo.HoA << " HA Address: " << homeNetInfo.homeAgentAddr
        << " Home Network Prefix: " << homeNetInfo.prefix    /*.prefix()*/;
     return os;
 }
 
-void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha, const IPv6Address& prefix, const int prefixLength)
+void Ipv6InterfaceData::updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha, const Ipv6Address& prefix, const int prefixLength)
 {
     EV_INFO << "\n++++++ Updating the Home Network Information \n";
     homeInfo.HoA = hoa;
@@ -624,9 +624,9 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
 
     // check if we already have a HoA on this interface
     // if not, then we create one
-    IPv6Address addr = getGlobalAddress(HoA);
+    Ipv6Address addr = getGlobalAddress(HoA);
 
-    if (addr == IPv6Address::UNSPECIFIED_ADDRESS)
+    if (addr == Ipv6Address::UNSPECIFIED_ADDRESS)
         this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
 

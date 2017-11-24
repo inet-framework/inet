@@ -18,9 +18,9 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
-import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
 #include <iostream>
@@ -57,15 +57,15 @@ class Ipv6Header extends NetworkHeaderBase
 {
     @customize;
     chunkLength = B(IPv6_HEADER_BYTES);
-    IPv6Address srcAddress;
-    IPv6Address destAddress;
+    Ipv6Address srcAddress;
+    Ipv6Address destAddress;
     int payloadLength = -1;    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
     unsigned char trafficClass;
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
-    IPProtocolId protocolId = IP_PROT_NONE;
+    IpProtocolId protocolId = IP_PROT_NONE;
 
     abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }

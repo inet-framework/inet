@@ -45,7 +45,7 @@ package inet.common.queue;
 // separately for each input gate, so this module can be
 // used to implement different packet drop priorities.
 //
-simple REDDropper
+simple RedDropper
 {
     parameters:
         int numGates = default(1);

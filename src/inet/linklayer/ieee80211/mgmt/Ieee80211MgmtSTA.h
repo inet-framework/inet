@@ -35,7 +35,7 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
+class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
 {
   public:
     //
@@ -43,7 +43,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //
     struct ScanningInfo
     {
-        MACAddress bssid;    // specific BSSID to scan for, or the broadcast address
+        MacAddress bssid;    // specific BSSID to scan for, or the broadcast address
         std::string ssid;    // SSID to scan for (empty=any)
         bool activeScan;    // whether to perform active or passive scanning
         simtime_t probeDelay;    // delay (in s) to be used prior to transmitting a Probe frame during active scanning
@@ -57,10 +57,10 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //
     // Stores AP info received during scanning
     //
-    struct APInfo : public cObject
+    struct ApInfo : public cObject
     {
         int channel;
-        MACAddress address;    // alias bssid
+        MacAddress address;    // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
         simtime_t beaconInterval;
@@ -70,7 +70,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
         int authSeqExpected;    // valid while authenticating; values: 1,3,5...
         cMessage *authTimeoutMsg;    // if non-nullptr: authentication is in progress
 
-        APInfo()
+        ApInfo()
         {
             channel = -1;
             beaconInterval = rxPower = 0;
@@ -83,12 +83,12 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //
     // Associated AP, plus data associated with the association with the associated AP
     //
-    struct AssociatedAPInfo : public APInfo
+    struct AssociatedApInfo : public ApInfo
     {
         int receiveSequence;
         cMessage *beaconTimeoutMsg;
 
-        AssociatedAPInfo() : APInfo() { receiveSequence = 0; beaconTimeoutMsg = nullptr; }
+        AssociatedApInfo() : ApInfo() { receiveSequence = 0; beaconTimeoutMsg = nullptr; }
     };
 
   protected:
@@ -103,15 +103,15 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
     // APInfo list: we collect scanning results and keep track of ongoing authentications here
     // Note: there can be several ongoing authentications simultaneously
-    typedef std::list<APInfo> AccessPointList;
+    typedef std::list<ApInfo> AccessPointList;
     AccessPointList apList;
 
     // associated Access Point
     cMessage *assocTimeoutMsg;    // if non-nullptr: association is in progress
-    AssociatedAPInfo assocAP;
+    AssociatedApInfo assocAP;
 
   public:
-    Ieee80211MgmtSTA() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -124,13 +124,13 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
     /** Utility function: sends authentication request */
-    virtual void startAuthentication(APInfo *ap, simtime_t timeout);
+    virtual void startAuthentication(ApInfo *ap, simtime_t timeout);
 
     /** Utility function: sends association request */
-    virtual void startAssociation(APInfo *ap, simtime_t timeout);
+    virtual void startAssociation(ApInfo *ap, simtime_t timeout);
 
     /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
-    virtual APInfo *lookupAP(const MACAddress& address);
+    virtual ApInfo *lookupAP(const MacAddress& address);
 
     /** Utility function: clear the AP list, and cancel any pending authentications. */
     virtual void clearAPList();
@@ -139,7 +139,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(const MACAddress& address, const Ptr<const Ieee80211BeaconFrame>& body);
+    virtual void storeAPInfo(const MacAddress& address, const Ptr<const Ieee80211BeaconFrame>& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
@@ -154,10 +154,10 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendScanConfirm();
 
     /** Sends back result of authentication to the agent */
-    virtual void sendAuthenticationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode);
+    virtual void sendAuthenticationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Sends back result of association to the agent */
-    virtual void sendAssociationConfirm(APInfo *ap, Ieee80211PrimResultCode resultCode);
+    virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: Cancel the existing association */
     virtual void disassociate();
@@ -166,7 +166,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: sends a management frame */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MACAddress& address);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;

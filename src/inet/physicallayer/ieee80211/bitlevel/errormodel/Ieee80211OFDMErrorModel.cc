@@ -32,9 +32,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMErrorModel);
+Define_Module(Ieee80211OfdmErrorModel);
 
-void Ieee80211OFDMErrorModel::initialize(int stage)
+void Ieee80211OfdmErrorModel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         dataSymbolErrorRate = par("dataSymbolErrorRate");
@@ -44,7 +44,7 @@ void Ieee80211OFDMErrorModel::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMErrorModel";
     if (level <= PRINT_LEVEL_TRACE)
@@ -55,7 +55,7 @@ std::ostream& Ieee80211OFDMErrorModel::printToStream(std::ostream& stream, int l
     return stream;
 }
 
-const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     double packetErrorRate = computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
@@ -67,7 +67,7 @@ const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const L
     return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
 }
 
-const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
@@ -80,15 +80,15 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     const BitVector *bits = transmissionBitModel->getBits();
     BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    if (dynamic_cast<const IAPSKModulation *>(signalModulation)) {
-        const IAPSKModulation *apskSignalModulation = (const IAPSKModulation *)signalModulation;
+    if (dynamic_cast<const IApskModulation *>(signalModulation)) {
+        const IApskModulation *apskSignalModulation = (const IApskModulation *)signalModulation;
         double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);
     }
     else
         throw cRuntimeError("Unknown signal modulation");
-    if (dynamic_cast<const IAPSKModulation *>(dataModulation)) {
-        const IAPSKModulation *apskDataModulation = (const IAPSKModulation *)signalModulation;
+    if (dynamic_cast<const IApskModulation *>(dataModulation)) {
+        const IApskModulation *apskDataModulation = (const IApskModulation *)signalModulation;
         double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), dataBitRate) : dataBitErrorRate;
         corruptBits(corruptedBits, dataFieldBer, signalBitLength, corruptedBits->getSize());
     }
@@ -97,33 +97,33 @@ const IReceptionBitModel *Ieee80211OFDMErrorModel::computeBitModel(const Layered
     return new ReceptionBitModel(b(signalBitLength), signalBitRate, b(dataBitLength), dataBitRate, corruptedBits);
 }
 
-const IReceptionSymbolModel *Ieee80211OFDMErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
-    const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const Ieee80211OFDMTransmissionSymbolModel *>(transmission->getSymbolModel());
+    const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const Ieee80211OfdmTransmissionSymbolModel *>(transmission->getSymbolModel());
     const IModulation *modulation = transmissionSymbolModel->getPayloadModulation();
-    const APSKModulationBase *dataModulation = check_and_cast<const APSKModulationBase *>(modulation);
+    const ApskModulationBase *dataModulation = check_and_cast<const ApskModulationBase *>(modulation);
     unsigned int dataFieldConstellationSize = dataModulation->getConstellationSize();
-    unsigned int signalFieldConstellationSize = BPSKModulation::singleton.getConstellationSize();
-    const std::vector<APSKSymbol> *constellationForDataField = dataModulation->getConstellation();
-    const std::vector<APSKSymbol> *constellationForSignalField = BPSKModulation::singleton.getConstellation();
+    unsigned int signalFieldConstellationSize = BpskModulation::singleton.getConstellationSize();
+    const std::vector<ApskSymbol> *constellationForDataField = dataModulation->getConstellation();
+    const std::vector<ApskSymbol> *constellationForSignalField = BpskModulation::singleton.getConstellation();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    double signalSER = std::isnan(signalSymbolErrorRate) ? BPSKModulation::singleton.calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
+    double signalSER = std::isnan(signalSymbolErrorRate) ? BpskModulation::singleton.calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
     double dataSER = std::isnan(dataSymbolErrorRate) ? dataModulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), transmissionBitModel->getDataBitRate()) : dataSymbolErrorRate;
     const std::vector<const ISymbol *> *symbols = transmissionSymbolModel->getSymbols();
     std::vector<const ISymbol *> *corruptedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol
-    corruptedSymbols->push_back(corruptOFDMSymbol(check_and_cast<const Ieee80211OFDMSymbol *>(symbols->at(0)), signalSER, signalFieldConstellationSize, constellationForSignalField));
+    corruptedSymbols->push_back(corruptOFDMSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0)), signalSER, signalFieldConstellationSize, constellationForSignalField));
     // The remaining are all data field symbols
     for (unsigned int i = 1; i < symbols->size(); i++) {
-        Ieee80211OFDMSymbol *corruptedOFDMSymbol = corruptOFDMSymbol(check_and_cast<const Ieee80211OFDMSymbol *>(symbols->at(i)), dataSER,
+        Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOFDMSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataSER,
                     dataFieldConstellationSize, constellationForDataField);
         corruptedSymbols->push_back(corruptedOFDMSymbol);
     }
-    return new Ieee80211OFDMReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), corruptedSymbols);
+    return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), corruptedSymbols);
 }
 
-void Ieee80211OFDMErrorModel::corruptBits(BitVector *bits, double ber, int begin, int end) const
+void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin, int end) const
 {
     for (int i = begin; i != end; i++) {
         double p = uniform(0, 1);
@@ -132,21 +132,21 @@ void Ieee80211OFDMErrorModel::corruptBits(BitVector *bits, double ber, int begin
     }
 }
 
-Ieee80211OFDMSymbol *Ieee80211OFDMErrorModel::corruptOFDMSymbol(const Ieee80211OFDMSymbol *symbol, double ser, int constellationSize, const std::vector<APSKSymbol> *constellation) const
+Ieee80211OfdmSymbol *Ieee80211OfdmErrorModel::corruptOFDMSymbol(const Ieee80211OfdmSymbol *symbol, double ser, int constellationSize, const std::vector<ApskSymbol> *constellation) const
 {
-    std::vector<const APSKSymbol *> subcarrierSymbols = symbol->getSubCarrierSymbols();
+    std::vector<const ApskSymbol *> subcarrierSymbols = symbol->getSubCarrierSymbols();
     for (int j = 0; j < symbol->symbolSize(); j++) {
         double p = uniform(0, 1);
         if (p <= ser) {
             int corruptedSubcarrierSymbolIndex = intuniform(0, constellationSize - 1); // TODO: it can be equal to the current symbol
-            const APSKSymbol *corruptedSubcarrierSymbol = &constellation->at(corruptedSubcarrierSymbolIndex);
+            const ApskSymbol *corruptedSubcarrierSymbol = &constellation->at(corruptedSubcarrierSymbolIndex);
             subcarrierSymbols[j] = corruptedSubcarrierSymbol;
         }
     }
-    return new Ieee80211OFDMSymbol(subcarrierSymbols);
+    return new Ieee80211OfdmSymbol(subcarrierSymbols);
 }
 
-const IReceptionSampleModel *Ieee80211OFDMErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     throw cRuntimeError("Unimplemented!");
     // TODO: implement sample error model

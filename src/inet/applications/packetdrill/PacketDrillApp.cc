@@ -208,7 +208,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case TCP_I_ESTABLISHED:
                     if (listenSet) {
                         if (acceptSet) {
-                            tcpSocket.setState(TCPSocket::CONNECTED);
+                            tcpSocket.setState(TcpSocket::CONNECTED);
                             tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
@@ -217,7 +217,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                             establishedPending = true;
                         }
                     } else {
-                        tcpSocket.setState(TCPSocket::CONNECTED);
+                        tcpSocket.setState(TcpSocket::CONNECTED);
                         tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
                     }
                     delete msg;
@@ -230,7 +230,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     {
                         cMessage *msg = new cMessage("data request");
                         msg->setKind(TCP_C_READ);
-                        TCPCommand *cmd = new TCPCommand();
+                        TcpCommand *cmd = new TcpCommand();
                         msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
                         msg->setControlInfo(cmd);
                         send(msg, "tcpOut");
@@ -372,7 +372,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 if (tcp->getHeaderOptionArraySize() > 0) {
                     for (unsigned int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
                         if (tcp->getHeaderOption(i)->getKind() == TCPOPT_TIMESTAMP) {
-                            TCPOptionTimestamp *option = new TCPOptionTimestamp();
+                            TcpOptionTimestamp *option = new TcpOptionTimestamp();
                             option->setEchoedTimestamp(peerTS);
                             tcp->setHeaderOption(i, option);
                         }
@@ -745,7 +745,7 @@ int PacketDrillApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char
             break;
 
         case IP_PROT_TCP:
-            if (tcpSocket.getState() == TCPSocket::NOT_BOUND) {
+            if (tcpSocket.getState() == TcpSocket::NOT_BOUND) {
                 tcpSocket.bind(localAddress, localPort);
             }
             break;
@@ -805,7 +805,7 @@ int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, ch
         return STATUS_ERR;
     if (establishedPending) {
         if (protocol == IP_PROT_TCP)
-            tcpSocket.setState(TCPSocket::CONNECTED);
+            tcpSocket.setState(TcpSocket::CONNECTED);
         else if (protocol == IP_PROT_SCTP)
             sctpSocket.setState(SCTPSocket::CONNECTED);
         establishedPending = false;
@@ -1337,7 +1337,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 case IP_PROT_TCP: {
                     cMessage *msg = new cMessage("dataRequest");
                     msg->setKind(TCP_C_READ);
-                    TCPCommand *tcpcmd = new TCPCommand();
+                    TcpCommand *tcpcmd = new TcpCommand();
                     msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
                     msg->setControlInfo(tcpcmd);
                     send(msg, "tcpOut");
@@ -1445,7 +1445,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
         case IP_PROT_TCP: {
             cMessage *msg = new cMessage("close");
             msg->setKind(TCP_C_CLOSE);
-            TCPCommand *cmd = new TCPCommand();
+            TcpCommand *cmd = new TcpCommand();
             msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
             msg->setControlInfo(cmd);
             send(msg, "tcpOut");
@@ -1646,13 +1646,13 @@ bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp
             return true;
         }
         if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
-            TCPOption *liveOption;
+            TcpOption *liveOption;
             for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
                 liveOption = liveTcp->getHeaderOption(i);
             }
             return false;
         } else {
-            TCPOption *storedOption, *liveOption;
+            TcpOption *storedOption, *liveOption;
             for (unsigned int i = 0; i < storedTcp->getHeaderOptionArraySize(); i++) {
                 storedOption = storedTcp->getHeaderOption(i);
                 liveOption = liveTcp->getHeaderOption(i);
@@ -1673,24 +1673,24 @@ bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp
                         case TCPOPT_WINDOW:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() == 3 &&
-                                check_and_cast<TCPOptionWindowScale *>(storedOption)->getWindowScale()
-                                 == check_and_cast<TCPOptionWindowScale *>(liveOption)->getWindowScale())) {
+                                check_and_cast<TcpOptionWindowScale *>(storedOption)->getWindowScale()
+                                 == check_and_cast<TcpOptionWindowScale *>(liveOption)->getWindowScale())) {
                                 return false;
                             }
                             break;
                         case TCPOPT_SACK:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() > 2 && (storedOption->getLength() % 8) == 2 &&
-                                check_and_cast<TCPOptionSack *>(storedOption)->getSackItemArraySize()
-                                == check_and_cast<TCPOptionSack *>(liveOption)->getSackItemArraySize())) {
+                                check_and_cast<TcpOptionSack *>(storedOption)->getSackItemArraySize()
+                                == check_and_cast<TcpOptionSack *>(liveOption)->getSackItemArraySize())) {
                                 return false;
                             }
                             break;
                         case TCPOPT_TIMESTAMP:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() == 10 &&
-                                check_and_cast<TCPOptionTimestamp *>(storedOption)->getSenderTimestamp()
-                                == check_and_cast<TCPOptionTimestamp *>(liveOption)->getSenderTimestamp())) {
+                                check_and_cast<TcpOptionTimestamp *>(storedOption)->getSenderTimestamp()
+                                == check_and_cast<TcpOptionTimestamp *>(liveOption)->getSenderTimestamp())) {
                                 return false;
                             }
                             break;

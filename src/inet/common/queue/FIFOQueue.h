@@ -28,7 +28,7 @@ namespace inet {
 /**
  * Passive FIFO Queue with unlimited buffer space.
  */
-class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
+class INET_API FifoQueue : public PassiveQueueBase, public IQueueAccess
 {
   protected:
     // state
@@ -40,7 +40,7 @@ class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
     static simsignal_t queueLengthSignal;
 
   public:
-    FIFOQueue() : outGate(nullptr), byteLength(0) {}
+    FifoQueue() : outGate(nullptr), byteLength(0) {}
 
   protected:
     virtual void initialize() override;

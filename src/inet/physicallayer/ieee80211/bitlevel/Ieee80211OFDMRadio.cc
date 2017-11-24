@@ -25,16 +25,16 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMRadio);
+Define_Module(Ieee80211OfdmRadio);
 
-Ieee80211OFDMRadio::Ieee80211OFDMRadio() :
+Ieee80211OfdmRadio::Ieee80211OfdmRadio() :
     FlatRadioBase()
 {
 }
 
-void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
+void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
 {
-    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
+    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOfdmTransmitter *>(transmitter);
     const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
     phyHeader->setRate(ofdmTransmitter->getMode(packet)->getSignalMode()->getRate());
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
@@ -45,9 +45,9 @@ void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
     packet->insertTrailer(phyTrailer);
 }
 
-void Ieee80211OFDMRadio::decapsulate(Packet *packet) const
+void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
 {
-    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOFDMTransmitter *>(transmitter);
+    auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOfdmTransmitter *>(transmitter);
     const auto& phyHeader = packet->popHeader<Ieee80211OfdmPhyHeader>();
     auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
     // pop padding and 6 tail bits

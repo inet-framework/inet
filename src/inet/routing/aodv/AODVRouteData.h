@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class INET_API AODVRouteData : public cObject
+class INET_API AodvRouteData : public cObject
 {
   protected:
     std::set<L3Address> precursorList;
@@ -38,7 +38,7 @@ class INET_API AODVRouteData : public cObject
 
   public:
 
-    AODVRouteData()
+    AodvRouteData()
     {
         active = true;
         repariable = false;
@@ -48,7 +48,7 @@ class INET_API AODVRouteData : public cObject
         destSeqNum = 0;
     }
 
-    virtual ~AODVRouteData() {}
+    virtual ~AodvRouteData() {}
 
     unsigned int getDestSeqNum() const { return destSeqNum; }
     void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }
@@ -66,7 +66,7 @@ class INET_API AODVRouteData : public cObject
     const std::set<L3Address>& getPrecursorList() const { return precursorList; }
 };
 
-std::ostream& operator<<(std::ostream& out, const AODVRouteData *data);
+std::ostream& operator<<(std::ostream& out, const AodvRouteData *data);
 
 } // namespace inet
 

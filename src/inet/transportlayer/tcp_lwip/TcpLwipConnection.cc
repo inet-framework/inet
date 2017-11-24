@@ -68,7 +68,7 @@ void TcpLwipConnection::Stats::recordReceive(const TcpHeader& tcpsegP)
         rcvAckVector.record(tcpsegP.getAckNo());
 }
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP)
+TcpLwipConnection::TcpLwipConnection(TcpLwip& tcpLwipP, int connIdP)
     :
     connIdM(connIdP),
     pcbM(nullptr),
@@ -133,7 +133,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
-    TCPAvailableInfo *ind = new TCPAvailableInfo();
+    TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(connIdM);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
@@ -152,7 +152,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
 
-    TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+    TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
@@ -201,14 +201,14 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     EV_DETAIL << "Notifying app: " << nameOfIndication << "\n";
     cMessage *msg = new cMessage(nameOfIndication);
     msg->setKind(code);
-    TCPCommand *ind = new TCPCommand();
+    TcpCommand *ind = new TcpCommand();
     msg->setControlInfo(ind);
     msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketInd>()->setSocketId(connIdM);
     tcpLwipM.send(msg, "appOut");
 }
 
-void TcpLwipConnection::fillStatusInfo(TCPStatusInfo& statusInfo)
+void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
 {
 //TODO    statusInfo.setState(fsm.getState());
 //TODO    statusInfo.setStateName(stateName(fsm.getState()));

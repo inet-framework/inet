@@ -30,11 +30,11 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Amplitude-shift_keying
  */
-class INET_API MASKModulation : public APSKModulationBase
+class INET_API MaskModulation : public ApskModulationBase
 {
   public:
-    MASKModulation(double maxAmplitude, unsigned int codeWordSize);
-    virtual ~MASKModulation();
+    MaskModulation(double maxAmplitude, unsigned int codeWordSize);
+    virtual ~MaskModulation();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

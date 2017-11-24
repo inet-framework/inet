@@ -27,7 +27,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKCode : public ICode
+class INET_API ApskCode : public ICode
 {
   protected:
     const ConvolutionalCode *convolutionalCode;
@@ -35,8 +35,8 @@ class INET_API APSKCode : public ICode
     const IScrambling *scrambling;
 
   public:
-    APSKCode(const ConvolutionalCode *convCode, const IInterleaving *interleaving, const IScrambling *scrambling);
-    ~APSKCode();
+    ApskCode(const ConvolutionalCode *convCode, const IInterleaving *interleaving, const IScrambling *scrambling);
+    ~ApskCode();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

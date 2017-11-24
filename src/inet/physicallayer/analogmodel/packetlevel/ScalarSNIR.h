@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API ScalarSNIR : public SNIRBase
+class INET_API ScalarSnir : public SnirBase
 {
   protected:
     mutable double minSNIR;
@@ -35,7 +35,7 @@ class INET_API ScalarSNIR : public SNIRBase
     virtual double computeMax() const;
 
   public:
-    ScalarSNIR(const IReception *reception, const INoise *noise);
+    ScalarSnir(const IReception *reception, const INoise *noise);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

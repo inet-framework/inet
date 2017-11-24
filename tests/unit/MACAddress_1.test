@@ -1,5 +1,5 @@
 %description:
-Test MACAddress::formInterfaceIdentifier()
+Test MacAddress::formInterfaceIdentifier()
 
 %includes:
 #include "inet/linklayer/common/MACAddress.h"
@@ -16,7 +16,7 @@ static std::ostream& operator<<(std::ostream& os, const ::inet::InterfaceToken& 
 
 %global:
 
-#define P(X)  EV << X << "-->" << ::inet::MACAddress(X).formInterfaceIdentifier() << "\n"
+#define P(X)  EV << X << "-->" << ::inet::MacAddress(X).formInterfaceIdentifier() << "\n"
 
 %activity:
 P("00:00:00:00:00:00");

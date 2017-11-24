@@ -43,8 +43,8 @@ class INET_API QoSAckHandler : public IAckHandler
             BLOCK_ACK_ARRIVED_ACKED
         };
     protected:
-        typedef std::pair<MACAddress, std::pair<Tid, SequenceControlField>> QoSKey;
-        typedef std::pair<MACAddress, SequenceControlField> Key;
+        typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
+        typedef std::pair<MacAddress, SequenceControlField> Key;
         std::map<QoSKey, Status> ackStatuses;
         std::map<Key, Status> mgmtAckStatuses;
 
@@ -60,7 +60,7 @@ class INET_API QoSAckHandler : public IAckHandler
         virtual ~QoSAckHandler() { }
 
         virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
-        virtual std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
+        virtual std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
 
         virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
         virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);

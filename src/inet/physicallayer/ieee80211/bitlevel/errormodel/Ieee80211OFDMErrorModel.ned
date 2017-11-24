@@ -39,13 +39,13 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 // 18.3.4) and data field (18.3.5).
 //
 //
-module Ieee80211OFDMErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
+module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:
         double dataSymbolErrorRate = default(0/0);
         double dataBitErrorRate = default(0/0);
         double signalSymbolErrorRate = default(0/0);
         double signalBitErrorRate = default(0/0);
-        @class(Ieee80211OFDMErrorModel);
+        @class(Ieee80211OfdmErrorModel);
         @display("i=block/broadcast");
 }

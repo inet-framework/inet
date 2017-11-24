@@ -24,10 +24,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKScalarTransmitter : public FlatTransmitterBase
+class INET_API ApskScalarTransmitter : public FlatTransmitterBase
 {
   public:
-    APSKScalarTransmitter();
+    ApskScalarTransmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;

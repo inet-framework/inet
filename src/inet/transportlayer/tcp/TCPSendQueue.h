@@ -34,10 +34,10 @@ namespace tcp {
  *
  * @see TCPRcvQueue
  */
-class INET_API TCPSendQueue : public cObject
+class INET_API TcpSendQueue : public cObject
 {
   protected:
-    TCPConnection *conn = nullptr;    // the connection that owns this queue
+    TcpConnection *conn = nullptr;    // the connection that owns this queue
     uint32 begin = 0;    // 1st sequence number stored
     uint32 end = 0;    // last sequence number stored +1
     ChunkQueue dataBuffer;      // dataBuffer
@@ -46,19 +46,19 @@ class INET_API TCPSendQueue : public cObject
     /**
      * Ctor
      */
-    TCPSendQueue();
+    TcpSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPSendQueue();
+    virtual ~TcpSendQueue();
 
     virtual ChunkQueue& getDataBuffer() { return dataBuffer; }
 
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
+    virtual void setConnection(TcpConnection *_conn) { conn = _conn; }
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first

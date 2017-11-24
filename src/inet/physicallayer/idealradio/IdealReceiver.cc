@@ -56,7 +56,7 @@ bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, cons
     return power == IdealReception::POWER_RECEIVABLE;
 }
 
-bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     auto power = check_and_cast<const IdealReception *>(reception)->getPower();
     if (power == IdealReception::POWER_RECEIVABLE) {
@@ -94,7 +94,7 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
     return new ListeningDecision(listening, false);
 }
 
-const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
+const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
     double errorRate = check_and_cast<const IdealReception *>(reception)->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;

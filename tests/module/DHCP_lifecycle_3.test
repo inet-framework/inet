@@ -1,7 +1,7 @@
 %description:
 This test is similar to DHCP_lifecycle_2.test but server shutting down with
 server.status.initialStatus = "DOWN" parameter not via lifecycle events.
-It is intended to test UDP internals in the DHCPClient for e.g. UDP bind won't
+It is intended to test UDP internals in the DhcpClient for e.g. UDP bind won't
 be invoked while the server is down.
 
 %inifile: omnetpp.ini
@@ -36,7 +36,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
@@ -49,7 +49,7 @@ network LifecycleTest
         lifecycleController: LifecycleController {
             @display("p=73,185");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
                 @display("p=73,116");

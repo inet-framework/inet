@@ -42,7 +42,7 @@ class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base
     virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
     virtual void setDestinationAddress(const L3Address& addr) override { setDestAddr(addr); }
     virtual ConstProtocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(ConstProtocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 };
 
 } // namespace inet

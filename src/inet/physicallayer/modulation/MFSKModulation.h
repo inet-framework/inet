@@ -29,13 +29,13 @@ namespace physicallayer {
  *
  * http://en.wikipedia.org/wiki/Multiple_frequency-shift_keying
  */
-class INET_API MFSKModulation : public IModulation
+class INET_API MfskModulation : public IModulation
 {
   protected:
     unsigned int codeWordSize;
 
   public:
-    MFSKModulation(unsigned int codeWordSize);
+    MfskModulation(unsigned int codeWordSize);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

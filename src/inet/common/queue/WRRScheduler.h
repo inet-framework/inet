@@ -27,7 +27,7 @@ namespace inet {
 /**
  * This module implements a Weighted Round Robin Scheduler.
  */
-class INET_API WRRScheduler : public SchedulerBase
+class INET_API WrrScheduler : public SchedulerBase
 {
   protected:
     int numInputs;    // number of input gates
@@ -35,10 +35,10 @@ class INET_API WRRScheduler : public SchedulerBase
     int *buckets;    // array of tokens in buckets (has numInputs elements)
 
   public:
-    WRRScheduler() : numInputs(0), weights(nullptr), buckets(nullptr) {}
+    WrrScheduler() : numInputs(0), weights(nullptr), buckets(nullptr) {}
 
   protected:
-    virtual ~WRRScheduler();
+    virtual ~WrrScheduler();
     virtual void initialize() override;
     virtual bool schedulePacket() override;
 };

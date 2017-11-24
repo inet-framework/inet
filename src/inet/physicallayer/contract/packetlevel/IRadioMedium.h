@@ -222,7 +222,7 @@ class INET_API IRadioMedium : public IPrintableObject
      * arriving at the provided receiver. This function never returns nullptr as
      * long as the transmission is live on the medium.
      */
-    virtual const ISNIR *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;
+    virtual const ISnir *getSNIR(const IRadio *receiver, const ITransmission *transmission) const = 0;
 
     /**
      * Returns true when the reception is possible of the transmission part.

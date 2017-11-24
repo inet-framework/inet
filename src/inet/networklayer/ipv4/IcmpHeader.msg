@@ -26,7 +26,7 @@ namespace inet;
 //
 // The real ICMP codes
 //
-enum ICMPType
+enum IcmpType
 {
 
     ICMP_DESTINATION_UNREACHABLE = 3;
@@ -47,7 +47,7 @@ enum ICMPType
     ICMP_MASK_REPLY = 18;    // address mask reply
 }
 
-enum ICMPRedirectSubcodes
+enum IcmpRedirectSubcodes
 {
     ICMP_REDIRECT_NET                = 0;    // for network
     ICMP_REDIRECT_HOST               = 1;    // for host
@@ -55,13 +55,13 @@ enum ICMPRedirectSubcodes
     ICMP_REDIRECT_TOSHOST            = 3;    // for tos and host
 }
 
-enum ICMPTimeExceededSubcodes
+enum IcmpTimeExceededSubcodes
 {
     ICMP_TIMXCEED_INTRANS            = 0;               // ttl==0 in transit
     ICMP_TIMXCEED_REASS              = 1;               // ttl==0 in reass
 }
 
-enum ICMPParameterProblemSubcodes
+enum IcmpParameterProblemSubcodes
 {
     ICMP_PARAMPROB_ERRATPTR          = 0;    // error at param ptr
     ICMP_PARAMPROB_OPTABSENT         = 1;    // req. opt. absent
@@ -71,7 +71,7 @@ enum ICMPParameterProblemSubcodes
 //
 // Codes for type ICMP_DESTINATION_UNREACHABLE
 //
-enum ICMPDestinationUnreachableCodes
+enum IcmpDestinationUnreachableCodes
 {
     ICMP_DU_NETWORK_UNREACHABLE =                      0;
     ICMP_DU_HOST_UNREACHABLE =                         1;
@@ -93,7 +93,7 @@ enum ICMPDestinationUnreachableCodes
 }
 
 cplusplus {{
-typedef int ICMPCode;
+typedef int IcmpCode;
 
 inline bool isIcmpInfoType(int type)
 {
@@ -122,13 +122,13 @@ inline bool isIcmpInfoType(int type)
 class IcmpHeader extends FieldsChunk
 {
     chunkLength = B(8);
-    ICMPType type = (ICMPType)-1;   // 1 byte
+    IcmpType type = (IcmpType)-1;   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
     CrcMode crcMode = (CrcMode)-1;
 }
 
-class ICMPEchoRequest extends IcmpHeader
+class IcmpEchoRequest extends IcmpHeader
 {
     type = ICMP_ECHO_REQUEST;
     code = 0;
@@ -136,7 +136,7 @@ class ICMPEchoRequest extends IcmpHeader
     int seqNumber; // sequence number           // 2 bytes
 }
 
-class ICMPEchoReply extends IcmpHeader
+class IcmpEchoReply extends IcmpHeader
 {
     type = ICMP_ECHO_REPLY;
     code = 0;

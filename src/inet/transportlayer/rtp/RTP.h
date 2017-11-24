@@ -35,7 +35,7 @@ namespace rtp {
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API RTP : public cSimpleModule, public ILifecycle
+class INET_API Rtp : public cSimpleModule, public ILifecycle
 {
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
@@ -75,49 +75,49 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     /**
      * Creates the profile module and initializes it.
      */
-    virtual void enterSession(RTPCIEnterSession *rifp);
+    virtual void enterSession(RtpCiEnterSession *rifp);
 
     /**
      * Destroys the profile module and orders the rtcp module
      * to send an rtcp bye packet.
      */
-    virtual void leaveSession(RTPCILeaveSession *rifp);
+    virtual void leaveSession(RtpCiLeaveSession *rifp);
 
-    virtual void createSenderModule(RTPCICreateSenderModule *rifp);
+    virtual void createSenderModule(RtpCiCreateSenderModule *rifp);
 
-    virtual void deleteSenderModule(RTPCIDeleteSenderModule *rifp);
+    virtual void deleteSenderModule(RtpCiDeleteSenderModule *rifp);
 
-    virtual void senderModuleControl(RTPCISenderControl *rifp);
+    virtual void senderModuleControl(RtpCiSenderControl *rifp);
 
     /**
      * Called when the profile module is initialized.
      */
-    virtual void profileInitialized(RTPInnerPacket *rinp);
+    virtual void profileInitialized(RtpInnerPacket *rinp);
 
-    virtual void senderModuleCreated(RTPInnerPacket *rinp);
+    virtual void senderModuleCreated(RtpInnerPacket *rinp);
 
-    virtual void senderModuleDeleted(RTPInnerPacket *rinp);
+    virtual void senderModuleDeleted(RtpInnerPacket *rinp);
 
-    virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+    virtual void senderModuleInitialized(RtpInnerPacket *rinp);
 
-    virtual void senderModuleStatus(RTPInnerPacket *rinp);
+    virtual void senderModuleStatus(RtpInnerPacket *rinp);
 
     /**
      * Sends a RTP data packet to the UDP layer and a copy
      * of it to the rtcp module.
      */
-    virtual void dataOut(RTPInnerPacket *rinp);
+    virtual void dataOut(RtpInnerPacket *rinp);
 
     /**
      * Informs the application that the session is entered.
      */
-    virtual void rtcpInitialized(RTPInnerPacket *rinp);
+    virtual void rtcpInitialized(RtpInnerPacket *rinp);
 
     /**
      * Informs the application that this end system
      * has left the RTP session.
      */
-    virtual void sessionLeft(RTPInnerPacket *rinp);
+    virtual void sessionLeft(RtpInnerPacket *rinp);
 
     /**
      * Creates the profile module.
@@ -176,7 +176,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     /**
      * The destination address.
      */
-    IPv4Address _destinationAddress;
+    Ipv4Address _destinationAddress;
 
     /**
      * The RTP port.
@@ -196,7 +196,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     /**
      * The UDP socket.
      */
-    UDPSocket _udpSocket;
+    UdpSocket _udpSocket;
 
     /**
      * True when this end system is about to leave the session.

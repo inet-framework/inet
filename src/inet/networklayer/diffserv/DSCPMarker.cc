@@ -36,11 +36,11 @@ namespace inet {
 
 using namespace DiffservUtil;
 
-Define_Module(DSCPMarker);
+Define_Module(DscpMarker);
 
-simsignal_t DSCPMarker::markPkSignal = registerSignal("markPk");
+simsignal_t DscpMarker::markPkSignal = registerSignal("markPk");
 
-void DSCPMarker::initialize()
+void DscpMarker::initialize()
 {
     parseDSCPs(par("dscps"), "dscps", dscps);
     if (dscps.empty())
@@ -54,7 +54,7 @@ void DSCPMarker::initialize()
     WATCH(numMarked);
 }
 
-void DSCPMarker::handleMessage(cMessage *msg)
+void DscpMarker::handleMessage(cMessage *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
     numRcvd++;
@@ -66,7 +66,7 @@ void DSCPMarker::handleMessage(cMessage *msg)
 
     send(packet, "out");
 }
-void DSCPMarker::refreshDisplay() const
+void DscpMarker::refreshDisplay() const
 {
     char buf[50] = "";
     if (numRcvd > 0)
@@ -76,7 +76,7 @@ void DSCPMarker::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool DSCPMarker::markPacket(Packet *packet, int dscp)
+bool DscpMarker::markPacket(Packet *packet, int dscp)
 {
     EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
 

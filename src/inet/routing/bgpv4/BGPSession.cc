@@ -23,7 +23,7 @@ namespace inet {
 
 namespace bgp {
 
-BGPSession::BGPSession(BGPRouting& _bgpRouting)
+BgpSession::BgpSession(BgpRouting& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(nullptr), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(nullptr)
     , _holdTime(BGP_HOLD_TIME), _ptrHoldTimer(nullptr)
@@ -36,7 +36,7 @@ BGPSession::BGPSession(BGPRouting& _bgpRouting)
     _info.sessionEstablished = false;
 };
 
-BGPSession::~BGPSession()
+BgpSession::~BgpSession()
 {
     _bgpRouting.getCancelAndDelete(_ptrConnectRetryTimer);
     _bgpRouting.getCancelAndDelete(_ptrStartEvent);
@@ -47,7 +47,7 @@ BGPSession::~BGPSession()
     delete _fsm;
 }
 
-void BGPSession::setInfo(SessionInfo info)
+void BgpSession::setInfo(SessionInfo info)
 {
     _info.sessionType = info.sessionType;
     _info.ASValue = info.ASValue;
@@ -55,10 +55,10 @@ void BGPSession::setInfo(SessionInfo info)
     _info.peerAddr = info.peerAddr;
     _info.sessionID = info.sessionID;
     _info.linkIntf = info.linkIntf;
-    _info.socket = new TCPSocket();
+    _info.socket = new TcpSocket();
 }
 
-void BGPSession::setTimers(simtime_t *delayTab)
+void BgpSession::setTimers(simtime_t *delayTab)
 {
     _connectRetryTime = delayTab[0];
     _holdTime = delayTab[1];
@@ -81,7 +81,7 @@ void BGPSession::setTimers(simtime_t *delayTab)
     _ptrKeepAliveTimer->setContextPointer(this);
 }
 
-void BGPSession::startConnection()
+void BgpSession::startConnection()
 {
     if (_ptrStartEvent == nullptr) {
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
@@ -95,7 +95,7 @@ void BGPSession::startConnection()
     }
 }
 
-void BGPSession::restartsHoldTimer()
+void BgpSession::restartsHoldTimer()
 {
     if (_holdTime != 0) {
         _bgpRouting.getCancelEvent(_ptrHoldTimer);
@@ -103,13 +103,13 @@ void BGPSession::restartsHoldTimer()
     }
 }
 
-void BGPSession::restartsKeepAliveTimer()
+void BgpSession::restartsKeepAliveTimer()
 {
     _bgpRouting.getCancelEvent(_ptrKeepAliveTimer);
     _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _keepAliveTime, _ptrKeepAliveTimer);
 }
 
-void BGPSession::restartsConnectRetryTimer(bool start)
+void BgpSession::restartsConnectRetryTimer(bool start)
 {
     _bgpRouting.getCancelEvent(_ptrConnectRetryTimer);
     if (!start) {
@@ -117,10 +117,10 @@ void BGPSession::restartsConnectRetryTimer(bool start)
     }
 }
 
-void BGPSession::sendOpenMessage()
+void BgpSession::sendOpenMessage()
 {
     Packet *pk = new Packet("BGPOpen");
-    const auto& openMsg = makeShared<BGPOpenMessage>();
+    const auto& openMsg = makeShared<BgpOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIPv4());
@@ -130,17 +130,17 @@ void BGPSession::sendOpenMessage()
     _openMsgSent++;
 }
 
-void BGPSession::sendKeepAliveMessage()
+void BgpSession::sendKeepAliveMessage()
 {
     Packet *pk = new Packet("BGPKeepAlive");
-    const auto &keepAliveMsg = makeShared<BGPKeepAliveMessage>();
+    const auto &keepAliveMsg = makeShared<BgpKeepAliveMessage>();
     keepAliveMsg->markImmutable();
     pk->pushHeader(keepAliveMsg);
     _info.socket->send(pk);
     _keepAliveMsgSent++;
 }
 
-void BGPSession::getStatistics(unsigned int *statTab)
+void BgpSession::getStatistics(unsigned int *statTab)
 {
     statTab[0] += _openMsgSent;
     statTab[1] += _openMsgRcv;

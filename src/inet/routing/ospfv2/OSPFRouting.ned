@@ -18,7 +18,7 @@ import inet.routing.contract.IIPRouting;
 //
 // Implements the OSPFv4 routing protocol.
 //
-simple OSPFRouting like IIPRouting
+simple OspfRouting like IIPRouting
 {
     parameters:
         string interfaceTableModule;
@@ -44,6 +44,6 @@ simple OSPFRouting like IIPRouting
 
         @display("i=block/network2");
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down);
 }

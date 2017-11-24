@@ -43,7 +43,7 @@ namespace inet {
  * References to default routers are stored in a circular list to
  * ease round-robin selection.
  */
-class INET_API IPv6NeighbourCache
+class INET_API Ipv6NeighbourCache
 {
   public:
     typedef std::vector<Packet *> MsgPtrVector;    // TODO verify this is really needed --Andras
@@ -58,9 +58,9 @@ class INET_API IPv6NeighbourCache
      */
     struct Key
     {
-        IPv6Address address;
+        Ipv6Address address;
         int interfaceID;
-        Key(IPv6Address addr, int ifaceID) { address = addr; interfaceID = ifaceID; }
+        Key(Ipv6Address addr, int ifaceID) { address = addr; interfaceID = ifaceID; }
         bool operator<(const Key& b) const
         {
             return interfaceID == b.interfaceID ? address < b.address : interfaceID < b.interfaceID;
@@ -72,7 +72,7 @@ class INET_API IPv6NeighbourCache
     {
         // Neighbour info
         const Key *nceKey = nullptr;    // points back to the key that links to this NCE
-        MACAddress macAddress;
+        MacAddress macAddress;
         bool isRouter = false;
         bool isHomeAgent = false;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
 
@@ -89,7 +89,7 @@ class INET_API IPv6NeighbourCache
         unsigned int numOfARNSSent = 0;
         cMessage *arTimer = nullptr;    //Address Resolution self-message timer
         MsgPtrVector pendingPackets;    //ptrs to queued packets associated with this NCE
-        IPv6Address nsSrcAddr;    //the src addr that was used to send the previous NS
+        Ipv6Address nsSrcAddr;    //the src addr that was used to send the previous NS
 
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement
@@ -162,11 +162,11 @@ class INET_API IPv6NeighbourCache
     DefaultRouterList defaultRouterList;
 
   public:
-    IPv6NeighbourCache(cSimpleModule& neighbourDiscovery);
-    virtual ~IPv6NeighbourCache() {}
+    Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery);
+    virtual ~Ipv6NeighbourCache() {}
 
     /** Returns a neighbour entry, or nullptr. */
-    virtual Neighbour *lookup(const IPv6Address& addr, int interfaceID);
+    virtual Neighbour *lookup(const Ipv6Address& addr, int interfaceID);
 
     /** Experimental code. */
     virtual const Key *lookupKeyAddr(Key& key);
@@ -181,18 +181,18 @@ class INET_API IPv6NeighbourCache
 
     /** Creates and initializes a neighbour entry with isRouter=false, state=INCOMPLETE. */
     //TODO merge into next one (using default arg)
-    virtual Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID);
+    virtual Neighbour *addNeighbour(const Ipv6Address& addr, int interfaceID);
 
     /** Creates and initializes a neighbour entry with isRouter=false, MAC address and state=STALE. */
-    virtual Neighbour *addNeighbour(const IPv6Address& addr, int interfaceID,
-            MACAddress macAddress);
+    virtual Neighbour *addNeighbour(const Ipv6Address& addr, int interfaceID,
+            MacAddress macAddress);
 
     /** Creates and initializes a router entry (isRouter=isDefaultRouter=true), MAC address and state=STALE. */
-    virtual Neighbour *addRouter(const IPv6Address& addr, int interfaceID,
-            MACAddress macAddress, simtime_t expiryTime, bool isHomeAgent = false);    // added HA flag, 3.9.07 - CB
+    virtual Neighbour *addRouter(const Ipv6Address& addr, int interfaceID,
+            MacAddress macAddress, simtime_t expiryTime, bool isHomeAgent = false);    // added HA flag, 3.9.07 - CB
 
     /** Deletes the given neighbour from the cache. */
-    virtual void remove(const IPv6Address& addr, int interfaceID);
+    virtual void remove(const Ipv6Address& addr, int interfaceID);
 
     /** Set status of all neighbours on given interface to state PROBE. */
     // Added by CB

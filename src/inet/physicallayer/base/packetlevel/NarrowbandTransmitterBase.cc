@@ -34,7 +34,7 @@ void NarrowbandTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        modulation = APSKModulationBase::findModulation(par("modulation"));
+        modulation = ApskModulationBase::findModulation(par("modulation"));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
     }

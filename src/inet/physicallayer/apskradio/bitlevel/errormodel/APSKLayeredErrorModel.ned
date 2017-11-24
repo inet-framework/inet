@@ -23,8 +23,8 @@ import inet.physicallayer.base.bitlevel.LayeredErrorModelBase;
 // This error model computes the erroneous bits, symbols, or simply whether the
 // packet is error free or not based on the SNIR.
 //
-module APSKLayeredErrorModel extends LayeredErrorModelBase
+module ApskLayeredErrorModel extends LayeredErrorModelBase
 {
     parameters:
-        @class(APSKLayeredErrorModel);
+        @class(ApskLayeredErrorModel);
 }

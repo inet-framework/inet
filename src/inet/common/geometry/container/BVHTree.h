@@ -32,7 +32,7 @@ namespace inet {
  * Implementation based on this sketch:
  * http://www.cs.utah.edu/~bes/papers/fastRT/paper-node8.html
  */
-class INET_API BVHTree
+class INET_API BvhTree
 {
     public:
         class Axis
@@ -50,12 +50,12 @@ class INET_API BVHTree
                 char getCurrentAxis() const { return axisOrder[curr]; }
         };
     public:
-      class BVHTreeVisitor : public IVisitor
+      class BvhTreeVisitor : public IVisitor
       {
         public:
           virtual void visit(const cObject *) const = 0;
           virtual LineSegment getLineSegment() const = 0;
-          virtual ~BVHTreeVisitor() {}
+          virtual ~BvhTreeVisitor() {}
       };
 
     protected:
@@ -82,8 +82,8 @@ class INET_API BVHTree
         std::string axisOrder;
         Coord boundingMin, boundingMax;
         Coord center;
-        BVHTree *left;
-        BVHTree *right;
+        BvhTree *left;
+        BvhTree *right;
         std::vector<const physicalenvironment::IPhysicalObject *> objects;
 
     protected:
@@ -93,8 +93,8 @@ class INET_API BVHTree
         bool intersectWithLineSegment(const LineSegment& lineSegment) const;
 
     public:
-        BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const physicalenvironment::IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
-        virtual ~BVHTree();
+        BvhTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const physicalenvironment::IPhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
+        virtual ~BvhTree();
         void lineSegmentQuery(const LineSegment& lineSegment,  const IVisitor *visitor) const;
 };
 

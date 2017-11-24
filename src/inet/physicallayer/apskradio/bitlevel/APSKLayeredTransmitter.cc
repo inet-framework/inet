@@ -29,9 +29,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKLayeredTransmitter);
+Define_Module(ApskLayeredTransmitter);
 
-APSKLayeredTransmitter::APSKLayeredTransmitter() :
+ApskLayeredTransmitter::ApskLayeredTransmitter() :
     levelOfDetail((LevelOfDetail) - 1),
     encoder(nullptr),
     modulator(nullptr),
@@ -44,7 +44,7 @@ APSKLayeredTransmitter::APSKLayeredTransmitter() :
 {
 }
 
-void APSKLayeredTransmitter::initialize(int stage)
+void ApskLayeredTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         encoder = dynamic_cast<const IEncoder *>(getSubmodule("encoder"));
@@ -75,7 +75,7 @@ void APSKLayeredTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& APSKLayeredTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKLayeredTransmitter";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -92,21 +92,21 @@ std::ostream& APSKLayeredTransmitter::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-const ITransmissionPacketModel *APSKLayeredTransmitter::createPacketModel(const Packet *packet) const
+const ITransmissionPacketModel *ApskLayeredTransmitter::createPacketModel(const Packet *packet) const
 {
     return new TransmissionPacketModel(check_and_cast<const Packet *>(packet), bitrate);
 }
 
-const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITransmissionPacketModel *packetModel) const
+const ITransmissionBitModel *ApskLayeredTransmitter::createBitModel(const ITransmissionPacketModel *packetModel) const
 {
     if (levelOfDetail >= BIT_DOMAIN)
         return encoder->encode(packetModel);
     else {
         auto packet = packetModel->getPacket();
-        b netHeaderLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength();
+        b netHeaderLength = packet->peekHeader<ApskPhyHeader>()->getChunkLength();
         b netDataLength = packet->getTotalLength() - netHeaderLength;
         if (encoder) {
-            const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
+            const ApskEncoder *apskEncoder = check_and_cast<const ApskEncoder *>(encoder);
             const ConvolutionalCode *forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
             if (forwardErrorCorrection == nullptr)
                 return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
@@ -122,7 +122,7 @@ const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITrans
     }
 }
 
-const ITransmissionSymbolModel *APSKLayeredTransmitter::createSymbolModel(const ITransmissionBitModel *bitModel) const
+const ITransmissionSymbolModel *ApskLayeredTransmitter::createSymbolModel(const ITransmissionBitModel *bitModel) const
 {
     if (levelOfDetail >= SYMBOL_DOMAIN)
         return modulator->modulate(bitModel);
@@ -130,7 +130,7 @@ const ITransmissionSymbolModel *APSKLayeredTransmitter::createSymbolModel(const 
         return new TransmissionSymbolModel(-1, NaN, -1, NaN, nullptr, modulator->getModulation(), modulator->getModulation());
 }
 
-const ITransmissionSampleModel *APSKLayeredTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
+const ITransmissionSampleModel *ApskLayeredTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
 {
     if (levelOfDetail >= SAMPLE_DOMAIN)
         return pulseShaper->shape(symbolModel);
@@ -138,7 +138,7 @@ const ITransmissionSampleModel *APSKLayeredTransmitter::createSampleModel(const 
         return nullptr;
 }
 
-const ITransmissionAnalogModel *APSKLayeredTransmitter::createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const
+const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSampleModel *sampleModel) const
 {
     if (digitalAnalogConverter) {
         if (sampleModel == nullptr)
@@ -152,7 +152,7 @@ const ITransmissionAnalogModel *APSKLayeredTransmitter::createAnalogModel(const 
     }
 }
 
-const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
+const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     const ITransmissionPacketModel *packetModel = createPacketModel(packet);
     const ITransmissionBitModel *bitModel = createBitModel(packetModel);

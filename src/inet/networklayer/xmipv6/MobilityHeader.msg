@@ -23,7 +23,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.networklayer.ipv6.IPv6Header;
 import inet.networklayer.ipv6.IPv6ExtensionHeaders;
 
@@ -61,7 +61,7 @@ class BindingUpdate extends MobilityHeader
     bool linkLocalAddressCompatibilityFlag;    //L-Flag (Link Local Address Compatibility Flag)
     bool keyManagementFlag = false;        //K-Flag (Key Management Flag)
     //Mobility Options not defined
-    IPv6Address homeAddressMN;        //As BU is supposed to be sent with Home Address Option, therefore i make this part of BU Msg.
+    Ipv6Address homeAddressMN;        //As BU is supposed to be sent with Home Address Option, therefore i make this part of BU Msg.
 
     // for CN communication; value different from 0 shows that it is used
     int bindingAuthorizationData = 0; // 28.08.07 - CB
@@ -70,7 +70,7 @@ class BindingUpdate extends MobilityHeader
 
 //Defining the status fields for the Binding Acknowledgement Message
 
-enum BAStatus
+enum BaStatus
 {
 
     BINDING_UPDATE_ACCEPTED = 0;
@@ -93,7 +93,7 @@ enum BAStatus
 
 class BindingAcknowledgement extends MobilityHeader
 {
-    BAStatus status;
+    BaStatus status;
     unsigned int sequenceNumber;
     unsigned int lifetime;
     bool keyManagementFlag = false;//K-Flag (Key Management Flag)
@@ -105,7 +105,7 @@ class BindingAcknowledgement extends MobilityHeader
 
 //==================Defining Binding Error Status====================
 
-enum BEStatus
+enum BeStatus
 {
 
     UNKNOWN_BINDING_FOR_HOME_ADDRESS_DEST_OPTION = 1;
@@ -116,8 +116,8 @@ enum BEStatus
 
 class BindingError extends MobilityHeader
 {
-    BEStatus status;
-    IPv6Address homeAddress;
+    BeStatus status;
+    Ipv6Address homeAddress;
     //Mobility Options not defined
 
 }
@@ -168,6 +168,6 @@ class BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 class HomeAddressOption extends Ipv6DestinationOptionsHeader
 {
-    IPv6Address homeAddress;
+    Ipv6Address homeAddress;
 }
 

@@ -1,5 +1,5 @@
 %description:
-Tests TCPSendQueue, TCPReceiveQueue classes
+Tests TcpSendQueue, TcpReceiveQueue classes
 - segments with/without last byte of message
 - overlapped segments
 - segments out of order
@@ -12,14 +12,14 @@ Tests TCPSendQueue, TCPReceiveQueue classes
 using namespace ::inet::tcp;
 
 %activity:
-TCPSendQueue sendQueue;
-TCPSendQueue *sq = &sendQueue;
+TcpSendQueue sendQueue;
+TcpSendQueue *sq = &sendQueue;
 
 sq->init(1000);
 EV << sq->info() <<"\n";
 
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *rq = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *rq = &rcvQueue;
 
 rq->init(1000);
 EV << rq->info() <<"\n";

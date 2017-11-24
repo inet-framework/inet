@@ -68,7 +68,7 @@ std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *data
     frames[dataHeader->getSequenceNumber()].push_back(dataPacket);
     if (blockAckReordering && blockAckAgreementHandler) {
         Tid tid = dataHeader->getTid();
-        MACAddress originatorAddr = dataHeader->getTransmitterAddress();
+        MacAddress originatorAddr = dataHeader->getTransmitterAddress();
         RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
         if (agreement)
             frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader);
@@ -129,7 +129,7 @@ std::vector<Packet *> RecipientQoSMacDataService::controlFrameReceived(Packet *c
         BlockAckReordering::ReorderBuffer frames;
         if (blockAckReordering) {
             Tid tid = blockAckReq->getTidInfo();
-            MACAddress originatorAddr = blockAckReq->getTransmitterAddress();
+            MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
             RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
             if (agreement)
                 frames = blockAckReordering->processReceivedBlockAckReq(blockAckReq);

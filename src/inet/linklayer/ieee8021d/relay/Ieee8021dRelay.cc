@@ -50,7 +50,7 @@ void Ieee8021dRelay::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        macTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
+        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         if (isOperational) {
@@ -154,7 +154,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 
     // BPDU Handling
     if (isStpAware
-            && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress)
+            && (frame->getDest() == MacAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress)
             && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED
             && isBpdu(packet, frame)) {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
@@ -208,7 +208,7 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     send(packet, "ifOut");
 }
 
-void Ieee8021dRelay::learn(MACAddress srcAddr, int arrivalInterfaceId)
+void Ieee8021dRelay::learn(MacAddress srcAddr, int arrivalInterfaceId)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
 
@@ -218,10 +218,10 @@ void Ieee8021dRelay::learn(MACAddress srcAddr, int arrivalInterfaceId)
 
 void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
-    const auto& bpdu = packet->peekHeader<BPDU>();
+    const auto& bpdu = packet->peekHeader<Bpdu>();
     (void)bpdu;       // unused variable
     unsigned int portNum = packet->getMandatoryTag<InterfaceReq>()->getInterfaceId();
-    MACAddress address = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MacAddress address = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
 
     if (ifTable->getInterfaceById(portNum) == nullptr)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
@@ -256,7 +256,7 @@ void Ieee8021dRelay::deliverBPDU(Packet *packet)
     const auto& llc = packet->popHeader<Ieee8022LlcHeader>();
     ASSERT(llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-    const auto& bpdu = packet->peekHeader<BPDU>();
+    const auto& bpdu = packet->peekHeader<Bpdu>();
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
     numDeliveredBDPUsToSTP++;

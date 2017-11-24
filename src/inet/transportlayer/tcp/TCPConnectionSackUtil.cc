@@ -36,7 +36,7 @@ namespace tcp {
 // helper functions for SACK
 //
 
-bool TCPConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSack& option)
+bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSack& option)
 {
     if (option.getLength() % 8 != 2) {
         EV_ERROR << "ERROR: option length incorrect\n";
@@ -132,7 +132,7 @@ bool TCPConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
     return true;
 }
 
-bool TCPConnection::isLost(uint32 seqNum)
+bool TcpConnection::isLost(uint32 seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -150,7 +150,7 @@ bool TCPConnection::isLost(uint32 seqNum)
     return isLost;
 }
 
-void TCPConnection::setPipe()
+void TcpConnection::setPipe()
 {
     ASSERT(state->sack_enabled);
 
@@ -218,7 +218,7 @@ void TCPConnection::setPipe()
         pipeVector->record(state->pipe);
 }
 
-bool TCPConnection::nextSeg(uint32& seqNum)
+bool TcpConnection::nextSeg(uint32& seqNum)
 {
     ASSERT(state->sack_enabled);
 
@@ -341,7 +341,7 @@ bool TCPConnection::nextSeg(uint32& seqNum)
     return false;
 }
 
-void TCPConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
+void TcpConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
@@ -372,7 +372,7 @@ void TCPConnection::sendDataDuringLossRecoveryPhase(uint32 congestionWindow)
     }
 }
 
-void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
+void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 {
     ASSERT(state->sack_enabled && state->lossRecovery);
 
@@ -438,7 +438,7 @@ void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
         tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
 }
 
-TcpHeader TCPConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
+TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 {
     uint options_len = 0;
     uint used_options_len = tcpseg->getHeaderOptionArrayLength();
@@ -586,13 +586,13 @@ TcpHeader TCPConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     }
 
     while (optArrSize < optArrSizeAligned) {
-        tcpseg->addHeaderOption(new TCPOptionNop());
+        tcpseg->addHeaderOption(new TcpOptionNop());
         optArrSize++;
     }
 
     ASSERT(used_options_len % 4 == 2);
 
-    TCPOptionSack *option = new TCPOptionSack();
+    TcpOptionSack *option = new TcpOptionSack();
     option->setLength(8 * n + 2);
     option->setSackItemArraySize(n);
 

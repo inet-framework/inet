@@ -29,7 +29,7 @@ namespace physicallayer {
  *
  * @author Konrad Polys, Krzysztof Grochla
  */
-class INET_API SUIPathLoss : public PathLossBase
+class INET_API SuiPathLoss : public PathLossBase
 {
   protected:
     /** @brief Transmitter antenna high */
@@ -44,7 +44,7 @@ class INET_API SUIPathLoss : public PathLossBase
     virtual void initialize(int stage) override;
 
   public:
-    SUIPathLoss();
+    SuiPathLoss();
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const override { return m(NaN); }

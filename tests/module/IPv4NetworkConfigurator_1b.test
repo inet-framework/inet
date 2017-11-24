@@ -1,12 +1,12 @@
 %description:
 
-Tests IPv4NetworkConfigurator for a wired LAN.
+Tests Ipv4NetworkConfigurator for a wired LAN.
 Topology:
    server <--> router <--> switch1 <--> switch2 <--> clients
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
@@ -17,7 +17,7 @@ network Test
     parameters:
         int numHosts;
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 dumpAddresses = true;
         }

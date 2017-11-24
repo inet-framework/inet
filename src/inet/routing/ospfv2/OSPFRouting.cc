@@ -34,24 +34,24 @@ namespace inet {
 
 namespace ospf {
 
-Define_Module(OSPFRouting);
+Define_Module(OspfRouting);
 
-OSPFRouting::OSPFRouting()
+OspfRouting::OspfRouting()
 {
 }
 
-OSPFRouting::~OSPFRouting()
+OspfRouting::~OspfRouting()
 {
     delete ospfRouter;
 }
 
-void OSPFRouting::initialize(int stage)
+void OspfRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         isUp = isNodeUp();
         if (isUp)
             createOspfRouter();
@@ -59,20 +59,20 @@ void OSPFRouting::initialize(int stage)
     }
 }
 
-void OSPFRouting::createOspfRouter()
+void OspfRouting::createOspfRouter()
 {
     ospfRouter = new Router(rt->getRouterId(), this, ift, rt);
 
     // read the OSPF AS configuration
     cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
-    OSPFConfigReader configReader(this, ift);
+    OspfConfigReader configReader(this, ift);
     if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
         throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 
     ospfRouter->addWatches();
 }
 
-void OSPFRouting::handleMessage(cMessage *msg)
+void OspfRouting::handleMessage(cMessage *msg)
 {
     if (!isUp)
         handleMessageWhenDown(msg);
@@ -80,7 +80,7 @@ void OSPFRouting::handleMessage(cMessage *msg)
         ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
-void OSPFRouting::handleMessageWhenDown(cMessage *msg)
+void OspfRouting::handleMessageWhenDown(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
@@ -88,7 +88,7 @@ void OSPFRouting::handleMessageWhenDown(cMessage *msg)
     delete msg;
 }
 
-bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool OspfRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -121,29 +121,29 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
     return true;
 }
 
-bool OSPFRouting::isNodeUp()
+bool OspfRouting::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void OSPFRouting::insertExternalRoute(int ifIndex, const IPv4AddressRange& netAddr)
+void OspfRouting::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 {
     Enter_Method_Silent();
-    OSPFASExternalLSAContents newExternalContents;
+    OspfAsExternalLsaContents newExternalContents;
     newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
     newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
-    const IPv4Address netmask = netAddr.mask;
+    const Ipv4Address netmask = netAddr.mask;
     newExternalContents.setNetworkMask(netmask);
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool OSPFRouting::checkExternalRoute(const IPv4Address& route)
+bool OspfRouting::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
     for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
-        ASExternalLSA *externalLSA = ospfRouter->getASExternalLSA(i);
-        IPv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
+        AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
+        Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
         if (externalAddr == route) //FIXME was this meant???
             return true;
     }

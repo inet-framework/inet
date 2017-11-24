@@ -31,7 +31,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public ApplicationBase
+class INET_API UdpBasicApp : public ApplicationBase
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -45,7 +45,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     const char *packetName = nullptr;
 
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfMsg = nullptr;
 
     // statistics
@@ -74,8 +74,8 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void handleNodeCrash() override;
 
   public:
-    UDPBasicApp() {}
-    ~UDPBasicApp();
+    UdpBasicApp() {}
+    ~UdpBasicApp();
 };
 
 } // namespace inet

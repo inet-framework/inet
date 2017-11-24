@@ -470,8 +470,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
           break;
          // ------ Queue indication -----------------------------------------
          case TCP_I_SEND_MSG: {
-            const TCPCommand* tcpCommand =
-               check_and_cast<TCPCommand*>(msg->getControlInfo());
+            const TcpCommand* tcpCommand =
+               check_and_cast<TcpCommand*>(msg->getControlInfo());
             assert(tcpCommand != nullptr);
             // Queue is underfull again -> give it more data.
             if(SocketTCP != nullptr) {   // T.D. 16.11.2011: Ensure that there is still a TCP socket!
@@ -577,7 +577,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          if(IncomingSocketTCP != nullptr) {
             delete IncomingSocketTCP;
          }
-         IncomingSocketTCP = new TCPSocket(msg);
+         IncomingSocketTCP = new TcpSocket(msg);
          IncomingSocketTCP->setOutputGate(gate("tcpOut"));
       }
 
@@ -701,7 +701,7 @@ void NetPerfMeter::createAndBindSocket()
    }
    else if(TransportProtocol == TCP) {
       assert(SocketTCP == nullptr);
-      SocketTCP = new TCPSocket;
+      SocketTCP = new TcpSocket;
       SocketTCP->setOutputGate(gate("tcpOut"));
       SocketTCP->bind(localAddr, localPort);
       if(ActiveMode == false) {
@@ -710,7 +710,7 @@ void NetPerfMeter::createAndBindSocket()
    }
    else if(TransportProtocol == UDP) {
       assert(SocketUDP == nullptr);
-      SocketUDP = new UDPSocket;
+      SocketUDP = new UdpSocket;
       SocketUDP->setOutputGate(gate("udpOut"));
       SocketUDP->bind(localAddr, localPort);
    }
@@ -1218,7 +1218,7 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    // When the queue is able accept more data again, it will be indicated by
    // TCP_I_SEND_MSG!
 
-   TCPCommand* queueInfo = new TCPCommand();
+   TcpCommand* queueInfo = new TcpCommand();
    queueInfo->setUserId(queueSize);
 
    cPacket* cmsg = new cPacket("QueueRequest");

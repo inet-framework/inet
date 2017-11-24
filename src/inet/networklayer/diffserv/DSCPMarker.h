@@ -26,7 +26,7 @@ namespace inet {
 /**
  * DSCP Marker.
  */
-class INET_API DSCPMarker : public cSimpleModule
+class INET_API DscpMarker : public cSimpleModule
 {
   protected:
     std::vector<int> dscps;
@@ -37,7 +37,7 @@ class INET_API DSCPMarker : public cSimpleModule
     static simsignal_t markPkSignal;
 
   public:
-    DSCPMarker() {}
+    DscpMarker() {}
 
   protected:
     virtual void initialize() override;

@@ -34,7 +34,7 @@ package inet.routing.aodv;
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
-simple AODVRouting
+simple AodvRouting
 {
     parameters:
         @display("i=block/network2");

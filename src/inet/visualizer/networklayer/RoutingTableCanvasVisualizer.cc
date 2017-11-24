@@ -23,7 +23,7 @@ namespace visualizer {
 
 Define_Module(RoutingTableCanvasVisualizer);
 
-RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId) :
     RouteVisualization(route, nodeModuleId, nextHopModuleId),
     figure(figure)
 {
@@ -65,7 +65,7 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
     }
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto figure = new LabeledLineFigure("routing entry");
     figure->setTags((std::string("route ") + tags).c_str());

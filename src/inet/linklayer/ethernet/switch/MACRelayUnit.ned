@@ -17,7 +17,7 @@ package inet.linklayer.ethernet.switch;
 
 import inet.linklayer.contract.IMACRelayUnit;
 
-simple MACRelayUnit like IMACRelayUnit
+simple MacRelayUnit like IMACRelayUnit
 {
     parameters:
         @display("i=block/switch");

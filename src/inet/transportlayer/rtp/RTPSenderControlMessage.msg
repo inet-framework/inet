@@ -37,7 +37,7 @@ namespace inet::rtp;
 //    - SEEK_TIME : go to temporal position within the file (not allowed while playing)
 //    - SEEK_BYTE : go to data byte (not allowed while playing)
 //
-enum RTPSenderControlMessageCommands
+enum RtpSenderControlMessageCommands
 {
     RTP_CONTROL_PLAY = 1;
     RTP_CONTROL_PLAY_UNTIL_TIME = 2;
@@ -48,9 +48,9 @@ enum RTPSenderControlMessageCommands
     RTP_CONTROL_SEEK_BYTE = 7;
 };
 
-packet RTPSenderControlMessage
+packet RtpSenderControlMessage
 {
-    RTPSenderControlMessageCommands command;
+    RtpSenderControlMessageCommands command;
     float commandParameter1;
     float commandParameter2;
 };

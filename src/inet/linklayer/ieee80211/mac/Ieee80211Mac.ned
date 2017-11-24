@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac;
 
-import inet.linklayer.base.MACProtocolBase;
+import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.ieee80211.IIeee80211Mac;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 import inet.linklayer.ieee80211.mac.contract.IStatistics;
@@ -58,7 +58,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
+module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 {
     parameters:
         string mibModule;

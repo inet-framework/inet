@@ -36,7 +36,7 @@ namespace inet {
  * and UDPVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UDPVideoStreamSvr : public ApplicationBase
+class INET_API UdpVideoStreamSvr : public ApplicationBase
 {
   public:
     struct VideoStreamData
@@ -54,7 +54,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
 
     // state
     VideoStreamMap streams;
-    UDPSocket socket;
+    UdpSocket socket;
 
     // parameters
     int localPort = -1;
@@ -82,8 +82,8 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     virtual void handleNodeCrash() override;
 
   public:
-    UDPVideoStreamSvr() {}
-    virtual ~UDPVideoStreamSvr();
+    UdpVideoStreamSvr() {}
+    virtual ~UdpVideoStreamSvr();
 };
 
 } // namespace inet

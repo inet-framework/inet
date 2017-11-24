@@ -58,7 +58,7 @@ bool NetworkRouteOsgVisualizer::isPathEnd(cModule *module) const
 bool NetworkRouteOsgVisualizer::isPathElement(cModule *module) const
 {
 #ifdef WITH_ETHERNET
-    if (dynamic_cast<MACRelayUnit *>(module) != nullptr)
+    if (dynamic_cast<MacRelayUnit *>(module) != nullptr)
         return true;
 #endif
 

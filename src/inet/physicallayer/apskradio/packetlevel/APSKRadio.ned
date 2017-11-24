@@ -26,9 +26,9 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 //
 // See also ~APSKScalarRadio, and ~APSKD.
 //
-module APSKRadio extends FlatRadioBase
+module ApskRadio extends FlatRadioBase
 {
     parameters:
         antennaType = default("IsotropicAntenna");
-        @class(APSKRadio);
+        @class(ApskRadio);
 }

@@ -22,18 +22,18 @@
 
 namespace inet {
 
-Define_Module(FIFOQueue);
+Define_Module(FifoQueue);
 
-simsignal_t FIFOQueue::queueLengthSignal = registerSignal("queueLength");
+simsignal_t FifoQueue::queueLengthSignal = registerSignal("queueLength");
 
-void FIFOQueue::initialize()
+void FifoQueue::initialize()
 {
     PassiveQueueBase::initialize();
     queue.setName(par("queueName"));
     outGate = gate("out");
 }
 
-cMessage *FIFOQueue::enqueue(cMessage *msg)
+cMessage *FifoQueue::enqueue(cMessage *msg)
 {
     cPacket *packet = check_and_cast<cPacket *>(msg);
     queue.insert(packet);
@@ -42,7 +42,7 @@ cMessage *FIFOQueue::enqueue(cMessage *msg)
     return nullptr;
 }
 
-cMessage *FIFOQueue::dequeue()
+cMessage *FifoQueue::dequeue()
 {
     if (queue.isEmpty())
         return nullptr;
@@ -53,12 +53,12 @@ cMessage *FIFOQueue::dequeue()
     return packet;
 }
 
-void FIFOQueue::sendOut(cMessage *msg)
+void FifoQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
 }
 
-bool FIFOQueue::isEmpty()
+bool FifoQueue::isEmpty()
 {
     return queue.isEmpty();
 }

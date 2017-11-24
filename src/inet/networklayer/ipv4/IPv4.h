@@ -34,10 +34,10 @@
 
 namespace inet {
 
-class ARPPacket;
+class ArpPacket;
 class IcmpHeader;
 class IInterfaceTable;
-class IIPv4RoutingTable;
+class IIpv4RoutingTable;
 
 /**
  * Implements the IPv4 protocol.
@@ -58,7 +58,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
         Packet *packet = nullptr;
         const IHook::Type hookType = (IHook::Type)-1;
     };
-    typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
+    typedef std::map<Ipv4Address, cPacketQueue> PendingPackets;
 
     struct SocketDescriptor
     {
@@ -69,10 +69,10 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     };
 
   protected:
-    IIPv4RoutingTable *rt = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    IARP *arp = nullptr;
-    ICMP *icmp = nullptr;
+    IArp *arp = nullptr;
+    Icmp *icmp = nullptr;
     int transportInGateBaseId = -1;
 
     // config
@@ -86,7 +86,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     // working vars
     bool isUp = false;
     long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
-    IPv4FragBuf fragbuf;    // fragmentation reassembly buffer
+    Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
@@ -110,7 +110,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     // utility: look up interface from getArrivalGate()
     virtual const InterfaceEntry *getSourceInterface(cPacket *packet);
     virtual const InterfaceEntry *getDestInterface(cPacket *packet);
-    virtual IPv4Address getNextHop(cPacket *packet);
+    virtual Ipv4Address getNextHop(cPacket *packet);
 
     // utility: look up route to the source of the datagram and return its interface
     virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;
@@ -119,10 +119,10 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void refreshDisplay() const override;
 
     // utility: processing requested ARP resolution completed
-    void arpResolutionCompleted(IARP::Notification *entry);
+    void arpResolutionCompleted(IArp::Notification *entry);
 
     // utility: processing requested ARP resolution timed out
-    void arpResolutionTimedOut(IARP::Notification *entry);
+    void arpResolutionTimedOut(IArp::Notification *entry);
 
     // utility: verifying CRC
     bool verifyCrc(const Ptr<const Ipv4Header>& ipv4Header);
@@ -210,11 +210,11 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      */
     virtual void sendDatagramToOutput(Packet *packet);
 
-    virtual MACAddress resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE);
+    virtual MacAddress resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE);
 
     virtual void sendPacketToNIC(Packet *packet);
 
-    virtual void sendIcmpError(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
+    virtual void sendIcmpError(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
 
     virtual Packet *prepareForForwarding(Packet *packet) const;
 

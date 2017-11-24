@@ -23,8 +23,8 @@ import inet.common.MessageDispatcher;
 import inet.networklayer.contract.IIPv6Tunneling;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.IxMIPv6Support;
-import inet.networklayer.icmpv6.ICMPv6;
-import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
+import inet.networklayer.icmpv6.Icmpv6;
+import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
 
 //
 // Represents an IPv6 network layer (L3).
@@ -52,11 +52,11 @@ module IPv6NetworkLayer like INetworkLayer
     gates:
         input ifIn @labels(INetworkHeader);
         output ifOut @labels(INetworkHeader);
-        input transportIn @labels(IPv4ControlInfo/down);
-        output transportOut @labels(IPv4ControlInfo/up);
+        input transportIn @labels(Ipv4ControlInfo/down);
+        output transportOut @labels(Ipv4ControlInfo/up);
 
     submodules:
-        routingTable: IPv6RoutingTable {
+        routingTable: Ipv6RoutingTable {
             parameters:
                 @display("p=100,100;is=s");
         }
@@ -64,7 +64,7 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,100;b=480,5");
         }
-        icmpv6: ICMPv6 {
+        icmpv6: Icmpv6 {
             parameters:
                 @display("p=600,200");
         }
@@ -72,7 +72,7 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,300;b=480,5");
         }
-        neighbourDiscovery: IPv6NeighbourDiscovery {
+        neighbourDiscovery: Ipv6NeighbourDiscovery {
             parameters:
                 @display("p=300,400");
         }

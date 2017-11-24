@@ -32,7 +32,7 @@ class MpduGen : public ApplicationBase
 {
 protected:
     int localPort = -1, destPort = -1;
-    UDPSocket socket;
+    UdpSocket socket;
 
     cMessage *selfMsg = nullptr;
     int numSent = 0;

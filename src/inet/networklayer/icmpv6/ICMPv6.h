@@ -29,14 +29,14 @@
 namespace inet {
 
 //foreign declarations:
-class IPv6Address;
+class Ipv6Address;
 class Ipv6Header;
 class PingPayload;
 
 /**
  * ICMPv6 implementation.
  */
-class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtocolRegistrationListener
+class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -52,18 +52,18 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtoco
      *      - Parameter Problem Message       - 4
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
-    virtual void sendErrorMessage(Packet *datagram, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code);
     bool verifyCrc(const Packet *packet);
 
   protected:
     // internal helper functions
-    virtual void sendToIP(Packet *msg, const IPv6Address& dest);
+    virtual void sendToIP(Packet *msg, const Ipv6Address& dest);
     virtual void sendToIP(Packet *msg);    // FIXME check if really needed
 
-    virtual Packet *createDestUnreachableMsg(ICMPv6DEST_UN code);
+    virtual Packet *createDestUnreachableMsg(Icmpv6DestUn code);
     virtual Packet *createPacketTooBigMsg(int mtu);
-    virtual Packet *createTimeExceededMsg(ICMPv6_TIME_EX code);
-    virtual Packet *createParamProblemMsg(ICMPv6_PARAMETER_PROB code);    //TODO:Section 3.4 describes a pointer. What is it?
+    virtual Packet *createTimeExceededMsg(Icmpv6TimeEx code);
+    virtual Packet *createParamProblemMsg(Icmpv6ParameterProb code);    //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**

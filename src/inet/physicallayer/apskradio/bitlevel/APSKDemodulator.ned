@@ -26,7 +26,7 @@ import inet.physicallayer.contract.bitlevel.IDemodulator;
 //
 // See also ~APSKModulator, ~APSKLayeredReceiver.
 //
-simple APSKDemodulator like IDemodulator
+simple ApskDemodulator like IDemodulator
 {
     parameters:
         string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see APSKModulationBase::findModulation)

@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class PIMNeighborTable;
+class PimNeighborTable;
 
 /**
  * Class holding information about a neighboring PIM router.
@@ -35,27 +35,27 @@ class PIMNeighborTable;
  * Currently only the version of the routers are stored.
  * TODO add fields for options received in Hello Messages (RFC 3973 4.7.5, RFC 4601 4.9.2).
  */
-class INET_API PIMNeighbor : public cObject
+class INET_API PimNeighbor : public cObject
 {
-    friend class PIMNeighborTable;
+    friend class PimNeighborTable;
 
   protected:
-    PIMNeighborTable *nt;
+    PimNeighborTable *nt;
     InterfaceEntry *ie;
-    IPv4Address address;
+    Ipv4Address address;
     int version;
     unsigned int generationId;
     long drPriority;    // -1 if not present
     cMessage *livenessTimer;
 
   public:
-    PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version);
-    virtual ~PIMNeighbor();
+    PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version);
+    virtual ~PimNeighbor();
     virtual std::string info() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }
-    IPv4Address getAddress() const { return address; }
+    Ipv4Address getAddress() const { return address; }
     int getVersion() const { return version; }
     unsigned int getGenerationId() const { return generationId; }
     long getDRPriority() const { return drPriority; }
@@ -74,7 +74,7 @@ class INET_API PIMNeighbor : public cObject
  *
  * Expired entries are automatically deleted.
  */
-class INET_API PIMNeighborTable : public cSimpleModule
+class INET_API PimNeighborTable : public cSimpleModule
 {
   public:
     enum TimerKind {
@@ -82,41 +82,41 @@ class INET_API PIMNeighborTable : public cSimpleModule
     };
 
   protected:
-    typedef std::vector<PIMNeighbor *> PIMNeighborVector;
-    typedef std::map<int, PIMNeighborVector> InterfaceToNeighborsMap;
-    friend std::ostream& operator<<(std::ostream& os, const PIMNeighborVector& v);
+    typedef std::vector<PimNeighbor *> PimNeighborVector;
+    typedef std::map<int, PimNeighborVector> InterfaceToNeighborsMap;
+    friend std::ostream& operator<<(std::ostream& os, const PimNeighborVector& v);
 
     // contains at most one neighbor with a given (ie,address)
     InterfaceToNeighborsMap neighbors;
 
   public:
-    virtual ~PIMNeighborTable();
+    virtual ~PimNeighborTable();
 
     /**
      * Adds the a neighbor to the table. The operation might fail
      * if there is a neighbor with the same (ie,address) in the table.
      * Success is indicated by the returned value.
      */
-    virtual bool addNeighbor(PIMNeighbor *neighbor, double holdTime);
+    virtual bool addNeighbor(PimNeighbor *neighbor, double holdTime);
 
     /**
      * Deletes a neighbor from the table. If the neighbor was
      * not found in the table then it is untouched, otherwise deleted.
      * Returns true if the neighbor object was deleted.
      */
-    virtual bool deleteNeighbor(PIMNeighbor *neighbor);
+    virtual bool deleteNeighbor(PimNeighbor *neighbor);
 
     /**
      * Restarts the Neighbor Liveness timer of the given neighbor.
      * When the timer expires, the neigbor is automatically deleted.
      */
-    virtual void restartLivenessTimer(PIMNeighbor *neighbor, double holdTime);
+    virtual void restartLivenessTimer(PimNeighbor *neighbor, double holdTime);
 
     /**
      * Returns the neighbor that is identified by the given (interfaceId,addr),
      * or nullptr if no such neighbor.
      */
-    virtual PIMNeighbor *findNeighbor(int interfaceId, IPv4Address addr);
+    virtual PimNeighbor *findNeighbor(int interfaceId, Ipv4Address addr);
 
     /**
      * Returns the number of neighbors on the given interface.
@@ -126,7 +126,7 @@ class INET_API PIMNeighborTable : public cSimpleModule
     /**
      * Returns the neighbor on the given interface at the specified position.
      */
-    virtual PIMNeighbor *getNeighbor(int interfaceId, int index);
+    virtual PimNeighbor *getNeighbor(int interfaceId, int index);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

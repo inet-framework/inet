@@ -117,13 +117,13 @@ void RoutingTableRecorder::recordSnapshot()
     }
     for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         cModule *module = getSimulation()->getModule(id);
-        IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
+        Ipv4RoutingTable *rt = dynamic_cast<Ipv4RoutingTable *>(module);
         if (rt) {
             cModule *host = getContainingNode(module);
             for (int i = 0; i < rt->getNumRoutes(); i++)
                 recordRoute(host, rt->getRoute(i), -1);
         }
-        IPv6RoutingTable *rt6 = dynamic_cast<IPv6RoutingTable *>(module);
+        Ipv6RoutingTable *rt6 = dynamic_cast<Ipv6RoutingTable *>(module);
         if (rt6) {
             cModule *host = getContainingNode(module);
             for (int i = 0; i < rt6->getNumRoutes(); i++)
@@ -144,7 +144,7 @@ void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *
     // moduleId, ifname, address
     std::stringstream content;
     content << host->getId() << " " << interface->getName() << " ";
-    content << (interface->ipv4Data() != nullptr ? interface->ipv4Data()->getIPAddress().str() : IPv4Address().str());
+    content << (interface->ipv4Data() != nullptr ? interface->ipv4Data()->getIPAddress().str() : Ipv4Address().str());
 
     if (signalID == NF_INTERFACE_CREATED) {
         envir->customCreatedEntry("IT", interfaceKey, content.str().c_str());
@@ -298,7 +298,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
             SIMTIME_STR(simTime()),
             host->getId(),
             ie->getInterfaceName(),
-            (ie->ipv4Data() != nullptr ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
+            (ie->ipv4Data() != nullptr ? ie->ipv4Data()->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
             );
     fflush(routingLogFile);
 }

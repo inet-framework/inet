@@ -20,15 +20,15 @@
 
 namespace inet {
 
-Define_Module(WRRScheduler);
+Define_Module(WrrScheduler);
 
-WRRScheduler::~WRRScheduler()
+WrrScheduler::~WrrScheduler()
 {
     delete[] weights;
     delete[] buckets;
 }
 
-void WRRScheduler::initialize()
+void WrrScheduler::initialize()
 {
     SchedulerBase::initialize();
 
@@ -49,7 +49,7 @@ void WRRScheduler::initialize()
         throw cRuntimeError("Too many values given in the weights parameter.");
 }
 
-bool WRRScheduler::schedulePacket()
+bool WrrScheduler::schedulePacket()
 {
     bool allQueueIsEmpty = true;
     for (int i = 0; i < numInputs; ++i) {

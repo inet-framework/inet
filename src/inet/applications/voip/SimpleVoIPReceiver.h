@@ -32,15 +32,15 @@
 
 namespace inet {
 
-class SimpleVoIPPacket;
+class SimpleVoipPacket;
 
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
+class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle
 {
   private:
-    class VoIPPacketInfo
+    class VoipPacketInfo
     {
       public:
         unsigned int packetID = 0;
@@ -49,8 +49,8 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
         simtime_t playoutTime;
     };
 
-    typedef std::list<VoIPPacketInfo *> PacketsList;
-    typedef std::vector<VoIPPacketInfo> PacketsVector;
+    typedef std::list<VoipPacketInfo *> PacketsList;
+    typedef std::vector<VoipPacketInfo> PacketsVector;
 
     class TalkspurtInfo
     {
@@ -68,10 +68,10 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 
       public:
         TalkspurtInfo() {}
-        void startTalkspurt(const SimpleVoIPPacket *pk);
+        void startTalkspurt(const SimpleVoipPacket *pk);
         void finishTalkspurt() { status = FINISHED; packets.clear(); }
-        bool checkPacket(const SimpleVoIPPacket *pk);
-        void addPacket(const SimpleVoIPPacket *pk);
+        bool checkPacket(const SimpleVoipPacket *pk);
+        void addPacket(const SimpleVoipPacket *pk);
         bool isActive() { return status == ACTIVE; }
     };
 
@@ -85,7 +85,7 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     simtime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
 
     // state
-    UDPSocket socket;
+    UdpSocket socket;
     cMessage *selfTalkspurtFinished = nullptr;
     TalkspurtInfo currentTalkspurt;
 
@@ -110,8 +110,8 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    SimpleVoIPReceiver();
-    ~SimpleVoIPReceiver();
+    SimpleVoipReceiver();
+    ~SimpleVoipReceiver();
 };
 
 } // namespace inet

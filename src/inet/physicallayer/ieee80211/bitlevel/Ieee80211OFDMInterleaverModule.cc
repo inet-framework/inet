@@ -21,24 +21,24 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMInterleaverModule);
+Define_Module(Ieee80211OfdmInterleaverModule);
 
-void Ieee80211OFDMInterleaverModule::initialize(int stage)
+void Ieee80211OfdmInterleaverModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         int numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
         int numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
-        const Ieee80211OFDMInterleaving *interleaving = new Ieee80211OFDMInterleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
-        interleaver = new Ieee80211OFDMInterleaver(interleaving);
+        const Ieee80211OfdmInterleaving *interleaving = new Ieee80211OfdmInterleaving(numberOfCodedBitsPerSymbol, numberOfCodedBitsPerSubcarrier);
+        interleaver = new Ieee80211OfdmInterleaver(interleaving);
     }
 }
 
-std::ostream& Ieee80211OFDMInterleaverModule::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmInterleaverModule::printToStream(std::ostream& stream, int level) const
 {
     return interleaver->printToStream(stream, level);
 }
 
-Ieee80211OFDMInterleaverModule::~Ieee80211OFDMInterleaverModule()
+Ieee80211OfdmInterleaverModule::~Ieee80211OfdmInterleaverModule()
 {
     delete interleaver->getInterleaving();
     delete interleaver;

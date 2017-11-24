@@ -21,7 +21,7 @@ package inet.node.ethernet;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.configurator.L2NodeConfigurator;
-import inet.linklayer.contract.IMACAddressTable;
+import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMACRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.contract.IWiredNic;
@@ -66,7 +66,7 @@ module EtherSwitch
         interfaceTable: InterfaceTable {
             @display("p=73,115;is=s");
         }
-        macTable: <macTableType> like IMACAddressTable {
+        macTable: <macTableType> like IMacAddressTable {
             @display("p=73,42;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit {

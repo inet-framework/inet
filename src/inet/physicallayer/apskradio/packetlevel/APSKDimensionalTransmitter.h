@@ -25,13 +25,13 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDimensionalTransmitter : public DimensionalTransmitterBase, public FlatTransmitterBase
+class INET_API ApskDimensionalTransmitter : public DimensionalTransmitterBase, public FlatTransmitterBase
 {
   protected:
     void initialize(int stage) override;
 
   public:
-    APSKDimensionalTransmitter();
+    ApskDimensionalTransmitter();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

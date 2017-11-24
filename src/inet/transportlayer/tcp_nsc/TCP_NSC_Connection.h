@@ -30,18 +30,18 @@ struct INetStreamSocket;
 
 namespace inet {
 
-class TCPConnectInfo;
+class TcpConnectInfo;
 
 namespace tcp {
 
-class TCP_NSC;
-class TCP_NSC_ReceiveQueue;
-class TCP_NSC_SendQueue;
+class TcpNsc;
+class TcpNscReceiveQueue;
+class TcpNscSendQueue;
 
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TCP_NSC_Connection
+class INET_API TcpNscConnection
 {
   public:
     class SockAddr
@@ -84,8 +84,8 @@ class INET_API TCP_NSC_Connection
     };
 
   public:
-    TCP_NSC_Connection();
-    ~TCP_NSC_Connection();
+    TcpNscConnection();
+    ~TcpNscConnection();
 
     void listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
     void connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
@@ -109,9 +109,9 @@ class INET_API TCP_NSC_Connection
     // TCP Windows Size
     int tcpWinSizeM;
 
-    TCP_NSC *tcpNscM = nullptr;
-    TCP_NSC_ReceiveQueue *receiveQueueM = nullptr;
-    TCP_NSC_SendQueue *sendQueueM = nullptr;
+    TcpNsc *tcpNscM = nullptr;
+    TcpNscReceiveQueue *receiveQueueM = nullptr;
+    TcpNscSendQueue *sendQueueM = nullptr;
 };
 
 } // namespace tcp

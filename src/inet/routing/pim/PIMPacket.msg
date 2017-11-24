@@ -20,18 +20,18 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
-enum PIMContstants {
+enum PimContstants {
     PIM_HEADER_LENGTH = 4;
     ENCODED_UNICODE_ADDRESS_LENGTH = 6; // IPv4 only
     ENCODED_GROUP_ADDRESS_LENGTH = 8; // IPv4 only
     ENCODED_SOURCE_ADDRESS_LENGTH = 8; // IPv4 only
 };
 
-enum PIMPacketType
+enum PimPacketType
 {
    Hello = 0;
    Register = 1;
@@ -45,7 +45,7 @@ enum PIMPacketType
    StateRefresh = 9;
 }
 
-enum PIMHelloOptionType
+enum PimHelloOptionType
 {
    Holdtime = 1;
    LANPruneDelay = 2;
@@ -57,7 +57,7 @@ enum PIMHelloOptionType
 
 class HelloOption extends cObject
 {
-    PIMHelloOptionType type;
+    PimHelloOptionType type;
 }
 
 class HoldtimeOption extends HelloOption
@@ -66,20 +66,20 @@ class HoldtimeOption extends HelloOption
     uint16_t holdTime;
 }
 
-class LANPruneDelayOption extends HelloOption
+class LanPruneDelayOption extends HelloOption
 {
     type = LANPruneDelay;
     uint16_t propagationDelay;
     uint16_t overrideInterval;
 }
 
-class DRPriorityOption extends HelloOption
+class DrPriorityOption extends HelloOption
 {
     type = DRPriority;
     uint32_t priority;
 }
 
-class GenerationIDOption extends HelloOption
+class GenerationIdOption extends HelloOption
 {
     type = GenerationID;
     uint32_t generationID;
@@ -92,7 +92,7 @@ class GenerationIDOption extends HelloOption
 
 struct EncodedAddress
 {
-    IPv4Address IPaddress;
+    Ipv4Address IPaddress;
     bool         S;
     bool        W;                //WC bit
     bool        R;                //RPT bit
@@ -102,22 +102,22 @@ struct EncodedAddress
 // in structure it is not possible to use dynamic arrays, iit is needed to use class
 class JoinPruneGroup extends cObject
 {
-    IPv4Address     groupAddress;
+    Ipv4Address     groupAddress;
     EncodedAddress     joinedSourceAddress[];
     EncodedAddress     prunedSourceAddress[];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Header
-class PIMPacket extends FieldsChunk
+class PimPacket extends FieldsChunk
 {
     short         version = 2;
-    PIMPacketType type;
+    PimPacketType type;
 }
 
 // Hello message
 // DM, SM
-class PIMHello extends PIMPacket
+class PimHello extends PimPacket
 {
     @customize;
     type = Hello;
@@ -126,10 +126,10 @@ class PIMHello extends PIMPacket
 
 // Join/Prune message
 // DM, SM
-class PIMJoinPrune extends PIMPacket
+class PimJoinPrune extends PimPacket
 {
     type= JoinPrune;
-    IPv4Address        upstreamNeighborAddress;
+    Ipv4Address        upstreamNeighborAddress;
     int                holdTime;
     //int                numGroups;
     JoinPruneGroup    joinPruneGroups[];
@@ -137,11 +137,11 @@ class PIMJoinPrune extends PIMPacket
 
 // Assert message
 // DM, SM
-class PIMAssert extends PIMPacket
+class PimAssert extends PimPacket
 {
     type = Assert;
-    IPv4Address        groupAddress;
-    IPv4Address        sourceAddress;
+    Ipv4Address        groupAddress;
+    Ipv4Address        sourceAddress;
     bool            R;
     int                metric;
     int                metricPreference;
@@ -149,7 +149,7 @@ class PIMAssert extends PIMPacket
 
 // Graft message, only message send by unicast
 // DM
-class PIMGraft extends PIMJoinPrune
+class PimGraft extends PimJoinPrune
 {
     type = Graft;
     holdTime = 0;
@@ -161,12 +161,12 @@ class PIMGraft extends PIMJoinPrune
 
 // State Refresh message
 // DM
-class PIMStateRefresh extends PIMPacket
+class PimStateRefresh extends PimPacket
 {
     type = StateRefresh;
-    IPv4Address        groupAddress;
-    IPv4Address        sourceAddress;
-    IPv4Address        originatorAddress;
+    Ipv4Address        groupAddress;
+    Ipv4Address        sourceAddress;
+    Ipv4Address        originatorAddress;
     int                metric;
     int                metricPreference;
     short            maskLen;
@@ -176,7 +176,7 @@ class PIMStateRefresh extends PIMPacket
 }
 // Register message
 // SM
-class PIMRegister extends PIMPacket
+class PimRegister extends PimPacket
 {
     type = Register;
     bool            B;
@@ -185,10 +185,10 @@ class PIMRegister extends PIMPacket
 
 // Register-Stop message
 // SM
-class PIMRegisterStop extends PIMPacket
+class PimRegisterStop extends PimPacket
 {
     type = RegisterStop;
-    IPv4Address        groupAddress;
-    IPv4Address        sourceAddress;
+    Ipv4Address        groupAddress;
+    Ipv4Address        sourceAddress;
 }
 

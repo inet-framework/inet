@@ -44,9 +44,9 @@
 
 namespace inet {
 
-Define_Module(MoBANLocal);
+Define_Module(MoBanLocal);
 
-MoBANLocal::MoBANLocal()
+MoBanLocal::MoBanLocal()
 {
     coordinator = nullptr;
     referencePosition = Coord::ZERO;
@@ -55,7 +55,7 @@ MoBANLocal::MoBANLocal()
     maxSpeed = 0;
 }
 
-void MoBANLocal::initialize(int stage)
+void MoBanLocal::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
@@ -73,12 +73,12 @@ void MoBANLocal::initialize(int stage)
     }
 }
 
-void MoBANLocal::setInitialPosition()
+void MoBanLocal::setInitialPosition()
 {
     lastPosition = referencePosition;
 }
 
-void MoBANLocal::setTargetPosition()
+void MoBanLocal::setTargetPosition()
 {
     if (speed != 0) {
         // find a uniformly random position within a sphere around the reference point
@@ -102,7 +102,7 @@ void MoBANLocal::setTargetPosition()
     }
 }
 
-void MoBANLocal::updateVisualRepresentation()
+void MoBanLocal::updateVisualRepresentation()
 {
     if (hasGUI() && visualRepresentation) {
         Coord coordinatorPosition = coordinator->getCurrentPosition();
@@ -111,12 +111,12 @@ void MoBANLocal::updateVisualRepresentation()
     }
 }
 
-void MoBANLocal::computeMaxSpeed()
+void MoBanLocal::computeMaxSpeed()
 {
     maxSpeed = coordinator->getMaxSpeed();
 }
 
-void MoBANLocal::setMoBANParameters(Coord referencePoint, double radius, double speed)
+void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double speed)
 {
     Enter_Method_Silent();
     this->referencePosition = referencePoint;
@@ -127,12 +127,12 @@ void MoBANLocal::setMoBANParameters(Coord referencePoint, double radius, double 
     scheduleUpdate();
 }
 
-Coord MoBANLocal::getCurrentPosition()
+Coord MoBanLocal::getCurrentPosition()
 {
     return LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
 }
 
-Coord MoBANLocal::getCurrentSpeed()
+Coord MoBanLocal::getCurrentSpeed()
 {
     return LineSegmentsMobilityBase::getCurrentSpeed() + coordinator->getCurrentSpeed();
 }

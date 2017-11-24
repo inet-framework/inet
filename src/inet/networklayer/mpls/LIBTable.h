@@ -46,10 +46,10 @@ typedef std::vector<LabelOp> LabelOpVector;
 /**
  * TODO documentation
  */
-class INET_API LIBTable : public cSimpleModule
+class INET_API LibTable : public cSimpleModule
 {
   public:
-    struct LIBEntry
+    struct LibEntry
     {
         int inLabel;
         std::string inInterface;
@@ -63,7 +63,7 @@ class INET_API LIBTable : public cSimpleModule
 
   protected:
     int maxLabel;
-    std::vector<LIBEntry> lib;
+    std::vector<LibEntry> lib;
 
   protected:
     virtual void initialize(int stage) override;
@@ -89,7 +89,7 @@ class INET_API LIBTable : public cSimpleModule
     static LabelOpVector popLabel();
 };
 
-std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib);
+std::ostream& operator<<(std::ostream& os, const LibTable::LibEntry& lib);
 std::ostream& operator<<(std::ostream& os, const LabelOpVector& label);
 
 } // namespace inet

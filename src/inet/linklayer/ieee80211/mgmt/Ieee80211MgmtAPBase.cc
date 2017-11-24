@@ -31,7 +31,7 @@ namespace inet {
 
 namespace ieee80211 {
 
-void Ieee80211MgmtAPBase::initialize(int stage)
+void Ieee80211MgmtApBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {

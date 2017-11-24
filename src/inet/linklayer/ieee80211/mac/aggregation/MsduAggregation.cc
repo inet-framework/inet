@@ -27,7 +27,7 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
 {
     // Note: Addr1 (RA), Addr2 (TA)
     // Table 8-19—Address field contents
-    MACAddress da, sa;
+    MacAddress da, sa;
     bool toDS = header->getToDS();
     bool fromDS = header->getFromDS();
     if (toDS == 0 && fromDS == 0) // STA to STA

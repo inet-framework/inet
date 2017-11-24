@@ -21,11 +21,11 @@ namespace inet {
 
 namespace rtp {
 
-Define_Module(RTPAVProfile);
+Define_Module(RtpAvProfile);
 
-void RTPAVProfile::initialize()
+void RtpAvProfile::initialize()
 {
-    RTPProfile::initialize();
+    RtpProfile::initialize();
     _profileName = "AVProfile";
     _rtcpPercentage = 5;
     _preferredPort = 5005;

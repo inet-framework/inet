@@ -45,12 +45,12 @@ simple InterfaceTable
         @signal[NF_INTERFACE_IPv4CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
         @signal[NF_INTERFACE_IPv6CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
         @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_IPv4_MCAST_JOIN](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_LEAVE](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_CHANGE](type=IPv4MulticastGroupSourceInfo);
-        @signal[NF_IPv4_MCAST_REGISTERED](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_UNREGISTERED](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_JOIN](type=IPv6MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_LEAVE](type=IPv6MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_JOIN](type=Ipv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_LEAVE](type=Ipv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_CHANGE](type=Ipv4MulticastGroupSourceInfo);
+        @signal[NF_IPv4_MCAST_REGISTERED](type=Ipv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_UNREGISTERED](type=Ipv4MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_JOIN](type=Ipv6MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_LEAVE](type=Ipv6MulticastGroupInfo);
 }
 

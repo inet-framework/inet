@@ -68,7 +68,7 @@ void IdealMac::clearQueue()
 
 void IdealMac::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         outStandingRequests = 0;
 
@@ -107,7 +107,7 @@ void IdealMac::initializeMACAddress()
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -158,7 +158,7 @@ void IdealMac::startTransmitting(Packet *msg)
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
-    MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MacAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
     encapsulate(check_and_cast<Packet *>(msg));
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
@@ -236,7 +236,7 @@ void IdealMac::handleSelfMessage(cMessage *message)
         getNextMsgFromHL();
     }
     else {
-        MACProtocolBase::handleSelfMessage(message);
+        MacProtocolBase::handleSelfMessage(message);
     }
 }
 
@@ -265,7 +265,7 @@ void IdealMac::encapsulate(Packet *packet)
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     idealMacHeader->setSrc(macAddressReq->getSrcAddress());
     idealMacHeader->setDest(macAddressReq->getDestAddress());
-    MACAddress dest = macAddressReq->getDestAddress();
+    MacAddress dest = macAddressReq->getDestAddress();
     if (dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified())
         idealMacHeader->setSrcModuleId(-1);
     else

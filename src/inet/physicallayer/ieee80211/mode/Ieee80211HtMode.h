@@ -28,7 +28,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211HTTimingRelatedParametersBase
+class INET_API Ieee80211HtTimingRelatedParametersBase
 {
     public:
         const simtime_t getDFTPeriod() const { return 3.2E-6; } // DFT
@@ -38,7 +38,7 @@ class INET_API Ieee80211HTTimingRelatedParametersBase
         const simtime_t getShortGISymbolInterval() const { return getDFTPeriod() + getShortGIDuration(); } // SYMS
 };
 
-class INET_API Ieee80211HTModeBase
+class INET_API Ieee80211HtModeBase
 {
     public:
         enum GuardIntervalType
@@ -61,7 +61,7 @@ class INET_API Ieee80211HTModeBase
         virtual bps computeNetBitrate() const = 0;
 
     public:
-        Ieee80211HTModeBase(unsigned int modulationAndCodingScheme, unsigned int numberOfSpatialStreams, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        Ieee80211HtModeBase(unsigned int modulationAndCodingScheme, unsigned int numberOfSpatialStreams, const Hz bandwidth, GuardIntervalType guardIntervalType);
 
         virtual int getNumberOfDataSubcarriers() const;
         virtual int getNumberOfPilotSubcarriers() const;
@@ -74,7 +74,7 @@ class INET_API Ieee80211HTModeBase
         virtual bps getGrossBitrate() const;
 };
 
-class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee80211HTModeBase, public Ieee80211HTTimingRelatedParametersBase
+class INET_API Ieee80211HtSignalMode : public IIeee80211HeaderMode, public Ieee80211HtModeBase, public Ieee80211HtTimingRelatedParametersBase
 {
     protected:
         const Ieee80211OfdmModulation *modulation;
@@ -85,9 +85,9 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
         virtual bps computeNetBitrate() const override;
 
     public:
-        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211HtCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType);
-        Ieee80211HTSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211ConvolutionalCode *convolutionalCode, const Hz bandwidth, GuardIntervalType guardIntervalType);
-        virtual ~Ieee80211HTSignalMode();
+        Ieee80211HtSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211HtCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        Ieee80211HtSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211ConvolutionalCode *convolutionalCode, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        virtual ~Ieee80211HtSignalMode();
 
         /* Table 20-11—HT-SIG fields, 1699p */
 
@@ -114,8 +114,8 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
         virtual unsigned int getModulationAndCodingScheme() const { return mcsIndex; }
         virtual const simtime_t getDuration() const override { return getHTSIGDuration(); }
         virtual b getLength() const override;
-        virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
-        virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
+        virtual bps getNetBitrate() const override { return Ieee80211HtModeBase::getNetBitrate(); }
+        virtual bps getGrossBitrate() const override { return Ieee80211HtModeBase::getGrossBitrate(); }
         virtual const IModulation *getModulation() const override { return modulation; }
 
         virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HtPhyHeader>(); }
@@ -125,7 +125,7 @@ class INET_API Ieee80211HTSignalMode : public IIeee80211HeaderMode, public Ieee8
  * The HT preambles are defined in HT-mixed format and in HT-greenfield format to carry the required
  * information to operate in a system with multiple transmit and multiple receive antennas. (20.3.9 HT preamble)
  */
-class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public Ieee80211HTTimingRelatedParametersBase
+class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public Ieee80211HtTimingRelatedParametersBase
 {
     public:
         enum HighTroughputPreambleFormat
@@ -135,7 +135,7 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
         };
 
     protected:
-        const Ieee80211HTSignalMode *highThroughputSignalMode; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
+        const Ieee80211HtSignalMode *highThroughputSignalMode; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
         const Ieee80211OfdmSignalMode *legacySignalMode; // L-SIG
         const HighTroughputPreambleFormat preambleFormat;
         const unsigned int numberOfHTLongTrainings; // N_LTF, 20.3.9.4.6 HT-LTF definition
@@ -145,13 +145,13 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
         virtual unsigned int computeNumberOfHTLongTrainings(unsigned int numberOfSpaceTimeStreams) const;
 
     public:
-        Ieee80211HTPreambleMode(const Ieee80211HTSignalMode* highThroughputSignalMode, const Ieee80211OfdmSignalMode *legacySignalMode, HighTroughputPreambleFormat preambleFormat, unsigned int numberOfSpatialStream);
-        virtual ~Ieee80211HTPreambleMode() { delete highThroughputSignalMode; }
+        Ieee80211HtPreambleMode(const Ieee80211HtSignalMode* highThroughputSignalMode, const Ieee80211OfdmSignalMode *legacySignalMode, HighTroughputPreambleFormat preambleFormat, unsigned int numberOfSpatialStream);
+        virtual ~Ieee80211HtPreambleMode() { delete highThroughputSignalMode; }
 
         HighTroughputPreambleFormat getPreambleFormat() const { return preambleFormat; }
-        virtual const Ieee80211HTSignalMode *getSignalMode() const { return highThroughputSignalMode; }
+        virtual const Ieee80211HtSignalMode *getSignalMode() const { return highThroughputSignalMode; }
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
-        virtual const Ieee80211HTSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
+        virtual const Ieee80211HtSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
         virtual inline unsigned int getNumberOfHTLongTrainings() const { return numberOfHTLongTrainings; }
 
         virtual const inline simtime_t getDoubleGIDuration() const { return 2 * getGIDuration(); } // GI2
@@ -169,7 +169,7 @@ class INET_API Ieee80211HTPreambleMode : public IIeee80211PreambleMode, public I
         virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HtPhyPreamble>(); }
 };
 
-class INET_API Ieee80211HTMCS
+class INET_API Ieee80211Htmcs
 {
     protected:
         const unsigned int mcsIndex;
@@ -181,12 +181,12 @@ class INET_API Ieee80211HTMCS
         const Hz bandwidth;
 
     public:
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211HtCode *code, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        Ieee80211HTMCS(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
-        virtual ~Ieee80211HTMCS();
+        Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211HtCode *code, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation);
+        Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        Ieee80211Htmcs(unsigned int mcsIndex, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211ConvolutionalCode *convolutionalCode, Hz bandwidth);
+        virtual ~Ieee80211Htmcs();
 
         const Ieee80211HtCode* getCode() const { return code; }
         unsigned int getMcsIndex() const { return mcsIndex; }
@@ -197,10 +197,10 @@ class INET_API Ieee80211HTMCS
         virtual Hz getBandwidth() const { return bandwidth; }
 };
 
-class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211HTModeBase, public Ieee80211HTTimingRelatedParametersBase
+class INET_API Ieee80211HtDataMode : public IIeee80211DataMode, public Ieee80211HtModeBase, public Ieee80211HtTimingRelatedParametersBase
 {
     protected:
-        const Ieee80211HTMCS *modulationAndCodingScheme;
+        const Ieee80211Htmcs *modulationAndCodingScheme;
         const unsigned int numberOfBccEncoders;
 
     protected:
@@ -211,23 +211,23 @@ class INET_API Ieee80211HTDataMode : public IIeee80211DataMode, public Ieee80211
         unsigned int computeNumberOfBccEncoders() const;
 
     public:
-        Ieee80211HTDataMode(const Ieee80211HTMCS *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType);
+        Ieee80211HtDataMode(const Ieee80211Htmcs *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType);
 
         b getServiceFieldLength() const { return b(16); }
         b getTailFieldLength() const { return b(6) * numberOfBccEncoders; }
 
-        virtual int getNumberOfSpatialStreams() const override { return Ieee80211HTModeBase::getNumberOfSpatialStreams(); }
+        virtual int getNumberOfSpatialStreams() const override { return Ieee80211HtModeBase::getNumberOfSpatialStreams(); }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
         virtual b getCompleteLength(b dataLength) const override;
         virtual const simtime_t getDuration(b dataLength) const override;
-        virtual bps getNetBitrate() const override { return Ieee80211HTModeBase::getNetBitrate(); }
-        virtual bps getGrossBitrate() const override { return Ieee80211HTModeBase::getGrossBitrate(); }
-        virtual const Ieee80211HTMCS *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
+        virtual bps getNetBitrate() const override { return Ieee80211HtModeBase::getNetBitrate(); }
+        virtual bps getGrossBitrate() const override { return Ieee80211HtModeBase::getGrossBitrate(); }
+        virtual const Ieee80211Htmcs *getModulationAndCodingScheme() const { return modulationAndCodingScheme; }
         virtual const Ieee80211HtCode* getCode() const { return modulationAndCodingScheme->getCode(); }
         virtual const Ieee80211OfdmModulation* getModulation() const override { return modulationAndCodingScheme->getModulation(); }
 };
 
-class INET_API Ieee80211HTMode : public Ieee80211ModeBase
+class INET_API Ieee80211HtMode : public Ieee80211ModeBase
 {
     public:
         enum BandMode
@@ -237,8 +237,8 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         };
 
     protected:
-        const Ieee80211HTPreambleMode *preambleMode;
-        const Ieee80211HTDataMode *dataMode;
+        const Ieee80211HtPreambleMode *preambleMode;
+        const Ieee80211HtDataMode *dataMode;
         const BandMode carrierFrequencyMode;
 
     protected:
@@ -246,12 +246,12 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
         virtual inline int getLegacyCwMax() const override { return 1023; }
 
     public:
-        Ieee80211HTMode(const char *name, const Ieee80211HTPreambleMode *preambleMode, const Ieee80211HTDataMode *dataMode, const BandMode carrierFrequencyMode);
-        virtual ~Ieee80211HTMode() { delete preambleMode; delete dataMode; }
+        Ieee80211HtMode(const char *name, const Ieee80211HtPreambleMode *preambleMode, const Ieee80211HtDataMode *dataMode, const BandMode carrierFrequencyMode);
+        virtual ~Ieee80211HtMode() { delete preambleMode; delete dataMode; }
 
-        virtual const Ieee80211HTDataMode* getDataMode() const override { return dataMode; }
-        virtual const Ieee80211HTPreambleMode* getPreambleMode() const override { return preambleMode; }
-        virtual const Ieee80211HTSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
+        virtual const Ieee80211HtDataMode* getDataMode() const override { return dataMode; }
+        virtual const Ieee80211HtPreambleMode* getPreambleMode() const override { return preambleMode; }
+        virtual const Ieee80211HtSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
 
         // Table 20-25—MIMO PHY characteristics
@@ -274,205 +274,205 @@ class INET_API Ieee80211HTMode : public Ieee80211ModeBase
 // parameters that consists of modulation order (e.g., BPSK, QPSK, 16-QAM,
 // 64-QAM) and forward error correction (FEC) coding rate (e.g., 1/2, 2/3,
 // 3/4, 5/6).
-class INET_API Ieee80211HTMCSTable
+class INET_API Ieee80211HtmcsTable
 {
     public:
         // Table 20-30—MCS parameters for mandatory 20 MHz, N_SS = 1, N_ES = 1
-        static const DI<Ieee80211HTMCS> htMcs0BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs1BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs2BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs3BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs4BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs5BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs6BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs7BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs0BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs1BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs2BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs3BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs4BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs5BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs6BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs7BW20MHz;
 
         // Table 20-31—MCS parameters for optional 20 MHz, N_SS = 2, N_ES = 1, EQM
-        static const DI<Ieee80211HTMCS> htMcs8BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs9BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs10BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs11BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs12BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs13BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs14BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs15BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs8BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs9BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs10BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs11BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs12BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs13BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs14BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs15BW20MHz;
 
         // Table 20-32—MCS parameters for optional 20 MHz, N_SS = 3, N_ES = 1, EQM
-        static const DI<Ieee80211HTMCS> htMcs16BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs17BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs18BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs19BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs20BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs21BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs22BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs23BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs16BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs17BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs18BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs19BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs20BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs21BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs22BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs23BW20MHz;
 
         // Table 20-33—MCS parameters for optional 20 MHz, N_SS = 4, N_ES = 1, EQM
-        static const DI<Ieee80211HTMCS> htMcs24BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs25BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs26BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs27BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs28BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs29BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs30BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs31BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs24BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs25BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs26BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs27BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs28BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs29BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs30BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs31BW20MHz;
 
         // Table 20-34—MCS parameters for optional 40 MHz, N_SS = 1, N_ES = 1
-        static const DI<Ieee80211HTMCS> htMcs0BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs1BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs2BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs3BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs4BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs5BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs6BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs7BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs0BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs1BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs2BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs3BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs4BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs5BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs6BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs7BW40MHz;
 
         // Table 20-35—MCS parameters for optional 40 MHz, N_SS = 2, N_ES = 1, EQM
-        static const DI<Ieee80211HTMCS> htMcs8BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs9BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs10BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs11BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs12BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs13BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs14BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs15BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs8BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs9BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs10BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs11BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs12BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs13BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs14BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs15BW40MHz;
 
         // Table 20-36—MCS parameters for optional 40 MHz, N_SS = 3, EQM
-        static const DI<Ieee80211HTMCS> htMcs16BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs17BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs18BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs19BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs20BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs21BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs22BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs23BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs16BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs17BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs18BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs19BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs20BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs21BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs22BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs23BW40MHz;
 
         // Table 20-37—MCS parameters for optional 40 MHz, N_SS = 4, EQM
-        static const DI<Ieee80211HTMCS> htMcs24BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs25BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs26BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs27BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs28BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs29BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs30BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs31BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs24BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs25BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs26BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs27BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs28BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs29BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs30BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs31BW40MHz;
 
         // Table 20-38—MCS parameters for optional 40 MHz MCS 32 format, N_SS = 1, N_ES = 1
-        static const DI<Ieee80211HTMCS> htMcs32BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs32BW40MHz;
 
         // Table 20-39—MCS parameters for optional 20 MHz, N_SS = 2, N_ES = 1, UEQM
-        static const DI<Ieee80211HTMCS> htMcs33BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs34BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs35BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs36BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs37BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs38BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs33BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs34BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs35BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs36BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs37BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs38BW20MHz;
 
         // Table 20-40—MCS parameters for optional 20 MHz, N SS = 3, N ES = 1, UEQM
-        static const DI<Ieee80211HTMCS> htMcs39BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs40BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs41BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs42BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs43BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs44BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs45BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs46BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs47BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs48BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs49BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs50BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs51BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs52BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs39BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs40BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs41BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs42BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs43BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs44BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs45BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs46BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs47BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs48BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs49BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs50BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs51BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs52BW20MHz;
 
         // Table 20-41—MCS parameters for optional 20 MHz, N_SS = 4, N_ES = 1, UEQM
-        static const DI<Ieee80211HTMCS> htMcs53BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs54BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs55BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs56BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs57BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs58BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs59BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs60BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs61BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs62BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs63BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs64BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs65BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs66BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs67BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs68BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs69BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs70BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs71BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs72BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs73BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs74BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs75BW20MHz;
-        static const DI<Ieee80211HTMCS> htMcs76BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs53BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs54BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs55BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs56BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs57BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs58BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs59BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs60BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs61BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs62BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs63BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs64BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs65BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs66BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs67BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs68BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs69BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs70BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs71BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs72BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs73BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs74BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs75BW20MHz;
+        static const DI<Ieee80211Htmcs> htMcs76BW20MHz;
 
         // Table 20-42—MCS parameters for optional 40 MHz, N_SS = 2, N_ES = 1, UEQM
-        static const DI<Ieee80211HTMCS> htMcs33BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs34BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs35BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs36BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs37BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs38BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs33BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs34BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs35BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs36BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs37BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs38BW40MHz;
 
         // Table 20-43—MCS parameters for optional 40 MHz, N SS = 3, UEQM
-        static const DI<Ieee80211HTMCS> htMcs39BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs40BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs41BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs42BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs43BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs44BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs45BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs46BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs47BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs48BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs49BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs50BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs51BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs52BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs39BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs40BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs41BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs42BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs43BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs44BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs45BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs46BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs47BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs48BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs49BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs50BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs51BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs52BW40MHz;
 
         // Table 20-44—MCS parameters for optional 40 MHz, N_SS = 4, UEQM
-        static const DI<Ieee80211HTMCS> htMcs53BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs54BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs55BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs56BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs57BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs58BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs59BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs60BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs61BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs62BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs63BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs64BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs65BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs66BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs67BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs68BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs69BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs70BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs71BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs72BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs73BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs74BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs75BW40MHz;
-        static const DI<Ieee80211HTMCS> htMcs76BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs53BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs54BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs55BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs56BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs57BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs58BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs59BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs60BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs61BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs62BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs63BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs64BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs65BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs66BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs67BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs68BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs69BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs70BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs71BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs72BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs73BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs74BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs75BW40MHz;
+        static const DI<Ieee80211Htmcs> htMcs76BW40MHz;
 };
 
-class INET_API Ieee80211HTCompliantModes
+class INET_API Ieee80211HtCompliantModes
 {
     protected:
-        static Ieee80211HTCompliantModes singleton;
+        static Ieee80211HtCompliantModes singleton;
 
-        std::map<std::tuple<Hz, unsigned int, Ieee80211HTModeBase::GuardIntervalType>, const Ieee80211HTMode *> modeCache;
+        std::map<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *> modeCache;
 
     public:
-        Ieee80211HTCompliantModes();
-        virtual ~Ieee80211HTCompliantModes();
+        Ieee80211HtCompliantModes();
+        virtual ~Ieee80211HtCompliantModes();
 
-        static const Ieee80211HTMode *getCompliantMode(const Ieee80211HTMCS *mcsMode, Ieee80211HTMode::BandMode carrierFrequencyMode, Ieee80211HTPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HTModeBase::GuardIntervalType guardIntervalType);
+        static const Ieee80211HtMode *getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode carrierFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType);
 
 };
 

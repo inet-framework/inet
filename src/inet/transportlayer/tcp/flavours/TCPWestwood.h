@@ -31,11 +31,11 @@ namespace tcp {
 /**
  * State variables for TCPWestwood.
  */
-class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
+class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
 {
   public:
-    TCPWestwoodStateVariables();
-    ~TCPWestwoodStateVariables();
+    TcpWestwoodStateVariables();
+    ~TcpWestwoodStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
@@ -49,32 +49,32 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
     double w_bwe;
     double w_sample_bwe;
 
-    TCPSegmentTransmitInfoList regions;
+    TcpSegmentTransmitInfoList regions;
 };
 
-class INET_API TCPWestwood : public TCPBaseAlg
+class INET_API TcpWestwood : public TcpBaseAlg
 {
   protected:
-    TCPWestwoodStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    TcpWestwoodStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() override
+    virtual TcpStateVariables *createStateVariables() override
     {
-        return new TCPWestwoodStateVariables();
+        return new TcpWestwoodStateVariables();
     }
 
     /** Utility function to recalculate ssthresh */
     virtual void recalculateSlowStartThreshold();
 
     /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TCPEventCode& event) override;
+    virtual void processRexmitTimer(TcpEventCode& event) override;
 
     /** Recalculate BWE */
     virtual void recalculateBWE(uint32 cumul_ack);
 
   public:
     /** Ctor */
-    TCPWestwood();
+    TcpWestwood();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32 firstSeqAcked) override;

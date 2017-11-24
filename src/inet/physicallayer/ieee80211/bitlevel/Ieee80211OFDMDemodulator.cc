@@ -27,12 +27,12 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMDemodulator::Ieee80211OFDMDemodulator(const Ieee80211OfdmModulation *subcarrierModulation) :
+Ieee80211OfdmDemodulator::Ieee80211OfdmDemodulator(const Ieee80211OfdmModulation *subcarrierModulation) :
     subcarrierModulation(subcarrierModulation)
 {
 }
 
-std::ostream& Ieee80211OFDMDemodulator::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDemodulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMDemodulator";
     if (level <= PRINT_LEVEL_TRACE)
@@ -40,14 +40,14 @@ std::ostream& Ieee80211OFDMDemodulator::printToStream(std::ostream& stream, int 
     return stream;
 }
 
-BitVector Ieee80211OFDMDemodulator::demodulateSymbol(const Ieee80211OFDMSymbol *signalSymbol) const
+BitVector Ieee80211OfdmDemodulator::demodulateSymbol(const Ieee80211OfdmSymbol *signalSymbol) const
 {
-    std::vector<const APSKSymbol *> apskSymbols = signalSymbol->getSubCarrierSymbols();
-    const APSKModulationBase *demodulationScheme = subcarrierModulation->getSubcarrierModulation();
+    std::vector<const ApskSymbol *> apskSymbols = signalSymbol->getSubCarrierSymbols();
+    const ApskModulationBase *demodulationScheme = subcarrierModulation->getSubcarrierModulation();
     BitVector field;
     for (unsigned int i = 0; i < apskSymbols.size(); i++) {
         if (!isPilotOrDcSubcarrier(i)) {
-            const APSKSymbol *apskSymbol = apskSymbols.at(i);
+            const ApskSymbol *apskSymbol = apskSymbols.at(i);
             ShortBitVector bits = demodulationScheme->demapToBitRepresentation(apskSymbol);
             for (unsigned int j = 0; j < bits.getSize(); j++)
                 field.appendBit(bits.getBit(j));
@@ -57,22 +57,22 @@ BitVector Ieee80211OFDMDemodulator::demodulateSymbol(const Ieee80211OFDMSymbol *
     return field;
 }
 
-const IReceptionBitModel *Ieee80211OFDMDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitRate, int dataFieldLength, bps dataFieldBitRate) const
+const IReceptionBitModel *Ieee80211OfdmDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitRate, int dataFieldLength, bps dataFieldBitRate) const
 {
     return new ReceptionBitModel(b(signalFieldLength), signalFieldBitRate, b(dataFieldLength), dataFieldBitRate, bitRepresentation);
 }
 
-bool Ieee80211OFDMDemodulator::isPilotOrDcSubcarrier(int i) const
+bool Ieee80211OfdmDemodulator::isPilotOrDcSubcarrier(int i) const
 {
     return i == 5 || i == 19 || i == 33 || i == 47 || i == 26; // pilots are: 5,19,33,47, 26 (0+26) is a dc subcarrier
 }
 
-const IReceptionBitModel *Ieee80211OFDMDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
+const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
     BitVector *bitRepresentation = new BitVector();
     for (auto & symbols_i : *symbols) {
-        const Ieee80211OFDMSymbol *symbol = dynamic_cast<const Ieee80211OFDMSymbol *>(symbols_i);
+        const Ieee80211OfdmSymbol *symbol = dynamic_cast<const Ieee80211OfdmSymbol *>(symbols_i);
         BitVector bits = demodulateSymbol(symbol);
         for (unsigned int j = 0; j < bits.getSize(); j++)
             bitRepresentation->appendBit(bits.getBit(j));

@@ -36,26 +36,26 @@
 namespace inet {
 
 // forward declarations:
-class TCPCommand;
+class TcpCommand;
 
 namespace tcp {
 
 // forward declarations:
 class TcpHeader;
-class TCP_NSC_SendQueue;
-class TCP_NSC_ReceiveQueue;
+class TcpNscSendQueue;
+class TcpNscReceiveQueue;
 
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
+class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
 {
   protected:
     enum { MAX_SEND_BYTES = 500000 };
 
   public:
-    TCP_NSC();
-    virtual ~TCP_NSC();
+    TcpNsc();
+    virtual ~TcpNsc();
 
     // Implement NSC callbacks:
 
@@ -76,29 +76,29 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     // internal utility functions:
 
-    void changeAddresses(TCP_NSC_Connection& connP,
-            const TCP_NSC_Connection::SockPair& inetSockPairP,
-            const TCP_NSC_Connection::SockPair& nscSockPairP);
+    void changeAddresses(TcpNscConnection& connP,
+            const TcpNscConnection::SockPair& inetSockPairP,
+            const TcpNscConnection::SockPair& nscSockPairP);
 
     // find a TCP_NSC_Connection by connection ID
-    TCP_NSC_Connection *findAppConn(int connIdP);
+    TcpNscConnection *findAppConn(int connIdP);
 
     // find a TCP_NSC_Connection by inet sockpair
-    TCP_NSC_Connection *findConnByInetSockPair(TCP_NSC_Connection::SockPair const& sockPairP);
+    TcpNscConnection *findConnByInetSockPair(TcpNscConnection::SockPair const& sockPairP);
 
     // find a TCP_NSC_Connection by nsc sockpair
-    TCP_NSC_Connection *findConnByNscSockPair(TCP_NSC_Connection::SockPair const& sockPairP);
+    TcpNscConnection *findConnByNscSockPair(TcpNscConnection::SockPair const& sockPairP);
 
     virtual void refreshDisplay() const override;
     void removeConnection(int connIdP);
-    void printConnBrief(TCP_NSC_Connection& connP);
+    void printConnBrief(TcpNscConnection& connP);
     void loadStack(const char *stacknameP, int bufferSizeP);
 
     void handleAppMessage(cMessage *msgP);
     void handleIpInputMessage(Packet *packet);
 
-    void sendDataToApp(TCP_NSC_Connection& c);
-    void sendErrorNotificationToApp(TCP_NSC_Connection& c, int err);
+    void sendDataToApp(TcpNscConnection& c);
+    void sendErrorNotificationToApp(TcpNscConnection& c, int err);
 
     // function to be called back from the NSC stack:
 
@@ -106,19 +106,19 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     // to be refined...
 
-    void processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP);
+    void processAppCommand(TcpNscConnection& connP, cMessage *msgP);
 
     // to be refined and filled in with calls into the NSC stack
 
-    void process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCommandP, cMessage *msgP);
-    void process_SEND(TCP_NSC_Connection& connP, Packet *msgP);
-    void process_CLOSE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_ABORT(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
+    void process_OPEN_ACTIVE(TcpNscConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_OPEN_PASSIVE(TcpNscConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_ACCEPT(TcpNscConnection& connP, TcpAcceptCommand *tcpCommandP, cMessage *msgP);
+    void process_SEND(TcpNscConnection& connP, Packet *msgP);
+    void process_CLOSE(TcpNscConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_ABORT(TcpNscConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_STATUS(TcpNscConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
 
-    void do_SEND(TCP_NSC_Connection& connP);
+    void do_SEND(TcpNscConnection& connP);
     void do_SEND_all();
 
     // return mapped remote IP in host byte order
@@ -132,29 +132,29 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     L3Address const& mapNsc2Remote(u_int32_t nscAddrP);
 
     // send a connection established msg to application layer
-    void sendEstablishedMsg(TCP_NSC_Connection& connP);
+    void sendEstablishedMsg(TcpNscConnection& connP);
 
     // send a connection available msg to application layer
-    void sendAvailableIndicationMsg(TCP_NSC_Connection& connP);
+    void sendAvailableIndicationMsg(TcpNscConnection& connP);
 
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCP_NSC_SendQueue *createSendQueue();
+    virtual TcpNscSendQueue *createSendQueue();
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCP_NSC_ReceiveQueue *createReceiveQueue();
+    virtual TcpNscReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
-    typedef std::map<int, TCP_NSC_Connection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection
+    typedef std::map<int, TcpNscConnection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection
     typedef std::map<u_int32_t, L3Address> Nsc2RemoteMap;
     typedef std::map<L3Address, u_int32_t> Remote2NscMap;
-    typedef std::map<TCP_NSC_Connection::SockPair, int> SockPair2ConnIdMap;
+    typedef std::map<TcpNscConnection::SockPair, int> SockPair2ConnIdMap;
 
     // Maps:
     TcpAppConnMap tcpAppConnMapM;
@@ -172,7 +172,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     bool isAliveM;    // true when I between initialize() and finish()
 
     int curAddrCounterM;    // incr, when set curLocalAddr, decr when "felhasznaltam"
-    TCP_NSC_Connection *curConnM;    // store current connection in connect/listen command
+    TcpNscConnection *curConnM;    // store current connection in connect/listen command
 
     TcpCrcInsertion crcInsertion;
     CrcMode crcMode = (CrcMode)-1;

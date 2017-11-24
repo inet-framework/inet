@@ -304,7 +304,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         outPk->pushHeader(header);
     }
     else if (*protocol == Protocol::arp) {
-        const auto& header = pk->popHeader<ARPPacket>();
+        const auto& header = pk->popHeader<ArpPacket>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
         outPk->pushHeader(header);

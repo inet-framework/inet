@@ -37,9 +37,9 @@ moduleinterface IIGMP
     @display("i=block/cogwheel");
 
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down);
 
-        input routerIn @labels(IPv4ControlInfo/up);
-        output routerOut @labels(IPv4ControlInfo/down);
+        input routerIn @labels(Ipv4ControlInfo/up);
+        output routerOut @labels(Ipv4ControlInfo/down);
 }

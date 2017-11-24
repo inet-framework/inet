@@ -41,16 +41,16 @@ namespace ospf {
 
 using namespace xmlutils;
 
-OSPFConfigReader::OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift) :
+OspfConfigReader::OspfConfigReader(cModule *ospfModule, IInterfaceTable *ift) :
         ospfModule(ospfModule), ift(ift)
 {
 }
 
-OSPFConfigReader::~OSPFConfigReader()
+OspfConfigReader::~OspfConfigReader()
 {
 }
 
-InterfaceEntry *OSPFConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
+InterfaceEntry *OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
 {
     const char *ifName = ifConfig.getAttribute("ifName");
     if (ifName && *ifName) {
@@ -77,7 +77,7 @@ InterfaceEntry *OSPFConfigReader::getInterfaceByXMLAttributesOf(const cXMLElemen
     throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, ifConfig.getSourceLocation());
 }
 
-int OSPFConfigReader::resolveInterfaceName(const std::string& name) const
+int OspfConfigReader::resolveInterfaceName(const std::string& name) const
 {
     InterfaceEntry *ie = ift->getInterfaceByName(name.c_str());
     if (!ie)
@@ -86,7 +86,7 @@ int OSPFConfigReader::resolveInterfaceName(const std::string& name) const
     return ie->getInterfaceId();
 }
 
-void OSPFConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaID>& areaList) const
+void OspfConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaId>& areaList) const
 {
     cXMLElementList routerConfig = routerNode.getChildren();
     for (auto & elem : routerConfig) {
@@ -96,14 +96,14 @@ void OSPFConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::se
             (nodeName == "NBMAInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
-            AreaID areaID = IPv4Address(getStrAttrOrPar(*elem, "areaID"));
+            AreaId areaID = Ipv4Address(getStrAttrOrPar(*elem, "areaID"));
             if (areaList.find(areaID) == areaList.end())
                 areaList.insert(areaID);
         }
     }
 }
 
-void OSPFConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaID areaID)
+void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaID)
 {
     std::string areaXPath("Area[@id='");
     areaXPath += areaID.str(false);
@@ -122,7 +122,7 @@ void OSPFConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaID areaI
     for (auto & areaDetail : areaDetails) {
         std::string nodeName = (areaDetail)->getTagName();
         if (nodeName == "AddressRange") {
-            IPv4AddressRange addressRange;
+            Ipv4AddressRange addressRange;
             addressRange.address = ipv4AddressFromAddressString(getRequiredAttribute(*areaDetail, "address"));
             addressRange.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(*areaDetail, "mask"));
             addressRange.address = addressRange.address & addressRange.mask;
@@ -142,7 +142,7 @@ void OSPFConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaID areaI
     ospfRouter->addArea(area);
 }
 
-int OSPFConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+int OspfConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
 {
     const char *attrStr = ifConfig.getAttribute(name);
     if (attrStr && *attrStr)
@@ -150,7 +150,7 @@ int OSPFConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *n
     return par(name).longValue();
 }
 
-bool OSPFConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+bool OspfConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
 {
     const char *attrStr = ifConfig.getAttribute(name);
     if (attrStr && *attrStr) {
@@ -163,7 +163,7 @@ bool OSPFConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char 
     return par(name).boolValue();
 }
 
-const char *OSPFConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+const char *OspfConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
 {
     const char *attrStr = ifConfig.getAttribute(name);
     if (attrStr && *attrStr)
@@ -171,21 +171,21 @@ const char *OSPFConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const
     return par(name).stringValue();
 }
 
-void OSPFConfigReader::joinMulticastGroups(int interfaceId)
+void OspfConfigReader::joinMulticastGroups(int interfaceId)
 {
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     if (!ie)
         throw cRuntimeError("Interface id=%d does not exist", interfaceId);
     if (!ie->isMulticast())
         return;
-    IPv4InterfaceData *ipv4Data = ie->ipv4Data();
+    Ipv4InterfaceData *ipv4Data = ie->ipv4Data();
     if (!ipv4Data)
         throw cRuntimeError("Interface %s (id=%d) does not have IPv4 data", ie->getInterfaceName(), interfaceId);
-    ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
-    ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
+    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
 
-void OSPFConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig)
+void OspfConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig)
 {
     std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
     if (authenticationType == "SimplePasswordType") {
@@ -213,7 +213,7 @@ void OSPFConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLEleme
     intf->setAuthenticationKey(keyValue);
 }
 
-void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
+void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     Interface *intf = new Interface;
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(ifConfig);
@@ -244,7 +244,7 @@ void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 
     joinMulticastGroups(ifIndex);
 
-    AreaID areaID = IPv4Address(getStrAttrOrPar(ifConfig, "areaID"));
+    AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
     intf->setAreaID(areaID);
 
     intf->setOutputCost(getIntAttrOrPar(ifConfig, "interfaceOutputCost"));
@@ -305,14 +305,14 @@ void OSPFConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     }
 }
 
-void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
+void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(externalRouteConfig);
     int ifIndex = ie->getInterfaceId();
 
-    OSPFASExternalLSAContents asExternalRoute;
+    OspfAsExternalLsaContents asExternalRoute;
     //RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
-    IPv4AddressRange networkAddress;
+    Ipv4AddressRange networkAddress;
 
     EV_DEBUG << "        loading ExternalInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
@@ -357,10 +357,10 @@ void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
     ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
 }
 
-void OSPFConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
+void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 {
     HostRouteParameters hostParameters;
-    AreaID hostArea;
+    AreaId hostArea;
 
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(hostRouteConfig);
     int ifIndex = ie->getInterfaceId();
@@ -385,7 +385,7 @@ void OSPFConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
     }
 }
 
-void OSPFConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
+void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     Interface *intf = new Interface;
     std::string endPoint = getRequiredAttribute(virtualLinkConfig, "endPointRouterID");
@@ -422,7 +422,7 @@ void OSPFConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     }
 }
 
-bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRouter)
+bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRouter)
 {
     this->ospfRouter = ospfRouter;
 
@@ -455,7 +455,7 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
     bool rfc1583Compatible = getBoolAttrOrPar(*routerNode, "RFC1583Compatible");
     ospfRouter->setRFC1583Compatibility(rfc1583Compatible);
 
-    std::set<AreaID> areaList;
+    std::set<AreaId> areaList;
     getAreaListFromXML(*routerNode, areaList);
 
     // if the router is an area border router then it MUST be part of the backbone(area 0)

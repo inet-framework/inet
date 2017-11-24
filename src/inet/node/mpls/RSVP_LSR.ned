@@ -17,13 +17,13 @@ import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.rsvp_te.RSVP;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.networklayer.mpls.LibTable;
+import inet.networklayer.mpls.Mpls;
+import inet.networklayer.rsvp_te.Rsvp;
 import inet.networklayer.rsvp_te.SimpleClassifier;
 import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
+import inet.networklayer.ted.Ted;
 
 
 //
@@ -60,7 +60,7 @@ module RSVP_LSR
             parameters:
                 @display("p=58,272;is=s");
         }
-        ted: TED {
+        ted: Ted {
             parameters:
                 @display("p=58,115;is=s");
         }
@@ -69,7 +69,7 @@ module RSVP_LSR
                 peers = peers;
                 @display("p=545,106");
         }
-        rsvp: RSVP {
+        rsvp: Rsvp {
             parameters:
                 peers = peers;
                 classifierModule = "^.classifier";
@@ -98,12 +98,12 @@ module RSVP_LSR
             parameters:
                 @display("p=271,394,row,90;q=l2queue");
         }
-        mpls: MPLS {
+        mpls: Mpls {
             parameters:
                 classifierModule = "^.classifier";
                 @display("p=448,311");
         }
-        libTable: LIBTable {
+        libTable: LibTable {
             parameters:
                 @display("p=58,186;is=s");
         }

@@ -24,17 +24,17 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API BGPUpdateMessage : public BGPUpdateMessage_Base
+class INET_API BgpUpdateMessage : public BgpUpdateMessage_Base
 {
   protected:
-    unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);
+    unsigned short computePathAttributesBytes(const BgpUpdatePathAttributeList& pathAttrs);
 
   public:
-    BGPUpdateMessage() : BGPUpdateMessage_Base() {}
-    virtual BGPUpdateMessage *dup() const override { return new BGPUpdateMessage(*this); }
+    BgpUpdateMessage() : BgpUpdateMessage_Base() {}
+    virtual BgpUpdateMessage *dup() const override { return new BgpUpdateMessage(*this); }
     void setWithdrawnRoutesArraySize(unsigned int size) override;
-    void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
-    void setNLRI(const BGPUpdateNLRI& NLRI_var) override;
+    void setPathAttributeList(const BgpUpdatePathAttributeList& pathAttributeList_var);
+    void setNLRI(const BgpUpdateNlri& NLRI_var) override;
 };
 
 } // namespace bgp

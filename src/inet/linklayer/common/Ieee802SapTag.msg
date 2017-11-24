@@ -10,7 +10,7 @@ namespace inet;
 //
 // Some 8-bit SAP values for IEEE 802.x LLC headers.
 //
-enum SAPCode
+enum SapCode
 {
     SAP_IBM_SNA = 0x04;
     SAP_IP = 0x06;

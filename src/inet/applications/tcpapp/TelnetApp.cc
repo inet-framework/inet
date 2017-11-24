@@ -45,7 +45,7 @@ void TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
 
 void TelnetApp::initialize(int stage)
 {
-    TCPAppBase::initialize(stage);
+    TcpAppBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         numCharsToType = numLinesToType = 0;
@@ -87,7 +87,7 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
-            if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
+            if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
                 close();
             // TODO: wait until socket is closed
         }
@@ -153,7 +153,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 
 void TelnetApp::socketEstablished(int connId, void *ptr)
 {
-    TCPAppBase::socketEstablished(connId, ptr);
+    TcpAppBase::socketEstablished(connId, ptr);
 
     // schedule first sending
     numLinesToType = (long)par("numCommands");
@@ -165,7 +165,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
 void TelnetApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
 {
     int len = msg->getByteLength();
-    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (len == 1) {
         // this is an echo, ignore
@@ -198,7 +198,7 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgen
 
 void TelnetApp::socketClosed(int connId, void *ptr)
 {
-    TCPAppBase::socketClosed(connId, ptr);
+    TcpAppBase::socketClosed(connId, ptr);
 
     // start another session after a delay
     cancelEvent(timeoutMsg);
@@ -208,7 +208,7 @@ void TelnetApp::socketClosed(int connId, void *ptr)
 
 void TelnetApp::socketFailure(int connId, void *ptr, int code)
 {
-    TCPAppBase::socketFailure(connId, ptr, code);
+    TcpAppBase::socketFailure(connId, ptr, code);
 
     // reconnect after a delay
     cancelEvent(timeoutMsg);

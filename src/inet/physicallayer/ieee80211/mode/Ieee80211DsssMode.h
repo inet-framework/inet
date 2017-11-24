@@ -42,7 +42,7 @@ class INET_API Ieee80211DsssPreambleMode : public Ieee80211DsssChunkMode, public
     virtual inline bps getNetBitrate() const { return Mbps(1); }
     virtual inline bps getGrossBitrate() const { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
-    virtual const DBPSKModulation *getModulation() const { return &DBPSKModulation::singleton; }
+    virtual const DbpskModulation *getModulation() const { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211DsssPhyPreamble>(); }
 };
@@ -61,7 +61,7 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
     virtual inline bps getNetBitrate() const override { return Mbps(1); }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual inline const simtime_t getDuration() const override { return (double)getLength().get() / getNetBitrate().get(); }
-    virtual const DBPSKModulation *getModulation() const override { return &DBPSKModulation::singleton; }
+    virtual const DbpskModulation *getModulation() const override { return &DbpskModulation::singleton; }
 
     virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211DsssPhyHeader>(); }
 };
@@ -69,17 +69,17 @@ class INET_API Ieee80211DsssHeaderMode : public Ieee80211DsssChunkMode, public I
 class INET_API Ieee80211DsssDataMode : public Ieee80211DsssChunkMode, public IIeee80211DataMode
 {
   protected:
-    const DPSKModulationBase *modulation;
+    const DpskModulationBase *modulation;
 
   public:
-    Ieee80211DsssDataMode(const DPSKModulationBase *modulation);
+    Ieee80211DsssDataMode(const DpskModulationBase *modulation);
 
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
-    virtual const DPSKModulationBase *getModulation() const override { return modulation; }
+    virtual const DpskModulationBase *getModulation() const override { return modulation; }
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 

@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
+class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 {
   public:
     /** @brief Gate ids */
@@ -38,7 +38,7 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
     InterfaceEntry *interfaceEntry;
 
   protected:
-    MACProtocolBase();
+    MacProtocolBase();
 
     virtual void initialize(int stage) override;
 

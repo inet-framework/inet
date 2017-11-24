@@ -52,7 +52,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
         if (agreement->getExpirationTime() == now) {
-            MACAddress receiverAddr = id.first.first;
+            MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
             delba->markImmutable();
@@ -63,7 +63,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     scheduleInactivityTimer(agreementHandlerCallback);
 }
 
-const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaRequest> OriginatorBlockAckAgreementHandler::buildAddbaRequest(MacAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy)
 {
     auto addbaRequest = makeShared<Ieee80211AddbaRequest>();
     addbaRequest->setReceiverAddress(receiverAddr);
@@ -101,14 +101,14 @@ void OriginatorBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreem
         callback->scheduleInactivityTimer(earliestExpirationTime);
 }
 
-OriginatorBlockAckAgreement* OriginatorBlockAckAgreementHandler::getAgreement(MACAddress receiverAddr, Tid tid)
+OriginatorBlockAckAgreement* OriginatorBlockAckAgreementHandler::getAgreement(MacAddress receiverAddr, Tid tid)
 {
     auto agreementId = std::make_pair(receiverAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
     return it != blockAckAgreements.end() ? it->second : nullptr;
 }
 
-const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
+const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode)
 {
     auto delba = makeShared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);
@@ -119,7 +119,7 @@ const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MACAddr
     return delba;
 }
 
-void OriginatorBlockAckAgreementHandler::terminateAgreement(MACAddress originatorAddr, Tid tid)
+void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);

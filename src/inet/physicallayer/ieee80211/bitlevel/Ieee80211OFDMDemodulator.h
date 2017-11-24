@@ -31,18 +31,18 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMDemodulator : public IDemodulator
+class INET_API Ieee80211OfdmDemodulator : public IDemodulator
 {
   protected:
     const Ieee80211OfdmModulation *subcarrierModulation = nullptr;
 
   protected:
-    BitVector demodulateSymbol(const Ieee80211OFDMSymbol *signalSymbol) const;
+    BitVector demodulateSymbol(const Ieee80211OfdmSymbol *signalSymbol) const;
     const IReceptionBitModel *createBitModel(const BitVector *bitRepresentation, int signalFieldBitLength, bps signalFieldBitRate, int dataFieldBitLength, bps dataFieldBitRate) const;
     bool isPilotOrDcSubcarrier(int i) const;
 
   public:
-    Ieee80211OFDMDemodulator(const Ieee80211OfdmModulation *subcarrierModulation);
+    Ieee80211OfdmDemodulator(const Ieee80211OfdmModulation *subcarrierModulation);
 
     const Ieee80211OfdmModulation *getModulation() const { return subcarrierModulation; }
     virtual const IReceptionBitModel *demodulate(const IReceptionSymbolModel *symbolModel) const override;

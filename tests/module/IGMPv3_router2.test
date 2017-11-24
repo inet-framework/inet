@@ -80,13 +80,13 @@ network=TestIGMPNetwork
 %#
 %postrun-command: grep "IGMPTester: Received" test.out > tester.out || true
 %contains-regex: tester.out
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.2,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.4,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.3,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
-IGMPTester: Received: inet::IGMPv3Query<group=225.0.0.1, sourceList=,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.1,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.2,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.4,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.1 10.0.0.3,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=10.0.0.3,.*>.
+IGMPTester: Received: inet::Igmpv3Query<group=225.0.0.1, sourceList=,.*>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

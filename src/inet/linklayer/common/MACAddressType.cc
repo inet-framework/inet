@@ -19,7 +19,7 @@
 
 namespace inet {
 
-MACAddressType MACAddressType::INSTANCE;
+MacAddressType MacAddressType::INSTANCE;
 
 } // namespace inet
 

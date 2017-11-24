@@ -42,7 +42,7 @@ void InterfaceStateBackup::processEvent(Interface *intf, Interface::InterfaceEve
     }
     if (event == Interface::HELLO_TIMER) {
         if (intf->getType() == Interface::BROADCAST) {
-            intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
+            intf->sendHelloPacket(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
         else {    // Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();

@@ -24,9 +24,9 @@
 
 namespace inet {
 
-Define_Module(TCPSrvHostApp);
+Define_Module(TcpSrvHostApp);
 
-void TCPSrvHostApp::initialize(int stage)
+void TcpSrvHostApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -37,7 +37,7 @@ void TCPSrvHostApp::initialize(int stage)
     }
 }
 
-void TCPSrvHostApp::start()
+void TcpSrvHostApp::start()
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
@@ -47,7 +47,7 @@ void TCPSrvHostApp::start()
     serverSocket.listen();
 }
 
-void TCPSrvHostApp::stop()
+void TcpSrvHostApp::stop()
 {
     //FIXME close sockets?
 
@@ -56,21 +56,21 @@ void TCPSrvHostApp::stop()
         removeThread(*threadSet.begin());
 }
 
-void TCPSrvHostApp::crash()
+void TcpSrvHostApp::crash()
 {
     // remove and delete threads
     while (!threadSet.empty())
         removeThread(*threadSet.begin());
 }
 
-void TCPSrvHostApp::refreshDisplay() const
+void TcpSrvHostApp::refreshDisplay() const
 {
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TCPSrvHostApp::handleMessage(cMessage *msg)
+void TcpSrvHostApp::handleMessage(cMessage *msg)
 {
     if (!isNodeUp()) {
         //TODO error?
@@ -78,24 +78,24 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
         delete msg;
     }
     else if (msg->isSelfMessage()) {
-        TCPServerThreadBase *thread = (TCPServerThreadBase *)msg->getContextPointer();
+        TcpServerThreadBase *thread = (TcpServerThreadBase *)msg->getContextPointer();
         if (threadSet.find(thread) == threadSet.end())
             throw cRuntimeError("Invalid thread pointer in the timer (msg->contextPointer is invalid)");
         thread->timerExpired(msg);
     }
     else {
-        TCPSocket *socket = socketMap.findSocketFor(msg);
+        TcpSocket *socket = socketMap.findSocketFor(msg);
 
         if (!socket) {
             // new connection -- create new socket object and server process
-            socket = new TCPSocket(msg);
+            socket = new TcpSocket(msg);
             socket->setOutputGate(gate("socketOut"));
 
             const char *serverThreadModuleType = par("serverThreadModuleType");
             cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
             char name[80];
             sprintf(name, "thread_%i", socket->getConnectionId());
-            TCPServerThreadBase *proc = check_and_cast<TCPServerThreadBase *>(moduleType->create(name, this));
+            TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
             proc->finalizeParameters();
 
             proc->callInitialize();
@@ -111,12 +111,12 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
     }
 }
 
-void TCPSrvHostApp::finish()
+void TcpSrvHostApp::finish()
 {
     stop();
 }
 
-void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
+void TcpSrvHostApp::removeThread(TcpServerThreadBase *thread)
 {
     // remove socket
     socketMap.removeSocket(thread->getSocket());
@@ -126,7 +126,7 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
     delete thread;
 }
 
-bool TCPSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TcpSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -148,9 +148,9 @@ bool TCPSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stag
     return true;
 }
 
-void TCPServerThreadBase::refreshDisplay() const
+void TcpServerThreadBase::refreshDisplay() const
 {
-    getDisplayString().setTagArg("t", 0, TCPSocket::stateName(sock->getState()));
+    getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
 }
 
 

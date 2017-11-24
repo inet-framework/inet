@@ -18,7 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
 cplusplus {{
@@ -27,7 +27,7 @@ cplusplus {{
 
 namespace inet;
 
-enum IGMPType
+enum IgmpType
 {
     IGMP_MEMBERSHIP_QUERY = 0x11;
     IGMPV1_MEMBERSHIP_REPORT = 0x12;
@@ -36,49 +36,49 @@ enum IGMPType
     IGMPV3_MEMBERSHIP_REPORT = 0x22;
 }
 
-class IGMPMessage extends FieldsChunk
+class IgmpMessage extends FieldsChunk
 {
-    IGMPType type;         // 1 byte
+    IgmpType type;         // 1 byte
     uint16_t crc = 0;                   // 2 bytes
     CrcMode crcMode = (CrcMode)-1;  // 0 bytes, inet only
 }
 
-class IGMPQuery extends IGMPMessage
+class IgmpQuery extends IgmpMessage
 {
     type = IGMP_MEMBERSHIP_QUERY;
-    IPv4Address groupAddress;
+    Ipv4Address groupAddress;
 }
 
-class IGMPv1Query extends IGMPQuery
+class Igmpv1Query extends IgmpQuery
 {
     chunkLength = B(8);
 }
 
-class IGMPv1Report extends IGMPMessage
+class Igmpv1Report extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV1_MEMBERSHIP_REPORT;
-    IPv4Address groupAddress;
+    Ipv4Address groupAddress;
 }
 
-class IGMPv2Query extends IGMPQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
+class Igmpv2Query extends IgmpQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
 {
     chunkLength = B(8);
     simtime_t maxRespTime;      // stored in `code` in units of 1/10 second, 0.1-25.5s
 }
 
-class IGMPv2Report extends IGMPMessage
+class Igmpv2Report extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV2_MEMBERSHIP_REPORT;
-    IPv4Address groupAddress;
+    Ipv4Address groupAddress;
 }
 
-class IGMPv2Leave extends IGMPMessage
+class Igmpv2Leave extends IgmpMessage
 {
     chunkLength = B(8);
     type = IGMPV2_LEAVE_GROUP;
-    IPv4Address groupAddress;
+    Ipv4Address groupAddress;
 }
 
 //
@@ -88,7 +88,7 @@ class IGMPv2Leave extends IGMPMessage
 // Note: in IGMPv3Query the maxResponseTime field is
 // renamed to maxResponseCode and it is interpreted
 // differently than in IGMPv2.
-class IGMPv3Query extends IGMPv2Query
+class Igmpv3Query extends Igmpv2Query
 {
     @customize;
     // maxRespTime stored in `code` in units of 1/10 second
@@ -97,7 +97,7 @@ class IGMPv3Query extends IGMPv2Query
     bool suppressRouterProc;
     unsigned char robustnessVariable;
     unsigned char queryIntervalCode;
-    IPv4AddressVector sourceList;
+    Ipv4AddressVector sourceList;
 }
 
 enum GroupRecordType
@@ -113,11 +113,11 @@ enum GroupRecordType
 struct GroupRecord
 {
     int recordType enum(GroupRecordType);
-    IPv4Address groupAddress;
-    IPv4AddressVector sourceList;
+    Ipv4Address groupAddress;
+    Ipv4AddressVector sourceList;
 };
 
-class IGMPv3Report extends IGMPMessage
+class Igmpv3Report extends IgmpMessage
 {
     type = IGMPV3_MEMBERSHIP_REPORT;
     GroupRecord groupRecord[];

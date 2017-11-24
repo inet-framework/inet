@@ -44,7 +44,7 @@ void InterfaceStatePointToPoint::processEvent(Interface *intf, Interface::Interf
             }
         }
         else {
-            intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
+            intf->sendHelloPacket(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }

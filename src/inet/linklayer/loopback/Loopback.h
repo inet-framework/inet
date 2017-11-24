@@ -33,7 +33,7 @@ class IPassiveQueue;
 /**
  * Loopback interface implementation.
  */
-class INET_API Loopback : public MACBase
+class INET_API Loopback : public MacBase
 {
   protected:
     // statistics

@@ -34,7 +34,7 @@ HelloHandler::HelloHandler(Router *containingRouter) :
 
 void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unused)
 {
-    const auto& helloPacket = packet->peekHeader<OSPFHelloPacket>();
+    const auto& helloPacket = packet->peekHeader<OspfHelloPacket>();
     bool shouldRebuildRoutingTable = false;
 
     /* The values of the Network Mask, HelloInterval,
@@ -46,7 +46,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
     if ((intf->getHelloInterval() == helloPacket->getHelloInterval()) &&
         (intf->getRouterDeadInterval() == helloPacket->getRouterDeadInterval()))
     {
-        Interface::OSPFInterfaceType interfaceType = intf->getType();
+        Interface::OspfInterfaceType interfaceType = intf->getType();
         /* There is one exception to the above rule: on point-to-point
            networks and on virtual links, the Network Mask in the received
            Hello Packet should be ignored.
@@ -61,7 +61,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                IPv4Address srcAddress = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                Ipv4Address srcAddress = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;
@@ -88,13 +88,13 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                 if (neighbor != nullptr) {
                     router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
-                    IPv4Address designatedAddress = neighbor->getDesignatedRouter().ipInterfaceAddress;
-                    IPv4Address backupAddress = neighbor->getBackupDesignatedRouter().ipInterfaceAddress;
+                    Ipv4Address designatedAddress = neighbor->getDesignatedRouter().ipInterfaceAddress;
+                    Ipv4Address backupAddress = neighbor->getBackupDesignatedRouter().ipInterfaceAddress;
                     char newPriority = helloPacket->getRouterPriority();
-                    IPv4Address source = srcAddress;
-                    IPv4Address newDesignatedRouter = helloPacket->getDesignatedRouter();
-                    IPv4Address newBackupRouter = helloPacket->getBackupDesignatedRouter();
-                    DesignatedRouterID dRouterID;
+                    Ipv4Address source = srcAddress;
+                    Ipv4Address newDesignatedRouter = helloPacket->getDesignatedRouter();
+                    Ipv4Address newBackupRouter = helloPacket->getBackupDesignatedRouter();
+                    DesignatedRouterId dRouterID;
 
                     if ((interfaceType == Interface::VIRTUAL) &&
                         (neighbor->getState() == Neighbor::DOWN_STATE))
@@ -213,7 +213,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                     }
                 }
                 else {
-                    DesignatedRouterID dRouterID;
+                    DesignatedRouterId dRouterID;
                     bool designatedSetUp = false;
                     bool backupSetUp = false;
 
@@ -265,7 +265,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                     intf->sendHelloPacket(neighbor->getAddress());
                 }
 
-                IPv4Address interfaceAddress = intf->getAddressRange().address;
+                Ipv4Address interfaceAddress = intf->getAddressRange().address;
                 unsigned int neighborsNeighborCount = helloPacket->getNeighborArraySize();
                 unsigned int i;
                 /* The list of neighbors contained in the Hello Packet is
@@ -307,7 +307,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                     }
 
                     if (neighborsDRStateChanged) {
-                        RouterLSA *routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
+                        RouterLsa *routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
 
                         if (routerLSA != nullptr) {
                             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -317,7 +317,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                                 routerLSA->incrementInstallTime();
                             }
                             else {
-                                RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
+                                RouterLsa *newLSA = intf->getArea()->originateRouterLSA();
 
                                 newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);

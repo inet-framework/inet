@@ -20,6 +20,6 @@ moduleinterface IIPRouting
     parameters:
         @display("i=block/network");
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down);
 }

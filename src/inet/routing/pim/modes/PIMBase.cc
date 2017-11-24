@@ -34,26 +34,26 @@ namespace inet {
 
 using namespace std;
 
-const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
+const Ipv4Address PimBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
-const PIMBase::AssertMetric PIMBase::AssertMetric::PIM_INFINITE;
+const PimBase::AssertMetric PimBase::AssertMetric::PIM_INFINITE;
 
-simsignal_t PIMBase::sentHelloPkSignal = registerSignal("sentHelloPk");
-simsignal_t PIMBase::rcvdHelloPkSignal = registerSignal("rcvdHelloPk");
+simsignal_t PimBase::sentHelloPkSignal = registerSignal("sentHelloPk");
+simsignal_t PimBase::rcvdHelloPkSignal = registerSignal("rcvdHelloPk");
 
-bool PIMBase::AssertMetric::operator==(const AssertMetric& other) const
+bool PimBase::AssertMetric::operator==(const AssertMetric& other) const
 {
     return rptBit == other.rptBit && preference == other.preference &&
            metric == other.metric && address == other.address;
 }
 
-bool PIMBase::AssertMetric::operator!=(const AssertMetric& other) const
+bool PimBase::AssertMetric::operator!=(const AssertMetric& other) const
 {
     return rptBit != other.rptBit || preference != other.preference ||
            metric != other.metric || address != other.address;
 }
 
-bool PIMBase::AssertMetric::operator<(const AssertMetric& other) const
+bool PimBase::AssertMetric::operator<(const AssertMetric& other) const
 {
     if (isInfinite())
         return false;
@@ -68,20 +68,20 @@ bool PIMBase::AssertMetric::operator<(const AssertMetric& other) const
     return address > other.address;
 }
 
-PIMBase::~PIMBase()
+PimBase::~PimBase()
 {
     cancelAndDelete(helloTimer);
 }
 
-void PIMBase::initialize(int stage)
+void PimBase::initialize(int stage)
 {
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
-        pimIft = getModuleFromPar<PIMInterfaceTable>(par("pimInterfaceTableModule"), this);
-        pimNbt = getModuleFromPar<PIMNeighborTable>(par("pimNeighborTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        pimIft = getModuleFromPar<PimInterfaceTable>(par("pimInterfaceTableModule"), this);
+        pimNbt = getModuleFromPar<PimNeighborTable>(par("pimNeighborTableModule"), this);
 
         cModule *host = findContainingNode(this);
         if (!host)
@@ -91,19 +91,19 @@ void PIMBase::initialize(int stage)
 
         helloPeriod = par("helloPeriod");
         holdTime = par("holdTime");
-        designatedRouterPriority = mode == PIMInterface::SparseMode ? par("designatedRouterPriority") : -1;
+        designatedRouterPriority = mode == PimInterface::SparseMode ? par("designatedRouterPriority") : -1;
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
         registerProtocol(Protocol::pim, gate("ipOut"));
 }
 
-bool PIMBase::handleNodeStart(IDoneCallback *doneCallback)
+bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     generationID = intrand(UINT32_MAX);
     // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
     isEnabled = false;
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
-        PIMInterface *pimInterface = pimIft->getInterface(i);
+        PimInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode) {
             pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
             isEnabled = true;
@@ -119,7 +119,7 @@ bool PIMBase::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool PIMBase::handleNodeShutdown(IDoneCallback *doneCallback)
+bool PimBase::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
@@ -127,14 +127,14 @@ bool PIMBase::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void PIMBase::handleNodeCrash()
+void PimBase::handleNodeCrash()
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
     helloTimer = nullptr;
 }
 
-void PIMBase::processHelloTimer(cMessage *timer)
+void PimBase::processHelloTimer(cMessage *timer)
 {
     ASSERT(timer == helloTimer);
     EV_DETAIL << "Hello Timer expired.\n";
@@ -142,21 +142,21 @@ void PIMBase::processHelloTimer(cMessage *timer)
     scheduleAt(simTime() + helloPeriod, helloTimer);
 }
 
-void PIMBase::sendHelloPackets()
+void PimBase::sendHelloPackets()
 {
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
-        PIMInterface *pimInterface = pimIft->getInterface(i);
+        PimInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode)
             sendHelloPacket(pimInterface);
     }
 }
 
-void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
+void PimBase::sendHelloPacket(PimInterface *pimInterface)
 {
     EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getInterfaceName() << "'\n";
 
     Packet *pk = new Packet("PIMHello");
-    const auto& msg = makeShared<PIMHello>();
+    const auto& msg = makeShared<PimHello>();
 
     int byteLength = PIM_HEADER_LENGTH + 6 + 8;    // HoldTime + GenerationID option
 
@@ -165,12 +165,12 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     holdtimeOption->setHoldTime(holdTime < 0 ? (uint16_t)0xffff : (uint16_t)holdTime);
     msg->setOptions(0, holdtimeOption);
 
-    GenerationIDOption *genIdOption = new GenerationIDOption();
+    GenerationIdOption *genIdOption = new GenerationIdOption();
     genIdOption->setGenerationID(generationID);
     msg->setOptions(1, genIdOption);
 
     if (designatedRouterPriority >= 0) {
-        DRPriorityOption *drPriorityOption = new DRPriorityOption();
+        DrPriorityOption *drPriorityOption = new DrPriorityOption();
         drPriorityOption->setPriority(designatedRouterPriority);
         msg->setOptions(2, drPriorityOption);
         byteLength += 8;
@@ -191,12 +191,12 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     send(pk, "ipOut");
 }
 
-void PIMBase::processHelloPacket(Packet *packet)
+void PimBase::processHelloPacket(Packet *packet)
 {
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
-    IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    const auto& pimPacket = packet->peekHeader<PIMHello>();
+    Ipv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    const auto& pimPacket = packet->peekHeader<PimHello>();
     int version = pimPacket->getVersion();
 
     emit(rcvdHelloPkSignal, packet);
@@ -212,10 +212,10 @@ void PIMBase::processHelloPacket(Packet *packet)
                 holdTime = check_and_cast<const HoldtimeOption *>(option)->getHoldTime();
                 break;
             case DRPriority:
-                drPriority = check_and_cast<const DRPriorityOption *>(option)->getPriority();
+                drPriority = check_and_cast<const DrPriorityOption *>(option)->getPriority();
                 break;
             case GenerationID:
-                generationId = check_and_cast<const GenerationIDOption *>(option)->getGenerationID();
+                generationId = check_and_cast<const GenerationIdOption *>(option)->getGenerationID();
                 break;
             default:
                 break;
@@ -226,11 +226,11 @@ void PIMBase::processHelloPacket(Packet *packet)
 
     EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getInterfaceName() << " address=" << address << "\n";
 
-    PIMNeighbor *neighbor = pimNbt->findNeighbor(interfaceId, address);
+    PimNeighbor *neighbor = pimNbt->findNeighbor(interfaceId, address);
     if (neighbor)
         pimNbt->restartLivenessTimer(neighbor, holdTime);
     else {
-        neighbor = new PIMNeighbor(ie, address, version);
+        neighbor = new PimNeighbor(ie, address, version);
         pimNbt->addNeighbor(neighbor, holdTime);
 
         // TODO If a Hello message is received from a new neighbor, the

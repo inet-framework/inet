@@ -20,9 +20,9 @@
 import inet.common.INETDefs;
 import inet.common.TLVOption;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
 cplusplus {{
@@ -53,7 +53,7 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 //
 // IPv4 options class
 //
-enum IPOptionClass
+enum IpOptionClass
 {
     IPOPTION_CLASS_CONTROL = 0;
     IPOPTION_CLASS_RESERVED = 1;
@@ -64,7 +64,7 @@ enum IPOptionClass
 //
 // IPv4 option types
 //
-enum IPOption
+enum IpOption
 {
     IPOPTION_END_OF_OPTIONS = 0;
     IPOPTION_NO_OPTION = 1;
@@ -91,17 +91,17 @@ enum TimestampFlag
     IP_TIMESTAMP_SENDER_INIT_ADDRESS = 3;
 }
 
-class IPv4Option extends TLVOptionBase
+class Ipv4Option extends TlvOptionBase
 {
 }
 
-class IPv4OptionNop extends IPv4Option
+class Ipv4OptionNop extends Ipv4Option
 {
     type = IPOPTION_NO_OPTION;
     length = 1;
 }
 
-class IPv4OptionEnd extends IPv4Option
+class Ipv4OptionEnd extends Ipv4Option
 {
     type = IPOPTION_END_OF_OPTIONS;
     length = 1;
@@ -110,7 +110,7 @@ class IPv4OptionEnd extends IPv4Option
 //
 // Option structure: Record Route
 //
-class IPv4OptionRecordRoute extends IPv4Option
+class Ipv4OptionRecordRoute extends Ipv4Option
 {
     // type = IPOPTION_RECORD_ROUTE;
     // type = IPOPTION_LOOSE_SOURCE_ROUTING
@@ -118,13 +118,13 @@ class IPv4OptionRecordRoute extends IPv4Option
     // length = 3 + 4 * getRecordAddressArraySize();
     short nextAddressIdx;
     // pointer = 4 + 4 * nextAddressIdx
-    IPv4Address recordAddress[];    // max size is 9
+    Ipv4Address recordAddress[];    // max size is 9
 }
 
 //
 // Option structure: Timestamp
 //
-class IPv4OptionTimestamp extends IPv4Option
+class Ipv4OptionTimestamp extends Ipv4Option
 {
     type = IPOPTION_TIMESTAMP;
     // length = 4 + 4 * getRecordAddressArraySize() + 4 * getRecordTimestampArraySize();
@@ -135,21 +135,21 @@ class IPv4OptionTimestamp extends IPv4Option
 
     // use either up to 4 addresses with timestamps or
     // only up to 9 timestamps, according to the flag
-    IPv4Address recordAddress[];
+    Ipv4Address recordAddress[];
     simtime_t recordTimestamp[];
 }
 
 //
 // Option Structure: Stream ID
 //
-class IPv4OptionStreamId extends IPv4Option
+class Ipv4OptionStreamId extends Ipv4Option
 {
     type = IPOPTION_STREAM_ID;
     length = 4;
     short streamId;
 }
 
-class IPv4OptionUnknown extends IPv4Option
+class Ipv4OptionUnknown extends Ipv4Option
 {
     // type = any
     // length = 2 + getBytesArraySize()
@@ -179,13 +179,13 @@ class Ipv4Header extends NetworkHeaderBase
     short version = 4;
     short headerLength = IP_HEADER_BYTES;
 
-    IPv4Address srcAddress;
-    IPv4Address destAddress;
+    Ipv4Address srcAddress;
+    Ipv4Address destAddress;
 
     uint16_t crc = 0;
     CrcMode crcMode = (CrcMode)-1;
 
-    IPProtocolId protocolId = IP_PROT_NONE;
+    IpProtocolId protocolId = IP_PROT_NONE;
     short timeToLive;
     int identification;
     bool moreFragments;
@@ -196,6 +196,6 @@ class Ipv4Header extends NetworkHeaderBase
     abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS
 
-    TLVOptions options; // array of option pointers, option pointers owned by datagram
+    TlvOptions options; // array of option pointers, option pointers owned by datagram
 }
 

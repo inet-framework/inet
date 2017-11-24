@@ -25,12 +25,12 @@ namespace inet {
 /**
  * TODO
  */
-class INET_API IRSVPClassifier : public IClassifier
+class INET_API IRsvpClassifier : public IClassifier
 {
   public:
-    virtual ~IRSVPClassifier() {}
+    virtual ~IRsvpClassifier() {}
 
-    virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) = 0;
+    virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) = 0;
 };
 
 } // namespace inet

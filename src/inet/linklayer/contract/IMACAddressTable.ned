@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // Interface for MAC address tables
 //
-moduleinterface IMACAddressTable
+moduleinterface IMacAddressTable
 {
     parameters:
         @display("i=block/table2");

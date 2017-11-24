@@ -24,11 +24,11 @@
 
 namespace inet {
 
-Define_Module(UDPEchoApp);
+Define_Module(UdpEchoApp);
 
-simsignal_t UDPEchoApp::pkSignal = registerSignal("pk");
+simsignal_t UdpEchoApp::pkSignal = registerSignal("pk");
 
-void UDPEchoApp::initialize(int stage)
+void UdpEchoApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
@@ -39,7 +39,7 @@ void UDPEchoApp::initialize(int stage)
     }
 }
 
-void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
+void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->getKind() == UDP_I_ERROR) {
         // ICMP error report -- discard it
@@ -65,19 +65,19 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void UDPEchoApp::refreshDisplay() const
+void UdpEchoApp::refreshDisplay() const
 {
     char buf[40];
     sprintf(buf, "echoed: %d pks", numEchoed);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void UDPEchoApp::finish()
+void UdpEchoApp::finish()
 {
     ApplicationBase::finish();
 }
 
-bool UDPEchoApp::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("socketOut"));
     int localPort = par("localPort");
@@ -87,13 +87,13 @@ bool UDPEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-void UDPEchoApp::handleNodeCrash()
+void UdpEchoApp::handleNodeCrash()
 {
 }
 

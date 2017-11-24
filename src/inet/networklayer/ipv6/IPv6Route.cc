@@ -23,9 +23,9 @@
 
 namespace inet {
 
-Register_Abstract_Class(IPv6Route);
+Register_Abstract_Class(Ipv6Route);
 
-std::string IPv6Route::info() const
+std::string Ipv6Route::info() const
 {
     std::stringstream out;
     out << getDestPrefix() << "/" << getPrefixLength() << " --> ";
@@ -37,18 +37,18 @@ std::string IPv6Route::info() const
     return out.str();
 }
 
-std::string IPv6Route::detailedInfo() const
+std::string Ipv6Route::detailedInfo() const
 {
     return std::string();
 }
 
-void IPv6Route::changed(int fieldCode)
+void Ipv6Route::changed(int fieldCode)
 {
     if (_rt)
         _rt->routeChanged(this, fieldCode);
 }
 
-IRoutingTable *IPv6Route::getRoutingTableAsGeneric() const
+IRoutingTable *Ipv6Route::getRoutingTableAsGeneric() const
 {
     return getRoutingTable();
 }

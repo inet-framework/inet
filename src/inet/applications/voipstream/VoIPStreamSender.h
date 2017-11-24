@@ -51,11 +51,11 @@ extern "C" {
 
 namespace inet {
 
-class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
+class INET_API VoipStreamSender : public cSimpleModule, public ILifecycle
 {
   public:
-    VoIPStreamSender();
-    ~VoIPStreamSender();
+    VoipStreamSender();
+    ~VoipStreamSender();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
@@ -131,7 +131,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     AVCodec *pCodecEncoder = nullptr;    // output encoder codec
 
     // state variables
-    UDPSocket socket;
+    UdpSocket socket;
     int streamIndex = -1;
     uint32_t pktID = 0;    // increasing packet sequence number
     int samplesPerPacket = 0;

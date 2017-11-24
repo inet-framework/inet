@@ -41,7 +41,7 @@ class INET_API IRecipientBlockAckAgreementHandler
         virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
         virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
-        virtual RecipientBlockAckAgreement* getAgreement(Tid tid, MACAddress originatorAddr) = 0;
+        virtual RecipientBlockAckAgreement* getAgreement(Tid tid, MacAddress originatorAddr) = 0;
 };
 
 } // namespace ieee80211

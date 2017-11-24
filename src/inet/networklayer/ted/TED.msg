@@ -14,23 +14,23 @@
 
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
 cplusplus {{
-typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;
+typedef std::vector<struct TeLinkStateInfo> TeLinkStateInfoVector;
 }}
 
 //
 // Represents a link in the ~TED and in ~LinkStateMsg packets.
 //
-struct TELinkStateInfo
+struct TeLinkStateInfo
 {
-    IPv4Address advrouter; // routerId of originator of this link state entry
-    IPv4Address linkid;    // identifies link within advrouter; set to peer's address
-    IPv4Address local;     // address of local interface of this link
-    IPv4Address remote;    // address of "gateway" to peer
+    Ipv4Address advrouter; // routerId of originator of this link state entry
+    Ipv4Address linkid;    // identifies link within advrouter; set to peer's address
+    Ipv4Address local;     // address of local interface of this link
+    Ipv4Address remote;    // address of "gateway" to peer
     double metric;       // link metric
     double MaxBandwidth; // maximum bandwidth (bps)
     double UnResvBandwidth[8]; // unreserved bandwidths --FIXME indexed by what?
@@ -47,7 +47,7 @@ struct TELinkStateInfo
 // This triggers the link state protocol to send out up-to-date link state info
 // about the given links.
 //
-class TEDChangeInfo extends cObject
+class TedChangeInfo extends cObject
 {
     int tedLinkIndices[];
 }

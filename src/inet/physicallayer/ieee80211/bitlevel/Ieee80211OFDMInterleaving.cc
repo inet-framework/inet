@@ -21,13 +21,13 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMInterleaving::Ieee80211OFDMInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier) :
+Ieee80211OfdmInterleaving::Ieee80211OfdmInterleaving(int numberOfCodedBitsPerSymbol, int numberOfCodedBitsPerSubcarrier) :
     numberOfCodedBitsPerSymbol(numberOfCodedBitsPerSymbol),
     numberOfCodedBitsPerSubcarrier(numberOfCodedBitsPerSubcarrier)
 {
 }
 
-std::ostream& Ieee80211OFDMInterleaving::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmInterleaving::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMInterleaving";
     if (level <= PRINT_LEVEL_TRACE)

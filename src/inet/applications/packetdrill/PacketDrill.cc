@@ -104,17 +104,17 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
 }
 
 
-TCPOption *setOptionValues(PacketDrillTcpOption* opt)
+TcpOption *setOptionValues(PacketDrillTcpOption* opt)
 {
     unsigned char length = opt->getLength();
     switch (opt->getKind()) {
         case TCPOPT_EOL: // EOL
-            return new TCPOptionEnd();
+            return new TcpOptionEnd();
         case TCPOPT_NOP: // NOP
-            return new TCPOptionNop();
+            return new TcpOptionNop();
         case TCPOPT_MAXSEG:
             if (length == 4) {
-                auto *option = new TCPOptionMaxSegmentSize();
+                auto *option = new TcpOptionMaxSegmentSize();
                 option->setLength(length);
                 option->setMaxSegmentSize(opt->getMss());
                 return option;
@@ -122,7 +122,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_WINDOW:
             if (length == 3) {
-                auto *option = new TCPOptionWindowScale();
+                auto *option = new TcpOptionWindowScale();
                 option->setLength(length);
                 option->setWindowScale(opt->getWindowScale());
                 return option;
@@ -130,14 +130,14 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_SACK_PERMITTED:
             if (length == 2) {
-                auto *option = new TCPOptionSackPermitted();
+                auto *option = new TcpOptionSackPermitted();
                 option->setLength(length);
                 return option;
             }
             break;
         case TCPOPT_SACK:
             if (length > 2 && (length % 8) == 2) {
-                auto *option = new TCPOptionSack();
+                auto *option = new TcpOptionSack();
                 option->setLength(length);
                 option->setSackItemArraySize(length / 8);
                 unsigned int count = 0;
@@ -152,7 +152,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_TIMESTAMP:
             if (length == 10) {
-                auto *option = new TCPOptionTimestamp();
+                auto *option = new TcpOptionTimestamp();
                 option->setLength(length);
                 option->setSenderTimestamp(opt->getVal());
                 option->setEchoedTimestamp(opt->getEcr());
@@ -163,7 +163,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             EV_INFO << "TCP option is not supported (yet).";
             break;
     } // switch
-    auto *option = new TCPOptionUnknown();
+    auto *option = new TcpOptionUnknown();
     option->setKind(opt->getKind());
     option->setLength(length);
     if (length > 2)
@@ -220,7 +220,7 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
     uint16 tcpOptionsLength = 0;
 
     if (tcpOptions && tcpOptions->getLength() > 0) { // options present?
-        TCPOption *option;
+        TcpOption *option;
         uint16 optionsCounter = 0;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {

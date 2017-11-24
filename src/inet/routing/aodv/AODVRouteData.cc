@@ -20,7 +20,7 @@
 
 namespace inet {
 
-std::ostream& operator<<(std::ostream& out, const AODVRouteData *data)
+std::ostream& operator<<(std::ostream& out, const AodvRouteData *data)
 {
     out << " isActive = " << data->isActive()
         << ", hasValidDestNum = " << data->hasValidDestNum()

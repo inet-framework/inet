@@ -27,9 +27,9 @@ namespace dymo {
 // TODO: use generic MANET port
 #define DYMO_UDP_PORT    269
 
-typedef uint32_t DYMOSequenceNumber;
+typedef uint32_t DymoSequenceNumber;
 
-enum DYMORouteState {
+enum DymoRouteState {
     ACTIVE,
     IDLE,
     EXPIRED,

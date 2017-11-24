@@ -29,7 +29,7 @@ namespace inet {
 class INET_API EthTestApp : public cSimpleModule
 {
   protected:
-    MACAddress destAddr;
+    MacAddress destAddr;
 
   public:
     EthTestApp() {}
@@ -49,7 +49,7 @@ Define_Module(EthTestApp);
 void EthTestApp::initialize()
 {
     const char *addr = par("destAddr");
-    destAddr = MACAddress(addr);
+    destAddr = MacAddress(addr);
     const char *script = par("script");
     parseScript(script);
 }

@@ -36,14 +36,14 @@ namespace inet {
 /**
  * Implements a DHCP server. See NED file for more details.
  */
-class INET_API DHCPServer : public cSimpleModule, public cListener, public ILifecycle
+class INET_API DhcpServer : public cSimpleModule, public cListener, public ILifecycle
 {
   protected:
-    typedef std::map<IPv4Address, DHCPLease> DHCPLeased;
+    typedef std::map<Ipv4Address, DhcpLease> DhcpLeased;
     enum TimerType {
         START_DHCP
     };
-    DHCPLeased leased;    // lookup table for lease infos
+    DhcpLeased leased;    // lookup table for lease infos
 
     bool isOperational = false;    // lifecycle
     int numSent = 0;    // num of sent UDP packets
@@ -54,12 +54,12 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /* Set by management, see DHCPServer NED file. */
     unsigned int maxNumOfClients = 0;
     unsigned int leaseTime = 0;
-    IPv4Address subnetMask;
-    IPv4Address gateway;
-    IPv4Address ipAddressStart;
+    Ipv4Address subnetMask;
+    Ipv4Address gateway;
+    Ipv4Address ipAddressStart;
 
     InterfaceEntry *ie = nullptr;    // interface to serve DHCP requests on
-    UDPSocket socket;
+    UdpSocket socket;
     simtime_t startTime;    // application start time
     cMessage *startTimer = nullptr;    // self message to start DHCP server
 
@@ -76,12 +76,12 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /*
      * Performs a database lookup by MAC address for lease information.
      */
-    virtual DHCPLease *getLeaseByMac(MACAddress mac);
+    virtual DhcpLease *getLeaseByMac(MacAddress mac);
 
     /*
      * Gets the next available lease to be assigned.
      */
-    virtual DHCPLease *getAvailableLease(IPv4Address requestedAddress, const MACAddress& clientMAC);
+    virtual DhcpLease *getAvailableLease(Ipv4Address requestedAddress, const MacAddress& clientMAC);
 
     /*
      * Implements the server's state machine.
@@ -92,18 +92,18 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
      * Send DHCPOFFER message to client in response to DHCPDISCOVER with offer of configuration
      * parameters.
      */
-    virtual void sendOffer(DHCPLease *lease, const Ptr<const DHCPMessage>& dhcpMsg);
+    virtual void sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& dhcpMsg);
 
     /*
      * Send DHCPACK message to client with configuration parameters, including committed network address.
      */
-    virtual void sendACK(DHCPLease *lease, const Ptr<const DHCPMessage>& dhcpMsg);
+    virtual void sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& dhcpMsg);
 
     /*
      * Send DHCPNAK message to client indicating client's notion of network address is incorrect
      * (e.g., client has moved to new subnet) or client's lease as expired.
      */
-    virtual void sendNAK(const Ptr<const DHCPMessage>& dhcpMsg);
+    virtual void sendNAK(const Ptr<const DhcpMessage>& dhcpMsg);
 
     virtual void handleSelfMessages(cMessage *msg);
     virtual InterfaceEntry *chooseInterface();
@@ -122,8 +122,8 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
-    DHCPServer();
-    virtual ~DHCPServer();
+    DhcpServer();
+    virtual ~DhcpServer();
 };
 
 } // namespace inet

@@ -10,5 +10,5 @@ namespace inet;
 class LMacHeader extends MacHeaderBase
 {
     int        mySlot; // the node's current slot number
-    MACAddress occupiedSlots[]; // currently known occupied slots
+    MacAddress occupiedSlots[]; // currently known occupied slots
 }

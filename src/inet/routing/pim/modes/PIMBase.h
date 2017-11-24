@@ -35,7 +35,7 @@ namespace inet {
 /**
  * Base class of PIMSM and PIMDM modules.
  */
-class INET_API PIMBase : public OperationalBase
+class INET_API PimBase : public OperationalBase
 {
   protected:
 
@@ -44,31 +44,31 @@ class INET_API PIMBase : public OperationalBase
         short rptBit;
         short preference;
         int metric;
-        IPv4Address address;
+        Ipv4Address address;
 
         static const AssertMetric PIM_INFINITE;
 
         AssertMetric() : rptBit(1), preference(-1), metric(0) {}
-        AssertMetric(int preference, int metric, IPv4Address address) :
+        AssertMetric(int preference, int metric, Ipv4Address address) :
             rptBit(0), preference(preference), metric(metric), address(address) { ASSERT(preference >= 0); }
-        AssertMetric(bool rptBit, int preference, int metric, IPv4Address address = IPv4Address::UNSPECIFIED_ADDRESS)
+        AssertMetric(bool rptBit, int preference, int metric, Ipv4Address address = Ipv4Address::UNSPECIFIED_ADDRESS)
             : rptBit(rptBit ? 1 : 0), preference(preference), metric(metric), address(address) { ASSERT(preference >= 0); }
         bool isInfinite() const { return preference == -1; }
         bool operator==(const AssertMetric& other) const;
         bool operator!=(const AssertMetric& other) const;
         bool operator<(const AssertMetric& other) const;
-        AssertMetric setAddress(IPv4Address address) const { return AssertMetric(rptBit, preference, metric, address); }
+        AssertMetric setAddress(Ipv4Address address) const { return AssertMetric(rptBit, preference, metric, address); }
     };
 
     struct RouteEntry
     {
-        PIMBase *owner;
-        IPv4Address source;
-        IPv4Address group;
+        PimBase *owner;
+        Ipv4Address source;
+        Ipv4Address group;
         int flags;
         AssertMetric metric;    // our metric of the unicast route to the source or RP(group)
 
-        RouteEntry(PIMBase *owner, IPv4Address source, IPv4Address group)
+        RouteEntry(PimBase *owner, Ipv4Address source, Ipv4Address group)
             : owner(owner), source(source), group(group), flags(0) {}
         virtual ~RouteEntry() {};
 
@@ -120,16 +120,16 @@ class INET_API PIMBase : public OperationalBase
 
     struct SourceAndGroup
     {
-        IPv4Address source;
-        IPv4Address group;
+        Ipv4Address source;
+        Ipv4Address group;
 
-        SourceAndGroup(IPv4Address source, IPv4Address group) : source(source), group(group) {}
+        SourceAndGroup(Ipv4Address source, Ipv4Address group) : source(source), group(group) {}
         bool operator==(const SourceAndGroup& other) const { return source == other.source && group == other.group; }
         bool operator!=(const SourceAndGroup& other) const { return source != other.source || group != other.group; }
         bool operator<(const SourceAndGroup& other) const { return source < other.source || (source == other.source && group < other.group); }
     };
 
-    enum PIMTimerKind {
+    enum PimTimerKind {
         // global timers
         HelloTimer = 1,
         TriggeredHelloDelay,
@@ -153,13 +153,13 @@ class INET_API PIMBase : public OperationalBase
         JoinTimer,
     };
 
-    static const IPv4Address ALL_PIM_ROUTERS_MCAST;
+    static const Ipv4Address ALL_PIM_ROUTERS_MCAST;
 
   protected:
-    IIPv4RoutingTable *rt = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    PIMInterfaceTable *pimIft = nullptr;
-    PIMNeighborTable *pimNbt = nullptr;
+    PimInterfaceTable *pimIft = nullptr;
+    PimNeighborTable *pimNbt = nullptr;
 
     bool isUp = false;
     bool isEnabled = false;
@@ -170,7 +170,7 @@ class INET_API PIMBase : public OperationalBase
     double holdTime = 0;
     int designatedRouterPriority = 0;
 
-    PIMInterface::PIMMode mode = (PIMInterface::PIMMode)0;
+    PimInterface::PimMode mode = (PimInterface::PimMode)0;
     uint32_t generationID = 0;
     cMessage *helloTimer = nullptr;
 
@@ -179,15 +179,15 @@ class INET_API PIMBase : public OperationalBase
     static simsignal_t rcvdHelloPkSignal;
 
   public:
-    PIMBase(PIMInterface::PIMMode mode) : mode(mode) {}
-    virtual ~PIMBase();
+    PimBase(PimInterface::PimMode mode) : mode(mode) {}
+    virtual ~PimBase();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
     void sendHelloPackets();
-    void sendHelloPacket(PIMInterface *pimInterface);
+    void sendHelloPacket(PimInterface *pimInterface);
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
 

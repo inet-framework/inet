@@ -35,7 +35,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
-    const auto& ddPacket = packet->peekHeader<OSPFDatabaseDescriptionPacket>();
+    const auto& ddPacket = packet->peekHeader<OspfDatabaseDescriptionPacket>();
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 
@@ -51,13 +51,13 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
                 break;
 
             case Neighbor::EXCHANGE_START_STATE: {
-                const OSPFDDOptions& ddOptions = ddPacket->getDdOptions();
+                const OspfDdOptions& ddOptions = ddPacket->getDdOptions();
 
                 if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                     (ddPacket->getLsaHeadersArraySize() == 0))
                 {
                     if (neighbor->getNeighborID() > router->getRouterID()) {
-                        Neighbor::DDPacketID packetID;
+                        Neighbor::DdPacketId packetID;
                         packetID.ddOptions = ddOptions;
                         packetID.options = ddPacket->getOptions();
                         packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -88,7 +88,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
                     (ddPacket->getDdSequenceNumber() == neighbor->getDDSequenceNumber()) &&
                     (neighbor->getNeighborID() < router->getRouterID()))
                 {
-                    Neighbor::DDPacketID packetID;
+                    Neighbor::DdPacketId packetID;
                     packetID.ddOptions = ddOptions;
                     packetID.options = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -114,7 +114,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
             break;
 
             case Neighbor::EXCHANGE_STATE: {
-                Neighbor::DDPacketID packetID;
+                Neighbor::DdPacketId packetID;
                 packetID.ddOptions = ddPacket->getDdOptions();
                 packetID.options = ddPacket->getOptions();
                 packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -162,7 +162,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
 
             case Neighbor::LOADING_STATE:
             case Neighbor::FULL_STATE: {
-                Neighbor::DDPacketID packetID;
+                Neighbor::DdPacketId packetID;
                 packetID.ddOptions = ddPacket->getDdOptions();
                 packetID.options = ddPacket->getOptions();
                 packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -188,7 +188,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
     }
 }
 
-bool DatabaseDescriptionHandler::processDDPacket(const OSPFDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart)
+bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart)
 {
     EV_INFO << "  Processing packet contents(ddOptions="
             << ((ddPacket->getDdOptions().I_Init) ? "I " : "_ ")
@@ -201,8 +201,8 @@ bool DatabaseDescriptionHandler::processDDPacket(const OSPFDatabaseDescriptionPa
     unsigned int headerCount = ddPacket->getLsaHeadersArraySize();
 
     for (unsigned int i = 0; i < headerCount; i++) {
-        const OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LSAType lsaType = static_cast<LSAType>(currentHeader.getLsType());
+        const OspfLsaHeader& currentHeader = ddPacket->getLsaHeaders(i);
+        LsaType lsaType = static_cast<LsaType>(currentHeader.getLsType());
 
         EV_DETAIL << "    " << currentHeader;
 
@@ -214,12 +214,12 @@ bool DatabaseDescriptionHandler::processDDPacket(const OSPFDatabaseDescriptionPa
             return false;
         }
         else {
-            LSAKeyType lsaKey;
+            LsaKeyType lsaKey;
 
             lsaKey.linkStateID = currentHeader.getLinkStateID();
             lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter();
 
-            OSPFLSA *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
+            OspfLsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
             if ((lsaInDatabase == nullptr) || (lsaInDatabase->getHeader() < currentHeader)) {

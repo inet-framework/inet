@@ -30,14 +30,14 @@ namespace ieee80211 {
 class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAgreementHandler
 {
     protected:
-        std::map<std::pair<MACAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
+        std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
 
     protected:
-        virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MACAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
+        virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, int startingSequenceNumber, IOriginatorBlockAckAgreementPolicy* blockAckAgreementPolicy);
         virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest);
         virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
-        virtual void terminateAgreement(MACAddress originatorAddr, Tid tid);
-        virtual const Ptr<Ieee80211Delba> buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode);
+        virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
+        virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
         virtual simtime_t computeEarliestExpirationTime();
         virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
@@ -51,7 +51,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
         virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
         virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
-        virtual OriginatorBlockAckAgreement *getAgreement(MACAddress receiverAddr, Tid tid) override;
+        virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) override;
 };
 
 } // namespace ieee80211

@@ -22,10 +22,10 @@ import inet.physicallayer.contract.bitlevel.IDemodulator;
 //
 // @see ~Ieee80211OFDMModulator
 //
-simple Ieee80211OFDMDemodulator like IDemodulator
+simple Ieee80211OfdmDemodulator like IDemodulator
 {
     parameters:
         string subcarrierModulation;
         @display("i=block/mac");
-        @class(Ieee80211OFDMDemodulatorModule);
+        @class(Ieee80211OfdmDemodulatorModule);
 }

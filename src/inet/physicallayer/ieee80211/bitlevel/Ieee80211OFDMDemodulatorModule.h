@@ -26,10 +26,10 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMDemodulatorModule : public IDemodulator, public cSimpleModule
+class INET_API Ieee80211OfdmDemodulatorModule : public IDemodulator, public cSimpleModule
 {
   protected:
-    const Ieee80211OFDMDemodulator *ofdmDemodulator = nullptr;
+    const Ieee80211OfdmDemodulator *ofdmDemodulator = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -37,7 +37,7 @@ class INET_API Ieee80211OFDMDemodulatorModule : public IDemodulator, public cSim
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle self messages"); }
 
   public:
-    virtual ~Ieee80211OFDMDemodulatorModule();
+    virtual ~Ieee80211OfdmDemodulatorModule();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return ofdmDemodulator->printToStream(stream, level); }
     const Ieee80211OfdmModulation *getModulation() const { return ofdmDemodulator->getModulation(); }

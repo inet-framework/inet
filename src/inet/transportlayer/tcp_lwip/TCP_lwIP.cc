@@ -57,9 +57,9 @@ namespace tcp {
 
 using namespace serializer;
 
-Define_Module(TCP_lwIP);
+Define_Module(TcpLwip);
 
-TCP_lwIP::TCP_lwIP()
+TcpLwip::TcpLwip()
     :
     pLwipFastTimerM(nullptr),
     pLwipTcpLayerM(nullptr),
@@ -81,7 +81,7 @@ TCP_lwIP::TCP_lwIP()
     netIf.state = nullptr;
 }
 
-void TCP_lwIP::initialize(int stage)
+void TcpLwip::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -141,7 +141,7 @@ void TCP_lwIP::initialize(int stage)
     }
 }
 
-TCP_lwIP::~TCP_lwIP()
+TcpLwip::~TcpLwip()
 {
     EV_TRACE << this << ": destructor\n";
     isAliveM = false;
@@ -159,7 +159,7 @@ TCP_lwIP::~TCP_lwIP()
         delete pLwipTcpLayerM;
 }
 
-void TCP_lwIP::handleIpInputMessage(Packet *packet)
+void TcpLwip::handleIpInputMessage(Packet *packet)
 {
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
@@ -248,7 +248,7 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
     delete packet;
 }
 
-void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
+void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
         const void *dataptr, int len)
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
@@ -264,7 +264,7 @@ void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     }
 }
 
-void TCP_lwIP::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
+void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)(pcb->callback_arg);
     if (conn != nullptr) {
@@ -275,7 +275,7 @@ void TCP_lwIP::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
     }
 }
 
-err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
+err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
     TcpLwipConnection *conn = (TcpLwipConnection *)arg;
@@ -319,7 +319,7 @@ err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
     return err;
 }
 
-err_t TCP_lwIP::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
+err_t TcpLwip::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
 {
     int newConnId = getEnvir()->getUniqueNumber();
     TcpLwipConnection *newConn = new TcpLwipConnection(conn, newConnId, pcb);
@@ -332,13 +332,13 @@ err_t TCP_lwIP::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb 
     return err;
 }
 
-err_t TCP_lwIP::tcp_event_sent(TcpLwipConnection& conn, u16_t size)
+err_t TcpLwip::tcp_event_sent(TcpLwipConnection& conn, u16_t size)
 {
     conn.do_SEND();
     return ERR_OK;
 }
 
-err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err)
+err_t TcpLwip::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err)
 {
     if (p == nullptr) {
         // Received FIN:
@@ -363,14 +363,14 @@ err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t er
     return err;
 }
 
-err_t TCP_lwIP::tcp_event_conn(TcpLwipConnection& conn, err_t err)
+err_t TcpLwip::tcp_event_conn(TcpLwipConnection& conn, err_t err)
 {
     conn.sendEstablishedMsg();
     conn.do_SEND();
     return err;
 }
 
-void TCP_lwIP::removeConnection(TcpLwipConnection& conn)
+void TcpLwip::removeConnection(TcpLwipConnection& conn)
 {
     conn.pcbM->callback_arg = nullptr;
     conn.pcbM = nullptr;
@@ -378,7 +378,7 @@ void TCP_lwIP::removeConnection(TcpLwipConnection& conn)
     delete &conn;
 }
 
-err_t TCP_lwIP::tcp_event_err(TcpLwipConnection& conn, err_t err)
+err_t TcpLwip::tcp_event_err(TcpLwipConnection& conn, err_t err)
 {
     switch (err) {
         case ERR_ABRT:
@@ -400,18 +400,18 @@ err_t TCP_lwIP::tcp_event_err(TcpLwipConnection& conn, err_t err)
     return err;
 }
 
-err_t TCP_lwIP::tcp_event_poll(TcpLwipConnection& conn)
+err_t TcpLwip::tcp_event_poll(TcpLwipConnection& conn)
 {
     conn.do_SEND();
     return ERR_OK;
 }
 
-struct netif *TCP_lwIP::ip_route(L3Address const& ipAddr)
+struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
 {
     return &netIf;
 }
 
-void TCP_lwIP::handleAppMessage(cMessage *msgP)
+void TcpLwip::handleAppMessage(cMessage *msgP)
 {
     int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
 
@@ -437,7 +437,7 @@ simtime_t roundTime(const simtime_t& timeP, int secSlicesP)
     return ret;
 }
 
-void TCP_lwIP::handleMessage(cMessage *msgP)
+void TcpLwip::handleMessage(cMessage *msgP)
 {
     if (msgP->isSelfMessage()) {
         // timer expired
@@ -479,7 +479,7 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
     }
 }
 
-void TCP_lwIP::refreshDisplay() const
+void TcpLwip::refreshDisplay() const
 {
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display
@@ -579,23 +579,23 @@ void TCP_lwIP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TcpLwipConnection *TCP_lwIP::findAppConn(int connIdP)
+TcpLwipConnection *TcpLwip::findAppConn(int connIdP)
 {
     auto i = tcpAppConnMapM.find(connIdP);
     return i == tcpAppConnMapM.end() ? nullptr : (i->second);
 }
 
-void TCP_lwIP::finish()
+void TcpLwip::finish()
 {
     isAliveM = false;
 }
 
-void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
+void TcpLwip::printConnBrief(TcpLwipConnection& connP)
 {
     EV_TRACE << this << ": connId=" << connP.connIdM;
 }
 
-void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Address const& destP, void *dataP, int lenP)
+void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Address const& destP, void *dataP, int lenP)
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
 
@@ -654,24 +654,24 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
     send(packet, "ipOut");
 }
 
-void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
+void TcpLwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
 {
     printConnBrief(connP);
 
     // first do actions
-    TCPCommand *tcpCommand = check_and_cast_nullable<TCPCommand *>(msgP->removeControlInfo());
+    TcpCommand *tcpCommand = check_and_cast_nullable<TcpCommand *>(msgP->removeControlInfo());
 
     switch (msgP->getKind()) {
         case TCP_C_OPEN_ACTIVE:
-            process_OPEN_ACTIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP);
+            process_OPEN_ACTIVE(connP, check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
             break;
 
         case TCP_C_OPEN_PASSIVE:
-            process_OPEN_PASSIVE(connP, check_and_cast<TCPOpenCommand *>(tcpCommand), msgP);
+            process_OPEN_PASSIVE(connP, check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
             break;
 
         case TCP_C_ACCEPT:
-            process_ACCEPT(connP, check_and_cast<TCPAcceptCommand *>(tcpCommand), msgP);
+            process_ACCEPT(connP, check_and_cast<TcpAcceptCommand *>(tcpCommand), msgP);
             break;
 
         case TCP_C_SEND:
@@ -698,7 +698,7 @@ void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
     }
 }
 
-void TCP_lwIP::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
+void TcpLwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP,
         cMessage *msgP)
 {
     if (tcpCommandP->getRemoteAddr().isUnspecified() || tcpCommandP->getRemotePort() == -1)
@@ -720,7 +720,7 @@ void TCP_lwIP::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
     delete msgP;
 }
 
-void TCP_lwIP::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP,
+void TcpLwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP,
         cMessage *msgP)
 {
     ASSERT(pLwipTcpLayerM);
@@ -743,21 +743,21 @@ void TCP_lwIP::process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tc
     delete msgP;
 }
 
-void TCP_lwIP::process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCommand, cMessage *msg)
+void TcpLwip::process_ACCEPT(TcpLwipConnection& connP, TcpAcceptCommand *tcpCommand, cMessage *msg)
 {
     connP.accept();
     delete tcpCommand;
     delete msg;
 }
 
-void TCP_lwIP::process_SEND(TcpLwipConnection& connP, Packet *msgP)
+void TcpLwip::process_SEND(TcpLwipConnection& connP, Packet *msgP)
 {
     EV_INFO << this << ": processing SEND command, len=" << msgP->getByteLength() << endl;
 
     connP.send(msgP);
 }
 
-void TCP_lwIP::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TcpLwip::process_CLOSE(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
 {
     EV_INFO << this << ": processing CLOSE(" << connP.connIdM << ") command\n";
 
@@ -767,7 +767,7 @@ void TCP_lwIP::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     connP.close();
 }
 
-void TCP_lwIP::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TcpLwip::process_ABORT(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
 {
     EV_INFO << this << ": processing ABORT(" << connP.connIdM << ") command\n";
 
@@ -777,30 +777,30 @@ void TCP_lwIP::process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, 
     connP.abort();
 }
 
-void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
+void TcpLwip::process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
 {
     EV_INFO << this << ": processing STATUS(" << connP.connIdM << ") command\n";
 
     delete tcpCommandP;    // but we'll reuse msg for reply
 
-    TCPStatusInfo *statusInfo = new TCPStatusInfo();
+    TcpStatusInfo *statusInfo = new TcpStatusInfo();
     connP.fillStatusInfo(*statusInfo);
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
     send(msgP, "appOut");
 }
 
-TcpLwipSendQueue *TCP_lwIP::createSendQueue()
+TcpLwipSendQueue *TcpLwip::createSendQueue()
 {
     return new TcpLwipSendQueue();
 }
 
-TcpLwipReceiveQueue *TCP_lwIP::createReceiveQueue()
+TcpLwipReceiveQueue *TcpLwip::createReceiveQueue()
 {
     return new TcpLwipReceiveQueue();
 }
 
-bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TcpLwip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 

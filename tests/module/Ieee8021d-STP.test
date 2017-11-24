@@ -1,6 +1,6 @@
 %description:
 
-Test RSTP treebuilding
+Test Rstp treebuilding
 
 %file: test.ned
 
@@ -10,12 +10,12 @@ import inet.common.lifecycle.LifecycleController;
 import inet.node.ethernet.EtherSwitch;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
-import inet.linklayer.ieee8021d.tester.STPTester;
+import inet.linklayer.ieee8021d.tester.StpTester;
 
 network LargeNet
 {
     submodules:
-        stpTester: STPTester;
+        stpTester: StpTester;
         scenarioManager: ScenarioManager;
         l2NetworkConfigurator: L2NetworkConfigurator;
         lifecycleController: LifecycleController;

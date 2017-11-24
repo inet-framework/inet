@@ -782,7 +782,7 @@ static void testStreaming()
     ASSERT(inputStream4.getRemainingLength() == b(0));
 
     // 8. MACAddress
-    MACAddress macAddress("0A:AA:01:02:03:04");
+    MacAddress macAddress("0A:AA:01:02:03:04");
     MemoryOutputStream outputStream5;
     outputStream5.writeMACAddress(macAddress);
     MemoryInputStream inputStream5(outputStream5.getData());
@@ -791,7 +791,7 @@ static void testStreaming()
     ASSERT(inputStream5.getRemainingLength() == b(0));
 
     // 9. IPv4Address
-    IPv4Address ipv4Address("192.168.10.1");
+    Ipv4Address ipv4Address("192.168.10.1");
     MemoryOutputStream outputStream6;
     outputStream6.writeIPv4Address(ipv4Address);
     MemoryInputStream inputStream6(outputStream6.getData());
@@ -800,7 +800,7 @@ static void testStreaming()
     ASSERT(inputStream6.getRemainingLength() == b(0));
 
     // 10. IPv6Address
-    IPv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
+    Ipv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
     MemoryOutputStream outputStream7;
     outputStream7.writeIPv6Address(ipv6Address);
     MemoryInputStream inputStream7(outputStream7.getData());

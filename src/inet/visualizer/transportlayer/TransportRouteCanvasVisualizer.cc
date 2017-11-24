@@ -76,7 +76,7 @@ bool TransportRouteCanvasVisualizer::isPathEnd(cModule *module) const
 bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
 {
 #ifdef WITH_ETHERNET
-    if (dynamic_cast<MACRelayUnit *>(module) != nullptr)
+    if (dynamic_cast<MacRelayUnit *>(module) != nullptr)
         return true;
 #endif
 

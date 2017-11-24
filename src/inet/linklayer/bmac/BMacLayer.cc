@@ -32,7 +32,7 @@ Define_Module(BMacLayer);
 
 void BMacLayer::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         queueLength = par("queueLength");
         animation = par("animation");
@@ -54,8 +54,8 @@ void BMacLayer::initialize(int stage)
         nbTxAcks = 0;
 
         txAttempts = 0;
-        lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
-        lastDataPktSrcAddr = MACAddress::BROADCAST_ADDRESS;
+        lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
+        lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
 
@@ -152,7 +152,7 @@ void BMacLayer::initializeMACAddress()
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -205,7 +205,7 @@ void BMacLayer::sendPreamble()
 {
     auto preamble = makeShared<BMacHeader>();
     preamble->setSrcAddr(address);
-    preamble->setDestAddr(MACAddress::BROADCAST_ADDRESS);
+    preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(b(headerLength));
     preamble->markImmutable();
 
@@ -428,14 +428,14 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress src = mac->peekHeader<BMacHeader>()->getSrcAddr();
+                const MacAddress src = mac->peekHeader<BMacHeader>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
                 if (src == lastDataPktDestAddr) {
                     EV_DETAIL << "New state SLEEP" << endl;
                     nbRecvdAcks++;
-                    lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
+                    lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
                     cancelEvent(ack_timeout);
                     delete macQueue.front();
                     macQueue.pop_front();
@@ -446,7 +446,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                         scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
+                    lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
                 }
                 delete msg;
                 return;
@@ -473,8 +473,8 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 nbRxDataPackets++;
                 auto mac = check_and_cast<Packet *>(msg);
                 const auto bmacHeader = mac->peekHeader<BMacHeader>();
-                const MACAddress& dest = bmacHeader->getDestAddr();
-                const MACAddress& src = bmacHeader->getSrcAddr();
+                const MacAddress& dest = bmacHeader->getDestAddr();
+                const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
                     EV_DETAIL << "Local delivery " << mac << endl;
                     decapsulate(mac);
@@ -548,7 +548,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     scheduleAt(simTime() + slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                lastDataPktSrcAddr = MACAddress::BROADCAST_ADDRESS;
+                lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
                 return;
             }
             break;

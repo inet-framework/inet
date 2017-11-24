@@ -32,7 +32,7 @@ class INET_API EthernetApplication : public cSimpleModule
     cPar *respLength = nullptr;
     cPar *waitTime = nullptr;
 
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
 
     // Reception statistics
     long packetsSent = 0;
@@ -48,7 +48,7 @@ class INET_API EthernetApplication : public cSimpleModule
     /*
      *	Gets the MAC address in case a host name was set in destAddress parameter
      */
-    virtual MACAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMACAddress();
 
     /*
      * sendPacket function for the server side
@@ -58,7 +58,7 @@ class INET_API EthernetApplication : public cSimpleModule
     /*
      * sendPacket function for the client side
      */
-    void sendPacket(cMessage *datapacket, const MACAddress& destAddr);
+    void sendPacket(cMessage *datapacket, const MacAddress& destAddr);
 
     /*
      * generates response packet. Server side.

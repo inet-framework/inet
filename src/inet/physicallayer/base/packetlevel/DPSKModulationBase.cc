@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-DPSKModulationBase::DPSKModulationBase(unsigned int constellationSize) :
+DpskModulationBase::DpskModulationBase(unsigned int constellationSize) :
     constellationSize(constellationSize)
 {
 }

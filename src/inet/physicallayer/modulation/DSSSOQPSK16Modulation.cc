@@ -21,16 +21,16 @@ namespace inet {
 
 namespace physicallayer {
 
-DSSSOQPSK16Modulation::DSSSOQPSK16Modulation() :
-    APSKModulationBase(new std::vector<APSKSymbol>())
+DsssOqpsk16Modulation::DsssOqpsk16Modulation() :
+    ApskModulationBase(new std::vector<ApskSymbol>())
 {
 }
 
-DSSSOQPSK16Modulation::~DSSSOQPSK16Modulation() {
+DsssOqpsk16Modulation::~DsssOqpsk16Modulation() {
     delete constellation;
 }
 
-double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double DsssOqpsk16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     // Taken from MiXiM 802.15.4 decider by Karl Wessel
     // Valid for IEEE 802.15.4 2.45 GHz OQPSK modulation
@@ -76,7 +76,7 @@ double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
     return (8.0 / 15) * (1.0 / 16) * dSumK;
 }
 
-double DSSSOQPSK16Modulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
+double DsssOqpsk16Modulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     return NAN;
 }

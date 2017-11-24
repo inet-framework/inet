@@ -21,7 +21,7 @@ package inet.applications.rtpapp;
 // which uses RTP. It acts as a sender if the parameter fileName is
 // set, and as a receiver if the parameter is empty.
 //
-simple RTPApplication
+simple RtpApplication
 {
     parameters:
         @display("i=block/app");

@@ -14,7 +14,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.rsvp_te.IntServ;
 
 namespace inet;
@@ -102,7 +102,7 @@ message RsbTimeoutMsg extends SignallingMsg
 //
 message HelloTimerMsg extends SignallingMsg
 {
-    IPv4Address peer;
+    Ipv4Address peer;
 
     command = MSG_HELLO_TIMER;
 }
@@ -112,7 +112,7 @@ message HelloTimerMsg extends SignallingMsg
 //
 message HelloTimeoutMsg extends SignallingMsg
 {
-    IPv4Address peer;
+    Ipv4Address peer;
 
     command = MSG_HELLO_TIMEOUT;
 }
@@ -122,8 +122,8 @@ message HelloTimeoutMsg extends SignallingMsg
 //
 message PathNotifyMsg extends SignallingMsg
 {
-    SessionObj_t session;
-    SenderTemplateObj_t sender;
+    SessionObj session;
+    SenderTemplateObj sender;
 
     int status;
 

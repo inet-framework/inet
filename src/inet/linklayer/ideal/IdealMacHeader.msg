@@ -19,7 +19,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
@@ -30,8 +30,8 @@ namespace inet;
 class IdealMacHeader extends FieldsChunk
 {
     chunkLength = B(16);
-    MACAddress src;     // source address
-    MACAddress dest;    // destination address
+    MacAddress src;     // source address
+    MacAddress dest;    // destination address
     int srcModuleId;    // technical data, uses instead of sending back an ACK packet
     int networkProtocol = -1;
 }

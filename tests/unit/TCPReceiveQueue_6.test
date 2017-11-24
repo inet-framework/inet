@@ -1,5 +1,5 @@
 %description:
-Test TCPReceiveQueue class
+Test TcpReceiveQueue class
 - out of range in the queue
 
 %includes:
@@ -10,8 +10,8 @@ Test TCPReceiveQueue class
 using namespace ::inet::tcp;
 
 %activity:
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *q = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *q = &rcvQueue;
 
 q->init(1000);
 

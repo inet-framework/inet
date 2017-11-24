@@ -88,7 +88,7 @@ import inet.applications.contract.IApp;
 //
 // @see ~TCPGenericSrvApp, ~GenericAppMsg, ~TelnetApp
 //
-simple TCPBasicClientApp like IApp
+simple TcpBasicClientApp like IApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
@@ -114,7 +114,7 @@ simple TCPBasicClientApp like IApp
         @statistic[numActiveSessions](title="number of active sessions"; source="sum(connect)"; record=max,timeavg,vector; interpolationmode=sample-hold);
         @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
     gates:
-        input socketIn @labels(TCPCommand/up);
-        output socketOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }
 

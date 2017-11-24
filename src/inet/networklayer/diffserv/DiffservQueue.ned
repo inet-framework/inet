@@ -22,7 +22,7 @@ import inet.common.queue.DropTailQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.PriorityScheduler;
 import inet.common.queue.Sink;
-import inet.common.queue.WRRScheduler;
+import inet.common.queue.WrrScheduler;
 
 
 //
@@ -90,7 +90,7 @@ module DiffservQueue like IOutputQueue
         beQueue: DropTailQueue {
             @display("p=195,628");
         }
-        wrr: WRRScheduler {
+        wrr: WrrScheduler {
             weights = default("1 1 1 1 1");
             @display("p=384,368");
         }

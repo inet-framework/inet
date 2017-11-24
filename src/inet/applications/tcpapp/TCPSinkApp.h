@@ -28,10 +28,10 @@ namespace inet {
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
  */
-class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
+class INET_API TcpSinkApp : public cSimpleModule, public ILifecycle
 {
   protected:
-    TCPSocket socket;
+    TcpSocket socket;
     long bytesRcvd;
 
     virtual void initialize(int stage) override;

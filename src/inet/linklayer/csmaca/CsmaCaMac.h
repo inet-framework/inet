@@ -28,7 +28,7 @@
 
 namespace inet {
 
-class INET_API CsmaCaMac : public MACProtocolBase
+class INET_API CsmaCaMac : public MacProtocolBase
 {
   protected:
     /**
@@ -36,7 +36,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
      */
     //@{
     FcsMode fcsMode;
-    MACAddress address;
+    MacAddress address;
     bool useAck = true;
     double bitrate = NaN;
     b headerLength = b(-1);

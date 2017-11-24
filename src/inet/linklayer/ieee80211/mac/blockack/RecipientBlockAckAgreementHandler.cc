@@ -46,7 +46,7 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
 {
     if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO: + Implicit Block Ack
         Tid tid = qosHeader->getTid();
-        MACAddress originatorAddr = qosHeader->getTransmitterAddress();
+        MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
         if (agreement)
             scheduleInactivityTimer(callback);
@@ -63,7 +63,7 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
         if (agreement->getExpirationTime() == now) {
-            MACAddress receiverAddr = id.first.first;
+            MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
             delba->markImmutable();
@@ -83,7 +83,7 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
 //
 RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
 {
-    MACAddress originatorAddr = addbaReq->getTransmitterAddress();
+    MacAddress originatorAddr = addbaReq->getTransmitterAddress();
     auto id = std::make_pair(originatorAddr, addbaReq->getTid());
     auto it = blockAckAgreements.find(id);
     if (it == blockAckAgreements.end()) {
@@ -101,7 +101,7 @@ RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::addAgreement(cons
 // field set to TIMEOUT and shall issue a MLME-DELBA.indication primitive with the ReasonCode
 // parameter having a value of TIMEOUT. The procedure is illustrated in Figure 10-14.
 //
-const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MACAddress receiverAddr, Tid tid, int reasonCode)
+const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode)
 {
     auto delba = makeShared<Ieee80211Delba>();
     delba->setReceiverAddress(receiverAddr);
@@ -137,7 +137,7 @@ void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee8021
         throw cRuntimeError("Agreement is not found");
 }
 
-void RecipientBlockAckAgreementHandler::terminateAgreement(MACAddress originatorAddr, Tid tid)
+void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
@@ -148,7 +148,7 @@ void RecipientBlockAckAgreementHandler::terminateAgreement(MACAddress originator
     }
 }
 
-RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::getAgreement(Tid tid, MACAddress originatorAddr)
+RecipientBlockAckAgreement* RecipientBlockAckAgreementHandler::getAgreement(Tid tid, MacAddress originatorAddr)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);

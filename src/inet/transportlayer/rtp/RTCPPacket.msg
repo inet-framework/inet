@@ -26,7 +26,7 @@ namespace inet;
 
 namespace inet::rtp;
 
-enum RTCPPacketType
+enum RtcpPacketType
 {
     RTCP_PT_UNDEF =   0; // default value undefined
     RTCP_PT_SR    = 200; // sender report
@@ -35,26 +35,26 @@ enum RTCPPacketType
     RTCP_PT_BYE   = 203; // bye
 };
 
-class RTCPPacket extends FieldsChunk
+class RtcpPacket extends FieldsChunk
 {
     chunkLength = B(4);
     @customize;  // see the generated C++ header for more info
     int8 version = 2;
     bool padding = 0;
     short count = 0;
-    RTCPPacketType packetType = RTCP_PT_UNDEF;
+    RtcpPacketType packetType = RTCP_PT_UNDEF;
     abstract int rtcpLength;
 }
 
 cplusplus{{
 
-class INET_API RTCPPacket : public RTCPPacket_Base
+class INET_API RtcpPacket : public RtcpPacket_Base
 {
   public:
-    RTCPPacket() : RTCPPacket_Base() {};
-    RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other) {}
-    RTCPPacket& operator=(const RTCPPacket& other) { RTCPPacket_Base::operator=(other); return *this; }
-    virtual RTCPPacket *dup() const override { return new RTCPPacket(*this); }
+    RtcpPacket() : RtcpPacket_Base() {};
+    RtcpPacket(const RtcpPacket& other) : RtcpPacket_Base(other) {}
+    RtcpPacket& operator=(const RtcpPacket& other) { RtcpPacket_Base::operator=(other); return *this; }
+    virtual RtcpPacket *dup() const override { return new RtcpPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPPacket_Base
 
@@ -67,7 +67,7 @@ class INET_API RTCPPacket : public RTCPPacket_Base
 
 }}
 
-class RTCPReceiverReportPacket extends RTCPPacket
+class RtcpReceiverReportPacket extends RtcpPacket
 {
     packetType = RTCP_PT_RR;
     @customize;  // see the generated C++ header for more info
@@ -77,13 +77,13 @@ class RTCPReceiverReportPacket extends RTCPPacket
 
 cplusplus {{
 
-class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
+class INET_API RtcpReceiverReportPacket : public RtcpReceiverReportPacket_Base
 {
   public:
-    RTCPReceiverReportPacket();
-    RTCPReceiverReportPacket(const RTCPReceiverReportPacket& other) : RTCPReceiverReportPacket_Base(other) {}
-    RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& other) { RTCPReceiverReportPacket_Base::operator=(other); return *this; }
-    virtual RTCPReceiverReportPacket *dup() const override { return new RTCPReceiverReportPacket(*this); }
+    RtcpReceiverReportPacket();
+    RtcpReceiverReportPacket(const RtcpReceiverReportPacket& other) : RtcpReceiverReportPacket_Base(other) {}
+    RtcpReceiverReportPacket& operator=(const RtcpReceiverReportPacket& other) { RtcpReceiverReportPacket_Base::operator=(other); return *this; }
+    virtual RtcpReceiverReportPacket *dup() const override { return new RtcpReceiverReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPReceiverReportPacket_Base
     /**
      * Adds a receiver report to this receiver report packet.
@@ -93,7 +93,7 @@ class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 
 }}
 
-class RTCPSDESPacket extends RTCPPacket
+class RtcpSdesPacket extends RtcpPacket
 {
     packetType = RTCP_PT_SDES;
     @customize;  // see the generated C++ header for more info
@@ -102,20 +102,20 @@ class RTCPSDESPacket extends RTCPPacket
 
 cplusplus {{
 
-class INET_API RTCPSDESPacket : public RTCPSDESPacket_Base
+class INET_API RtcpSdesPacket : public RtcpSdesPacket_Base
 {
   public:
-    RTCPSDESPacket();
-    RTCPSDESPacket(const RTCPSDESPacket& other) : RTCPSDESPacket_Base(other) {}
-    RTCPSDESPacket& operator=(const RTCPSDESPacket& other) { RTCPSDESPacket_Base::operator=(other); return *this; }
-    virtual RTCPSDESPacket *dup() const override { return new RTCPSDESPacket(*this); }
+    RtcpSdesPacket();
+    RtcpSdesPacket(const RtcpSdesPacket& other) : RtcpSdesPacket_Base(other) {}
+    RtcpSdesPacket& operator=(const RtcpSdesPacket& other) { RtcpSdesPacket_Base::operator=(other); return *this; }
+    virtual RtcpSdesPacket *dup() const override { return new RtcpSdesPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSDESPacket_Base
-    void addSDESChunk(SDESChunk *sdesChunk);
+    void addSDESChunk(SdesChunk *sdesChunk);
 };
 
 }}
 
-class RTCPByePacket extends RTCPPacket
+class RtcpByePacket extends RtcpPacket
 {
     packetType = RTCP_PT_BYE;
     count = 1;
@@ -125,19 +125,19 @@ class RTCPByePacket extends RTCPPacket
 
 cplusplus {{
 
-class INET_API RTCPByePacket : public RTCPByePacket_Base
+class INET_API RtcpByePacket : public RtcpByePacket_Base
 {
   public:
-    RTCPByePacket();
-    RTCPByePacket(const RTCPByePacket& other) : RTCPByePacket_Base(other) {}
-    RTCPByePacket& operator=(const RTCPByePacket& other) { RTCPByePacket_Base::operator=(other); return *this; }
-    virtual RTCPByePacket *dup() const override { return new RTCPByePacket(*this); }
+    RtcpByePacket();
+    RtcpByePacket(const RtcpByePacket& other) : RtcpByePacket_Base(other) {}
+    RtcpByePacket& operator=(const RtcpByePacket& other) { RtcpByePacket_Base::operator=(other); return *this; }
+    virtual RtcpByePacket *dup() const override { return new RtcpByePacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPByePacket_Base
 };
 
 }}
 
-class RTCPSenderReportPacket extends RTCPReceiverReportPacket
+class RtcpSenderReportPacket extends RtcpReceiverReportPacket
 {
     packetType = RTCP_PT_SR;
     @customize;  // see the generated C++ header for more info
@@ -146,13 +146,13 @@ class RTCPSenderReportPacket extends RTCPReceiverReportPacket
 
 cplusplus {{
 
-class INET_API RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
+class INET_API RtcpSenderReportPacket : public RtcpSenderReportPacket_Base
 {
   public:
-    RTCPSenderReportPacket();
-    RTCPSenderReportPacket(const RTCPSenderReportPacket& other) : RTCPSenderReportPacket_Base(other) {}
-    RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) { RTCPSenderReportPacket_Base::operator=(other); return *this; }
-    virtual RTCPSenderReportPacket *dup() const override { return new RTCPSenderReportPacket(*this); }
+    RtcpSenderReportPacket();
+    RtcpSenderReportPacket(const RtcpSenderReportPacket& other) : RtcpSenderReportPacket_Base(other) {}
+    RtcpSenderReportPacket& operator=(const RtcpSenderReportPacket& other) { RtcpSenderReportPacket_Base::operator=(other); return *this; }
+    virtual RtcpSenderReportPacket *dup() const override { return new RtcpSenderReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
 

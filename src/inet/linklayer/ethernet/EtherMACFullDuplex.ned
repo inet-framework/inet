@@ -116,7 +116,7 @@ import inet.linklayer.contract.IEtherMAC;
 // @see ~EtherMAC, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLLC
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
 //
-simple EtherMACFullDuplex like IEtherMAC
+simple EtherMacFullDuplex like IEtherMAC
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module

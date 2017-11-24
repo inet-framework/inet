@@ -2,10 +2,10 @@
 
 package inet.node.rtp;
 
-import inet.applications.rtpapp.RTPApplication;
+import inet.applications.rtpapp.RtpApplication;
 import inet.node.inet.StandardHost;
-import inet.transportlayer.rtp.RTCP;
-import inet.transportlayer.rtp.RTP;
+import inet.transportlayer.rtp.Rtcp;
+import inet.transportlayer.rtp.Rtp;
 import ned.IdealChannel;
 
 
@@ -25,7 +25,7 @@ module RTPHost extends StandardHost
         @display("i=device/pc2");
 
     submodules:
-        rtpApp: RTPApplication {
+        rtpApp: RtpApplication {
             parameters:
                 profileName = profileName;
                 destinationAddress = destinationAddress;
@@ -35,11 +35,11 @@ module RTPHost extends StandardHost
                 payloadType = payloadType;
                 @display("p=736,60");
         }
-        rtp: RTP {
+        rtp: Rtp {
             parameters:
                 @display("p=637,132");
         }
-        rtcp: RTCP {
+        rtcp: Rtcp {
             parameters:
                 @display("p=838,132");
         }

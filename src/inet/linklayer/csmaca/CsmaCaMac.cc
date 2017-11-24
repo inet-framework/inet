@@ -60,7 +60,7 @@ CsmaCaMac::~CsmaCaMac()
  */
 void CsmaCaMac::initialize(int stage)
 {
-    MACProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
@@ -93,7 +93,7 @@ void CsmaCaMac::initialize(int stage)
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
             // assign automatic address
-            address = MACAddress::generateAutoAddress();
+            address = MacAddress::generateAutoAddress();
             // change module parameter from "auto" to concrete address
             par("address").setStringValue(address.str().c_str());
         }

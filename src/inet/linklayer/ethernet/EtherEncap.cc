@@ -233,7 +233,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     Ieee802PauseCommand *etherctrl = dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802PauseCommand controlinfo", msg->getName());
-    MACAddress dest = etherctrl->getDestinationAddress();
+    MacAddress dest = etherctrl->getDestinationAddress();
     int pauseUnits = etherctrl->getPauseUnits();
     delete msg;
 
@@ -247,7 +247,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     const auto& hdr = makeShared<EthernetMacHeader>();
     frame->setPauseTime(pauseUnits);
     if (dest.isUnspecified())
-        dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
+        dest = MacAddress::MULTICAST_PAUSE_ADDRESS;
     hdr->setDest(dest);
     packet->insertHeader(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);

@@ -79,8 +79,8 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
 void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // assign IPv4 addresses
-    uint32 networkAddress = IPv4Address(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = IPv4Address(par("netmask").stringValue()).getInt();
+    uint32 networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
+    uint32 netmask = Ipv4Address(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
     if (topo.getNumNodes() > maxNodes)
         throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
@@ -99,8 +99,8 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback()) {
-                ie->ipv4Data()->setIPAddress(IPv4Address(addr));
-                ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
+                ie->ipv4Data()->setIPAddress(Ipv4Address(addr));
+                ie->ipv4Data()->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
             }
         }
     }
@@ -117,7 +117,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
             continue;
 
         IInterfaceTable *ift = nodeInfo[i].ift;
-        IIPv4RoutingTable *rt = nodeInfo[i].rt;
+        IIpv4RoutingTable *rt = nodeInfo[i].rt;
 
         // count non-loopback interfaces
         int numIntf = 0;
@@ -136,9 +136,9 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
                 << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
-        IPv4Route *e = new IPv4Route();
-        e->setDestination(IPv4Address());
-        e->setNetmask(IPv4Address());
+        Ipv4Route *e = new Ipv4Route();
+        e->setDestination(Ipv4Address());
+        e->setNetmask(Ipv4Address());
         e->setInterface(ie);
         e->setSourceType(IRoute::MANUAL);
         //e->getMetric() = 1;
@@ -156,7 +156,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        IPv4Address destAddr = nodeInfo[i].address;
+        Ipv4Address destAddr = nodeInfo[i].address;
         std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
@@ -176,7 +176,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
 
-            IPv4Address atAddr = nodeInfo[j].address;
+            Ipv4Address atAddr = nodeInfo[j].address;
 
             IInterfaceTable *ift = nodeInfo[j].ift;
 
@@ -185,14 +185,14 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV_INFO << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
-            EV_INFO << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getInterfaceName() << endl;
+            EV_INFO << "  from " << atNode->getModule()->getFullName() << "=" << Ipv4Address(atAddr);
+            EV_INFO << " towards " << destModName << "=" << Ipv4Address(destAddr) << " interface " << ie->getInterfaceName() << endl;
 
             // add route
-            IIPv4RoutingTable *rt = nodeInfo[j].rt;
-            IPv4Route *e = new IPv4Route();
+            IIpv4RoutingTable *rt = nodeInfo[j].rt;
+            Ipv4Route *e = new Ipv4Route();
             e->setDestination(destAddr);
-            e->setNetmask(IPv4Address(255, 255, 255, 255));    // full match needed
+            e->setNetmask(Ipv4Address(255, 255, 255, 255));    // full match needed
             e->setInterface(ie);
             e->setSourceType(IRoute::MANUAL);
             //e->getMetric() = 1;

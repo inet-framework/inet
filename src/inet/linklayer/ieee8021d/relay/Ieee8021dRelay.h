@@ -39,9 +39,9 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     Ieee8021dRelay();
 
   protected:
-    MACAddress bridgeAddress;
+    MacAddress bridgeAddress;
     IInterfaceTable *ifTable = nullptr;
-    IMACAddressTable *macTable = nullptr;
+    IMacAddressTable *macTable = nullptr;
     InterfaceEntry *ie = nullptr;
     EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
     bool isOperational = false;
@@ -70,7 +70,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      */
     void handleAndDispatchFrame(Packet *packet);
     void dispatch(Packet *packet, InterfaceEntry *ie);
-    void learn(MACAddress srcAddr, int arrivalInterfaceId);
+    void learn(MacAddress srcAddr, int arrivalInterfaceId);
     void broadcast(Packet *packet);
 
     /**

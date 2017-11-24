@@ -27,10 +27,10 @@ namespace serializer {
 /**
  * Calculates checksum.
  */
-class INET_API TCPIPchecksum
+class INET_API TcpIpChecksum
 {
   public:
-    TCPIPchecksum() {}
+    TcpIpChecksum() {}
 
     /*
      * calculate the 16 bit one's complement of the one's

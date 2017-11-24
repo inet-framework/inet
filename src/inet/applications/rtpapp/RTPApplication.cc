@@ -24,9 +24,9 @@
 
 namespace inet {
 
-Define_Module(RTPApplication)
+Define_Module(RtpApplication)
 
-void RTPApplication::initialize(int stage)
+void RtpApplication::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -84,7 +84,7 @@ void RTPApplication::initialize(int stage)
     }
 }
 
-void RTPApplication::handleMessage(cMessage *msgIn)
+void RtpApplication::handleMessage(cMessage *msgIn)
 {
     using namespace rtp;
 
@@ -97,13 +97,13 @@ void RTPApplication::handleMessage(cMessage *msgIn)
                 }
                 else {
                     isActiveSession = true;
-                    RTPCIEnterSession *ci = new RTPCIEnterSession();
+                    RtpCiEnterSession *ci = new RtpCiEnterSession();
                     ci->setCommonName(commonName);
                     ci->setProfileName(profileName);
                     ci->setBandwidth(bandwidth);
                     ci->setDestinationAddress(destinationAddress);
                     ci->setPort(port);
-                    cMessage *msg = new RTPControlMsg("Enter Session");
+                    cMessage *msg = new RtpControlMsg("Enter Session");
                     msg->setControlInfo(ci);
                     send(msg, "rtpOut");
                 }
@@ -115,10 +115,10 @@ void RTPApplication::handleMessage(cMessage *msgIn)
                     EV_WARN << "Session already left\n";
                 }
                 else {
-                    RTPCISenderControl *ci = new RTPCISenderControl();
+                    RtpCiSenderControl *ci = new RtpCiSenderControl();
                     ci->setCommand(RTP_CONTROL_PLAY);
                     ci->setSsrc(ssrc);
-                    cMessage *msg = new RTPControlMsg("senderModuleControl(PLAY)");
+                    cMessage *msg = new RtpControlMsg("senderModuleControl(PLAY)");
                     msg->setControlInfo(ci);
                     send(msg, "rtpOut");
 
@@ -133,10 +133,10 @@ void RTPApplication::handleMessage(cMessage *msgIn)
                     EV_WARN << "Session already left\n";
                 }
                 else {
-                    RTPCISenderControl *ci = new RTPCISenderControl();
+                    RtpCiSenderControl *ci = new RtpCiSenderControl();
                     ci->setCommand(RTP_CONTROL_STOP);
                     ci->setSsrc(ssrc);
-                    cMessage *msg = new RTPControlMsg("senderModuleControl(STOP)");
+                    cMessage *msg = new RtpControlMsg("senderModuleControl(STOP)");
                     msg->setControlInfo(ci);
                     send(msg, "rtpOut");
                 }
@@ -148,8 +148,8 @@ void RTPApplication::handleMessage(cMessage *msgIn)
                     EV_WARN << "Session already left\n";
                 }
                 else {
-                    RTPCILeaveSession *ci = new RTPCILeaveSession();
-                    cMessage *msg = new RTPControlMsg("Leave Session");
+                    RtpCiLeaveSession *ci = new RtpCiLeaveSession();
+                    cMessage *msg = new RtpControlMsg("Leave Session");
                     msg->setControlInfo(ci);
                     send(msg, "rtpOut");
                 }
@@ -162,19 +162,19 @@ void RTPApplication::handleMessage(cMessage *msgIn)
     }
     else if (isActiveSession) {
         cObject *obj = msgIn->removeControlInfo();
-        RTPControlInfo *ci = dynamic_cast<RTPControlInfo *>(obj);
+        RtpControlInfo *ci = dynamic_cast<RtpControlInfo *>(obj);
         if (ci) {
             switch (ci->getType()) {
                 case RTP_IFP_SESSION_ENTERED: {
                     EV_INFO << "Session Entered" << endl;
-                    ssrc = (check_and_cast<RTPCISessionEntered *>(ci))->getSsrc();
+                    ssrc = (check_and_cast<RtpCiSessionEntered *>(ci))->getSsrc();
                     if (opp_strcmp(fileName, "")) {
                         EV_INFO << "CreateSenderModule" << endl;
-                        RTPCICreateSenderModule *ci = new RTPCICreateSenderModule();
+                        RtpCiCreateSenderModule *ci = new RtpCiCreateSenderModule();
                         ci->setSsrc(ssrc);
                         ci->setPayloadType(payloadType);
                         ci->setFileName(fileName);
-                        cMessage *msg = new RTPControlMsg("createSenderModule()");
+                        cMessage *msg = new RtpControlMsg("createSenderModule()");
                         msg->setControlInfo(ci);
                         send(msg, "rtpOut");
                     }
@@ -195,7 +195,7 @@ void RTPApplication::handleMessage(cMessage *msgIn)
 
                 case RTP_IFP_SENDER_STATUS: {
                     cMessage *selfMsg;
-                    RTPCISenderStatus *rsim = check_and_cast<RTPCISenderStatus *>(ci);
+                    RtpCiSenderStatus *rsim = check_and_cast<RtpCiSenderStatus *>(ci);
                     switch (rsim->getStatus()) {
                         case RTP_SENDER_STATUS_PLAYING:
                             EV_INFO << "PLAYING" << endl;
@@ -239,7 +239,7 @@ void RTPApplication::handleMessage(cMessage *msgIn)
     delete msgIn;
 }
 
-bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool RtpApplication::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 

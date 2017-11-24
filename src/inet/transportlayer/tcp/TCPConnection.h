@@ -28,16 +28,16 @@
 
 namespace inet {
 
-class TCPCommand;
-class TCPOpenCommand;
+class TcpCommand;
+class TcpOpenCommand;
 
 namespace tcp {
 
 class TcpHeader;
-class TCPSendQueue;
-class TCPSACKRexmitQueue;
-class TCPReceiveQueue;
-class TCPAlgorithm;
+class TcpSendQueue;
+class TcpSackRexmitQueue;
+class TcpReceiveQueue;
+class TcpAlgorithm;
 
 //
 // TCP FSM states
@@ -78,7 +78,7 @@ enum TcpState {
 // Event, strictly for the FSM state transition purposes.
 // DO NOT USE outside performStateTransition()!
 //
-enum TCPEventCode {
+enum TcpEventCode {
     TCP_E_IGNORE,
 
     // app commands
@@ -146,10 +146,10 @@ typedef std::list<Sack> SackList;
  * into TCPAlgorithm subclasses which can have their own state blocks,
  * subclassed from TCPStateVariables. See TCPAlgorithm::createStateVariables().
  */
-class INET_API TCPStateVariables : public cObject
+class INET_API TcpStateVariables : public cObject
 {
   public:
-    TCPStateVariables();
+    TcpStateVariables();
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
@@ -314,7 +314,7 @@ class INET_API TCPStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TCPConnection object.
  *
  */
-class INET_API TCPConnection : public cObject
+class INET_API TcpConnection : public cObject
 {
   public:
     // connection identification by apps: socketId
@@ -339,22 +339,22 @@ class INET_API TCPConnection : public cObject
     cFSM fsm;
 
     // variables associated with TCP state
-    TCPStateVariables *state = nullptr;
+    TcpStateVariables *state = nullptr;
 
     // TCP queues
-    TCPSendQueue *sendQueue = nullptr;
-    TCPSendQueue *getSendQueue() const { return sendQueue; }
-    TCPReceiveQueue *receiveQueue = nullptr;
-    TCPReceiveQueue *getReceiveQueue() const { return receiveQueue; }
+    TcpSendQueue *sendQueue = nullptr;
+    TcpSendQueue *getSendQueue() const { return sendQueue; }
+    TcpReceiveQueue *receiveQueue = nullptr;
+    TcpReceiveQueue *getReceiveQueue() const { return receiveQueue; }
 
   public:
-    TCPSACKRexmitQueue *rexmitQueue = nullptr;
-    TCPSACKRexmitQueue *getRexmitQueue() const { return rexmitQueue; }
+    TcpSackRexmitQueue *rexmitQueue = nullptr;
+    TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }
 
   protected:
     // TCP behavior in data transfer state
-    TCPAlgorithm *tcpAlgorithm = nullptr;
-    TCPAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
+    TcpAlgorithm *tcpAlgorithm = nullptr;
+    TcpAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
 
     // timers
     cMessage *the2MSLTimer = nullptr;
@@ -387,24 +387,24 @@ class INET_API TCPConnection : public cObject
     /** @name FSM transitions: analysing events and executing state transitions */
     //@{
     /** Maps app command codes (msg kind of app command msgs) to TCP_E_xxx event codes */
-    virtual TCPEventCode preanalyseAppCommandEvent(int commandCode);
+    virtual TcpEventCode preanalyseAppCommandEvent(int commandCode);
     /** Implemements the pure TCP state machine */
-    virtual bool performStateTransition(const TCPEventCode& event);
+    virtual bool performStateTransition(const TcpEventCode& event);
     /** Perform cleanup necessary when entering a new state, e.g. cancelling timers */
-    virtual void stateEntered(int state, int oldState, TCPEventCode event);
+    virtual void stateEntered(int state, int oldState, TcpEventCode event);
     //@}
 
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
-    virtual void process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_ACCEPT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
-    virtual void process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg);
+    virtual void process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     //@}
 
     /** @name Processing TCP segment arrivals. Invoked from processTCPSegment(). */
@@ -418,21 +418,21 @@ class INET_API TCPConnection : public cObject
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TCPEventCode process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
-    virtual TCPEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg);
+    virtual TcpEventCode process_RCV_SEGMENT(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegmentInListen(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegmentInSynSent(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TcpEventCode processSegment1stThru8th(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
+    virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpseg);
     virtual bool processAckInEstabEtc(Packet *packet, const Ptr<const TcpHeader>& tcpseg);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option);
-    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionWindowScale& option);
-    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSackPermitted& option);
-    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionSack& option);
-    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpseg, const TCPOptionTimestamp& option);
+    virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionMaxSegmentSize& option);
+    virtual bool processWSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSackPermitted& option);
+    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionSack& option);
+    virtual bool processTSOption(const Ptr<const TcpHeader>& tcpseg, const TcpOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -440,14 +440,14 @@ class INET_API TCPConnection : public cObject
     virtual void process_TIMEOUT_2MSL();
     virtual void process_TIMEOUT_CONN_ESTAB();
     virtual void process_TIMEOUT_FIN_WAIT_2();
-    virtual void process_TIMEOUT_SYN_REXMIT(TCPEventCode& event);
+    virtual void process_TIMEOUT_SYN_REXMIT(TcpEventCode& event);
     //@}
 
     /** Utility: clone a listening connection. Used for forking. */
-    virtual TCPConnection *cloneListeningConnection();
+    virtual TcpConnection *cloneListeningConnection();
 
     /** Utility: creates send/receive queues and tcpAlgorithm */
-    virtual void initConnection(TCPOpenCommand *openCmd);
+    virtual void initConnection(TcpOpenCommand *openCmd);
 
     /** Utility: set snd_mss, rcv_wnd and sack in newly created state variables block */
     virtual void configureStateVariables();
@@ -584,18 +584,18 @@ class INET_API TCPConnection : public cObject
     /**
      * The "normal" constructor.
      */
-    TCPConnection(TCP *mod, int socketId);
+    TcpConnection(TCP *mod, int socketId);
 
     /**
      * Note: this default ctor is NOT used to create live connections, only
      * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
      */
-    TCPConnection(TCP *mod);
+    TcpConnection(TCP *mod);
 
     /**
      * Destructor.
      */
-    virtual ~TCPConnection();
+    virtual ~TcpConnection();
 
     int getLocalPort() const { return localPort; }
     L3Address getLocalAddress() const { return localAddr; }
@@ -614,12 +614,12 @@ class INET_API TCPConnection : public cObject
     /** @name Various getters **/
     //@{
     int getFsmState() const { return fsm.getState(); }
-    const TCPStateVariables *getState() const { return state; }
-    TCPStateVariables *getState() { return state; }
-    TCPSendQueue *getSendQueue() { return sendQueue; }
-    TCPSACKRexmitQueue *getRexmitQueue() { return rexmitQueue; }
-    TCPReceiveQueue *getReceiveQueue() { return receiveQueue; }
-    TCPAlgorithm *getTcpAlgorithm() { return tcpAlgorithm; }
+    const TcpStateVariables *getState() const { return state; }
+    TcpStateVariables *getState() { return state; }
+    TcpSendQueue *getSendQueue() { return sendQueue; }
+    TcpSackRexmitQueue *getRexmitQueue() { return rexmitQueue; }
+    TcpReceiveQueue *getReceiveQueue() { return receiveQueue; }
+    TcpAlgorithm *getTcpAlgorithm() { return tcpAlgorithm; }
     TCP *getTcpMain() { return tcpMain; }
     //@}
 

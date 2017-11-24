@@ -24,14 +24,14 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPReno);
+Register_Class(TcpReno);
 
-TCPReno::TCPReno() : TCPTahoeRenoFamily(),
-    state((TCPRenoStateVariables *&)TCPAlgorithm::state)
+TcpReno::TcpReno() : TcpTahoeRenoFamily(),
+    state((TcpRenoStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TCPReno::recalculateSlowStartThreshold()
+void TcpReno::recalculateSlowStartThreshold()
 {
     // RFC 2581, page 4:
     // "When a TCP sender detects segment loss using the retransmission
@@ -53,9 +53,9 @@ void TCPReno::recalculateSlowStartThreshold()
         ssthreshVector->record(state->ssthresh);
 }
 
-void TCPReno::processRexmitTimer(TCPEventCode& event)
+void TcpReno::processRexmitTimer(TcpEventCode& event)
 {
-    TCPTahoeRenoFamily::processRexmitTimer(event);
+    TcpTahoeRenoFamily::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -88,9 +88,9 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TCPReno::receivedDataAck(uint32 firstSeqAcked)
+void TcpReno::receivedDataAck(uint32 firstSeqAcked)
 {
-    TCPTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
     if (state->dupacks >= DUPTHRESH) {    // DUPTHRESH = 3
         //
@@ -200,9 +200,9 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
     sendData(false);
 }
 
-void TCPReno::receivedDuplicateAck()
+void TcpReno::receivedDuplicateAck()
 {
-    TCPTahoeRenoFamily::receivedDuplicateAck();
+    TcpTahoeRenoFamily::receivedDuplicateAck();
 
     if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";

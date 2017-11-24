@@ -22,31 +22,31 @@
 #include "inet/routing/pim/tables/PIMNeighborTable.h"
 
 namespace inet {
-Register_Abstract_Class(PIMNeighbor);
-Define_Module(PIMNeighborTable);
+Register_Abstract_Class(PimNeighbor);
+Define_Module(PimNeighborTable);
 
 using namespace std;
 
-PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
+PimNeighbor::PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version)
     : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
 
-    livenessTimer = new cMessage("NeighborLivenessTimer", PIMNeighborTable::NeighborLivenessTimer);
+    livenessTimer = new cMessage("NeighborLivenessTimer", PimNeighborTable::NeighborLivenessTimer);
     livenessTimer->setContextPointer(this);
 }
 
-PIMNeighbor::~PIMNeighbor()
+PimNeighbor::~PimNeighbor()
 {
     ASSERT(!livenessTimer->isScheduled());
     delete livenessTimer;
 }
 
 // for WATCH_MAP()
-std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVector& v)
+std::ostream& operator<<(std::ostream& os, const PimNeighborTable::PimNeighborVector& v)
 {
     for (unsigned int i = 0; i < v.size(); i++) {
-        PIMNeighbor *e = v[i];
+        PimNeighbor *e = v[i];
         os << "[" << i << "]: "
            << "{ If = " << e->getInterfacePtr()->getInterfaceName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion()
            << "; GenID = " << e->getGenerationId() << "; Pr = " << e->getDRPriority() << "}; ";
@@ -54,20 +54,20 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighborTable::PIMNeighborVe
     return os;
 };
 
-std::string PIMNeighbor::info() const
+std::string PimNeighbor::info() const
 {
     std::stringstream out;
     out << "PIMNeighbor addr=" << address << ", iface=" << ie->getInterfaceName() << ", v=" << version << ", priority=" << this->drPriority << "}";
     return out.str();
 }
 
-void PIMNeighbor::changed()
+void PimNeighbor::changed()
 {
     if (nt)
         nt->emit(NF_PIM_NEIGHBOR_CHANGED, this);
 }
 
-PIMNeighborTable::~PIMNeighborTable()
+PimNeighborTable::~PimNeighborTable()
 {
     for (auto & elem : neighbors) {
         for (auto & _it2 : elem.second) {
@@ -77,7 +77,7 @@ PIMNeighborTable::~PIMNeighborTable()
     }
 }
 
-void PIMNeighborTable::initialize(int stage)
+void PimNeighborTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -86,7 +86,7 @@ void PIMNeighborTable::initialize(int stage)
     }
 }
 
-void PIMNeighborTable::handleMessage(cMessage *msg)
+void PimNeighborTable::handleMessage(cMessage *msg)
 {
     // self message (timer)
     if (msg->isSelfMessage()) {
@@ -100,20 +100,20 @@ void PIMNeighborTable::handleMessage(cMessage *msg)
         throw cRuntimeError("PIMNeighborTable received a message although it does not have gates.");
 }
 
-void PIMNeighborTable::processLivenessTimer(cMessage *livenessTimer)
+void PimNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 {
     EV << "PIMNeighborTable::processNLTimer\n";
-    PIMNeighbor *neighbor = check_and_cast<PIMNeighbor *>((cObject *)livenessTimer->getContextPointer());
-    IPv4Address neighborAddress = neighbor->getAddress();
+    PimNeighbor *neighbor = check_and_cast<PimNeighbor *>((cObject *)livenessTimer->getContextPointer());
+    Ipv4Address neighborAddress = neighbor->getAddress();
     deleteNeighbor(neighbor);
     EV << "PIM::processNLTimer: Neighbor " << neighborAddress << "was removed from PIM neighbor table.\n";
 }
 
-bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
+bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
 {
     Enter_Method_Silent();
 
-    PIMNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
+    PimNeighborVector& neighborsOnInterface = neighbors[entry->getInterfaceId()];
 
     for (auto & elem : neighborsOnInterface)
         if ((elem)->getAddress() == entry->getAddress())
@@ -131,13 +131,13 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
     return true;
 }
 
-bool PIMNeighborTable::deleteNeighbor(PIMNeighbor *neighbor)
+bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
 {
     Enter_Method_Silent();
 
     auto it = neighbors.find(neighbor->getInterfaceId());
     if (it != neighbors.end()) {
-        PIMNeighborVector& neighborsOnInterface = it->second;
+        PimNeighborVector& neighborsOnInterface = it->second;
         auto it2 = find(neighborsOnInterface.begin(), neighborsOnInterface.end(), neighbor);
         if (it2 != neighborsOnInterface.end()) {
             neighborsOnInterface.erase(it2);
@@ -154,14 +154,14 @@ bool PIMNeighborTable::deleteNeighbor(PIMNeighbor *neighbor)
     return false;
 }
 
-void PIMNeighborTable::restartLivenessTimer(PIMNeighbor *neighbor, double holdTime)
+void PimNeighborTable::restartLivenessTimer(PimNeighbor *neighbor, double holdTime)
 {
     Enter_Method_Silent();
     cancelEvent(neighbor->getLivenessTimer());
     scheduleAt(simTime() + holdTime, neighbor->getLivenessTimer());
 }
 
-PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
+PimNeighbor *PimNeighborTable::findNeighbor(int interfaceId, Ipv4Address addr)
 {
     auto neighborsOnInterface = neighbors.find(interfaceId);
     if (neighborsOnInterface != neighbors.end()) {
@@ -173,13 +173,13 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
     return nullptr;
 }
 
-int PIMNeighborTable::getNumNeighbors(int interfaceId)
+int PimNeighborTable::getNumNeighbors(int interfaceId)
 {
     auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.size() : 0;
 }
 
-PIMNeighbor *PIMNeighborTable::getNeighbor(int interfaceId, int index)
+PimNeighbor *PimNeighborTable::getNeighbor(int interfaceId, int index)
 {
     auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : nullptr;

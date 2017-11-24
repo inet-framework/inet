@@ -20,7 +20,7 @@
 
 namespace inet {
 
-Define_Module(ANSimMobility);
+Define_Module(AnsimMobility);
 
 static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
 {
@@ -36,7 +36,7 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
 }
 
 
-void ANSimMobility::computeMaxSpeed()
+void AnsimMobility::computeMaxSpeed()
 {
     cXMLElement *rootElem = par("ansimTrace");
     cXMLElement *curElem = rootElem->getElementByPath("mobility/position_change");
@@ -75,14 +75,14 @@ void ANSimMobility::computeMaxSpeed()
     }
 }
 
-ANSimMobility::ANSimMobility()
+AnsimMobility::AnsimMobility()
 {
     maxSpeed = 0;
     nodeId = -1;
     nextPositionChange = nullptr;
 }
 
-void ANSimMobility::initialize(int stage)
+void AnsimMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
@@ -105,7 +105,7 @@ void ANSimMobility::initialize(int stage)
     }
 }
 
-void ANSimMobility::setInitialPosition()
+void AnsimMobility::setInitialPosition()
 {
     cXMLElement *firstPositionChange = findNextPositionChange(nextPositionChange);
     if (firstPositionChange)
@@ -113,7 +113,7 @@ void ANSimMobility::setInitialPosition()
     lastPosition = targetPosition;
 }
 
-cXMLElement *ANSimMobility::findNextPositionChange(cXMLElement *positionChange)
+cXMLElement *AnsimMobility::findNextPositionChange(cXMLElement *positionChange)
 {
     // find next <position_change> element with matching <node_id> tag (current one also OK)
     while (positionChange) {
@@ -126,7 +126,7 @@ cXMLElement *ANSimMobility::findNextPositionChange(cXMLElement *positionChange)
     return positionChange;
 }
 
-void ANSimMobility::setTargetPosition()
+void AnsimMobility::setTargetPosition()
 {
     nextPositionChange = findNextPositionChange(nextPositionChange);
     if (!nextPositionChange) {
@@ -143,7 +143,7 @@ void ANSimMobility::setTargetPosition()
     nextPositionChange = nextPositionChange->getNextSibling();
 }
 
-void ANSimMobility::extractDataFrom(cXMLElement *node)
+void AnsimMobility::extractDataFrom(cXMLElement *node)
 {
     // extract data from <position_change> element
     // FIXME start_time has to be taken into account too! as pause from prev element's end_time
@@ -164,7 +164,7 @@ void ANSimMobility::extractDataFrom(cXMLElement *node)
     targetPosition.y = atof(yStr);
 }
 
-void ANSimMobility::move()
+void AnsimMobility::move()
 {
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();

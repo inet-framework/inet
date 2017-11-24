@@ -22,18 +22,18 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPReceiveQueue);
+Register_Class(TcpReceiveQueue);
 
-TCPReceiveQueue::TCPReceiveQueue() :
+TcpReceiveQueue::TcpReceiveQueue() :
     rcv_nxt(-1)
 {
 }
 
-TCPReceiveQueue::~TCPReceiveQueue()
+TcpReceiveQueue::~TcpReceiveQueue()
 {
 }
 
-void TCPReceiveQueue::init(uint32 startSeq)
+void TcpReceiveQueue::init(uint32 startSeq)
 {
     rcv_nxt = startSeq;
 
@@ -41,7 +41,7 @@ void TCPReceiveQueue::init(uint32 startSeq)
     reorderBuffer.setExpectedOffset(B(startSeq));
 }
 
-std::string TCPReceiveQueue::str() const
+std::string TcpReceiveQueue::str() const
 {
     std::ostringstream buf;
     buf << "rcv_nxt=" << rcv_nxt;
@@ -52,7 +52,7 @@ std::string TCPReceiveQueue::str() const
     return buf.str();
 }
 
-uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
+uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
@@ -88,7 +88,7 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
     return rcv_nxt;
 }
 
-cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
+cPacket *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
@@ -111,7 +111,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     return nullptr;
 }
 
-uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
+uint32 TcpReceiveQueue::getAmountOfBufferedBytes()
 {
     uint32 bytes = 0;
 
@@ -121,24 +121,24 @@ uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
     return bytes;
 }
 
-uint32 TCPReceiveQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
+uint32 TcpReceiveQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
 {
     uint32 usedRcvBuffer = getAmountOfBufferedBytes();
     uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
     return (maxRcvBuffer > usedRcvBuffer) ? freeRcvBuffer : 0;
 }
 
-uint32 TCPReceiveQueue::getQueueLength()
+uint32 TcpReceiveQueue::getQueueLength()
 {
     return reorderBuffer.getNumRegions();
 }
 
-void TCPReceiveQueue::getQueueStatus()
+void TcpReceiveQueue::getQueueStatus()
 {
     EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << str() << "\n";
 }
 
-uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
+uint32 TcpReceiveQueue::getLE(uint32 fromSeqNum)
 {
     B fs = seqToOffset(fromSeqNum);
 
@@ -150,7 +150,7 @@ uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
     return fromSeqNum;
 }
 
-uint32 TCPReceiveQueue::getRE(uint32 toSeqNum)
+uint32 TcpReceiveQueue::getRE(uint32 toSeqNum)
 {
     B fs = seqToOffset(toSeqNum);
 
@@ -162,7 +162,7 @@ uint32 TCPReceiveQueue::getRE(uint32 toSeqNum)
     return toSeqNum;
 }
 
-uint32 TCPReceiveQueue::getFirstSeqNo()
+uint32 TcpReceiveQueue::getFirstSeqNo()
 {
     if (reorderBuffer.getNumRegions() == 0)
         return rcv_nxt;

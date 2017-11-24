@@ -25,14 +25,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKDimensionalReceiver : public FlatReceiverBase
+class INET_API ApskDimensionalReceiver : public FlatReceiverBase
 {
   protected:
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
   public:
-    APSKDimensionalReceiver();
+    ApskDimensionalReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };

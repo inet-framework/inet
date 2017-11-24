@@ -25,7 +25,7 @@ namespace inet {
 namespace rtp {
 
 //Forward declarations:
-class RTPInnerPacket;
+class RtpInnerPacket;
 
 /**
  * The class RTPProfile is a module which handles RTPPayloadSender and
@@ -38,21 +38,21 @@ class RTPInnerPacket;
  * RTP<profileName>Payload<payloadType>Sender
  * RTP<profileName>Payload<payloadType>Receiver
  */
-class INET_API RTPProfile : public cSimpleModule
+class INET_API RtpProfile : public cSimpleModule
 {
   protected:
     // helper class to store the association between an ssrc identifier
     // and the gate which leads to the RTPPayloadReceiver module.
     // Note: in the original, this used to be a hundred lines, as RTPSSRCGate.cc/h,
     // but even this class is an overkill --Andras
-    class SSRCGate : public cNamedObject    //FIXME why is it a namedObject?
+    class SsrcGate : public cNamedObject    //FIXME why is it a namedObject?
     {
       protected:
         uint32 ssrc;
         int gateId;
 
       public:
-        SSRCGate(uint32 ssrc = 0) { this->ssrc = ssrc; gateId = 0; }
+        SsrcGate(uint32 ssrc = 0) { this->ssrc = ssrc; gateId = 0; }
         uint32 getSsrc() { return ssrc; }
         void setSSRC(uint32 ssrc) { this->ssrc = ssrc; }
         int getGateId() { return gateId; }
@@ -60,7 +60,7 @@ class INET_API RTPProfile : public cSimpleModule
     };
 
   public:
-    RTPProfile();
+    RtpProfile();
 
   protected:
     /**
@@ -68,7 +68,7 @@ class INET_API RTPProfile : public cSimpleModule
      */
     virtual void initialize() override;
 
-    virtual ~RTPProfile();
+    virtual ~RtpProfile();
 
     /**
      * Creates and removes payload sender and receiver modules on demand.
@@ -93,7 +93,7 @@ class INET_API RTPProfile : public cSimpleModule
     /**
      * Initialization message received from rtp module.
      */
-    virtual void initializeProfile(RTPInnerPacket *rinp);
+    virtual void initializeProfile(RtpInnerPacket *rinp);
 
     /**
      * This method is called when the application issued the creation
@@ -103,26 +103,26 @@ class INET_API RTPProfile : public cSimpleModule
      * Then it initializes the newly create sender module with
      * a inititalizeSenderModule message.
      */
-    virtual void createSenderModule(RTPInnerPacket *rinp);
+    virtual void createSenderModule(RtpInnerPacket *rinp);
 
     /**
      * When a sender module is no longer needed it can be deleted by the
      * profile module.
      */
-    virtual void deleteSenderModule(RTPInnerPacket *rinp);
+    virtual void deleteSenderModule(RtpInnerPacket *rinp);
 
     /**
      * The profile module forwards sender control messages to the
      * sender module.
      */
-    virtual void senderModuleControl(RTPInnerPacket *rinp);
+    virtual void senderModuleControl(RtpInnerPacket *rinp);
 
     /**
      * Handles incoming data packets: If there isn't a receiver module
      * for this sender it creates one. The data packet is forwarded to
      * the receiver module after calling processIncomingPacket.
      */
-    virtual void dataIn(RTPInnerPacket *rinp);
+    virtual void dataIn(RtpInnerPacket *rinp);
 
     /**
      * The sender module returns a senderModuleInitialized message after
@@ -130,20 +130,20 @@ class INET_API RTPProfile : public cSimpleModule
      * the rtp module which delivers it to its destination, the rtcp
      * module.
      */
-    virtual void senderModuleInitialized(RTPInnerPacket *rinp);
+    virtual void senderModuleInitialized(RtpInnerPacket *rinp);
 
     /**
      * After having received a sender module control message the sender
      * module returns a sender status message to inform the application
      * what it's doing at the moment.
      */
-    virtual void senderModuleStatus(RTPInnerPacket *rinp);
+    virtual void senderModuleStatus(RtpInnerPacket *rinp);
 
     /**
      * Handles outgoing data packets: Calls processOutgoingPacket and
      * forwards the packet to the rtp module.
      */
-    virtual void dataOut(RTPInnerPacket *rinp);
+    virtual void dataOut(RtpInnerPacket *rinp);
 
     /**
      * Every time a rtp packet is received it it pre-processed by this
@@ -153,24 +153,24 @@ class INET_API RTPProfile : public cSimpleModule
      * Important: This method works with RTPInnerPacket. So the rtp
      * packet must be decapsulated, changed and encapsulated again.
      */
-    virtual void processIncomingPacket(RTPInnerPacket *rinp);
+    virtual void processIncomingPacket(RtpInnerPacket *rinp);
 
     /**
      * Simular to the procedure for incoming packets, this adds profile
      * specific extensions to outgoing rtp packets.
      */
-    virtual void processOutgoingPacket(RTPInnerPacket *rinp);
+    virtual void processOutgoingPacket(RtpInnerPacket *rinp);
 
     /**
      * Finds the gate of the receiver module for rtp data
      * packets from this ssrc.
      */
-    virtual SSRCGate *findSSRCGate(uint32 ssrc);
+    virtual SsrcGate *findSSRCGate(uint32 ssrc);
 
     /**
      * Creates a new association ssrc/gateId for this ssrc.
      */
-    virtual SSRCGate *newSSRCGate(uint32 ssrc);
+    virtual SsrcGate *newSSRCGate(uint32 ssrc);
 
     /**
      * The name of this profile. Needed for dynamic creating
@@ -189,8 +189,8 @@ class INET_API RTPProfile : public cSimpleModule
      * Stores information to which gate rtp data packets
      * from a ssrc must be forwarded.
      */
-    typedef std::map<uint32, SSRCGate *> SSRCGateMap;
-    SSRCGateMap _ssrcGates;
+    typedef std::map<uint32, SsrcGate *> SsrcGateMap;
+    SsrcGateMap _ssrcGates;
 
     /**
      * The percentage of the available bandwidth to be used for rtcp.

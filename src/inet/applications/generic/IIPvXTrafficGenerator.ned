@@ -29,7 +29,7 @@ moduleinterface IIPvXTrafficGenerator
 {
     @display("i=block/app");
     gates:
-        input ipIn @labels(IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down,IPv6ControlInfo/down);
+        input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
 

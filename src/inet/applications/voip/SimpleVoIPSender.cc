@@ -25,19 +25,19 @@
 
 namespace inet {
 
-Define_Module(SimpleVoIPSender);
+Define_Module(SimpleVoipSender);
 
-SimpleVoIPSender::SimpleVoIPSender()
+SimpleVoipSender::SimpleVoipSender()
 {
 }
 
-SimpleVoIPSender::~SimpleVoIPSender()
+SimpleVoipSender::~SimpleVoipSender()
 {
     cancelAndDelete(selfSender);
     cancelAndDelete(selfSource);
 }
 
-void SimpleVoIPSender::initialize(int stage)
+void SimpleVoipSender::initialize(int stage)
 {
     EV_TRACE << "VoIP Sender initialize: stage " << stage << endl;
 
@@ -81,7 +81,7 @@ void SimpleVoIPSender::initialize(int stage)
     }
 }
 
-void SimpleVoIPSender::handleMessage(cMessage *msg)
+void SimpleVoipSender::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         if (msg == selfSender)
@@ -91,7 +91,7 @@ void SimpleVoIPSender::handleMessage(cMessage *msg)
     }
 }
 
-void SimpleVoIPSender::talkspurt(simtime_t dur)
+void SimpleVoipSender::talkspurt(simtime_t dur)
 {
     simtime_t curTime = simTime();
     simtime_t startTime = curTime;
@@ -111,7 +111,7 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
     scheduleAt(startTime + packetizationInterval, selfSender);
 }
 
-void SimpleVoIPSender::selectTalkOrSilenceInterval()
+void SimpleVoipSender::selectTalkOrSilenceInterval()
 {
     simtime_t now = simTime();
     if (stopTime >= SIMTIME_ZERO && now >= stopTime)
@@ -140,13 +140,13 @@ void SimpleVoIPSender::selectTalkOrSilenceInterval()
     }
 }
 
-void SimpleVoIPSender::sendVoIPPacket()
+void SimpleVoipSender::sendVoIPPacket()
 {
     if (destAddress.isUnspecified())
         destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
 
     Packet *packet = new Packet("VoIP");
-    const auto& voice = makeShared<SimpleVoIPPacket>();
+    const auto& voice = makeShared<SimpleVoipPacket>();
     voice->setTalkspurtID(talkspurtID - 1);
     voice->setTalkspurtNumPackets(talkspurtNumPackets);
     voice->setPacketID(packetID);

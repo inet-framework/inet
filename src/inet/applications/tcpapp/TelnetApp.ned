@@ -83,7 +83,7 @@ simple TelnetApp like IApp
         @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
 
     gates:
-        input socketIn @labels(TCPCommand/up);
-        output socketOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }
 

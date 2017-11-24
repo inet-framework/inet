@@ -39,7 +39,7 @@ package inet.routing.pim.modes;
 // Other parameters are timer values from the specification.
 // They should not be modified except for testing purposes.
 //
-simple PIMDM
+simple PimDm
 {
     parameters:
         @display("i=block/network2");

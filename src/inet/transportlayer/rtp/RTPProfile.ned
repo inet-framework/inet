@@ -4,7 +4,7 @@ package inet.transportlayer.rtp;
 // Generic RTP Profile. ~RTPProfile is internal to the ~RTP module;
 // instances are created and connected dynamically by ~RTP.
 //
-simple RTPProfile
+simple RtpProfile
 {
     parameters:
         bool autoOutputFileNames;
@@ -13,7 +13,7 @@ simple RTPProfile
         input rtpIn;
         input payloadSenderIn;
         input payloadReceiverIn[];
-        output rtpOut @labels(RTPInnerPacket);
+        output rtpOut @labels(RtpInnerPacket);
         output payloadSenderOut;
         output payloadReceiverOut[];
 }
@@ -22,7 +22,7 @@ simple RTPProfile
 // Audio-Video RTP Profile. ~RTPAVProfile is internal to the ~RTP module;
 // instances are created and connected dynamically by ~RTP.
 //
-simple RTPAVProfile
+simple RtpAvProfile
 {
     parameters:
         bool autoOutputFileNames;

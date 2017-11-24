@@ -17,13 +17,13 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
 class MacHeaderBase extends FieldsChunk
 {
-    MACAddress srcAddr;
-    MACAddress destAddr;
+    MacAddress srcAddr;
+    MacAddress destAddr;
     int networkProtocol = -1;
 }

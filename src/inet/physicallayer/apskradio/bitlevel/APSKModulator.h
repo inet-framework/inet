@@ -28,17 +28,17 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API APSKModulator : public IModulator, public cSimpleModule
+class INET_API ApskModulator : public IModulator, public cSimpleModule
 {
   protected:
-    const APSKModulationBase *modulation;
+    const ApskModulationBase *modulation;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
   public:
-    APSKModulator();
+    ApskModulator();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const IModulation *getModulation() const override { return modulation; }

@@ -25,7 +25,7 @@ namespace inet {
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
  */
-class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
+class INET_API MacAddressTable : public cSimpleModule, public IMacAddressTable
 {
   protected:
     struct AddressEntry
@@ -40,12 +40,12 @@ class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
 
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
 
-    struct MAC_compare
+    struct MacCompare
     {
-        bool operator()(const MACAddress& u1, const MACAddress& u2) const { return u1.compareTo(u2) < 0; }
+        bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
 
-    typedef std::map<MACAddress, AddressEntry, MAC_compare> AddressTable;
+    typedef std::map<MacAddress, AddressEntry, MacCompare> AddressTable;
     typedef std::map<unsigned int, AddressTable *> VlanAddressTable;
 
     simtime_t agingTime;    // Max idle time for address table entries
@@ -65,8 +65,8 @@ class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
 
   public:
 
-    MACAddressTable();
-    ~MACAddressTable();
+    MacAddressTable();
+    ~MacAddressTable();
 
   public:
     // Table management
@@ -77,13 +77,13 @@ class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
      * @param vid VLAN ID
      * @return Output port for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(const MACAddress& address, unsigned int vid = 0) override;
+    virtual int getPortForAddress(const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int portno, const MACAddress& address, unsigned int vid = 0) override;
+    virtual bool updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      *  @brief Clears portno cache

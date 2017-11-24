@@ -40,7 +40,7 @@ void L3Address::set(AddressType type, uint64 lo)
     this->lo = lo;
 }
 
-void L3Address::set(const IPv6Address& addr)
+void L3Address::set(const Ipv6Address& addr)
 {
     const uint32 *words = addr.words();
     hi = ((uint64) * (words + 0) << 32) + *(words + 1);
@@ -64,13 +64,13 @@ IL3AddressType *L3Address::getAddressType() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return &IPv4AddressType::INSTANCE;
+            return &Ipv4AddressType::INSTANCE;
 
         case L3Address::IPv6:
-            return &IPv6AddressType::INSTANCE;
+            return &Ipv6AddressType::INSTANCE;
 
         case L3Address::MAC:
-            return &MACAddressType::INSTANCE;
+            return &MacAddressType::INSTANCE;
 
         case L3Address::MODULEID:
             return &ModuleIdAddressType::INSTANCE;
@@ -111,12 +111,12 @@ std::string L3Address::str() const
 
 bool L3Address::tryParse(const char *addr)
 {
-    IPv6Address ipv6;
-    MACAddress mac;
+    Ipv6Address ipv6;
+    MacAddress mac;
     ModuleIdAddress moduleId;
     ModulePathAddress modulePath;
-    if (IPv4Address::isWellFormed(addr))
-        set(IPv4Address(addr));
+    if (Ipv4Address::isWellFormed(addr))
+        set(Ipv4Address(addr));
     else if (ipv6.tryParse(addr))
         set(ipv6);
     else if (mac.tryParse(addr))
@@ -336,7 +336,7 @@ bool L3Address::matches(const L3Address& other, int prefixLength) const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return IPv4Address::maskedAddrAreEqual(toIPv4(), other.toIPv4(), IPv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
+            return Ipv4Address::maskedAddrAreEqual(toIPv4(), other.toIPv4(), Ipv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
 
         case L3Address::IPv6:
             return toIPv6().matches(other.toIPv6(), prefixLength);

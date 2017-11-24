@@ -23,16 +23,16 @@ namespace inet {
 
 namespace rtp {
 
-Register_Class(SDESItem);
+Register_Class(SdesItem);
 
-SDESItem::SDESItem() : cObject()
+SdesItem::SdesItem() : cObject()
 {
     _type = SDES_UNDEF;
     _length = 2;
     _content = "";
 }
 
-SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
+SdesItem::SdesItem(SdesItemType type, const char *content) : cObject()
 {
     if (nullptr == content)
         throw cRuntimeError("The content parameter must be a valid pointer.");
@@ -44,17 +44,17 @@ SDESItem::SDESItem(SDES_ITEM_TYPE type, const char *content) : cObject()
     _length = 2 + _content.length();
 }
 
-SDESItem::SDESItem(const SDESItem& sdesItem) : cObject(sdesItem)
+SdesItem::SdesItem(const SdesItem& sdesItem) : cObject(sdesItem)
 {
     copy(sdesItem);
 }
 
-SDESItem::~SDESItem()
+SdesItem::~SdesItem()
 {
     clean();
 }
 
-SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
+SdesItem& SdesItem::operator=(const SdesItem& sdesItem)
 {
     if (this == &sdesItem)
         return *this;
@@ -64,43 +64,43 @@ SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
     return *this;
 }
 
-void SDESItem::copy(const SDESItem& sdesItem)
+void SdesItem::copy(const SdesItem& sdesItem)
 {
     _type = sdesItem._type;
     _length = sdesItem._length;
     _content = sdesItem._content;
 }
 
-SDESItem *SDESItem::dup() const
+SdesItem *SdesItem::dup() const
 {
-    return new SDESItem(*this);
+    return new SdesItem(*this);
 }
 
-std::string SDESItem::info() const
+std::string SdesItem::info() const
 {
     std::stringstream out;
     out << "SDESItem=" << _content;
     return out.str();
 }
 
-void SDESItem::dump(std::ostream& os) const
+void SdesItem::dump(std::ostream& os) const
 {
     os << "SDESItem:" << endl;
     os << "  type = " << _type << endl;
     os << "  content = " << _content << endl;
 }
 
-SDESItem::SDES_ITEM_TYPE SDESItem::getType() const
+SdesItem::SdesItemType SdesItem::getType() const
 {
     return _type;
 }
 
-const char *SDESItem::getContent() const
+const char *SdesItem::getContent() const
 {
     return _content.c_str();
 }
 
-int SDESItem::getLength() const
+int SdesItem::getLength() const
 {
     // bytes needed for this sdes item are
     // one byte for type, one for length
@@ -112,24 +112,24 @@ int SDESItem::getLength() const
 // SDESChunk
 //
 
-Register_Class(SDESChunk);
+Register_Class(SdesChunk);
 
-SDESChunk::SDESChunk(const char *name, uint32 ssrc) : cArray(name)
+SdesChunk::SdesChunk(const char *name, uint32 ssrc) : cArray(name)
 {
     _ssrc = ssrc;
     _length = 4;
 }
 
-SDESChunk::SDESChunk(const SDESChunk& sdesChunk) : cArray(sdesChunk)
+SdesChunk::SdesChunk(const SdesChunk& sdesChunk) : cArray(sdesChunk)
 {
     copy(sdesChunk);
 }
 
-SDESChunk::~SDESChunk()
+SdesChunk::~SdesChunk()
 {
 }
 
-SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
+SdesChunk& SdesChunk::operator=(const SdesChunk& sdesChunk)
 {
     if (this == &sdesChunk)
         return *this;
@@ -138,40 +138,40 @@ SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
     return *this;
 }
 
-inline void SDESChunk::copy(const SDESChunk& sdesChunk)
+inline void SdesChunk::copy(const SdesChunk& sdesChunk)
 {
     _ssrc = sdesChunk._ssrc;
     _length = sdesChunk._length;
 }
 
-SDESChunk *SDESChunk::dup() const
+SdesChunk *SdesChunk::dup() const
 {
-    return new SDESChunk(*this);
+    return new SdesChunk(*this);
 }
 
-std::string SDESChunk::info() const
+std::string SdesChunk::info() const
 {
     std::stringstream out;
     out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();
     return out.str();
 }
 
-void SDESChunk::dump(std::ostream& os) const
+void SdesChunk::dump(std::ostream& os) const
 {
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {
-            ((const SDESItem *)(get(i)))->dump(os);
+            ((const SdesItem *)(get(i)))->dump(os);
         }
     }
 }
 
-void SDESChunk::addSDESItem(SDESItem *sdesItem)
+void SdesChunk::addSDESItem(SdesItem *sdesItem)
 {
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {
-            SDESItem *compareItem = check_and_cast<SDESItem *>(get(i));
+            SdesItem *compareItem = check_and_cast<SdesItem *>(get(i));
             if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
                 _length = _length - compareItem->getLength();
@@ -185,17 +185,17 @@ void SDESChunk::addSDESItem(SDESItem *sdesItem)
     _length += sdesItem->getLength();
 }
 
-uint32 SDESChunk::getSsrc() const
+uint32 SdesChunk::getSsrc() const
 {
     return _ssrc;
 }
 
-void SDESChunk::setSsrc(uint32 ssrc)
+void SdesChunk::setSsrc(uint32 ssrc)
 {
     _ssrc = ssrc;
 }
 
-int SDESChunk::getLength() const
+int SdesChunk::getLength() const
 {
     return _length;
 }

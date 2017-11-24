@@ -45,7 +45,7 @@ class INET_API RateSelection : public IRateSelection, public cSimpleModule, publ
         const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
 
         const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
-        std::map<MACAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
+        std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
         // originator frame modes
         const physicallayer::IIeee80211Mode *multicastFrameMode = nullptr;

@@ -23,7 +23,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211FhssDataMode::Ieee80211FhssDataMode(const GFSKModulationBase *modulation) :
+Ieee80211FhssDataMode::Ieee80211FhssDataMode(const GfskModulationBase *modulation) :
     modulation(modulation)
 {
 }
@@ -43,8 +43,8 @@ const Ieee80211FhssPreambleMode Ieee80211FhssCompliantModes::fhssPreambleMode1Mb
 const Ieee80211FhssHeaderMode Ieee80211FhssCompliantModes::fhssHeaderMode1Mbps;
 
 // data modes
-const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode1Mbps(&_2GFSKModulation::singleton);
-const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode2Mbps(&_4GFSKModulation::singleton);
+const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode1Mbps(&_2GfskModulation::singleton);
+const Ieee80211FhssDataMode Ieee80211FhssCompliantModes::fhssDataMode2Mbps(&_4GfskModulation::singleton);
 
 // modes
 const Ieee80211FhssMode Ieee80211FhssCompliantModes::fhssMode1Mbps("fhssMode1Mbps", &fhssPreambleMode1Mbps, &fhssHeaderMode1Mbps, &fhssDataMode1Mbps);

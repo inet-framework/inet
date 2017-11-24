@@ -37,26 +37,26 @@ class IInterfaceTable;
  * - uses global mapping (or table, or algorithm)
  * - not a protocol -- doesn't communicate
  */
-class INET_API GenericARP : public cSimpleModule, public IARP
+class INET_API GenericArp : public cSimpleModule, public IArp
 {
   private:
     IInterfaceTable *ift = nullptr;
 
   public:
-    GenericARP() {}
-    virtual ~GenericARP() {}
+    GenericArp() {}
+    virtual ~GenericArp() {}
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
-    virtual L3Address getL3AddressFor(const MACAddress&) const override { throw cRuntimeError("getL3AddressFor() not implemented yet"); }
+    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
+    virtual L3Address getL3AddressFor(const MacAddress&) const override { throw cRuntimeError("getL3AddressFor() not implemented yet"); }
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    MACAddress mapUnicastAddress(L3Address addr);
-    MACAddress mapMulticastAddress(L3Address addr);
-    void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
+    MacAddress mapUnicastAddress(L3Address addr);
+    MacAddress mapMulticastAddress(L3Address addr);
+    void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MacAddress& macAddress, int etherType);
 };
 
 } // namespace inet

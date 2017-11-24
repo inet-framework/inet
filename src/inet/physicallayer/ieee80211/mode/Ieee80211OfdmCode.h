@@ -30,16 +30,16 @@ class INET_API Ieee80211OfdmCode : public ICode
 {
     protected:
         const ConvolutionalCode *convolutionalCode;
-        const Ieee80211OFDMInterleaving *interleaving;
+        const Ieee80211OfdmInterleaving *interleaving;
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OFDMInterleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OfdmInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
         virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
         const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
-        const Ieee80211OFDMInterleaving *getInterleaving() const { return interleaving; }
+        const Ieee80211OfdmInterleaving *getInterleaving() const { return interleaving; }
         const AdditiveScrambling *getScrambling() const { return scrambling; }
 };
 
@@ -52,10 +52,10 @@ class INET_API Ieee80211OfdmCompliantCodes
     static const Ieee80211ConvolutionalCode ofdmConvolutionalCode3_4;
 
     // Interleavings supported by the OFDM PHY: 18.3.5.7 Data interleaving
-    static const Ieee80211OFDMInterleaving ofdmBPSKInterleaving;
-    static const Ieee80211OFDMInterleaving ofdmQPSKInterleaving;
-    static const Ieee80211OFDMInterleaving ofdmQAM16Interleaving;
-    static const Ieee80211OFDMInterleaving ofdmQAM64Interleaving;
+    static const Ieee80211OfdmInterleaving ofdmBPSKInterleaving;
+    static const Ieee80211OfdmInterleaving ofdmQPSKInterleaving;
+    static const Ieee80211OfdmInterleaving ofdmQAM16Interleaving;
+    static const Ieee80211OfdmInterleaving ofdmQAM64Interleaving;
 
     // Scrambling supported by the OFDM PHY: 18.3.5.5 PLCP DATA scrambler and descrambler
     static const AdditiveScrambling ofdmScrambling;

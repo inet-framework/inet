@@ -38,7 +38,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     {
         bool active;
         bool primaryPath;
-        IPv4Address pid;
+        Ipv4Address pid;
     };
     typedef std::map<int, long> RcvdPacketsPerAssoc;
     typedef std::map<int, long> SentPacketsPerAssoc;

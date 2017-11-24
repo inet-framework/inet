@@ -25,9 +25,9 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPWestwood);
+Register_Class(TcpWestwood);
 
-TCPWestwoodStateVariables::TCPWestwoodStateVariables()
+TcpWestwoodStateVariables::TcpWestwoodStateVariables()
 {
     ssthresh = 65535;
     w_RTTmin = SIMTIME_MAX;
@@ -37,33 +37,33 @@ TCPWestwoodStateVariables::TCPWestwoodStateVariables()
     w_sample_bwe = 0;
 }
 
-TCPWestwoodStateVariables::~TCPWestwoodStateVariables()
+TcpWestwoodStateVariables::~TcpWestwoodStateVariables()
 {
 }
 
-std::string TCPWestwoodStateVariables::info() const
+std::string TcpWestwoodStateVariables::info() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::info();
+    out << TcpBaseAlgStateVariables::info();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
 
-std::string TCPWestwoodStateVariables::detailedInfo() const
+std::string TcpWestwoodStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TCPBaseAlgStateVariables::detailedInfo();
+    out << TcpBaseAlgStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "w_RTTmin = " << w_RTTmin << "\n";
     return out.str();
 }
 
-TCPWestwood::TCPWestwood()
-    : TCPBaseAlg(), state((TCPWestwoodStateVariables *&)TCPAlgorithm::state)
+TcpWestwood::TcpWestwood()
+    : TcpBaseAlg(), state((TcpWestwoodStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-void TCPWestwood::recalculateSlowStartThreshold()
+void TcpWestwood::recalculateSlowStartThreshold()
 {
     state->ssthresh = (uint32)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
 
@@ -73,7 +73,7 @@ void TCPWestwood::recalculateSlowStartThreshold()
     EV_DEBUG << "recalculateSlowStartThreshold(), ssthresh=" << state->ssthresh << "\n";
 }
 
-void TCPWestwood::recalculateBWE(uint32 cumul_ack)
+void TcpWestwood::recalculateBWE(uint32 cumul_ack)
 {
     simtime_t currentTime = simTime();
     simtime_t timeAck = currentTime - state->w_lastAckTime;
@@ -89,9 +89,9 @@ void TCPWestwood::recalculateBWE(uint32 cumul_ack)
     state->w_lastAckTime = currentTime;
 }
 
-void TCPWestwood::processRexmitTimer(TCPEventCode& event)
+void TcpWestwood::processRexmitTimer(TcpEventCode& event)
 {
-    TCPBaseAlg::processRexmitTimer(event);
+    TcpBaseAlg::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -123,12 +123,12 @@ void TCPWestwood::processRexmitTimer(TCPEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
+void TcpWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
-    TCPBaseAlg::receivedDataAck(firstSeqAcked);
+    TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
     state->regions.clearTo(state->snd_una);
-    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
 
     if (found != nullptr) {
         simtime_t currentTime = simTime();
@@ -219,9 +219,9 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
     sendData(false);
 }
 
-void TCPWestwood::receivedDuplicateAck()
+void TcpWestwood::receivedDuplicateAck()
 {
-    TCPBaseAlg::receivedDuplicateAck();
+    TcpBaseAlg::receivedDuplicateAck();
 
     {
         // BWE calculation: dupack counts 1
@@ -292,9 +292,9 @@ void TCPWestwood::receivedDuplicateAck()
     }
 }
 
-void TCPWestwood::dataSent(uint32 fromseq)
+void TcpWestwood::dataSent(uint32 fromseq)
 {
-    TCPBaseAlg::dataSent(fromseq);
+    TcpBaseAlg::dataSent(fromseq);
 
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
@@ -304,9 +304,9 @@ void TCPWestwood::dataSent(uint32 fromseq)
     state->regions.set(fromseq, state->snd_max, sendtime);
 }
 
-void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+void TcpWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
-    TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
+    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
 
     state->regions.set(fromseq, toseq, simTime());
 }

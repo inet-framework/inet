@@ -20,7 +20,7 @@ package inet.linklayer.ieee80211;
 import inet.linklayer.common.IIeee8021dQoSClassifier;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
-import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.physicallayer.contract.packetlevel.IRadio;
@@ -74,7 +74,7 @@ module Ieee80211Nic like IWirelessNic
             parameters:
                 @display("p=400,82");
         }
-        agent: Ieee80211AgentSTA if _agentNeeded {
+        agent: Ieee80211AgentSta if _agentNeeded {
             parameters:
                 @display("p=550,250");
         }

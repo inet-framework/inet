@@ -33,34 +33,34 @@ namespace rtp {
  * This class processes RTP packets, rtcp sender reports and rtcp sdes chunks
  * originating from this endsystem.
  */
-class INET_API RTPReceiverInfo : public RTPParticipantInfo
+class INET_API RtpReceiverInfo : public RtpParticipantInfo
 {
   public:
     enum { MAX_INACTIVE_INTERVALS = 5 };
     /**
      * Default constructor.
      */
-    RTPReceiverInfo(uint32 ssrc = 0);
+    RtpReceiverInfo(uint32 ssrc = 0);
 
     /**
      * Copy constructor.
      */
-    RTPReceiverInfo(const RTPReceiverInfo& receiverInfo);
+    RtpReceiverInfo(const RtpReceiverInfo& receiverInfo);
 
     /**
      * Destructor.
      */
-    virtual ~RTPReceiverInfo();
+    virtual ~RtpReceiverInfo();
 
     /**
      * Assignment operator.
      */
-    RTPReceiverInfo& operator=(const RTPReceiverInfo& receiverInfo);
+    RtpReceiverInfo& operator=(const RtpReceiverInfo& receiverInfo);
 
     /**
      * Duplicates this RTPReceiverInfo by calling the copy constructor.
      */
-    virtual RTPReceiverInfo *dup() const override;
+    virtual RtpReceiverInfo *dup() const override;
 
     /**
      * Extracts information of the given RTPPacket.
@@ -76,7 +76,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     /**
      * Extracts information of the given SDESChunk.
      */
-    virtual void processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime) override;
+    virtual void processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime) override;
 
     /**
      * Returns a ReceptionReport if this RTP end system is a sender,
@@ -107,7 +107,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     virtual bool toBeDeleted(simtime_t now) override;
 
   private:
-    void copy(const RTPReceiverInfo& other);
+    void copy(const RtpReceiverInfo& other);
 
   protected:
     /**

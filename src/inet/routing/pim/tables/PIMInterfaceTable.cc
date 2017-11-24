@@ -25,38 +25,38 @@
 using namespace std;
 
 namespace inet {
-Define_Module(PIMInterfaceTable);
+Define_Module(PimInterfaceTable);
 
 // for WATCH_VECTOR
-std::ostream& operator<<(std::ostream& os, const PIMInterface *e)
+std::ostream& operator<<(std::ostream& os, const PimInterface *e)
 {
     os << "name = " << e->getInterfacePtr()->getInterfaceName() << "; mode = ";
-    if (e->getMode() == PIMInterface::DenseMode)
+    if (e->getMode() == PimInterface::DenseMode)
         os << "Dense";
-    else if (e->getMode() == PIMInterface::SparseMode)
+    else if (e->getMode() == PimInterface::SparseMode)
         os << "Sparse; DR = " << e->getDRAddress();
     return os;
 };
 
-std::string PIMInterface::info() const
+std::string PimInterface::info() const
 {
     std::stringstream out;
     out << this;
     return out.str();
 }
 
-PIMInterfaceTable::~PIMInterfaceTable()
+PimInterfaceTable::~PimInterfaceTable()
 {
     for (auto & elem : pimInterfaces)
         delete elem;
 }
 
-void PIMInterfaceTable::handleMessage(cMessage *msg)
+void PimInterfaceTable::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void PIMInterfaceTable::initialize(int stage)
+void PimInterfaceTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -74,7 +74,7 @@ void PIMInterfaceTable::initialize(int stage)
     }
 }
 
-void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
+void PimInterfaceTable::configureInterfaces(cXMLElement *config)
 {
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
@@ -85,7 +85,7 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
         if (ie->isMulticast() && !ie->isLoopback()) {
             int i = matcher.findMatchingSelector(ie);
             if (i >= 0) {
-                PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
+                PimInterface *pimInterface = createInterface(ie, interfaceElements[i]);
                 if (pimInterface)
                     pimInterfaces.push_back(pimInterface);
             }
@@ -93,27 +93,27 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
     }
 }
 
-PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement *config)
+PimInterface *PimInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement *config)
 {
     const char *modeAttr = config->getAttribute("mode");
     if (!modeAttr)
         return nullptr;
 
-    PIMInterface::PIMMode mode;
+    PimInterface::PimMode mode;
     if (strcmp(modeAttr, "dense") == 0)
-        mode = PIMInterface::DenseMode;
+        mode = PimInterface::DenseMode;
     else if (strcmp(modeAttr, "sparse") == 0)
-        mode = PIMInterface::SparseMode;
+        mode = PimInterface::SparseMode;
     else
         throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getInterfaceName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     bool stateRefreshFlag = stateRefreshAttr && !strcmp(stateRefreshAttr, "true");
 
-    return new PIMInterface(ie, mode, stateRefreshFlag);
+    return new PimInterface(ie, mode, stateRefreshFlag);
 }
 
-PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
+PimInterface *PimInterfaceTable::getInterfaceById(int interfaceId)
 {
     for (int i = 0; i < getNumInterfaces(); i++)
         if (interfaceId == getInterface(i)->getInterfaceId())
@@ -122,7 +122,7 @@ PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
     return nullptr;
 }
 
-void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void PimInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
@@ -139,7 +139,7 @@ void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
     }
 }
 
-PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface(InterfaceEntry *ie)
+PimInterfaceTable::PimInterfaceVector::iterator PimInterfaceTable::findInterface(InterfaceEntry *ie)
 {
     for (auto it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         if ((*it)->getInterfacePtr() == ie)
@@ -148,7 +148,7 @@ PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface
     return pimInterfaces.end();
 }
 
-void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
+void PimInterfaceTable::addInterface(InterfaceEntry *ie)
 {
     ASSERT(findInterface(ie) == pimInterfaces.end());
 
@@ -158,13 +158,13 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
 
     int i = matcher.findMatchingSelector(ie);
     if (i >= 0) {
-        PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
+        PimInterface *pimInterface = createInterface(ie, interfaceElements[i]);
         if (pimInterface)
             pimInterfaces.push_back(pimInterface);
     }
 }
 
-void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
+void PimInterfaceTable::removeInterface(InterfaceEntry *ie)
 {
     auto it = findInterface(ie);
     if (it != pimInterfaces.end())

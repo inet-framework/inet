@@ -28,12 +28,12 @@ Ieee80211IrPreambleMode::Ieee80211IrPreambleMode(int syncSlotLength) :
 {
 }
 
-Ieee80211IrHeaderMode::Ieee80211IrHeaderMode(const PPMModulationBase *modulation) :
+Ieee80211IrHeaderMode::Ieee80211IrHeaderMode(const PpmModulationBase *modulation) :
     modulation(modulation)
 {
 }
 
-Ieee80211IrDataMode::Ieee80211IrDataMode(const PPMModulationBase *modulation) :
+Ieee80211IrDataMode::Ieee80211IrDataMode(const PpmModulationBase *modulation) :
     modulation(modulation)
 {
 }
@@ -50,12 +50,12 @@ Ieee80211IrMode::Ieee80211IrMode(const char *name, const Ieee80211IrPreambleMode
 const Ieee80211IrPreambleMode Ieee80211IrCompliantModes::irPreambleMode64SyncSlots(64);
 
 // header modes
-const Ieee80211IrHeaderMode Ieee80211IrCompliantModes::irHeaderMode1Mbps(&_16PPMModulation::singleton);
-const Ieee80211IrHeaderMode Ieee80211IrCompliantModes::irHeaderMode2Mbps(&_4PPMModulation::singleton);
+const Ieee80211IrHeaderMode Ieee80211IrCompliantModes::irHeaderMode1Mbps(&_16PpmModulation::singleton);
+const Ieee80211IrHeaderMode Ieee80211IrCompliantModes::irHeaderMode2Mbps(&_4PpmModulation::singleton);
 
 // data modes
-const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode1Mbps(&_16PPMModulation::singleton);
-const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode2Mbps(&_4PPMModulation::singleton);
+const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode1Mbps(&_16PpmModulation::singleton);
+const Ieee80211IrDataMode Ieee80211IrCompliantModes::irDataMode2Mbps(&_4PpmModulation::singleton);
 
 // modes
 const Ieee80211IrMode Ieee80211IrCompliantModes::irMode1Mbps("irMode1Mbps", &irPreambleMode64SyncSlots, &irHeaderMode1Mbps, &irDataMode1Mbps);

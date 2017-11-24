@@ -181,7 +181,7 @@ void MatrixCloudDelayer::calculateDropAndDelay(const cMessage *msg, int srcID, i
 
 MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int srcID, int destID)
 {
-    IDPair idPair(srcID, destID);
+    IdPair idPair(srcID, destID);
     auto it = idPairToDescriptorMap.find(idPair);
     if (it != idPairToDescriptorMap.end())
         return &(it->second);
@@ -204,7 +204,7 @@ MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int sr
                     throw cRuntimeError("Inconsistent xml config between '%s' and '%s' nodes (at %s and %s)",
                             src.c_str(), dest.c_str(), matrixEntry->entity->getSourceLocation(),
                             reverseMatrixEntry->entity->getSourceLocation());
-                IDPair reverseIdPair(destID, srcID);
+                IdPair reverseIdPair(destID, srcID);
                 MatrixCloudDelayer::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
                 rdescriptor = descriptor;
             }

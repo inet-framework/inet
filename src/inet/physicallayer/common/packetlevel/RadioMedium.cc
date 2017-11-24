@@ -177,7 +177,7 @@ void RadioMedium::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-bool RadioMedium::isRadioMacAddress(const IRadio *radio, const MACAddress address) const
+bool RadioMedium::isRadioMacAddress(const IRadio *radio, const MacAddress address) const
 {
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
@@ -302,7 +302,7 @@ const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *ra
     receptionDecisionComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
-    const ISNIR *snir = getSNIR(radio, transmission);
+    const ISnir *snir = getSNIR(radio, transmission);
     return radio->getReceiver()->computeReceptionDecision(listening, reception, part, interference, snir);
 }
 
@@ -311,7 +311,7 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
     receptionResultComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
-    const ISNIR *snir = getSNIR(radio, transmission);
+    const ISnir *snir = getSNIR(radio, transmission);
     const IReceptionDecision *receptionDecision = getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
     const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
     return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
@@ -383,10 +383,10 @@ const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission 
     return noise;
 }
 
-const ISNIR *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *transmission) const
+const ISnir *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *transmission) const
 {
     cacheSNIRGetCount++;
-    const ISNIR *snir = communicationCache->getCachedSNIR(receiver, transmission);
+    const ISnir *snir = communicationCache->getCachedSNIR(receiver, transmission);
     if (snir)
         cacheSNIRHitCount++;
     else {
@@ -662,7 +662,7 @@ bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmiss
     const IListening *listening = getListening(receiver, transmission);
     // TODO: why compute?
     const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    const ISNIR *snir = getSNIR(receiver, transmission);
+    const ISnir *snir = getSNIR(receiver, transmission);
     bool isReceptionSuccessful = receiver->getReceiver()->computeIsReceptionSuccessful(listening, reception, part, interference, snir);
     delete interference;
     return isReceptionSuccessful;

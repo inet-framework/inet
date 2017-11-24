@@ -50,7 +50,7 @@ package inet.linklayer.ethernet;
 // - reception of non-~EtherFrameWithLLC objects (e.g. ~EthernetIIFrame,
 //   ~EtherFrameWithSNAP) will cause a runtime error.
 //
-simple EtherLLC
+simple EtherLlc
 {
     parameters:
         @display("i=block/fork");

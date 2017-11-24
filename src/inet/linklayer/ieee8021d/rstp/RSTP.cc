@@ -26,21 +26,21 @@
 
 namespace inet {
 
-Define_Module(RSTP);
+Define_Module(Rstp);
 
-RSTP::RSTP()
+Rstp::Rstp()
 {
 }
 
-RSTP::~RSTP()
+Rstp::~Rstp()
 {
     cancelAndDelete(helloTimer);
     cancelAndDelete(upgradeTimer);
 }
 
-void RSTP::initialize(int stage)
+void Rstp::initialize(int stage)
 {
-    STPBase::initialize(stage);
+    StpBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         autoEdge = par("autoEdge");
@@ -51,7 +51,7 @@ void RSTP::initialize(int stage)
     }
 }
 
-void RSTP::scheduleNextUpgrade()
+void Rstp::scheduleNextUpgrade()
 {
     cancelEvent(upgradeTimer);
     Ieee8021dInterfaceData *nextInterfaceData = nullptr;
@@ -85,7 +85,7 @@ void RSTP::scheduleNextUpgrade()
         scheduleAt(nextInterfaceData->getNextUpgrade(), upgradeTimer);
 }
 
-void RSTP::handleMessage(cMessage *msg)
+void Rstp::handleMessage(cMessage *msg)
 {
     // it can receive BPDU or self messages
     if (!isOperational) {
@@ -117,7 +117,7 @@ void RSTP::handleMessage(cMessage *msg)
     }
 }
 
-void RSTP::handleUpgrade(cMessage *msg)
+void Rstp::handleUpgrade(cMessage *msg)
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
@@ -146,7 +146,7 @@ void RSTP::handleUpgrade(cMessage *msg)
     scheduleNextUpgrade();
 }
 
-void RSTP::handleHelloTime(cMessage *msg)
+void Rstp::handleHelloTime(cMessage *msg)
 {
     EV_DETAIL << "Hello time." << endl;
     for (unsigned int i = 0; i < numPorts; i++) {
@@ -213,7 +213,7 @@ void RSTP::handleHelloTime(cMessage *msg)
     scheduleAt(simTime() + helloTime, msg);    // programming next hello time
 }
 
-void RSTP::checkTC(const Ptr<const BPDU>& frame, int arrivalInterfaceId)
+void Rstp::checkTC(const Ptr<const Bpdu>& frame, int arrivalInterfaceId)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
     if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
@@ -232,7 +232,7 @@ void RSTP::checkTC(const Ptr<const BPDU>& frame, int arrivalInterfaceId)
     }
 }
 
-void RSTP::handleBackup(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId)
+void Rstp::handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
@@ -269,13 +269,13 @@ void RSTP::handleBackup(const Ptr<const BPDU>& frame, unsigned int arrivalInterf
     }
 }
 
-void RSTP::handleIncomingFrame(Packet *packet)
+void Rstp::handleIncomingFrame(Packet *packet)
 {
-    const Ptr<const BPDU>& frame = packet->peekHeader<BPDU>();
+    const Ptr<const Bpdu>& frame = packet->peekHeader<Bpdu>();
     // incoming BPDU handling
     // checking message age
     int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MACAddress src = packet->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+    MacAddress src = packet->getMandatoryTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
     if (frame->getMessageAge() < maxAge) {
         // checking TC
@@ -291,7 +291,7 @@ void RSTP::handleIncomingFrame(Packet *packet)
     delete packet;
 }
 
-void RSTP::processBPDU(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId)
+void Rstp::processBPDU(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId)
 {
     //three challenges.
     //
@@ -312,7 +312,7 @@ void RSTP::processBPDU(const Ptr<const BPDU>& frame, unsigned int arrivalInterfa
     }
 }
 
-bool RSTP::processBetterSource(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId)
+bool Rstp::processBetterSource(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "Better BDPU received than the current best for this port." << endl;
     // update that port rstp info
@@ -448,7 +448,7 @@ bool RSTP::processBetterSource(const Ptr<const BPDU>& frame, unsigned int arriva
     return false;
 }
 
-bool RSTP::processSameSource(const Ptr<const BPDU>& frame, unsigned int arrivalInterfaceId)
+bool Rstp::processSameSource(const Ptr<const Bpdu>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "BDPU received from the same source than the current best for this port" << endl;
     Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
@@ -568,7 +568,7 @@ bool RSTP::processSameSource(const Ptr<const BPDU>& frame, unsigned int arrivalI
     return false;
 }
 
-void RSTP::sendTCNtoRoot()
+void Rstp::sendTCNtoRoot()
 {
     // if TCWhile is not expired, sends BPDU with TC flag to the root
     this->bubble("SendTCNtoRoot");
@@ -579,7 +579,7 @@ void RSTP::sendTCNtoRoot()
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
                 Packet *packet = new Packet("BPDU");
-                const auto& frame = makeShared<BPDU>();
+                const auto& frame = makeShared<Bpdu>();
                 frame->setRootPriority(rootPort->getRootPriority());
                 frame->setRootAddress(rootPort->getRootAddress());
                 frame->setMessageAge(rootPort->getAge());
@@ -601,7 +601,7 @@ void RSTP::sendTCNtoRoot()
 
                 auto macAddressReq = packet->ensureTag<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
-                macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
+                macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
                 packet->ensureTag<InterfaceReq>()->setInterfaceId(r);
 
                 send(packet, "relayOut");
@@ -610,7 +610,7 @@ void RSTP::sendTCNtoRoot()
     }
 }
 
-void RSTP::sendBPDUs()
+void Rstp::sendBPDUs()
 {
     // send BPDUs through all ports, if they are required
     for (unsigned int i = 0; i < numPorts; i++) {
@@ -625,7 +625,7 @@ void RSTP::sendBPDUs()
     }
 }
 
-void RSTP::sendBPDU(int interfaceId)
+void Rstp::sendBPDU(int interfaceId)
 {
     // send a BPDU throuth port
     Ieee8021dInterfaceData *iport = getPortInterfaceData(interfaceId);
@@ -635,7 +635,7 @@ void RSTP::sendBPDU(int interfaceId)
         rootPort = getPortInterfaceData(r);
     if (iport->getRole() != Ieee8021dInterfaceData::DISABLED) {
         Packet *packet = new Packet("BPDU");
-        const auto& frame = makeShared<BPDU>();
+        const auto& frame = makeShared<Bpdu>();
         if (r != -1) {
             frame->setRootPriority(rootPort->getRootPriority());
             frame->setRootAddress(rootPort->getRootAddress());
@@ -668,14 +668,14 @@ void RSTP::sendBPDU(int interfaceId)
 
         auto macAddressReq = packet->ensureTag<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);
-        macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
+        macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
         send(packet, "relayOut");
     }
 }
 
-void RSTP::printState()
+void Rstp::printState()
 {
     //  prints current database info
     EV_DETAIL << "Switch " << findContainingNode(this)->getFullName() << " state:" << endl;
@@ -708,7 +708,7 @@ void RSTP::printState()
     EV_DETAIL << endl;
 }
 
-void RSTP::initInterfacedata(unsigned int interfaceId)
+void Rstp::initInterfacedata(unsigned int interfaceId)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
     ifd->setRootPriority(bridgePriority);
@@ -722,7 +722,7 @@ void RSTP::initInterfacedata(unsigned int interfaceId)
     ifd->setLostBPDU(0);
 }
 
-void RSTP::initPorts()
+void Rstp::initPorts()
 {
     for (unsigned int j = 0; j < numPorts; j++) {
         int interfaceId = ifTable->getInterface(j)->getInterfaceId();
@@ -742,7 +742,7 @@ void RSTP::initPorts()
     scheduleNextUpgrade();
 }
 
-void RSTP::updateInterfacedata(const Ptr<const BPDU>& frame, unsigned int portNum)
+void Rstp::updateInterfacedata(const Ptr<const Bpdu>& frame, unsigned int portNum)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(portNum);
     ifd->setRootPriority(frame->getRootPriority());
@@ -756,7 +756,7 @@ void RSTP::updateInterfacedata(const Ptr<const BPDU>& frame, unsigned int portNu
     ifd->setLostBPDU(0);
 }
 
-RSTP::CompareResult RSTP::contestInterfacedata(unsigned int portNum)
+Rstp::CompareResult Rstp::contestInterfacedata(unsigned int portNum)
 {
     int r = getRootInterfaceId();
     Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
@@ -771,7 +771,7 @@ RSTP::CompareResult RSTP::contestInterfacedata(unsigned int portNum)
             portNum, ifd->getPortNum());
 }
 
-RSTP::CompareResult RSTP::contestInterfacedata(const Ptr<const BPDU>& msg, unsigned int interfaceId)
+Rstp::CompareResult Rstp::contestInterfacedata(const Ptr<const Bpdu>& msg, unsigned int interfaceId)
 {
     int r = getRootInterfaceId();
     Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
@@ -786,7 +786,7 @@ RSTP::CompareResult RSTP::contestInterfacedata(const Ptr<const BPDU>& msg, unsig
             interfaceId, msg->getPortNum());
 }
 
-RSTP::CompareResult RSTP::compareInterfacedata(unsigned int interfaceId, const Ptr<const BPDU>& msg, int linkCost)
+Rstp::CompareResult Rstp::compareInterfacedata(unsigned int interfaceId, const Ptr<const Bpdu>& msg, int linkCost)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
 
@@ -799,11 +799,11 @@ RSTP::CompareResult RSTP::compareInterfacedata(unsigned int interfaceId, const P
             ifd->getPortNum(), msg->getPortNum());
 }
 
-RSTP::CompareResult RSTP::compareRSTPData(int rootPriority1, int rootPriority2,
-        MACAddress rootAddress1, MACAddress rootAddress2,
+Rstp::CompareResult Rstp::compareRSTPData(int rootPriority1, int rootPriority2,
+        MacAddress rootAddress1, MacAddress rootAddress2,
         int rootPathCost1, int rootPathCost2,
         int bridgePriority1, int bridgePriority2,
-        MACAddress bridgeAddress1, MACAddress bridgeAddress2,
+        MacAddress bridgeAddress1, MacAddress bridgeAddress2,
         int portPriority1, int portPriority2,
         int portNum1, int portNum2)
 {
@@ -833,7 +833,7 @@ RSTP::CompareResult RSTP::compareRSTPData(int rootPriority1, int rootPriority2,
     return SIMILAR;
 }
 
-int RSTP::getBestAlternate()
+int Rstp::getBestAlternate()
 {
     int candidate = -1;    // index of the best alternate found
     for (unsigned int j = 0; j < numPorts; j++) {
@@ -861,7 +861,7 @@ int RSTP::getBestAlternate()
     return candidate;
 }
 
-void RSTP::flushOtherPorts(unsigned int portId)
+void Rstp::flushOtherPorts(unsigned int portId)
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
@@ -873,7 +873,7 @@ void RSTP::flushOtherPorts(unsigned int portId)
 }
 
 //void RSTP::receiveChangeNotification(int signalID, const cObject *obj)
-void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 
@@ -897,16 +897,16 @@ void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     }
 }
 
-void RSTP::start()
+void Rstp::start()
 {
-    STPBase::start();
+    StpBase::start();
     initPorts();
     scheduleAt(simTime(), helloTimer);
 }
 
-void RSTP::stop()
+void Rstp::stop()
 {
-    STPBase::stop();
+    StpBase::stop();
     cancelEvent(helloTimer);
     cancelEvent(upgradeTimer);
 }

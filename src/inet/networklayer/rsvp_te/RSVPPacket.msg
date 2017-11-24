@@ -33,7 +33,7 @@ enum RsvpConstants {
 //
 // RSVP message common part
 //
-class RSVPMessage extends FieldsChunk
+class RsvpMessage extends FieldsChunk
 {
     int rsvpKind;
 }
@@ -41,10 +41,10 @@ class RSVPMessage extends FieldsChunk
 //
 // FIXME missing documentation
 //
-class RSVPPacket extends RSVPMessage
+class RsvpPacket extends RsvpMessage
 {
     @customize;
-    SessionObj_t session;
+    SessionObj session;
     bool checksumValid = true;
 }
 
@@ -56,20 +56,20 @@ cplusplus {{
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class INET_API RSVPPacket : public RSVPPacket_Base
+class INET_API RsvpPacket : public RsvpPacket_Base
 {
   public:
-    RSVPPacket() : RSVPPacket_Base() {}
-    RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other) {}
-    RSVPPacket& operator=(const RSVPPacket& other) { RSVPPacket_Base::operator=(other); return *this; }
-    virtual RSVPPacket *dup() const override { return new RSVPPacket(*this); }
+    RsvpPacket() : RsvpPacket_Base() {}
+    RsvpPacket(const RsvpPacket& other) : RsvpPacket_Base(other) {}
+    RsvpPacket& operator=(const RsvpPacket& other) { RsvpPacket_Base::operator=(other); return *this; }
+    virtual RsvpPacket *dup() const override { return new RsvpPacket(*this); }
 
-    inline IPv4Address getDestAddress() { return getSession().DestAddress; }
+    inline Ipv4Address getDestAddress() { return getSession().DestAddress; }
     inline int getTunnelId() { return getSession().Tunnel_Id; }
     inline int getExTunnelId() { return getSession().Extended_Tunnel_Id; }
     inline int getSetupPri() { return getSession().setupPri; }
     inline int getHoldingPri() { return getSession().holdingPri; }
-    inline bool isInSession(SessionObj_t *s) const
+    inline bool isInSession(SessionObj *s) const
     {
         return getSession().DestAddress == s->DestAddress &&
                getSession().Tunnel_Id == s->Tunnel_Id &&

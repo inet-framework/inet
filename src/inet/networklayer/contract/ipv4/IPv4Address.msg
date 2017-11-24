@@ -26,19 +26,19 @@ cplusplus {{
 namespace inet;
 
 cplusplus {{
-typedef std::vector<IPv4Address> IPv4AddressVector;
+typedef std::vector<Ipv4Address> Ipv4AddressVector;
 }}
 
 
-class IPv4Address
+class Ipv4Address
 {
     @existingClass;
     @opaque;
     @tostring(.str());
-    @fromstring(IPv4Address($));
+    @fromstring(Ipv4Address($));
 }
 
-class IPv4AddressVector
+class Ipv4AddressVector
 {
    @existingClass;
    //FIXME tostring, ...

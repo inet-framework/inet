@@ -24,14 +24,14 @@
 
 package inet.linklayer.csma;
 
-import inet.linklayer.base.MACProtocolBase;
-import inet.linklayer.contract.IMACProtocol;
+import inet.linklayer.base.MacProtocolBase;
+import inet.linklayer.contract.IMacProtocol;
 
 //
 // Generic CSMA protocol supporting Mac-ACKs as well as
 // constant, linear or exponential backoff times.
 //
-simple CSMA extends MACProtocolBase like IMACProtocol
+simple Csma extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -92,7 +92,7 @@ simple CSMA extends MACProtocolBase like IMACProtocol
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
-        @class(CSMA);
+        @class(Csma);
         @signal[linkBreak](type=Packet);
         @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
         @statistic[packetDropNotAddressToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

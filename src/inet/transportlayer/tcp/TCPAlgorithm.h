@@ -34,11 +34,11 @@ namespace tcp {
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above algorithms.
  */
-class INET_API TCPAlgorithm : public cObject
+class INET_API TcpAlgorithm : public cObject
 {
   protected:
-    TCPConnection *conn;    // we belong to this connection
-    TCPStateVariables *state;    // our state variables
+    TcpConnection *conn;    // we belong to this connection
+    TcpStateVariables *state;    // our state variables
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -46,29 +46,29 @@ class INET_API TCPAlgorithm : public cObject
      * subclassed from TCPStateVariables. This factory method should
      * create and return a "blank" state block of the appropriate type.
      */
-    virtual TCPStateVariables *createStateVariables() = 0;
+    virtual TcpStateVariables *createStateVariables() = 0;
 
   public:
     /**
      * Ctor.
      */
-    TCPAlgorithm() { state = nullptr; conn = nullptr; }
+    TcpAlgorithm() { state = nullptr; conn = nullptr; }
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPAlgorithm() {}
+    virtual ~TcpAlgorithm() {}
 
     /**
      * Assign this object to a TCPConnection. Its sendQueue and receiveQueue
      * must be set already at this time, because we cache their pointers here.
      */
-    void setConnection(TCPConnection *_conn) { conn = _conn; }
+    void setConnection(TcpConnection *_conn) { conn = _conn; }
 
     /**
      * Creates and returns the TCP state variables.
      */
-    TCPStateVariables *getStateVariables()
+    TcpStateVariables *getStateVariables()
     {
         if (!state)
             state = createStateVariables();
@@ -106,7 +106,7 @@ class INET_API TCPAlgorithm : public cObject
      * Method may also change the event code (by default set to TCP_E_IGNORE)
      * to cause the state transition of TCP FSM.
      */
-    virtual void processTimer(cMessage *timer, TCPEventCode& event) = 0;
+    virtual void processTimer(cMessage *timer, TcpEventCode& event) = 0;
 
     /**
      * Called after user sent TCP_C_SEND command to us.

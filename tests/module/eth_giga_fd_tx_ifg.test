@@ -1,5 +1,5 @@
 %description:
-EtherMAC and EtherMACFullDuplex module: tests IFG in full duplex mode on gigabit ethernet
+EtherMac and EtherMacFullDuplex module: tests IFG in full duplex mode on gigabit ethernet
 
 
 %inifile: {}.ini

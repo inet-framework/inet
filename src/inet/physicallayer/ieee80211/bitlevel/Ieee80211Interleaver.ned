@@ -32,7 +32,7 @@ import inet.physicallayer.contract.bitlevel.IInterleaver;
 //
 // The latter is simply N_{BPSC} * number of subcarriers in a symbol.
 //
-module Ieee80211OFDMInterleaver like IInterleaver
+module Ieee80211OfdmInterleaver like IInterleaver
 {
     parameters:
         int numberOfCodedBitsPerSymbol;

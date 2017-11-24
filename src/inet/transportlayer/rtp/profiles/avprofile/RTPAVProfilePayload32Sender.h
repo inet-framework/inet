@@ -34,7 +34,7 @@ namespace rtp {
  * an RTPMpegPacket.
  * The corresponding receiver module RTPAVProfilePayload32Receiver.
  */
-class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
+class INET_API RtpAvProfilePayload32Sender : public RtpPayloadSender
 {
   protected:
     /**
@@ -51,7 +51,7 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
     /**
      * This method reads the gdf file header.
      */
-    virtual void initializeSenderModule(RTPInnerPacket *rinpIn) override;
+    virtual void initializeSenderModule(RtpInnerPacket *rinpIn) override;
 
     /**
      * This method sends one mpeg frame. It sends one or more

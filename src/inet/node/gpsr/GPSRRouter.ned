@@ -5,7 +5,7 @@
 package inet.node.gpsr;
 
 import inet.node.inet.WirelessHost;
-import inet.routing.gpsr.GPSR;
+import inet.routing.gpsr.Gpsr;
 
 module GPSRRouter extends WirelessHost
 {
@@ -15,7 +15,7 @@ module GPSRRouter extends WirelessHost
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
 
     submodules:
-        gpsr: GPSR {
+        gpsr: Gpsr {
             parameters:
                 @display("p=700,300");
         }

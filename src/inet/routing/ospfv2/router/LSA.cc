@@ -21,7 +21,7 @@ namespace inet {
 
 namespace ospf {
 
-bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
+bool operator<(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
@@ -46,7 +46,7 @@ bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
     return false;
 }
 
-bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
+bool operator==(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
@@ -65,7 +65,7 @@ bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
     }
 }
 
-bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
+bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
 {
     return (leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
            (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
@@ -74,7 +74,7 @@ bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits);
 }
 
-unsigned int calculateLSASize(const OSPFRouterLSA *routerLSA)
+unsigned int calculateLSASize(const OspfRouterLsa *routerLSA)
 {
     unsigned int lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
     unsigned short linkCount = routerLSA->getLinksArraySize();
@@ -87,25 +87,25 @@ unsigned int calculateLSASize(const OSPFRouterLSA *routerLSA)
     return lsaLength;
 }
 
-unsigned int calculateLSASize(const OSPFNetworkLSA *networkLSA)
+unsigned int calculateLSASize(const OspfNetworkLsa *networkLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH
            + (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH);
 }
 
-unsigned int calculateLSASize(const OSPFSummaryLSA *summaryLSA)
+unsigned int calculateLSASize(const OspfSummaryLsa *summaryLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
            + (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH);
 }
 
-unsigned int calculateLSASize(const OSPFASExternalLSA *asExternalLSA)
+unsigned int calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH
            + (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH);
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsaHeader)
+std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
 {
     ostr << "LSAHeader: age=" << lsaHeader.getLsAge()
          << ", type=";
@@ -141,7 +141,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsaHeader)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
+std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa)
 {
     ostr << "Mask: " << lsa.getNetworkMask();
     unsigned int cnt = lsa.getAttachedRoutersArraySize();
@@ -155,7 +155,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const TOSData& tos)
+std::ostream& operator<<(std::ostream& ostr, const TosData& tos)
 {
     ostr << "tos: " << (int)tos.tos
          << "metric:";
@@ -170,7 +170,7 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
          << ", data: ";
     unsigned long data = link.getLinkData();
     if ((data & 0xFF000000) != 0)
-        ostr << IPv4Address(data).str(false);
+        ostr << Ipv4Address(data).str(false);
     else
         ostr << data;
     ostr << ", cost: " << link.getLinkCost();
@@ -185,7 +185,7 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa)
+std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa)
 {
     if (lsa.getV_VirtualLinkEndpoint())
         ostr << "V, ";
@@ -206,7 +206,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa)
+std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa)
 {
     ostr << "Mask: " << lsa.getNetworkMask()
          << ", Cost: " << lsa.getRouteCost() << ", ";
@@ -222,7 +222,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos)
+std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos)
 {
     ostr << "TOSData: {" << tos.tosData
          << "}, MetricType: " << tos.E_ExternalMetricType
@@ -231,9 +231,9 @@ std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos)
     return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
+std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa)
 {
-    const OSPFASExternalLSAContents& contents = lsa.getContents();
+    const OspfAsExternalLsaContents& contents = lsa.getContents();
     ostr << "Mask: " << contents.getNetworkMask()
          << ", Cost: " << contents.getRouteCost()
          << ", MetricType: " << contents.getE_ExternalMetricType()

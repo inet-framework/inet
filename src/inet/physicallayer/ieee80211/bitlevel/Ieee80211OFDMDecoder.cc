@@ -29,7 +29,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OfdmCode *code) :
+Ieee80211OfdmDecoder::Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code) :
     code(code),
     descrambler(nullptr),
     fecDecoder(nullptr),
@@ -40,10 +40,10 @@ Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OfdmCode *code) :
     if (code->getConvolutionalCode())
         fecDecoder = new ConvolutionalCoder(code->getConvolutionalCode());
     if (code->getInterleaving())
-        deinterleaver = new Ieee80211OFDMInterleaver(code->getInterleaving());
+        deinterleaver = new Ieee80211OfdmInterleaver(code->getInterleaving());
 }
 
-std::ostream& Ieee80211OFDMDecoder::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMDecoder";
     if (level <= PRINT_LEVEL_TRACE)
@@ -54,7 +54,7 @@ std::ostream& Ieee80211OFDMDecoder::printToStream(std::ostream& stream, int leve
     return stream;
 }
 
-const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitModel *bitModel) const
+const IReceptionPacketModel *Ieee80211OfdmDecoder::decode(const IReceptionBitModel *bitModel) const
 {
     bool hasBitError = false;
     BitVector *decodedBits = new BitVector(*bitModel->getBits());
@@ -78,7 +78,7 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::decode(const IReceptionBitMod
     return createPacketModel(decodedBits, hasBitError, scrambling, forwardErrorCorrection, interleaving);
 }
 
-const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVector *decodedBits, bool hasBitError, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const
+const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVector *decodedBits, bool hasBitError, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const
 {
     Packet *packet;
     if (decodedBits->getSize() % 8 == 0) {
@@ -99,7 +99,7 @@ const IReceptionPacketModel *Ieee80211OFDMDecoder::createPacketModel(const BitVe
     return new ReceptionPacketModel(packet, bps(NaN));
 }
 
-ShortBitVector Ieee80211OFDMDecoder::getSignalFieldRate(const BitVector& signalField) const
+ShortBitVector Ieee80211OfdmDecoder::getSignalFieldRate(const BitVector& signalField) const
 {
     ShortBitVector rate;
     for (int i = SIGNAL_RATE_FIELD_START; i <= SIGNAL_RATE_FIELD_END; i++)
@@ -107,7 +107,7 @@ ShortBitVector Ieee80211OFDMDecoder::getSignalFieldRate(const BitVector& signalF
     return rate;
 }
 
-unsigned int Ieee80211OFDMDecoder::getSignalFieldLength(const BitVector& signalField) const
+unsigned int Ieee80211OfdmDecoder::getSignalFieldLength(const BitVector& signalField) const
 {
     ShortBitVector length;
     for (int i = SIGNAL_LENGTH_FIELD_START; i <= SIGNAL_LENGTH_FIELD_END; i++)
@@ -115,16 +115,16 @@ unsigned int Ieee80211OFDMDecoder::getSignalFieldLength(const BitVector& signalF
     return length.toDecimal();
 }
 
-unsigned int Ieee80211OFDMDecoder::calculatePadding(unsigned int dataFieldLengthInBits, const IModulation *modulationScheme, const Ieee80211ConvolutionalCode *fec) const
+unsigned int Ieee80211OfdmDecoder::calculatePadding(unsigned int dataFieldLengthInBits, const IModulation *modulationScheme, const Ieee80211ConvolutionalCode *fec) const
 {
-    const IAPSKModulation *dataModulationScheme = dynamic_cast<const IAPSKModulation *>(modulationScheme);
+    const IApskModulation *dataModulationScheme = dynamic_cast<const IApskModulation *>(modulationScheme);
     ASSERT(dataModulationScheme != nullptr);
     unsigned int codedBitsPerOFDMSymbol = dataModulationScheme->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol * fec->getCodeRatePuncturingK() / fec->getCodeRatePuncturingN();
     return dataBitsPerOFDMSymbol - dataFieldLengthInBits % dataBitsPerOFDMSymbol;
 }
 
-Ieee80211OFDMDecoder::~Ieee80211OFDMDecoder()
+Ieee80211OfdmDecoder::~Ieee80211OfdmDecoder()
 {
     delete deinterleaver;
     delete descrambler;

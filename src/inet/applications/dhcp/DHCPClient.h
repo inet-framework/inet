@@ -34,7 +34,7 @@ namespace inet {
 /**
  * Implements a DHCP client. See NED file for more details.
  */
-class INET_API DHCPClient : public cSimpleModule, public cListener, public ILifecycle
+class INET_API DhcpClient : public cSimpleModule, public cListener, public ILifecycle
 {
   protected:
     // DHCP timer types (RFC 2131 4.4.5)
@@ -50,12 +50,12 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     // parameters
     int serverPort = -1;
     int clientPort = -1;
-    UDPSocket socket;    // UDP socket for client-server communication
+    UdpSocket socket;    // UDP socket for client-server communication
     simtime_t startTime;    // application start time
-    MACAddress macAddress;    // client's MAC address
+    MacAddress macAddress;    // client's MAC address
     cModule *host = nullptr;    // containing host module (@networkNode)
     InterfaceEntry *ie = nullptr;    // interface to configure
-    IIPv4RoutingTable *irt = nullptr;    // routing table to update
+    IIpv4RoutingTable *irt = nullptr;    // routing table to update
 
     // state
     cMessage *timerT1 = nullptr;    // time at which the client enters the RENEWING state
@@ -66,8 +66,8 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     bool isOperational = false;    // lifecycle
     ClientState clientState = INIT;    // current state
     unsigned int xid = 0;    // transaction id; to associate messages and responses between a client and a server
-    DHCPLease *lease = nullptr;    // leased IP information
-    IPv4Route *route = nullptr;    // last added route
+    DhcpLease *lease = nullptr;    // leased IP information
+    Ipv4Route *route = nullptr;    // last added route
 
     // statistics
     int numSent = 0;    // number of sent DHCP messages
@@ -83,7 +83,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     virtual void scheduleTimerT1();
     virtual void scheduleTimerT2();
     static const char *getStateName(ClientState state);
-    const char *getAndCheckMessageTypeName(DHCPMessageType type);
+    const char *getAndCheckMessageTypeName(DhcpMessageType type);
     virtual void refreshDisplay() const override;
 
 
@@ -131,17 +131,17 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     /*
      * Client to server indicating network address is already in use.
      */
-    virtual void sendDecline(IPv4Address declinedIp);
+    virtual void sendDecline(Ipv4Address declinedIp);
 
     /*
      * Records configuration parameters from a DHCPACK message.
      */
-    virtual void recordLease(const Ptr<const DHCPMessage>& dhcpACK);
+    virtual void recordLease(const Ptr<const DhcpMessage>& dhcpACK);
 
     /*
      * Records minimal configuration parameters from a DHCPOFFER message.
      */
-    virtual void recordOffer(const Ptr<const DHCPMessage>& dhcpOffer);
+    virtual void recordOffer(const Ptr<const DhcpMessage>& dhcpOffer);
 
     /*
      * Assigns the IP address to the interface.
@@ -168,7 +168,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
      * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
      * in response to DHCPINFORM messages.
      */
-    virtual void handleDHCPACK(const Ptr<const DHCPMessage>& msg);
+    virtual void handleDHCPACK(const Ptr<const DhcpMessage>& msg);
 
     /*
      * Selects the first non-loopback interface
@@ -181,8 +181,8 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
-    DHCPClient() {}
-    virtual ~DHCPClient();
+    DhcpClient() {}
+    virtual ~DhcpClient();
 };
 
 } // namespace inet

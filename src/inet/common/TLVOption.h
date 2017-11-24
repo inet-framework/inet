@@ -25,21 +25,21 @@
 
 namespace inet {
 
-class INET_API TLVOptions : public TLVOptions_Base
+class INET_API TlvOptions : public TlvOptions_Base
 {
   public:
-    typedef std::vector<TLVOptionBase*> TLVOptionVector;
+    typedef std::vector<TlvOptionBase*> TlvOptionVector;
 
   private:
-    TLVOptionVector optionVector;
-    void copy(const TLVOptions& other);
+    TlvOptionVector optionVector;
+    void copy(const TlvOptions& other);
 
   public:
-    TLVOptions() : TLVOptions_Base() {}
-    ~TLVOptions() { clear(); }
-    TLVOptions(const TLVOptions& other) : TLVOptions_Base(other) { copy(other); }
-    TLVOptions& operator=(const TLVOptions& other) { if (this != &other) { TLVOptions_Base::operator=(other); clear(); copy(other); } return *this; }
-    virtual TLVOptions *dup() const override { return new TLVOptions(*this); }
+    TlvOptions() : TlvOptions_Base() {}
+    ~TlvOptions() { clear(); }
+    TlvOptions(const TlvOptions& other) : TlvOptions_Base(other) { copy(other); }
+    TlvOptions& operator=(const TlvOptions& other) { if (this != &other) { TlvOptions_Base::operator=(other); clear(); copy(other); } return *this; }
+    virtual TlvOptions *dup() const override { return new TlvOptions(*this); }
 
     int size() const { return optionVector.size(); }
 
@@ -51,12 +51,12 @@ class INET_API TLVOptions : public TLVOptions_Base
     /*
      * Insert the option at the end of optionVector. The inserted option will be deleted by this class.
      */
-    void add(TLVOptionBase *option, int atPos = -1);
+    void add(TlvOptionBase *option, int atPos = -1);
 
     /*
      * Removes option from optionVector and returns option when removed, otherwise returns nullptr.
      */
-    TLVOptionBase *remove(TLVOptionBase *option);
+    TlvOptionBase *remove(TlvOptionBase *option);
 
     /*
      * Removes all options or first only option where type is the specified type.
@@ -66,12 +66,12 @@ class INET_API TLVOptions : public TLVOptions_Base
     /*
      * Get the option at the specified position of optionVector. Throws an error if m invalid.
      */
-    TLVOptionBase& at(int m) const { return *optionVector.at(m); }
+    TlvOptionBase& at(int m) const { return *optionVector.at(m); }
 
     /*
      * Get the option at the specified position of optionVector. Throws an error if m invalid.
      */
-    TLVOptionBase& operator[](int m)  { return at(m); }
+    TlvOptionBase& operator[](int m)  { return at(m); }
 
     /*
      * Calculate and returns the total length of all stored options in bytes
@@ -87,9 +87,9 @@ class INET_API TLVOptions : public TLVOptions_Base
     // redefine and implement pure virtual functions from TLVOptions_Base
     virtual void setTlvOptionArraySize(unsigned int size) override { throw cRuntimeError("Do not use it!"); }
     virtual unsigned int getTlvOptionArraySize() const override { return size(); }
-    virtual const TLVOptionBase& getTlvOption(unsigned int k) const override { return *optionVector.at(k); }
-    virtual TLVOptionBase& getMutableTlvOption(unsigned int k) override { return *optionVector.at(k); }
-    virtual void setTlvOption(unsigned int k, const TLVOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
+    virtual const TlvOptionBase& getTlvOption(unsigned int k) const override { return *optionVector.at(k); }
+    virtual TlvOptionBase& getMutableTlvOption(unsigned int k) override { return *optionVector.at(k); }
+    virtual void setTlvOption(unsigned int k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
 
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;

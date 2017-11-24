@@ -34,16 +34,16 @@ const uint32 MULTICAST_MASK = 0xFF000000;
 
 // RFC 3513: IPv6 Addressing Architecture
 // Section 2.7.1: Pre-defined Multicast Addresses
-const IPv6Address IPv6Address::UNSPECIFIED_ADDRESS("::0");
-const IPv6Address IPv6Address::LOOPBACK_ADDRESS("::1");
-const IPv6Address IPv6Address::ALL_NODES_1("FF01::1");
-const IPv6Address IPv6Address::ALL_NODES_2("FF02::1");
-const IPv6Address IPv6Address::ALL_ROUTERS_1("FF01::2");
-const IPv6Address IPv6Address::ALL_ROUTERS_2("FF02::2");
-const IPv6Address IPv6Address::ALL_ROUTERS_5("FF05::2");
-const IPv6Address IPv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
-const IPv6Address IPv6Address::LINKLOCAL_PREFIX("FE80::");
-const IPv6Address IPv6Address::LL_MANET_ROUTERS("FF02:0:0:0:0:0:0:6D");
+const Ipv6Address Ipv6Address::UNSPECIFIED_ADDRESS("::0");
+const Ipv6Address Ipv6Address::LOOPBACK_ADDRESS("::1");
+const Ipv6Address Ipv6Address::ALL_NODES_1("FF01::1");
+const Ipv6Address Ipv6Address::ALL_NODES_2("FF02::1");
+const Ipv6Address Ipv6Address::ALL_ROUTERS_1("FF01::2");
+const Ipv6Address Ipv6Address::ALL_ROUTERS_2("FF02::2");
+const Ipv6Address Ipv6Address::ALL_ROUTERS_5("FF05::2");
+const Ipv6Address Ipv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
+const Ipv6Address Ipv6Address::LINKLOCAL_PREFIX("FE80::");
+const Ipv6Address Ipv6Address::LL_MANET_ROUTERS("FF02:0:0:0:0:0:0:6D");
 
 // Helper: Parses at most 8 colon-separated 16-bit hex numbers ("groups"),
 // and returns their count. Advances s just over the last hex digit converted.
@@ -70,7 +70,7 @@ static int parseGroups(const char *& s, uint16_t *groups)
     return k;
 }
 
-bool IPv6Address::doTryParse(const char *& addr)
+bool Ipv6Address::doTryParse(const char *& addr)
 {
     if (!strcmp(addr, "<unspec>")) {
         addr += 8;
@@ -108,7 +108,7 @@ bool IPv6Address::doTryParse(const char *& addr)
     return true;
 }
 
-bool IPv6Address::tryParse(const char *addr)
+bool Ipv6Address::tryParse(const char *addr)
 {
     if (!addr)
         return false;
@@ -119,7 +119,7 @@ bool IPv6Address::tryParse(const char *addr)
     return true;
 }
 
-bool IPv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
+bool Ipv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
 {
     if (!addr)
         return false;
@@ -141,7 +141,7 @@ bool IPv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
     return true;
 }
 
-void IPv6Address::set(const char *addr)
+void Ipv6Address::set(const char *addr)
 {
     if (!tryParse(addr))
         throw cRuntimeError("IPv6Address: cannot interpret address string `%s'", addr);
@@ -174,7 +174,7 @@ static void findGap(uint16_t *groups, int& start, int& end)
     }
 }
 
-std::string IPv6Address::str() const
+std::string Ipv6Address::str() const
 {
     if (isUnspecified())
         return std::string("<unspec>");
@@ -203,7 +203,7 @@ std::string IPv6Address::str() const
     return os.str();
 }
 
-IPv6Address::Scope IPv6Address::getScope() const
+Ipv6Address::Scope Ipv6Address::getScope() const
 {
     //Mask the given IPv6 address with the different mask types
     //to get only the IPv6 address scope. Compare the masked
@@ -234,7 +234,7 @@ IPv6Address::Scope IPv6Address::getScope() const
     }
 }
 
-const char *IPv6Address::scopeName(Scope scope)
+const char *Ipv6Address::scopeName(Scope scope)
 {
     switch (scope) {
         case UNSPECIFIED:
@@ -260,7 +260,7 @@ const char *IPv6Address::scopeName(Scope scope)
     }
 }
 
-void IPv6Address::constructMask(int prefixLength, uint32 *mask)
+void Ipv6Address::constructMask(int prefixLength, uint32 *mask)
 {
     ASSERT(prefixLength >= 0 && prefixLength <= 128 && mask != nullptr);
 
@@ -298,24 +298,24 @@ void IPv6Address::constructMask(int prefixLength, uint32 *mask)
     }
 }
 
-IPv6Address IPv6Address::constructMask(int prefixLength)
+Ipv6Address Ipv6Address::constructMask(int prefixLength)
 {
-    IPv6Address ret;
+    Ipv6Address ret;
     constructMask(prefixLength, ret.d);
     return ret;
 }
 
-IPv6Address IPv6Address::getPrefix(int prefixLength) const
+Ipv6Address Ipv6Address::getPrefix(int prefixLength) const
 {
     // First we construct a mask.
     uint32 mask[4];
     constructMask(prefixLength, mask);
 
     // Now we mask each IPv6 address segment and create a new IPv6 Address!
-    return IPv6Address(d[0] & mask[0], d[1] & mask[1], d[2] & mask[2], d[3] & mask[3]);
+    return Ipv6Address(d[0] & mask[0], d[1] & mask[1], d[2] & mask[2], d[3] & mask[3]);
 }
 
-IPv6Address IPv6Address::getSuffix(int prefixLength) const
+Ipv6Address Ipv6Address::getSuffix(int prefixLength) const
 {
     // First we construct a mask.
     uint32 mask[4];
@@ -323,10 +323,10 @@ IPv6Address IPv6Address::getSuffix(int prefixLength) const
 
     // Now we mask each IPv6 address segment, inverse it
     // and create a new IPv6 Address!
-    return IPv6Address(d[0] & ~mask[0], d[1] & ~mask[1], d[2] & ~mask[2], d[3] & ~mask[3]);
+    return Ipv6Address(d[0] & ~mask[0], d[1] & ~mask[1], d[2] & ~mask[2], d[3] & ~mask[3]);
 }
 
-const IPv6Address& IPv6Address::setPrefix(const IPv6Address& fromAddr, int prefixLength)
+const Ipv6Address& Ipv6Address::setPrefix(const Ipv6Address& fromAddr, int prefixLength)
 {
     // first we construct a mask.
     uint32 mask[4];
@@ -340,7 +340,7 @@ const IPv6Address& IPv6Address::setPrefix(const IPv6Address& fromAddr, int prefi
     return *this;
 }
 
-const IPv6Address& IPv6Address::setSuffix(const IPv6Address& fromAddr, int prefixLength)
+const Ipv6Address& Ipv6Address::setSuffix(const Ipv6Address& fromAddr, int prefixLength)
 {
     // first we construct a mask.
     uint32 mask[4];
@@ -354,15 +354,15 @@ const IPv6Address& IPv6Address::setSuffix(const IPv6Address& fromAddr, int prefi
     return *this;
 }
 
-IPv6Address IPv6Address::formLinkLocalAddress(const InterfaceToken& ident)
+Ipv6Address Ipv6Address::formLinkLocalAddress(const InterfaceToken& ident)
 {
-    IPv6Address suffix(0, 0, ident.normal(), ident.low());
-    IPv6Address linkLocalAddr = IPv6Address::LINKLOCAL_PREFIX;
+    Ipv6Address suffix(0, 0, ident.normal(), ident.low());
+    Ipv6Address linkLocalAddr = Ipv6Address::LINKLOCAL_PREFIX;
     linkLocalAddr.setSuffix(suffix, 128 - ident.length());
     return linkLocalAddr;
 }
 
-bool IPv6Address::matches(const IPv6Address& prefix, int prefixLength) const
+bool Ipv6Address::matches(const Ipv6Address& prefix, int prefixLength) const
 {
     // first we construct a mask.
     uint32 mask[4];
@@ -374,7 +374,7 @@ bool IPv6Address::matches(const IPv6Address& prefix, int prefixLength) const
             | ((d[2] ^ prefix.d[2]) & mask[2]) | ((d[3] ^ prefix.d[3]) & mask[3])) == 0;
 }
 
-int IPv6Address::getMulticastScope() const
+int Ipv6Address::getMulticastScope() const
 {
     if ((d[0] & MULTICAST_MASK) != MULTICAST_PREFIX)
         throw cRuntimeError("IPv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());

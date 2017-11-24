@@ -25,36 +25,36 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API RoutingTableEntry : public IPv4Route
+class INET_API RoutingTableEntry : public Ipv4Route
 {
   public:
     typedef unsigned char RoutingPathType;
 
     RoutingTableEntry(void);
-    RoutingTableEntry(const IPv4Route *entry);
+    RoutingTableEntry(const Ipv4Route *entry);
     virtual ~RoutingTableEntry(void) {}
 
     void setPathType(RoutingPathType type) { _pathType = type; }
     RoutingPathType getPathType(void) const { return _pathType; }
-    void addAS(ASID newAS) { _ASList.push_back(newAS); }
+    void addAS(AsId newAS) { _ASList.push_back(newAS); }
     unsigned int getASCount(void) const { return _ASList.size(); }
-    ASID getAS(unsigned int index) const { return _ASList[index]; }
+    AsId getAS(unsigned int index) const { return _ASList[index]; }
 
   private:
     // destinationID is RoutingEntry::host
     // addressMask is RoutingEntry::netmask
     RoutingPathType _pathType = INCOMPLETE;
-    std::vector<ASID> _ASList;
+    std::vector<AsId> _ASList;
 };
 
 inline RoutingTableEntry::RoutingTableEntry(void)
 {
-    setNetmask(IPv4Address::ALLONES_ADDRESS);
+    setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setMetric(DEFAULT_COST);
     setSourceType(IRoute::BGP);
 }
 
-inline RoutingTableEntry::RoutingTableEntry(const IPv4Route *entry)
+inline RoutingTableEntry::RoutingTableEntry(const Ipv4Route *entry)
 {
     setDestination(entry->getDestination());
     setNetmask(entry->getNetmask());

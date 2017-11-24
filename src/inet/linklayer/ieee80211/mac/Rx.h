@@ -38,7 +38,7 @@ class INET_API Rx : public cSimpleModule, public IRx
         std::vector<IContention *> contentions;
         IStatistics *statistics = nullptr;
 
-        MACAddress address;
+        MacAddress address;
         cMessage *endNavTimer = nullptr;
         physicallayer::IRadio::ReceptionState receptionState = physicallayer::IRadio::RECEPTION_STATE_UNDEFINED;
         physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;

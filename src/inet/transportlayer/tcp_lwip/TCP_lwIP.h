@@ -36,7 +36,7 @@
 namespace inet {
 
 // forward declarations:
-class TCPOpenCommand;
+class TcpOpenCommand;
 
 namespace tcp {
 
@@ -51,11 +51,11 @@ class TcpLwipSendQueue;
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
 
-class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public ILifecycle
+class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public ILifecycle
 {
   public:
-    TCP_lwIP();
-    virtual ~TCP_lwIP();
+    TcpLwip();
+    virtual ~TcpLwip();
 
   protected:
     // called by the OMNeT++ simulation kernel:
@@ -117,13 +117,13 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
 
     // to be refined and filled in with calls into the NSC stack
 
-    void process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
-    void process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
-    void process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCommand, cMessage *msg);
+    void process_OPEN_ACTIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP, cMessage *msgP);
+    void process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP, cMessage *msgP);
+    void process_ACCEPT(TcpLwipConnection& connP, TcpAcceptCommand *tcpCommand, cMessage *msg);
     void process_SEND(TcpLwipConnection& connP, Packet *msgP);
-    void process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
-    void process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
+    void process_CLOSE(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_ABORT(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
 
     // send a connection established msg to application layer
     //void sendEstablishedMsg(TcpLwipConnection& connP);

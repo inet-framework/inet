@@ -24,11 +24,11 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API DSSSOQPSK16Modulation : public APSKModulationBase
+class INET_API DsssOqpsk16Modulation : public ApskModulationBase
 {
   public:
-    DSSSOQPSK16Modulation();
-    virtual ~DSSSOQPSK16Modulation();
+    DsssOqpsk16Modulation();
+    virtual ~DsssOqpsk16Modulation();
 
     double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;

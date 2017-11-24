@@ -27,11 +27,11 @@ static const char *ENABLED_LINK_COLOR = "#000000";
 static const char *DISABLED_LINK_COLOR = "#bbbbbb";
 static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
-STPBase::STPBase()
+StpBase::StpBase()
 {
 }
 
-void STPBase::initialize(int stage)
+void StpBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         visualize = par("visualize");
@@ -41,7 +41,7 @@ void STPBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
-        macTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
+        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         switchModule = getContainingNode(this);
     }
@@ -58,7 +58,7 @@ void STPBase::initialize(int stage)
     }
 }
 
-void STPBase::start()
+void StpBase::start()
 {
     isOperational = true;
     ie = chooseInterface();
@@ -69,13 +69,13 @@ void STPBase::start()
         throw cRuntimeError("No non-loopback interface found!");
 }
 
-void STPBase::stop()
+void StpBase::stop()
 {
     isOperational = false;
     ie = nullptr;
 }
 
-void STPBase::colorLink(InterfaceEntry *ie, bool forwarding) const
+void StpBase::colorLink(InterfaceEntry *ie, bool forwarding) const
 {
     if (visualize) {
         cGate *inGate = switchModule->gate(ie->getNodeInputGateId());
@@ -107,7 +107,7 @@ void STPBase::colorLink(InterfaceEntry *ie, bool forwarding) const
     }
 }
 
-void STPBase::refreshDisplay() const
+void StpBase::refreshDisplay() const
 {
     if (visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
@@ -134,7 +134,7 @@ void STPBase::refreshDisplay() const
     }
 }
 
-Ieee8021dInterfaceData *STPBase::getPortInterfaceData(unsigned int interfaceId)
+Ieee8021dInterfaceData *StpBase::getPortInterfaceData(unsigned int interfaceId)
 {
     Ieee8021dInterfaceData *portData = getPortInterfaceEntry(interfaceId)->ieee8021dData();
     if (!portData)
@@ -143,7 +143,7 @@ Ieee8021dInterfaceData *STPBase::getPortInterfaceData(unsigned int interfaceId)
     return portData;
 }
 
-InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int interfaceId)
+InterfaceEntry *StpBase::getPortInterfaceEntry(unsigned int interfaceId)
 {
     InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)
@@ -152,7 +152,7 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int interfaceId)
     return gateIfEntry;
 }
 
-int STPBase::getRootInterfaceId() const
+int StpBase::getRootInterfaceId() const
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
@@ -163,7 +163,7 @@ int STPBase::getRootInterfaceId() const
     return -1;
 }
 
-InterfaceEntry *STPBase::chooseInterface()
+InterfaceEntry *StpBase::chooseInterface()
 {
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since STP and RSTP work on EtherSwitches.
@@ -177,7 +177,7 @@ InterfaceEntry *STPBase::chooseInterface()
     return nullptr;
 }
 
-bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool StpBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 

@@ -31,11 +31,11 @@
 
 namespace inet {
 
-MACBase::~MACBase()
+MacBase::~MacBase()
 {
 }
 
-void MACBase::initialize(int stage)
+void MacBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -49,7 +49,7 @@ void MACBase::initialize(int stage)
     }
 }
 
-bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool MacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -77,7 +77,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     return true;
 }
 
-void MACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     if (signalID == NF_INTERFACE_DELETED) {
         if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
@@ -85,18 +85,18 @@ void MACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *o
     }
 }
 
-bool MACBase::isNodeUp()
+bool MacBase::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(hostModule->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void MACBase::updateOperationalFlag(bool isNodeUp)
+void MacBase::updateOperationalFlag(bool isNodeUp)
 {
     isOperational = isNodeUp;    // TODO and interface is up, too
 }
 
-void MACBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
+void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
 {
     ASSERT(interfaceEntry == nullptr);
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -108,7 +108,7 @@ void MACBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExis
     }
 }
 
-void MACBase::handleMessageWhenDown(cMessage *msg)
+void MacBase::handleMessageWhenDown(cMessage *msg)
 {
     if (isUpperMsg(msg) || msg->isSelfMessage()) {    //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
         throw cRuntimeError("Message received from higher layer while interface is off");

@@ -23,27 +23,27 @@ namespace inet {
 
 namespace physicallayer {
 
-SNIRReceiverBase::SNIRReceiverBase() :
+SnirReceiverBase::SnirReceiverBase() :
     ReceiverBase(),
     snirThreshold(NaN)
 {
 }
 
-void SNIRReceiverBase::initialize(int stage)
+void SnirReceiverBase::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         snirThreshold = math::dB2fraction(par("snirThreshold"));
 }
 
-std::ostream& SNIRReceiverBase::printToStream(std::ostream& stream, int level) const
+std::ostream& SnirReceiverBase::printToStream(std::ostream& stream, int level) const
 {
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", snirThreshold = " << snirThreshold;
     return stream;
 }
 
-bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     return snir->getMin() > snirThreshold;
 }

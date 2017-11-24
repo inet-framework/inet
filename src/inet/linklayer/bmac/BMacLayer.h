@@ -52,7 +52,7 @@ namespace inet {
  * @author Anna Foerster
  *
  */
-class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
+class INET_API BMacLayer : public MacProtocolBase, public IMacProtocol
 {
   private:
     /** @brief Copy constructor is not allowed.
@@ -90,7 +90,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     typedef std::list<Packet *> MacQueue;
 
     /** @brief The MAC address of the interface. */
-    MACAddress address;
+    MacAddress address;
 
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission.*/
@@ -183,8 +183,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     /** @name Help variables for the acknowledgment process. */
     /*@{*/
-    MACAddress lastDataPktSrcAddr;
-    MACAddress lastDataPktDestAddr;
+    MacAddress lastDataPktSrcAddr;
+    MacAddress lastDataPktDestAddr;
     int txAttempts = 0;
     /*@}*/
 

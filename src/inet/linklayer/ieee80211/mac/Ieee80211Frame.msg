@@ -17,7 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 cplusplus {{
 #include "inet/common/BitVector.h"
@@ -122,7 +122,7 @@ class Ieee80211MacHeader extends FieldsChunk
     // TODO: rename to durationField (levy)
     simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
-    MACAddress receiverAddress; // aka address1
+    MacAddress receiverAddress; // aka address1
     simtime_t MACArrive;    // FIXME remove it, technical data, used inside of MAC module
 }
 
@@ -148,7 +148,7 @@ class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
     chunkLength = LENGTH_RTS - B(4);
-    MACAddress transmitterAddress; // aka address2
+    MacAddress transmitterAddress; // aka address2
 }
 
 //
@@ -175,7 +175,7 @@ class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
     chunkLength = LENGTH_MGMT - B(4);
-    MACAddress address3;
+    MacAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
 }
@@ -194,7 +194,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //  With Address 4 and QoS the correct value is indeed 36.
     chunkLength = b(DATAFRAME_HEADER_MINLENGTH) - B(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
-    MACAddress address4;    // optional field, exists when toDS and fromDS are true
+    MacAddress address4;    // optional field, exists when toDS and fromDS are true
     AckPolicy ackPolicy = NORMAL_ACK;
     uint8 tid;
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
@@ -229,8 +229,8 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
     chunkLength = LENGTH_A_MSDU_SUBFRAME_HEADER;
-    MACAddress sa; // source addr.
-    MACAddress da; // destination addr.
+    MacAddress sa; // source addr.
+    MacAddress da; // destination addr.
     int length;
 }
 

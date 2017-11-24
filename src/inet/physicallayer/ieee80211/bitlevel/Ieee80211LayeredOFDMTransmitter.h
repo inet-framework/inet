@@ -31,7 +31,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
+class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
 {
     // TODO: copy
 
@@ -82,7 +82,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
     const Ieee80211OfdmMode *computeMode(Hz bandwidth) const;
 
   public:
-    virtual ~Ieee80211LayeredOFDMTransmitter();
+    virtual ~Ieee80211LayeredOfdmTransmitter();
 
     virtual b getPaddingLength(const Ieee80211OfdmMode *mode, b length) const;
     virtual const Ieee80211OfdmMode *getMode(const Packet* packet) const;

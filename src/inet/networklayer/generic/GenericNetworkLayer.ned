@@ -18,7 +18,7 @@
 package inet.networklayer.generic;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.arp.generic.GenericARP;
+import inet.networklayer.arp.generic.GenericArp;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
@@ -41,8 +41,8 @@ module GenericNetworkLayer like INetworkLayer
     gates:
         input ifIn @labels(INetworkHeader);
         output ifOut @labels(INetworkHeader);
-        input transportIn @labels(IPv4ControlInfo/down);
-        output transportOut @labels(IPv4ControlInfo/up);
+        input transportIn @labels(Ipv4ControlInfo/down);
+        output transportOut @labels(Ipv4ControlInfo/up);
 
     submodules:
         routingTable: GenericRoutingTable {
@@ -57,7 +57,7 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=500,100");
         }
-        arp: GenericARP {
+        arp: GenericArp {
             parameters:
                 @display("p=200,300;q=pendingQueue");
         }

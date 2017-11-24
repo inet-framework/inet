@@ -117,7 +117,7 @@ int getParameterIntValue(const cXMLElement *ptr, const char *name)
     return atoi(xvalue->getNodeValue());
 }
 
-IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name, IPv4Address def)
+Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name, Ipv4Address def)
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
@@ -126,7 +126,7 @@ IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
         return def;
 }
 
-IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name)
+Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name)
 {
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
     return L3AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();

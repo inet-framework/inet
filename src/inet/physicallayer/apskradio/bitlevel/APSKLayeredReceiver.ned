@@ -48,7 +48,7 @@ import inet.physicallayer.contract.bitlevel.IPulseFilter;
 //
 // See also ~APSKDemodulator, ~APSKDecoder, and ~APSKLayeredTransmitter.
 //
-module APSKLayeredReceiver like IReceiver
+module ApskLayeredReceiver like IReceiver
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
@@ -63,7 +63,7 @@ module APSKLayeredReceiver like IReceiver
         double bandwidth @unit(Hz);
         double snirThreshold @unit(dB);
         @display("i=block/wrx");
-        @class(APSKLayeredReceiver);
+        @class(ApskLayeredReceiver);
 
     submodules:
         decoder: <decoderType> like IDecoder if decoderType != "" {

@@ -27,7 +27,7 @@ namespace tcp {
 /**
  * Sends fabricated TCP packets.
  */
-class INET_API TCPSpoof : public cSimpleModule
+class INET_API TcpSpoof : public cSimpleModule
 {
   protected:
     virtual void sendToIP(Packet *pk, L3Address src, L3Address dest);

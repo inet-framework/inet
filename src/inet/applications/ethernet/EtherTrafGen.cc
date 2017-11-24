@@ -150,9 +150,9 @@ void EtherTrafGen::cancelNextPacket()
     cancelEvent(timerMsg);
 }
 
-MACAddress EtherTrafGen::resolveDestMACAddress()
+MacAddress EtherTrafGen::resolveDestMACAddress()
 {
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
         // try as mac address first, then as a module

@@ -28,7 +28,7 @@ namespace inet {
 /**
  * Implementation of Random Early Detection (RED).
  */
-class INET_API REDDropper : public AlgorithmicDropperBase
+class INET_API RedDropper : public AlgorithmicDropperBase
 {
   protected:
     double wq = 0.0;
@@ -42,10 +42,10 @@ class INET_API REDDropper : public AlgorithmicDropperBase
     simtime_t q_time;
 
   public:
-    REDDropper() {}
+    RedDropper() {}
 
   protected:
-    virtual ~REDDropper();
+    virtual ~RedDropper();
     virtual void initialize() override;
     virtual bool shouldDrop(cPacket *packet) override;
     virtual void sendOut(cPacket *packet) override;

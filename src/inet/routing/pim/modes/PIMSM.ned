@@ -50,7 +50,7 @@ package inet.routing.pim.modes;
 // - Switchover to the shortest path tree is not supported.
 // - Source specific excludes in the shared tree are not supported.
 //
-simple PIMSM
+simple PimSm
 {
     parameters:
         @display("i=block/network2");

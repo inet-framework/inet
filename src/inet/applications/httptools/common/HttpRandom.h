@@ -30,7 +30,7 @@ namespace inet {
 
 namespace httptools {
 
-enum DISTR_TYPE { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf };
+enum DistrType { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf };
 
 // Defines for the distribution names
 #define DISTR_NORMAL_STR         "normal"
@@ -46,14 +46,14 @@ enum DISTR_TYPE { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_consta
 class INET_API rdObject
 {
   protected:
-    DISTR_TYPE m_type = dt_normal;
+    DistrType m_type = dt_normal;
 
   protected:
     bool _hasKey(cXMLAttributeMap attributes, std::string key) { return attributes.find(key) != attributes.end(); }
 
   public:
     virtual ~rdObject() {}
-    DISTR_TYPE getType() { return m_type; }
+    DistrType getType() { return m_type; }
     std::string typeStr();
     virtual std::string toString() { return typeStr(); }
 

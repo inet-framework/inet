@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211DsssDataMode::Ieee80211DsssDataMode(const DPSKModulationBase *modulation) :
+Ieee80211DsssDataMode::Ieee80211DsssDataMode(const DpskModulationBase *modulation) :
     modulation(modulation)
 {
 }
@@ -46,8 +46,8 @@ const Ieee80211DsssPreambleMode Ieee80211DsssCompliantModes::dsssPreambleMode1Mb
 const Ieee80211DsssHeaderMode Ieee80211DsssCompliantModes::dsssHeaderMode1Mbps;
 
 // data modes
-const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode1Mbps(&DBPSKModulation::singleton);
-const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode2Mbps(&DQPSKModulation::singleton);
+const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode1Mbps(&DbpskModulation::singleton);
+const Ieee80211DsssDataMode Ieee80211DsssCompliantModes::dsssDataMode2Mbps(&DqpskModulation::singleton);
 
 // modes
 const Ieee80211DsssMode Ieee80211DsssCompliantModes::dsssMode1Mbps("dsssMode1Mbps", &dsssPreambleMode1Mbps, &dsssHeaderMode1Mbps, &dsssDataMode1Mbps);

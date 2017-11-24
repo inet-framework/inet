@@ -34,7 +34,7 @@ namespace ospf {
 /**
  * Configuration reader for the OSPF module.
  */
-class INET_API OSPFConfigReader
+class INET_API OspfConfigReader
 {
   private:
     cModule *ospfModule = nullptr;
@@ -63,13 +63,13 @@ class INET_API OSPFConfigReader
      * @param routerNode [in]  XML node describing this router.
      * @param areaList   [out] A set of OSPF Areas connected to this router.
      */
-    void getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaID>& areaList) const;
+    void getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaId>& areaList) const;
 
     /**
      * Loads basic configuration information for a given area from the config XML.
      * Reads the configured address ranges, and whether this Area should be handled as a stub Area.
      */
-    void loadAreaFromXML(const cXMLElement& asConfig, AreaID areaID);
+    void loadAreaFromXML(const cXMLElement& asConfig, AreaId areaID);
 
     /**
      * Loads authenticationType and authenticationKey attributes for a router interface
@@ -100,8 +100,8 @@ class INET_API OSPFConfigReader
     void joinMulticastGroups(int interfaceId);
 
   public:
-    OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift);
-    virtual ~OSPFConfigReader();
+    OspfConfigReader(cModule *ospfModule, IInterfaceTable *ift);
+    virtual ~OspfConfigReader();
 
     /**
      * Loads the configuration of the OSPF data structure from the config XML.

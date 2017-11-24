@@ -44,33 +44,33 @@ class SenderReport;
  * \sa RTPReceiverInformation
  * \sa RTPSenderInformation
  */
-class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
+class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
 {
   public:
     /**
      * Default constructor.
      */
-    RTPParticipantInfo(uint32 ssrc = 0);
+    RtpParticipantInfo(uint32 ssrc = 0);
 
     /**
      * Copy constructor.
      */
-    RTPParticipantInfo(const RTPParticipantInfo& participantInfo);
+    RtpParticipantInfo(const RtpParticipantInfo& participantInfo);
 
     /**
      * Destructor.
      */
-    virtual ~RTPParticipantInfo();
+    virtual ~RtpParticipantInfo();
 
     /**
      * Assignment operator.
      */
-    RTPParticipantInfo& operator=(const RTPParticipantInfo& participantInfo);
+    RtpParticipantInfo& operator=(const RtpParticipantInfo& participantInfo);
 
     /**
      * Duplicates this RTPParticipantInfo by calling the copy constructor.
      */
-    virtual RTPParticipantInfo *dup() const override;
+    virtual RtpParticipantInfo *dup() const override;
 
     /**
      * This method should be extended by a subclass for
@@ -96,18 +96,18 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     /**
      * This method extracts sdes information of the given sdes chunk.and stores it.
      */
-    virtual void processSDESChunk(const SDESChunk *sdesChunk, simtime_t arrivalTime);
+    virtual void processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime);
 
     /**
      * Returns a copy of the sdes chunk used for storing source
      * description items about this system.
      */
-    virtual SDESChunk *getSDESChunk() const;
+    virtual SdesChunk *getSDESChunk() const;
 
     /**
      * Adds this sdes item to the sdes chunk of this participant.
      */
-    virtual void addSDESItem(SDESItem *sdesItem);
+    virtual void addSDESItem(SdesItem *sdesItem);
 
     /**
      * This method is intended to be overwritten by subclasses. It
@@ -166,7 +166,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * Creates a new SDESItem and adds it to the SDESChunk stored in
      * this RTPParticipantInfo.
      */
-    virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
+    virtual void addSDESItem(SdesItem::SdesItemType type, const char *content);
 
     virtual void parsimPack(cCommBuffer *b) const override { throw cRuntimeError(this, "parsimPack() not implemented"); }
     virtual void parsimUnpack(cCommBuffer *b) override { throw cRuntimeError("The parsimUnpack() not implemented."); }
@@ -179,14 +179,14 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     static std::string ssrcToName(uint32 ssrc);
 
   private:
-    void copy(const RTPParticipantInfo& other);
+    void copy(const RtpParticipantInfo& other);
 
   protected:
     /**
      * Used for storing sdes information about this RTP endsystem.
      * The ssrc identifier is also stored here.
      */
-    SDESChunk _sdesChunk;
+    SdesChunk _sdesChunk;
 
     /**
      * Stores the number of rtcp intervals (including the current one)

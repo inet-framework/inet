@@ -36,13 +36,13 @@ namespace inet {
 // that's not good. we don't use kind, because kind
 // is used by IP QoS mechanism (use DS field for IP QoS instead???)
 
-class INET_API RSVPHelloMsg : public RSVPHelloMsg_Base
+class INET_API RsvpHelloMsg : public RsvpHelloMsg_Base
 {
   public:
-    RSVPHelloMsg(/* const char *name = nullptr, int kind = RSVP_TRAFFIC */) : RSVPHelloMsg_Base(/* name, kind */) {}
-    RSVPHelloMsg(const RSVPHelloMsg& other) : RSVPHelloMsg_Base(other) {}
-    RSVPHelloMsg& operator=(const RSVPHelloMsg& other) { RSVPHelloMsg_Base::operator=(other); return *this; }
-    virtual RSVPHelloMsg *dup() const override { return new RSVPHelloMsg(*this); }
+    RsvpHelloMsg(/* const char *name = nullptr, int kind = RSVP_TRAFFIC */) : RsvpHelloMsg_Base(/* name, kind */) {}
+    RsvpHelloMsg(const RsvpHelloMsg& other) : RsvpHelloMsg_Base(other) {}
+    RsvpHelloMsg& operator=(const RsvpHelloMsg& other) { RsvpHelloMsg_Base::operator=(other); return *this; }
+    virtual RsvpHelloMsg *dup() const override { return new RsvpHelloMsg(*this); }
 };
 
 } // namespace inet

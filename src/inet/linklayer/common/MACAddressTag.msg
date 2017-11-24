@@ -4,14 +4,14 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
 class MacAddressTagBase extends TagBase
 {
-    MACAddress srcAddress;      // may be unspecified
-    MACAddress destAddress; // always specified
+    MacAddress srcAddress;      // may be unspecified
+    MacAddress destAddress; // always specified
 }
 
 //

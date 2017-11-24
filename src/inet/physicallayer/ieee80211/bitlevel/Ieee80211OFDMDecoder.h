@@ -33,12 +33,12 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211OFDMDecoder : public IDecoder
+class INET_API Ieee80211OfdmDecoder : public IDecoder
 {
   protected:
     const Ieee80211OfdmCode *code = nullptr;
     const IScrambler *descrambler = nullptr;
-    const IFECCoder *fecDecoder = nullptr;
+    const IFecCoder *fecDecoder = nullptr;
     const IInterleaver *deinterleaver = nullptr;
 
   protected:
@@ -48,9 +48,9 @@ class INET_API Ieee80211OFDMDecoder : public IDecoder
     unsigned int calculatePadding(unsigned int dataFieldLengthInBits, const IModulation *modulationScheme, const Ieee80211ConvolutionalCode *fec) const;
 
   public:
-    Ieee80211OFDMDecoder(const IScrambler *descrambler, const IFECCoder *fecDecoder, const IInterleaver *deinterleaver);
-    Ieee80211OFDMDecoder(const Ieee80211OfdmCode *code);
-    virtual ~Ieee80211OFDMDecoder();
+    Ieee80211OfdmDecoder(const IScrambler *descrambler, const IFecCoder *fecDecoder, const IInterleaver *deinterleaver);
+    Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code);
+    virtual ~Ieee80211OfdmDecoder();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     const IReceptionPacketModel *decode(const IReceptionBitModel *bitModel) const override;

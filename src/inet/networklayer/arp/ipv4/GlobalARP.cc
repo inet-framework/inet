@@ -34,18 +34,18 @@ static std::ostream& operator<<(std::ostream& out, const cMessage *msg)
     return out;
 }
 
-static std::ostream& operator<<(std::ostream& out, const GlobalARP::ARPCacheEntry& e)
+static std::ostream& operator<<(std::ostream& out, const GlobalArp::ArpCacheEntry& e)
 {
     out << "MAC:" << e.macAddress << "  age:" << floor(simTime() - e.lastUpdate) << "s";
     return out;
 }
 
-GlobalARP::ARPCache GlobalARP::globalArpCache;
-int GlobalARP::globalArpCacheRefCnt = 0;
+GlobalArp::ArpCache GlobalArp::globalArpCache;
+int GlobalArp::globalArpCacheRefCnt = 0;
 
-Define_Module(GlobalARP);
+Define_Module(GlobalArp);
 
-GlobalARP::GlobalARP()
+GlobalArp::GlobalArp()
 {
     if (++globalArpCacheRefCnt == 1) {
         if (!globalArpCache.empty())
@@ -56,7 +56,7 @@ GlobalARP::GlobalARP()
     rt = nullptr;
 }
 
-void GlobalARP::initialize(int stage)
+void GlobalArp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -65,7 +65,7 @@ void GlobalARP::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {    // IP addresses should be available
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         isUp = isNodeUp();
 
@@ -76,14 +76,14 @@ void GlobalARP::initialize(int stage)
                 continue;
             if (!ie->ipv4Data())
                 continue;
-            IPv4Address nextHopAddr = ie->ipv4Data()->getIPAddress();
+            Ipv4Address nextHopAddr = ie->ipv4Data()->getIPAddress();
             if (nextHopAddr.isUnspecified())
                 continue; // if the address is not defined it isn't included in the global cache
             // check if the entry exist
             auto it = globalArpCache.find(nextHopAddr);
             if (it != globalArpCache.end())
                 continue;
-            ARPCacheEntry *entry = new ARPCacheEntry();
+            ArpCacheEntry *entry = new ArpCacheEntry();
             entry->owner = this;
             entry->ie = ie;
             entry->macAddress = ie->getMacAddress();
@@ -98,11 +98,11 @@ void GlobalARP::initialize(int stage)
     }
 }
 
-void GlobalARP::finish()
+void GlobalArp::finish()
 {
 }
 
-GlobalARP::~GlobalARP()
+GlobalArp::~GlobalArp()
 {
     --globalArpCacheRefCnt;
     // delete my entries from the globalArpCache
@@ -117,7 +117,7 @@ GlobalARP::~GlobalARP()
     }
 }
 
-void GlobalARP::handleMessage(cMessage *msg)
+void GlobalArp::handleMessage(cMessage *msg)
 {
     if (!isUp) {
         handleMessageWhenDown(msg);
@@ -127,15 +127,15 @@ void GlobalARP::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
         processSelfMessage(msg);
     else
-        processARPPacket(check_and_cast<ARPPacket *>(msg));
+        processARPPacket(check_and_cast<ArpPacket *>(msg));
 }
 
-void GlobalARP::processSelfMessage(cMessage *msg)
+void GlobalArp::processSelfMessage(cMessage *msg)
 {
     throw cRuntimeError("Model error: unexpected self message");
 }
 
-void GlobalARP::handleMessageWhenDown(cMessage *msg)
+void GlobalArp::handleMessageWhenDown(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
@@ -143,7 +143,7 @@ void GlobalARP::handleMessageWhenDown(cMessage *msg)
     delete msg;
 }
 
-bool GlobalARP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool GlobalArp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -165,57 +165,57 @@ bool GlobalARP::handleOperationStage(LifecycleOperation *operation, int stage, I
     return true;
 }
 
-void GlobalARP::start()
+void GlobalArp::start()
 {
     isUp = true;
 }
 
-void GlobalARP::stop()
+void GlobalArp::stop()
 {
     isUp = false;
 }
 
-bool GlobalARP::isNodeUp()
+bool GlobalArp::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void GlobalARP::processARPPacket(ARPPacket *arp)
+void GlobalArp::processARPPacket(ArpPacket *arp)
 {
     EV << "ARP packet " << arp << " arrived, dropped\n";
     delete arp;
 }
 
-MACAddress GlobalARP::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
+MacAddress GlobalArp::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
 {
     Enter_Method_Silent();
 
-    IPv4Address addr = address.toIPv4();
-    ARPCache::const_iterator it = globalArpCache.find(addr);
+    Ipv4Address addr = address.toIPv4();
+    ArpCache::const_iterator it = globalArpCache.find(addr);
     if (it != globalArpCache.end())
         return it->second->macAddress;
 
     throw cRuntimeError("GlobalARP does not support dynamic address resolution");
-    return MACAddress::UNSPECIFIED_ADDRESS;
+    return MacAddress::UNSPECIFIED_ADDRESS;
 }
 
-L3Address GlobalARP::getL3AddressFor(const MACAddress& macAddr) const
+L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddr) const
 {
     Enter_Method_Silent();
 
     if (macAddr.isUnspecified())
-        return IPv4Address::UNSPECIFIED_ADDRESS;
+        return Ipv4Address::UNSPECIFIED_ADDRESS;
 
-    for (ARPCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
+    for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
         if (it->second->macAddress == macAddr && it->first.getType() == L3Address::IPv4)
             return it->first.toIPv4();
 
 
-    return IPv4Address::UNSPECIFIED_ADDRESS;
+    return Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
-void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
@@ -230,11 +230,11 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             if (it->second->ie == ie)
                 break;
         }
-        ARPCacheEntry *entry = nullptr;
+        ArpCacheEntry *entry = nullptr;
         if (it == globalArpCache.end()) {
             if (!ie->ipv4Data() || ie->ipv4Data()->getIPAddress().isUnspecified())
                 return; // if the address is not defined it isn't included in the global cache
-            entry = new ARPCacheEntry();
+            entry = new ArpCacheEntry();
             entry->owner = this;
             entry->ie = ie;
         }
@@ -249,7 +249,7 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             }
         }
         entry->macAddress = ie->getMacAddress();
-        IPv4Address ipAddr = ie->ipv4Data()->getIPAddress();
+        Ipv4Address ipAddr = ie->ipv4Data()->getIPAddress();
         auto where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipAddr, entry));
         ASSERT(where->second == entry);
         entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"

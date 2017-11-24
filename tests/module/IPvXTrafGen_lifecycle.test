@@ -51,8 +51,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 import inet.applications.generic.IIPvXTrafficGenerator;
 import inet.common.lifecycle.LifecycleController;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.node.base.NetworkLayerNodeBase;
 import inet.common.scenario.ScenarioManager;
 
@@ -88,7 +88,7 @@ network Test
         recip: TrafGenHost {
             @display("p=359,181");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=229,36");
         }
     connections:

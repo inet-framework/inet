@@ -42,7 +42,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
 
     int localSAP = -1;
     int remoteSAP = -1;
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     NodeStatus *nodeStatus = nullptr;
 
     // self messages
@@ -65,7 +65,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     virtual void scheduleNextPacket(bool start);
     virtual void cancelNextPacket();
 
-    virtual MACAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMACAddress();
 
     virtual void sendPacket();
     virtual void receivePacket(cPacket *msg);

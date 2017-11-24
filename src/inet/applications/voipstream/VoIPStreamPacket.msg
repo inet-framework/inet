@@ -33,7 +33,7 @@ namespace inet;
 //
 // For the type field of VoIPPacket
 //
-enum VoIPStreamPacketType
+enum VoipStreamPacketType
 {
     VOICE = 1;
     SILENCE = 2;
@@ -42,9 +42,9 @@ enum VoIPStreamPacketType
 //
 // Packet type used by VoIPSourceApp and VoIPSinkApp
 //
-class VoIPStreamPacket extends FieldsChunk
+class VoipStreamPacket extends FieldsChunk
 {
-    VoIPStreamPacketType type;
+    VoipStreamPacketType type;
 
     int codec;  // FFmpeg identifier of the codec
     short sampleBits;

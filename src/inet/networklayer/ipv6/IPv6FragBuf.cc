@@ -28,24 +28,24 @@
 
 namespace inet {
 
-IPv6FragBuf::IPv6FragBuf()
+Ipv6FragBuf::Ipv6FragBuf()
 {
     icmpModule = nullptr;
 }
 
-IPv6FragBuf::~IPv6FragBuf()
+Ipv6FragBuf::~Ipv6FragBuf()
 {
     for (auto & elem : bufs) {
         delete elem.second.packet;
     }
 }
 
-void IPv6FragBuf::init(ICMPv6 *icmp)
+void Ipv6FragBuf::init(Icmpv6 *icmp)
 {
     icmpModule = icmp;
 }
 
-Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const Ipv6FragmentHeader *fh, simtime_t now)
+Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const Ipv6FragmentHeader *fh, simtime_t now)
 {
     // find datagram buffer
     Key key;
@@ -150,7 +150,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
       sent to the source of that fragment.
  *
  */
-void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
+void Ipv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...

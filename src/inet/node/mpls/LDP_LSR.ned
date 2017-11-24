@@ -17,12 +17,12 @@ import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.networklayer.ldp.LDP;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.networklayer.ldp.Ldp;
+import inet.networklayer.mpls.LibTable;
+import inet.networklayer.mpls.Mpls;
 import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.ted.TED;
+import inet.networklayer.ted.Ted;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 
@@ -61,13 +61,13 @@ module LDP_LSR
             parameters:
                 @display("p=73,301;is=s");
         }
-        ldp: LDP {
+        ldp: Ldp {
             parameters:
                 holdTime = holdTime;
                 helloInterval = helloInterval;
                 @display("p=222,67");
         }
-        ted: TED {
+        ted: Ted {
             parameters:
                 @display("p=73,114;is=s");
         }
@@ -103,13 +103,13 @@ module LDP_LSR
             parameters:
                 @display("p=267,396,row,90;q=l2queue");
         }
-        mpls: MPLS {
+        mpls: Mpls {
             parameters:
                 //peers = peers,
                 classifierModule = "^.ldp";
                 @display("p=401,309");
         }
-        libTable: LIBTable {
+        libTable: LibTable {
             parameters:
                 @display("p=73,186;is=s");
         }

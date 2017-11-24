@@ -21,7 +21,7 @@ namespace inet {
 
 namespace ospf {
 
-bool ASExternalLSA::update(const OSPFASExternalLSA *lsa)
+bool AsExternalLsa::update(const OspfAsExternalLsa *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -35,10 +35,10 @@ bool ASExternalLSA::update(const OSPFASExternalLSA *lsa)
     }
 }
 
-bool ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) const
+bool AsExternalLsa::differsFrom(const OspfAsExternalLsa *asExternalLSA) const
 {
-    const OSPFLSAHeader& thisHeader = getHeader();
-    const OSPFLSAHeader& lsaHeader = asExternalLSA->getHeader();
+    const OspfLsaHeader& thisHeader = getHeader();
+    const OspfLsaHeader& lsaHeader = asExternalLSA->getHeader();
     bool differentHeader = ((thisHeader.getLsOptions() != lsaHeader.getLsOptions()) ||
                             ((thisHeader.getLsAge() == MAX_AGE) && (lsaHeader.getLsAge() != MAX_AGE)) ||
                             ((thisHeader.getLsAge() != MAX_AGE) && (lsaHeader.getLsAge() == MAX_AGE)) ||
@@ -46,8 +46,8 @@ bool ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) const
     bool differentBody = false;
 
     if (!differentHeader) {
-        const OSPFASExternalLSAContents& thisContents = getContents();
-        const OSPFASExternalLSAContents& lsaContents = asExternalLSA->getContents();
+        const OspfAsExternalLsaContents& thisContents = getContents();
+        const OspfAsExternalLsaContents& lsaContents = asExternalLSA->getContents();
 
         unsigned int thisTosInfoCount = thisContents.getExternalTOSInfoArraySize();
 
@@ -60,8 +60,8 @@ bool ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) const
 
         if (!differentBody) {
             for (unsigned int i = 0; i < thisTosInfoCount; i++) {
-                const ExternalTOSInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
-                const ExternalTOSInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
+                const ExternalTosInfo& thisTOSInfo = thisContents.getExternalTOSInfo(i);
+                const ExternalTosInfo& lsaTOSInfo = lsaContents.getExternalTOSInfo(i);
 
                 if ((thisTOSInfo.tosData.tos != lsaTOSInfo.tosData.tos) ||
                     (thisTOSInfo.tosData.tosMetric[0] != lsaTOSInfo.tosData.tosMetric[0]) ||

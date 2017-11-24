@@ -42,7 +42,7 @@ class INET_API IOriginatorBlockAckAgreementHandler
         virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
         virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
-        virtual OriginatorBlockAckAgreement *getAgreement(MACAddress receiverAddr, Tid tid) = 0;
+        virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) = 0;
 };
 
 } // namespace ieee80211

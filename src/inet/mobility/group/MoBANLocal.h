@@ -60,11 +60,11 @@ namespace inet {
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class INET_API MoBANLocal : public LineSegmentsMobilityBase
+class INET_API MoBanLocal : public LineSegmentsMobilityBase
 {
   protected:
     /** @brief The coordinator of the WBAN. */
-    MoBANCoordinator *coordinator;
+    MoBanCoordinator *coordinator;
 
     /** @brief Reference position of the node in the current posture. */
     Coord referencePosition;
@@ -91,13 +91,13 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
 
     virtual void computeMaxSpeed();
   public:
-    MoBANLocal();
+    MoBanLocal();
 
     virtual Coord getCurrentPosition() override;
 
     virtual Coord getCurrentSpeed() override;
 
-    void setCoordinator(MoBANCoordinator *coordinator) { this->coordinator = coordinator; }
+    void setCoordinator(MoBanCoordinator *coordinator) { this->coordinator = coordinator; }
 
     void setMoBANParameters(Coord referencePoint, double radius, double speed);
 

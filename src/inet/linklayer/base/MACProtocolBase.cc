@@ -20,7 +20,7 @@
 
 namespace inet {
 
-MACProtocolBase::MACProtocolBase() :
+MacProtocolBase::MacProtocolBase() :
     upperLayerInGateId(-1),
     upperLayerOutGateId(-1),
     lowerLayerInGateId(-1),
@@ -29,7 +29,7 @@ MACProtocolBase::MACProtocolBase() :
 {
 }
 
-void MACProtocolBase::initialize(int stage)
+void MacProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -40,7 +40,7 @@ void MACProtocolBase::initialize(int stage)
     }
 }
 
-void MACProtocolBase::registerInterface()
+void MacProtocolBase::registerInterface()
 {
     ASSERT(interfaceEntry == nullptr);
     IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -52,26 +52,26 @@ void MACProtocolBase::registerInterface()
     }
 }
 
-void MACProtocolBase::sendUp(cMessage *message)
+void MacProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToUpperSignal, message);
     send(message, upperLayerOutGateId);
 }
 
-void MACProtocolBase::sendDown(cMessage *message)
+void MacProtocolBase::sendDown(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     send(message, lowerLayerOutGateId);
 }
 
-bool MACProtocolBase::isUpperMessage(cMessage *message)
+bool MacProtocolBase::isUpperMessage(cMessage *message)
 {
     return message->getArrivalGateId() == upperLayerInGateId;
 }
 
-bool MACProtocolBase::isLowerMessage(cMessage *message)
+bool MacProtocolBase::isLowerMessage(cMessage *message)
 {
     return message->getArrivalGateId() == lowerLayerInGateId;
 }

@@ -51,10 +51,10 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~IPv4 and ~IPv6.
 //
-simple TCPEchoApp extends TCPSrvHostApp
+simple TcpEchoApp extends TcpSrvHostApp
 {
     parameters:
-        @class(TCPEchoApp);
+        @class(TcpEchoApp);
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
         serverThreadModuleType = default("inet.applications.tcpapp.TCPEchoAppThread"); // module type of "thread" module to launch on incoming connections
@@ -65,7 +65,7 @@ simple TCPEchoApp extends TCPSrvHostApp
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
 }
 
-simple TCPEchoAppThread
+simple TcpEchoAppThread
 {
 }
 

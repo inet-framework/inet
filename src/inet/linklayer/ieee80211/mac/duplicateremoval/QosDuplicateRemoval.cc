@@ -28,11 +28,11 @@ bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
-        MACAddress transmitterAddr = header->getTransmitterAddress();
+        MacAddress transmitterAddr = header->getTransmitterAddress();
         Mac2SeqValMap& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
         auto it = cache.find(transmitterAddr);
         if (it == cache.end()) {
-            cache.insert(std::pair<MACAddress, SequenceControlField>(transmitterAddr, seqVal));
+            cache.insert(std::pair<MacAddress, SequenceControlField>(transmitterAddr, seqVal));
             return false;
         }
         else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && header->getRetry())

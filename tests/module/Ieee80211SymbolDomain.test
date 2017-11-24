@@ -4,10 +4,10 @@ This is a test for the IEEE 802.11 symbol domain modules.
 This test shows that INET can produce the precise frequency domain of an arbitrary IEEE 802.11 PHY frame.
 
 The SIGNAL field is FEC encoded with an 1/2 convolutional encoder, interleaved and then modulated with
-a Ieee80211OFDMModulator equipped with BPSK scheme.
+a Ieee80211OfdmModulator equipped with BPSK scheme.
 
 The DATA field is FEC encoded with an 1/2 convolutional encoder, punctured to code rate 3/4, interleaved,
-scrambled and then modulated with a QAM-16 Ieee80211OFDMModulator.
+scrambled and then modulated with a QAM-16 Ieee80211OfdmModulator.
 
 The resulting outputs are BPSK modulated SIGNAL field and Modulated #ith DATA field. These can be verified by
 comparing them with the valid results given in IEEE Std 802.11-2012 PART 11: WIRELESS LAN MAC AND PHY
@@ -18,23 +18,23 @@ of SIGNAL field with pilots inserted.
 %file: test.ned
 
 import ieee80211.Ieee80211SymbolDomainTest;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMDecoder;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMDemodulator;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMEncoder;
-import inet.physicallayer.ieee80211.bitlevel.Ieee80211OFDMModulator;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDecoder;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmDemodulator;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmEncoder;
+import inet.physicallayer.ieee80211.bitlevel.Ieee80211OfdmModulator;
 
 network SymbolDomainTest
 {
     submodules:
         ieee80211SymbolDomainTest : Ieee80211SymbolDomainTest;
-        ieee80211OFDMSignalEncoder : Ieee80211OFDMEncoder;
-        ieee80211OFDMDataEncoder : Ieee80211OFDMEncoder;
-        ieee80211OFDMSignalDecoder: Ieee80211OFDMDecoder;
-        ieee80211OFDMDataDecoder: Ieee80211OFDMDecoder;
-        ieee80211OFDMSignalModulator : Ieee80211OFDMModulator;
-        ieee80211OFDMDataModulator : Ieee80211OFDMModulator;
-        ieee80211OFDMSignalDemodulator : Ieee80211OFDMDemodulator;
-        ieee80211OFDMDataDemodulator : Ieee80211OFDMDemodulator;
+        ieee80211OFDMSignalEncoder : Ieee80211OfdmEncoder;
+        ieee80211OFDMDataEncoder : Ieee80211OfdmEncoder;
+        ieee80211OFDMSignalDecoder: Ieee80211OfdmDecoder;
+        ieee80211OFDMDataDecoder: Ieee80211OfdmDecoder;
+        ieee80211OFDMSignalModulator : Ieee80211OfdmModulator;
+        ieee80211OFDMDataModulator : Ieee80211OfdmModulator;
+        ieee80211OFDMSignalDemodulator : Ieee80211OfdmDemodulator;
+        ieee80211OFDMDataDemodulator : Ieee80211OfdmDemodulator;
 }
 
 %#--------------------------------------------------------------------------------------------------------------

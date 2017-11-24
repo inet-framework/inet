@@ -31,7 +31,7 @@ namespace inet {
  * @ingroup mobility
  * @author Andras Varga
  */
-class INET_API ANSimMobility : public LineSegmentsMobilityBase
+class INET_API AnsimMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config
@@ -62,7 +62,7 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
     virtual void computeMaxSpeed();
   public:
     virtual double getMaxSpeed() const override { return maxSpeed; }
-    ANSimMobility();
+    AnsimMobility();
 };
 
 } // namespace inet

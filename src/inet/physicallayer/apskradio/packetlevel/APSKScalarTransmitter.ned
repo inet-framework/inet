@@ -26,9 +26,9 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // See also ~APSKScalarReceiver, ~APSKScalarRadio, ~APSKScalarRadioMedium, and
 // ~APSKScalarAnalogModel.
 //
-module APSKScalarTransmitter extends NarrowbandTransmitterBase
+module ApskScalarTransmitter extends NarrowbandTransmitterBase
 {
     parameters:
         modulation = default("BPSK");
-        @class(APSKScalarTransmitter);
+        @class(ApskScalarTransmitter);
 }

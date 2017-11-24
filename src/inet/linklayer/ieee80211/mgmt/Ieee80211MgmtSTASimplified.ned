@@ -31,7 +31,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211MgmtSTASimplified like IIeee80211Mgmt
+simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
 {
     parameters:
         string accessPointAddress; // MAC address of associate AP

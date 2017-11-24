@@ -30,18 +30,18 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKLayeredErrorModel);
+Define_Module(ApskLayeredErrorModel);
 
-APSKLayeredErrorModel::APSKLayeredErrorModel()
+ApskLayeredErrorModel::ApskLayeredErrorModel()
 {
 }
 
-std::ostream& APSKLayeredErrorModel::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int level) const
 {
     return stream << "LayeredAPSKErrorModel";
 }
 
-const IReceptionPacketModel *APSKLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel* bitModel = transmission->getBitModel();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
@@ -59,7 +59,7 @@ const IReceptionPacketModel *APSKLayeredErrorModel::computePacketModel(const Lay
     return LayeredErrorModelBase::computePacketModel(transmission, packetErrorRate);
 }
 
-const IReceptionBitModel *APSKLayeredErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel* bitModel = transmission->getBitModel();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
@@ -68,7 +68,7 @@ const IReceptionBitModel *APSKLayeredErrorModel::computeBitModel(const LayeredTr
     return LayeredErrorModelBase::computeBitModel(transmission, bitErrorRate);
 }
 
-const IReceptionSymbolModel *APSKLayeredErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const IModulation* modulation = transmission->getSymbolModel()->getPayloadModulation();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
@@ -77,7 +77,7 @@ const IReceptionSymbolModel *APSKLayeredErrorModel::computeSymbolModel(const Lay
     return LayeredErrorModelBase::computeSymbolModel(transmission, symbolErrorRate);
 }
 
-const IReceptionSampleModel *APSKLayeredErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const
+const IReceptionSampleModel *ApskLayeredErrorModel::computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     throw cRuntimeError("Not yet implemented");
 }

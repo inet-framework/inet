@@ -42,7 +42,7 @@ const short PORT_MAX = 0x7fff;
 /**
  * IPv4 address.
  */
-class INET_API IPv4Address
+class INET_API Ipv4Address
 {
   protected:
     // Address is encoded in a single uint32
@@ -99,19 +99,19 @@ class INET_API IPv4Address
 
     /** @name Predefined addresses */
     //@{
-    static const IPv4Address UNSPECIFIED_ADDRESS;    ///< 0.0.0.0
-    static const IPv4Address LOOPBACK_ADDRESS;    ///< 127.0.0.1
-    static const IPv4Address LOOPBACK_NETMASK;    ///< 255.0.0.0
-    static const IPv4Address ALLONES_ADDRESS;    ///< 255.255.255.255
+    static const Ipv4Address UNSPECIFIED_ADDRESS;    ///< 0.0.0.0
+    static const Ipv4Address LOOPBACK_ADDRESS;    ///< 127.0.0.1
+    static const Ipv4Address LOOPBACK_NETMASK;    ///< 255.0.0.0
+    static const Ipv4Address ALLONES_ADDRESS;    ///< 255.255.255.255
 
-    static const IPv4Address ALL_HOSTS_MCAST;    ///< 224.0.0.1 All hosts on a subnet
-    static const IPv4Address ALL_ROUTERS_MCAST;    ///< 224.0.0.2 All routers on a subnet
-    static const IPv4Address ALL_DVMRP_ROUTERS_MCAST;    ///< 224.0.0.4 All DVMRP routers
-    static const IPv4Address ALL_OSPF_ROUTERS_MCAST;    ///< 224.0.0.5 All OSPF routers (DR Others)
-    static const IPv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;    ///< 224.0.0.6 All OSPF Designated Routers
-    static const IPv4Address ALL_IGMPV3_ROUTERS_MCAST;    ///< 224.0.0.22 All IGMPv3 routers
-    static const IPv4Address LL_MANET_ROUTERS;    ///< 224.0.0.109 Manet all designated routers
-    static const IPv4Address ALL_RIP_ROUTERS_MCAST;
+    static const Ipv4Address ALL_HOSTS_MCAST;    ///< 224.0.0.1 All hosts on a subnet
+    static const Ipv4Address ALL_ROUTERS_MCAST;    ///< 224.0.0.2 All routers on a subnet
+    static const Ipv4Address ALL_DVMRP_ROUTERS_MCAST;    ///< 224.0.0.4 All DVMRP routers
+    static const Ipv4Address ALL_OSPF_ROUTERS_MCAST;    ///< 224.0.0.5 All OSPF routers (DR Others)
+    static const Ipv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;    ///< 224.0.0.6 All OSPF Designated Routers
+    static const Ipv4Address ALL_IGMPV3_ROUTERS_MCAST;    ///< 224.0.0.22 All IGMPv3 routers
+    static const Ipv4Address LL_MANET_ROUTERS;    ///< 224.0.0.109 Manet all designated routers
+    static const Ipv4Address ALL_RIP_ROUTERS_MCAST;
     //@}
 
     /** name Constructors, destructor */
@@ -120,29 +120,29 @@ class INET_API IPv4Address
     /**
      * Default constructor, initializes to 0.0.0.0.
      */
-    IPv4Address() { addr = 0; }
+    Ipv4Address() { addr = 0; }
 
     /**
      * IPv4 address as int
      */
-    explicit IPv4Address(uint32 ip) { addr = ip; }
+    explicit Ipv4Address(uint32 ip) { addr = ip; }
 
     /**
      * IPv4 address bytes: "i0.i1.i2.i3" format
      */
-    IPv4Address(int i0, int i1, int i2, int i3) { set(i0, i1, i2, i3); }
+    Ipv4Address(int i0, int i1, int i2, int i3) { set(i0, i1, i2, i3); }
 
     /**
      * IPv4 address given as text: "192.66.86.1"
      */
-    explicit IPv4Address(const char *text) { set(text); }
+    explicit Ipv4Address(const char *text) { set(text); }
 
     /**
      * Copy constructor
      */
-    IPv4Address(const IPv4Address& obj) { addr = obj.addr; }
+    Ipv4Address(const Ipv4Address& obj) { addr = obj.addr; }
 
-    ~IPv4Address() {}
+    ~Ipv4Address() {}
     //@}
 
     /** name Setting the address */
@@ -166,7 +166,7 @@ class INET_API IPv4Address
     /**
      * Assignment
      */
-    IPv4Address& operator=(const IPv4Address& obj) { addr = obj.addr; return *this; }
+    Ipv4Address& operator=(const Ipv4Address& obj) { addr = obj.addr; return *this; }
 
     /**
      * True if all four address bytes are zero. The null value is customarily
@@ -178,12 +178,12 @@ class INET_API IPv4Address
     /**
      * Returns true if the two addresses are equal
      */
-    bool equals(const IPv4Address& toCmp) const { return addr == toCmp.addr; }
+    bool equals(const Ipv4Address& toCmp) const { return addr == toCmp.addr; }
 
     /**
      * Returns binary AND of the two addresses
      */
-    IPv4Address doAnd(const IPv4Address& ip) const { return IPv4Address(addr & ip.addr); }
+    Ipv4Address doAnd(const Ipv4Address& ip) const { return Ipv4Address(addr & ip.addr); }
 
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
@@ -243,23 +243,23 @@ class INET_API IPv4Address
      * of the hosts part are to 0). For D and E class addresses,
      * it returns a null address.
      */
-    IPv4Address getNetwork() const;
+    Ipv4Address getNetwork() const;
 
     /**
      * Returns an address with the network mask corresponding to the
      * address class. For D and E class addresses, it returns a null address.
      */
-    IPv4Address getNetworkMask() const;
+    Ipv4Address getNetworkMask() const;
 
     /**
      * Indicates if the address is from the same network
      */
-    bool isNetwork(const IPv4Address& toCmp) const;
+    bool isNetwork(const Ipv4Address& toCmp) const;
 
     /**
      * Compares the first numbits bits of the two addresses.
      */
-    bool prefixMatches(const IPv4Address& to_cmp, int numbits) const;
+    bool prefixMatches(const Ipv4Address& to_cmp, int numbits) const;
 
     /**
      * Indicates how many bits from the to_cmp address, starting counting
@@ -269,7 +269,7 @@ class INET_API IPv4Address
      *
      * Typical usage for comparing IPv4 prefixes.
      */
-    int getNumMatchingPrefixBits(const IPv4Address& to_cmp) const;
+    int getNumMatchingPrefixBits(const Ipv4Address& to_cmp) const;
 
     /**
      * Counts 1 bits in a netmask. E.g. for 255.255.254.0, it will return 23.
@@ -279,7 +279,7 @@ class INET_API IPv4Address
     /**
      * Get the first prefixLength bits of the address, with the rest set to zero.
      */
-    IPv4Address getPrefix(int prefixLength) const { return doAnd(makeNetmask(prefixLength)); }
+    Ipv4Address getPrefix(int prefixLength) const { return doAnd(makeNetmask(prefixLength)); }
 
     /**
      * Returns true if the address is a valid netmask, i.e. ones are contiguous
@@ -291,32 +291,32 @@ class INET_API IPv4Address
      * Test if the masked addresses (ie the mask is applied to addr1 and
      * addr2) are equal.
      */
-    static bool maskedAddrAreEqual(const IPv4Address& addr1,
-            const IPv4Address& addr2,
-            const IPv4Address& netmask);
+    static bool maskedAddrAreEqual(const Ipv4Address& addr1,
+            const Ipv4Address& addr2,
+            const Ipv4Address& netmask);
 
     /**
      * Returns the broadcast address for the given netmask
      */
-    IPv4Address makeBroadcastAddress(IPv4Address netmask) const;
+    Ipv4Address makeBroadcastAddress(Ipv4Address netmask) const;
 
     /**
      * Returns equals(addr).
      */
-    bool operator==(const IPv4Address& addr1) const { return equals(addr1); }
+    bool operator==(const Ipv4Address& addr1) const { return equals(addr1); }
 
     /**
      * Returns !equals(addr).
      */
-    bool operator!=(const IPv4Address& addr1) const { return !equals(addr1); }
+    bool operator!=(const Ipv4Address& addr1) const { return !equals(addr1); }
 
     /**
      * Compares two IPv4 addresses.
      */
-    bool operator<(const IPv4Address& addr1) const { return getInt() < addr1.getInt(); }
-    bool operator<=(const IPv4Address& addr1) const { return getInt() <= addr1.getInt(); }
-    bool operator>(const IPv4Address& addr1) const { return getInt() > addr1.getInt(); }
-    bool operator>=(const IPv4Address& addr1) const { return getInt() >= addr1.getInt(); }
+    bool operator<(const Ipv4Address& addr1) const { return getInt() < addr1.getInt(); }
+    bool operator<=(const Ipv4Address& addr1) const { return getInt() <= addr1.getInt(); }
+    bool operator>(const Ipv4Address& addr1) const { return getInt() > addr1.getInt(); }
+    bool operator>=(const Ipv4Address& addr1) const { return getInt() >= addr1.getInt(); }
 
     /**
      * Returns true if the format of the string corresponds to an IPv4 address
@@ -332,20 +332,20 @@ class INET_API IPv4Address
      * Creates and returns a netmask with the given length. For example,
      * for length=23 it will return 255.255.254.0.
      */
-    static IPv4Address makeNetmask(int length) { _checkNetmaskLength(length); return IPv4Address(_makeNetmask(length)); }
+    static Ipv4Address makeNetmask(int length) { _checkNetmaskLength(length); return Ipv4Address(_makeNetmask(length)); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)
+inline std::ostream& operator<<(std::ostream& os, const Ipv4Address& ip)
 {
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, const IPv4Address& addr)
+inline void doPacking(cCommBuffer *buf, const Ipv4Address& addr)
 {
     buf->pack(addr.getInt());
 }
 
-inline void doUnpacking(cCommBuffer *buf, IPv4Address& addr)
+inline void doUnpacking(cCommBuffer *buf, Ipv4Address& addr)
 {
     int32 d;
     buf->unpack(d);

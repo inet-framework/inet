@@ -23,9 +23,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(APSKEncoder);
+Define_Module(ApskEncoder);
 
-APSKEncoder::APSKEncoder() :
+ApskEncoder::ApskEncoder() :
     code(nullptr),
     scrambler(nullptr),
     fecEncoder(nullptr),
@@ -33,27 +33,27 @@ APSKEncoder::APSKEncoder() :
 {
 }
 
-APSKEncoder::~APSKEncoder()
+ApskEncoder::~ApskEncoder()
 {
     delete code;
 }
 
-void APSKEncoder::initialize(int stage)
+void ApskEncoder::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         scrambler = dynamic_cast<IScrambler *>(getSubmodule("scrambler"));
-        fecEncoder = dynamic_cast<IFECCoder *>(getSubmodule("fecEncoder"));
+        fecEncoder = dynamic_cast<IFecCoder *>(getSubmodule("fecEncoder"));
         interleaver = dynamic_cast<IInterleaver *>(getSubmodule("interleaver"));
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const IScrambling *scrambling = scrambler != nullptr ? scrambler->getScrambling() : nullptr;
         const ConvolutionalCode *forwardErrorCorrection = fecEncoder != nullptr ? check_and_cast<const ConvolutionalCode *>(fecEncoder->getForwardErrorCorrection()) : nullptr;
         const IInterleaving *interleaving = interleaver != nullptr ? interleaver->getInterleaving() : nullptr;
-        code = new APSKCode(forwardErrorCorrection, interleaving, scrambling);
+        code = new ApskCode(forwardErrorCorrection, interleaving, scrambling);
     }
 }
 
-std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
+std::ostream& ApskEncoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKEncoder";
     if (level <= PRINT_LEVEL_DETAIL)
@@ -65,10 +65,10 @@ std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
     return stream;
 }
 
-const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel *packetModel) const
+const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
-    const auto& apskPhyHeader = packet->peekHeader<APSKPhyHeader>();
+    const auto& apskPhyHeader = packet->peekHeader<ApskPhyHeader>();
     auto length = packet->getTotalLength();
     BitVector *encodedBits;
     if (b(length).get() % 8 == 0)

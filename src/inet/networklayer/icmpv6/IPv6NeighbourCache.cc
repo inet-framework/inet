@@ -20,7 +20,7 @@
 
 namespace inet {
 
-void IPv6NeighbourCache::DefaultRouterList::add(Neighbour& router)
+void Ipv6NeighbourCache::DefaultRouterList::add(Neighbour& router)
 {
     ASSERT(router.isRouter);
     ASSERT(!router.nextDefaultRouter);
@@ -38,7 +38,7 @@ void IPv6NeighbourCache::DefaultRouterList::add(Neighbour& router)
     }
 }
 
-void IPv6NeighbourCache::DefaultRouterList::remove(Neighbour& router)
+void Ipv6NeighbourCache::DefaultRouterList::remove(Neighbour& router)
 {
     ASSERT(router.isDefaultRouter());
     if (router.nextDefaultRouter == &router) {
@@ -53,12 +53,12 @@ void IPv6NeighbourCache::DefaultRouterList::remove(Neighbour& router)
     router.nextDefaultRouter = router.prevDefaultRouter = nullptr;
 }
 
-std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Key& e)
+std::ostream& operator<<(std::ostream& os, const Ipv6NeighbourCache::Key& e)
 {
     return os << "if=" << e.interfaceID << " " << e.address;    //FIXME try printing interface name
 }
 
-std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& e)
+std::ostream& operator<<(std::ostream& os, const Ipv6NeighbourCache::Neighbour& e)
 {
     os << e.macAddress;
     if (e.isRouter)
@@ -67,7 +67,7 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
         os << "DefaultRtr";
     if (e.isHomeAgent)
         os << " Home Agent";
-    os << " " << IPv6NeighbourCache::stateName(e.reachabilityState);
+    os << " " << Ipv6NeighbourCache::stateName(e.reachabilityState);
     os << " reachabilityExp:" << e.reachabilityExpires;
     if (e.numProbesSent)
         os << " probesSent:" << e.numProbesSent;
@@ -76,26 +76,26 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
     return os;
 }
 
-IPv6NeighbourCache::IPv6NeighbourCache(cSimpleModule& neighbourDiscovery)
+Ipv6NeighbourCache::Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery)
     : neighbourDiscovery(neighbourDiscovery)
 {
     WATCH_MAP(neighbourMap);
 }
 
-IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::lookup(const IPv6Address& addr, int interfaceID)
+Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::lookup(const Ipv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);
     auto i = neighbourMap.find(key);
     return i == neighbourMap.end() ? nullptr : &(i->second);
 }
 
-const IPv6NeighbourCache::Key *IPv6NeighbourCache::lookupKeyAddr(Key& key)
+const Ipv6NeighbourCache::Key *Ipv6NeighbourCache::lookupKeyAddr(Key& key)
 {
     auto i = neighbourMap.find(key);
     return &(i->first);
 }
 
-IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Address& addr, int interfaceID)
+Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);
     ASSERT(neighbourMap.find(key) == neighbourMap.end());    // entry must not exist yet
@@ -108,7 +108,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Addres
     return &nbor;
 }
 
-IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Address& addr, int interfaceID, MACAddress macAddress)
+Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Address& addr, int interfaceID, MacAddress macAddress)
 {
     Key key(addr, interfaceID);
     ASSERT(neighbourMap.find(key) == neighbourMap.end());    // entry must not exist yet
@@ -127,8 +127,8 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Addres
  *
  * Update by CB: Added an optional parameter which is false by default. Specifies whether a router is also a home agent.
  */
-IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& addr,
-        int interfaceID, MACAddress macAddress, simtime_t expiryTime, bool isHomeAgent)
+Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addRouter(const Ipv6Address& addr,
+        int interfaceID, MacAddress macAddress, simtime_t expiryTime, bool isHomeAgent)
 {
     Key key(addr, interfaceID);
     ASSERT(neighbourMap.find(key) == neighbourMap.end());    // entry must not exist yet
@@ -146,7 +146,7 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     return &nbor;
 }
 
-void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
+void Ipv6NeighbourCache::remove(const Ipv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);
     auto it = neighbourMap.find(key);
@@ -154,7 +154,7 @@ void IPv6NeighbourCache::remove(const IPv6Address& addr, int interfaceID)
     remove(it);
 }
 
-void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
+void Ipv6NeighbourCache::remove(NeighbourMap::iterator it)
 {
     neighbourDiscovery.cancelAndDelete(it->second.nudTimeoutEvent);    // 20.9.07 - CB
     it->second.nudTimeoutEvent = nullptr;
@@ -164,7 +164,7 @@ void IPv6NeighbourCache::remove(NeighbourMap::iterator it)
 }
 
 // Added by CB
-void IPv6NeighbourCache::invalidateEntriesForInterfaceID(int interfaceID)
+void Ipv6NeighbourCache::invalidateEntriesForInterfaceID(int interfaceID)
 {
     for (auto & elem : neighbourMap) {
         if (elem.first.interfaceID == interfaceID) {
@@ -176,7 +176,7 @@ void IPv6NeighbourCache::invalidateEntriesForInterfaceID(int interfaceID)
 }
 
 // Added by CB
-void IPv6NeighbourCache::invalidateAllEntries()
+void Ipv6NeighbourCache::invalidateAllEntries()
 {
     while (!neighbourMap.empty()) {
         auto it = neighbourMap.begin();
@@ -194,7 +194,7 @@ void IPv6NeighbourCache::invalidateAllEntries()
      */
 }
 
-const char *IPv6NeighbourCache::stateName(ReachabilityState state)
+const char *Ipv6NeighbourCache::stateName(ReachabilityState state)
 {
     switch (state) {
         case INCOMPLETE:

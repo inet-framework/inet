@@ -19,9 +19,9 @@
 
 import inet.common.INETDefs;
 import inet.common.TLVOption;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.ipv6.IPv6Header;
-import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
@@ -37,7 +37,7 @@ enum Ipv6ExtensionConstants {
 //
 // IPv6 TLV option types
 //
-enum IPv6TLVOptionTypes
+enum Ipv6TlvOptionTypes
 {
     IPv6TLVOPTION_NOP1 = 0;
     IPv6TLVOPTION_NOPN = 1;
@@ -54,7 +54,7 @@ class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_HOP;
     // byteLength = utils::roundUp(2 + tlvOptions.getLength(), 8);
-    TLVOptions tlvOptions;
+    TlvOptions tlvOptions;
 }
 
 //
@@ -70,7 +70,7 @@ class Ipv6RoutingHeader extends Ipv6ExtensionHeader
     //byteLength = 8+16*getAddressArraySize() when routingType == 0
     uint8 routingType;
     uint8 segmentsLeft;
-    IPv6Address address[];
+    Ipv6Address address[];
 }
 
 //
@@ -96,7 +96,7 @@ class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_DEST;
     byteLength = 8;    // utils::roundUp(2 + tlvOptions.getLength(), 8);
-    TLVOptions tlvOptions;
+    TlvOptions tlvOptions;
 }
 
 //

@@ -36,11 +36,11 @@ class IPassiveQueue;
  *
  * See NED file for more details.
  */
-class INET_API EtherMAC : public EtherMACBase
+class INET_API EtherMac : public EtherMacBase
 {
   public:
-    EtherMAC() {}
-    virtual ~EtherMAC();
+    EtherMac() {}
+    virtual ~EtherMac();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

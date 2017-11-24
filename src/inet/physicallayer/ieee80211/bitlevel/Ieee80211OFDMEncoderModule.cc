@@ -21,30 +21,30 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211OFDMEncoderModule);
+Define_Module(Ieee80211OfdmEncoderModule);
 
-void Ieee80211OFDMEncoderModule::initialize(int stage)
+void Ieee80211OfdmEncoderModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         scrambler = dynamic_cast<IScrambler *>(getSubmodule("scrambler"));
-        convolutionalCoder = dynamic_cast<IFECCoder *>(getSubmodule("fecEncoder"));
+        convolutionalCoder = dynamic_cast<IFecCoder *>(getSubmodule("fecEncoder"));
         interleaver = dynamic_cast<IInterleaver *>(getSubmodule("interleaver"));
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const ConvolutionalCode *convolutionalCode = convolutionalCoder? check_and_cast<const ConvolutionalCode *>(convolutionalCoder->getForwardErrorCorrection()) : nullptr;
-        const Ieee80211OFDMInterleaving *interleaving = interleaver ? check_and_cast<const Ieee80211OFDMInterleaving *>(interleaver->getInterleaving()) : nullptr;
+        const Ieee80211OfdmInterleaving *interleaving = interleaver ? check_and_cast<const Ieee80211OfdmInterleaving *>(interleaver->getInterleaving()) : nullptr;
         const AdditiveScrambling *scrambling = scrambler ? check_and_cast<const AdditiveScrambling *>(scrambler->getScrambling()) : nullptr;
         code = new Ieee80211OfdmCode(convolutionalCode, interleaving, scrambling);
-        encoder = new Ieee80211OFDMEncoder(code);
+        encoder = new Ieee80211OfdmEncoder(code);
     }
 }
 
-const ITransmissionBitModel *Ieee80211OFDMEncoderModule::encode(const ITransmissionPacketModel *packetModel) const
+const ITransmissionBitModel *Ieee80211OfdmEncoderModule::encode(const ITransmissionPacketModel *packetModel) const
 {
     return encoder->encode(packetModel);
 }
 
-Ieee80211OFDMEncoderModule::~Ieee80211OFDMEncoderModule()
+Ieee80211OfdmEncoderModule::~Ieee80211OfdmEncoderModule()
 {
     delete code;
     delete encoder;

@@ -1,5 +1,5 @@
 %description:
-Test TCPSendQueue, TCPReceiveQueue classes
+Test TcpSendQueue, TcpReceiveQueue classes
 - sending and receiving 2GB data
 
 %includes:
@@ -10,14 +10,14 @@ Test TCPSendQueue, TCPReceiveQueue classes
 using namespace ::inet::tcp;
 
 %activity:
-TCPSendQueue sendQueue;
-TCPSendQueue *sq = &sendQueue;
+TcpSendQueue sendQueue;
+TcpSendQueue *sq = &sendQueue;
 
 sq->init(0);
 EV << sq->info() <<"\n";
 
-TCPReceiveQueue rcvQueue;
-TCPReceiveQueue *rq = &rcvQueue;
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *rq = &rcvQueue;
 
 uint32 seq = 0;
 rq->init(seq);

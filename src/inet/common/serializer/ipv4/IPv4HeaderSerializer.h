@@ -26,17 +26,17 @@ namespace serializer {
 /**
  * Converts between Ipv4Header and binary (network byte order) IPv4 header.
  */
-class INET_API IPv4HeaderSerializer : public FieldsChunkSerializer
+class INET_API Ipv4HeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const;
-    virtual TLVOptionBase *deserializeOption(MemoryInputStream& stream) const;
+    virtual void serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option) const;
+    virtual TlvOptionBase *deserializeOption(MemoryInputStream& stream) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    IPv4HeaderSerializer() : FieldsChunkSerializer() {}
+    Ipv4HeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.ratecontrol;
 
-simple ARFRateControl extends AARFRateControl
+simple ARFRateControl extends AarfRateControl
 {
     parameters:
         increaseThresholdFactor = default(1);

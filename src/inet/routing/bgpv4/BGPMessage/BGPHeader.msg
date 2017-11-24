@@ -17,7 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.routing.bgpv4.BGPCommon;
 
 namespace inet::bgp;
@@ -31,9 +31,9 @@ enum BgpConstants {
 //
 // Represents a BGPv4 AS_PATH path attribute (RFC 4271 Section 4.3)
 //
-class BGPASPathSegment extends cObject
+class BgpAsPathSegment extends cObject
 {
-    BGPPathSegmentType type;
+    BgpPathSegmentType type;
     unsigned char length;
     unsigned short asValue[];
 }
@@ -42,7 +42,7 @@ class BGPASPathSegment extends cObject
 //
 // BGPv4 message types
 //
-enum BGPType
+enum BgpType
 {
     BGP_OPEN = 1;
     BGP_UPDATE = 2;
@@ -58,10 +58,10 @@ enum BGPType
 //   - Length: 2 octets  (total size of the message)
 //   - Type: 1 octet
 //
-class BGPHeader extends FieldsChunk
+class BgpHeader extends FieldsChunk
 {
     chunkLength = B(BGP_HEADER_OCTETS);
-    BGPType type;
+    BgpType type;
 }
 
 //
@@ -70,22 +70,22 @@ class BGPHeader extends FieldsChunk
 // KEEPALIVE messages are exchanged as often as necessary between systems
 // to avoid exceeding the BGP Hold Timer (constant defined in BGPOpen).
 //
-class BGPKeepAliveMessage extends BGPHeader
+class BgpKeepAliveMessage extends BgpHeader
 {
     type = BGP_KEEPALIVE;
 }
 
-struct BGPParameterValues
+struct BgpParameterValues
 {
     short authCode;
     long authenticationData;
 }
 
-struct BGPOptionalParameters
+struct BgpOptionalParameters
 {
     short parameterType;
     unsigned short parameterLength;
-    BGPParameterValues parameterValues;
+    BgpParameterValues parameterValues;
 }
 
 
@@ -105,7 +105,7 @@ struct BGPOptionalParameters
 //    - Auth code
 //    - Authentication Data
 //
-class BGPOpenMessage extends BGPHeader
+class BgpOpenMessage extends BgpHeader
 {
     type = BGP_OPEN;
     chunkLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS);
@@ -113,11 +113,11 @@ class BGPOpenMessage extends BGPHeader
     char version = 4;
     unsigned short myAS;
     simtime_t holdTime;
-    IPv4Address BGPIdentifier;
-    BGPOptionalParameters optionalParameters[];
+    Ipv4Address BGPIdentifier;
+    BgpOptionalParameters optionalParameters[];
 }
 
-enum BGPUpdateAttributeTypeCode
+enum BgpUpdateAttributeTypeCode
 {
     ORIGIN = 1;
     AS_PATH = 2;
@@ -126,7 +126,7 @@ enum BGPUpdateAttributeTypeCode
     ATOMIC_AGGREGATE = 6;
 }
 
-struct BGPUpdateAttributeFlags
+struct BgpUpdateAttributeFlags
 {
     bool optionalBit;
     bool transitiveBit;
@@ -134,77 +134,77 @@ struct BGPUpdateAttributeFlags
     bool estendedLengthBit;
 }
 
-struct BGPUpdateAttributeType
+struct BgpUpdateAttributeType
 {
-    BGPUpdateAttributeFlags flags;
-    BGPUpdateAttributeTypeCode typeCode;
+    BgpUpdateAttributeFlags flags;
+    BgpUpdateAttributeTypeCode typeCode;
 }
 
-class BGPUpdatePathAttributes extends cObject
+class BgpUpdatePathAttributes extends cObject
 {
-    BGPUpdateAttributeType type; // 2 octets
+    BgpUpdateAttributeType type; // 2 octets
     unsigned short length; // 2 octets
 }
 
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
-class BGPUpdatePathAttributesOrigin extends BGPUpdatePathAttributes
+class BgpUpdatePathAttributesOrigin extends BgpUpdatePathAttributes
 {
-    BGPSessionType value;
+    BgpSessionType value;
 }
 
 // AS_PATH (RFC4271 Section 4.3, Type code 2):
-class BGPUpdatePathAttributesASPath extends BGPUpdatePathAttributes
+class BgpUpdatePathAttributesAsPath extends BgpUpdatePathAttributes
 {
-    BGPASPathSegment value[];
+    BgpAsPathSegment value[];
 }
 
 //NEXT_HOP (RFC4271 Section 4.3, Type code 3):
-class BGPUpdatePathAttributesNextHop extends BGPUpdatePathAttributes
+class BgpUpdatePathAttributesNextHop extends BgpUpdatePathAttributes
 {
-    IPv4Address value;
+    Ipv4Address value;
 }
 
 //LOCAL_PREF (RFC4271 Section 4.3, Type code 5):
-class BGPUpdatePathAttributesLocalPref extends BGPUpdatePathAttributes
+class BgpUpdatePathAttributesLocalPref extends BgpUpdatePathAttributes
 {
     unsigned int value;
 }
 
 //ATOMIC_AGGREGATE (RFC4271 Section 4.3, Type code 6):
-enum BGPUpdateAtomicAggregateValues
+enum BgpUpdateAtomicAggregateValues
 {
     NO_SPECIFIC_ROUTE = 0;
     SPECIFIC_ROUTE = 1;
 }
 
-class BGPUpdatePathAttributesAtomicAggregate extends BGPUpdatePathAttributes
+class BgpUpdatePathAttributesAtomicAggregate extends BgpUpdatePathAttributes
 {
-    BGPUpdateAtomicAggregateValues value;
+    BgpUpdateAtomicAggregateValues value;
 }
 
-struct BGPUpdateWithdrawnRoutes
+struct BgpUpdateWithdrawnRoutes
 {
     unsigned char length; // 1 octet
-    IPv4Address prefix; // 4 octets
+    Ipv4Address prefix; // 4 octets
 }
 
-struct BGPUpdateNLRI
+struct BgpUpdateNlri
 {
     unsigned char length; // 1 octet
-    IPv4Address prefix; // 4 octets
+    Ipv4Address prefix; // 4 octets
 }
 
 //
 // Represents the list of path attributes in a BGPv4 UPDATE message.
 // See RFC 4271, section 4.3
 //
-class BGPUpdatePathAttributeList extends cObject
+class BgpUpdatePathAttributeList extends cObject
 {
-    BGPUpdatePathAttributesOrigin origin; // mandatory attribute
-    BGPUpdatePathAttributesASPath asPath[]; // mandatory attribute
-    BGPUpdatePathAttributesNextHop nextHop; // mandatory attribute
-    BGPUpdatePathAttributesLocalPref localPref[]; // optional attribute
-    BGPUpdatePathAttributesAtomicAggregate atomicAggregate[]; // optional attribute
+    BgpUpdatePathAttributesOrigin origin; // mandatory attribute
+    BgpUpdatePathAttributesAsPath asPath[]; // mandatory attribute
+    BgpUpdatePathAttributesNextHop nextHop; // mandatory attribute
+    BgpUpdatePathAttributesLocalPref localPref[]; // optional attribute
+    BgpUpdatePathAttributesAtomicAggregate atomicAggregate[]; // optional attribute
 }
 
 //
@@ -222,14 +222,14 @@ class BGPUpdatePathAttributeList extends cObject
 //    - Length : 1 octet
 //    - prefix : variable size (contains the IP prefix; IPv4: 4 octets)
 //
-class BGPUpdateMessage extends BGPHeader
+class BgpUpdateMessage extends BgpHeader
 {
     @customize;
     type = BGP_UPDATE;
     chunkLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS);
 
-    BGPUpdateWithdrawnRoutes withdrawnRoutes[];
-    BGPUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)
-    BGPUpdateNLRI NLRI;
+    BgpUpdateWithdrawnRoutes withdrawnRoutes[];
+    BgpUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)
+    BgpUpdateNlri NLRI;
 }
 

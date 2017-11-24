@@ -248,7 +248,7 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     return getModulePathAddress();
 }
 
-void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
+void InterfaceEntry::setIPv4Data(Ipv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
     if (ipv4data && ipv4data->ownerp == this)
@@ -261,7 +261,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 #endif // ifdef WITH_IPv4
 }
 
-void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
+void InterfaceEntry::setIPv6Data(Ipv6InterfaceData *p)
 {
 #ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
@@ -274,7 +274,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #endif // ifdef WITH_IPv6
 }
 
-void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
+void InterfaceEntry::setTRILLInterfaceData(TrillInterfaceData *p)
 {
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)trilldata; // Khmm...
@@ -283,7 +283,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
     configChanged(F_TRILL_DATA);
 }
 
-void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
+void InterfaceEntry::setISISInterfaceData(IsisInterfaceData *p)
 {
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
@@ -350,7 +350,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
     }
 }
 
-static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::vector<IPv4Address>& result)
+static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
 {
     result.reserve(addresses.size());
     for (auto & addresse : addresses)
@@ -364,7 +364,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     switch (multicastAddress.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4: {
-            std::vector<IPv4Address> oldIPv4SourceList, newIPv4SourceList;
+            std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
             toIPv4AddressVector(newSourceList, newIPv4SourceList);
             ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
@@ -392,11 +392,11 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     }
 }
 
-IPv4Address InterfaceEntry::getIPv4Address() const {
+Ipv4Address InterfaceEntry::getIPv4Address() const {
 #ifdef WITH_IPv4
-    return ipv4data == nullptr ? IPv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
+    return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else
-    return IPv4Address::UNSPECIFIED_ADDRESS;
+    return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
 }
 

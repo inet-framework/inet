@@ -33,7 +33,7 @@ class InterfaceEntry;
 /**
  * Represents an IPv4 ARP module.
  */
-class INET_API IARP
+class INET_API IArp
 {
   public:
     /**
@@ -43,11 +43,11 @@ class INET_API IARP
     {
       public:
         L3Address l3Address;
-        MACAddress macAddress;
+        MacAddress macAddress;
         const InterfaceEntry *ie;
 
       public:
-        Notification(L3Address l3Address, MACAddress macAddress, const InterfaceEntry *ie)
+        Notification(L3Address l3Address, MacAddress macAddress, const InterfaceEntry *ie)
             : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
     };
 
@@ -57,14 +57,14 @@ class INET_API IARP
     static const simsignal_t failedARPResolutionSignal;
 
   public:
-    virtual ~IARP() {}
+    virtual ~IArp() {}
 
     /**
      * Returns the Layer 3 address for the given MAC address. If it is not available
      * (not in the cache, pending resolution, or already expired), UNSPECIFIED_ADDRESS
      * is returned.
      */
-    virtual L3Address getL3AddressFor(const MACAddress&) const = 0;
+    virtual L3Address getL3AddressFor(const MacAddress&) const = 0;
 
     /**
      * Tries to resolve the given network address to a MAC address. If the MAC
@@ -72,7 +72,7 @@ class INET_API IARP
      * an address resolution procedure. A signal is emitted when the address
      * resolution procedure terminates.
      */
-    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) = 0;
+    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) = 0;
 };
 
 } // namespace inet

@@ -144,24 +144,24 @@ double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint3
     return pms;
 }
 
-double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
+double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
 {
-    if (subcarrierModulation == &BPSKModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, 1);
         return getFecBpskBer(snr, bitLength, 3);
     }
-    else if (subcarrierModulation == &QPSKModulation::singleton) {
+    else if (subcarrierModulation == &QpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecQpskBer(snr, bitLength, 1);
         return getFecQpskBer(snr, bitLength, 3);
     }
-    else if (subcarrierModulation == &QAM16Modulation::singleton) {
+    else if (subcarrierModulation == &Qam16Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFec16QamBer(snr, bitLength, 1);
         return getFec16QamBer(snr, bitLength, 3);
     }
-    else if (subcarrierModulation == &QAM64Modulation::singleton) {
+    else if (subcarrierModulation == &Qam64Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3)
             return getFec64QamBer(snr, bitLength, 2);
         return getFec64QamBer(snr, bitLength, 3);

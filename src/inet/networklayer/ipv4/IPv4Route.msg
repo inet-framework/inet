@@ -14,7 +14,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 cplusplus {{
 #include "inet/networklayer/ipv4/IPv4Route.h"
@@ -22,13 +22,13 @@ cplusplus {{
 
 namespace inet;
 
-class IPv4Route extends cNamedObject
+class Ipv4Route extends cNamedObject
 {
     @existingClass;
     @descriptor(readonly);
-    IPv4Address destination;
-    IPv4Address netmask;
-    IPv4Address gateway;
+    Ipv4Address destination;
+    Ipv4Address netmask;
+    Ipv4Address gateway;
     int metric;
     int prefixLength;
     string interfaceName;

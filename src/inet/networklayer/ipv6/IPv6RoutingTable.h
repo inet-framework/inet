@@ -31,7 +31,7 @@ namespace inet {
 
 class IInterfaceTable;
 class InterfaceEntry;
-class IPv6RoutingTable;
+class Ipv6RoutingTable;
 
 /**
  * Represents the IPv6 routing table and neighbour discovery data structures.
@@ -48,7 +48,7 @@ class IPv6RoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
+class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     IInterfaceTable *ift = nullptr;    // cached pointer
@@ -68,35 +68,35 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     struct DestCacheEntry
     {
         int interfaceId = -1;
-        IPv6Address nextHopAddr;
+        Ipv6Address nextHopAddr;
         simtime_t expiryTime;
         // more destination specific data may be added here, e.g. path MTU
     };
     friend std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
-    typedef std::map<IPv6Address, DestCacheEntry> DestCache;
+    typedef std::map<Ipv6Address, DestCacheEntry> DestCache;
     DestCache destCache;
 
     // RouteList contains local prefixes, and (for routers)
     // static, OSPF, RIP etc routes as well
-    typedef std::vector<IPv6Route *> RouteList;
+    typedef std::vector<Ipv6Route *> RouteList;
     RouteList routeList;
 
   protected:
     // creates a new empty route, factory method overriden in subclasses that use custom routes
-    virtual IPv6Route *createNewRoute(IPv6Address destPrefix, int prefixLength, IRoute::SourceType src);
+    virtual Ipv6Route *createNewRoute(Ipv6Address destPrefix, int prefixLength, IRoute::SourceType src);
 
     // internal: routes of different type can only be added via well-defined functions
-    virtual void addRoute(IPv6Route *route);
+    virtual void addRoute(Ipv6Route *route);
 
     // helper for addRoute()
     class RouteLessThan
     {
-        const IPv6RoutingTable &c;
+        const Ipv6RoutingTable &c;
       public:
-        RouteLessThan(const IPv6RoutingTable& c) : c(c) {}
-        bool operator () (const IPv6Route *a, const IPv6Route *b) { return c.routeLessThan(a, b); }
+        RouteLessThan(const Ipv6RoutingTable& c) : c(c) {}
+        bool operator () (const Ipv6Route *a, const Ipv6Route *b) { return c.routeLessThan(a, b); }
     };
-    bool routeLessThan(const IPv6Route *a, const IPv6Route *b) const;
+    bool routeLessThan(const Ipv6Route *a, const Ipv6Route *b) const;
 
     // internal
     virtual void configureInterfaceForIPv6(InterfaceEntry *ie);
@@ -112,8 +112,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     // internal
     virtual void configureTunnelFromXML(cXMLElement *cfg);
 
-    void internalAddRoute(IPv6Route *route);
-    IPv6Route *internalRemoveRoute(IPv6Route *route);
+    void internalAddRoute(Ipv6Route *route);
+    Ipv6Route *internalRemoveRoute(Ipv6Route *route);
     RouteList::iterator internalDeleteRoute(RouteList::iterator it);
 
   protected:
@@ -121,8 +121,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual void refreshDisplay() const override;
 
   public:
-    IPv6RoutingTable();
-    virtual ~IPv6RoutingTable();
+    Ipv6RoutingTable();
+    virtual ~Ipv6RoutingTable();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -146,7 +146,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const IPv6Address& address) const;
+    virtual InterfaceEntry *getInterfaceByAddress(const Ipv6Address& address) const;
     //@}
 
     /**
@@ -161,7 +161,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * maintaining internal data structures and firing "routing table changed"
      * notifications.
      */
-    virtual void routeChanged(IPv6Route *entry, int fieldCode);
+    virtual void routeChanged(Ipv6Route *entry, int fieldCode);
 
 #ifdef WITH_xMIPv6
     /**
@@ -193,7 +193,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * Checks if the address is one of the host's addresses, i.e.
      * assigned to one of its interfaces (tentatively or not).
      */
-    virtual bool isLocalAddress(const IPv6Address& dest) const;
+    virtual bool isLocalAddress(const Ipv6Address& dest) const;
 
     /**
      * Looks up the given destination address in the Destination Cache,
@@ -206,18 +206,18 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * NOTE: outInterfaceId is an OUTPUT parameter -- its initial value is ignored,
      * and the lookupDestCache() sets it to the correct value instead.
      */
-    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId);
+    const Ipv6Address& lookupDestCache(const Ipv6Address& dest, int& outInterfaceId);
 
     /**
      * Performs longest prefix match in the routing table and returns
      * the resulting route, or nullptr if there was no match.
      */
-    const IPv6Route *doLongestPrefixMatch(const IPv6Address& dest);
+    const Ipv6Route *doLongestPrefixMatch(const Ipv6Address& dest);
 
     /**
      * Checks if the given prefix already exists in the routing table (prefix list)
      */
-    virtual bool isPrefixPresent(const IPv6Address& prefix) const;
+    virtual bool isPrefixPresent(const Ipv6Address& prefix) const;
 
     //TBD multicast delivery
     //@}
@@ -227,7 +227,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Add or update a destination cache entry.
      */
-    virtual void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
+    virtual void updateDestCache(const Ipv6Address& dest, const Ipv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
 
     /**
      * Discard all entries in destination cache
@@ -240,7 +240,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * becomes unreachable, and all destinations going via that router have to
      * go though router selection again.
      */
-    virtual void purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId);
+    virtual void purgeDestCacheEntriesToNeighbour(const Ipv6Address& nextHopAddr, int interfaceId);
 
     /**
      * Removes all destination cache entries for the specified interface
@@ -261,7 +261,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * in the IInterfaceTable (see IPv6InterfaceData); that has to be done
      * separately.
      */
-    virtual void addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
+    virtual void addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength,
             int interfaceId, simtime_t expiryTime);
 
     /**
@@ -271,28 +271,28 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * NOTE: This method does NOT remove the matching addresses from the
      * IInterfaceTable (see IPv6InterfaceData); that has to be done separately.
      */
-    virtual void deleteOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
+    virtual void deleteOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength);
 
     /**
      * Add route of type OWN_ADV_PREFIX. This is a prefix that *this* router
      * advertises on this interface.
      */
-    virtual void addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
+    virtual void addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, int prefixLength,
             int interfaceId, simtime_t expiryTime);
 
     /**
      * Creates a static route. If metric is omitted, it gets initialized
      * to the interface's metric value.
      */
-    virtual void addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
-            unsigned int interfaceId, const IPv6Address& nextHop,
+    virtual void addStaticRoute(const Ipv6Address& destPrefix, int prefixLength,
+            unsigned int interfaceId, const Ipv6Address& nextHop,
             int metric = 0);
 
     /**
      *  Adds a default route for a host. This method requires the RA's source
      *  address and the router expiry time plus the simTime().
      */
-    virtual void addDefaultRoute(const IPv6Address& raSrcAddr, unsigned int ifID,
+    virtual void addDefaultRoute(const Ipv6Address& raSrcAddr, unsigned int ifID,
             simtime_t routerLifetime);
 
     /**
@@ -300,19 +300,19 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * with src==ROUTING_PROT. To store additional information with the route,
      * one can subclass from IPv6Route and add more fields.
      */
-    virtual void addRoutingProtocolRoute(IPv6Route *route);
+    virtual void addRoutingProtocolRoute(Ipv6Route *route);
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned if the route was not in the routing table.
      */
-    virtual IPv6Route *removeRoute(IPv6Route *route);
+    virtual Ipv6Route *removeRoute(Ipv6Route *route);
 
     /**
      * Deletes the given route from the route table.
      * Returns true, if it was deleted, false if it was not found in the routing table.
      */
-    virtual bool deleteRoute(IPv6Route *route);
+    virtual bool deleteRoute(Ipv6Route *route);
 
     /**
      * Deletes the routes that are using the specified interface.
@@ -327,7 +327,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Return the ith route.
      */
-    virtual IPv6Route *getRoute(int i) const override;
+    virtual Ipv6Route *getRoute(int i) const override;
     //@}
 
 #ifdef WITH_xMIPv6
@@ -336,12 +336,12 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     //void updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
     //const IPv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
     //const IPv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
-    const IPv6Address& getHomeAddress();    // NEW, 14.01.08 - CB
+    const Ipv6Address& getHomeAddress();    // NEW, 14.01.08 - CB
 
     /**
      * Check whether provided address is a HoA
      */
-    bool isHomeAddress(const IPv6Address& addr);
+    bool isHomeAddress(const Ipv6Address& addr);
 
     /**
      * Deletes the current default routes for the given interface.
@@ -374,7 +374,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * Checks whether the provided address is in an on-link address
      * with respect to the prefix advertisement list.
      */
-    bool isOnLinkAddress(const IPv6Address& address);    // update 11.9.07 - CB
+    bool isOnLinkAddress(const Ipv6Address& address);    // update 11.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
     /**
@@ -385,26 +385,26 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     // IRoutingTable methods:
     virtual bool isForwardingEnabled() const override { return isRouter(); }    //XXX inconsistent names
     virtual bool isMulticastForwardingEnabled() const override { return true;    /*TODO isMulticastForwardingEnabled();*/ }
-    virtual L3Address getRouterIdAsGeneric() const override { return L3Address(IPv6Address());    /*TODO getRouterId();*/ }
+    virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address());    /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIPv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;
     virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
     virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return nullptr;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
     virtual IRoute *getDefaultRoute() const override { return nullptr;    /*TODO getDefaultRoute();*/ }
-    virtual void addRoute(IRoute *entry) override { addRoutingProtocolRoute(check_and_cast<IPv6Route *>(entry)); }    //XXX contrast that with addStaticRoute()!
-    virtual IRoute *removeRoute(IRoute *entry) override { return removeRoute(check_and_cast<IPv6Route *>(entry)); }
-    virtual bool deleteRoute(IRoute *entry) override { return deleteRoute(check_and_cast<IPv6Route *>(entry)); }
+    virtual void addRoute(IRoute *entry) override { addRoutingProtocolRoute(check_and_cast<Ipv6Route *>(entry)); }    //XXX contrast that with addStaticRoute()!
+    virtual IRoute *removeRoute(IRoute *entry) override { return removeRoute(check_and_cast<Ipv6Route *>(entry)); }
+    virtual bool deleteRoute(IRoute *entry) override { return deleteRoute(check_and_cast<Ipv6Route *>(entry)); }
     virtual IMulticastRoute *getMulticastRoute(int i) const override { return nullptr;    /*TODO*/ }
     virtual int getNumMulticastRoutes() const override { return 0;    /*TODO getNumMulticastRoutes();*/ }
     virtual void addMulticastRoute(IMulticastRoute *entry) override {    /*TODO addMulticastRoute(entry);*/ }
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) override {    /*TODO removeMulticastRoute(entry);*/ return entry; }
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) override { return false;    /*TODO: deleteMulticastRoute(entry);*/ }
-    virtual IRoute *createRoute() override { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
+    virtual IRoute *createRoute() override { return new Ipv6Route(Ipv6Address(), 0, IRoute::MANUAL); }
 
     /**
      * Prints the routing table.

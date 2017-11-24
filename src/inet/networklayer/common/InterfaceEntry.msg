@@ -14,8 +14,8 @@
 //
 
 import inet.common.INETDefs;
-import inet.linklayer.common.MACAddress;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.linklayer.common.MacAddress;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 cplusplus {{
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -33,6 +33,7 @@ class InterfaceEntry extends cModule
     bool pointToPoint @getter("isPointToPoint");
     bool loopback @getter("isLoopback");
     int mtu @getter("getMTU");
-    MACAddress macAddress;
-    IPv4Address ipv4Address @getter("getIPv4Address");
+    MacAddress macAddress;
+    Ipv4Address ipv4Address @getter("getIPv4Address");
 }
+

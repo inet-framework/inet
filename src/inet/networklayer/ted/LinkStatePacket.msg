@@ -15,7 +15,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.networklayer.ted.TED;
+import inet.networklayer.ted.Ted;
 
 namespace inet;
 
@@ -26,7 +26,7 @@ namespace inet;
 //
 class LinkStateMsg extends FieldsChunk
 {
-    TELinkStateInfo linkInfo[];
+    TeLinkStateInfo linkInfo[];
 
     bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?
         // bool ack = false; -- apparently unused, removed -- TODO check with Vojta

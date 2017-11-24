@@ -1,5 +1,5 @@
 %description:
-EtherMAC module: tests IFG and framebursting in half duplex mode
+EtherMac module: tests IFG and framebursting in half duplex mode
 
 
 %inifile: {}.ini

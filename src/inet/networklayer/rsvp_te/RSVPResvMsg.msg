@@ -14,9 +14,9 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.rsvp_te.IntServ;
-import inet.networklayer.rsvp_te.RSVPPacket;
+import inet.networklayer.rsvp_te.RsvpPacket;
 
 cplusplus {{
 #include "inet/networklayer/rsvp_te/RSVPPacket.h"
@@ -27,10 +27,10 @@ namespace inet;
 //
 // FIXME missing documentation
 //
-class RSVPResvMsg extends RSVPPacket
+class RsvpResvMsg extends RsvpPacket
 {
     @customize;
-    RsvpHopObj_t hop;
+    RsvpHopObj hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RESV_MESSAGE;
 }
@@ -38,10 +38,10 @@ class RSVPResvMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-class RSVPResvTear extends RSVPPacket
+class RsvpResvTear extends RsvpPacket
 {
     @customize;
-    RsvpHopObj_t hop;
+    RsvpHopObj hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RTEAR_MESSAGE;
 }
@@ -49,11 +49,11 @@ class RSVPResvTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-class RSVPResvError extends RSVPPacket
+class RsvpResvError extends RsvpPacket
 {
     @customize;
-    RsvpHopObj_t hop;
-    IPv4Address errorNode;
+    RsvpHopObj hop;
+    Ipv4Address errorNode;
     int errorCode;
     rsvpKind = RERROR_MESSAGE;
 }

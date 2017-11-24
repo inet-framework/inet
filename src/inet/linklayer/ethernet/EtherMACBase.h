@@ -40,10 +40,10 @@ class InterfaceEntry;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public MACBase
+class INET_API EtherMacBase : public MacBase
 {
   public:
-        enum MACTransmitState {
+        enum MacTransmitState {
             TX_IDLE_STATE = 1,
             WAIT_IFG_STATE,
             SEND_IFG_STATE,
@@ -53,7 +53,7 @@ class INET_API EtherMACBase : public MACBase
             PAUSE_STATE
         };
 
-        enum MACReceiveState {
+        enum MacReceiveState {
             RX_IDLE_STATE = 1,
             RECEIVING_STATE,
             RX_COLLISION_STATE,
@@ -131,7 +131,7 @@ class INET_API EtherMACBase : public MACBase
     // configuration
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
-    MACAddress address;    // own MAC address
+    MacAddress address;    // own MAC address
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
     bool disabled = false;    // true if the MAC is disabled, defined by the user
     bool promiscuous = false;    // if true, passes up all received frames
@@ -147,8 +147,8 @@ class INET_API EtherMACBase : public MACBase
 
     // state
     bool channelsDiffer = false;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
-    MACTransmitState transmitState = (MACTransmitState)-1;    // "transmit state" of the MAC
-    MACReceiveState receiveState = (MACReceiveState)-1;    // "receive state" of the MAC
+    MacTransmitState transmitState = (MacTransmitState)-1;    // "transmit state" of the MAC
+    MacReceiveState receiveState = (MacReceiveState)-1;    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
     Packet *curTxFrame = nullptr;    // frame being transmitted
@@ -183,16 +183,16 @@ class INET_API EtherMACBase : public MACBase
     static const double SPEED_OF_LIGHT_IN_CABLE;
 
   public:
-    EtherMACBase();
-    virtual ~EtherMACBase();
+    EtherMacBase();
+    virtual ~EtherMacBase();
 
-    virtual MACAddress getMACAddress() { return address; }
+    virtual MacAddress getMACAddress() { return address; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
 
-    MACTransmitState getTransmitState(){ return transmitState; }
-    MACReceiveState getReceiveState(){ return receiveState; }
+    MacTransmitState getTransmitState(){ return transmitState; }
+    MacReceiveState getReceiveState(){ return receiveState; }
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 

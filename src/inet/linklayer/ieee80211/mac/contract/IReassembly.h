@@ -47,7 +47,7 @@ class INET_API IReassembly
          * address, the TID, and the sequence number range [startSeqNumber, endSeqNumber[.
          * Set tid=-1 for non-QoS frames.
          */
-        virtual void purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
+        virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
 };
 
 } // namespace ieee80211

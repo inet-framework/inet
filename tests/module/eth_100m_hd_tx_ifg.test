@@ -1,5 +1,5 @@
 %description:
-EtherMAC module: tests IFG in half duplex mode
+EtherMac module: tests IFG in half duplex mode
 
 
 %inifile: {}.ini

@@ -23,7 +23,7 @@ namespace physicallayer {
 
 Ieee80211HtCode::Ieee80211HtCode(
         const IForwardErrorCorrection* forwardErrorCorrection,
-        const Ieee80211HTInterleaving* interleaving,
+        const Ieee80211HtInterleaving* interleaving,
         const AdditiveScrambling* scrambling) :
                 forwardErrorCorrection(forwardErrorCorrection),
                 interleaving(interleaving),
@@ -43,8 +43,8 @@ const Ieee80211HtCode* Ieee80211HtCompliantCodes::getCompliantCode(const Ieee802
         numberOfCodedBitsPerSpatialStreams.push_back(stream3Modulation->getSubcarrierModulation()->getCodeWordSize());
     if (stream4Modulation)
         numberOfCodedBitsPerSpatialStreams.push_back(stream4Modulation->getSubcarrierModulation()->getCodeWordSize());
-    return withScrambling ? new Ieee80211HtCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), &Ieee80211OfdmCompliantCodes::ofdmScrambling) :
-                            new Ieee80211HtCode(convolutionalCode, new Ieee80211HTInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), nullptr);
+    return withScrambling ? new Ieee80211HtCode(convolutionalCode, new Ieee80211HtInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), &Ieee80211OfdmCompliantCodes::ofdmScrambling) :
+                            new Ieee80211HtCode(convolutionalCode, new Ieee80211HtInterleaving(numberOfCodedBitsPerSpatialStreams, bandwidth), nullptr);
 }
 
 Ieee80211HtCode::~Ieee80211HtCode()

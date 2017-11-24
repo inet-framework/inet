@@ -25,8 +25,8 @@ namespace inet {
 
 #define TED_TRAFFIC    1
 
-class TED;
-class IIPv4RoutingTable;
+class Ted;
+class IIpv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
 
@@ -56,11 +56,11 @@ class InterfaceEntry;
 class INET_API LinkStateRouting : public cSimpleModule, public cListener
 {
   protected:
-    TED *tedmod = nullptr;
+    Ted *tedmod = nullptr;
     cMessage *announceMsg = nullptr;
-    IPv4Address routerId;
+    Ipv4Address routerId;
 
-    IPv4AddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
+    Ipv4AddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
 
   public:
     LinkStateRouting();
@@ -71,14 +71,14 @@ class INET_API LinkStateRouting : public cSimpleModule, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processLINK_STATE_MESSAGE(Packet *msg, IPv4Address sender);
+    virtual void processLINK_STATE_MESSAGE(Packet *msg, Ipv4Address sender);
 
     // cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-    virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer);
-    virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo>& list, bool req);
-    virtual void sendToIP(Packet *msg, IPv4Address destAddr);
+    virtual void sendToPeers(const std::vector<TeLinkStateInfo>& list, bool req, Ipv4Address exceptPeer);
+    virtual void sendToPeer(Ipv4Address peer, const std::vector<TeLinkStateInfo>& list, bool req);
+    virtual void sendToIP(Packet *msg, Ipv4Address destAddr);
 };
 
 } // namespace inet

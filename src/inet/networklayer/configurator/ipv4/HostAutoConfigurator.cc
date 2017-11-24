@@ -54,21 +54,21 @@ void HostAutoConfigurator::setupNetworkLayer()
     EV_INFO << "host auto configuration started" << std::endl;
 
     std::string interfaces = par("interfaces").stringValue();
-    IPv4Address addressBase = IPv4Address(par("addressBase").stringValue());
-    IPv4Address netmask = IPv4Address(par("netmask").stringValue());
+    Ipv4Address addressBase = Ipv4Address(par("addressBase").stringValue());
+    Ipv4Address netmask = Ipv4Address(par("netmask").stringValue());
     std::string mcastGroups = par("mcastGroups").stringValue();
 
     // get our host module
     cModule *host = getContainingNode(this);
 
-    IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(host->getId()));
+    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32(host->getId()));
 
     // address test
-    if (!IPv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
+    if (!Ipv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
         throw cRuntimeError("Generated IP address is out of specified address range");
 
     // get our routing table
-    IIPv4RoutingTable *routingTable = L3AddressResolver().routingTableOf(host);
+    IIpv4RoutingTable *routingTable = L3AddressResolver().routingTableOf(host);
     if (!routingTable)
         throw cRuntimeError("No routing table found");
 
@@ -98,14 +98,14 @@ void HostAutoConfigurator::setupNetworkLayer()
         ie->setBroadcast(true);
 
         // associate interface with default multicast groups
-        ie->ipv4Data()->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
-        ie->ipv4Data()->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
+        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // associate interface with specified multicast groups
         cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
         const char *mcastGroup_s;
         while ((mcastGroup_s = interfaceTokenizer.nextToken()) != nullptr) {
-            IPv4Address mcastGroup(mcastGroup_s);
+            Ipv4Address mcastGroup(mcastGroup_s);
             ie->ipv4Data()->joinMulticastGroup(mcastGroup);
         }
     }

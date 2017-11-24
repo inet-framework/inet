@@ -26,42 +26,42 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee802154UWBIRReceiver);
+Define_Module(Ieee802154UwbIrReceiver);
 
-Ieee802154UWBIRReceiver::Ieee802154UWBIRReceiver() :
+Ieee802154UwbIrReceiver::Ieee802154UwbIrReceiver() :
     ReceiverBase()
 {
 }
 
-void Ieee802154UWBIRReceiver::initialize(int stage)
+void Ieee802154UwbIrReceiver::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        cfg = Ieee802154UWBIRMode::cfg_mandatory_16M;
+        cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
     }
 }
 
-std::ostream& Ieee802154UWBIRReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int level) const
 {
     return stream << "Ieee802154UWBIRReceiver";
 }
 
-const IListening *Ieee802154UWBIRReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
+const IListening *Ieee802154UwbIrReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     return new BandListening(radio, startTime, endTime, startPosition, endPosition, cfg.centerFrequency, cfg.bandwidth);
 }
 
-const IListeningDecision *Ieee802154UWBIRReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
+const IListeningDecision *Ieee802154UwbIrReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
     return new ListeningDecision(listening, true);
 }
 
-bool Ieee802154UWBIRReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
+bool Ieee802154UwbIrReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
 {
     return true;
 }
 
-bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+bool Ieee802154UwbIrReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     std::vector<bool> *bits = decode(reception, interference->getInterferingReceptions(), interference->getBackgroundNoise());
     int bitLength = bits->size() - 48 - 8;
@@ -80,13 +80,13 @@ bool Ieee802154UWBIRReceiver::computeIsReceptionSuccessful(const IListening *lis
     return isReceptionSuccessful;
 }
 
-const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+const IReceptionDecision *Ieee802154UwbIrReceiver::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     bool isReceptionSuccessful = computeIsReceptionSuccessful(listening, reception, part, interference, snir);
     return new ReceptionDecision(reception, part, true, true, isReceptionSuccessful);
 }
 
-std::vector<bool> *Ieee802154UWBIRReceiver::decode(const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+std::vector<bool> *Ieee802154UwbIrReceiver::decode(const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {
     simtime_t now, offset;
     simtime_t aSymbol, shift, burst;
@@ -134,7 +134,7 @@ std::vector<bool> *Ieee802154UWBIRReceiver::decode(const IReception *reception, 
  * 16 pulse peak positions of the voltage measured by the receiver ADC.
  */
 // TODO: review this code regarding the dimensional API, could it be done simply by simply adding the signal, the interference and the noise and integrating that?
-std::pair<double, double> Ieee802154UWBIRReceiver::integrateWindow(simtime_t_cref pNow, simtime_t_cref burst, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
+std::pair<double, double> Ieee802154UwbIrReceiver::integrateWindow(simtime_t_cref pNow, simtime_t_cref burst, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {
     std::pair<double, double>       energy = std::make_pair(0.0, 0.0); // first: stores SNIR, second: stores total captured window energy
     Argument                        arg;

@@ -75,17 +75,17 @@ class INET_API Neighbor
         SLAVE = 1
     };
 
-    struct DDPacketID
+    struct DdPacketId
     {
-        OSPFDDOptions ddOptions;
-        OSPFOptions options;
+        OspfDdOptions ddOptions;
+        OspfOptions options;
         unsigned long sequenceNumber;
     };
 
   private:
-    struct TransmittedLSA
+    struct TransmittedLsa
     {
-        LSAKeyType lsaKey;
+        LsaKeyType lsaKey;
         unsigned short age;
     };
 
@@ -102,19 +102,19 @@ class INET_API Neighbor
     DatabaseExchangeRelationshipType databaseExchangeRelationship = (DatabaseExchangeRelationshipType)-1;
     bool firstAdjacencyInited = false;
     unsigned long ddSequenceNumber = 0;
-    DDPacketID lastReceivedDDPacket;
-    RouterID neighborID;
+    DdPacketId lastReceivedDDPacket;
+    RouterId neighborID;
     unsigned char neighborPriority = 0;
-    IPv4Address neighborIPAddress;
-    OSPFOptions neighborOptions;
-    DesignatedRouterID neighborsDesignatedRouter;
-    DesignatedRouterID neighborsBackupDesignatedRouter;
+    Ipv4Address neighborIPAddress;
+    OspfOptions neighborOptions;
+    DesignatedRouterId neighborsDesignatedRouter;
+    DesignatedRouterId neighborsBackupDesignatedRouter;
     bool designatedRoutersSetUp = false;
     short neighborsRouterDeadInterval = 0;
-    std::list<OSPFLSA *> linkStateRetransmissionList;
-    std::list<OSPFLSAHeader *> databaseSummaryList;
-    std::list<OSPFLSAHeader *> linkStateRequestList;
-    std::list<TransmittedLSA> transmittedLSAs;
+    std::list<OspfLsa *> linkStateRetransmissionList;
+    std::list<OspfLsaHeader *> databaseSummaryList;
+    std::list<OspfLsaHeader *> linkStateRequestList;
+    std::list<TransmittedLsa> transmittedLSAs;
     Packet *lastTransmittedDDPacket = nullptr;
 
     Interface *parentInterface = nullptr;
@@ -126,7 +126,7 @@ class INET_API Neighbor
     void changeState(NeighborState *newState, NeighborState *currentState);
 
   public:
-    Neighbor(RouterID neighbor = NULL_ROUTERID);
+    Neighbor(RouterId neighbor = NULL_ROUTERID);
     virtual ~Neighbor();
 
     void processEvent(NeighborEventType event);
@@ -140,42 +140,42 @@ class INET_API Neighbor
     void sendLinkStateRequestPacket();
     void retransmitUpdatePacket();
     bool needAdjacency();
-    void addToRetransmissionList(const OSPFLSA *lsa);
-    void removeFromRetransmissionList(LSAKeyType lsaKey);
-    bool isLinkStateRequestListEmpty(LSAKeyType lsaKey) const;
-    OSPFLSA *findOnRetransmissionList(LSAKeyType lsaKey);
+    void addToRetransmissionList(const OspfLsa *lsa);
+    void removeFromRetransmissionList(LsaKeyType lsaKey);
+    bool isLinkStateRequestListEmpty(LsaKeyType lsaKey) const;
+    OspfLsa *findOnRetransmissionList(LsaKeyType lsaKey);
     void startUpdateRetransmissionTimer();
     void clearUpdateRetransmissionTimer();
-    void addToRequestList(const OSPFLSAHeader *lsaHeader);
-    void removeFromRequestList(LSAKeyType lsaKey);
-    bool isLSAOnRequestList(LSAKeyType lsaKey) const;
-    OSPFLSAHeader *findOnRequestList(LSAKeyType lsaKey);
+    void addToRequestList(const OspfLsaHeader *lsaHeader);
+    void removeFromRequestList(LsaKeyType lsaKey);
+    bool isLSAOnRequestList(LsaKeyType lsaKey) const;
+    OspfLsaHeader *findOnRequestList(LsaKeyType lsaKey);
     void startRequestRetransmissionTimer();
     void clearRequestRetransmissionTimer();
-    void addToTransmittedLSAList(LSAKeyType lsaKey);
-    bool isOnTransmittedLSAList(LSAKeyType lsaKey) const;
+    void addToTransmittedLSAList(LsaKeyType lsaKey);
+    bool isOnTransmittedLSAList(LsaKeyType lsaKey) const;
     void ageTransmittedLSAList();
     unsigned long getUniqueULong();
     void deleteLastSentDDPacket();
 
-    void setNeighborID(RouterID id) { neighborID = id; }
-    RouterID getNeighborID() const { return neighborID; }
+    void setNeighborID(RouterId id) { neighborID = id; }
+    RouterId getNeighborID() const { return neighborID; }
     void setPriority(unsigned char priority) { neighborPriority = priority; }
     unsigned char getPriority() const { return neighborPriority; }
-    void setAddress(IPv4Address address) { neighborIPAddress = address; }
-    IPv4Address getAddress() const { return neighborIPAddress; }
-    void setDesignatedRouter(DesignatedRouterID routerID) { neighborsDesignatedRouter = routerID; }
-    DesignatedRouterID getDesignatedRouter() const { return neighborsDesignatedRouter; }
-    void setBackupDesignatedRouter(DesignatedRouterID routerID) { neighborsBackupDesignatedRouter = routerID; }
-    DesignatedRouterID getBackupDesignatedRouter() const { return neighborsBackupDesignatedRouter; }
+    void setAddress(Ipv4Address address) { neighborIPAddress = address; }
+    Ipv4Address getAddress() const { return neighborIPAddress; }
+    void setDesignatedRouter(DesignatedRouterId routerID) { neighborsDesignatedRouter = routerID; }
+    DesignatedRouterId getDesignatedRouter() const { return neighborsDesignatedRouter; }
+    void setBackupDesignatedRouter(DesignatedRouterId routerID) { neighborsBackupDesignatedRouter = routerID; }
+    DesignatedRouterId getBackupDesignatedRouter() const { return neighborsBackupDesignatedRouter; }
     void setRouterDeadInterval(short interval) { neighborsRouterDeadInterval = interval; }
     short getRouterDeadInterval() const { return neighborsRouterDeadInterval; }
     void setDDSequenceNumber(unsigned long sequenceNumber) { ddSequenceNumber = sequenceNumber; }
     unsigned long getDDSequenceNumber() const { return ddSequenceNumber; }
-    void setOptions(OSPFOptions options) { neighborOptions = options; }
-    OSPFOptions getOptions() const { return neighborOptions; }
-    void setLastReceivedDDPacket(DDPacketID packetID) { lastReceivedDDPacket = packetID; }
-    DDPacketID getLastReceivedDDPacket() const { return lastReceivedDDPacket; }
+    void setOptions(OspfOptions options) { neighborOptions = options; }
+    OspfOptions getOptions() const { return neighborOptions; }
+    void setLastReceivedDDPacket(DdPacketId packetID) { lastReceivedDDPacket = packetID; }
+    DdPacketId getLastReceivedDDPacket() const { return lastReceivedDDPacket; }
 
     void setDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
     DatabaseExchangeRelationshipType getDatabaseExchangeRelationship() const { return databaseExchangeRelationship; }
@@ -201,7 +201,7 @@ class INET_API Neighbor
     void popFirstLinkStateRequest() { linkStateRequestList.pop_front(); }
 };
 
-inline bool operator==(Neighbor::DDPacketID leftID, Neighbor::DDPacketID rightID)
+inline bool operator==(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID)
 {
     return (leftID.ddOptions.I_Init == rightID.ddOptions.I_Init) &&
            (leftID.ddOptions.M_More == rightID.ddOptions.M_More) &&
@@ -210,7 +210,7 @@ inline bool operator==(Neighbor::DDPacketID leftID, Neighbor::DDPacketID rightID
            (leftID.sequenceNumber == rightID.sequenceNumber);
 }
 
-inline bool operator!=(Neighbor::DDPacketID leftID, Neighbor::DDPacketID rightID)
+inline bool operator!=(Neighbor::DdPacketId leftID, Neighbor::DdPacketId rightID)
 {
     return !(leftID == rightID);
 }

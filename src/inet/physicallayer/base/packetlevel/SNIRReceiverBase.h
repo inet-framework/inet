@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API SNIRReceiverBase : public ReceiverBase
+class INET_API SnirReceiverBase : public ReceiverBase
 {
   protected:
     double snirThreshold;
@@ -34,13 +34,13 @@ class INET_API SNIRReceiverBase : public ReceiverBase
     virtual void initialize(int stage) override;
 
   public:
-    SNIRReceiverBase();
+    SnirReceiverBase();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getSNIRThreshold() const { return snirThreshold; }
 
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 };
 
 } // namespace physicallayer

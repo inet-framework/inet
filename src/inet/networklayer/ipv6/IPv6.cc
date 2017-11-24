@@ -63,7 +63,7 @@ IPv6::~IPv6()
 }
 
 #ifdef WITH_xMIPv6
-IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const InterfaceEntry *ie, MacAddress macAddr, bool fromHL) :
         packet(packet),
         ipv6Header(ipv6Header),
         ie(ie),
@@ -84,10 +84,10 @@ void IPv6::initialize(int stage)
         QueueBase::initialize();
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IPv6RoutingTable>(par("routingTableModule"), this);
-        nd = getModuleFromPar<IPv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
-        icmp = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
-        tunneling = getModuleFromPar<IPv6Tunneling>(par("ipv6TunnelingModule"), this);
+        rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
+        nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
+        icmp = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
+        tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
@@ -207,9 +207,9 @@ void IPv6::endService(cPacket *msg)
     }
     else if (msg->getArrivalGate()->isName("ndIn") && msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
-        IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
+        Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();
-        IPv6Address nextHop = ctrl->getNextHop();
+        Ipv6Address nextHop = ctrl->getNextHop();
         int interfaceId = ctrl->getInterfaceId();
         delete ctrl;
         resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
@@ -222,9 +222,9 @@ void IPv6::endService(cPacket *msg)
         packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
-            IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
+            Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
             fromHL = ctrl->getFromHL();
-            IPv6Address nextHop = ctrl->getNextHop();
+            Ipv6Address nextHop = ctrl->getNextHop();
             int interfaceId = ctrl->getInterfaceId();
             delete ctrl;
             resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
@@ -238,7 +238,7 @@ void IPv6::endService(cPacket *msg)
 
         const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
         const InterfaceEntry *destIE = nullptr;
-        L3Address nextHop(IPv6Address::UNSPECIFIED_ADDRESS);
+        L3Address nextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
         if (fromHL) {
             // remove control info
             delete packet->removeControlInfo();
@@ -258,10 +258,10 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
-void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
+void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
-    IPv6Address destAddr = ipv6Header->getDestAddress();
+    Ipv6Address destAddr = ipv6Header->getDestAddress();
     // remove control info
     delete packet->removeControlInfo();
 
@@ -297,7 +297,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
 #endif /* WITH_xMIPv6 */
 
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
-    IPv6Address destAddress = ipv6Header->getDestAddress();
+    Ipv6Address destAddress = ipv6Header->getDestAddress();
 
     // check for local delivery
     if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress)) {
@@ -320,28 +320,28 @@ void IPv6::handleMessageFromHL(cPacket *msg)
             destIE = ift->getFirstLoopbackInterface();
         ASSERT(destIE);
     }
-    L3Address nextHopAddr(IPv6Address::UNSPECIFIED_ADDRESS);
+    L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, destIE, nextHopAddr.toIPv6());
 }
 
-void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress)
+void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     // route packet
     if (destIE != nullptr)
-        fragmentAndSend(packet, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
+        fragmentAndSend(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
         routeMulticastPacket(packet, destIE, nullptr, true);
 }
 
-void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL)
+void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // TBD add option handling code here
-    IPv6Address destAddress = ipv6Header->getDestAddress();
+    Ipv6Address destAddress = ipv6Header->getDestAddress();
 
     EV_INFO << "Routing datagram `" << ipv6Header->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
 
@@ -390,7 +390,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
 
     // routing
     int interfaceId = -1;
-    IPv6Address nextHop(requestedNextHopAddress);
+    Ipv6Address nextHop(requestedNextHopAddress);
 
 #ifdef WITH_xMIPv6
     // tunneling support - CB
@@ -406,7 +406,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
             // as T2RH or HoA Opt. are not allowed with these messages
-            interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL); // 10.06.08 - CB
+            interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL); // 10.06.08 - CB
         //getVIfIndexForDestForXSplitTunnel(destAddress);
         else
             // otherwise we can search for everything
@@ -415,7 +415,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
 #else // ifdef WITH_xMIPv6
       // FIXME this is not the same as the code above (when WITH_xMIPv6 is defined),
       // so tunneling examples could not work with xMIPv6
-    interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL);
+    interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
 #endif /* WITH_xMIPv6 */
 
     if (interfaceId == -1 && destIE != nullptr)
@@ -438,13 +438,13 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
     resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
 }
 
-void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6Address nextHop, bool fromHL)
+void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6Address nextHop, bool fromHL)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie != nullptr);
     ASSERT(!nextHop.isUnspecified());
-    IPv6Address destAddress = ipv6Header->getDestAddress();
+    Ipv6Address destAddress = ipv6Header->getDestAddress();
     EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getInterfaceName() << "\n";
 
 #ifdef WITH_xMIPv6
@@ -452,7 +452,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
         if (ipv6Header->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
-            && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
+            && !ie->ipv6Data()->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
             delete packet;
@@ -462,11 +462,11 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
     }
 #endif /* WITH_xMIPv6 */
 
-    MACAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);    // might initiate NUD
+    MacAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);    // might initiate NUD
     if (macAddr.isUnspecified()) {
         if (!ie->isPointToPoint()) {
             EV_INFO << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
-            IPv6NDControlInfo *ctrl = new IPv6NDControlInfo();
+            Ipv6NdControlInfo *ctrl = new Ipv6NdControlInfo();
             ctrl->setFromHL(fromHL);
             ctrl->setNextHop(nextHop);
             ctrl->setInterfaceId(interfaceId);
@@ -486,7 +486,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
 void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
-    const IPv6Address& destAddr = ipv6Header->getDestAddress();
+    const Ipv6Address& destAddr = ipv6Header->getDestAddress();
 
     EV_INFO << "destination address " << destAddr << " is multicast, doing multicast routing\n";
     numMulticast++;
@@ -531,7 +531,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (fromIE != ie && !ie->isLoopback())
-            fragmentAndSend(packet->dup(), ie, MACAddress::BROADCAST_ADDRESS, fromHL);
+            fragmentAndSend(packet->dup(), ie, MacAddress::BROADCAST_ADDRESS, fromHL);
     }
     delete packet;
 
@@ -699,7 +699,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 void IPv6::handleReceivedICMP(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<Icmpv6Header>();
-    if (dynamicPtrCast<const IPv6NDMessage>(icmpHeader) != nullptr) {
+    if (dynamicPtrCast<const Ipv6NdMessage>(icmpHeader) != nullptr) {
         EV_INFO << "Neighbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");
     }
@@ -741,8 +741,8 @@ void IPv6::encapsulate(Packet *transportPacket)
     auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
     L3AddressReq *addresses = transportPacket->removeMandatoryTag<L3AddressReq>();
-    IPv6Address src = addresses->getSrcAddress().toIPv6();
-    IPv6Address dest = addresses->getDestAddress().toIPv6();
+    Ipv6Address src = addresses->getSrcAddress().toIPv6();
+    Ipv6Address dest = addresses->getDestAddress().toIPv6();
     delete addresses;
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
@@ -781,10 +781,10 @@ void IPv6::encapsulate(Packet *transportPacket)
 
     ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
-    ipv6Header->setProtocolId((IPProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    ipv6Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
-    auto extHeadersTag = transportPacket->removeTag<IPv6ExtHeaderReq>();
+    auto extHeadersTag = transportPacket->removeTag<Ipv6ExtHeaderReq>();
     while (extHeadersTag && 0 < extHeadersTag->getExtensionHeaderArraySize()) {
         Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         ipv6Header->addExtensionHeader(extHeader);
@@ -798,7 +798,7 @@ void IPv6::encapsulate(Packet *transportPacket)
     // setting IP options is currently not supported
 }
 
-void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
+void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // hop counter check
@@ -814,7 +814,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
     {
         // source address can be unspecified during DAD
-        const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+        const Ipv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
 
         // TODO: factor out
@@ -896,7 +896,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
     delete packet;
 }
 
-void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MACAddress& macAddr)
+void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr)
 {
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddr);
     delete packet->removeTag<DispatchProtocolReq>();
@@ -906,7 +906,7 @@ void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, co
     send(packet, "queueOut");
 }
 
-bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
+bool IPv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,
         int& interfaceId, Packet *packet, bool fromHL)
 {
     // try destination cache
@@ -915,7 +915,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
     if (interfaceId == -1) {
         // address not in destination cache: do longest prefix match in routing table
         EV_INFO << "do longest prefix match in routing table" << endl;
-        const IPv6Route *route = rt->doLongestPrefixMatch(destAddress);
+        const Ipv6Route *route = rt->doLongestPrefixMatch(destAddress);
         EV_INFO << "finished longest prefix match in routing table" << endl;
         if (!route) {
             if (rt->isRouter()) {
@@ -925,7 +925,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             }
             else {    // host
                 EV_INFO << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                IPv6NDControlInfo *ctrl = new IPv6NDControlInfo();
+                Ipv6NdControlInfo *ctrl = new Ipv6NdControlInfo();
                 ctrl->setFromHL(fromHL);
                 ctrl->setNextHop(nextHop);
                 ctrl->setInterfaceId(interfaceId);
@@ -1200,7 +1200,7 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void IPv6::sendIcmpError(Packet *packet, ICMPv6Type type, int code)
+void IPv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
 }

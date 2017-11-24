@@ -28,10 +28,10 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPEchoApp : public ApplicationBase
+class INET_API UdpEchoApp : public ApplicationBase
 {
   protected:
-    UDPSocket socket;
+    UdpSocket socket;
     int numEchoed;    // just for WATCH
     static simsignal_t pkSignal;
 

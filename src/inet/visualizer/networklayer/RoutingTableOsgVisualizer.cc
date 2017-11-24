@@ -32,7 +32,7 @@ Define_Module(RoutingTableOsgVisualizer);
 
 #ifdef WITH_OSG
 
-RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, const IPv4Route *route, int nodeModuleId, int nextHopModuleId) :
+RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId) :
     RouteVisualization(route, nodeModuleId, nextHopModuleId),
     node(node)
 {
@@ -43,7 +43,7 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
     // TODO: delete node;
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto nodePosition = getPosition(node);
     auto nextHopPosition = getPosition(nextHop);

@@ -25,17 +25,17 @@ namespace serializer {
 /**
  * Converts between ARPPacket and binary (network byte order)  ARP header.
  */
-class INET_API ARPPacketSerializer : public FieldsChunkSerializer
+class INET_API ArpPacketSerializer : public FieldsChunkSerializer
 {
   protected:
-    MACAddress readMACAddress(MemoryInputStream& stream, unsigned int size) const;
-    IPv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
+    MacAddress readMACAddress(MemoryInputStream& stream, unsigned int size) const;
+    Ipv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    ARPPacketSerializer() : FieldsChunkSerializer() {}
+    ArpPacketSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

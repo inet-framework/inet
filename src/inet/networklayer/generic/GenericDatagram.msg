@@ -25,14 +25,14 @@ cplusplus {{
 #include "inet/networklayer/common/L3Address.h"
 }}
 
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 
 namespace inet;
 
 //
 // Generic protocol TLV option types
 //
-enum GenericTLVOptionTypes
+enum GenericTlvOptionTypes
 {
     GENERIC_TLVOPTION_NOP1 = 0;
     GENERIC_TLVOPTION_NOPN = 1;
@@ -47,8 +47,8 @@ class GenericDatagramHeader extends NetworkHeaderBase
     @customize;
     L3Address srcAddr;
     L3Address destAddr;
-    IPProtocolId protocolId = IP_PROT_NONE;
+    IpProtocolId protocolId = IP_PROT_NONE;
     short hopLimit;
-    TLVOptions tlvOptions;
+    TlvOptions tlvOptions;
 }
 

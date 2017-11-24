@@ -31,17 +31,17 @@ namespace inet {
 
 #define LS_INFINITY    1e16
 
-Define_Module(TED);
+Define_Module(Ted);
 
-TED::TED()
+Ted::Ted()
 {
 }
 
-TED::~TED()
+Ted::~Ted()
 {
 }
 
-void TED::initialize(int stage)
+void Ted::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -50,7 +50,7 @@ void TED::initialize(int stage)
 
         WATCH_VECTOR(ted);
 
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routerId = rt->getRouterId();
         ASSERT(!routerId.isUnspecified());
@@ -63,7 +63,7 @@ void TED::initialize(int stage)
     }
 }
 
-void TED::initializeTED()
+void Ted::initializeTED()
 {
     //
     // Extract initial TED contents from the routing table.
@@ -102,10 +102,10 @@ void TED::initializeTED()
         }
         if (!g) // not connected
             continue;
-        IIPv4RoutingTable *destRt = L3AddressResolver().findIPv4RoutingTableOf(destNode);
+        IIpv4RoutingTable *destRt = L3AddressResolver().findIPv4RoutingTableOf(destNode);
         if (!destRt) // switch, hub, bus, accesspoint, etc
             continue;
-        IPv4Address destRouterId = destRt->getRouterId();
+        Ipv4Address destRouterId = destRt->getRouterId();
         IInterfaceTable *destIft = L3AddressResolver().findInterfaceTableOf(destNode);
         ASSERT(destIft);
         InterfaceEntry *destIe = destIft->getInterfaceByNodeInputGateId(g->getId());
@@ -114,7 +114,7 @@ void TED::initializeTED()
         //
         // fill in and insert TED entry
         //
-        TELinkStateInfo entry;
+        TeLinkStateInfo entry;
         entry.advrouter = routerId;
         ASSERT(ie->ipv4Data());
         entry.local = ie->ipv4Data()->getIPAddress();
@@ -153,12 +153,12 @@ void TED::initializeTED()
     rebuildRoutingTable();
 }
 
-void TED::handleMessage(cMessage *msg)
+void Ted::handleMessage(cMessage *msg)
 {
     ASSERT(false);
 }
 
-std::ostream& operator<<(std::ostream& os, const TELinkStateInfo& info)
+std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info)
 {
     os << "advrouter:" << info.advrouter;
     os << "  linkid:" << info.linkid;
@@ -174,7 +174,7 @@ std::ostream& operator<<(std::ostream& os, const TELinkStateInfo& info)
 }
 
 // FIXME should this be called findOrCreateVertex() or something like that?
-int TED::assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr)
+int Ted::assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr)
 {
     // find node in vertices[] whose IPv4 address is nodeAddr
     for (unsigned int i = 0; i < vertices.size(); i++)
@@ -192,8 +192,8 @@ int TED::assignIndex(std::vector<vertex_t>& vertices, IPv4Address nodeAddr)
     return vertices.size() - 1;
 }
 
-IPv4AddressVector TED::calculateShortestPath(IPv4AddressVector dest,
-        const TELinkStateInfoVector& topology, double req_bandwidth, int priority)
+Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
+        const TeLinkStateInfoVector& topology, double req_bandwidth, int priority)
 {
     // FIXME comment: what do we do here?
     std::vector<vertex_t> V = calculateShortestPaths(topology, req_bandwidth, priority);
@@ -213,7 +213,7 @@ IPv4AddressVector TED::calculateShortestPath(IPv4AddressVector dest,
         minIndex = i;
     }
 
-    IPv4AddressVector result;
+    Ipv4AddressVector result;
 
     if (minIndex < 0)
         return result;
@@ -227,7 +227,7 @@ IPv4AddressVector TED::calculateShortestPath(IPv4AddressVector dest,
     return result;
 }
 
-void TED::rebuildRoutingTable()
+void Ted::rebuildRoutingTable()
 {
     EV_INFO << "rebuilding routing table at " << routerId << endl;
 
@@ -237,7 +237,7 @@ void TED::rebuildRoutingTable()
     int n = rt->getNumRoutes();
     int j = 0;
     for (int i = 0; i < n; i++) {
-        IPv4Route *entry = rt->getRoute(j);
+        Ipv4Route *entry = rt->getRoute(j);
         if (entry->getDestination().isMulticast()) {
             ++j;
         }
@@ -273,11 +273,11 @@ void TED::rebuildRoutingTable()
 
         ASSERT(isLocalPeer(V[nHop].node));
 
-        IPv4Route *entry = new IPv4Route;
+        Ipv4Route *entry = new Ipv4Route;
         entry->setDestination(V[i].node);
 
         if (V[i].node == V[nHop].node) {
-            entry->setGateway(IPv4Address());
+            entry->setGateway(Ipv4Address());
         }
         else {
             entry->setGateway(V[nHop].node);
@@ -285,7 +285,7 @@ void TED::rebuildRoutingTable()
         entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
         entry->setSourceType(IRoute::OSPF);
 
-        entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
+        entry->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         entry->setMetric(0);
 
         EV_DETAIL << "  inserting route: dest=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
@@ -296,14 +296,14 @@ void TED::rebuildRoutingTable()
     // insert local peers
 
     for (auto & elem : interfaceAddrs) {
-        IPv4Route *entry = new IPv4Route;
+        Ipv4Route *entry = new Ipv4Route;
 
         entry->setDestination(getPeerByLocalAddress(elem));
-        entry->setGateway(IPv4Address());
+        entry->setGateway(Ipv4Address());
         entry->setInterface(rt->getInterfaceByAddress(elem));
         entry->setSourceType(IRoute::OSPF);
 
-        entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
+        entry->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         entry->setMetric(0);    // XXX FIXME what's that?
 
         EV_DETAIL << "  inserting route: local=" << elem << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
@@ -312,7 +312,7 @@ void TED::rebuildRoutingTable()
     }
 }
 
-IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
+Ipv4Address Ted::getInterfaceAddrByPeerAddress(Ipv4Address peerIP)
 {
     for (auto & elem : ted)
         if (elem.linkid == peerIP && elem.advrouter == routerId)
@@ -321,7 +321,7 @@ IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
 }
 
-IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
+Ipv4Address Ted::peerRemoteInterface(Ipv4Address peerIP)
 {
     ASSERT(isLocalPeer(peerIP));
     for (auto & elem : ted)
@@ -331,7 +331,7 @@ IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
     throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
 }
 
-bool TED::isLocalPeer(IPv4Address inetAddr)
+bool Ted::isLocalPeer(Ipv4Address inetAddr)
 {
     for (auto & elem : ted)
         if (elem.linkid == inetAddr && elem.advrouter == routerId)
@@ -340,7 +340,7 @@ bool TED::isLocalPeer(IPv4Address inetAddr)
     return false;
 }
 
-std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVector& topology,
+std::vector<Ted::vertex_t> Ted::calculateShortestPaths(const TeLinkStateInfoVector& topology,
         double req_bandwidth, int priority)
 {
     std::vector<vertex_t> vertices;
@@ -362,7 +362,7 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
         edges.push_back(edge);
     }
 
-    IPv4Address srcAddr = routerId;
+    Ipv4Address srcAddr = routerId;
 
     int srcIndex = assignIndex(vertices, srcAddr);
     vertices[srcIndex].dist = 0.0;
@@ -397,7 +397,7 @@ std::vector<TED::vertex_t> TED::calculateShortestPaths(const TELinkStateInfoVect
     return vertices;
 }
 
-bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match)
+bool Ted::checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match)
 {
     match = nullptr;
 
@@ -426,7 +426,7 @@ bool TED::checkLinkValidity(TELinkStateInfo link, TELinkStateInfo *& match)
     return true;
 }
 
-unsigned int TED::linkIndex(IPv4Address localInf)
+unsigned int Ted::linkIndex(Ipv4Address localInf)
 {
     for (unsigned int i = 0; i < ted.size(); i++)
         if (ted[i].advrouter == routerId && ted[i].local == localInf)
@@ -436,7 +436,7 @@ unsigned int TED::linkIndex(IPv4Address localInf)
     return -1;    // to eliminate warning
 }
 
-unsigned int TED::linkIndex(IPv4Address advrouter, IPv4Address linkid)
+unsigned int Ted::linkIndex(Ipv4Address advrouter, Ipv4Address linkid)
 {
     for (unsigned int i = 0; i < ted.size(); i++)
         if (ted[i].advrouter == advrouter && ted[i].linkid == linkid)
@@ -446,7 +446,7 @@ unsigned int TED::linkIndex(IPv4Address advrouter, IPv4Address linkid)
     return -1;    // to eliminate warning
 }
 
-bool TED::isLocalAddress(IPv4Address addr)
+bool Ted::isLocalAddress(Ipv4Address addr)
 {
     for (auto & elem : interfaceAddrs)
         if (elem == addr)
@@ -455,7 +455,7 @@ bool TED::isLocalAddress(IPv4Address addr)
     return false;
 }
 
-void TED::updateTimestamp(TELinkStateInfo *link)
+void Ted::updateTimestamp(TeLinkStateInfo *link)
 {
     ASSERT(link->advrouter == routerId);
 
@@ -463,12 +463,12 @@ void TED::updateTimestamp(TELinkStateInfo *link)
     link->messageId = ++maxMessageId;
 }
 
-IPv4AddressVector TED::getLocalAddress()
+Ipv4AddressVector Ted::getLocalAddress()
 {
     return interfaceAddrs;
 }
 
-IPv4Address TED::primaryAddress(IPv4Address localInf)    // only used in RSVP::processHelloMsg
+Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in RSVP::processHelloMsg
 {
     for (auto & elem : ted) {
         if (elem.local == localInf)
@@ -478,16 +478,16 @@ IPv4Address TED::primaryAddress(IPv4Address localInf)    // only used in RSVP::p
             return elem.linkid;
     }
     ASSERT(false);
-    return IPv4Address();    // to eliminate warning
+    return Ipv4Address();    // to eliminate warning
 }
 
-IPv4Address TED::getPeerByLocalAddress(IPv4Address localInf)
+Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
 {
     unsigned int index = linkIndex(localInf);
     return ted[index].linkid;
 }
 
-bool TED::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ted::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {

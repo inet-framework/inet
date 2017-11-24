@@ -27,10 +27,10 @@ namespace physicallayer {
 /**
  * Base class for gray coded rectangular quadrature amplitude modulations.
  */
-class INET_API MQAMModulationBase : public APSKModulationBase
+class INET_API MqamModulationBase : public ApskModulationBase
 {
   public:
-    MQAMModulationBase(const std::vector<APSKSymbol> *constellation);
+    MqamModulationBase(const std::vector<ApskSymbol> *constellation);
 
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;

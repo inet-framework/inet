@@ -20,14 +20,14 @@
 
 namespace inet {
 
-Define_Module(RandomWPMobility);
+Define_Module(RandomWpMobility);
 
-RandomWPMobility::RandomWPMobility()
+RandomWpMobility::RandomWpMobility()
 {
     nextMoveIsWait = false;
 }
 
-void RandomWPMobility::initialize(int stage)
+void RandomWpMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
@@ -36,7 +36,7 @@ void RandomWPMobility::initialize(int stage)
     }
 }
 
-void RandomWPMobility::setTargetPosition()
+void RandomWpMobility::setTargetPosition()
 {
     if (nextMoveIsWait) {
         simtime_t waitTime = par("waitTime");
@@ -52,13 +52,13 @@ void RandomWPMobility::setTargetPosition()
     nextMoveIsWait = !nextMoveIsWait;
 }
 
-void RandomWPMobility::move()
+void RandomWpMobility::move()
 {
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
 
-double RandomWPMobility::getMaxSpeed() const
+double RandomWpMobility::getMaxSpeed() const
 {
     return NaN;
 }

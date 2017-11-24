@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-BlockAckRecord::BlockAckRecord(MACAddress originatorAddress, Tid tid) :
+BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
     originatorAddress(originatorAddress),
     tid(tid)
 {

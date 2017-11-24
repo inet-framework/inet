@@ -45,11 +45,11 @@ s TxopProcedure::getTxopLimit(const IIeee80211Mode *mode, AccessCategory ac)
         case AC_BE: return s(0);
         case AC_VI:
             if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(6.016);
-            else if (dynamic_cast<const Ieee80211HTMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(3.008);
+            else if (dynamic_cast<const Ieee80211HtMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(3.008);
             else return s(0);
         case AC_VO:
             if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(3.264);
-            else if (dynamic_cast<const Ieee80211HTMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(1.504);
+            else if (dynamic_cast<const Ieee80211HtMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(1.504);
             else return s(0);
         default: throw cRuntimeError("Unknown access category = %d", ac);
     }

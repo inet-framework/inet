@@ -21,38 +21,38 @@ namespace inet {
 
 namespace physicallayer {
 
-static std::vector<APSKSymbol> *createConstellation(double maxAmplitude, unsigned int codeWordSize)
+static std::vector<ApskSymbol> *createConstellation(double maxAmplitude, unsigned int codeWordSize)
 {
-    auto symbols = new std::vector<APSKSymbol>();
+    auto symbols = new std::vector<ApskSymbol>();
     unsigned int constellationSize = pow(2, codeWordSize);
     for (unsigned int i = 0; i < constellationSize; i++) {
         double amplitude = 2 * maxAmplitude / (constellationSize - 1) * i - maxAmplitude;
-        symbols->push_back(APSKSymbol(amplitude));
+        symbols->push_back(ApskSymbol(amplitude));
     }
     return symbols;
 }
 
-MASKModulation::MASKModulation(double maxAmplitude, unsigned int codeWordSize) : APSKModulationBase(createConstellation(maxAmplitude, codeWordSize))
+MaskModulation::MaskModulation(double maxAmplitude, unsigned int codeWordSize) : ApskModulationBase(createConstellation(maxAmplitude, codeWordSize))
 {
 }
 
-MASKModulation::~MASKModulation()
+MaskModulation::~MaskModulation()
 {
     delete constellation;
 }
 
-std::ostream& MASKModulation::printToStream(std::ostream& stream, int level) const
+std::ostream& MaskModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "MASKModulaiton";
-    return APSKModulationBase::printToStream(stream, level);
+    return ApskModulationBase::printToStream(stream, level);
 }
 
-double MASKModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
+double MaskModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     throw cRuntimeError("Not implemented yet");
 }
 
-double MASKModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
+double MaskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
     throw cRuntimeError("Not implemented yet");
 }

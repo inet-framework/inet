@@ -49,7 +49,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
@@ -58,7 +58,7 @@ network Test
     submodules:
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         client: StandardHost;
         server: StandardHost;
     connections:

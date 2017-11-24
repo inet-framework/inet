@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-Ieee80211OFDMTransmissionSymbolModel::~Ieee80211OFDMTransmissionSymbolModel()
+Ieee80211OfdmTransmissionSymbolModel::~Ieee80211OfdmTransmissionSymbolModel()
 {
     if (symbols) {
         for (auto it : *symbols)
@@ -29,7 +29,7 @@ Ieee80211OFDMTransmissionSymbolModel::~Ieee80211OFDMTransmissionSymbolModel()
     }
 }
 
-Ieee80211OFDMReceptionSymbolModel::~Ieee80211OFDMReceptionSymbolModel()
+Ieee80211OfdmReceptionSymbolModel::~Ieee80211OfdmReceptionSymbolModel()
 {
     if (symbols) {
         for (auto it : *symbols)
@@ -37,12 +37,12 @@ Ieee80211OFDMReceptionSymbolModel::~Ieee80211OFDMReceptionSymbolModel()
     }
 }
 
-Ieee80211OFDMTransmissionSymbolModel::Ieee80211OFDMTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation) :
+Ieee80211OfdmTransmissionSymbolModel::Ieee80211OfdmTransmissionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols, const IModulation *headerModulation, const IModulation *payloadModulation) :
     TransmissionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols, headerModulation, payloadModulation)
 {
 }
 
-Ieee80211OFDMReceptionSymbolModel::Ieee80211OFDMReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols) :
+Ieee80211OfdmReceptionSymbolModel::Ieee80211OfdmReceptionSymbolModel(int headerSymbolLength, double headerSymbolRate, int payloadSymbolLength, double payloadSymbolRate, const std::vector<const ISymbol *> *symbols) :
     ReceptionSymbolModel(headerSymbolLength, headerSymbolRate, payloadSymbolLength, payloadSymbolRate, symbols)
 {
 }
