@@ -16,7 +16,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.common.IPProtocolId;
+import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 namespace inet;
