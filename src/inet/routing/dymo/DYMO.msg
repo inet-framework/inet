@@ -35,7 +35,8 @@ enum DYMOMetricType {
 class DYMOSequenceNumber
 {
     @existingClass;
-    @primitive;
+    @opaque;
+    @byvalue;
     @fromstring(string2ulong($));
     @tostring(ulong2string($));
     @defaultvalue(0);
