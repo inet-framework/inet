@@ -111,8 +111,13 @@ void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
         interfaceData->setMetric(1);
     }
     else {
-        // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-        interfaceData->setMetric((int)ceil(2e9 / interfaceEntry->getDatarate()));    // use OSPF cost as default
+        auto datarate = interfaceEntry->getDatarate();
+        // TODO: KLUDGE: how do we set the metric correctly for both wired and wireless interfaces even if datarate is unknown
+        if (datarate == 0)
+            interfaceData->setMetric(1);
+        else
+            // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+            interfaceData->setMetric((int)ceil(2e9 / datarate));    // use OSPF cost as default
         if (interfaceEntry->isMulticast()) {
             interfaceData->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
             if (routingTable->isForwardingEnabled())
