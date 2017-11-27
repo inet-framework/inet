@@ -31,6 +31,10 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
         fragmentFrame->popHeader<Ieee80211DataOrMgmtHeader>();
         fragmentFrame->popTrailer<Ieee80211MacTrailer>();
         defragmentedFrame->append(fragmentFrame->peekData());
+        std::string defragmentedName(fragmentFrame->getName());
+        auto index = defragmentedName.find("-frag");
+        if (index != std::string::npos)
+            defragmentedFrame->setName(defragmentedName.substr(0, index).c_str());
     }
     defragmentedHeader->setFragmentNumber(0);
     defragmentedHeader->setMoreFragments(false);
