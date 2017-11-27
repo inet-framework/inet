@@ -81,6 +81,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
+    double holdAnimationTime = NaN;
     //@}
 
     LineManager *lineManager = nullptr;

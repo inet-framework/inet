@@ -82,6 +82,7 @@ void LinkVisualizerBase::initialize(int stage)
         fadeOutMode = par("fadeOutMode");
         fadeOutTime = par("fadeOutTime");
         fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
+        holdAnimationTime = par("holdAnimationTime");
         lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
         if (displayLinks)
             subscribe();
@@ -181,6 +182,8 @@ const LinkVisualizerBase::LinkVisualization *LinkVisualizerBase::getLinkVisualiz
 void LinkVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization)
 {
     linkVisualizations[sourceAndDestination] = linkVisualization;
+    if (holdAnimationTime != 0)
+        visualizerTargetModule->getCanvas()->holdSimulationFor(holdAnimationTime);
 }
 
 void LinkVisualizerBase::removeLinkVisualization(const LinkVisualization *linkVisualization)

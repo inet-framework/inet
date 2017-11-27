@@ -66,5 +66,7 @@ simple LinkVisualizerBase extends VisualizerBase
         double fadeOutTime @unit(s) = default(1s); // how quickly inactive links fade away, 1 second by default
         double fadeOutAnimationSpeed = default(0); // animation speed while there are active links, value must be in the range (0, +inf)
 
+        double holdAnimationTime @unit(s) = default(0s); // hold simulation (no progress) for the specified amount of animation time when the link is activated
+
         @class(LinkVisualizerBase);
 }
