@@ -62,7 +62,8 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     auto toDS = firstHeader->getToDS();
     auto fromDS = firstHeader->getFromDS();
     auto ra = firstHeader->getReceiverAddress();
-    auto aggregatedFrame = new Packet("A-MSDU");
+    auto aggregatedFrame = new Packet();
+    std::string aggregatedName;
     for (int i = 0; i < (int)frames->size(); i++)
     {
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
@@ -81,6 +82,9 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
             padding->markImmutable();
             aggregatedFrame->append(padding);
         }
+        if (i != 0)
+            aggregatedName.append("+");
+        aggregatedName.append(frame->getName());
         delete frame;
     }
     // The MPDU containing the A-MSDU is carried in any of the following data frame subtypes: QoS Data,
@@ -98,6 +102,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);
     aggregatedFrame->insertTrailer(makeShared<Ieee80211MacTrailer>());
+    aggregatedFrame->setName(aggregatedName.c_str());
     return aggregatedFrame;
 }
 

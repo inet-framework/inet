@@ -59,6 +59,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     aggregatedFrame->popTrailer<Ieee80211MacTrailer>();
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
+    cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
     while (aggregatedFrame->getDataLength() > b(0))
     {
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
@@ -66,7 +67,8 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));
         paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
-        auto frame = new Packet("A-MSDU-Subframe");
+        auto frame = new Packet();
+        frame->setName(tokenizer.nextToken());
         frame->append(msdu);
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
