@@ -1,0 +1,32 @@
+
+Cli -> Client
+Srv -> Server
+Svr -> Server
+Icmpv6DestUn -> ???
+Icmpv6ParameterProb -> Icmpv6ParameterProblem???
+IpAddressVector -> Ipv4AddressVector
+IpOption -> Ipv4Option
+IpOptionClass -> Ipv4OptionClass
+IpProtocolId -> Ipv4ProtocolId
+IdealMac -> MaMac?
+IdealRadio -> UnitDiskRadio
+Ieee80211* -> *???
+RandomWpMobility -> RandomWaypointMobility
+FlatNetworkConfigurator -> Ipv4FlatNetworkConfigurator
+FlatNetworkConfigurator6 -> Ipv6FlatNetworkConfigurator
+
+IxMIPv6Support -> ???
+xMIPv6 -> ???
+xMIPv6Support -> ???
+xMobileIPv6 -> ???
+LDP_LSR -> LdpRouter ???
+RSVP_LSR -> RsvpRouter ???
+CorrespondentNode6 -> ???
+HomeAgent6 -> ???
+MobileHost6 -> ???
+WirelessHost6 -> ???
+Router6 -> ???
+StandardHost6 -> ???
+dsss-error-rate-model -> DsssErrorRateModel ???  # van valami oka annak, hogy a fájlt így hívják?
+
+*CRC* -> *Crc* ????
