@@ -2213,6 +2213,9 @@
 ../../src/inet/routing/bgpv4/BgpCommon.msg
 ../../src/inet/routing/bgpv4/BgpFsm.cc
 ../../src/inet/routing/bgpv4/BgpFsm.h
+../../src/inet/routing/bgpv4/bgpmessage/BgpHeader.msg
+../../src/inet/routing/bgpv4/bgpmessage/BgpUpdate.cc
+../../src/inet/routing/bgpv4/bgpmessage/BgpUpdate.h
 ../../src/inet/routing/bgpv4/BgpRouting.cc
 ../../src/inet/routing/bgpv4/BgpRouting.h
 ../../src/inet/routing/bgpv4/BgpRouting.ned
