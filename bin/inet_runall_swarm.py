@@ -90,7 +90,7 @@ class Runall:
 
     def __init__(self):
         print("connecting to the job queue")
-        conn = redis.Redis(host="172.17.0.1")
+        conn = redis.Redis(host="localhost")
         self.build_q = rq.Queue("build", connection=conn, default_timeout=10*60*60)
         self.run_q = rq.Queue("run", connection=conn, default_timeout=10*60*60)
 
@@ -172,7 +172,7 @@ class Runall:
                         if j.result is not None:
                             pprint.pprint(vars(j.result))
 
-                            with pymongo.MongoClient("172.17.0.1", socketTimeoutMS=10*60*1000, connectTimeoutMS=10*60*1000, serverSelectionTimeoutMS=10*60*1000) as client:
+                            with pymongo.MongoClient("localhost", socketTimeoutMS=10*60*1000, connectTimeoutMS=10*60*1000, serverSelectionTimeoutMS=10*60*1000) as client:
                                 gfs = gridfs.GridFS(client.opp)
                                 unzip_bytes(gfs.get(j.id).read())
 
@@ -226,7 +226,7 @@ class Runall:
                 exit(1)
 
     def resolveRunNumbers(self, simProgArgs):
-        tmpArgs = ["opp_run"] + simProgArgs + ["-s", "-q", "runnumbers"]
+        tmpArgs = ["opp_run_dbg"] + simProgArgs + ["-s", "-q", "runnumbers"]
         print("running: " + " ".join(tmpArgs))
         try:
             output = subprocess.check_output(tmpArgs)
