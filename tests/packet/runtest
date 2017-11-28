@@ -2,7 +2,7 @@
 
 make MODE=debug > test.out
 
-./inet-master_dbg -c UnitTest -u Cmdenv >> test.out
+./inet_dbg -c UnitTest -u Cmdenv >> test.out
 
 if [[ $? -eq 0 ]]; then
     echo "Packet unit test: PASS"

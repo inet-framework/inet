@@ -20,12 +20,16 @@
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "NewTest.h"
 #include "UnitTest_m.h"
 #include "UnitTest.h"
 
 namespace inet {
 
+Register_Serializer(ApplicationHeader, ApplicationHeaderSerializer);
+Register_Serializer(TcpHeader, TcpHeaderSerializer);
+Register_Serializer(IpHeader, IpHeaderSerializer);
+Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
+Register_Serializer(EthernetTrailer, EthernetTrailerSerializer);
 Register_Serializer(CompoundHeader, CompoundHeaderSerializer);
 Register_Serializer(TlvHeader, TlvHeaderSerializer);
 Register_Serializer(TlvHeaderBool, TlvHeaderBoolSerializer);
@@ -90,6 +94,109 @@ static const Ptr<EthernetTrailer> makeImmutableEthernetTrailer()
     auto chunk = makeShared<EthernetTrailer>();
     chunk->markImmutable();
     return chunk;
+}
+
+void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& applicationHeader = staticPtrCast<const ApplicationHeader>(chunk);
+    auto position = stream.getLength();
+    stream.writeUint16Be(applicationHeader->getSomeData());
+    stream.writeByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getLength() + position).get());
+}
+
+const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto applicationHeader = makeShared<ApplicationHeader>();
+    auto position = stream.getPosition();
+    applicationHeader->setSomeData(stream.readUint16Be());
+    stream.readByteRepeatedly(0, B(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
+    return applicationHeader;
+}
+
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& tcpHeader = staticPtrCast<const TcpHeader>(chunk);
+    auto position = stream.getLength();
+    if (tcpHeader->getCrcMode() != CRC_COMPUTED)
+        throw cRuntimeError("Cannot serialize TCP header");
+    stream.writeUint16Be(tcpHeader->getLengthField());
+    stream.writeUint16Be(tcpHeader->getSrcPort());
+    stream.writeUint16Be(tcpHeader->getDestPort());
+    stream.writeUint16Be(tcpHeader->getCrc());
+    stream.writeByteRepeatedly(0, B(tcpHeader->getChunkLength() - stream.getLength() + position).get());
+}
+
+const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto tcpHeader = makeShared<TcpHeader>();
+    auto position = stream.getPosition();
+    auto remainingLength = stream.getRemainingLength();
+    auto lengthField = B(stream.readUint16Be());
+    if (lengthField > remainingLength)
+        tcpHeader->markIncomplete();
+    auto length = lengthField < remainingLength ? lengthField : B(remainingLength);
+    tcpHeader->setChunkLength(B(length));
+    tcpHeader->setLengthField(B(lengthField).get());
+    tcpHeader->setSrcPort(stream.readUint16Be());
+    tcpHeader->setDestPort(stream.readUint16Be());
+    tcpHeader->setCrcMode(CRC_COMPUTED);
+    tcpHeader->setCrc(stream.readUint16Be());
+    stream.readByteRepeatedly(0, B(length - stream.getPosition() + position).get());
+    return tcpHeader;
+}
+
+void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& ipHeader = staticPtrCast<const IpHeader>(chunk);
+    auto position = stream.getLength();
+    stream.writeUint16Be((int16_t)ipHeader->getProtocol());
+    stream.writeByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getLength() + position).get());
+}
+
+const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto ipHeader = makeShared<IpHeader>();
+    auto position = stream.getPosition();
+    Protocol protocol = (Protocol)stream.readUint16Be();
+    if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
+        ipHeader->markImproperlyRepresented();
+    ipHeader->setProtocol(protocol);
+    stream.readByteRepeatedly(0, B(ipHeader->getChunkLength() - stream.getPosition() + position).get());
+    return ipHeader;
+}
+
+void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& ethernetHeader = staticPtrCast<const EthernetHeader>(chunk);
+    auto position = stream.getLength();
+    stream.writeUint16Be((int16_t)ethernetHeader->getProtocol());
+    stream.writeByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
+}
+
+const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto ethernetHeader = makeShared<EthernetHeader>();
+    auto position = stream.getPosition();
+    ethernetHeader->setProtocol((Protocol)stream.readUint16Be());
+    stream.readByteRepeatedly(0, B(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
+    return ethernetHeader;
+}
+
+void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& ethernetTrailer = staticPtrCast<const EthernetTrailer>(chunk);
+    auto position = stream.getLength();
+    stream.writeUint16Be(ethernetTrailer->getCrc());
+    stream.writeByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
+}
+
+const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
+{
+    auto ethernetTrailer = makeShared<EthernetTrailer>();
+    auto position = stream.getPosition();
+    ethernetTrailer->setCrc(stream.readUint16Be());
+    stream.readByteRepeatedly(0, B(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
+    return ethernetTrailer;
 }
 
 const Ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
