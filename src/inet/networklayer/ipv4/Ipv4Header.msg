@@ -18,7 +18,7 @@
 
 
 import inet.common.INETDefs;
-import inet.common.TLVOption;
+import inet.common.TlvOptions;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
@@ -26,7 +26,7 @@ import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
 cplusplus {{
-#include "inet/common/TLVOption.h"
+#include "inet/common/TlvOptions.h"
 }}
 
 namespace inet;

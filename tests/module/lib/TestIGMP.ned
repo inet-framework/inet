@@ -1,6 +1,6 @@
-import inet.networklayer.ipv4.IIGMP;
+import inet.networklayer.ipv4.IIgmp;
 
-simple TestIGMP like IIGMP
+simple TestIGMP like IIgmp
 {
     parameters:
         string interfaceTableModule;

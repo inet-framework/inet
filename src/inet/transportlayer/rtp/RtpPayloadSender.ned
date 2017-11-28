@@ -6,35 +6,35 @@ package inet.transportlayer.rtp;
 // These modules are internal to the ~Rtp module; instances are created
 // and connected dynamically by ~RtpProfile.
 //
-moduleinterface IRTPPayloadSender
+moduleinterface IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpPayloadSender like IRTPPayloadSender
+simple RtpPayloadSender like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload10Sender like IRTPPayloadSender
+simple RTPAVProfilePayload10Sender like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RtpAvProfilePayload32Sender like IRTPPayloadSender
+simple RtpAvProfilePayload32Sender like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfileSampleBasedAudioSender like IRTPPayloadSender
+simple RTPAVProfileSampleBasedAudioSender like IRtpPayloadSender
 {
     gates:
         input profileIn @labels(RtpInnerPacket);

@@ -18,7 +18,7 @@
 #ifndef __INET_INFOOSGVISUALIZER_H
 #define __INET_INFOOSGVISUALIZER_H
 
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/InfoVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 

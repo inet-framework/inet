@@ -18,7 +18,7 @@
 #ifndef __INET_QUEUEOSGVISUALIZER_H
 #define __INET_QUEUEOSGVISUALIZER_H
 
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/QueueVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 

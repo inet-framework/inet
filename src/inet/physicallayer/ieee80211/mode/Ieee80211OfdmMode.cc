@@ -16,7 +16,7 @@
 //
 
 #include "Ieee80211OfdmMode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "Ieee80211OfdmModulation.h"
 
 namespace inet {

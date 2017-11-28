@@ -39,7 +39,7 @@
 // A few useful starting points for browsing the documentation:
 //  - hosts, routers, switches and other network level modules:
 //    ~StandardHost, ~Router, ~EtherSwitch, ~EtherHub, ~InternetCloud etc.
-//  - network interfaces: ~EthernetInterface, ~PPPInterface, ~Ieee80211Nic
+//  - network interfaces: ~EthernetInterface, ~PppInterface, ~Ieee80211Nic
 //  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
 //    mode are supported
 //  - IPv4 layer: ~IPv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
@@ -53,8 +53,8 @@
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle
 //    of the simulation to study transient behaviour
-//  - message classes: ~Ipv4Header, ~TCPSegment, ~UdpHeader, ~EthernetIIFrame,
-//    ~ArpPacket, ~PPPFrame, ~GenericAppMsg, ~EtherAppReq, etc.
+//  - message classes: ~Ipv4Header, ~TcpHeader, ~UdpHeader, ~EthernetIIFrame,
+//    ~ArpPacket, ~PppFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
 //    ~Ipv4ControlInfo, ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
 //  - application models: ~UdpVideoStreamSvr, ~UdpVideoStreamCli, ~UdpBasicApp, ~UdpEchoApp,
@@ -69,7 +69,7 @@
 //    see also the list of <a href="standards.html">implemented standards</a>
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
 //    daemon ported into the INET Framework, currently in a different project)
-//    used inside QuaggaRouter; alternatively one can run ~OSPFRouter which relies
+//    used inside QuaggaRouter; alternatively one can run ~OspfRouter which relies
 //    on the ~OspfRouting module;
 //
 // Related documentation:

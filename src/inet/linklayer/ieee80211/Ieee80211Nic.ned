@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.common.IIeee8021dQoSClassifier;
+import inet.linklayer.common.IIeee8021dQosClassifier;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
@@ -70,7 +70,7 @@ module Ieee80211Nic like IWirelessNic
             parameters:
                 @display("p=250,131");
         }
-        classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
+        classifier: <classifierType> like IIeee8021dQosClassifier if classifierType != "" {
             parameters:
                 @display("p=400,82");
         }

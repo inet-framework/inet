@@ -58,11 +58,11 @@ simple Rtp
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
 
     gates:
-        input appIn @labels(RTPInterfacePacket/down);
+        input appIn @labels(RtpInterfacePacket/down);
         input profileIn @labels(RtpInnerPacket);
         input rtcpIn @labels(RtpInnerPacket);
         input udpIn @labels(UdpControlInfo/up);
-        output appOut @labels(RTPInterfacePacket/up);
+        output appOut @labels(RtpInterfacePacket/up);
         output profileOut @labels(RtpInnerPacket);
         output rtcpOut @labels(RtpInnerPacket);
         output udpOut @labels(UdpControlInfo/down);

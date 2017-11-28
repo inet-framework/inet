@@ -43,7 +43,7 @@ package inet.common.packet.recorder;
 // IPv6Datagram classes), possibly encapsulated into other (L2, PHY, etc)
 // frames at any depth. Packets not containing IP packets are discarded.
 // The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: Ipv4Header, SCTPMessage, TCPSegment,
+// recognized and dumped/recorded: Ipv4Header, SCTPMessage, TcpHeader,
 // ICMPMessage.
 //
 // <b>Bugs:</b> IPv6 datagrams cannot be recorded into PCAP. (To be implemented).

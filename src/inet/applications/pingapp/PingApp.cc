@@ -44,7 +44,7 @@
 
 #ifdef WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 

@@ -25,7 +25,7 @@ package inet.networklayer.mpls;
 //
 // Operations
 //
-// MPLS packets are represented by the MPLSPacket class.
+// MPLS packets are represented by the MplsPacket class.
 // The local LIB (Label Information Base) is stored in a ~LibTable module
 // in the LSR.
 //
@@ -59,6 +59,6 @@ simple Mpls
     gates:
         input netwIn @labels(Ipv4Header);
         output netwOut @labels(Ipv4Header);
-        input ifIn @labels(MPLSPacket,Ipv4Header);
-        output ifOut @labels(MPLSPacket,Ipv4Header);
+        input ifIn @labels(MplsPacket,Ipv4Header);
+        output ifOut @labels(MplsPacket,Ipv4Header);
 }

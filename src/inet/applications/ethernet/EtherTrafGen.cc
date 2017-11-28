@@ -28,7 +28,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 

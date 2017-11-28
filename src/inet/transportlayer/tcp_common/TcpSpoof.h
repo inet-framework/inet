@@ -17,7 +17,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

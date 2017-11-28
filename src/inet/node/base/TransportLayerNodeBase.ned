@@ -18,9 +18,9 @@
 package inet.node.base;
 
 import inet.common.MessageDispatcher;
-import inet.transportlayer.contract.ISCTP;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
+import inet.transportlayer.contract.ISctp;
+import inet.transportlayer.contract.ITcp;
+import inet.transportlayer.contract.IUdp;
 
 module TransportLayerNodeBase extends NetworkLayerNodeBase
 {
@@ -35,15 +35,15 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         @figure[transportLayer.title](type=text; pos=910,220; anchor=ne; text="transport layer");
 
     submodules:
-        udp: <udpType> like IUDP if hasUdp {
+        udp: <udpType> like IUdp if hasUdp {
             parameters:
                 @display("p=400,300");
         }
-        tcp: <tcpType> like ITCP if hasTcp {
+        tcp: <tcpType> like ITcp if hasTcp {
             parameters:
                 @display("p=500,300");
         }
-        sctp: <sctpType> like ISCTP if hasSctp {
+        sctp: <sctpType> like ISctp if hasSctp {
             parameters:
                 @display("p=600,300");
         }

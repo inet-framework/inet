@@ -17,7 +17,7 @@
 #define __INET_TCPHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 

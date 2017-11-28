@@ -20,7 +20,7 @@
 
 package inet.networklayer.ipv6tunneling;
 
-import inet.networklayer.contract.IIPv6Tunneling;
+import inet.networklayer.contract.IIpv6Tunneling;
 
 
 //
@@ -28,7 +28,7 @@ import inet.networklayer.contract.IIPv6Tunneling;
 //
 // @see IPv6, Ipv6NeighbourDiscovery, Icmpv6
 //
-simple Ipv6Tunneling like IIPv6Tunneling
+simple Ipv6Tunneling like IIpv6Tunneling
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

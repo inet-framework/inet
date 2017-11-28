@@ -16,8 +16,8 @@
 //
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211FhssMode.h"
-#include "inet/physicallayer/modulation/2GFSKModulation.h"
-#include "inet/physicallayer/modulation/4GFSKModulation.h"
+#include "inet/physicallayer/modulation/2GfskModulation.h"
+#include "inet/physicallayer/modulation/4GfskModulation.h"
 
 namespace inet {
 

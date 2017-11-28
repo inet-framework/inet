@@ -1,7 +1,7 @@
 
 
-import inet.linklayer.contract.IEtherMAC;
-import inet.linklayer.ethernet.EtherQoSQueue;
+import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.ethernet.EtherQosQueue;
 
 
 simple EthTestApp
@@ -28,12 +28,12 @@ module EthTestHost
         app: EthTestApp {
             @display("p=155,72");
         }
-        queue: EtherQoSQueue if queueType != "" {
+        queue: EtherQosQueue if queueType != "" {
             parameters:
                 dataQueueType = queueType;
                 @display("p=65,171;q=l2queue");
         }
-        mac: <macType> like IEtherMAC {
+        mac: <macType> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=155,272;q=txQueue");

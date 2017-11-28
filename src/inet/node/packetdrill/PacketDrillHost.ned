@@ -21,9 +21,9 @@ package inet.node.packetdrill;
 
 import inet.applications.packetdrill.PacketDrillApp;
 import inet.node.inet.StandardHost;
-import inet.transportlayer.contract.ISCTP;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
+import inet.transportlayer.contract.ISctp;
+import inet.transportlayer.contract.ITcp;
+import inet.transportlayer.contract.IUdp;
 
 
 //

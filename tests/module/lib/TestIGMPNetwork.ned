@@ -1,7 +1,7 @@
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
-import inet.networklayer.ipv4.IIGMP;
+import inet.networklayer.ipv4.IIgmp;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.common.scenario.ScenarioManager;
 
@@ -45,7 +45,7 @@ network TestIGMPNetwork
                 tester: IgmpTesterNic {
                     @display("p=70,153");
                 }
-                igmp: <igmpType> like IIGMP {
+                igmp: <igmpType> like IIgmp {
                     @display("p=176,153");
                 }
                 nodeConfigurator: Ipv4NodeConfigurator {

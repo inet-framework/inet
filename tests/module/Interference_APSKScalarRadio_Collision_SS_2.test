@@ -1,6 +1,6 @@
 %description:
 
-This is a test for APSKScalarRadio interference handling.
+This is a test for ApskScalarRadio interference handling.
 The first signal is stronger than the reception threshold.
 The second signal is stronger than the reception threshold.
 The second signal is much stronger than the first signal.
@@ -11,12 +11,12 @@ No signals are expected to be received.
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.apskradio.packetlevel.APSKScalarRadioMedium;
+import inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: APSKScalarRadioMedium;
+        radioMedium: ApskScalarRadioMedium;
         configurator: Ipv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;
@@ -61,7 +61,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "APSKScalarRadio"
+*.host*.wlan[*].radioType = "ApskScalarRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.preambleDuration = 0s
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b

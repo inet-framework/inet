@@ -22,12 +22,12 @@
 
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
-#include "inet/routing/bgpv4/BGPRoutingTableEntry.h"
-#include "inet/routing/bgpv4/BGPCommon.h"
+#include "inet/routing/bgpv4/BgpRoutingTableEntry.h"
+#include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/routing/bgpv4/BGPMessage/BgpHeader_m.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {

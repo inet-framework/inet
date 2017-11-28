@@ -18,7 +18,7 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
@@ -56,7 +56,7 @@ const ITransmission *ApskScalarTransmitter::createTransmission(const IRadio *tra
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new APSKScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
+    return new ApskScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

@@ -16,8 +16,8 @@
 //
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211IrMode.h"
-#include "inet/physicallayer/modulation/16PPMModulation.h"
-#include "inet/physicallayer/modulation/4PPMModulation.h"
+#include "inet/physicallayer/modulation/16PpmModulation.h"
+#include "inet/physicallayer/modulation/4PpmModulation.h"
 
 namespace inet {
 

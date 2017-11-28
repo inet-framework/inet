@@ -31,7 +31,7 @@ namespace rtp {
  * type 32 in the rtp audio/video profile, which is mpeg video.
  * This implementation doesn't send real mpeg data it just reads the gdf
  * file created by Mpeg_Stat and sends rtp data packets which contain
- * an RTPMpegPacket.
+ * an RtpMpegPacket.
  * The corresponding receiver module RtpAvProfilePayload32Receiver.
  */
 class INET_API RtpAvProfilePayload32Sender : public RtpPayloadSender

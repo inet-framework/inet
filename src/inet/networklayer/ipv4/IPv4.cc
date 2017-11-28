@@ -47,7 +47,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 

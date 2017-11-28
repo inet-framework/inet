@@ -25,7 +25,7 @@ package inet.routing.pim;
 // it is possible to build nodes that operates in Dense Mode on some interfaces,
 // and in Sparse Mode on others.
 //
-// See ~PIMRouting module for example usage.
+// See ~PimRouting module for example usage.
 //
 simple PimSplitter
 {

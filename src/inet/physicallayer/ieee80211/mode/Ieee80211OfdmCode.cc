@@ -17,7 +17,7 @@
 
 #include "Ieee80211OfdmCode.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 
 namespace inet {
 namespace physicallayer {

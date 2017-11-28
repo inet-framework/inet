@@ -38,7 +38,7 @@ module WirelessNic like IWirelessNic
         output upperLayerOut;
         input radioIn @labels(ISignal);
     submodules:
-        classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
+        classifier: <classifierType> like IIeee8021dQosClassifier if classifierType != "" {
                 @display("p=80,70");
         }
         mac: <macType> like IMacProtocol {

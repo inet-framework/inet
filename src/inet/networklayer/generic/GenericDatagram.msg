@@ -16,11 +16,11 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.TLVOption;
+import inet.common.TlvOptions;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 cplusplus {{
-#include "inet/common/TLVOption.h"
+#include "inet/common/TlvOptions.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 }}

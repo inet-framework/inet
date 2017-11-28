@@ -18,7 +18,7 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.networklayer.ipv6.IPv6Header;
+import inet.networklayer.ipv6.Ipv6Header;
 
 namespace inet;
 

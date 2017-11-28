@@ -36,7 +36,7 @@
 #endif
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif
 

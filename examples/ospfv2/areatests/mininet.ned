@@ -6,7 +6,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network OSPF_mininet
@@ -23,12 +23,12 @@ network OSPF_mininet
             thruputDisplayFormat = "#N";
         }
     submodules:
-        BBR[numBBr]: OSPFRouter;
-        BBRtoS1: OSPFRouter;
-        S1R[numSBr]: OSPFRouter;
+        BBR[numBBr]: OspfRouter;
+        BBRtoS1: OspfRouter;
+        S1R[numSBr]: OspfRouter;
         S1H[numHst]: StandardHost;
-        BBRtoS2: OSPFRouter;
-        S2R[numSBr]: OSPFRouter;
+        BBRtoS2: OspfRouter;
+        S2R[numSBr]: OspfRouter;
         S2H[numHst]: StandardHost;
         configurator: Ipv4NetworkConfigurator {
             parameters:

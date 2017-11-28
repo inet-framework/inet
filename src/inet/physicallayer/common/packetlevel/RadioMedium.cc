@@ -19,7 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"

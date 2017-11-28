@@ -22,7 +22,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/MacAddressTable.h"

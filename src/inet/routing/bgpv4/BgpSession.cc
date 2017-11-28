@@ -17,7 +17,7 @@
 
 #include "inet/routing/bgpv4/BgpSession.h"
 #include "inet/routing/bgpv4/BgpRouting.h"
-#include "inet/routing/bgpv4/BGPFSM.h"
+#include "inet/routing/bgpv4/BgpFsm.h"
 
 namespace inet {
 
@@ -119,7 +119,7 @@ void BgpSession::restartsConnectRetryTimer(bool start)
 
 void BgpSession::sendOpenMessage()
 {
-    Packet *pk = new Packet("BGPOpen");
+    Packet *pk = new Packet("BgpOpen");
     const auto& openMsg = makeShared<BgpOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
@@ -132,7 +132,7 @@ void BgpSession::sendOpenMessage()
 
 void BgpSession::sendKeepAliveMessage()
 {
-    Packet *pk = new Packet("BGPKeepAlive");
+    Packet *pk = new Packet("BgpKeepAlive");
     const auto &keepAliveMsg = makeShared<BgpKeepAliveMessage>();
     keepAliveMsg->markImmutable();
     pk->pushHeader(keepAliveMsg);

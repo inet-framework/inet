@@ -15,7 +15,7 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/reports.h"
+#include "inet/transportlayer/rtp/Reports.h"
 
 namespace inet {
 

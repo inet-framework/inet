@@ -433,7 +433,7 @@ void BgpRouting::updateSendProcess(const unsigned char type, SessionId sessionIn
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
             {
-                Packet *pk = new Packet("BGPUpdate");
+                Packet *pk = new Packet("BgpUpdate");
                 const auto& updateMsg = makeShared<BgpUpdateMessage>();
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);

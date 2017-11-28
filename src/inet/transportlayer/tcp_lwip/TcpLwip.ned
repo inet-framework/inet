@@ -18,15 +18,15 @@
 
 package inet.transportlayer.tcp_lwip;
 
-import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.ITcp;
 
 //
 // TCP model based on the LWIP 1.3.2 project.
 // The original LWIP is available on the http://savannah.nongnu.org/projects/lwip/ page.
 //
-// See ~ITCP for general TCP layer informations.
+// See ~ITcp for general TCP layer informations.
 //
-simple TcpLwip like ITCP
+simple TcpLwip like ITcp
 {
     parameters:
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled

@@ -17,7 +17,7 @@
 
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 
-#include "inet/transportlayer/rtp/reports.h"
+#include "inet/transportlayer/rtp/Reports.h"
 #include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {

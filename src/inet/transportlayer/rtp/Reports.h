@@ -24,7 +24,7 @@
 #define __INET_REPORTS_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/rtp/reports_m.h"
+#include "inet/transportlayer/rtp/Reports_m.h"
 
 namespace inet {
 

@@ -24,7 +24,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
-#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
@@ -165,7 +165,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
 
         bool compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp);
 
-        bool compareTcpPacket(tcp::TCPSegment *storedTcp, tcp::TCPSegment *liveTcp);
+        bool compareTcpPacket(tcp::TcpHeader *storedTcp, tcp::TcpHeader *liveTcp);
 
         bool compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liveSctp);
 

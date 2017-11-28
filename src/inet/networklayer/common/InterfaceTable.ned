@@ -21,7 +21,7 @@ package inet.networklayer.common;
 // Keeps the table of network interfaces.
 //
 // Interfaces are dynamically registered by the corresponding L2 modules, e.g.
-// ~PPPInterface. In addition to registered interfaces, a loopback interface
+// ~PppInterface. In addition to registered interfaces, a loopback interface
 // will also be created. This table only contains protocol-independent
 // properties of interfaces -- IPv4 or IPv6 specific per-interface data
 // (addresses etc) are kept in ~Ipv4RoutingTable and ~Ipv6RoutingTable.

@@ -22,7 +22,7 @@
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 

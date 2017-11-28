@@ -19,7 +19,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalReceiver.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmission.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalTransmission.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
 namespace inet {
@@ -41,13 +41,13 @@ std::ostream& ApskDimensionalReceiver::printToStream(std::ostream& stream, int l
 
 bool ApskDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
-    auto apskTransmission = dynamic_cast<const APSKDimensionalTransmission *>(transmission);
+    auto apskTransmission = dynamic_cast<const ApskDimensionalTransmission *>(transmission);
     return apskTransmission && NarrowbandReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
 
 bool ApskDimensionalReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
-    auto apksTransmission = dynamic_cast<const APSKDimensionalTransmission *>(reception->getTransmission());
+    auto apksTransmission = dynamic_cast<const ApskDimensionalTransmission *>(reception->getTransmission());
     return apksTransmission && FlatReceiverBase::computeIsReceptionPossible(listening, reception, part);
 }
 

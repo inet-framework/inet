@@ -16,7 +16,7 @@ import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
+import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
@@ -51,7 +51,7 @@ module RSVP_LSR
         *.rsvpModule = default(absPath(".rsvp"));
         *.libTableModule = default(absPath(".libTable"));
     gates:
-        inout pppg[] @labels(PPPFrame-conn);
+        inout pppg[] @labels(PppFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=58,50;is=s");
@@ -83,7 +83,7 @@ module RSVP_LSR
             parameters:
                 @display("p=409,185;b=580,5,,,,1");
         }
-        ipv4: IPv4NetworkLayer {
+        ipv4: Ipv4NetworkLayer {
             parameters:
                 @display("p=409,223");
         }
@@ -94,7 +94,7 @@ module RSVP_LSR
         lo[numLoInterfaces]: LoopbackInterface {
             @display("p=139,394");
         }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
             parameters:
                 @display("p=271,394,row,90;q=l2queue");
         }

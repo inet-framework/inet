@@ -23,7 +23,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RtpProfile.h"
 #include "inet/transportlayer/rtp/RtpSenderControlMessage_m.h"
 #include "inet/transportlayer/rtp/RtpSenderStatusMessage_m.h"

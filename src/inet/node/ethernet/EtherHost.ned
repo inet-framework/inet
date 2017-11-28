@@ -21,9 +21,9 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppCli;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IEtherMAC;
+import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.ethernet.EtherLlc;
-import inet.linklayer.ethernet.EtherQoSQueue;
+import inet.linklayer.ethernet.EtherQosQueue;
 
 
 //
@@ -68,12 +68,12 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        queue: EtherQoSQueue if queueType != "" {
+        queue: EtherQosQueue if queueType != "" {
             parameters:
                 dataQueueType = queueType;
                 @display("p=159,199;q=l2queue");
         }
-        mac: <macType> like IEtherMAC {
+        mac: <macType> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=215,270;q=txQueue");

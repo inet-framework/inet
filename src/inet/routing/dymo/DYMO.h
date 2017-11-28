@@ -29,7 +29,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
-#include "inet/routing/dymo/DYMOdefs.h"
+#include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
 #include "inet/routing/dymo/DYMO_m.h"
 

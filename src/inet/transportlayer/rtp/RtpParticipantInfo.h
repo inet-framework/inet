@@ -24,7 +24,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/transportlayer/rtp/RtpPacket.h"
-#include "inet/transportlayer/rtp/sdes.h"
+#include "inet/transportlayer/rtp/Sdes.h"
 
 namespace inet {
 

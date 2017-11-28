@@ -15,11 +15,11 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.rtp.reports;
+import inet.transportlayer.rtp.Reports;
 
 cplusplus{{
-#include "inet/transportlayer/rtp/reports.h"
-#include "inet/transportlayer/rtp/sdes.h"
+#include "inet/transportlayer/rtp/Reports.h"
+#include "inet/transportlayer/rtp/Sdes.h"
 }}
 
 namespace inet;

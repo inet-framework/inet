@@ -27,8 +27,8 @@ package inet.routing.aodv;
 // memory overhead, low network utilization, and determines unicast
 // routes to destinations within the ad hoc network.
 //
-// This routing protocol communicates over UDP and used in ~AODVRouter
-// nodes as a routing submodule. ~AODVRouter is just a ~WirelessHost
+// This routing protocol communicates over UDP and used in ~AodvRouter
+// nodes as a routing submodule. ~AodvRouter is just a ~WirelessHost
 // extended with ~AodvRouting submodule.
 //
 // This implementation is based on RFC 3561. For more information, you may

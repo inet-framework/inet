@@ -95,12 +95,12 @@ package inet.networklayer.ipv4;
 //
 // <b>Disabling IGMP</b>
 //
-// The IPv4 ~IPv4NetworkLayer contains an instance of the IGMP
+// The IPv4 ~Ipv4NetworkLayer contains an instance of the IGMP
 // module. IGMP can be turned off by setting the 'enabled'
 // parameter to false. When disabled, then no IGMP message
 // is generated, and incoming IGMP messages are ignored.
 //
-simple Igmpv2 like IIGMP
+simple Igmpv2 like IIgmp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

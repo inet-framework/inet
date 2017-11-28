@@ -17,10 +17,10 @@
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateUpdateHandler.h"
 
-#include "inet/routing/ospfv2/router/OSPFArea.h"
-#include "inet/routing/ospfv2/router/OSPFcommon.h"
-#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
-#include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
+#include "inet/routing/ospfv2/router/OspfCommon.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
 

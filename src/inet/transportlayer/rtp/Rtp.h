@@ -22,7 +22,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {

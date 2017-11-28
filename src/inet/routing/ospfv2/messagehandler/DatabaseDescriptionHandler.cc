@@ -17,10 +17,10 @@
 
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 
-#include "inet/routing/ospfv2/router/OSPFArea.h"
-#include "inet/routing/ospfv2/interface/OSPFInterface.h"
-#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
-#include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
 

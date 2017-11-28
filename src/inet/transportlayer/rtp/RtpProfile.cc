@@ -99,7 +99,7 @@ void RtpProfile::handleMessageFromRTP(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("RtpInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
+            throw cRuntimeError("RtpInnerPacket from RtpModule has wrong type: %d", rinpIn->getType());
             break;
     }
 

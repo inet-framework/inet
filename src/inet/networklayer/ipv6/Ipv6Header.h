@@ -21,7 +21,7 @@
 #include <list>
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/networklayer/ipv6/IPv6Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
 

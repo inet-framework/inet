@@ -18,7 +18,7 @@
 
 package inet.transportlayer.tcp_nsc;
 
-import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.ITcp;
 
 //
 // TCP model based on the Network Simulation Cradle by Sam Jansen.
@@ -26,7 +26,7 @@ import inet.transportlayer.contract.ITCP;
 // You must read the inet/3dparty/README before use this TCP implementation.
 // This model is compatible with both IPv4 (~IPv4) and ~IPv6.
 // The TCP_TRANSFER_OBJECT data transfer mode isn't implemented yet.
-// See the ~ITCP for the TCP layer general informations.
+// See the ~ITcp for the TCP layer general informations.
 //
 // <b>Settings</b>
 //
@@ -37,7 +37,7 @@ import inet.transportlayer.contract.ITCP;
 // The NSC sets the wmem_max, rmem_max, tcp_rmem, tcp_wmem parameters to this value
 // on linux TCP implementations. For details, you can see the NSC documentation.
 //
-simple TcpNsc like ITCP
+simple TcpNsc like ITcp
 {
     parameters:
         // full library name of the tcp stack implementation

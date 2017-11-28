@@ -367,7 +367,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
         Ipv4Header *ip = check_and_cast<Ipv4Header *>(event->getPacket()->getInetPacket());
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
             if (protocol == IP_PROT_TCP) {
-                TCPSegment* tcp = check_and_cast<TCPSegment*>(ip->decapsulate());
+                TcpHeader* tcp = check_and_cast<TcpHeader*>(ip->decapsulate());
                 tcp->setAckNo(tcp->getAckNo() + relSequenceOut);
                 if (tcp->getHeaderOptionArraySize() > 0) {
                     for (unsigned int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
@@ -1582,8 +1582,8 @@ bool PacketDrillApp::compareDatagram(Ipv4Header *storedDatagram, Ipv4Header *liv
         }
 
         case IP_PROT_TCP: {
-            TCPSegment *storedTcp = check_and_cast<TCPSegment *>(storedDatagram->getEncapsulatedPacket());
-            TCPSegment *liveTcp = check_and_cast<TCPSegment *>(liveDatagram->getEncapsulatedPacket());
+            TcpHeader *storedTcp = check_and_cast<TcpHeader *>(storedDatagram->getEncapsulatedPacket());
+            TcpHeader *liveTcp = check_and_cast<TcpHeader *>(liveDatagram->getEncapsulatedPacket());
             if (storedTcp->getSynBit()) { // SYN was sent. Store the sequence number for comparisons
                 relSequenceOut = liveTcp->getSequenceNo();
             }
@@ -1617,7 +1617,7 @@ bool PacketDrillApp::compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp)
         (storedUdp->getDestinationPort() == liveUdp->getDestinationPort());
 }
 
-bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp)
+bool PacketDrillApp::compareTcpPacket(TcpHeader *storedTcp, TcpHeader *liveTcp)
 {
     if (!(storedTcp->getSrcPort() == liveTcp->getSrcPort())) {
         return false;

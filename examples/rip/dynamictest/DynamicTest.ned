@@ -7,7 +7,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.inet.StandardHost;
-import inet.node.rip.RIPRouter;
+import inet.node.rip.RipRouter;
 
 
 network DynamicTest
@@ -31,25 +31,25 @@ network DynamicTest
             gates:
                 ethg[1];
         }
-        R1: RIPRouter {
+        R1: RipRouter {
             parameters:
                 @display("p=192,123");
             gates:
                 ethg[3];
         }
-        RA: RIPRouter {
+        RA: RipRouter {
             parameters:
                 @display("p=351,42");
             gates:
                 ethg[2];
         }
-        RB: RIPRouter {
+        RB: RipRouter {
             parameters:
                 @display("p=351,194");
             gates:
                 ethg[2];
         }
-        R2: RIPRouter {
+        R2: RipRouter {
             parameters:
                 @display("p=486,123");
             gates:

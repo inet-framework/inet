@@ -19,9 +19,9 @@ package inet.node.inet;
 
 import inet.applications.contract.IApp;
 import inet.node.base.ApplicationLayerNodeBase;
-import inet.routing.contract.IBGPRouting;
-import inet.routing.contract.IIPRouting;
-import inet.routing.contract.IPIMRouting;
+import inet.routing.contract.IBgpRouting;
+import inet.routing.contract.IIpRouting;
+import inet.routing.contract.IPimRouting;
 
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
@@ -39,7 +39,7 @@ import inet.routing.contract.IPIMRouting;
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
 //   **.ext.typename in the INI file. see: ~ExtInterface and ~IExternalNic
-// - PPP queueing type can be set using **.ppp.queueType see: ~PPPInterface
+// - PPP queueing type can be set using **.ppp.queueType see: ~PppInterface
 // - If wireless card is present, node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
 //
@@ -62,11 +62,11 @@ module Router extends ApplicationLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"OspfRouting"> like IIPRouting if hasOSPF {
+        ospf: <"OspfRouting"> like IIpRouting if hasOSPF {
             parameters:
                 @display("p=800,300,row");
         }
-        bgp: <"BgpRouting"> like IBGPRouting if hasBGP {
+        bgp: <"BgpRouting"> like IBgpRouting if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=600,100");
@@ -75,7 +75,7 @@ module Router extends ApplicationLayerNodeBase
             parameters:
                 @display("p=700,100");
         }
-        pim: <"PIMRouting"> like IPIMRouting if hasPIM {
+        pim: <"PimRouting"> like IPimRouting if hasPIM {
             parameters:
                 @display("p=700,300");
         }

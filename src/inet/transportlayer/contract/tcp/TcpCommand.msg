@@ -26,7 +26,7 @@ namespace inet;
 // TCP command codes, sent by the application to TCP. These constants
 // should be set as message kind on a message sent to the TCP entity.
 //
-// @see ~TcpCommand, ~TcpOpenCommand, ~ITCP
+// @see ~TcpCommand, ~TcpOpenCommand, ~ITcp
 //
 enum TcpCommandCode
 {
@@ -46,7 +46,7 @@ enum TcpCommandCode
 // TCP indications, sent by TCP to the application. TCP will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see ~TcpCommand, ~TcpStatusInfo, ~ITCP
+// @see ~TcpCommand, ~TcpStatusInfo, ~ITcp
 //
 enum TcpStatusInd
 {
@@ -85,7 +85,7 @@ enum TcpErrorCode
 //
 //# TODO explain userId
 //
-// @see ~TcpCommandCode, ~TcpStatusInd, ~TcpOpenCommand, ~TcpStatusInfo, ~ITCP
+// @see ~TcpCommandCode, ~TcpStatusInd, ~TcpOpenCommand, ~TcpStatusInfo, ~ITcp
 //
 class TcpCommand extends cObject
 {
@@ -124,7 +124,7 @@ class TcpErrorInfo extends TcpCommand
 // TcpAlgorithm, respectively.
 // If not set, module parameters with similar names are used.
 //
-// @see ~TcpCommandCode, ~ITCP
+// @see ~TcpCommandCode, ~ITcp
 //
 class TcpOpenCommand extends TcpCommand
 {
@@ -148,7 +148,7 @@ class TcpAcceptCommand extends TcpCommand
 //
 // Control info to be used with the SEND command.
 //
-// @see ~TcpCommandCode, ~ITCP
+// @see ~TcpCommandCode, ~ITcp
 //
 
 
@@ -156,7 +156,7 @@ class TcpAcceptCommand extends TcpCommand
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
 // about the local and remote IP address and port.
 //
-// @see ~TcpCommandCode, ~ITCP
+// @see ~TcpCommandCode, ~ITcp
 //
 class TcpAvailableInfo extends TcpCommand
 {
@@ -172,7 +172,7 @@ class TcpAvailableInfo extends TcpCommand
 // Sent with message kind TCP_I_ESTABLISHED, to let the app know
 // about the local and remote IP address and port.
 //
-// @see ~TcpCommandCode, ~ITCP
+// @see ~TcpCommandCode, ~ITcp
 //
 class TcpConnectInfo extends TcpCommand
 {
@@ -188,7 +188,7 @@ class TcpConnectInfo extends TcpCommand
 // For explanation of variables, see RFC 793 or TcpStateVariables in
 // TcpConnection.h.
 //
-// @see ~TcpStatusInd, ~TcpCommandCode, ~ITCP
+// @see ~TcpStatusInd, ~TcpCommandCode, ~ITcp
 //
 class TcpStatusInfo extends TcpCommand
 {

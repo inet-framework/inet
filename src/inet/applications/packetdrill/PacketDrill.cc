@@ -26,7 +26,7 @@
 
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
@@ -178,7 +178,7 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
                                      int32 window, cQueue *tcpOptions, char **error)
 {
     PacketDrillApp *app = PacketDrill::pdapp;
-    TCPSegment *tcpseg = new TCPSegment("TCPInject");
+    TcpHeader *tcpseg = new TcpHeader("TCPInject");
 
     // fill TCP header structure
     if (direction == DIRECTION_INBOUND) {

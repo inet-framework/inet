@@ -20,7 +20,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 
 namespace inet {
 

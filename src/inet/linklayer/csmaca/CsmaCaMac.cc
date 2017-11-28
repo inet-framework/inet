@@ -21,7 +21,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"

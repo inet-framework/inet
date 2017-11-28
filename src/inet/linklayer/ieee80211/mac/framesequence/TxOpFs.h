@@ -19,7 +19,7 @@
 #define __INET_TXOPFS_H
 
 #include "inet/linklayer/ieee80211/mac/framesequence/GenericFrameSequences.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 
 namespace inet {
 namespace ieee80211 {

@@ -23,7 +23,7 @@
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Receiver.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {

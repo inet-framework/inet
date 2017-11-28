@@ -24,9 +24,9 @@ package inet.linklayer.ieee80211.mgmt;
 // reception and transmission of frames.
 //
 // When simulating an AP that has other (Ethernet or wireless) interfaces
-// as well, this module can be connected to a ~IMACRelayUnit which performs
+// as well, this module can be connected to a ~IMacRelayUnit which performs
 // bridging of Ethernet frames. This module will perform conversion from/to
-// ~EtherFrame for ~IMACRelayUnit.
+// ~EtherFrame for ~IMacRelayUnit.
 //
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).

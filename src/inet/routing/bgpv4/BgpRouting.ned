@@ -17,7 +17,7 @@
 
 package inet.routing.bgpv4;
 
-import inet.routing.contract.IBGPRouting;
+import inet.routing.contract.IBgpRouting;
 
 
 //
@@ -51,7 +51,7 @@ import inet.routing.contract.IBGPRouting;
 //
 // @author Helene Lageber
 //
-simple BgpRouting like IBGPRouting
+simple BgpRouting like IBgpRouting
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

@@ -18,7 +18,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 
 #ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader.h"

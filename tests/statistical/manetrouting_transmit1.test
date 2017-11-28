@@ -7,7 +7,7 @@ Testing manetrouting with AODV routing protocol, UDP forwarding
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.FlatNetworkConfigurator;
-import inet.node.aodv.AODVRouter;
+import inet.node.aodv.AodvRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -22,21 +22,21 @@ network Net80211_aodv_test
         int numHosts;
         int distance @unit(m) = default(350m);
     submodules:
-        senderhost: AODVRouter {
+        senderhost: AodvRouter {
             parameters:
                 mobility.initialX = 1m;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        rcvrhost: AODVRouter {
+        rcvrhost: AodvRouter {
             parameters:
                 mobility.initialX = 1m + (numHosts+1) * distance;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        host[numHosts]: AODVRouter {
+        host[numHosts]: AodvRouter {
             parameters:
                 mobility.initialX = 1m + (index+1) * distance;
                 mobility.initialY = 200m;

@@ -4,7 +4,7 @@ package inet.examples.rtp.multicast1;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
-import inet.node.rtp.RTPHost;
+import inet.node.rtp.RtpHost;
 import ned.DatarateChannel;
 
 
@@ -17,7 +17,7 @@ network RTPMulticast1
             datarate = 10Mbps;
         }
     submodules:
-        host1: RTPHost {
+        host1: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";
@@ -26,7 +26,7 @@ network RTPMulticast1
                 bandwidth = 8000;
                 @display("p=150,50");
         }
-        host2: RTPHost {
+        host2: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";
@@ -35,7 +35,7 @@ network RTPMulticast1
                 bandwidth = 8000;
                 @display("p=250,150");
         }
-        host3: RTPHost {
+        host3: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";
@@ -44,7 +44,7 @@ network RTPMulticast1
                 bandwidth = 8000;
                 @display("p=150,250");
         }
-        host4: RTPHost {
+        host4: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";

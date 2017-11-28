@@ -19,11 +19,11 @@
 
 package inet.transportlayer.tcp;
 
-import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.ITcp;
 
 //
 // TCP protocol implementation.
-// See the ~ITCP for the TCP layer general informations.
+// See the ~ITcp for the TCP layer general informations.
 //
 // This implementation supports:
 //   - RFC  793 - Transmission Control Protocol
@@ -41,7 +41,7 @@ import inet.transportlayer.contract.ITCP;
 //
 // This module is compatible with both ~IPv4 and ~IPv6.
 //
-// A TCP segment is represented by the class ~TCPSegment.
+// A TCP segment is represented by the class ~TcpHeader.
 //
 // <b>Communication with clients</b>
 //
@@ -104,7 +104,7 @@ import inet.transportlayer.contract.ITCP;
 //
 // The TCP flavour supported depends on the value of the tcpAlgorithmClass
 // module parameter, e.g. "TcpTahoe" or "TcpReno". In the future, other
-// classes can be written which implement Vegas, LinuxTCP (which
+// classes can be written which implement Vegas, LinuxTcp (which
 // differs from others) or other variants.
 //
 // Note that ~TcpOpenCommand allows tcpAlgorithmClass to be chosen per-connection.
@@ -193,7 +193,7 @@ import inet.transportlayer.contract.ITCP;
 //
 // Please also see ChangeLog.
 //
-simple TCP like ITCP
+simple TCP like ITcp
 {
     parameters:
         string crcMode @enum("declared", "computed") = default("declared");
@@ -215,7 +215,7 @@ simple TCP like ITCP
         @signal[tcpConnectionRemoved];
     gates:
         input appIn @labels(TcpCommand/down);
-        input ipIn @labels(TCPSegment,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(TcpCommand/up);
-        output ipOut @labels(TCPSegment,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
+        output ipOut @labels(TcpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }

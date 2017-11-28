@@ -24,7 +24,7 @@
 
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/sctp/SCTPMessage.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"

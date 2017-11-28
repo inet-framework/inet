@@ -29,9 +29,9 @@ package inet.applications.netperfmeter;
 
 import inet.applications.contract.INetPerfMeterApp;
 import inet.node.base.TransportLayerNodeBase;
-import inet.transportlayer.contract.ISCTP;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
+import inet.transportlayer.contract.ISctp;
+import inet.transportlayer.contract.ITcp;
+import inet.transportlayer.contract.IUdp;
 
 //
 // NetPerfMeter application host.

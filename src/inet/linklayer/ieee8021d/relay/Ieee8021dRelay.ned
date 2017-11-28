@@ -15,7 +15,7 @@
 
 package inet.linklayer.ieee8021d.relay;
 
-import inet.linklayer.contract.IMACRelayUnit;
+import inet.linklayer.contract.IMacRelayUnit;
 
 
 //
@@ -31,7 +31,7 @@ import inet.linklayer.contract.IMACRelayUnit;
 //
 // @see EtherFrame, MacAddressTable, Stp, Rstp
 //
-simple Ieee8021dRelay like IMACRelayUnit
+simple Ieee8021dRelay like IMacRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");

@@ -17,7 +17,7 @@
 
 #include <string.h>
 
-#include "inet/transportlayer/rtp/sdes.h"
+#include "inet/transportlayer/rtp/Sdes.h"
 
 namespace inet {
 

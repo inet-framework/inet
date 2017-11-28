@@ -22,7 +22,7 @@
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
 #include "inet/transportlayer/rtp/RtpPacket.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Sender.h"
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"
 
 namespace inet {
 

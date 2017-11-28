@@ -296,7 +296,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
         throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getInterfaceFullPath().c_str(), this->getFullPath().c_str());
 
     // ASSUMPTIONS:
-    // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. IPv4NetworkLayer or Mpls)
+    // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. Ipv4NetworkLayer or Mpls)
     // 2. If it *is* connected to a network layer, the network layer module's gates must be called
     //    ifIn[] and ifOut[], and NIC must be connected to identical gate indices in both vectors.
     // 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] gates, we assume

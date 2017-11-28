@@ -22,17 +22,17 @@ import inet.linklayer.ieee80211.mac.blockack.RecipientBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
-import inet.linklayer.ieee80211.mac.originator.NonQoSRecoveryProcedure;
-import inet.linklayer.ieee80211.mac.originator.OriginatorQoSAckPolicy;
-import inet.linklayer.ieee80211.mac.originator.OriginatorQoSMacDataService;
-import inet.linklayer.ieee80211.mac.originator.QoSRecoveryProcedure;
-import inet.linklayer.ieee80211.mac.originator.QoSRtsPolicy;
+import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
-import inet.linklayer.ieee80211.mac.rateselection.QoSRateSelection;
-import inet.linklayer.ieee80211.mac.recipient.QoSCtsPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientQoSAckPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientQoSMacDataService;
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
 
 //
@@ -68,15 +68,15 @@ module Hcf
             parameters:
                 @display("p=150,200");
         }
-        originatorMacDataService: OriginatorQoSMacDataService {
+        originatorMacDataService: OriginatorQosMacDataService {
             parameters:
                 @display("p=150,300");
         }
-        recipientMacDataService: RecipientQoSMacDataService {
+        recipientMacDataService: RecipientQosMacDataService {
             parameters:
                 @display("p=150,400");
         }
-        rateSelection: QoSRateSelection {
+        rateSelection: QosRateSelection {
             parameters:
                 rateControlModule = "^.rateControl";
                 @display("p=400,100");
@@ -89,13 +89,13 @@ module Hcf
             parameters:
                 @display("p=400,300");
         }
-        edcaMgmtAndNonQoSRecoveryProcedure: NonQoSRecoveryProcedure {
+        edcaMgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^.edca.edcaf[1]"; // best effort
                 rtsPolicyModule = "^.rtsPolicy";
                 @display("p=700,300");
         }
-        edcaDataRecoveryProcedures[numEdcafs]: QoSRecoveryProcedure {
+        edcaDataRecoveryProcedures[numEdcafs]: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^.edca.edcaf[" + string(index) + "]";
                 rtsPolicyModule = "^.rtsPolicy";
@@ -105,19 +105,19 @@ module Hcf
             parameters:
                 @display("p=400,400,column,100");
         }
-        originatorAckPolicy: OriginatorQoSAckPolicy {
+        originatorAckPolicy: OriginatorQosAckPolicy {
             parameters:
                 @display("p=1000,100");
         }
-        recipientAckPolicy: RecipientQoSAckPolicy {
+        recipientAckPolicy: RecipientQosAckPolicy {
             parameters:
                 @display("p=1000,200");
         }
-        rtsPolicy: QoSRtsPolicy {
+        rtsPolicy: QosRtsPolicy {
             parameters:
                 @display("p=1000,300");
         }
-        ctsPolicy: QoSCtsPolicy {
+        ctsPolicy: QosCtsPolicy {
             parameters:
                 @display("p=1000,400");
         }

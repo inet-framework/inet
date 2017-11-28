@@ -17,7 +17,7 @@
 
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
-#include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
+#include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
 
 namespace inet {

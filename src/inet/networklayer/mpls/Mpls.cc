@@ -28,7 +28,7 @@
 
 // FIXME temporary fix
 #include "inet/networklayer/ldp/Ldp.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {

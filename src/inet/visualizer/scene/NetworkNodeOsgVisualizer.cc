@@ -17,8 +17,8 @@
 
 #include <omnetpp/osgutil.h>
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {

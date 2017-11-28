@@ -17,7 +17,7 @@
 
 package inet.transportlayer.tcp_common;
 
-import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.ITcp;
 
 //
 // Sends fabricated TCP packets. This is a base implementation,
@@ -26,7 +26,7 @@ import inet.transportlayer.contract.ITCP;
 //
 // Compatible with both IPv4 (~IPv4) and ~IPv6.
 //
-simple TcpSpoof like ITCP
+simple TcpSpoof like ITcp
 {
     parameters:
         string srcAddress = default("");  // local address; may be left empty ("")
@@ -43,7 +43,7 @@ simple TcpSpoof like ITCP
     gates:
         input appIn @labels(TcpCommand/down); // Not used!
         output appOut @labels(TcpCommand/up); // Not used!
-        output ipOut @labels(TCPSegment,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
-        input ipIn @labels(TCPSegment,Ipv4ControlInfo/up,Ipv6ControlInfo/up); // Not used!
+        output ipOut @labels(TcpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
+        input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up); // Not used!
 }
 

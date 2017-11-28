@@ -19,7 +19,7 @@
 //
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"

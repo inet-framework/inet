@@ -18,7 +18,7 @@
 
 package inet.transportlayer.udp;
 
-import inet.transportlayer.contract.IUDP;
+import inet.transportlayer.contract.IUdp;
 
 //
 // UDP protocol implementation, for IPv4 and IPv6.
@@ -65,7 +65,7 @@ import inet.transportlayer.contract.IUDP;
 //
 // @see ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
 //
-simple UDP like IUDP
+simple UDP like IUdp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

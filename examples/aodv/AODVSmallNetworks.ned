@@ -21,7 +21,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.node.aodv.AODVRouter;
+import inet.node.aodv.AodvRouter;
 import inet.physicallayer.idealradio.IdealRadioMedium;
 
 
@@ -55,15 +55,15 @@ network SimpleRREQ
                 script = default(xml("<scenario/>"));
                 @display("p=50,250");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,51");
         }
-        intermediateNode: AODVRouter {
+        intermediateNode: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,214");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,377");
         }
@@ -100,19 +100,19 @@ network SimpleRREQ2
                 script = default(xml("<scenario/>"));
                 @display("p=50,250");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=284,51");
         }
-        intermediateNodeA: AODVRouter {
+        intermediateNodeA: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=203,206");
         }
-        intermediateNodeB: AODVRouter {
+        intermediateNodeB: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=386,206");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=284,378");
         }
@@ -149,23 +149,23 @@ network ShortestPath
                 script = default(xml("<scenario/>"));
                 @display("p=50,250");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=283,63");
         }
-        intermediateNodeA: AODVRouter {
+        intermediateNodeA: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=203,206");
         }
-        intermediateNodeB: AODVRouter {
+        intermediateNodeB: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=385,256");
         }
-        intermediateNodeC: AODVRouter {
+        intermediateNodeC: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=292,325");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=292,454");
         }

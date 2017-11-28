@@ -18,12 +18,12 @@
 
 package inet.transportlayer.sctp;
 
-import inet.transportlayer.contract.ISCTP;
+import inet.transportlayer.contract.ISctp;
 
 //
 // Implements the SCTP protocol.
 //
-simple SCTP like ISCTP
+simple SCTP like ISctp
 {
     parameters:
         string interfaceTableModule;

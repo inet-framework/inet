@@ -7,7 +7,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.inet.StandardHost;
-import inet.node.rip.RIPRouter;
+import inet.node.rip.RipRouter;
 
 
 network SimpleTest
@@ -37,13 +37,13 @@ network SimpleTest
             gates:
                 ethg[2];
         }
-        R1: RIPRouter {
+        R1: RipRouter {
             parameters:
                 @display("p=296,92");
             gates:
                 ethg[2];
         }
-        R2: RIPRouter {
+        R2: RipRouter {
             parameters:
                 @display("p=416,92");
             gates:

@@ -37,7 +37,7 @@
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/csma/CsmaHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 

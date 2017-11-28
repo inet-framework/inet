@@ -16,15 +16,15 @@ import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
+import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.networklayer.ldp.Ldp;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
+import inet.transportlayer.contract.ITcp;
+import inet.transportlayer.contract.IUdp;
 
 
 //
@@ -52,7 +52,7 @@ module LDP_LSR
         *.tedModule = default(absPath(".ted"));
         *.libTableModule = default(absPath(".libTable"));
     gates:
-        inout pppg[] @labels(PPPFrame-conn);
+        inout pppg[] @labels(PppFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=73,45;is=s");
@@ -76,11 +76,11 @@ module LDP_LSR
                 peers = peers;
                 @display("p=544,106");
         }
-        tcp: <tcpType> like ITCP {
+        tcp: <tcpType> like ITcp {
             parameters:
                 @display("p=177,145");
         }
-        udp: <default(firstAvailable("UDP"))> like IUDP {
+        udp: <default(firstAvailable("UDP"))> like IUdp {
             parameters:
                 @display("p=267,145");
         }
@@ -88,7 +88,7 @@ module LDP_LSR
             parameters:
                 @display("p=409,185;b=580,5,,,,1");
         }
-        ipv4: IPv4NetworkLayer {
+        ipv4: Ipv4NetworkLayer {
             parameters:
                 @display("p=409,223");
         }
@@ -99,7 +99,7 @@ module LDP_LSR
         lo[numLoInterfaces]: LoopbackInterface {
             @display("p=147,396");
         }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
             parameters:
                 @display("p=267,396,row,90;q=l2queue");
         }

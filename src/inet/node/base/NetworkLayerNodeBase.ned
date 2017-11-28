@@ -20,8 +20,8 @@ package inet.node.base;
 import inet.common.MessageDispatcher;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.generic.GenericNetworkLayer;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv6.IPv6NetworkLayer;
+import inet.networklayer.ipv4.Ipv4NetworkLayer;
+import inet.networklayer.ipv6.Ipv6NetworkLayer;
 
 module NetworkLayerNodeBase extends LinkLayerNodeBase
 {
@@ -38,11 +38,11 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         @figure[networkLayer.title](type=text; pos=910,420; anchor=ne; text="network layer");
 
     submodules:
-        ipv4: IPv4NetworkLayer if hasIpv4 {
+        ipv4: Ipv4NetworkLayer if hasIpv4 {
             parameters:
                 @display("p=400,500;q=queue");
         }
-        ipv6: IPv6NetworkLayer if hasIpv6 {
+        ipv6: Ipv6NetworkLayer if hasIpv6 {
             parameters:
                 @display("p=500,500;q=queue");
         }

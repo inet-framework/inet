@@ -23,7 +23,7 @@
 // and a simplified, duplex-only ~EtherMacFullDuplex);
 // encapsulation/decapsulation models (~EtherEncap, ~EtherLlc);
 // bus and hub models ((~EtherBus for modelling coaxial cable, and ~EtherHub);
-// a switch model (~EtherSwitch) with various relay units (~IMACRelayUnit,
+// a switch model (~EtherSwitch) with various relay units (~IMacRelayUnit,
 // ~MacRelayUnit and ~Ieee8021dRelay); some traffic generators
 // (~EtherTrafGen, ~EtherAppCli/~EtherAppSrv); and example host models
 // (~EtherHost, ~EtherHost2). In INET hosts, an Ethernet interface is
@@ -74,7 +74,7 @@
 // MAC and LLC are implemented as separate modules (~EtherMac and
 // ~EtherLlc/~EtherEncap) because encapsulation/decapsulation functionality
 // is not always needed. (Switches don't do encapsulation/decapsulation.)
-// In switches, ~EtherMac is used with ~IMACRelayUnit.
+// In switches, ~EtherMac is used with ~IMacRelayUnit.
 //
 //
 // <h3>~EtherLlc and higher layers</h3>
@@ -180,7 +180,7 @@
 // and ~EtherLlc and ~EtherEncap can be instructed by a command to send
 // a PAUSE frame to MAC.
 //
-// ~IMACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
+// ~IMacRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
 // scheme for sending PAUSE frames -- this can be refined if the need arises.
 //
 

@@ -17,8 +17,8 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/LinkOsgVisualizerBase.h"
 

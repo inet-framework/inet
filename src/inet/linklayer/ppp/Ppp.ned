@@ -22,7 +22,7 @@ package inet.linklayer.ppp;
 //
 // PPP implementation.
 //
-// Packets are encapsulated in ~PPPFrame.
+// Packets are encapsulated in ~PppFrame.
 //
 // PPP is a complex protocol with strong support for link configuration
 // and maintenance. This model ignores those details, and only performs
@@ -41,7 +41,7 @@ package inet.linklayer.ppp;
 // There is no buffering done on received packets -- they are just decapsulated
 // and sent up immediately.
 //
-// @see ~PPPInterface, ~IOutputQueue, ~PPPFrame
+// @see ~PppInterface, ~IOutputQueue, ~PppFrame
 //
 simple Ppp
 {
@@ -74,6 +74,6 @@ simple Ppp
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        inout phys @labels(PPPFrame);
+        inout phys @labels(PppFrame);
 }
 

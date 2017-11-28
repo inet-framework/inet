@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/ppp/PPPFrame_m.h"
+#include "inet/linklayer/ppp/PppFrame_m.h"
 #include "inet/linklayer/common/TxNotifDetails.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"

@@ -22,10 +22,10 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/routing/bgpv4/BGPCommon.h"
+#include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/routing/bgpv4/BgpRouting.h"
-#include "inet/routing/bgpv4/BGPFSM.h"
+#include "inet/routing/bgpv4/BgpFsm.h"
 
 namespace inet {
 

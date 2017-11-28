@@ -8,7 +8,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.node.gpsr.GPSRRouter;
+import inet.node.gpsr.GpsrRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -42,7 +42,7 @@ network GPSRNetworkRandom
                 script = default(xml("<scenario/>"));
                 @display("p=50,250");
         }
-        host[numHosts]: GPSRRouter {
+        host[numHosts]: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
@@ -65,47 +65,47 @@ network GPSRNetworkManual
             parameters:
                 @display("p=50,150");
         }
-        host0: GPSRRouter {
+        host0: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=37,300");
         }
-        host1: GPSRRouter {
+        host1: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=723,300");
         }
-        host2: GPSRRouter {
+        host2: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=185,300");
         }
-        host3: GPSRRouter {
+        host3: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=345,300");
         }
-        host4: GPSRRouter {
+        host4: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=345,157");
         }
-        host5: GPSRRouter {
+        host5: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=346,26");
         }
-        host6: GPSRRouter {
+        host6: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=446,26");
         }
-        host7: GPSRRouter {
+        host7: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=346,446");
         }
-        host8: GPSRRouter {
+        host8: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=345,572");
         }
-        host9: GPSRRouter {
+        host9: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=446,572");
         }
-        host10: GPSRRouter {
+        host10: GpsrRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=642,100");
         }

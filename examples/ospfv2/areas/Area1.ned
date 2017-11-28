@@ -3,7 +3,7 @@ package inet.examples.ospfv2.areas;
 
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 import ned.DatarateChannel;
 
 
@@ -20,7 +20,7 @@ module TwoNetsArea
             datarate = 100Mbps;
         }
     submodules:
-        R1: OSPFRouter {
+        R1: OspfRouter {
             parameters:
                 @display("p=248,124");
             gates:
@@ -38,7 +38,7 @@ module TwoNetsArea
             gates:
                 ethg[2];
         }
-        R3: OSPFRouter {
+        R3: OspfRouter {
             parameters:
                 @display("p=360,180");
             gates:
@@ -56,7 +56,7 @@ module TwoNetsArea
             gates:
                 ethg[1];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
                 @display("p=248,232");
             gates:

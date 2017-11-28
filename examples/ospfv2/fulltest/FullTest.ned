@@ -7,7 +7,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 channel C extends ThruputMeteringChannel
@@ -47,13 +47,13 @@ module OSPF_Area1
     gates:
         inout ethg[3];
     submodules:
-        RT1: OSPFRouter {
+        RT1: OspfRouter {
             parameters:
                 @display("p=232,136");
             gates:
                 ethg[2];
         }
-        RT2: OSPFRouter {
+        RT2: OspfRouter {
             parameters:
                 @display("p=236,348");
             gates:
@@ -98,7 +98,7 @@ module OSPF_Area2
     gates:
         inout ethg[4];
     submodules:
-        RT8: OSPFRouter {
+        RT8: OspfRouter {
             parameters:
                 @display("p=304,196");
             gates:
@@ -137,13 +137,13 @@ module OSPF_Area3
     gates:
         inout ethg[1];
     submodules:
-        RT9: OSPFRouter {
+        RT9: OspfRouter {
             parameters:
                 @display("p=148,200");
             gates:
                 ethg[2];
         }
-        RT12: OSPFRouter {
+        RT12: OspfRouter {
             parameters:
                 @display("p=148,360");
             gates:
@@ -196,43 +196,43 @@ network OSPF_RFC2328_Fig6
             parameters:
                 @display("p=128,468;b=176,168");
         }
-        RT3: OSPFRouter {
+        RT3: OspfRouter {
             parameters:
                 @display("p=276,208");
             gates:
                 ethg[3];
         }
-        RT4: OSPFRouter {
+        RT4: OspfRouter {
             parameters:
                 @display("p=276,144");
             gates:
                 ethg[2];
         }
-        RT5: OSPFRouter {
+        RT5: OspfRouter {
             parameters:
                 @display("p=496,144");
             gates:
                 ethg[6];
         }
-        RT6: OSPFRouter {
+        RT6: OspfRouter {
             parameters:
                 @display("p=424,208");
             gates:
                 ethg[3];
         }
-        RT7: OSPFRouter {
+        RT7: OspfRouter {
             parameters:
                 @display("p=496,328");
             gates:
                 ethg[4];
         }
-        RT10: OSPFRouter {
+        RT10: OspfRouter {
             parameters:
                 @display("p=424,328");
             gates:
                 ethg[3];
         }
-        RT11: OSPFRouter {
+        RT11: OspfRouter {
             parameters:
                 @display("p=284,468");
             gates:

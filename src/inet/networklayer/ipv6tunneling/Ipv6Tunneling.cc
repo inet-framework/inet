@@ -37,7 +37,7 @@
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
+#include "inet/networklayer/contract/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"

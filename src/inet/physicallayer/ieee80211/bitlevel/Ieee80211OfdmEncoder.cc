@@ -19,7 +19,7 @@
 #include "inet/common/ShortBitVector.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 #include "../mode/Ieee80211OfdmModulation.h"

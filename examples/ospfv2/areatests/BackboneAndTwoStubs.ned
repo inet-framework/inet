@@ -5,7 +5,7 @@ package inet.examples.ospfv2.areatests;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network OSPF_BackboneAndTwoStubsTest
@@ -21,7 +21,7 @@ network OSPF_BackboneAndTwoStubsTest
             thruputDisplayFormat = "#N";
         }
     submodules:
-        BBR[numBBRouters]: OSPFRouter;
+        BBR[numBBRouters]: OspfRouter;
         Stub1: TestArea {
             parameters:
                 numHosts = 2;

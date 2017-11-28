@@ -1,6 +1,6 @@
 // package module_.lib;
 
-import inet.transportlayer.contract.ITCP;
+import inet.transportlayer.contract.ITcp;
 
 
 network TcpTestNet1
@@ -12,10 +12,10 @@ network TcpTestNet1
         cli_app: TcpTestClient {
             @display("p=95,95");
         }
-        cli_tcp: <tcpType> like ITCP {
+        cli_tcp: <tcpType> like ITcp {
             @display("p=95,178");
         }
-        srv_tcp: <tcpType> like ITCP {
+        srv_tcp: <tcpType> like ITcp {
             @display("p=302,178");
         }
         srv_app: TcpTestClient {
@@ -46,10 +46,10 @@ network TcpTestNet2
         cli_app: TcpTestClient {
             @display("p=95,95");
         }
-        cli_tcp: <tcpType> like ITCP {
+        cli_tcp: <tcpType> like ITcp {
             @display("p=95,178");
         }
-        srv_tcp: <tcpType> like ITCP {
+        srv_tcp: <tcpType> like ITcp {
             @display("p=302,178");
         }
         srv_app: TcpTestClient {

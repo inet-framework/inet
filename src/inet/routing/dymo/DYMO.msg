@@ -22,7 +22,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/routing/dymo/DYMOdefs.h"
+#include "inet/routing/dymo/DymoDefs.h"
 }}
 
 namespace inet::dymo;

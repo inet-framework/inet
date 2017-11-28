@@ -28,7 +28,7 @@
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
-#include "inet/networklayer/mpls/MPLSPacket.h"
+#include "inet/networklayer/mpls/MplsPacket.h"
 
 namespace inet {
 

@@ -36,7 +36,7 @@
 #include "inet/linklayer/ieee80211/mac/lifetime/DcfReceiveLifetimeHandler.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/DcfTransmitLifetimeHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/NonQoSRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
@@ -78,7 +78,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRtsPolicy *rtsPolicy = nullptr;
         ICtsProcedure *ctsProcedure = nullptr;
         ICtsPolicy *ctsPolicy = nullptr;
-        NonQoSRecoveryProcedure *recoveryProcedure = nullptr;
+        NonQosRecoveryProcedure *recoveryProcedure = nullptr;
 
         // TODO: Unimplemented
         ITransmitLifetimeHandler *transmitLifetimeHandler = nullptr;

@@ -20,7 +20,7 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 
 namespace inet {

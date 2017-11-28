@@ -26,7 +26,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ideal/IdealMac.h"
 #include "inet/linklayer/ideal/IdealMacHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

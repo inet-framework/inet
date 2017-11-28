@@ -1,7 +1,7 @@
 package inet.examples.rtp.unicast2;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.rtp.RTPHost;
+import inet.node.rtp.RtpHost;
 
 
 network RTPUnicast2
@@ -16,7 +16,7 @@ network RTPUnicast2
         }
 
     submodules:
-        sender: RTPHost {
+        sender: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";
@@ -27,7 +27,7 @@ network RTPUnicast2
                 payloadType = 32;
                 @display("p=185,128");
         }
-        receiver: RTPHost {
+        receiver: RtpHost {
             parameters:
                 forwarding = false;
                 profileName = "inet.transportlayer.rtp.RtpAvProfile";

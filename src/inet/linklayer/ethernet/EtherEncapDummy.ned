@@ -23,7 +23,7 @@ package inet.linklayer.ethernet;
 //
 // Expected environment:
 // - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMac
-// - upperLayerIn, upperLayerOut gates should be connected to an ~IMACRelayUnit
+// - upperLayerIn, upperLayerOut gates should be connected to an ~IMacRelayUnit
 //
 // Functionality:
 // - packets coming from upper layers will be sent to MAC.

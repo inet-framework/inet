@@ -7,7 +7,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network SimpleTest
@@ -34,14 +34,14 @@ network SimpleTest
             gates:
                 ethg[2];
         }
-        R1: OSPFRouter {
+        R1: OspfRouter {
             parameters:
                 @display("p=296,92");
                 hasStatus = true;
             gates:
                 ethg[2];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
                 @display("p=416,92");
                 hasStatus = true;

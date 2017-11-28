@@ -19,12 +19,12 @@
 
 package inet.linklayer.ethernet;
 
-import inet.linklayer.contract.IEtherMAC;
+import inet.linklayer.contract.IEtherMac;
 
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
-// See the ~IEtherMAC for the Ethernet MAC layer general informations.
+// See the ~IEtherMac for the Ethernet MAC layer general informations.
 // Doesn't do encapsulation/decapsulation; see ~EtherLlc and ~EtherEncap for
 // that.
 //
@@ -107,7 +107,7 @@ import inet.linklayer.contract.IEtherMAC;
 // @see ~EtherMacFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLlc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
-simple EtherMac like IEtherMAC
+simple EtherMac like IEtherMac
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -152,8 +152,8 @@ simple EtherMac like IEtherMAC
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

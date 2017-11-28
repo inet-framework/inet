@@ -40,7 +40,7 @@ module LinkLayerNodeBase extends NodeBase
 
     gates:
         input radioIn[numWlanInterfaces] @directIn;
-        inout pppg[] @labels(PPPFrame-conn);
+        inout pppg[] @labels(PppFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
 
     submodules:
@@ -61,7 +61,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=600,700,row,50;q=queue");
         }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
             parameters:
                 @display("p=400,700,row,50;q=txQueue");
         }

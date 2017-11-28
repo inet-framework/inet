@@ -30,7 +30,7 @@
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 
@@ -86,7 +86,7 @@ class TcpReceiveQueue;
  * from TcpConnection into TcpAlgorithm: delayed acks, slow start, fast rexmit,
  * etc. are all implemented in TcpAlgorithm subclasses. This simplifies the
  * design of TcpConnection and makes it a lot easier to implement new TCP
- * variations such as NewReno, Vegas or LinuxTCP as TcpAlgorithm subclasses.
+ * variations such as NewReno, Vegas or LinuxTcp as TcpAlgorithm subclasses.
  *
  * Currently implemented TcpAlgorithm classes are TcpReno, TcpTahoe, TcpNewReno,
  * TcpNoCongestionControl and DumbTcp.

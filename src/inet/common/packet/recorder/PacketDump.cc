@@ -34,7 +34,7 @@
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_IPv4

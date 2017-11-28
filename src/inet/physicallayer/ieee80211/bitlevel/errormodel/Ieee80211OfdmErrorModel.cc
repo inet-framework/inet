@@ -24,7 +24,7 @@
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
 

@@ -28,7 +28,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
 #include "inet/applications/common/SocketTag_m.h"
@@ -47,7 +47,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 

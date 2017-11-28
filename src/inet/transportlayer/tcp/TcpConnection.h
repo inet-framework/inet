@@ -24,7 +24,7 @@
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 
@@ -289,7 +289,7 @@ class INET_API TcpStateVariables : public cObject
  *
  * The "entry points" of TCPConnnection from TCP are:
  *  - processTimer(cMessage *msg): handle self-messages which belong to the connection
- *  - processTCPSegment(TCPSegment *tcpSeg, Address srcAddr, Address destAddr):
+ *  - processTCPSegment(TcpHeader *tcpSeg, Address srcAddr, Address destAddr):
  *    handle segment arrivals
  *  - processAppCommand(cMessage *msg): process commands which arrive from the
  *    application (TCP_C_xxx)

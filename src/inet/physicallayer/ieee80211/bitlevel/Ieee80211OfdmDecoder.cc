@@ -23,7 +23,7 @@
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
 #include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple QoSRtsPolicy 
+simple QosRtsPolicy 
 {
     parameters:
         string rateSelectionModule;

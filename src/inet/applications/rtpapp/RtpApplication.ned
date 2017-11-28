@@ -38,6 +38,6 @@ simple RtpApplication
         double sessionLeaveDelay @unit(s); // delay before leave session (related to "file transmission finished/stopped" or "session entered" when fileName is "")
 
     gates:
-        output rtpOut @labels(RTPInterfacePacket/down);
-        input rtpIn @labels(RTPInterfacePacket/up);
+        output rtpOut @labels(RtpInterfacePacket/down);
+        input rtpIn @labels(RtpInterfacePacket/up);
 }

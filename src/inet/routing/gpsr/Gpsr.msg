@@ -18,14 +18,14 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.TLVOption;
+import inet.common.TlvOptions;
 import inet.common.geometry.Geometry;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/common/TLVOption.h"
-#include "inet/routing/gpsr/GPSRDefs.h"
+#include "inet/common/TlvOptions.h"
+#include "inet/routing/gpsr/GpsrDefs.h"
 }}
 
 namespace inet;

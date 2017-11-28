@@ -18,7 +18,7 @@
 
 package inet.examples.inet.routerperf;
 
-import inet.applications.generic.IIPvXTrafficGenerator;
+import inet.applications.generic.IIpvxTrafficGenerator;
 import inet.node.base.TransportLayerNodeBase;
 
 //
@@ -35,7 +35,7 @@ module BurstHost extends TransportLayerNodeBase
         string trafGenType;
         *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
-        trafGen: <trafGenType> like IIPvXTrafficGenerator {
+        trafGen: <trafGenType> like IIpvxTrafficGenerator {
             parameters:
                 @display("p=329,81");
         }

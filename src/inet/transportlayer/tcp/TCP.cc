@@ -31,7 +31,7 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 
 #ifdef WITH_IPv4
@@ -39,7 +39,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
 
@@ -197,7 +197,7 @@ void TCP::handleMessage(cMessage *msg)
             delete msg;
         }
         else if (protocol == &Protocol::tcp) {
-            // must be a TCPSegment
+            // must be a TcpHeader
             auto tcpHeader = packet->peekHeader<TcpHeader>();
 
             // get src/dest addresses

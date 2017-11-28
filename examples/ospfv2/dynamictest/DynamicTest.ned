@@ -8,7 +8,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network DynamicTest
@@ -29,25 +29,25 @@ network DynamicTest
             gates:
                 ethg[1];
         }
-        R1: OSPFRouter {
+        R1: OspfRouter {
             parameters:
                 @display("p=192,123");
             gates:
                 ethg[3];
         }
-        RA: OSPFRouter {
+        RA: OspfRouter {
             parameters:
                 @display("p=351,42");
             gates:
                 ethg[2];
         }
-        RB: OSPFRouter {
+        RB: OspfRouter {
             parameters:
                 @display("p=351,194");
             gates:
                 ethg[2];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
                 @display("p=486,123");
             gates:

@@ -19,12 +19,12 @@
 
 package inet.linklayer.ethernet;
 
-import inet.linklayer.contract.IEtherMAC;
+import inet.linklayer.contract.IEtherMac;
 
 
 //
 // Ethernet MAC which supports full-duplex operation ONLY.
-// See the ~IEtherMAC for general informations.
+// See the ~IEtherMac for general informations.
 //
 // Most of today's Ethernet networks are switched, and operate
 // in full-duplex mode. Full-duplex transmission can be used for
@@ -116,7 +116,7 @@ import inet.linklayer.contract.IEtherMAC;
 // @see ~EtherMac, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLlc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
-simple EtherMacFullDuplex like IEtherMAC
+simple EtherMacFullDuplex like IEtherMac
 {
     parameters:
         string interfaceTableModule;        // The path to the InterfaceTable module
@@ -158,8 +158,8 @@ simple EtherMacFullDuplex like IEtherMAC
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
         inout phys @labels(EtherFrame);            // to physical layer or the network
 }
 

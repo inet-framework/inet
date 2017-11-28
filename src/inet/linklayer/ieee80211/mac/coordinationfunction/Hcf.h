@@ -33,17 +33,17 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckProcedure.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSAckPolicy.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/NonQoSRecoveryProcedure.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQoSMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/originator/QoSAckHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/QoSRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
@@ -71,7 +71,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRx *rx = nullptr;
         ITx *tx = nullptr;
 
-        IQoSRateSelection *rateSelection = nullptr;
+        IQosRateSelection *rateSelection = nullptr;
 
         // Channel Access Methods
         Edca *edca = nullptr;
@@ -79,12 +79,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         // MAC Data Service
         IOriginatorMacDataService *originatorDataService = nullptr;
-        IRecipientQoSMacDataService *recipientDataService = nullptr;
+        IRecipientQosMacDataService *recipientDataService = nullptr;
 
         // MAC Procedures
         IRecipientAckProcedure *recipientAckProcedure = nullptr;
         IOriginatorQoSAckPolicy *originatorAckPolicy = nullptr;
-        IRecipientQoSAckPolicy *recipientAckPolicy = nullptr;
+        IRecipientQosAckPolicy *recipientAckPolicy = nullptr;
         IRtsProcedure *rtsProcedure = nullptr;
         IRtsPolicy *rtsPolicy = nullptr;
         ICtsProcedure *ctsProcedure = nullptr;
@@ -92,8 +92,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IOriginatorBlockAckProcedure *originatorBlockAckProcedure = nullptr;
         IRecipientBlockAckProcedure *recipientBlockAckProcedure = nullptr;
         EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        std::vector<QoSRecoveryProcedure*> edcaDataRecoveryProcedures;
-        NonQoSRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
+        std::vector<QosRecoveryProcedure*> edcaDataRecoveryProcedures;
+        NonQosRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
 
         // Block Ack Agreement Handlers
         IOriginatorBlockAckAgreementHandler *originatorBlockAckAgreementHandler = nullptr;
@@ -102,7 +102,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRecipientBlockAckAgreementPolicy *recipientBlockAckAgreementPolicy = nullptr;
 
         // Ack handler
-        std::vector<QoSAckHandler *> edcaAckHandlers;
+        std::vector<QosAckHandler *> edcaAckHandlers;
 
         // Tx Opportunity
         std::vector<TxopProcedure*> edcaTxops;

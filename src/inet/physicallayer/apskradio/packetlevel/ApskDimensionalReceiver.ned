@@ -25,8 +25,8 @@ import inet.physicallayer.base.packetlevel.NarrowbandReceiverBase;
 // sufficiently high. It uses the error model to compute the error rate based on
 // this value and the used modulation.
 //
-// See also ~ApskDimensionalTransmitter, ~APSKDimensionalRadio,
-// ~APSKDimensionalRadioMedium, and ~DimensionalAnalogModel.
+// See also ~ApskDimensionalTransmitter, ~ApskDimensionalRadio,
+// ~ApskDimensionalRadioMedium, and ~DimensionalAnalogModel.
 //
 module ApskDimensionalReceiver extends NarrowbandReceiverBase
 {

@@ -83,7 +83,7 @@ bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
-    return false; // FIXME: QoSRtsPolicy should handle this case
+    return false; // FIXME: QosRtsPolicy should handle this case
 }
 
 } // namespace ieee80211

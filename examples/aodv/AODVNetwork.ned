@@ -21,7 +21,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.node.aodv.AODVRouter;
+import inet.node.aodv.AodvRouter;
 import inet.physicallayer.idealradio.IdealRadioMedium;
 
 
@@ -52,7 +52,7 @@ network AODVNetwork
                 script = default(xml("<scenario/>"));
                 @display("p=50,250");
         }
-        host[numHosts]: AODVRouter {
+        host[numHosts]: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }

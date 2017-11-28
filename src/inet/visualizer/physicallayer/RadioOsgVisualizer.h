@@ -18,7 +18,7 @@
 #ifndef __INET_RADIOOSGVISUALIZER_H
 #define __INET_RADIOOSGVISUALIZER_H
 
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 

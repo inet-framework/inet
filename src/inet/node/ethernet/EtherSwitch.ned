@@ -22,7 +22,7 @@ import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IMacAddressTable;
-import inet.linklayer.contract.IMACRelayUnit;
+import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
@@ -47,7 +47,7 @@ module EtherSwitch
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string spanningTreeProtocol = default("");
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the ~IMACRelayUnit;
+        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the ~IMacRelayUnit;
         string macTableType = default("MacAddressTable"); // type of the ~IMacAddressTable
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
@@ -69,7 +69,7 @@ module EtherSwitch
         macTable: <macTableType> like IMacAddressTable {
             @display("p=73,42;is=s");
         }
-        relayUnit: <relayUnitType> like IMACRelayUnit {
+        relayUnit: <relayUnitType> like IMacRelayUnit {
             @display("p=264,89;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {

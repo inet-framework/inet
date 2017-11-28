@@ -22,9 +22,9 @@
 
 #include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 
 namespace inet {
 
