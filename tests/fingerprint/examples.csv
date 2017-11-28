@@ -282,7 +282,7 @@
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0,         20s,             4b19-7f88/tplx, PASS,  wireless adhoc
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             3303-05ad/tplx, PASS, wireless
 
-/examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          72f8-5c0b/tplx, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c AnsimMobility -r 0,          10000s,          72f8-5c0b/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          ce84-30b6/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    10000s,          5e8f-b884/tplx, PASS,      # do not move nodes simtime always 0 at all events
 /examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          4b3c-6272/tplx, PASS,
@@ -307,7 +307,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        bb94-612c/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          7e9a-4c42/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          5717-6286/tplx, PASS,
-/examples/mobility/,                 -f omnetpp.ini -c RandomWPMobility -r 0,       5000s,           fb98-8029/tplx, PASS,
+/examples/mobility/,                 -f omnetpp.ini -c RandomWpMobility -r 0,       5000s,           fb98-8029/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          4860-beb1/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000-0000/tplx, PASS,         # (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0000-0000/tplx, PASS,         # (zero time simulated)
@@ -334,7 +334,7 @@
 
 /examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             778c-aec3/tplx, PASS, wireless
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             778c-aec3/tplx, PASS, wireless
-/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,             778c-aec3/tplx, PASS, wireless
+/examples/objectcache/,              -f omnetpp.ini -c BvhObjectCache -r 0,         20s,             778c-aec3/tplx, PASS, wireless
 
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            becd-d347/tplx, PASS,
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            0d7d-52e4/tplx, PASS,

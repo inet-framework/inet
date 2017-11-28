@@ -26,7 +26,7 @@ Define_Module(RtpAvProfile);
 void RtpAvProfile::initialize()
 {
     RtpProfile::initialize();
-    _profileName = "AVProfile";
+    _profileName = "AvProfile";
     _rtcpPercentage = 5;
     _preferredPort = 5005;
 }

@@ -155,7 +155,7 @@ void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
 
     EV_INFO << "ProfileName: " << _profileName << " payloadType: " << payloadType << endl;
     const char *pkgPrefix = "inet.transportlayer.rtp.";    //FIXME hardcoded string
-    sprintf(moduleName, "%sRTP%sPayload%iSender", pkgPrefix, _profileName, payloadType);
+    sprintf(moduleName, "%sRtp%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
     cModuleType *moduleType = cModuleType::find(moduleName);
     if (moduleType == nullptr)
@@ -215,7 +215,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
         ssrcGate = newSSRCGate(ssrc);
         char payloadReceiverName[100];
         const char *pkgPrefix = "inet.transportlayer.rtp.";    //FIXME hardcoded string
-        sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver",
+        sprintf(payloadReceiverName, "%sRtp%sPayload%iReceiver",
                 pkgPrefix, _profileName, rtpHeader->getPayloadType());
 
         cModuleType *moduleType = cModuleType::find(payloadReceiverName);
