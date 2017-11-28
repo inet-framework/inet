@@ -75,7 +75,7 @@ class cPacketChunk extends Chunk
 {
     @existingClass;
     @descriptor(readonly);
-    cPacket* _packet @getter(getPacket) @getval(.getPacket());
+    cPacket* _packet @getter(getPacket);
 }
 
 class FieldsChunk extends Chunk
