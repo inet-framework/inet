@@ -15,7 +15,6 @@ remove if possible:
 Chunk.msg:
 _getChunk -> getChunk
 _packet -> packet
-@getter vs @getval
 
 DYMOSequenceNumber: class DYMOSequenceNumber??? why class? primitive class???
 PacketDrop: packet_ -> packet
