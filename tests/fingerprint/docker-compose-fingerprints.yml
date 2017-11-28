@@ -11,6 +11,9 @@ services:
     ports:
       - "6379:6379"
     deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
       placement:
         constraints: [node.role == manager]
 
@@ -24,6 +27,9 @@ services:
     ports:
       - "27017:27017"
     deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
       placement:
         constraints: [node.role == manager]
 
@@ -63,7 +69,7 @@ services:
 #        constraints: [node.role != manager]
       resources:
         reservations:
-          cpus: "1.01" # keeping 1 core free on every host. Useful for the manager to run the redis/mongo servers, and the client to run the client. the workers have no issue anyway, because rq is nice-d.
+          cpus: "0.99" # keeping 1 core free on every host. Useful for the manager to run the redis/mongo servers, and the client to run the client. the workers have no issue anyway, because rq is nice-d.
       mode: replicated
       replicas: 100
       restart_policy:
