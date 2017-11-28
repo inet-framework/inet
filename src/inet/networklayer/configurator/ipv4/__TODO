@@ -1,0 +1,60 @@
+Configurator errors
+
+1.	Other hosts remain unconfigured
+*.configurator.config = xml("<config><interface hosts='*.Host3' names='eth0' address='10.0.0.100'/></config>")	// its a feature, not a bug?
+
+2.	Doesn't use lower addresses
+*.configurator.config = xml("<config><interface hosts='*.Host3' names='eth0' address='10.0.0.254'/><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")
+
+Error in module (inet::IPv4NetworkConfigurator) Simple.configurator (id=2) during network initialization: Failed to configure unique address for Simple.Host2.eth0. Please refine your parameters and try again!.
+
+3.	Address doesn't take effect
+*.configurator.config = xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/><interface hosts='*.Host3' names='eth0' address='10.0.0.100'/></config>")	// wrong order?
+
+Assignment for Host3 has no effect
+
+4.	All-ones host addresses should not be assigned to hosts (they are usually used for local broadcast)
+
+5.	Cannot add manual route
+*.configurator.config = xml("<config><route hosts='*.Router0' destination='10.0.0.13' netmask='255.255.255.x' gateway='10.0.0.22' interface='eth3' metric='x'/></config>")
+
+Error in module (inet::IPv4NetworkConfigurator) Routes.configurator (id=2) during network initialization: Error in XML <route> element at content:1: Invalid IPv4 address string `255.255.255.x'.
+
+Should be able to specify certain manual routes and the configurator should add the rest automatically
+Or is this supposed to be done by dumping the config and rewriting the routes?
+
+6.	Optimizer fails to merge some routes
+
+Node nineteen.Area3Router
+-- Routing table --
+Destination      Netmask          Gateway          Iface                  Metric
+10.3.3.1         255.255.255.255  *                eth2 (10.3.3.2) 0
+10.3.1.0         255.255.255.248  *                eth0 (10.3.1.4) 0
+10.3.2.0         255.255.255.248  *                eth1 (10.3.2.4) 0
+10.0.0.0         255.252.0.0      10.3.3.1         eth2 (10.3.3.2) 0
+
+first could be merged with last one (gw:* gateway is the same as the destination)
+
+7.	Az auto route element feldolgozása nem veszi figyelembe a már létező route-okat, így pl az errorRate metric egy mixed wireless/wired networkben teljes útvonalra hat, beleértve a wired részt is.
+
+8. 	const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntry) should look for SSID first to determine members a wireless network (swap the two code blocks)
+
+9. 	The Ipv4NetworkConfigurator ned documentation states that the configurator builds a graph with edge weights inversely proportional to the bitrate, so the configurator favors paths
+	with higher bitrate. This is no true, because default the metric is hopcount, so edges get a weight of 1.
+
+10.	addStaticRoutes parameter description in NED doc: turn off when config file contains manual routes <- false
+
+11.	error in optimizer:
+
+Error in module (inet::IPv4NetworkConfigurator) ConfiguratorB.configurator (id=2) during network initialization: ASSERT: condition false false in function checkOriginalRoutes, inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.cc line 1496.
+
+solved by optimizeRoutes=false
+
+12.	<autoroute> subelements: link selection should be more accurate
+
+13.	RoutingTableCanvasVisualizer: when nodes have address <unspec>, it matches the default route, and it visualizes that. Also, it doesnt react to changing addresses from unspec to specified
+					it should visualize default routes from <unspec> addresses
+
+14.	Mixed metric autoroute in step 12: when addDefaultRoutes = true, the routing table changes and we dont understand why
+
+15.	DHCP Server: it should be enough to specify numReservedAddresses or maxNumClients. In general, DHCP config should be simpler.
