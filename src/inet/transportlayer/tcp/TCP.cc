@@ -80,15 +80,6 @@ void TCP::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        const char *q;
-        q = par("sendQueueClass");
-        if (*q != '\0')
-            throw cRuntimeError("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
-
-        q = par("receiveQueueClass");
-        if (*q != '\0')
-            throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
-
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         WATCH(lastEphemeralPort);
 

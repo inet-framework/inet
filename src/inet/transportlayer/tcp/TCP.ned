@@ -209,8 +209,6 @@ simple TCP like ITCP
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
         string tcpAlgorithmClass @enum("TCPVegas", "TCPWestwood", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPNoCongestionControl") = default("TCPReno");
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
-        string sendQueueClass = default("");    // Obsolete!!!
-        string receiveQueueClass = default(""); // Obsolete!!!
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
