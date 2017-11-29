@@ -207,7 +207,7 @@ simple TCP like ITCP
         int windowScalingFactor = default(-1); // Window Scaling Factor to the power of 2. -1 indicates that manual window scaling is turned off.
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
-        string tcpAlgorithmClass = default("TCPReno"); // TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl/DumbTCP
+        string tcpAlgorithmClass @enum("TCPVegas", "TCPWestwood", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPNoCongestionControl") = default("TCPReno");
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
