@@ -28,7 +28,6 @@ APSKRadio -> ApskRadio
 APSKScalarReceiver -> ApskScalarReceiver
 APSKScalarTransmitter -> ApskScalarTransmitter
 APSKSymbol -> ApskSymbol
-ARP -> Arp
 ARPCache -> ArpCache
 ARPCacheEntry -> ArpCacheEntry
 ARPOpcode -> ArpOpcode
@@ -70,7 +69,6 @@ BGPUpdatePathAttributesNextHop -> BgpUpdatePathAttributesNextHop
 BGPUpdatePathAttributesOrigin -> BgpUpdatePathAttributesOrigin
 BGPUpdateWithdrawnRoutes -> BgpUpdateWithdrawnRoutes
 BMFileMap -> BmFileMap
-BPDU -> Bpdu
 BPSKModulation -> BpskModulation
 BRTransmitIfEntry -> BrTransmitIfEntry
 BULExpiryIfEntry -> BulExpiryIfEntry
@@ -80,7 +78,6 @@ BVHTree -> BvhTree
 BVHTreeVisitor -> BvhTreeVisitor
 CCCVariant -> CccVariant
 CNList -> CnList
-CSMA -> Csma
 CSMAHeader -> CsmaHeader
 CUCVariant -> CucVariant
 DADEntry -> DadEntry
@@ -102,7 +99,6 @@ DISTR_TYPE -> DistrType
 DPSKModulationBase -> DpskModulationBase
 DQPSKModulation -> DqpskModulation
 DRPriorityOption -> DrPriorityOption
-DSCP -> Dscp
 DSCPMarker -> DscpMarker
 DSSSOQPSK16Modulation -> DsssOqpsk16Modulation
 DYMOMetricType -> DymoMetricType
@@ -129,7 +125,6 @@ FilterSpecObj_t -> FilterSpecObj
 FlowSpecObj_t -> FlowSpecObj
 GFSKModulationBase -> GfskModulationBase
 GLOVariant -> GloVariant
-GPSR -> Gpsr
 GPSRBeacon -> GpsrBeacon
 GPSRForwardingMode -> GpsrForwardingMode
 GPSROption -> GpsrOption
@@ -141,7 +136,6 @@ GlobalARP -> GlobalArp
 HelloState_t -> HelloState
 IAPSKModulation -> IApskModulation
 IARP -> IArp
-ICMP -> Icmp
 ICMPCode -> IcmpCode
 ICMPDestinationUnreachableCodes -> IcmpDestinationUnreachableCodes
 ICMPEchoReply -> IcmpEchoReply
@@ -151,7 +145,6 @@ ICMPParameterProblemSubcodes -> IcmpParameterProblemSubcodes
 ICMPRedirectSubcodes -> IcmpRedirectSubcodes
 ICMPTimeExceededSubcodes -> IcmpTimeExceededSubcodes
 ICMPType -> IcmpType
-ICMPv6 -> Icmpv6
 ICMPv6DEST_UN -> Icmpv6DestUn
 ICMPv6HeaderSerializer -> Icmpv6HeaderSerializer
 ICMPv6Type -> Icmpv6Type
@@ -169,11 +162,9 @@ IGMPTimerKind -> IgmpTimerKind
 IGMPType -> IgmpType
 IGMPv1Query -> Igmpv1Query
 IGMPv1Report -> Igmpv1Report
-IGMPv2 -> Igmpv2
 IGMPv2Leave -> Igmpv2Leave
 IGMPv2Query -> Igmpv2Query
 IGMPv2Report -> Igmpv2Report
-IGMPv3 -> Igmpv3
 IGMPv3Query -> Igmpv3Query
 IGMPv3Query_Base -> Igmpv3Query_Base
 IGMPv3Report -> Igmpv3Report
@@ -294,7 +285,6 @@ Ieee802154UWBIRMode -> Ieee802154UwbIrMode
 Ieee802154UWBIRReceiver -> Ieee802154UwbIrReceiver
 Ieee802154UWBIRTransmitter -> Ieee802154UwbIrTransmitter
 LANPruneDelayOption -> LanPruneDelayOption
-LDP -> Ldp
 LDPAddress -> LdpAddress
 LDPHello -> LdpHello
 LDPIni -> LdpIni
@@ -329,7 +319,6 @@ MBVariant -> MbVariant
 MFSKModulation -> MfskModulation
 MIPv6HAInformation -> Mipv6HaInformation
 MIPv6NDAdvertisementInterval -> Mipv6NdAdvertisementInterval
-MPLS -> Mpls
 MPSKModulation -> MpskModulation
 MQAMModulation -> MqamModulation
 MQAMModulationBase -> MqamModulationBase
@@ -378,13 +367,11 @@ PIMPacket -> PimPacket
 PIMPacketType -> PimPacketType
 PIMRegister -> PimRegister
 PIMRegisterStop -> PimRegisterStop
-PIMSM -> PimSm
 PIMSMOutInterface -> PimSmOutInterface
 PIMSplitter -> PimSplitter
 PIMStateRefresh -> PimStateRefresh
 PIMTimerKind -> PimTimerKind
 PPMModulationBase -> PpmModulationBase
-PPP -> Ppp
 PSBVector -> PsbVector
 PathStateBlock_t -> PathStateBlock
 QAM16Modulation -> Qam16Modulation
@@ -412,8 +399,6 @@ RREQIdentifierCompare -> RreqIdentifierCompare
 RREQTimer -> RreqTimer
 RREQWaitRREPTimer -> RreqWaitRrepTimer
 RSBVector -> RsbVector
-RSTP -> Rstp
-RSVP -> Rsvp
 RSVPHelloMsg -> RsvpHelloMsg
 RSVPHelloMsg_Base -> RsvpHelloMsg_Base
 RSVPMessage -> RsvpMessage
@@ -431,7 +416,6 @@ RSVPResvMsg -> RsvpResvMsg
 RSVPResvMsg_Base -> RsvpResvMsg_Base
 RSVPResvTear -> RsvpResvTear
 RSVPResvTear_Base -> RsvpResvTear_Base
-RTCP -> Rtcp
 RTCPByePacket -> RtcpByePacket
 RTCPByePacket_Base -> RtcpByePacket_Base
 RTCPCompoundPacket -> RtcpCompoundPacket
@@ -444,7 +428,6 @@ RTCPSDESPacket -> RtcpSdesPacket
 RTCPSDESPacket_Base -> RtcpSdesPacket_Base
 RTCPSenderReportPacket -> RtcpSenderReportPacket
 RTCPSenderReportPacket_Base -> RtcpSenderReportPacket_Base
-RTP -> Rtp
 RTPAVProfile -> RtpAvProfile
 RTPAVProfilePayload32Receiver -> RtpAvProfilePayload32Receiver
 RTPAVProfilePayload32Sender -> RtpAvProfilePayload32Sender
@@ -495,7 +478,6 @@ SSRCGate -> SsrcGate
 SSRCGateMap -> SsrcGateMap
 STAInfo -> StaInfo
 STAList -> StaList
-STP -> Stp
 STPBase -> StpBase
 STPTester -> StpTester
 SUIPathLoss -> SuiPathLoss
@@ -573,7 +555,6 @@ TCP_NSC_Connection -> TcpNscConnection
 TCP_NSC_ReceiveQueue -> TcpNscReceiveQueue
 TCP_NSC_SendQueue -> TcpNscSendQueue
 TCP_lwIP -> TcpLwip
-TED -> Ted
 TEDChangeInfo -> TedChangeInfo
 TELinkStateInfo -> TeLinkStateInfo
 TELinkStateInfoVector -> TeLinkStateInfoVector
