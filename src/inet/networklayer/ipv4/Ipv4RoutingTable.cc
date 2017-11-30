@@ -179,7 +179,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         invalidateCache();
     }
     else if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED) {
-        // if anything IPv4-related changes in the interfaces, interface netmask
+        // if anything Ipv4-related changes in the interfaces, interface netmask
         // based routes have to be re-built.
         updateNetmaskRoutes();
     }
@@ -331,7 +331,7 @@ void Ipv4RoutingTable::configureLoopbackForIPv4()
 {
     InterfaceEntry *ie = ift->getFirstLoopbackInterface();
     if (ie) {
-        // add IPv4 info. Set 127.0.0.1/8 as address by default --
+        // add Ipv4 info. Set 127.0.0.1/8 as address by default --
         // we may reconfigure later it to be the routerId
         Ipv4InterfaceData *d = new Ipv4InterfaceData();
         d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);

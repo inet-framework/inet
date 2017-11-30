@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -47,22 +47,22 @@ namespace inet {
 
 namespace tcp {
 
-Define_Module(TCP);
+Define_Module(Tcp);
 
-simsignal_t TCP::tcpConnectionAddedSignal = registerSignal("tcpConnectionAdded");
-simsignal_t TCP::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemoved");
+simsignal_t Tcp::tcpConnectionAddedSignal = registerSignal("tcpConnectionAdded");
+simsignal_t Tcp::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemoved");
 
 #define EPHEMERAL_PORTRANGE_START    1024
 #define EPHEMERAL_PORTRANGE_END      5000
 
-static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
+static std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
 {
     os << "loc=" << sp.localAddr << ":" << sp.localPort << " "
        << "rem=" << sp.remoteAddr << ":" << sp.remotePort;
     return os;
 }
 
-static std::ostream& operator<<(std::ostream& os, const TCP::AppConnKey& app)
+static std::ostream& operator<<(std::ostream& os, const Tcp::AppConnKey& app)
 {
     os << "socketId=" << app.socketId;
     return os;
@@ -75,7 +75,7 @@ static std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
     return os;
 }
 
-void TCP::initialize(int stage)
+void Tcp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -119,7 +119,7 @@ void TCP::initialize(int stage)
     }
 }
 
-TCP::~TCP()
+Tcp::~Tcp()
 {
     while (!tcpAppConnMap.empty()) {
         auto i = tcpAppConnMap.begin();
@@ -128,7 +128,7 @@ TCP::~TCP()
     }
 }
 
-bool TCP::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
+bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
 {
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
@@ -175,12 +175,12 @@ bool TCP::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }
 
-void TCP::handleMessage(cMessage *msg)
+void Tcp::handleMessage(cMessage *msg)
 {
     if (!isOperational) {
         if (msg->isSelfMessage())
             throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV_ERROR << "TCP is turned off, dropping '" << msg->getName() << "' message\n";
+        EV_ERROR << "Tcp is turned off, dropping '" << msg->getName() << "' message\n";
         delete msg;
     }
     else if (msg->isSelfMessage()) {
@@ -193,7 +193,7 @@ void TCP::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
-            EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
+            EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
             delete msg;
         }
         else if (protocol == &Protocol::tcp) {
@@ -208,7 +208,7 @@ void TCP::handleMessage(cMessage *msg)
             //interfaceId = controlInfo->getInterfaceId();
 
             if (!checkCrc(tcpHeader, packet)) {
-                EV_WARN << "TCP segment has wrong CRC, dropped\n";
+                EV_WARN << "Tcp segment has wrong CRC, dropped\n";
                 delete packet;
                 return;
             }
@@ -241,7 +241,7 @@ void TCP::handleMessage(cMessage *msg)
             key.socketId = socketId;
             tcpAppConnMap[key] = conn;
 
-            EV_INFO << "TCP connection created for " << msg << "\n";
+            EV_INFO << "Tcp connection created for " << msg << "\n";
         }
         bool ret = conn->processAppCommand(msg);
         if (!ret)
@@ -249,12 +249,12 @@ void TCP::handleMessage(cMessage *msg)
     }
 }
 
-TcpConnection *TCP::createConnection(int socketId)
+TcpConnection *Tcp::createConnection(int socketId)
 {
     return new TcpConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TcpConnection *tmp = new TcpConnection(this);
     tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
@@ -262,7 +262,7 @@ void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& 
     delete packet;
 }
 
-void TCP::refreshDisplay() const
+void Tcp::refreshDisplay() const
 {
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display
@@ -368,7 +368,7 @@ void TCP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TcpConnection *TCP::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;
@@ -409,7 +409,7 @@ TcpConnection *TCP::findConnForSegment(const Ptr<const TcpHeader>& tcpseg, L3Add
     return nullptr;
 }
 
-TcpConnection *TCP::findConnForApp(int socketId)
+TcpConnection *Tcp::findConnForApp(int socketId)
 {
     AppConnKey key;
     key.socketId = socketId;
@@ -418,7 +418,7 @@ TcpConnection *TCP::findConnForApp(int socketId)
     return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
-ushort TCP::getEphemeralPort()
+ushort Tcp::getEphemeralPort()
 {
     // start at the last allocated port number + 1, and search for an unused one
     ushort searchUntil = lastEphemeralPort++;
@@ -439,7 +439,7 @@ ushort TCP::getEphemeralPort()
     return lastEphemeralPort;
 }
 
-void TCP::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // update addresses/ports in TcpConnection
     SockPair key;
@@ -468,7 +468,7 @@ void TCP::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remote
         usedEphemeralPorts.insert(localPort);
 }
 
-void TCP::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+void Tcp::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // find with existing address/port pair...
     SockPair key;
@@ -493,7 +493,7 @@ void TCP::updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address rem
     // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
 }
 
-void TCP::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
+void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // update conn's socket pair, and register newConn (which'll keep LISTENing)
     updateSockPair(conn, localAddr, remoteAddr, localPort, remotePort);
@@ -512,9 +512,9 @@ void TCP::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Add
     tcpAppConnMap[key] = newConn;
 }
 
-void TCP::removeConnection(TcpConnection *conn)
+void Tcp::removeConnection(TcpConnection *conn)
 {
-    EV_INFO << "Deleting TCP connection\n";
+    EV_INFO << "Deleting Tcp connection\n";
 
     AppConnKey key;
     key.socketId = conn->socketId;
@@ -538,22 +538,22 @@ void TCP::removeConnection(TcpConnection *conn)
     delete conn;
 }
 
-void TCP::finish()
+void Tcp::finish()
 {
     EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
-TcpSendQueue *TCP::createSendQueue()
+TcpSendQueue *Tcp::createSendQueue()
 {
     return new TcpSendQueue();
 }
 
-TcpReceiveQueue *TCP::createReceiveQueue()
+TcpReceiveQueue *Tcp::createReceiveQueue()
 {
     return new TcpReceiveQueue();
 }
 
-bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Tcp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -584,7 +584,7 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     return true;
 }
 
-void TCP::reset()
+void Tcp::reset()
 {
     for (auto & elem : tcpAppConnMap)
         delete elem.second;

@@ -20,11 +20,11 @@
 
 //
 // Implementation of RFC 2473
-// Generic Packet Tunneling in IPv6
+// Generic Packet Tunneling in Ipv6
 //
 // This module implements the basic tunneling functionality.
 // Packet flow is modeled as in the RFC: each two input and output
-// gates are used to exchange packets with the IPv6 core.
+// gates are used to exchange packets with the Ipv6 core.
 //
 // Not implemented:
 //  - 4.1.1
@@ -157,7 +157,7 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
         tunnels[vIfIndexTop].flowLabel = 0;
 
         // 6.3
-        // The tunnel hop limit default value for hosts is the IPv6 Neighbor
+        // The tunnel hop limit default value for hosts is the Ipv6 Neighbor
         // Discovery advertised hop limit [ND-Spec].
         if (rt->isRouter())
             tunnels[vIfIndexTop].hopLimit = IPv6__INET_DEFAULT_ROUTER_HOPLIMIT;
@@ -412,7 +412,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             rh2 = tunnels[vIfIndex].exit;    // HoA
         }
 
-        // get rid of the encapsulation of the IPv6 module
+        // get rid of the encapsulation of the Ipv6 module
         packet->popHeader<Ipv6Header>();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
 
@@ -459,7 +459,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     else {
 #endif    // WITH_xMIPv6
       // normal tunnel - just modify controlInfo and send
-      // datagram back to IPv6 module for encapsulation
+      // datagram back to Ipv6 module for encapsulation
 
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = packet->ensureTag<L3AddressReq>();
@@ -476,7 +476,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
 void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
-    // decapsulation is performed in IPv6 module
+    // decapsulation is performed in Ipv6 module
     Ipv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
 #ifdef WITH_xMIPv6

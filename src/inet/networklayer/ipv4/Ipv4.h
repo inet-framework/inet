@@ -40,9 +40,9 @@ class IInterfaceTable;
 class IIpv4RoutingTable;
 
 /**
- * Implements the IPv4 protocol.
+ * Implements the Ipv4 protocol.
  */
-class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -144,7 +144,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void preroutingFinish(Packet *packet);
 
     /**
-     * Handle messages (typically packets to be send in IPv4) from transport or ICMP.
+     * Handle messages (typically packets to be send in Ipv4) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handlePacketFromHL(Packet *packet);
@@ -219,8 +219,8 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual Packet *prepareForForwarding(Packet *packet) const;
 
   public:
-    IPv4();
-    virtual ~IPv4();
+    Ipv4();
+    virtual ~Ipv4();
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
@@ -230,7 +230,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void handleMessage(cMessage *msg) override;
 
     /**
-     * Processing of IPv4 datagrams. Called when a datagram reaches the front
+     * Processing of Ipv4 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
     virtual void endService(cPacket *packet) override;

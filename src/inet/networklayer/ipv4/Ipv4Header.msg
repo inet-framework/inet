@@ -32,10 +32,10 @@ cplusplus {{
 namespace inet;
 
 cplusplus {{
-// default IPv4 header length: 20 bytes
+// default Ipv4 header length: 20 bytes
 const int IP_HEADER_BYTES = 20;
 
-// maximum IPv4 header length (base+options): 60 = 4 * 15 bytes
+// maximum Ipv4 header length (base+options): 60 = 4 * 15 bytes
 const int IP_MAX_HEADER_BYTES = 60;
 
 // option type fields
@@ -51,7 +51,7 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 
 //
-// IPv4 options class
+// Ipv4 options class
 //
 enum IpOptionClass
 {
@@ -62,7 +62,7 @@ enum IpOptionClass
 };
 
 //
-// IPv4 option types
+// Ipv4 option types
 //
 enum IpOption
 {
@@ -82,7 +82,7 @@ enum IpOption
 };
 
 //
-// The timestamp flag uses the same numeric values as the IPv4 Protocol
+// The timestamp flag uses the same numeric values as the Ipv4 Protocol
 //
 enum TimestampFlag
 {
@@ -158,7 +158,7 @@ class Ipv4OptionUnknown extends Ipv4Option
 
 
 //
-// Represents an IPv4 datagram.
+// Represents an Ipv4 datagram.
 //
 // Uses the following cPacket fields:
 //    - getByteLength() / setByteLength() to represent total datagram length

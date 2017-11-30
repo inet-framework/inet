@@ -29,7 +29,7 @@ class InterfaceEntry;
 class IIpv4RoutingTable;
 
 /**
- * IPv4 unicast route in IIpv4RoutingTable.
+ * Ipv4 unicast route in IIpv4RoutingTable.
  *
  * @see IIpv4RoutingTable, Ipv4RoutingTable
  */
@@ -134,15 +134,15 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
     virtual void setDestination(const L3Address& dest) override { setDestination(dest.toIPv4()); }
     virtual void setPrefixLength(int len) override { setNetmask(Ipv4Address::makeNetmask(len)); }
-    virtual void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIPv4()); }    //TODO rename IPv4 method
+    virtual void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIPv4()); }    //TODO rename Ipv4 method
 
     virtual L3Address getDestinationAsGeneric() const override { return getDestination(); }
     virtual int getPrefixLength() const override { return getNetmask().getNetmaskLength(); }
-    virtual L3Address getNextHopAsGeneric() const override { return getGateway(); }    //TODO rename IPv4 method
+    virtual L3Address getNextHopAsGeneric() const override { return getGateway(); }    //TODO rename Ipv4 method
 };
 
 /**
- * IPv4 multicast route in IIpv4RoutingTable.
+ * Ipv4 multicast route in IIpv4RoutingTable.
  * Multicast routing protocols may extend this class to store protocol
  * specific fields.
  *
@@ -252,7 +252,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIPv4()); }
 
     virtual bool isEnabled() const override { return true;    /*TODO: isEnabled();*/ }
-    virtual bool isExpired() const override { return !isValid(); }    //TODO rename IPv4 method
+    virtual bool isExpired() const override { return !isValid(); }    //TODO rename Ipv4 method
     virtual L3Address getOriginAsGeneric() const override { return getOrigin(); }
     virtual int getPrefixLength() const override { return getOriginNetmask().getNetmaskLength(); }    //TODO inconsistent naming
     virtual L3Address getMulticastGroupAsGeneric() const override { return getMulticastGroup(); }

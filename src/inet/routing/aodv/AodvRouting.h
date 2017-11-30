@@ -68,7 +68,7 @@ class INET_API AodvRouting : public cSimpleModule, public ILifecycle, public Net
     };
 
     // context
-    IL3AddressType *addressType = nullptr;    // to support both IPv4 and v6 addresses.
+    IL3AddressType *addressType = nullptr;    // to support both Ipv4 and v6 addresses.
 
     // environment
     cModule *host = nullptr;

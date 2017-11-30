@@ -18,32 +18,32 @@
 package inet.networklayer.ipv6;
 
 //
-// Implements the IPv6 protocol.
+// Implements the Ipv6 protocol.
 //
-// An overview of the IPv6 implementation in the INET Framework is
+// An overview of the Ipv6 implementation in the INET Framework is
 // provided <a href="ipv6overview.html">here</a>.
 //
-// The IPv6 protocol header is represented by the ~IPv6Datagram message class.
+// The Ipv6 protocol header is represented by the ~IPv6Datagram message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over IPv6 from a higher layer protocol, the module should
+// To send a packet over Ipv6 from a higher layer protocol, the module should
 // fill in an ~Ipv6ControlInfo object, attach it to the packet with cMessage's
-// setControlInfo() method, the send it to the ~IPv6 module.
+// setControlInfo() method, the send it to the ~Ipv6 module.
 //
-// When ~IPv6 sends up a packet to a higher layer protocol, it will also attach
-// an ~Ipv6ControlInfo to the packet, with the source and destination IPv6 address,
-// etc. of the IPv6 datagram in which the packet arrived.
+// When ~Ipv6 sends up a packet to a higher layer protocol, it will also attach
+// an ~Ipv6ControlInfo to the packet, with the source and destination Ipv6 address,
+// etc. of the Ipv6 datagram in which the packet arrived.
 //
-// ~IPv6 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the IPv6 module,
+// ~Ipv6 can serve several higher-layer protocols. The higher layer protocols
+// should call registerProtocol with their gate towards the Ipv6 module,
 // for fill up the protocol-to-gateindex map. When delivering packets to them,
-// the output gate is determined from the Protocol field in the IPv6 header.
+// the output gate is determined from the Protocol field in the Ipv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //
 // The routing table is stored in the module ~Ipv6RoutingTable. When a datagram
-// needs to be routed, IPv6 queries ~Ipv6RoutingTable for the output interface
+// needs to be routed, Ipv6 queries ~Ipv6RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
 // calling C++ methods of ~Ipv6RoutingTable. No message exchange with ~Ipv6RoutingTable
 // takes place.
@@ -55,7 +55,7 @@ package inet.networklayer.ipv6;
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~IPv6 contains a FIFO which queues up IPv6 datagrams;
+// In the current form, ~Ipv6 contains a FIFO which queues up Ipv6 datagrams;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
@@ -63,7 +63,7 @@ package inet.networklayer.ipv6;
 //
 // @author Andras Varga
 //
-simple IPv6
+simple Ipv6
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

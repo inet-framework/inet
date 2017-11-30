@@ -20,7 +20,7 @@ package inet.transportlayer.contract;
 //
 // Interface for TCP protocol implementations. All TCP implementations should
 // implement this (i.e. declared as: TCP like ITcp)
-// The existing implementations are these: ~TCP, ~TcpNsc and ~TcpLwip.
+// The existing implementations are these: ~Tcp, ~TcpNsc and ~TcpLwip.
 //
 // <b>Communication with applications</b>
 //

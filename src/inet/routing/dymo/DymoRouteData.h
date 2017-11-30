@@ -22,14 +22,14 @@
 
 #include <omnetpp.h>
 #include "inet/networklayer/contract/IRoute.h"
-#include "inet/routing/dymo/DYMO_m.h"
+#include "inet/routing/dymo/Dymo_m.h"
 
 namespace inet {
 
 namespace dymo {
 
 /**
- * DYMO-specific extra route data attached to routes in the routing table.
+ * Dymo-specific extra route data attached to routes in the routing table.
  */
 class INET_API DymoRouteData : public cObject
 {

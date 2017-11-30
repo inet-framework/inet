@@ -95,7 +95,7 @@ package inet.networklayer.ipv4;
 //
 // <b>Disabling IGMP</b>
 //
-// The IPv4 ~NetworkLayer contains an instance of the IGMP
+// The Ipv4 ~NetworkLayer contains an instance of the IGMP
 // module. IGMP can be turned off by setting the 'enabled'
 // parameter to false. When disabled, then no IGMP message
 // is generated, and incoming IGMP messages are ignored.
@@ -121,7 +121,7 @@ simple Igmpv3 like IIgmp
 
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
-        output ipOut @labels(Ipv4ControlInfo/down); // to ~IPv4
+        output ipOut @labels(Ipv4ControlInfo/down); // to ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);
         output routerOut @labels(Ipv4ControlInfo/down);

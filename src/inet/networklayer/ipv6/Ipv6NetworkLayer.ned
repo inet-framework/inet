@@ -27,7 +27,7 @@ import inet.networklayer.icmpv6.Icmpv6;
 import inet.networklayer.icmpv6.Ipv6NeighbourDiscovery;
 
 //
-// Represents an IPv6 network layer (L3).
+// Represents an Ipv6 network layer (L3).
 //
 // The module has ports to connect to a higher layer (TCP, UDP) and
 // several network interfaces.
@@ -77,7 +77,7 @@ module Ipv6NetworkLayer like INetworkLayer
                 @display("p=300,400");
         }
         // TODO: rename to ip
-        ipv6: IPv6 {
+        ipv6: Ipv6 {
             parameters:
                 @display("p=450,400");
         }

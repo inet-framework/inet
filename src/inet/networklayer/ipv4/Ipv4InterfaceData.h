@@ -80,7 +80,7 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
 };
 
 /**
- * IPv4-specific data in an InterfaceEntry. Stores interface IPv4 address,
+ * Ipv4-specific data in an InterfaceEntry. Stores interface Ipv4 address,
  * netmask, metric, etc.
  *
  * @see InterfaceEntry
@@ -144,7 +144,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
         std::string detailedInfo();
     };
 
-    Ipv4Address inetAddr;    ///< IPv4 address of interface
+    Ipv4Address inetAddr;    ///< Ipv4 address of interface
     Ipv4Address netmask;    ///< netmask
     int metric;    ///< link "cost"; see e.g. MS KB article Q299540
     HostMulticastData *hostData;

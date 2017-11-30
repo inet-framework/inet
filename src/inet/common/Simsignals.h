@@ -69,7 +69,7 @@ extern INET_API simsignal_t    // admin
     NF_MROUTE_DELETED,
     NF_MROUTE_CHANGED,
 
-// layer 3 - IPv4
+// layer 3 - Ipv4
     NF_IPv4_MCAST_JOIN,
     NF_IPv4_MCAST_LEAVE,
     NF_IPv4_MCAST_CHANGE,
@@ -87,7 +87,7 @@ extern INET_API simsignal_t    // admin
     NF_PIM_NEIGHBOR_DELETED,
     NF_PIM_NEIGHBOR_CHANGED,
 
-// layer 3 - IPv6
+// layer 3 - Ipv6
     NF_IPv6_HANDOVER_OCCURRED,
     NF_MIPv6_RO_COMPLETED,
     NF_IPv6_MCAST_JOIN,

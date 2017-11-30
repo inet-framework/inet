@@ -92,7 +92,7 @@ class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtoco
     virtual void processEchoReply(Packet *packet, const Ptr<const Icmpv6EchoReplyMsg>& header);
 
     /**
-     * Validate the received IPv6 datagram before responding with error message.
+     * Validate the received Ipv6 datagram before responding with error message.
      */
     virtual bool validateDatagramPromptingError(Packet *packet);
 

@@ -26,7 +26,7 @@
 namespace inet {
 
 /**
- * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
+ * Represents an Ipv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
  */
 class INET_API Ipv6Header : public Ipv6Header_Base
@@ -102,13 +102,13 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
 
     /**
-     * Calculates the length of the IPv6 header plus the extension
+     * Calculates the length of the Ipv6 header plus the extension
      * headers.
      */
     virtual int calculateHeaderByteLength() const;
 
     /**
-     * Calculates the length of the unfragmentable part of IPv6 header
+     * Calculates the length of the unfragmentable part of Ipv6 header
      * plus the extension headers.
      */
     virtual int calculateUnfragmentableHeaderByteLength() const;

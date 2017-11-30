@@ -40,7 +40,7 @@ const short PORT_UNDEF = 0;
 const short PORT_MAX = 0x7fff;
 
 /**
- * IPv4 address.
+ * Ipv4 address.
  */
 class INET_API Ipv4Address
 {
@@ -49,7 +49,7 @@ class INET_API Ipv4Address
     uint32 addr;
 
   protected:
-    // Parses IPv4 address into the given bytes, and returns true if syntax was OK.
+    // Parses Ipv4 address into the given bytes, and returns true if syntax was OK.
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
     // Throws error if length is outside 0..32
     static void _checkNetmaskLength(int length);
@@ -58,9 +58,9 @@ class INET_API Ipv4Address
 
   public:
     /**
-     * IPv4 address category
+     * Ipv4 address category
      *
-     * RFC 5735               Special Use IPv4 Addresses           January 2010
+     * RFC 5735               Special Use Ipv4 Addresses           January 2010
      * 4.  Summary Table
      * Address Block       Present Use                Reference
      * ------------------------------------------------------------------
@@ -123,17 +123,17 @@ class INET_API Ipv4Address
     Ipv4Address() { addr = 0; }
 
     /**
-     * IPv4 address as int
+     * Ipv4 address as int
      */
     explicit Ipv4Address(uint32 ip) { addr = ip; }
 
     /**
-     * IPv4 address bytes: "i0.i1.i2.i3" format
+     * Ipv4 address bytes: "i0.i1.i2.i3" format
      */
     Ipv4Address(int i0, int i1, int i2, int i3) { set(i0, i1, i2, i3); }
 
     /**
-     * IPv4 address given as text: "192.66.86.1"
+     * Ipv4 address given as text: "192.66.86.1"
      */
     explicit Ipv4Address(const char *text) { set(text); }
 
@@ -148,17 +148,17 @@ class INET_API Ipv4Address
     /** name Setting the address */
     //@{
     /**
-     * IPv4 address as int
+     * Ipv4 address as int
      */
     void set(uint32 ip) { addr = ip; }
 
     /**
-     * IPv4 address bytes: "i0.i1.i2.i3" format
+     * Ipv4 address bytes: "i0.i1.i2.i3" format
      */
     void set(int i0, int i1, int i2, int i3);
 
     /**
-     * IPv4 address given as text: "192.66.86.1"
+     * Ipv4 address given as text: "192.66.86.1"
      */
     void set(const char *t);
     //@}
@@ -209,7 +209,7 @@ class INET_API Ipv4Address
     char getIPClass() const;
 
     /**
-     * Get the IPv4 address category.
+     * Get the Ipv4 address category.
      */
     AddressCategory getAddressCategory() const;
 
@@ -267,7 +267,7 @@ class INET_API Ipv4Address
      * E.g. if the address is 130.206.72.237, and to_cmp 130.206.72.0,
      * 24 will be returned.
      *
-     * Typical usage for comparing IPv4 prefixes.
+     * Typical usage for comparing Ipv4 prefixes.
      */
     int getNumMatchingPrefixBits(const Ipv4Address& to_cmp) const;
 
@@ -311,7 +311,7 @@ class INET_API Ipv4Address
     bool operator!=(const Ipv4Address& addr1) const { return !equals(addr1); }
 
     /**
-     * Compares two IPv4 addresses.
+     * Compares two Ipv4 addresses.
      */
     bool operator<(const Ipv4Address& addr1) const { return getInt() < addr1.getInt(); }
     bool operator<=(const Ipv4Address& addr1) const { return getInt() <= addr1.getInt(); }
@@ -319,10 +319,10 @@ class INET_API Ipv4Address
     bool operator>=(const Ipv4Address& addr1) const { return getInt() >= addr1.getInt(); }
 
     /**
-     * Returns true if the format of the string corresponds to an IPv4 address
+     * Returns true if the format of the string corresponds to an Ipv4 address
      * with the dotted notation ("192.66.86.1"), and false otherwise.
      *
-     * This function can be used to verify an IPv4 address string before assigning
+     * This function can be used to verify an Ipv4 address string before assigning
      * it to an Ipv4Address object (both its ctor and set() function raises an
      * error if the string has invalid format.)
      */

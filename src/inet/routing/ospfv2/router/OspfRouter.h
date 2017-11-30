@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OspfArea.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
@@ -105,9 +105,9 @@ class INET_API Router
     Area *getAreaByID(AreaId areaID);
 
     /**
-     * Returns the Area pointer from the Area list which contains the input IPv4 address,
+     * Returns the Area pointer from the Area list which contains the input Ipv4 address,
      * nullptr if there's no such area connected to the Router.
-     * @param address [in] The IPv4 address whose containing Area we're looking for.
+     * @param address [in] The Ipv4 address whose containing Area we're looking for.
      */
     Area *getAreaByAddr(Ipv4Address address);
 
@@ -178,16 +178,16 @@ class INET_API Router
     bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
-     * Returns true if the input IPv4 address falls into any of the Router's Areas' configured
-     * IPv4 address ranges, false otherwise.
-     * @param address [in] The IPv4 address to look for.
+     * Returns true if the input Ipv4 address falls into any of the Router's Areas' configured
+     * Ipv4 address ranges, false otherwise.
+     * @param address [in] The Ipv4 address to look for.
      */
     bool isLocalAddress(Ipv4Address address) const;
 
     /**
-     * Returns true if one of the Router's Areas the same IPv4 address range configured as the
-     * input IPv4 address range, false otherwise.
-     * @param addressRange [in] The IPv4 address range to look for.
+     * Returns true if one of the Router's Areas the same Ipv4 address range configured as the
+     * input Ipv4 address range, false otherwise.
+     * @param addressRange [in] The Ipv4 address range to look for.
      */
     bool hasAddressRange(const Ipv4AddressRange& addressRange) const;
 

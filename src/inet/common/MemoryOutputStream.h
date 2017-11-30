@@ -278,7 +278,7 @@ class INET_API MemoryOutputStream {
     }
 
     /**
-     * Writes an IPv4 address to the end of the stream in big endian byte order
+     * Writes an Ipv4 address to the end of the stream in big endian byte order
      * and MSB to LSB bit order.
      */
     void writeIPv4Address(Ipv4Address address) {
@@ -286,7 +286,7 @@ class INET_API MemoryOutputStream {
     }
 
     /**
-     * Writes an IPv6 address to the end of the stream in big endian byte order
+     * Writes an Ipv6 address to the end of the stream in big endian byte order
      * and MSB to LSB bit order.
      */
     void writeIPv6Address(Ipv6Address address) {

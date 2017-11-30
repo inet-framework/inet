@@ -25,9 +25,8 @@ import inet.networklayer.contract.INetworkLayer;
 
 
 //
-// Network layer of an IPv4 node.
+// Network layer of an Ipv4 node.
 //
-// Interfaces to transport layer: TCP, UDP, echo/ping, Rsvp
 //
 module Ipv4NetworkLayer like INetworkLayer
 {
@@ -80,7 +79,7 @@ module Ipv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,300;b=480,5");
         }
-        ip: IPv4 {
+        ip: Ipv4 {
             parameters:
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=450,400;q=queue");

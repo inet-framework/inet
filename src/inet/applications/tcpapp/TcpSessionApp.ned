@@ -25,8 +25,8 @@ import inet.applications.contract.IApp;
 // or may be controlled by a "script" which is a series of
 // (time, number of bytes) pairs. May act either as client or as server,
 // and works with TCPVirtualBytesSendQueue/RcvQueue as sendQueue/receiveQueue
-// setting for ~TCP.
-// Compatible with both IPv4 (~IPv4) and ~IPv6.
+// setting for ~Tcp.
+// Compatible with both Ipv4 (~Ipv4) and ~Ipv6.
 //
 // <b>Opening the connection</b>
 //

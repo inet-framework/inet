@@ -31,7 +31,7 @@ namespace inet {
 class InterfaceEntry;
 
 /**
- * Represents an IPv4 ARP module.
+ * Represents an Ipv4 ARP module.
  */
 class INET_API IArp
 {

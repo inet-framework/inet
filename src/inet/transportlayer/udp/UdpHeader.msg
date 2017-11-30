@@ -28,7 +28,7 @@ enum UdpConstants {
 };
 
 //
-// Represents an UDP header, to be used with the ~UDP module.
+// Represents an Udp header, to be used with the ~Udp module.
 //
 class UdpHeader extends TransportHeaderBase
 {

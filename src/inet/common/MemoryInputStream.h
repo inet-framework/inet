@@ -372,7 +372,7 @@ class INET_API MemoryInputStream {
     }
 
     /**
-     * Reads an IPv4 address at the current position of the stream in big endian
+     * Reads an Ipv4 address at the current position of the stream in big endian
      * byte order and MSB to LSB bit order.
      */
     Ipv4Address readIPv4Address() {
@@ -380,7 +380,7 @@ class INET_API MemoryInputStream {
     }
 
     /**
-     * Reads an IPv6 address at the current position of the stream in big endian
+     * Reads an Ipv6 address at the current position of the stream in big endian
      * byte order and MSB to LSB bit order.
      */
     Ipv6Address readIPv6Address() {

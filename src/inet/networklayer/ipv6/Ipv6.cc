@@ -32,7 +32,7 @@
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
-#include "inet/networklayer/ipv6/IPv6.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -47,23 +47,23 @@
 
 namespace inet {
 
-#define FRAGMENT_TIMEOUT    60   // 60 sec, from IPv6 RFC
+#define FRAGMENT_TIMEOUT    60   // 60 sec, from Ipv6 RFC
 
-Define_Module(IPv6);
+Define_Module(Ipv6);
 
-IPv6::IPv6() :
+Ipv6::Ipv6() :
         curFragmentId(0)
 {
 }
 
-IPv6::~IPv6()
+Ipv6::~Ipv6()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
 }
 
 #ifdef WITH_xMIPv6
-IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const InterfaceEntry *ie, MacAddress macAddr, bool fromHL) :
+Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const InterfaceEntry *ie, MacAddress macAddr, bool fromHL) :
         packet(packet),
         ipv6Header(ipv6Header),
         ie(ie),
@@ -72,13 +72,13 @@ IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv
 {
 }
 
-IPv6::ScheduledDatagram::~ScheduledDatagram()
+Ipv6::ScheduledDatagram::~ScheduledDatagram()
 {
     delete packet;
 }
 #endif /* WITH_xMIPv6 */
 
-void IPv6::initialize(int stage)
+void Ipv6::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
@@ -116,13 +116,13 @@ void IPv6::initialize(int stage)
     }
 }
 
-void IPv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
 {
     Enter_Method("handleRegisterProtocol");
     mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
 }
 
-void IPv6::handleMessage(cMessage *msg)
+void Ipv6::handleMessage(cMessage *msg)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
@@ -153,7 +153,7 @@ void IPv6::handleMessage(cMessage *msg)
         QueueBase::handleMessage(msg);
 }
 
-void IPv6::refreshDisplay() const
+void Ipv6::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -169,7 +169,7 @@ void IPv6::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void IPv6::endService(cPacket *msg)
+void Ipv6::endService(cPacket *msg)
 {
 #ifdef WITH_xMIPv6
     // 28.09.07 - CB
@@ -182,7 +182,7 @@ void IPv6::endService(cPacket *msg)
         if (sDgram->getIE()->ipv6Data()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
             //queue.insert(sDgram);
-            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to IPv4 ARP)
+            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
         }
         else {
             // address is not tentative anymore - send out datagram
@@ -231,7 +231,7 @@ void IPv6::endService(cPacket *msg)
         }
 
         // Do not handle header biterrors, because
-        // 1. IPv6 header does not contain checksum for the header fields, each field is
+        // 1. Ipv6 header does not contain checksum for the header fields, each field is
         //    validated when they are processed.
         // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
         ASSERT(!packet->hasBitError());
@@ -252,13 +252,13 @@ void IPv6::endService(cPacket *msg)
     }
 }
 
-InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
+InterfaceEntry *Ipv6::getSourceInterfaceFrom(cPacket *packet)
 {
     auto interfaceInd = packet->getTag<InterfaceInd>();
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
-void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr)
+void Ipv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     Ipv6Address destAddr = ipv6Header->getDestAddress();
@@ -272,7 +272,7 @@ void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         routeMulticastPacket(packet, destIE, fromIE, false);
 }
 
-void IPv6::handleMessageFromHL(cPacket *msg)
+void Ipv6::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
@@ -325,7 +325,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
         datagramLocalOut(packet, destIE, nextHopAddr.toIPv6());
 }
 
-void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress)
+void Ipv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     // route packet
@@ -337,7 +337,7 @@ void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Ad
         routeMulticastPacket(packet, destIE, nullptr, true);
 }
 
-void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
+void Ipv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // TBD add option handling code here
@@ -379,7 +379,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // hop counter decrement: only if datagram arrived from network, and will be
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
-        // TBD: in IPv4, arrange TTL check like this
+        // TBD: in Ipv4, arrange TTL check like this
         packet->removePoppedChunks();
         ipv6Header = nullptr;
         const auto& newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
@@ -438,7 +438,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
     resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
 }
 
-void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6Address nextHop, bool fromHL)
+void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6Address nextHop, bool fromHL)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
@@ -483,7 +483,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     fragmentAndSend(packet, ie, macAddr, fromHL);
 }
 
-void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
+void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     const Ipv6Address& destAddr = ipv6Header->getDestAddress();
@@ -609,7 +609,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
  */
 }
 
-void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
+void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 {
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
 
@@ -696,7 +696,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     delete origPacket;
 }
 
-void IPv6::handleReceivedICMP(Packet *msg)
+void Ipv6::handleReceivedICMP(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<Icmpv6Header>();
     if (dynamicPtrCast<const Ipv6NdMessage>(icmpHeader) != nullptr) {
@@ -709,7 +709,7 @@ void IPv6::handleReceivedICMP(Packet *msg)
     }
 }
 
-void IPv6::decapsulate(Packet *packet)
+void Ipv6::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     auto ipv6Header = packet->popHeader<Ipv6Header>();
@@ -736,7 +736,7 @@ void IPv6::decapsulate(Packet *packet)
     packet->ensureTag<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 }
 
-void IPv6::encapsulate(Packet *transportPacket)
+void Ipv6::encapsulate(Packet *transportPacket)
 {
     auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
@@ -798,7 +798,7 @@ void IPv6::encapsulate(Packet *transportPacket)
     // setting IP options is currently not supported
 }
 
-void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL)
+void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // hop counter check
@@ -833,7 +833,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             // queue.insert(sDgram);
-            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to IPv4 ARP)
+            scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
     #endif /* WITH_xMIPv6 */
@@ -896,7 +896,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
     delete packet;
 }
 
-void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr)
+void Ipv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr)
 {
     packet->ensureTag<MacAddressReq>()->setDestAddress(macAddr);
     delete packet->removeTag<DispatchProtocolReq>();
@@ -906,7 +906,7 @@ void IPv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, co
     send(packet, "queueOut");
 }
 
-bool IPv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,
+bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,
         int& interfaceId, Packet *packet, bool fromHL)
 {
     // try destination cache
@@ -947,7 +947,7 @@ bool IPv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
 }
 
 #ifdef WITH_xMIPv6
-bool IPv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
+bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 {
     int noExtHeaders = ipv6Header->getExtensionHeaderArraySize();
     EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;
@@ -994,32 +994,32 @@ bool IPv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
         }
     }
 
-    // we have processed no extension headers -> the IPv6 module can continue
+    // we have processed no extension headers -> the Ipv6 module can continue
     // working on this datagram
     return true;
 }
 
 #endif /* WITH_xMIPv6 */
 
-bool IPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
 // NetFilter:
-void IPv6::registerHook(int priority, INetfilter::IHook *hook)
+void Ipv6::registerHook(int priority, INetfilter::IHook *hook)
 {
     Enter_Method("registerHook()");
     NetfilterBase::registerHook(priority, hook);
 }
 
-void IPv6::unregisterHook(INetfilter::IHook *hook)
+void Ipv6::unregisterHook(INetfilter::IHook *hook)
 {
     Enter_Method("unregisterHook()");
     NetfilterBase::unregisterHook(hook);
 }
 
-void IPv6::dropQueuedDatagram(const Packet *packet)
+void Ipv6::dropQueuedDatagram(const Packet *packet)
 {
     Enter_Method("dropQueuedDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -1031,7 +1031,7 @@ void IPv6::dropQueuedDatagram(const Packet *packet)
     }
 }
 
-void IPv6::reinjectQueuedDatagram(const Packet *packet)
+void Ipv6::reinjectQueuedDatagram(const Packet *packet)
 {
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -1070,7 +1070,7 @@ void IPv6::reinjectQueuedDatagram(const Packet *packet)
     }
 }
 
-INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet)
+INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
@@ -1096,7 +1096,7 @@ INetfilter::IHook::Result IPv6::datagramPreRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet)
+INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
@@ -1122,7 +1122,7 @@ INetfilter::IHook::Result IPv6::datagramForwardHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
@@ -1148,7 +1148,7 @@ INetfilter::IHook::Result IPv6::datagramPostRoutingHook(Packet *packet, const In
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramLocalInHook(Packet *packet, const InterfaceEntry *inIE)
+INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const InterfaceEntry *inIE)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
@@ -1174,7 +1174,7 @@ INetfilter::IHook::Result IPv6::datagramLocalInHook(Packet *packet, const Interf
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet)
+INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
@@ -1200,7 +1200,7 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void IPv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
+void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
 }

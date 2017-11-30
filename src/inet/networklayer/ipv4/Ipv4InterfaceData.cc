@@ -170,7 +170,7 @@ Ipv4InterfaceData::~Ipv4InterfaceData()
 std::string Ipv4InterfaceData::info() const
 {
     std::stringstream out;
-    out << "IPv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
+    out << "Ipv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
     if (hostData)
         out << hostData->info();
     if (routerData)

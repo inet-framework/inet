@@ -185,8 +185,8 @@ void PingApp::handleMessage(cMessage *msg)
             int l3ProtocolId = -1;
             int icmp;
             switch (destAddr.getType()) {
-                case L3Address::IPv4: icmp = IP_PROT_ICMP; l3ProtocolId = Protocol::ipv4.getId(); break;
-                case L3Address::IPv6: icmp = IP_PROT_IPv6_ICMP; l3ProtocolId = Protocol::ipv6.getId(); break;
+                case L3Address::Ipv4: icmp = IP_PROT_ICMP; l3ProtocolId = Protocol::ipv4.getId(); break;
+                case L3Address::Ipv6: icmp = IP_PROT_IPv6_ICMP; l3ProtocolId = Protocol::ipv6.getId(); break;
                 case L3Address::MODULEID:
                 case L3Address::MODULEPATH: icmp = IP_PROT_ECHO; l3ProtocolId = Protocol::gnp.getId(); break;
                     //TODO
@@ -362,7 +362,7 @@ void PingApp::sendPingRequest()
     payload->markImmutable();
 
     switch (destAddr.getType()) {
-        case L3Address::IPv4: {
+        case L3Address::Ipv4: {
 #ifdef WITH_IPv4
             const auto& request = makeShared<IcmpEchoRequest>();
             request->setIdentifier(pid);
@@ -373,10 +373,10 @@ void PingApp::sendPingRequest()
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
-            throw cRuntimeError("INET compiled without IPv4");
+            throw cRuntimeError("INET compiled without Ipv4");
 #endif
         }
-        case L3Address::IPv6: {
+        case L3Address::Ipv6: {
 #ifdef WITH_IPv6
             const auto& request = makeShared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
@@ -387,7 +387,7 @@ void PingApp::sendPingRequest()
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
-            throw cRuntimeError("INET compiled without IPv6");
+            throw cRuntimeError("INET compiled without Ipv6");
 #endif
         }
         case L3Address::MODULEID:

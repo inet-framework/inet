@@ -248,7 +248,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     // if output port was explicitly requested, use that, otherwise use GenericNetworkProtocol routing
-    // TODO: see IPv4, using destIE here leaves nextHope unspecified
+    // TODO: see Ipv4, using destIE here leaves nextHope unspecified
     L3Address nextHop;
     if (destIE && !requestedNextHop.isUnspecified()) {
         EV_DETAIL << "using manually specified output interface " << destIE->getInterfaceName() << "\n";

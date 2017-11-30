@@ -52,7 +52,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     iphdr.ip_dst.s_addr = htonl(ipv4Header->getDestAddress().getInt());
     iphdr.ip_len = htons(ipv4Header->getTotalLengthField());
     if (ipv4Header->getCrcMode() != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize IPv4 header without a properly computed CRC");
+        throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header->getCrc());
     stream.writeBytes((uint8_t *)&iphdr, B(IP_HEADER_BYTES));
 
@@ -67,7 +67,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
         }    // if options present
         if (ipv4Header->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
-            throw cRuntimeError("Serializing an IPv4 packet with wrong headerLength value: not enough for store options.\n");
+            throw cRuntimeError("Serializing an Ipv4 packet with wrong headerLength value: not enough for store options.\n");
         auto writtenLength = B(stream.getLength() - startPosition).get();
         if (writtenLength < headerLength)
             stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);

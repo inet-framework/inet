@@ -155,7 +155,7 @@ std::string Ipv6InterfaceData::info() const
 {
     // FIXME FIXME FIXME FIXME info() should never print a newline
     std::ostringstream os;
-    os << "IPv6:{" << endl;
+    os << "Ipv6:{" << endl;
     for (int i = 0; i < getNumAddresses(); i++) {
         os << (i ? "\t            , " : "\tAddrs:") << getAddress(i)
            << "(" << Ipv6Address::scopeName(getAddress(i).getScope())

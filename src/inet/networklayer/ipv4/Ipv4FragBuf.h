@@ -32,7 +32,7 @@ class Icmp;
 class Ipv4Header;
 
 /**
- * Reassembly buffer for fragmented IPv4 datagrams.
+ * Reassembly buffer for fragmented Ipv4 datagrams.
  */
 class INET_API Ipv4FragBuf
 {

@@ -26,11 +26,11 @@
 #endif
 
 #ifdef WITH_TCP_INET
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #endif
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDP.h"
+#include "inet/transportlayer/udp/Udp.h"
 #endif
 
 namespace inet {
@@ -42,12 +42,12 @@ Define_Module(TransportRouteOsgVisualizer);
 bool TransportRouteOsgVisualizer::isPathStart(cModule *module) const
 {
 #ifdef WITH_UDP
-    if (dynamic_cast<UDP *>(module) != nullptr)
+    if (dynamic_cast<Udp *>(module) != nullptr)
         return true;
 #endif
 
 #ifdef WITH_TCP_INET
-    if (dynamic_cast<tcp::TCP *>(module) != nullptr)
+    if (dynamic_cast<tcp::Tcp *>(module) != nullptr)
         return true;
 #endif
 
@@ -57,12 +57,12 @@ bool TransportRouteOsgVisualizer::isPathStart(cModule *module) const
 bool TransportRouteOsgVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_UDP
-    if (dynamic_cast<UDP *>(module) != nullptr)
+    if (dynamic_cast<Udp *>(module) != nullptr)
         return true;
 #endif
 
 #ifdef WITH_TCP_INET
-    if (dynamic_cast<tcp::TCP *>(module) != nullptr)
+    if (dynamic_cast<tcp::Tcp *>(module) != nullptr)
         return true;
 #endif
 

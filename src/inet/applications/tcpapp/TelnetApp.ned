@@ -22,7 +22,7 @@ import inet.applications.contract.IApp;
 //
 // Models Telnet sessions with a specific user behaviour.
 // The server app should be ~TcpGenericSrvApp.
-// Compatible with both ~IPv4 and ~IPv6.
+// Compatible with both ~Ipv4 and ~Ipv6.
 //
 // NOTE: This module emulates a very specific user behaviour, and as such,
 // it should be viewed as an example rather than a generic Telnet model.

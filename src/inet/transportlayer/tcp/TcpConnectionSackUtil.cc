@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <algorithm>    // min,max
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -54,7 +54,7 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpseg, const 
     if (fsm.getState() != TCP_S_SYN_RCVD && fsm.getState() != TCP_S_ESTABLISHED
         && fsm.getState() != TCP_S_FIN_WAIT_1 && fsm.getState() != TCP_S_FIN_WAIT_2)
     {
-        EV_ERROR << "ERROR: TCP Header Option SACK received, but in unexpected state\n";
+        EV_ERROR << "ERROR: Tcp Header Option SACK received, but in unexpected state\n";
         return false;
     }
 

@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 //
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them.
-// Compatible with both ~IPv4 and ~IPv6.
+// Compatible with both ~Ipv4 and ~Ipv6.
 //
 // <b>Configuring App</b>
 //

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {
 

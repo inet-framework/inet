@@ -220,7 +220,7 @@ class BgpUpdatePathAttributeList extends cObject
 //     - Attribute Values (variable size)
 // - Network Layer Reachability Information: (variable size)
 //    - Length : 1 octet
-//    - prefix : variable size (contains the IP prefix; IPv4: 4 octets)
+//    - prefix : variable size (contains the IP prefix; Ipv4: 4 octets)
 //
 class BgpUpdateMessage extends BgpHeader
 {

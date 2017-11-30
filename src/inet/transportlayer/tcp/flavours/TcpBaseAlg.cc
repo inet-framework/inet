@@ -17,7 +17,7 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {

@@ -53,7 +53,7 @@ extern "C" {
 #define IP_OPTIONS_SEND   LWIP_IGMP
 
 //#define IP_HLEN 20
-#define IP_HLEN ((addr->addr.getType() == L3Address::IPv6) ? 40 : (addr->addr.getType() == L3Address::IPv4) ? 20 : throw cRuntimeError("Unknown address type"))
+#define IP_HLEN ((addr->addr.getType() == L3Address::Ipv6) ? 40 : (addr->addr.getType() == L3Address::Ipv4) ? 20 : throw cRuntimeError("Unknown address type"))
 
 #define IP_PROTO_ICMP    1
 #define IP_PROTO_UDP     17

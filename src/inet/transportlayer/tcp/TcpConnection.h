@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
@@ -333,7 +333,7 @@ class INET_API TcpConnection : public cObject
     int remotePort = -1;
 
   protected:
-    TCP *tcpMain = nullptr;    // TCP module
+    Tcp *tcpMain = nullptr;    // Tcp module
 
     // TCP state machine
     cFSM fsm;
@@ -584,13 +584,13 @@ class INET_API TcpConnection : public cObject
     /**
      * The "normal" constructor.
      */
-    TcpConnection(TCP *mod, int socketId);
+    TcpConnection(Tcp *mod, int socketId);
 
     /**
      * Note: this default ctor is NOT used to create live connections, only
      * temporary ones so that TCPMain can invoke their segmentArrivalWhileClosed().
      */
-    TcpConnection(TCP *mod);
+    TcpConnection(Tcp *mod);
 
     /**
      * Destructor.
@@ -620,7 +620,7 @@ class INET_API TcpConnection : public cObject
     TcpSackRexmitQueue *getRexmitQueue() { return rexmitQueue; }
     TcpReceiveQueue *getReceiveQueue() { return receiveQueue; }
     TcpAlgorithm *getTcpAlgorithm() { return tcpAlgorithm; }
-    TCP *getTcpMain() { return tcpMain; }
+    Tcp *getTcpMain() { return tcpMain; }
     //@}
 
     /**

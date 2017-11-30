@@ -38,9 +38,9 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     const auto& tcpHeader = staticPtrCast<const TcpHeader>(chunk);
     struct tcphdr tcp;
 
-    // fill TCP header structure
+    // fill Tcp header structure
     if (tcpHeader->getCrcMode() != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize TCP header without a properly computed CRC");
+        throw cRuntimeError("Cannot serialize Tcp header without a properly computed CRC");
     tcp.th_sum = htons(tcpHeader->getCrc());
     tcp.th_sport = htons(tcpHeader->getSrcPort());
     tcp.th_dport = htons(tcpHeader->getDestPort());
@@ -66,7 +66,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_win = htons(tcpHeader->getWindow());
     tcp.th_urp = htons(tcpHeader->getUrgentPointer());
     if (tcpHeader->getHeaderLength() % 4 != 0)
-        throw cRuntimeError("invalid TCP header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
+        throw cRuntimeError("invalid Tcp header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
     tcp.th_offs = tcpHeader->getHeaderLength() / 4;
 
     stream.writeBytes((uint8_t *)&tcp, B(TCP_HEADER_OCTETS));
@@ -169,7 +169,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
 
-    // fill TCP header structure
+    // fill Tcp header structure
     tcpHeader->setSrcPort(ntohs(tcp.th_sport));
     tcpHeader->setDestPort(ntohs(tcp.th_dport));
     tcpHeader->setSequenceNo(ntohl(tcp.th_seq));

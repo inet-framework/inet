@@ -20,12 +20,12 @@ package inet.networklayer.ipv6;
 import inet.networklayer.contract.IRoutingTable;
 
 //
-// IPv6 Routing Table and Neighbour Discovery data structures.
+// Ipv6 Routing Table and Neighbour Discovery data structures.
 // NOTE: This component MUST be named as "routingTable6" inside
 // a StandardHost/Router etc. in order to be accessible by the
-// ~IPv6 and other modules
+// ~Ipv6 and other modules
 //
-// @see ~IPv6, ~Ipv6NeighbourDiscovery, ~Icmpv6
+// @see ~Ipv6, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 simple Ipv6RoutingTable like IRoutingTable
 {

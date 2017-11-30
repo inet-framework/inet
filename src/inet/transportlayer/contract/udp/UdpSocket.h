@@ -119,12 +119,12 @@ class INET_API UdpSocket
     void connect(L3Address remoteAddr, int remotePort);
 
     /**
-     * Set the TTL (IPv6: Hop Limit) field on sent packets.
+     * Set the TTL (Ipv6: Hop Limit) field on sent packets.
      */
     void setTimeToLive(int ttl);
 
     /**
-     * Sets the IPv4 Type of Service / IPv6 Traffic Class fields of packets
+     * Sets the Ipv4 Type of Service / Ipv6 Traffic Class fields of packets
      * sent from the UDP socket.
      */
     void setTypeOfService(unsigned char tos);

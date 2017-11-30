@@ -32,7 +32,7 @@ import inet.applications.contract.IApp;
 // hosts in the network (i.e. routing tables were set up properly).
 //
 // Start/stop time, sendInterval etc. can be specified via parameters. An address
-// may be given in the dotted decimal notation (or, for IPv6, in the usual
+// may be given in the dotted decimal notation (or, for Ipv6, in the usual
 // notation with colons), or with the module name.
 // (The L3AddressResolver class is used to resolve the address.)
 
@@ -61,7 +61,7 @@ import inet.applications.contract.IApp;
 simple PingApp like IApp
 {
     parameters:
-        string destAddr = default(""); // destination address(es), separated by spaces, "*" means all IPv4/IPv6 interfaces in entire simulation
+        string destAddr = default(""); // destination address(es), separated by spaces, "*" means all Ipv4/Ipv6 interfaces in entire simulation
         string srcAddr = default(""); // source address (useful with multi-homing)
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)

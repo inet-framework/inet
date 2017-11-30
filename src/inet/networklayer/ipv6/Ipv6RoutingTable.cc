@@ -314,7 +314,7 @@ void Ipv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
 {
     /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific
        node's interface. We can set advertising prefixes and other variables to be used
-       in RAs. The IPv6 interface data gets overwritten if lines 249 to 262 is uncommented.
+       in RAs. The Ipv6 interface data gets overwritten if lines 249 to 262 is uncommented.
        The fix is to create an XML file with all the default values. Customised XML files
        can be used for future protocols that requires different values. (MIPv6)*/
     Ipv6InterfaceData *d = ie->ipv6Data();

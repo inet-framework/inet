@@ -72,7 +72,7 @@ class Mipv6HaInformation extends cObject
 }
 
 //
-// Neighbour Discovery for IPv6.
+// Neighbour Discovery for Ipv6.
 // RFC 2461
 //
 // ICMP fields inherited from ~Icmpv6Header:

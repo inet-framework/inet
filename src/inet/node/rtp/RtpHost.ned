@@ -1,4 +1,4 @@
-// the original file was included in the ~UDP sockets example
+// the original file was included in the ~Udp sockets example
 
 package inet.node.rtp;
 

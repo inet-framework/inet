@@ -43,7 +43,7 @@ class xMIPv6;
 #endif /* WITH_xMIPv6 */
 
 /**
- * Implements RFC 2461 Neighbor Discovery for IPv6.
+ * Implements RFC 2461 Neighbor Discovery for Ipv6.
  */
 class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 {
@@ -62,17 +62,17 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 
   public:
     /**
-     * Public method, to be invoked from the IPv6 module to determine
+     * Public method, to be invoked from the Ipv6 module to determine
      * link-layer address and the output interface of the next hop.
      *
      * If the neighbor cache does not contain this address or it's in the
      * state INCOMPLETE, this method will return the nullptr address, and the
-     * IPv6 module should then send the datagram here to Ipv6NeighbourDiscovery
+     * Ipv6 module should then send the datagram here to Ipv6NeighbourDiscovery
      * where it will be stored until neighbour resolution completes.
      *
      * If the neighbour cache entry is STALE (or REACHABLE but more than
      * reachableTime elapsed since reachability was last confirmed),
-     * the link-layer address is still returned and IPv6 can send the
+     * the link-layer address is still returned and Ipv6 can send the
      * datagram, but simultaneously, this call should trigger the Neighbour
      * Unreachability Detection procedure to start in the
      * Ipv6NeighbourDiscovery module.
@@ -80,7 +80,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     const MacAddress& resolveNeighbour(const Ipv6Address& nextHop, int interfaceId);
 
     /**
-     * Public method, it can be invoked from the IPv6 module or any other
+     * Public method, it can be invoked from the Ipv6 module or any other
      * module to let Neighbour Discovery know that the reachability
      * of the given neighbor has just been confirmed (e.g. TCP received
      * ACK of new data from it). Neighbour Discovery can then update
@@ -267,7 +267,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  as it is not possbile to explicitly define RFC 2462. ND is the next
      *  best place to do this.
      *
-     *  RFC 2462-IPv6 Stateless Address Autoconfiguration: Section 1
+     *  RFC 2462-Ipv6 Stateless Address Autoconfiguration: Section 1
      *  The autoconfiguration process specified in this document applies only
      *  to hosts and not routers. Since host autoconfiguration uses
      *  information advertised by routers, routers will need to be configured
@@ -394,7 +394,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 
     /**
      *  RFC2463 Section 3.1: Destination Unreachable Message
-     *  Send an unreachable message to the IPv6 module.
+     *  Send an unreachable message to the Ipv6 module.
      *  TODO: Relocate to Icmpv6 module
      */
     /*Icmpv6DestUnreachableMsg *createAndSendUnreachableMessage(

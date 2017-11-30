@@ -90,7 +90,7 @@ class INET_API PacketDump
 
 #ifdef WITH_IPv4
     /**
-     * Dumps info about the given IPv4 datagram. The l2r parameter denotes the
+     * Dumps info about the given Ipv4 datagram. The l2r parameter denotes the
      * direction of the packet.
      */
     void dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const char *comment = nullptr);
@@ -100,7 +100,7 @@ class INET_API PacketDump
 
 #ifdef WITH_IPv6
     /**
-     * Dumps info about the given IPv6 datagram. The l2r parameter denotes
+     * Dumps info about the given Ipv6 datagram. The l2r parameter denotes
      * the direction of the packet.
      */
     void dumpIPv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment = nullptr);

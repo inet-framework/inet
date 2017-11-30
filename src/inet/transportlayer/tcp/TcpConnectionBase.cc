@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include <assert.h>
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -169,7 +169,7 @@ std::string TcpStateVariables::detailedInfo() const
     return out.str();
 }
 
-TcpConnection::TcpConnection(TCP *mod) :
+TcpConnection::TcpConnection(Tcp *mod) :
         tcpMain(mod)
 {
     // Note: this ctor is NOT used to create live connections, only
@@ -180,7 +180,7 @@ TcpConnection::TcpConnection(TCP *mod) :
 // FSM framework, TCP FSM
 //
 
-TcpConnection::TcpConnection(TCP *_mod, int _socketId)
+TcpConnection::TcpConnection(Tcp *_mod, int _socketId)
 {
     tcpMain = _mod;
     socketId = _socketId;

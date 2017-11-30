@@ -21,7 +21,7 @@ package inet.applications.generic;
 
 //
 // Consumes and prints packets received from the IP module.
-// Compatible with both ~IPv4 and ~IPv6.
+// Compatible with both ~Ipv4 and ~Ipv6.
 //
 simple IpvxTrafSink like IIpvxTrafficGenerator
 {

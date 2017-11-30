@@ -30,7 +30,7 @@
 namespace inet {
 
 /**
- * Buffer length needed to hold an IPv4 address in string form (dotted decimal notation)
+ * Buffer length needed to hold an Ipv4 address in string form (dotted decimal notation)
  */
 static const int IPADDRESS_STRING_SIZE = 20;
 
@@ -97,11 +97,11 @@ void Ipv4Address::set(const char *text)
 {
     unsigned char buf[4];
     if (!text)
-        throw cRuntimeError("IPv4 address string is nullptr");
+        throw cRuntimeError("Ipv4 address string is nullptr");
 
     bool ok = parseIPAddress(text, buf);
     if (!ok)
-        throw cRuntimeError("Invalid IPv4 address string `%s'", text);
+        throw cRuntimeError("Invalid Ipv4 address string `%s'", text);
 
     set(buf[0], buf[1], buf[2], buf[3]);
 }

@@ -28,13 +28,13 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.internetcloud.ICloudDelayer;
 import inet.networklayer.ipv4.Icmp;
-import inet.networklayer.ipv4.IPv4;
+import inet.networklayer.ipv4.Ipv4;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.node.base.NetworkLayerNodeBase;
 
 
 //
-// This module is an IPv4 router that can delay or drop packets (while retaining their order)
+// This module is an Ipv4 router that can delay or drop packets (while retaining their order)
 // based on which interface card the packet arrived on and on which interface
 // it is leaving the cloud. The delayer module is replacable.
 //

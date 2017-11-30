@@ -56,7 +56,7 @@ int parseIntAttribute(const char *attrValue, const char *attrName, bool isOption
 
 /**
  * Parses an IP protocol number.
- * Recognizes the names defined in IpProtocolId.msg (e.g. "UDP", "udp", "Tcp"),
+ * Recognizes the names defined in IpProtocolId.msg (e.g. "Udp", "udp", "Tcp"),
  * and accepts decimal/octal/hex/binary numbers.
  */
 int parseProtocol(const char *attrValue, const char *attrName);
@@ -96,7 +96,7 @@ double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule
 
 /**
  * Returns the IP datagram encapsulated inside packet, or
- * the packet itself if it is an IPv4/IPv6 datagram.
+ * the packet itself if it is an Ipv4/Ipv6 datagram.
  * Returns nullptr, if there is no IP datagram in the packet.
  */
 cPacket *findIPDatagramInPacket(cPacket *packet);

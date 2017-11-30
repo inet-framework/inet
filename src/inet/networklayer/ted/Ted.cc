@@ -176,7 +176,7 @@ std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info)
 // FIXME should this be called findOrCreateVertex() or something like that?
 int Ted::assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr)
 {
-    // find node in vertices[] whose IPv4 address is nodeAddr
+    // find node in vertices[] whose Ipv4 address is nodeAddr
     for (unsigned int i = 0; i < vertices.size(); i++)
         if (vertices[i].node == nodeAddr)
             return i;

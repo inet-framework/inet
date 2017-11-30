@@ -32,7 +32,7 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint16Be(phyHeader->getLengthField());
     auto crcMode = phyHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize UDP header without turned off or properly computed CRC, try changing the value of crcMode parameter for UDP");
+        throw cRuntimeError("Cannot serialize Udp header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
     stream.writeUint16Be(phyHeader->getCrc());
 }
 

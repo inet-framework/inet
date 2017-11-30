@@ -22,7 +22,7 @@
 #include <algorithm>    // min,max
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -283,7 +283,7 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
-    check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
+    check_and_cast<Tcp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 
 void TcpConnection::signalConnectionTimeout()
@@ -397,7 +397,7 @@ void TcpConnection::configureStateVariables()
 {
     long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
     state->ws_support = tcpMain->par("windowScalingSupport");    // if set, this means that current host supports WS (RFC 1323)
-    state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for TCP validation
+    state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for Tcp validation
     if (!state->ws_support && (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0))
         throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
 
@@ -615,7 +615,7 @@ void TcpConnection::sendFin()
     const auto& tcpseg = makeShared<TcpHeader>();
 
     // Note: ACK bit *must* be set for both FIN and FIN+ACK. What makes
-    // the difference for FIN+ACK is that its ackNo acks the remote TCP's FIN.
+    // the difference for FIN+ACK is that its ackNo acks the remote Tcp's FIN.
     tcpseg->setFinBit(true);
     tcpseg->setAckBit(true);
     tcpseg->setAckNo(state->rcv_nxt);
@@ -940,7 +940,7 @@ void TcpConnection::retransmitData()
 
 void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
 {
-    EV_INFO << "TCP Header Option(s) received:\n";
+    EV_INFO << "Tcp Header Option(s) received:\n";
 
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TcpOption *option = tcpseg->getHeaderOption(i);
@@ -983,7 +983,7 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
             default:
-                EV_ERROR << "ERROR: Unsupported TCP option kind " << kind << "\n";
+                EV_ERROR << "ERROR: Unsupported Tcp option kind " << kind << "\n";
                 break;
         }
         (void)ok;    // unused
@@ -998,7 +998,7 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const T
     }
 
     if (fsm.getState() != TCP_S_LISTEN && fsm.getState() != TCP_S_SYN_SENT) {
-        EV_ERROR << "ERROR: TCP Header Option MSS received, but in unexpected state\n";
+        EV_ERROR << "ERROR: Tcp Header Option MSS received, but in unexpected state\n";
         return false;
     }
 
@@ -1021,7 +1021,7 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpseg, const T
     if (state->snd_mss == 0)
         state->snd_mss = 536;
 
-    EV_INFO << "TCP Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
+    EV_INFO << "Tcp Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
 }
 
@@ -1033,17 +1033,17 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpseg, const Tc
     }
 
     if (fsm.getState() != TCP_S_LISTEN && fsm.getState() != TCP_S_SYN_SENT) {
-        EV_ERROR << "ERROR: TCP Header Option WS received, but in unexpected state\n";
+        EV_ERROR << "ERROR: Tcp Header Option WS received, but in unexpected state\n";
         return false;
     }
 
     state->rcv_ws = true;
     state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
     state->snd_wnd_scale = option.getWindowScale();
-    EV_INFO << "TCP Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
+    EV_INFO << "Tcp Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
     if (state->snd_wnd_scale > 14) {    // RFC 1323, page 11: "the shift count must be limited to 14"
-        EV_ERROR << "ERROR: TCP Header Option WS received but shift count value is exceeding 14\n";
+        EV_ERROR << "ERROR: Tcp Header Option WS received but shift count value is exceeding 14\n";
         state->snd_wnd_scale = 14;
     }
 
@@ -1061,17 +1061,17 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpseg, const Tc
         (state->ts_enabled && fsm.getState() != TCP_S_SYN_RCVD && fsm.getState() != TCP_S_ESTABLISHED &&
          fsm.getState() != TCP_S_FIN_WAIT_1 && fsm.getState() != TCP_S_FIN_WAIT_2))
     {
-        EV_ERROR << "ERROR: TCP Header Option TS received, but in unexpected state\n";
+        EV_ERROR << "ERROR: Tcp Header Option TS received, but in unexpected state\n";
         return false;
     }
 
     if (!state->ts_enabled) {
         state->rcv_initial_ts = true;
         state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-        EV_INFO << "TCP Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+        EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
     }
     else
-        EV_INFO << "TCP Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
+        EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
 
     // RFC 1323, page 35:
     // "Check whether the segment contains a Timestamps option and bit
@@ -1106,13 +1106,13 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpse
     }
 
     if (fsm.getState() != TCP_S_LISTEN && fsm.getState() != TCP_S_SYN_SENT) {
-        EV_ERROR << "ERROR: TCP Header Option SACK_PERMITTED received, but in unexpected state\n";
+        EV_ERROR << "ERROR: Tcp Header Option SACK_PERMITTED received, but in unexpected state\n";
         return false;
     }
 
     state->rcv_sack_perm = true;
     state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
-    EV_INFO << "TCP Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
+    EV_INFO << "Tcp Header Option SACK_PERMITTED received, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
     return true;
 }
 
@@ -1128,7 +1128,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
             option->setMaxSegmentSize(state->snd_mss);
             tcpseg->addHeaderOption(option);
-            EV_INFO << "TCP Header Option MSS(=" << state->snd_mss << ") sent\n";
+            EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
         }
 
         // WS header option
@@ -1155,7 +1155,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             option->setWindowScale(state->rcv_wnd_scale);    // rcv_wnd_scale is also set in scaleRcvWnd()
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
-            EV_INFO << "TCP Header Option WS(=" << option->getWindowScale() << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
+            EV_INFO << "Tcp Header Option WS(=" << option->getWindowScale() << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
             tcpseg->addHeaderOption(option);
         }
 
@@ -1174,7 +1174,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             // Update SACK variables
             state->snd_sack_perm = true;
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
-            EV_INFO << "TCP Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
+            EV_INFO << "Tcp Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
         }
 
         // TS header option
@@ -1190,21 +1190,21 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
+            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
             // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the TCP header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote TCP in the TSval field
+            // bit is set in the Tcp header; if it is valid, it echos a times-
+            // tamp value that was sent by the remote Tcp in the TSval field
             // of a Timestamps option.  When TSecr is not valid, its value
             // must be zero."
             option->setEchoedTimestamp(tcpseg->getAckBit() ? state->ts_recent : 0);
 
             state->snd_initial_ts = true;
             state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-            EV_INFO << "TCP Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
             tcpseg->addHeaderOption(option);
         }
 
@@ -1225,19 +1225,19 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the TCP sending the option."
+            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
             // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
             // RFC 1323, page 13:
             // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the TCP header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote TCP in the TSval field
+            // bit is set in the Tcp header; if it is valid, it echos a times-
+            // tamp value that was sent by the remote Tcp in the TSval field
             // of a Timestamps option.  When TSecr is not valid, its value
             // must be zero."
             option->setEchoedTimestamp(tcpseg->getAckBit() ? state->ts_recent : 0);
 
-            EV_INFO << "TCP Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
+            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
             tcpseg->addHeaderOption(option);
         }
 

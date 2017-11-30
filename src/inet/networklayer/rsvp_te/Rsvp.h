@@ -79,7 +79,7 @@ class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycl
         // SENDER_TSPEC structure
         SenderTspecObj Sender_Tspec_Object;
 
-        // Previous Hop IPv4 address from PHOP object
+        // Previous Hop Ipv4 address from PHOP object
         Ipv4Address Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
@@ -115,7 +115,7 @@ class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycl
         // SESSION object structure
         SessionObj Session_Object;
 
-        // Next Hop IPv4 address from PHOP object
+        // Next Hop Ipv4 address from PHOP object
         Ipv4Address Next_Hop_Address;
 
         // Outgoing Interface on which reservation is to be made or has been made

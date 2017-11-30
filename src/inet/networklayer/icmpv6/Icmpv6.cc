@@ -151,7 +151,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
  * that Echo Request message.
  *
  * An Echo Reply SHOULD be sent in response to an Echo Request message
- * sent to an IPv6 multicast or anycast address.  In this case, the
+ * sent to an Ipv6 multicast or anycast address.  In this case, the
  * source address of the reply MUST be a unicast address belonging to
  * the interface on which the Echo Request message was received.
  *
@@ -220,7 +220,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
     // Encapsulate the original datagram, but the whole ICMPv6 error
-    // packet cannot be larger than the minimum IPv6 MTU (RFC 4443 2.4. (c)).
+    // packet cannot be larger than the minimum Ipv6 MTU (RFC 4443 2.4. (c)).
     // NOTE: since we just overwrite the errorMsg length without actually
     // truncating origDatagram, one can get "packet length became negative"
     // error when decapsulating the origDatagram on the receiver side.

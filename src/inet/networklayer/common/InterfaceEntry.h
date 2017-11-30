@@ -30,7 +30,7 @@
 namespace inet {
 
 // Forward declarations. Do NOT #include the corresponding header files
-// since that would create dependence on IPv4 and IPv6 stuff!
+// since that would create dependence on Ipv4 and Ipv6 stuff!
 class InterfaceEntry;
 class IInterfaceTable;
 class InterfaceProtocolData;
@@ -117,10 +117,10 @@ class INET_API InterfaceEntry : public cModule
     bool loopback = false;    ///< interface is loopback interface
     double datarate = 0;    ///< data rate in bit/s
     MacAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
-    InterfaceToken token;    ///< for IPv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
+    InterfaceToken token;    ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
-    Ipv4InterfaceData *ipv4data = nullptr;    ///< IPv4-specific interface info (IPv4 address, etc)
-    Ipv6InterfaceData *ipv6data = nullptr;    ///< IPv6-specific interface info (IPv6 addresses, etc)
+    Ipv4InterfaceData *ipv4data = nullptr;    ///< Ipv4-specific interface info (Ipv4 address, etc)
+    Ipv6InterfaceData *ipv6data = nullptr;    ///< Ipv6-specific interface info (Ipv6 addresses, etc)
     GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
     IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
     TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info

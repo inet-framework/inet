@@ -180,7 +180,7 @@ void OspfConfigReader::joinMulticastGroups(int interfaceId)
         return;
     Ipv4InterfaceData *ipv4Data = ie->ipv4Data();
     if (!ipv4Data)
-        throw cRuntimeError("Interface %s (id=%d) does not have IPv4 data", ie->getInterfaceName(), interfaceId);
+        throw cRuntimeError("Interface %s (id=%d) does not have Ipv4 data", ie->getInterfaceName(), interfaceId);
     ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
     ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }

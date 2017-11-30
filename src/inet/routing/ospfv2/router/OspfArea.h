@@ -22,7 +22,7 @@
 #include <map>
 
 #include "inet/common/INETDefs.h"
-#include "inet/routing/ospfv2/router/LSA.h"
+#include "inet/routing/ospfv2/router/Lsa.h"
 #include "inet/routing/ospfv2/router/OspfCommon.h"
 #include "inet/routing/ospfv2/interface/OspfInterface.h"
 #include "inet/routing/ospfv2/router/OspfRoutingTableEntry.h"

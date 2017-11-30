@@ -149,7 +149,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
             destAddr = l3Header->getDestinationAddress();
 #ifdef WITH_IPv4
             if (const auto *ipv4Header = dynamic_cast<const Ipv4Header *>(chunk)) {
-                out << "IPv4: " << srcAddr << " > " << destAddr;
+                out << "Ipv4: " << srcAddr << " > " << destAddr;
                 if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset() > 0) {
                     out << " " << (ipv4Header->getMoreFragments() ? "" : "last ")
                         << "fragment with offset=" << ipv4Header->getFragmentOffset() << " of ";

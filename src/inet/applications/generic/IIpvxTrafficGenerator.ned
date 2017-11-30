@@ -21,7 +21,7 @@ package inet.applications.generic;
 
 //
 // Prototype for modules that generate traffic directly over IP.
-// Compatible with both ~IPv4 and ~IPv6.
+// Compatible with both ~Ipv4 and ~Ipv6.
 //
 // @see ~IpvxTrafGen, ~IpvxTrafSink
 //

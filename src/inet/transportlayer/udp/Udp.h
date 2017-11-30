@@ -44,16 +44,16 @@ class InterfaceEntry;
 const bool DEFAULT_MULTICAST_LOOP = true;
 
 /**
- * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
+ * Implements the Udp protocol: encapsulates/decapsulates user data into/from Udp.
  *
  * More info in the NED file.
  */
-class INET_API UDP : public cSimpleModule, public ILifecycle
+class INET_API Udp : public cSimpleModule, public ILifecycle
 {
   public:
     class CrcInsertion : public NetfilterBase::HookBase {
       public:
-        UDP *udp = nullptr;
+        Udp *udp = nullptr;
 
       public:
         virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
@@ -175,7 +175,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void processICMPv4Error(Packet *icmpPacket);
     virtual void processICMPv6Error(Packet *icmpPacket);
 
-    // process UDP packets coming from IP
+    // process Udp packets coming from IP
     virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
@@ -184,7 +184,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);
 
-    // create a blank UDP packet; override to subclass UdpHeader
+    // create a blank Udp packet; override to subclass UdpHeader
     virtual UdpHeader *createUDPPacket();
 
     // ILifeCycle:
@@ -196,8 +196,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
 
   public:
-    UDP();
-    virtual ~UDP();
+    Udp();
+    virtual ~Udp();
 
   protected:
     virtual void initialize(int stage) override;

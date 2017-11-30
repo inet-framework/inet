@@ -1,5 +1,5 @@
 %description:
-Test the IPv6 fragmentation reassembly buffer (Ipv6FragBuf class)
+Test the Ipv6 fragmentation reassembly buffer (Ipv6FragBuf class)
 Adapted from IPFragBuf_1.test.
 
 %includes:
@@ -28,7 +28,7 @@ typedef std::vector<Frag> FragVector;
 
 bool insertFragment(Ipv6FragBuf& fragbuf, Frag& f)
 {
-    Packet *pk = new Packet("IPv6");
+    Packet *pk = new Packet("Ipv6");
     const auto& frag = makeShared<Ipv6Header>();
     frag->setSrcAddress(Ipv6Address(0,0,0,f.src));
     frag->setDestAddress(Ipv6Address(0,0,0,f.dest));

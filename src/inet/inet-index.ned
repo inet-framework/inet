@@ -42,10 +42,10 @@
 //  - network interfaces: ~EthernetInterface, ~PppInterface, ~Ieee80211Nic
 //  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
 //    mode are supported
-//  - IPv4 layer: ~IPv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
-//  - IPv6 support: ~IPv6, ~Ipv6NeighbourDiscovery, ~Icmpv6, ~Ipv6RoutingTable;
-//    see <a href="ipv6overview.html">IPv6 model overview</a>
-//  - transport layer: ~TCP, ~UDP, ~SCTP
+//  - Ipv4 layer: ~Ipv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
+//  - Ipv6 support: ~Ipv6, ~Ipv6NeighbourDiscovery, ~Icmpv6, ~Ipv6RoutingTable;
+//    see <a href="ipv6overview.html">Ipv6 model overview</a>
+//  - transport layer: ~Tcp, ~Udp, ~SCTP
 //  - ~InterfaceTable and ~Ipv4RoutingTable can be found in every
 //    host and router model
 //  - queues in router network interfaces: ~DropTailQueue, ~DiffservQueue.

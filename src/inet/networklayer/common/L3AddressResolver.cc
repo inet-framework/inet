@@ -184,7 +184,7 @@ L3Address L3AddressResolver::routerIdOf(cModule *host)
     IIpv4RoutingTable *rt = routingTableOf(host);
     return L3Address(rt->getRouterId());
 #else // ifdef WITH_IPv4
-    throw cRuntimeError("INET was compiled without IPv4 support");
+    throw cRuntimeError("INET was compiled without Ipv4 support");
 #endif // ifdef WITH_IPv4
 }
 
@@ -267,7 +267,7 @@ bool L3AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
 #ifdef WITH_IPv4
-    // choose first usable interface address (configured for IPv4, non-loopback if, addr non-null)
+    // choose first usable interface address (configured for Ipv4, non-loopback if, addr non-null)
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->isLoopback())
@@ -290,7 +290,7 @@ bool L3AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *
     return false;
 #else // ifndef WITH_IPv6
     if (netmask)
-        return false; // IPv6 netmask not supported yet
+        return false; // Ipv6 netmask not supported yet
 
     bool ret = false;
     Ipv6Address::Scope retScope = Ipv6Address::UNSPECIFIED;
@@ -366,7 +366,7 @@ bool L3AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *
 {
 #ifdef WITH_IPv6
     if (netmask)
-        return false; // IPv6 netmask not supported yet
+        return false; // Ipv6 netmask not supported yet
     if (ie->ipv6Data()) {
         Ipv6Address addr = ie->ipv6Data()->getPreferredAddress();
         if (!addr.isUnspecified()) {
@@ -500,14 +500,14 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                 InterfaceEntry *entry = itable->getInterface(i);
                 switch (add.getType()) {
 #ifdef WITH_IPv6
-                    case L3Address::IPv6:
+                    case L3Address::Ipv6:
                         if (entry->ipv6Data()->hasAddress(add.toIPv6()))
                             return mod;
                         break;
 
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
-                    case L3Address::IPv4:
+                    case L3Address::Ipv4:
                         if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIPv4())
                             return mod;
                         break;

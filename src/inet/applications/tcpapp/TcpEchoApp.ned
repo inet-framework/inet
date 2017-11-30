@@ -49,7 +49,7 @@ import inet.applications.contract.IApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-// Compatible with both ~IPv4 and ~IPv6.
+// Compatible with both ~Ipv4 and ~Ipv6.
 //
 simple TcpEchoApp extends TcpSrvHostApp
 {

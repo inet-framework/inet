@@ -35,7 +35,7 @@ enum Ipv6ExtensionConstants {
 }
 
 //
-// IPv6 TLV option types
+// Ipv6 TLV option types
 //
 enum Ipv6TlvOptionTypes
 {

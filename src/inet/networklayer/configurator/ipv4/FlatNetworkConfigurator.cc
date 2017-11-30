@@ -41,7 +41,7 @@ void FlatNetworkConfigurator::initialize(int stage)
         // isIPNode, rt and ift members of nodeInfo[]
         extractTopology(topo, nodeInfo);
 
-        // assign addresses to IPv4 nodes, and also store result in nodeInfo[].address
+        // assign addresses to Ipv4 nodes, and also store result in nodeInfo[].address
         assignAddresses(topo, nodeInfo);
 
         // add default routes to hosts (nodes with a single attachment);
@@ -78,7 +78,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
 
 void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    // assign IPv4 addresses
+    // assign Ipv4 addresses
     uint32 networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
     uint32 netmask = Ipv4Address(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
@@ -216,7 +216,7 @@ void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& 
 
     // update display string
     char buf[80];
-    sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes() - numIPNodes);
+    sprintf(buf, "%d Ipv4 nodes\n%d non-Ipv4 nodes", numIPNodes, topo.getNumNodes() - numIPNodes);
     getDisplayString().setTagArg("t", 0, buf);
 }
 

@@ -35,7 +35,7 @@ import inet.routing.aodv.AodvRouting;
 // For more info about AodvRouting, see the corresponding module:
 // ~AodvRouting and its C++ implementation with the same name.
 //
-// The AODV v.2 (known as DYMO) is also implemented: ~DYMO,
+// The AODV v.2 (known as Dymo) is also implemented: ~Dymo,
 // ~DymoRouter.
 //
 module AodvRouter extends WirelessHost

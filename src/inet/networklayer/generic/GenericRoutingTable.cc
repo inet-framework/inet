@@ -89,7 +89,7 @@ void GenericRoutingTable::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // At this point, all L2 modules have registered themselves (added their
-        // interface entries). Create the per-interface IPv4 data structures.
+        // interface entries). Create the per-interface Ipv4 data structures.
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         for (int i = 0; i < interfaceTable->getNumInterfaces(); ++i)
             configureInterface(interfaceTable->getInterface(i));
@@ -188,7 +188,7 @@ void GenericRoutingTable::configureLoopback()
 {
 //TODO needed???
 //    InterfaceEntry *ie = ift->getFirstLoopbackInterface()
-//    // add IPv4 info. Set 127.0.0.1/8 as address by default --
+//    // add Ipv4 info. Set 127.0.0.1/8 as address by default --
 //    // we may reconfigure later it to be the routerId
 //    Ipv4InterfaceData *d = new Ipv4InterfaceData();
 //    d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);

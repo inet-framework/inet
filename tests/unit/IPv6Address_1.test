@@ -1,5 +1,5 @@
 %description:
-Test parsing IPv6 addresses
+Test parsing Ipv6 addresses
 
 %includes:
 #include <stdio.h>

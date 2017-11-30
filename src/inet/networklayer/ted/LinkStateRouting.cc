@@ -78,7 +78,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
         sendToPeers(tedmod->ted, true, Ipv4Address());
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
-        EV_INFO << "Processing message from IPv4: " << msg << endl;
+        EV_INFO << "Processing message from Ipv4: " << msg << endl;
         Ipv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
         processLINK_STATE_MESSAGE(check_and_cast<Packet *>(msg), sender);
     }

@@ -50,7 +50,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'm':
             result = interfaceEntry->getMacAddress().str();
             break;
-        case 'l': // TODO: IPv4 or IPv6
+        case 'l': // TODO: Ipv4 or Ipv6
 #ifdef WITH_IPv4
             if (interfaceEntry->ipv4Data() != nullptr)
                 result = std::to_string(interfaceEntry->ipv4Data()->getNetmask().getNetmaskLength());

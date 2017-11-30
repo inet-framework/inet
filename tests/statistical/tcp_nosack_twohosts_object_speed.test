@@ -47,7 +47,7 @@ module STest
         clients_INET: SubTest {
             parameters:
                 srvTcpType = srvTcpType;
-                cliTcpType = "TCP";
+                cliTcpType = "Tcp";
         }
 //      clients_NSC: SubTest {
 //          parameters:
@@ -66,7 +66,7 @@ network TcpSpeedTest
     submodules:
         server_INET: STest {
             parameters:
-                srvTcpType = "TCP";
+                srvTcpType = "Tcp";
         }
 //      server_NSC: STest {
 //          parameters:

@@ -21,7 +21,7 @@ import inet.node.inet.Router;
 
 
 //
-// IPv6 router.
+// Ipv6 router.
 //
 // see ~Router for configuration options
 //

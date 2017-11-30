@@ -746,7 +746,7 @@ void Router::rebuildRoutingTable()
 
     std::vector<Ipv4Route *> eraseEntries;
     unsigned long routingEntryNumber = rt->getNumRoutes();
-    // remove entries from the IPv4 routing table inserted by the OSPF module
+    // remove entries from the Ipv4 routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
         Ipv4Route *entry = rt->getRoute(i);
         RoutingTableEntry *ospfEntry = dynamic_cast<RoutingTableEntry *>(entry);
@@ -1377,7 +1377,7 @@ void Router::addExternalRouteInIPTable(Ipv4Address networkAddress, const OspfAsE
     int routingEntryNumber = rt->getNumRoutes();
     bool inRoutingTable = false;
 
-    // add the external route to the IPv4 routing table if it was not added by another module
+    // add the external route to the Ipv4 routing table if it was not added by another module
     for (int i = 1; i < routingEntryNumber; i++) {
         const Ipv4Route *entry = rt->getRoute(i);
         if ((entry->getDestination() == networkAddress)

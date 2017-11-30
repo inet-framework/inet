@@ -26,9 +26,9 @@ namespace inet;
 
 enum PimContstants {
     PIM_HEADER_LENGTH = 4;
-    ENCODED_UNICODE_ADDRESS_LENGTH = 6; // IPv4 only
-    ENCODED_GROUP_ADDRESS_LENGTH = 8; // IPv4 only
-    ENCODED_SOURCE_ADDRESS_LENGTH = 8; // IPv4 only
+    ENCODED_UNICODE_ADDRESS_LENGTH = 6; // Ipv4 only
+    ENCODED_GROUP_ADDRESS_LENGTH = 8; // Ipv4 only
+    ENCODED_SOURCE_ADDRESS_LENGTH = 8; // Ipv4 only
 };
 
 enum PimPacketType

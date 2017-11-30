@@ -29,7 +29,7 @@
 namespace inet {
 
 /**
- * IPv6 Neighbour Cache (RFC 2461 Neighbor Discovery for IPv6).
+ * Ipv6 Neighbour Cache (RFC 2461 Neighbor Discovery for Ipv6).
  * Used internally by the Ipv6NeighbourDiscovery simple module.
  *
  * This is just a plain container class -- the Ipv6NeighbourDiscovery

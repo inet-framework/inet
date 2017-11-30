@@ -33,8 +33,8 @@ enum {
 };
 
 /**
- * Stores a 128-bit IPv6 address in an efficient way. Complies to RFC 3513,
- * "Internet Protocol Version 6 (IPv6) Addressing Architecture."
+ * Stores a 128-bit Ipv6 address in an efficient way. Complies to RFC 3513,
+ * "Internet Protocol Version 6 (Ipv6) Addressing Architecture."
  */
 class INET_API Ipv6Address
 {
@@ -48,7 +48,7 @@ class INET_API Ipv6Address
 
   public:
     /**
-     * IPv6 address scope (RFC 3513)
+     * Ipv6 address scope (RFC 3513)
      */
     // FIXME TBD add multicast address scopes!!! rfc 3513, section 2.7
     enum Scope {
@@ -94,12 +94,12 @@ class INET_API Ipv6Address
     //@}
 
     /**
-     * Constructor. Initializes the IPv6 address to ::0 (all-zeroes).
+     * Constructor. Initializes the Ipv6 address to ::0 (all-zeroes).
      */
     Ipv6Address() { d[0] = d[1] = d[2] = d[3] = 0; }
 
     /**
-     * Constructs an IPv6 address from two 64-bit integers.
+     * Constructs an Ipv6 address from two 64-bit integers.
      */
     Ipv6Address(uint64 hi, uint64 lo)
     {
@@ -111,7 +111,7 @@ class INET_API Ipv6Address
     }
 
     /**
-     * Constructs an IPv6 address from four 32-bit integers. The most significant
+     * Constructs an Ipv6 address from four 32-bit integers. The most significant
      * word should be passed in the first argument.
      */
     Ipv6Address(uint32 segment0, uint32 segment1, uint32 segment2, uint32 segment3)
@@ -150,8 +150,8 @@ class INET_API Ipv6Address
     }
 
     /**
-     * Tries parsing an IPv6 address string into the object.
-     * Returns true if the string contains a well-formed IPv6 address,
+     * Tries parsing an Ipv6 address string into the object.
+     * Returns true if the string contains a well-formed Ipv6 address,
      * and false otherwise. All RFC 3513 notations are accepted (e.g.
      * FEDC:BA98:7654:3210:FEDC:BA98:7654:3210, FF01::101, ::1), plus
      * also "<unspec>" as a synonym for the unspecified address (all-zeroes).
@@ -169,7 +169,7 @@ class INET_API Ipv6Address
     bool tryParseAddrWithPrefix(const char *addr, int& prefixLen);
 
     /**
-     * Sets the IPv6 address. Given a string.
+     * Sets the Ipv6 address. Given a string.
      */
     void set(const char *addr);
 
@@ -180,7 +180,7 @@ class INET_API Ipv6Address
     std::string str() const;
 
     /**
-     * Sets the IPv6 address from four 32-bit integers. The most significant
+     * Sets the Ipv6 address from four 32-bit integers. The most significant
      * word should be passed in the first argument.
      */
     void set(uint32 d0, uint32 d1, uint32 d2, uint32 d3)
@@ -204,7 +204,7 @@ class INET_API Ipv6Address
     const uint32 *words() const { return d; }
 
     /**
-     * Get the IPv6 address scope.
+     * Get the Ipv6 address scope.
      */
     Scope getScope() const;
 
@@ -221,7 +221,7 @@ class INET_API Ipv6Address
     static Ipv6Address constructMask(int prefixLength);
 
     /**
-     * Get the IPv6 first prefixLength bits of the address, with
+     * Get the Ipv6 first prefixLength bits of the address, with
      * the rest set to zero.
      */
     Ipv6Address getPrefix(int prefixLength) const;
@@ -281,7 +281,7 @@ class INET_API Ipv6Address
     bool matches(const Ipv6Address& prefix, int prefixLength) const;
 
     /**
-     * Check if the IPv6 Address is undefined.
+     * Check if the Ipv6 Address is undefined.
      */
     bool isUnspecified() const { return (d[0] | d[1] | d[2] | d[3]) == 0; }
 
@@ -304,7 +304,7 @@ class INET_API Ipv6Address
     bool isGlobal() const { return getScope() == GLOBAL; }
 
     /**
-     * Get the 4-bit scope field of an IPv6 multicast address.
+     * Get the 4-bit scope field of an Ipv6 multicast address.
      */
     int getMulticastScope() const;
 };

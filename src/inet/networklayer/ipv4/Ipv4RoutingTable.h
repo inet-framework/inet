@@ -110,7 +110,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     MulticastRouteVector multicastRoutes;    // Multicast route array, sorted by netmask desc, origin asc, metric asc
 
   protected:
-    // set IPv4 address etc on local loopback
+    // set Ipv4 address etc on local loopback
     virtual void configureLoopbackForIPv4();
 
     // set router Id
@@ -196,12 +196,12 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     //@}
 
     /**
-     * IPv4 forwarding on/off
+     * Ipv4 forwarding on/off
      */
     virtual bool isForwardingEnabled() const override { return forwarding; }
 
     /**
-     * IPv4 multicast forwarding on/off
+     * Ipv4 multicast forwarding on/off
      */
     virtual bool isMulticastForwardingEnabled() const override { return multicastForward; }
 
@@ -383,7 +383,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
     virtual L3Address getNextHopForDestination(const L3Address& dest) const override { return getGatewayForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
     virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return isLocalMulticastAddress(dest.toIPv4()); }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return const_cast<Ipv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIPv4(), group.toIPv4())); }    //XXX remove 'const' from IPv4 method?
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return const_cast<Ipv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIPv4(), group.toIPv4())); }    //XXX remove 'const' from Ipv4 method?
     virtual IRoute *createRoute() override { return new Ipv4Route(); }
 
   private:

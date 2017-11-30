@@ -1733,7 +1733,7 @@ void PimDm::deleteRoute(Ipv4Address source, Ipv4Address group)
 
 void PimDm::clearRoutes()
 {
-    // delete IPv4 routes
+    // delete Ipv4 routes
     bool changed = true;
     while (changed) {
         changed = false;

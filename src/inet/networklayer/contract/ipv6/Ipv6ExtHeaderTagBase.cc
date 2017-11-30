@@ -97,7 +97,7 @@ void Ipv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos
     // insert at position atPos, shift up the rest of the array
     extensionHeaders.insert(extensionHeaders.begin() + atPos, eh);
 #else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "INET was compiled without Ipv6 support");
 #endif // ifdef WITH_IPv6
 }
 
@@ -112,7 +112,7 @@ Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
     extensionHeaders.erase(first);
     return ret;
 #else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "INET was compiled without Ipv6 support");
 #endif // ifdef WITH_IPv6
 }
 

@@ -75,14 +75,14 @@ void Mpls::processPacketFromL3(Packet *msg)
 
     const Protocol *protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     if (protocol != &Protocol::ipv4) {
-        // only the IPv4 protocol supported yet
+        // only the Ipv4 protocol supported yet
         sendToL2(msg);
         return;
     }
 
     const auto& ipHeader = msg->peekHeader<Ipv4Header>();
 
-    // XXX temporary solution, until TcpSocket and IPv4 are extended to support nam tracing
+    // XXX temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
     if (ipHeader->getProtocolId() == IP_PROT_TCP) {
         const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
@@ -149,7 +149,7 @@ void Mpls::labelAndForwardIPv4Datagram(Packet *ipdatagram)
     if (tryLabelAndForwardIPv4Datagram(ipdatagram))
         return;
 
-    // handling our outgoing IPv4 traffic that didn't match any FEC/LSP
+    // handling our outgoing Ipv4 traffic that didn't match any FEC/LSP
     // do not use labelAndForwardIPv4Datagram for packets arriving to ingress!
 
     EV_INFO << "FEC not resolved, doing regular L3 routing" << endl;
@@ -197,7 +197,7 @@ void Mpls::processPacketFromL2(Packet *packet)
         processMPLSPacketFromL2(packet);
     }
     else if (protocol == &Protocol::ipv4) {
-        // IPv4 datagram arrives at Ingress router. We'll try to classify it
+        // Ipv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
         if (!tryLabelAndForwardIPv4Datagram(packet)) {
@@ -223,7 +223,7 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
     EV_INFO << "Received " << packet << " from L2, label=" << oldLabel.getLabel() << " inInterface=" << incomingInterfaceName << endl;
 
     if (oldLabel.getLabel() == -1) {
-        // This is a IPv4 native packet (RSVP/TED traffic)
+        // This is a Ipv4 native packet (RSVP/TED traffic)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
         sendToL3(packet);
@@ -268,9 +268,9 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
         sendToL2(packet);
     }
     else {
-        // last label popped, decapsulate and send out IPv4 datagram
+        // last label popped, decapsulate and send out Ipv4 datagram
 
-        EV_INFO << "decapsulating IPv4 datagram" << endl;
+        EV_INFO << "decapsulating Ipv4 datagram" << endl;
 
         if (outgoingInterface) {
             packet->removePoppedChunks();

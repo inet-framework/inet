@@ -26,7 +26,7 @@
 #endif
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 #endif
 
 namespace inet {
@@ -38,7 +38,7 @@ Define_Module(NetworkRouteOsgVisualizer);
 bool NetworkRouteOsgVisualizer::isPathStart(cModule *module) const
 {
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPv4 *>(module) != nullptr)
+    if (dynamic_cast<Ipv4 *>(module) != nullptr)
         return true;
 #endif
 
@@ -48,7 +48,7 @@ bool NetworkRouteOsgVisualizer::isPathStart(cModule *module) const
 bool NetworkRouteOsgVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPv4 *>(module) != nullptr)
+    if (dynamic_cast<Ipv4 *>(module) != nullptr)
         return true;
 #endif
 

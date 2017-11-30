@@ -32,7 +32,7 @@ const uint32 LINK_LOCAL_MASK = 0xFFC00000;
 const uint32 SITE_LOCAL_MASK = 0xFFC00000;
 const uint32 MULTICAST_MASK = 0xFF000000;
 
-// RFC 3513: IPv6 Addressing Architecture
+// RFC 3513: Ipv6 Addressing Architecture
 // Section 2.7.1: Pre-defined Multicast Addresses
 const Ipv6Address Ipv6Address::UNSPECIFIED_ADDRESS("::0");
 const Ipv6Address Ipv6Address::LOOPBACK_ADDRESS("::1");
@@ -205,8 +205,8 @@ std::string Ipv6Address::str() const
 
 Ipv6Address::Scope Ipv6Address::getScope() const
 {
-    //Mask the given IPv6 address with the different mask types
-    //to get only the IPv6 address scope. Compare the masked
+    //Mask the given Ipv6 address with the different mask types
+    //to get only the Ipv6 address scope. Compare the masked
     //address with the different prefixes.
 
     if ((d[0] & LINK_LOCAL_MASK) == LINK_LOCAL_PREFIX) {
@@ -226,7 +226,7 @@ Ipv6Address::Scope Ipv6Address::getScope() const
             return LOOPBACK;
         }
         else {
-            return GLOBAL;    // actually an "IPv4-compatible IPv6 address"
+            return GLOBAL;    // actually an "Ipv4-compatible Ipv6 address"
         }
     }
     else {
@@ -311,7 +311,7 @@ Ipv6Address Ipv6Address::getPrefix(int prefixLength) const
     uint32 mask[4];
     constructMask(prefixLength, mask);
 
-    // Now we mask each IPv6 address segment and create a new IPv6 Address!
+    // Now we mask each Ipv6 address segment and create a new Ipv6 Address!
     return Ipv6Address(d[0] & mask[0], d[1] & mask[1], d[2] & mask[2], d[3] & mask[3]);
 }
 
@@ -321,8 +321,8 @@ Ipv6Address Ipv6Address::getSuffix(int prefixLength) const
     uint32 mask[4];
     constructMask(prefixLength, mask);
 
-    // Now we mask each IPv6 address segment, inverse it
-    // and create a new IPv6 Address!
+    // Now we mask each Ipv6 address segment, inverse it
+    // and create a new Ipv6 Address!
     return Ipv6Address(d[0] & ~mask[0], d[1] & ~mask[1], d[2] & ~mask[2], d[3] & ~mask[3]);
 }
 

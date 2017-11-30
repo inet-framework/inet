@@ -17,7 +17,7 @@
 //
 
 #include <string.h>
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -1012,7 +1012,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             tcpAlgorithm->established(true);
-            tcpMain->emit(TCP::tcpConnectionAddedSignal, this);
+            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
 
             // This will trigger transition to ESTABLISHED. Timers and notifying

@@ -33,7 +33,7 @@
 // Protocols are represented by simple modules. A simple module's external
 // interface (gates [connectors] and parameters) is described in a NED file,
 // and the implementation is contained in a C++ class with the same name.
-// Some examples: ~TCP, ~IPv4.
+// Some examples: ~Tcp, ~Ipv4.
 //
 // These modules can be freely combined to form hosts and other network devices
 // with the NED language (no C++ code and no recompilation required).
@@ -84,13 +84,13 @@
 //
 // - ~Ipv4RoutingTable. This module contains the IP (v4) routing table, and heavily relies
 //   on ~InterfaceTable for its operation. This module is also accessed from other
-//   modules (typically ~IPv4) by calling the public member functions of its C++ class.
+//   modules (typically ~Ipv4) by calling the public member functions of its C++ class.
 //   There are member functions for querying, adding, deleting routes, and
 //   finding the best matching route for a given destination IP address.
 //   The routing table submodule within the host (router) must be called
 //   <code>routingTable</code> for other modules to find it.
 //
-// - ~Ipv6RoutingTable. This is like ~Ipv4RoutingTable, but for IPv6.
+// - ~Ipv6RoutingTable. This is like ~Ipv4RoutingTable, but for Ipv6.
 //
 // <h3>Common modules at network level</h3>
 //
@@ -127,23 +127,23 @@
 // Control info only holds auxiliary information for the next protocol layer,
 // and is not supposed to be sent over the network to other hosts and routers.
 //
-// @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
+// @page ipaddresses.html, Specifying IP (Ipv6) addresses in module parameters
 //
-// In INET, ~TCP, ~UDP and all application layer modules work with
-// both IPv4 and IPv6. Internally they use the Address C++ class, which
-// can represent both IPv4 and IPv6 addresses.
+// In INET, ~Tcp, ~Udp and all application layer modules work with
+// both Ipv4 and Ipv6. Internally they use the Address C++ class, which
+// can represent both Ipv4 and Ipv6 addresses.
 //
 // Most modules use the L3AddressResolver C++ class to resolve addresses
 // specified in module parameters in omnetpp.ini.
 // L3AddressResolver accepts the following syntax:
 //
-//    - literal IPv4 address: "186.54.66.2"
-//    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
+//    - literal Ipv4 address: "186.54.66.2"
+//    - literal Ipv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
 //    - module name: "server", "subnet.server[3]"
 //    - interface of a host or router: "server/eth0", "subnet.server[3]/eth0"
-//    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
+//    - Ipv4 or Ipv6 address of a host or router: "server(ipv4)",
 //      "subnet.server[3](ipv6)"
-//    - IPv4 or IPv6 address of an interface of a host or router:
+//    - Ipv4 or Ipv6 address of an interface of a host or router:
 //      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
 //
 // @page irt.html, The IP routing files
@@ -239,10 +239,10 @@
 //
 //
 //
-// @page ipv6overview.html, IPv6 model overview
+// @page ipv6overview.html, Ipv6 model overview
 //
-// IPv6 support is implemented by several cooperating modules. The ~IPv6 module
-// implements IPv6 datagram handling (sending, forwarding etc). It relies on
+// Ipv6 support is implemented by several cooperating modules. The ~Ipv6 module
+// implements Ipv6 datagram handling (sending, forwarding etc). It relies on
 // ~Ipv6RoutingTable to get access to the routes. ~Ipv6RoutingTable also contains the
 // neighbour discovery data structures (destination cache, neighbour cache,
 // prefix list -- the latter effectively merged into the route table). Interface
@@ -255,10 +255,10 @@
 // structures themselves (destination cache, neighbour cache, prefix list)
 // are kept in ~Ipv6RoutingTable, and are accessed via public C++ methods.
 // Neighbour discovery packets are only sent and processed by this module --
-// when ~IPv6 receives one, it forwards the packet to ~Ipv6NeighbourDiscovery.
+// when ~Ipv6 receives one, it forwards the packet to ~Ipv6NeighbourDiscovery.
 //
 // The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-// the ~Icmpv6 module, just like with IPv4.
+// the ~Icmpv6 module, just like with Ipv4.
 //
 
 package inet;

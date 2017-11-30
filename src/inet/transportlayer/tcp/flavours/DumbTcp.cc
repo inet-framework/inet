@@ -16,7 +16,7 @@
 //
 
 #include "inet/transportlayer/tcp/flavours/DumbTcp.h"
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
 

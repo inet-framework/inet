@@ -19,28 +19,28 @@
 package inet.networklayer.ipv4;
 
 //
-// Implements the IPv4 protocol. The protocol header is represented
+// Implements the Ipv4 protocol. The protocol header is represented
 // by the ~Ipv4Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over IPv4 from a higher layer protocol, the module should
+// To send a packet over Ipv4 from a higher layer protocol, the module should
 // fill in an ~Ipv4ControlInfo object, attach it to the packet with cMessage's
-// setControlInfo() method, the send it to the ~IPv4 module.
+// setControlInfo() method, the send it to the ~Ipv4 module.
 //
-// When ~IPv4 sends up a packet to a higher layer protocol, it will also attach
-// an ~Ipv4ControlInfo to the packet, with the source and destination IPv4 address,
-// etc. of the IPv4 datagram in which the packet arrived.
+// When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
+// an ~Ipv4ControlInfo to the packet, with the source and destination Ipv4 address,
+// etc. of the Ipv4 datagram in which the packet arrived.
 //
-// ~IPv4 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the IPv4 module,
+// ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
+// should call registerProtocol with their gate towards the Ipv4 module,
 // for fill up the protocol-to-gateindex map. When delivering packets to them,
-// the output gate is determined from the Protocol in the IPv4 header.
+// the output gate is determined from the Protocol in the Ipv4 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //
 // The routing table is stored in the module ~Ipv4RoutingTable. When a datagram
-// needs to be routed, ~IPv4 queries ~Ipv4RoutingTable for the output interface
+// needs to be routed, ~Ipv4 queries ~Ipv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
 // calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~Ipv4RoutingTable.
 // No message exchange with ~Ipv4RoutingTable takes place.
@@ -54,26 +54,26 @@ package inet.networklayer.ipv4;
 //
 // <b>Working with Arp</b>
 //
-// IPv4 module subscribe to completedARPResolution and failedARPResolution signals on Arp module.
-// The Arp module accessed via arpOut gate, should not insert any module between IPv4 and Arp.
-// Before IPv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
+// Ipv4 module subscribe to completedARPResolution and failedARPResolution signals on Arp module.
+// The Arp module accessed via arpOut gate, should not insert any module between Ipv4 and Arp.
+// Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
 // method call. If MacAddress unspecified, then start address resolution via Arp method call and
 // insert packet to a queue specified by next hop addr.
 // When received a completedARPResolution, then send packets from queue of next hop addr.
 // When received a failedARPResolution, then drop packets from queue of next hop addr.
-// When IPv4 module received an Arp packet from Lower Layer on some queueIn gate,
+// When Ipv4 module received an Arp packet from Lower Layer on some queueIn gate,
 // then send out this packet on arpOut gate. When received a packet on arpIn gate,
 // then send out this packet on the specified queueOut gate.
 //
 // <b>Performance model, QoS</b>
 //
-// In the current form, ~IPv4 contains a FIFO which queues up IPv4 datagrams;
+// In the current form, ~Ipv4 contains a FIFO which queues up Ipv4 datagrams;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
 // The current performance model comes from the QueueBase C++ base class.
 // If you need a more sophisticated performance model, you may change the
-// module implementation (the IPv4 class), and: (1) override the startService()
+// module implementation (the Ipv4 class), and: (1) override the startService()
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
@@ -81,7 +81,7 @@ package inet.networklayer.ipv4;
 //
 // @author Andras Varga
 //
-simple IPv4
+simple Ipv4
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

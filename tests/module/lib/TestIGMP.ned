@@ -23,7 +23,7 @@ simple TestIGMP like IIgmp
 
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
-        output ipOut @labels(Ipv4ControlInfo/down); // to ~IPv4
+        output ipOut @labels(Ipv4ControlInfo/down); // to ~Ipv4
 
         input routerIn @labels(Ipv4ControlInfo/up);
         output routerOut @labels(Ipv4ControlInfo/down);

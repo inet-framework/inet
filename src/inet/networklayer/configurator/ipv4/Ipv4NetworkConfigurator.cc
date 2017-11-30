@@ -87,7 +87,7 @@ void Ipv4NetworkConfigurator::computeConfiguration()
     TIME(extractTopology(topology));
     // read the configuration from XML; it will serve as input for address assignment
     TIME(readInterfaceConfiguration(topology));
-    // assign addresses to IPv4 nodes
+    // assign addresses to Ipv4 nodes
     if (assignAddressesParameter)
         TIME(assignAddresses(topology));
     // read and configure multicast groups from the XML configuration
@@ -665,7 +665,7 @@ void Ipv4NetworkConfigurator::parseAddressAndSpecifiedBits(const char *addressAt
     specifiedBits = specifiedBits.substr(0, specifiedBits.size() - 1);
 
     if (!Ipv4Address::isWellFormed(address.c_str()) || !Ipv4Address::isWellFormed(specifiedBits.c_str()))
-        throw cRuntimeError("Malformed IPv4 address or netmask constraint '%s'", addressAttr);
+        throw cRuntimeError("Malformed Ipv4 address or netmask constraint '%s'", addressAttr);
 
     outAddress = Ipv4Address(address.c_str()).getInt();
     outAddressSpecifiedBits = Ipv4Address(specifiedBits.c_str()).getInt();
@@ -1640,7 +1640,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     // which pairs of routes we merge, and in which order.
 
     // STEP 1.
-    // instead of working with IPv4 routes we transform them into the internal representation of the optimizer.
+    // instead of working with Ipv4 routes we transform them into the internal representation of the optimizer.
     // routes are classified based on their action (gateway, interface, type, source, metric, etc.) and a color is assigned to them.
     RoutingTableInfo routingTableInfo;
     std::vector<Ipv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
@@ -1684,7 +1684,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
 #endif // ifndef NDEBUG
 
     // STEP 3.
-    // convert the optimized routes to new optimized IPv4 routes based on the saved colors
+    // convert the optimized routes to new optimized Ipv4 routes based on the saved colors
     std::vector<Ipv4Route *> optimizedRoutes;
     for (auto & routeInfo : routingTableInfo.routeInfos) {
         Ipv4Route *routeColor = colorToRoute[routeInfo->color];

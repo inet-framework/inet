@@ -33,7 +33,7 @@ namespace inet {
 
 /**
  * This module provides the global static configuration for the Ipv4RoutingTable and
- * the IPv4 network interfaces of all nodes in the network.
+ * the Ipv4 network interfaces of all nodes in the network.
  *
  * For more info please see the NED file.
  */
@@ -134,7 +134,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
   public:
     /**
-     * Computes the IPv4 network configuration for all nodes in the network.
+     * Computes the Ipv4 network configuration for all nodes in the network.
      * The result of the computation is only stored in the network configurator.
      */
     virtual void computeConfiguration();
@@ -198,7 +198,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void addStaticRoutes(Topology& topology, cXMLElement *element);
 
     /**
-     * Destructively optimizes the given IPv4 routes by merging some of them.
+     * Destructively optimizes the given Ipv4 routes by merging some of them.
      * The resulting routes might be different in that they will route packets
      * that the original routes did not. Nevertheless the following invariant
      * holds: any packet routed by the original routes will still be routed

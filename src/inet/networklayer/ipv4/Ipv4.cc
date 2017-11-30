@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/networklayer/ipv4/IPv4.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
@@ -51,25 +51,25 @@
 
 namespace inet {
 
-Define_Module(IPv4);
+Define_Module(Ipv4);
 
 //TODO TRANSLATE
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
-IPv4::IPv4() :
+Ipv4::Ipv4() :
     isUp(true)
 {
 }
 
-IPv4::~IPv4()
+Ipv4::~Ipv4()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
     flush();
 }
 
-void IPv4::initialize(int stage)
+void Ipv4::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
@@ -123,13 +123,13 @@ void IPv4::initialize(int stage)
     }
 }
 
-void IPv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
 {
     Enter_Method("handleRegisterProtocol");
     mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
 }
 
-void IPv4::refreshDisplay() const
+void Ipv4::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -145,7 +145,7 @@ void IPv4::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void IPv4::handleMessage(cMessage *msg)
+void Ipv4::handleMessage(cMessage *msg)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
@@ -176,10 +176,10 @@ void IPv4::handleMessage(cMessage *msg)
         QueueBase::handleMessage(msg);
 }
 
-void IPv4::endService(cPacket *packet)
+void Ipv4::endService(cPacket *packet)
 {
     if (!isUp) {
-        EV_ERROR << "IPv4 is down -- discarding message\n";
+        EV_ERROR << "Ipv4 is down -- discarding message\n";
         delete packet;
         return;
     }
@@ -192,7 +192,7 @@ void IPv4::endService(cPacket *packet)
     }
 }
 
-bool IPv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
+bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
 {
     switch (ipv4Header->getCrcMode()) {
         case CRC_DECLARED_CORRECT: {
@@ -223,25 +223,25 @@ bool IPv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
     }
 }
 
-const InterfaceEntry *IPv4::getSourceInterface(cPacket *packet)
+const InterfaceEntry *Ipv4::getSourceInterface(cPacket *packet)
 {
     auto tag = packet->getTag<InterfaceInd>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
-const InterfaceEntry *IPv4::getDestInterface(cPacket *packet)
+const InterfaceEntry *Ipv4::getDestInterface(cPacket *packet)
 {
     auto tag = packet->getTag<InterfaceReq>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
-Ipv4Address IPv4::getNextHop(cPacket *packet)
+Ipv4Address Ipv4::getNextHop(cPacket *packet)
 {
     auto tag = packet->getTag<NextHopAddressReq>();
     return tag != nullptr ? tag->getNextHopAddress().toIPv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
-void IPv4::handleIncomingDatagram(Packet *packet)
+void Ipv4::handleIncomingDatagram(Packet *packet)
 {
     ASSERT(packet);
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
@@ -290,7 +290,7 @@ void IPv4::handleIncomingDatagram(Packet *packet)
         preroutingFinish(packet);
 }
 
-Packet *IPv4::prepareForForwarding(Packet *packet) const
+Packet *Ipv4::prepareForForwarding(Packet *packet) const
 {
     const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
     ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
@@ -298,7 +298,7 @@ Packet *IPv4::prepareForForwarding(Packet *packet) const
     return packet;
 }
 
-void IPv4::preroutingFinish(Packet *packet)
+void Ipv4::preroutingFinish(Packet *packet)
 {
     const InterfaceEntry *fromIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     Ipv4Address nextHopAddr = getNextHop(packet);
@@ -372,7 +372,7 @@ void IPv4::preroutingFinish(Packet *packet)
     }
 }
 
-void IPv4::handlePacketFromHL(Packet *packet)
+void Ipv4::handlePacketFromHL(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer.\n";
     emit(packetReceivedFromUpperSignal, packet);
@@ -397,7 +397,7 @@ void IPv4::handlePacketFromHL(Packet *packet)
         datagramLocalOut(packet);
 }
 
-void IPv4::datagramLocalOut(Packet *packet)
+void Ipv4::datagramLocalOut(Packet *packet)
 {
     const InterfaceEntry *destIE = getDestInterface(packet);
     Ipv4Address requestedNextHopAddress = getNextHop(packet);
@@ -476,7 +476,7 @@ void IPv4::datagramLocalOut(Packet *packet)
  *   3. if no route, choose the interface according to the source address
  *   4. or if the source address is unspecified, choose the first MULTICAST interface
  */
-const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption)
+const InterfaceEntry *Ipv4::determineOutgoingInterfaceForMulticastDatagram(const Ptr<const Ipv4Header>& ipv4Header, const InterfaceEntry *multicastIFOption)
 {
     const InterfaceEntry *ie = nullptr;
     if (multicastIFOption) {
@@ -503,7 +503,7 @@ const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const
     return ie;
 }
 
-void IPv4::routeUnicastPacket(Packet *packet)
+void Ipv4::routeUnicastPacket(Packet *packet)
 {
     const InterfaceEntry *fromIE = getSourceInterface(packet);
     const InterfaceEntry *destIE = getDestInterface(packet);
@@ -513,7 +513,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
     Ipv4Address destAddr = ipv4Header->getDestAddress();
     EV_INFO << "Routing " << packet << " with destination = " << destAddr << ", ";
 
-    // if output port was explicitly requested, use that, otherwise use IPv4 routing
+    // if output port was explicitly requested, use that, otherwise use Ipv4 routing
     if (destIE) {
         EV_DETAIL << "using manually specified output interface " << destIE->getInterfaceName() << "\n";
         // and nextHopAddr remains unspecified
@@ -530,7 +530,7 @@ void IPv4::routeUnicastPacket(Packet *packet)
         }
     }
     else {
-        // use IPv4 routing (lookup in routing table)
+        // use Ipv4 routing (lookup in routing table)
         const Ipv4Route *re = rt->findBestMatchingRoute(destAddr);
         if (re) {
             destIE = re->getInterface();
@@ -557,14 +557,14 @@ void IPv4::routeUnicastPacket(Packet *packet)
     }
 }
 
-void IPv4::routeUnicastPacketFinish(Packet *packet)
+void Ipv4::routeUnicastPacketFinish(Packet *packet)
 {
     EV_INFO << "output interface = " << getDestInterface(packet)->getInterfaceName() << ", next hop address = " << getNextHop(packet) << "\n";
     numForwarded++;
     fragmentPostRouting(packet);
 }
 
-void IPv4::routeLocalBroadcastPacket(Packet *packet)
+void Ipv4::routeLocalBroadcastPacket(Packet *packet)
 {
     auto interfaceReq = packet->getTag<InterfaceReq>();
     const InterfaceEntry *destIE = interfaceReq != nullptr ? ift->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
@@ -596,12 +596,12 @@ void IPv4::routeLocalBroadcastPacket(Packet *packet)
     }
 }
 
-const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const
+const InterfaceEntry *Ipv4::getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const
 {
     return rt->getInterfaceForDestAddr(ipv4Header->getSrcAddress());
 }
 
-void IPv4::forwardMulticastPacket(Packet *packet)
+void Ipv4::forwardMulticastPacket(Packet *packet)
 {
     const InterfaceEntry *fromIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
@@ -684,7 +684,7 @@ void IPv4::forwardMulticastPacket(Packet *packet)
     }
 }
 
-void IPv4::reassembleAndDeliver(Packet *packet)
+void Ipv4::reassembleAndDeliver(Packet *packet)
 {
     EV_INFO << "Delivering " << packet << " locally.\n";
 
@@ -715,7 +715,7 @@ void IPv4::reassembleAndDeliver(Packet *packet)
         reassembleAndDeliverFinish(packet);
 }
 
-void IPv4::reassembleAndDeliverFinish(Packet *packet)
+void Ipv4::reassembleAndDeliverFinish(Packet *packet)
 {
     auto ipv4HeaderPosition = packet->getHeaderPopOffset();
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
@@ -746,7 +746,7 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet)
     }
 }
 
-void IPv4::decapsulate(Packet *packet)
+void Ipv4::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     const auto& ipv4Header = packet->popHeader<Ipv4Header>();
@@ -755,7 +755,7 @@ void IPv4::decapsulate(Packet *packet)
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv4Header->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getExplicitCongestionNotification());
 
-    // original IPv4 datagram might be needed in upper layers to send back ICMP error message
+    // original Ipv4 datagram might be needed in upper layers to send back ICMP error message
 
     auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getProtocolId());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
@@ -766,7 +766,7 @@ void IPv4::decapsulate(Packet *packet)
     packet->ensureTag<HopLimitInd>()->setHopLimit(ipv4Header->getTimeToLive());
 }
 
-void IPv4::fragmentPostRouting(Packet *packet)
+void Ipv4::fragmentPostRouting(Packet *packet)
 {
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
     // fill in source address
@@ -779,7 +779,7 @@ void IPv4::fragmentPostRouting(Packet *packet)
         fragmentAndSend(packet);
 }
 
-void IPv4::fragmentAndSend(Packet *packet)
+void Ipv4::fragmentAndSend(Packet *packet)
 {
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
     Ipv4Address nextHopAddr = getNextHop(packet);
@@ -906,7 +906,7 @@ void IPv4::fragmentAndSend(Packet *packet)
     delete packet;
 }
 
-void IPv4::encapsulate(Packet *transportPacket)
+void Ipv4::encapsulate(Packet *transportPacket)
 {
     const auto& ipv4Header = makeShared<Ipv4Header>();
 
@@ -986,10 +986,10 @@ void IPv4::encapsulate(Packet *transportPacket)
             throw cRuntimeError("Unknown CRC mode");
     }
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv4, ipv4Header);
-    // setting IPv4 options is currently not supported
+    // setting Ipv4 options is currently not supported
 }
 
-void IPv4::sendDatagramToOutput(Packet *packet)
+void Ipv4::sendDatagramToOutput(Packet *packet)
 {
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId());
     auto nextHopAddressReq = packet->removeMandatoryTag<NextHopAddressReq>();
@@ -1004,16 +1004,16 @@ void IPv4::sendDatagramToOutput(Packet *packet)
             pendingPackets[nextHopAddr].insert(packet);
         }
         else {
-            ASSERT2(pendingPackets.find(nextHopAddr) == pendingPackets.end(), "IPv4-ARP error: nextHopAddr found in ARP table, but IPv4 queue for nextHopAddr not empty");
+            ASSERT2(pendingPackets.find(nextHopAddr) == pendingPackets.end(), "Ipv4-ARP error: nextHopAddr found in ARP table, but Ipv4 queue for nextHopAddr not empty");
             packet->ensureTag<MacAddressReq>()->setDestAddress(nextHopMacAddr);
             sendPacketToNIC(packet);
         }
     }
 }
 
-void IPv4::arpResolutionCompleted(IArp::Notification *entry)
+void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
 {
-    if (entry->l3Address.getType() != L3Address::IPv4)
+    if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
     auto it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
@@ -1032,9 +1032,9 @@ void IPv4::arpResolutionCompleted(IArp::Notification *entry)
     }
 }
 
-void IPv4::arpResolutionTimedOut(IArp::Notification *entry)
+void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
 {
-    if (entry->l3Address.getType() != L3Address::IPv4)
+    if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
     auto it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
@@ -1051,7 +1051,7 @@ void IPv4::arpResolutionTimedOut(IArp::Notification *entry)
     }
 }
 
-MacAddress IPv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE)
+MacAddress Ipv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE)
 {
     if (nextHopAddr.isLimitedBroadcastAddress() || nextHopAddr == destIE->ipv4Data()->getNetworkBroadcastAddress()) {
         EV_DETAIL << "destination address is broadcast, sending packet to broadcast MAC address\n";
@@ -1067,7 +1067,7 @@ MacAddress IPv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAd
     return arp->resolveL3Address(nextHopAddr, destIE);
 }
 
-void IPv4::sendPacketToNIC(Packet *packet)
+void Ipv4::sendPacketToNIC(Packet *packet)
 {
     EV_INFO << "Sending " << packet << " to output interface = " << ift->getInterfaceById(packet->getMandatoryTag<InterfaceReq>()->getInterfaceId())->getInterfaceName() << ".\n";
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
@@ -1079,19 +1079,19 @@ void IPv4::sendPacketToNIC(Packet *packet)
 
 // NetFilter:
 
-void IPv4::registerHook(int priority, INetfilter::IHook *hook)
+void Ipv4::registerHook(int priority, INetfilter::IHook *hook)
 {
     Enter_Method("registerHook()");
     NetfilterBase::registerHook(priority, hook);
 }
 
-void IPv4::unregisterHook(INetfilter::IHook *hook)
+void Ipv4::unregisterHook(INetfilter::IHook *hook)
 {
     Enter_Method("unregisterHook()");
     NetfilterBase::unregisterHook(hook);
 }
 
-void IPv4::dropQueuedDatagram(const Packet *packet)
+void Ipv4::dropQueuedDatagram(const Packet *packet)
 {
     Enter_Method("dropQueuedDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -1103,7 +1103,7 @@ void IPv4::dropQueuedDatagram(const Packet *packet)
     }
 }
 
-void IPv4::reinjectQueuedDatagram(const Packet *packet)
+void Ipv4::reinjectQueuedDatagram(const Packet *packet)
 {
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -1141,7 +1141,7 @@ void IPv4::reinjectQueuedDatagram(const Packet *packet)
     }
 }
 
-INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet)
+INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
@@ -1167,7 +1167,7 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *packet)
+INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
@@ -1193,7 +1193,7 @@ INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramPostRoutingHook(Packet *packet)
+INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
@@ -1219,7 +1219,7 @@ INetfilter::IHook::Result IPv4::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-bool IPv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -1237,45 +1237,45 @@ bool IPv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     return true;
 }
 
-void IPv4::start()
+void Ipv4::start()
 {
     ASSERT(queue.isEmpty());
     isUp = true;
 }
 
-void IPv4::stop()
+void Ipv4::stop()
 {
     isUp = false;
     flush();
 }
 
-void IPv4::flush()
+void Ipv4::flush()
 {
     delete cancelService();
-    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.str() << endl;
+    EV_DEBUG << "Ipv4::flush(): packets in queue: " << queue.str() << endl;
     queue.clear();
 
-    EV_DEBUG << "IPv4::flush(): pending packets:\n";
+    EV_DEBUG << "Ipv4::flush(): pending packets:\n";
     for (auto & elem : pendingPackets) {
-        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
+        EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
         elem.second.clear();
     }
     pendingPackets.clear();
 
-    EV_DEBUG << "IPv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    EV_DEBUG << "Ipv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
     for (auto & elem : queuedDatagramsForHooks) {
         delete elem.packet;
     }
     queuedDatagramsForHooks.clear();
 }
 
-bool IPv4::isNodeUp()
+bool Ipv4::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-INetfilter::IHook::Result IPv4::datagramLocalInHook(Packet *packet)
+INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
@@ -1304,7 +1304,7 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramLocalOutHook(Packet *packet)
+INetfilter::IHook::Result Ipv4::datagramLocalOutHook(Packet *packet)
 {
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
@@ -1330,7 +1330,7 @@ INetfilter::IHook::Result IPv4::datagramLocalOutHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 
@@ -1342,7 +1342,7 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     }
 }
 
-void IPv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
+void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
 {
     icmp->sendErrorMessage(origPacket, inputInterfaceId, type, code);
 }

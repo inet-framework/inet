@@ -25,7 +25,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
+ * Converts between IPv6Datagram and binary (network byte order) Ipv6 header.
  */
 class INET_API Ipv6HeaderSerializer : public FieldsChunkSerializer
 {

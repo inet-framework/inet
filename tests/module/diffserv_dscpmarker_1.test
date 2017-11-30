@@ -43,7 +43,7 @@ void TestApp::initialize()
 
     char buf[30];
 
-    // send 64 IPv4 datagram
+    // send 64 Ipv4 datagram
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv4-%d", i);
@@ -55,7 +55,7 @@ void TestApp::initialize()
       send(packet, "out", i);
     }
 
-    // send 64 IPv6 datagram
+    // send 64 Ipv6 datagram
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv6-%d", i);

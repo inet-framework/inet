@@ -251,7 +251,7 @@ void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA)
     Enter_Method_Silent();    // can be called by NeighborDiscovery module
 
     if (!(ie->isLoopback()) && rt6->isMobileNode()) {
-        EV_INFO << "Initiating Mobile IPv6 protocol..." << endl;
+        EV_INFO << "Initiating Mobile Ipv6 protocol..." << endl;
 
         // The MN is supposed to send a BU to the HA after forming a CoA
         Ipv6Address haDest = ie->ipv6Data()->getHomeAgentAddress();    // HA address for use in the BU for Home Registration
@@ -547,7 +547,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie,
     Ipv6Address HoA = ie->ipv6Data()->getGlobalAddress(Ipv6InterfaceData::HoA);
     ASSERT(!HoA.isUnspecified());
 
-    // As every IPv6 Datagram sending the BU has to have the Home Address Option, I have
+    // As every Ipv6 Datagram sending the BU has to have the Home Address Option, I have
     // made this field a part of BU message to ease my task of simulation...
     // this can be accessed from the InterfaceTable of the MN.
     bu->setHomeAddressMN(HoA);    //HoA of MN
@@ -582,18 +582,18 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie,
 
     /*11.7.1
        o  The care-of address for the binding MUST be used as the Source
-         Address in the packet's IPv6 header, unless an Alternate Care-of
+         Address in the packet's Ipv6 header, unless an Alternate Care-of
          Address mobility option is included in the Binding Update.  This
          option MUST be included in all home registrations, as the ESP
-         protocol will not be able to protect care-of addresses in the IPv6
-         header.  (Mobile IPv6 implementations that know they are using
+         protocol will not be able to protect care-of addresses in the Ipv6
+         header.  (Mobile Ipv6 implementations that know they are using
          IPsec AH to protect a particular message might avoid this option.
          For brevity the usage of AH is not discussed in this document.)*/
     /*11.7.2
        o  The current care-of address of the mobile node MUST be sent either
-         in the Source Address of the IPv6 header, or in the Alternate
+         in the Source Address of the Ipv6 header, or in the Alternate
          Care-of Address mobility option.
-       o  The Destination Address of the IPv6 header MUST contain the
+       o  The Destination Address of the Ipv6 header MUST contain the
          address of the correspondent node.*/
     sendMobilityMessageToIPv6Module(packet, dest, CoA, ie->getInterfaceId());
     //sendMobilityMessageToIPv6Module(bu, dest);
@@ -645,7 +645,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
     msg->ensureTag<L3AddressReq>()->setSrcAddress(srcAddr);
     msg->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
     msg->ensureTag<HopLimitReq>()->setHopLimit(255);
-    EV_INFO << "ControlInfo appended successfully. Sending mobility message to IPv6 module\n";
+    EV_INFO << "ControlInfo appended successfully. Sending mobility message to Ipv6 module\n";
 
     EV_DETAIL << "controlInfo: DestAddr=" << destAddr
               << " SrcAddr=" << srcAddr
@@ -671,7 +671,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
     controlInfo->setInterfaceId(-1);
     msg->setControlInfo(controlInfo);
 
-    EV << "\n<<======CONTROL INFO APPENDED SUCCESSFULLY; SENDING MOBILITY MESSAGE TO IPv6 MODULE =====>>\n";
+    EV << "\n<<======CONTROL INFO APPENDED SUCCESSFULLY; SENDING MOBILITY MESSAGE TO Ipv6 MODULE =====>>\n";
 
     EV << "controlInfo: DestAddr=" << controlInfo->destAddr()
        << "SrcAddr=" << controlInfo->srcAddr()
@@ -835,7 +835,7 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
                 }
                 else if (!rt6->isOnLinkAddress(HoA)) {
                     /*Else, if the home address for the binding (the Home Address field
-                       in the packet's Home Address option) is not an on-link IPv6
+                       in the packet's Home Address option) is not an on-link Ipv6
                        address with respect to the home agent's current Prefix List, then
                        the home agent MUST reject the Binding Update and SHOULD return a
                        Binding Acknowledgement to the mobile node, in which the Status
@@ -2040,7 +2040,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
 
     /*11.3.3
        A node receiving a packet addressed to itself (i.e., one of the
-       node's addresses is in the IPv6 destination field) follows the next
+       node's addresses is in the Ipv6 destination field) follows the next
        header chain of headers and processes them.  When it encounters a
        type 2 routing header during this processing, it performs the
        following checks.  If any of these checks fail, the node MUST
@@ -2063,7 +2063,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
        particular the address field is required to be a unicast routable
        address.*/
     if (rt6->isHomeAddress(HoA)) {
-        /*Once the above checks have been performed, the node swaps the IPv6
+        /*Once the above checks have been performed, the node swaps the Ipv6
            destination field with the Home Address field in the routing header,
            decrements segments left by one from the value it had on the wire,
            and resubmits the packet to IP for processing the next header.*/

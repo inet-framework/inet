@@ -44,7 +44,7 @@ module LDP_LSR
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
-        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
+        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.forwarding = true;
         *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -80,7 +80,7 @@ module LDP_LSR
             parameters:
                 @display("p=177,145");
         }
-        udp: <default(firstAvailable("UDP"))> like IUdp {
+        udp: <default(firstAvailable("Udp"))> like IUdp {
             parameters:
                 @display("p=267,145");
         }

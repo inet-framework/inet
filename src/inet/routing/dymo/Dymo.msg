@@ -61,7 +61,7 @@ class AddressBlock extends cObject
 }
 
 //
-// DYMO timer messages
+// Dymo timer messages
 //
 
 message RreqTimer {
@@ -80,7 +80,7 @@ message RreqHolddownTimer extends RreqTimer {
 }
 
 //
-// DYMO packets
+// Dymo packets
 //
 
 class DymoPacket extends FieldsChunk {
@@ -95,25 +95,25 @@ class RteMsg extends DymoPacket {
 }
 
 //
-// DYMO RREQ packet
+// Dymo RREQ packet
 //
 class RREQ extends RteMsg {
 }
 
 //
-// DYMO RREP packet
+// Dymo RREP packet
 //
 class RREP extends RteMsg {
 }
 
 //
-// DYMO RREP ACK packet
+// Dymo RREP ACK packet
 //
 class RrepAck extends DymoPacket {
 }
 
 //
-// DYMO RERR packet
+// Dymo RERR packet
 //
 class RERR extends DymoPacket {
     AddressBlock unreachableNode[];

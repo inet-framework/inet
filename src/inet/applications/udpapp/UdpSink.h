@@ -27,7 +27,7 @@
 namespace inet {
 
 /**
- * Consumes and prints packets received from the UDP module. See NED for more info.
+ * Consumes and prints packets received from the Udp module. See NED for more info.
  */
 class INET_API UdpSink : public ApplicationBase
 {

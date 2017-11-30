@@ -22,7 +22,7 @@ package inet.applications.udpapp;
 import inet.applications.contract.IApp;
 
 //
-// Consumes and prints packets received from the ~UDP module.
+// Consumes and prints packets received from the ~Udp module.
 //
 simple UdpSink like IApp
 {

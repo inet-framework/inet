@@ -28,7 +28,7 @@ import inet.transportlayer.contract.ITcp;
 
 
 //
-// Example IPv4 router with BGPv4 support.
+// Example Ipv4 router with BGPv4 support.
 //
 module BGPRouterSimple
 {
@@ -36,7 +36,7 @@ module BGPRouterSimple
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
+        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".routingTable"));
     gates:

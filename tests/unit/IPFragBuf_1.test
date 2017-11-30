@@ -35,7 +35,7 @@ bool insertFragment(Ipv4FragBuf& fragbuf, Frag& f)
        << " islast=" << f.islast
        << "\n";
 */
-    Packet *pk = new Packet("IPv4");
+    Packet *pk = new Packet("Ipv4");
     const auto& frag = makeShared<Ipv4Header>();
     frag->setIdentification(f.id);
     frag->setSrcAddress(Ipv4Address(f.src));

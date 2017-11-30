@@ -139,7 +139,7 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
-     * Receive messages from IPv6 module and encapsulate/decapsulate them.
+     * Receive messages from Ipv6 module and encapsulate/decapsulate them.
      */
     virtual void handleMessage(cMessage *msg) override;
 

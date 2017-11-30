@@ -136,7 +136,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
-        // pretend it came from the IPv4 layer
+        // pretend it came from the Ipv4 layer
         errorPacket->ensureTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
@@ -259,7 +259,7 @@ void Icmp::processEchoRequest(Packet *request)
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the IPv4 layer
+    // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the Ipv4 layer
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress().toIPv4());
     addressReq->setDestAddress(addressInd->getSrcAddress().toIPv4());

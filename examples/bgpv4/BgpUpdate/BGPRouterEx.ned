@@ -37,7 +37,7 @@ module BGPRouterEx
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
+        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         bool forwarding = true;
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;

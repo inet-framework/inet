@@ -25,7 +25,7 @@
 namespace inet {
 
 /**
- * Represents an IPv4 datagram. More info in the Ipv4Header.msg file
+ * Represents an Ipv4 datagram. More info in the Ipv4Header.msg file
  * (and the documentation generated from it).
  */
 class INET_API Ipv4Header : public Ipv4Header_Base
@@ -93,7 +93,7 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     virtual void addOption(TlvOptionBase *opt, int atPos = -1);
 
     /**
-     * Calculates the length of the IPv6 header plus the extension
+     * Calculates the length of the Ipv6 header plus the extension
      * headers.
      */
     virtual int calculateHeaderByteLength() const;

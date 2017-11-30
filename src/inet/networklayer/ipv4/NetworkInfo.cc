@@ -62,7 +62,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         throw cRuntimeError("cannot open `%s' for write", filename);
 
     if (compat)
-        s << "Kernel IPv4 routing table" << endl;
+        s << "Kernel Ipv4 routing table" << endl;
     s << "Destination     Gateway         Genmask         ";
     if (compat)
         s << "Flags ";

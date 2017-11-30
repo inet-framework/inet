@@ -31,14 +31,14 @@
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
-#include "inet/routing/dymo/DYMO_m.h"
+#include "inet/routing/dymo/Dymo_m.h"
 
 namespace inet {
 
 namespace dymo {
 
 /**
- * This class provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
+ * This class provides Dynamic MANET On-demand (Dymo also known as AODVv2) Routing
  * based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
  *
  * Optional features implemented:
@@ -49,14 +49,14 @@ namespace dymo {
  *  - 13.1. Expanding Rings Multicast
  *    Increase hop limit from min to max with each retry.
  *  - 13.2. Intermediate RREP
- *    Allow intermediate DYMO routers to reply with RREP.
+ *    Allow intermediate Dymo routers to reply with RREP.
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
+class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
 {
   private:
-    // DYMO parameters from RFC
+    // Dymo parameters from RFC
     const char *clientAddresses;
     bool useMulticastRREP;
     const char *interfaces;
@@ -71,7 +71,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     int bufferSizePackets;
     int bufferSizeBytes;
 
-    // DYMO extension parameters
+    // Dymo extension parameters
     simtime_t maxJitter;
     bool sendIntermediateRREP;
     int minHopLimit;
@@ -94,8 +94,8 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
   public:
-    DYMO();
-    virtual ~DYMO();
+    Dymo();
+    virtual ~Dymo();
 
   protected:
     // module interface
@@ -143,11 +143,11 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void scheduleRREQHolddownTimer(RreqHolddownTimer *message);
     void processRREQHolddownTimer(RreqHolddownTimer *message);
 
-    // handling UDP packets
+    // handling Udp packets
     void sendUDPPacket(cPacket *packet, double delay);
     void processUDPPacket(Packet *packet);
 
-    // handling DYMO packets
+    // handling Dymo packets
     void sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
     void processDYMOPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
 

@@ -229,7 +229,7 @@ void Ipv6NeighbourDiscovery::finish()
 void Ipv6NeighbourDiscovery::processIPv6Datagram(Packet *packet)
 {
     const auto& msg = packet->peekHeader<Ipv6Header>();
-    EV_INFO << "Packet " << packet << " arrived from IPv6 module.\n";
+    EV_INFO << "Packet " << packet << " arrived from Ipv6 module.\n";
 
     Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(packet->getControlInfo());
     int nextHopIfID = ctrl->getInterfaceId();
@@ -970,7 +970,7 @@ void Ipv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
         myIPv6Address = ie->ipv6Data()->getLinkLocalAddress(); //so we use the link local address instead
 
     if (ie->ipv6Data()->isTentativeAddress(myIPv6Address))
-        myIPv6Address = Ipv6Address::UNSPECIFIED_ADDRESS; //set my IPv6 address to unspecified.
+        myIPv6Address = Ipv6Address::UNSPECIFIED_ADDRESS; //set my Ipv6 address to unspecified.
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = makeShared<Ipv6RouterSolicitation>();
@@ -1466,8 +1466,8 @@ void Ipv6NeighbourDiscovery::processRAForRouterUpdates(Packet *packet, const Ipv
 
     /*If the MTU option is present, hosts SHOULD copy the option's value into
        LinkMTU so long as the value is greater than or equal to the minimum link MTU
-       [IPv6] and does not exceed the default LinkMTU value specified in the link
-       type specific document (e.g., [IPv6-ETHER]).*/
+       [Ipv6] and does not exceed the default LinkMTU value specified in the link
+       type specific document (e.g., [Ipv6-ETHER]).*/
     //TODO: not done yet
 
     processRAPrefixInfo(ra, ie);

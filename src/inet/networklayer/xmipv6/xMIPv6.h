@@ -63,7 +63,7 @@ class Ipv6RoutingTable;
 #define EXPIRY_TYPE_TOKEN    63 // {Home, CareOf}TokenExpiryIfEntry
 
 /**
- * Implements RFC 3775 Mobility Support in IPv6.
+ * Implements RFC 3775 Mobility Support in Ipv6.
  */
 class INET_API xMIPv6 : public cSimpleModule
 {
@@ -237,7 +237,7 @@ class INET_API xMIPv6 : public cSimpleModule
     xMIPv6::BuTransmitIfEntry *fetchBUTransmitIfEntry(InterfaceEntry *ie, const Ipv6Address& dest);
 
     /**
-     * Append an Ipv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the IPv6 Module
+     * Append an Ipv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the Ipv6 Module
      */
     void sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
             const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
@@ -260,7 +260,7 @@ class INET_API xMIPv6 : public cSimpleModule
     bool validateBUderegisterMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu);
 
     /**
-     * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
+     * Constructs and send a BA to the Ipv6 module. Only applicable to HAs and CNs.
      */
     void createAndSendBAMessage(const Ipv6Address& src,
             const Ipv6Address& dest, int interfaceId, const BaStatus& baStatus, const uint baSeq,
@@ -430,7 +430,7 @@ class INET_API xMIPv6 : public cSimpleModule
     void sendPeriodicBRR(cMessage *msg);
 
     /**
-     * Creates a Binding Refresh Request and sends it to the IPv6 module.
+     * Creates a Binding Refresh Request and sends it to the Ipv6 module.
      */
     void createAndSendBRRMessage(const Ipv6Address& dest, InterfaceEntry *ie);
 

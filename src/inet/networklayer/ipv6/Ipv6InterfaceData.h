@@ -99,8 +99,8 @@ struct INET_API Ipv6MulticastGroupInfo : public cObject
 };
 
 /**
- * IPv6-specific data for InterfaceEntry. Most of this comes from
- * section 6.2.1 of RFC 2461 (IPv6 Neighbor Discovery, Router Configuration
+ * Ipv6-specific data for InterfaceEntry. Most of this comes from
+ * section 6.2.1 of RFC 2461 (Ipv6 Neighbor Discovery, Router Configuration
  * Variables).
  */
 class INET_API Ipv6InterfaceData : public InterfaceProtocolData
@@ -269,7 +269,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *
          *  Default: 1, but may be overridden by a link-type specific value in
          *  the document that covers issues related to the transmission of IP
-         *  over a particular link type (e.g., [IPv6-ETHER]).
+         *  over a particular link type (e.g., [Ipv6-ETHER]).
          *
          *  Autoconfiguration also assumes the presence of the variable RetransTimer
          *  as defined in [DISCOVERY]. For autoconfiguration purposes, RetransTimer
@@ -290,7 +290,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
         /**
          *  The MTU of the link.
          *  Default: The valued defined in the specific document that describes
-         *           how IPv6 operates over the particular link layer (e.g., [IPv6-ETHER]).
+         *           how Ipv6 operates over the particular link layer (e.g., [Ipv6-ETHER]).
          */
         uint linkMTU;
         /**

@@ -42,30 +42,30 @@ class TcpSendQueue;
 class TcpReceiveQueue;
 
 /**
- * Implements the TCP protocol. This section describes the internal
- * architecture of the TCP model.
+ * Implements the Tcp protocol. This section describes the internal
+ * architecture of the Tcp model.
  *
  * Usage and compliance with various RFCs are discussed in the corresponding
- * NED documentation for TCP. Also, you may want to check the TcpSocket
- * class which makes it easier to use TCP from applications.
+ * NED documentation for Tcp. Also, you may want to check the TcpSocket
+ * class which makes it easier to use Tcp from applications.
  *
- * The TCP protocol implementation is composed of several classes (discussion
+ * The Tcp protocol implementation is composed of several classes (discussion
  * follows below):
- *  - TCP: the module class
+ *  - Tcp: the module class
  *  - TcpConnection: manages a connection
  *  - TcpSendQueue, TcpReceiveQueue: abstract base classes for various types
  *    of send and receive queues
  *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
  *    queues with "virtual" bytes (byte counts only)
- *  - TcpAlgorithm: abstract base class for TCP algorithms, and subclasses:
+ *  - TcpAlgorithm: abstract base class for Tcp algorithms, and subclasses:
  *    DumbTcp, TcpBaseAlg, TcpTahoeRenoFamily, TcpTahoe, TcpReno, TcpNewReno.
  *
- * TCP subclassed from cSimpleModule. It manages socketpair-to-connection
+ * Tcp subclassed from cSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
  * TcpConnection object.
  *
  * TcpConnection manages the connection, with the help of other objects.
- * TcpConnection itself implements the basic TCP "machinery": takes care
+ * TcpConnection itself implements the basic Tcp "machinery": takes care
  * of the state machine, stores the state variables (TCB), sends/receives
  * SYN, FIN, RST, ACKs, etc.
  *
@@ -75,7 +75,7 @@ class TcpReceiveQueue;
  * This makes it possible to easily accomodate need for various types of
  * simulated data transfer: real byte stream, "virtual" bytes (byte counts
  * only), and sequence of cMessage objects (where every message object is
- * mapped to a TCP sequence number range).
+ * mapped to a Tcp sequence number range).
  *
  * Currently implemented send queue and receive queue classes are
  * TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
@@ -85,7 +85,7 @@ class TcpReceiveQueue;
  * retransmissions, congestion control and ACK sending are "outsourced"
  * from TcpConnection into TcpAlgorithm: delayed acks, slow start, fast rexmit,
  * etc. are all implemented in TcpAlgorithm subclasses. This simplifies the
- * design of TcpConnection and makes it a lot easier to implement new TCP
+ * design of TcpConnection and makes it a lot easier to implement new Tcp
  * variations such as NewReno, Vegas or LinuxTcp as TcpAlgorithm subclasses.
  *
  * Currently implemented TcpAlgorithm classes are TcpReno, TcpTahoe, TcpNewReno,
@@ -94,7 +94,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API TCP : public cSimpleModule, public ILifecycle
+class INET_API Tcp : public cSimpleModule, public ILifecycle
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -141,7 +141,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     std::multiset<ushort> usedEphemeralPorts;
 
   protected:
-    /** Factory method; may be overriden for customizing TCP */
+    /** Factory method; may be overriden for customizing Tcp */
     virtual TcpConnection *createConnection(int socketId);
 
     // utility methods
@@ -162,8 +162,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     CrcMode crcMode = (CrcMode)-1;
 
   public:
-    TCP() {}
-    virtual ~TCP();
+    Tcp() {}
+    virtual ~Tcp();
 
   protected:
     virtual void initialize(int stage) override;

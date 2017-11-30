@@ -1474,7 +1474,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         msg->markImmutable();
         pk->pushHeader(msg);
 
-        // set encapsulated packet (IPv4 header only)
+        // set encapsulated packet (Ipv4 header only)
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(multGroup);
         ipv4Header->setSrcAddress(multOrigin);
@@ -1584,7 +1584,7 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     EV << "pimSM::forwardMulticastData" << endl;
 
     //
-    // Note: we should inject the datagram somehow into the normal IPv4 forwarding path.
+    // Note: we should inject the datagram somehow into the normal Ipv4 forwarding path.
     //
     const auto& ipv4Header = data->popHeader<Ipv4Header>();
 
@@ -1735,7 +1735,7 @@ PimInterface *PimSm::getIncomingInterface(InterfaceEntry *fromIE)
 bool PimSm::deleteMulticastRoute(Route *route)
 {
     if (removeRoute(route)) {
-        // remove route from IPv4 routing table
+        // remove route from Ipv4 routing table
         Ipv4MulticastRoute *ipv4Route = findIPv4Route(route->source, route->group);
         if (ipv4Route)
             rt->deleteMulticastRoute(ipv4Route);
@@ -1756,7 +1756,7 @@ bool PimSm::deleteMulticastRoute(Route *route)
 
 void PimSm::clearRoutes()
 {
-    // delete IPv4 routes
+    // delete Ipv4 routes
     bool changed = true;
     while (changed) {
         changed = false;
@@ -2060,7 +2060,7 @@ void PimSm::Route::addDownstreamInterface(DownstreamInterface *outInterface)
 
 void PimSm::Route::removeDownstreamInterface(unsigned int i)
 {
-    // remove corresponding out interface from the IPv4 route,
+    // remove corresponding out interface from the Ipv4 route,
     // because it refers to the downstream interface to be deleted
     Ipv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
     ipv4Route->removeOutInterface(i);

@@ -37,7 +37,7 @@ const int IPv6_HEADER_BYTES = 40;
 }}
 
 //
-// This serves as the base class for all the IPv6 extension headers.
+// This serves as the base class for all the Ipv6 extension headers.
 //
 class Ipv6ExtensionHeader extends cObject
 {
@@ -46,7 +46,7 @@ class Ipv6ExtensionHeader extends cObject
 }
 
 //
-// IPv6 datagram. RFC 2460 Section 3.
+// Ipv6 datagram. RFC 2460 Section 3.
 //
 // Header fields not explicitly modelled:
 //    - version (=6): represented by the class name itself

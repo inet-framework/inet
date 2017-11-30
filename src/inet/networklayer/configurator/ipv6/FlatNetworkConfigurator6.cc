@@ -58,7 +58,7 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
 {
     // update display string
     char buf[80];
-    sprintf(buf, "%d IPv6 nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
+    sprintf(buf, "%d Ipv6 nodes\n%d non-IP nodes", numIPNodes, numNonIPNodes);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
@@ -83,7 +83,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(mod);
         Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(mod);
 
-        // skip non-IPv6 nodes
+        // skip non-Ipv6 nodes
         if (!rt)
             continue;
 
@@ -142,7 +142,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
         Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(node->getModule());
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(node->getModule());
 
-        // skip non-IPv6 nodes
+        // skip non-Ipv6 nodes
         if (!rt)
             continue;
 
@@ -190,7 +190,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
         Ipv6RoutingTable *destRt = L3AddressResolver().findIPv6RoutingTableOf(destNode->getModule());
         IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode->getModule());
 
-        // skip non-IPv6 nodes
+        // skip non-Ipv6 nodes
         if (!destRt)
             continue;
 
@@ -231,7 +231,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(atNode->getModule());
             IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(atNode->getModule());
 
-            // skip non-IPv6 nodes
+            // skip non-Ipv6 nodes
             if (!rt)
                 continue;
 

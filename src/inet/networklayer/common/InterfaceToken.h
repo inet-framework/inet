@@ -23,9 +23,9 @@
 namespace inet {
 
 /**
- * An "interface token" as defined in RFC 1971 (IPv6 Stateless Autoconfiguration).
+ * An "interface token" as defined in RFC 1971 (Ipv6 Stateless Autoconfiguration).
  * This class supports tokens of length 1..64-bits. An interface token needs
- * to be provided by L2 modules in order to be able to form IPv6 link local
+ * to be provided by L2 modules in order to be able to form Ipv6 link local
  * addresses.
  */
 class INET_API InterfaceToken

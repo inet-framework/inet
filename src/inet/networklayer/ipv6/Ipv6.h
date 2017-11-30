@@ -38,9 +38,9 @@ namespace inet {
 class Icmpv6Header;
 
 /**
- * IPv6 implementation.
+ * Ipv6 implementation.
  */
-class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -94,7 +94,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
 
 #ifdef WITH_xMIPv6
     // 28.9.07 - CB
-    // datagrams that are supposed to be sent with a tentative IPv6 address
+    // datagrams that are supposed to be sent with a tentative Ipv6 address
     // are rescheduled for later resubmission.
     class ScheduledDatagram : public cPacket
     {
@@ -136,7 +136,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void handleMessage(cMessage *msg) override;
 
     /**
-     * Handle messages (typically packets to be send in IPv6) from transport or ICMP.
+     * Handle messages (typically packets to be send in Ipv6) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cPacket *msg);
@@ -214,8 +214,8 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     IHook::Result datagramLocalOutHook(Packet *packet);
 
   public:
-    IPv6();
-    ~IPv6();
+    Ipv6();
+    ~Ipv6();
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
@@ -233,7 +233,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
-     * Processing of IPv6 datagrams. Called when a datagram reaches the front
+     * Processing of Ipv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
     virtual void endService(cPacket *msg) override;

@@ -32,7 +32,7 @@ namespace inet {
 
 /**
  * This module provides the static configuration for the Ipv4RoutingTable and
- * the IPv4 network interfaces of a particular node in the network.
+ * the Ipv4 network interfaces of a particular node in the network.
  *
  * For more info please see the NED file.
  */

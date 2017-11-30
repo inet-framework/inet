@@ -41,7 +41,7 @@ namespace inet {
  *
  * Interfaces are dynamically registered: at the start of the simulation,
  * every L2 module adds its own InterfaceEntry to the table; after that,
- * IPv4's IIpv4RoutingTable and IPv6's Ipv6RoutingTable (an possibly, further
+ * Ipv4's IIpv4RoutingTable and Ipv6's Ipv6RoutingTable (an possibly, further
  * L3 protocols) add protocol-specific data on each InterfaceEntry
  * (see Ipv4InterfaceData, Ipv6InterfaceData, and InterfaceEntry::setIPv4Data(),
  * InterfaceEntry::setIPv6Data())
@@ -84,7 +84,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     // displays summary above the icon
     virtual void refreshDisplay() const override;
 
-    // displays the interface IPv4/IPv6 address on the outgoing link that corresponds to the interface
+    // displays the interface Ipv4/Ipv6 address on the outgoing link that corresponds to the interface
     virtual void updateLinkDisplayString(InterfaceEntry *entry) const;
 
     // discover and store which nwlayer/host gates connect to this interface

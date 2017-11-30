@@ -32,7 +32,7 @@ class Ipv6Header;
 class Ipv6FragmentHeader;
 
 /**
- * Reassembly buffer for fragmented IPv6 datagrams.
+ * Reassembly buffer for fragmented Ipv6 datagrams.
  */
 class INET_API Ipv6FragBuf
 {

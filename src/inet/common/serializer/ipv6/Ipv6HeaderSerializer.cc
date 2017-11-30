@@ -44,7 +44,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     unsigned int i;
     uint32_t flowinfo;
 
-    EV << "Serialize IPv6 packet\n";
+    EV << "Serialize Ipv6 packet\n";
 
     unsigned int nextHdrCodePos = B(stream.getLength()).get() + 6;
     struct ip6_hdr ip6h;
@@ -115,7 +115,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 break;
             }
             default: {
-                throw cRuntimeError("Unknown IPv6 extension header %d (%s)%s", extHdr->getExtensionType(), extHdr->getClassName(), extHdr->getFullName());
+                throw cRuntimeError("Unknown Ipv6 extension header %d (%s)%s", extHdr->getExtensionType(), extHdr->getClassName(), extHdr->getFullName());
                 break;
             }
         }

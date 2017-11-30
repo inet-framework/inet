@@ -129,7 +129,7 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
 #ifdef WITH_TCP_COMMON
 void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const tcp::TcpHeader>& tcpHeader) const
 {
-    os << " TCP: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
+    os << " Tcp: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
     // flags
     bool flags = false;
     if (tcpHeader->getUrgBit()) { flags = true; os << "U "; }
@@ -160,7 +160,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3A
 void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<const UdpHeader>& udpHeader) const
 {
 
-    os << " UDP: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
+    os << " Udp: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
        << ": (" << udpHeader->getTotalLengthField() << ")";
 }
 #endif // ifdef WITH_UDP

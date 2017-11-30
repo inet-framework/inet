@@ -74,7 +74,7 @@ class INET_API BindingCache : public cSimpleModule
         // omitted
     };
 
-    typedef std::map<Ipv6Address, BindingCacheEntry> BindingCache6;    //The IPv6 Address KEY of this map is the HomeAddress of the MN
+    typedef std::map<Ipv6Address, BindingCacheEntry> BindingCache6;    //The Ipv6 Address KEY of this map is the HomeAddress of the MN
     BindingCache6 bindingCache;
 
     friend std::ostream& operator<<(std::ostream& os, const BindingCacheEntry& bce);

@@ -24,7 +24,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between Ipv4Header and binary (network byte order) IPv4 header.
+ * Converts between Ipv4Header and binary (network byte order) Ipv4 header.
  */
 class INET_API Ipv4HeaderSerializer : public FieldsChunkSerializer
 {

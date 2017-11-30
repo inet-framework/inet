@@ -37,16 +37,16 @@ class GenericRoutingTable;
 #define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MODULEPATH | ADDR_MODULEID)
 
 /**
- * Utility class for finding IPv4 or IPv6 address of a host or router.
+ * Utility class for finding Ipv4 or Ipv6 address of a host or router.
  *
  * Syntax variations understood:
- *    - literal IPv4 address: "186.54.66.2"
- *    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
+ *    - literal Ipv4 address: "186.54.66.2"
+ *    - literal Ipv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
  *    - module name: "server", "subnet.server[3]"
  *    - interface of a host or router: "server%eth0", "subnet.server[3]%eth0"
- *    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
+ *    - Ipv4 or Ipv6 address of a host or router: "server(ipv4)",
  *      "subnet.server[3](ipv6)"
- *    - IPv4 or IPv6 address of an interface of a host or router:
+ *    - Ipv4 or Ipv6 address of an interface of a host or router:
  *      "server%eth0(ipv4)", "subnet.server[3]%eth0(ipv6)"
  *    - routerId: "router1%routerId", "R1%routerId"
  *    - interface of a host or router toward defined another node: "client1>router"
@@ -116,7 +116,7 @@ class INET_API L3AddressResolver
     /** @name Utility functions supporting resolve() */
     //@{
     /**
-     * Returns IPv4 or IPv6 address of the given host or router.
+     * Returns Ipv4 or Ipv6 address of the given host or router.
      *
      * This function uses routingTableOf() to find the IIpv4RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
@@ -129,7 +129,7 @@ class INET_API L3AddressResolver
     virtual L3Address addressOf(cModule *host, const char *ifname, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
-     * Returns IPv4 or IPv6 address of the given host or router.
+     * Returns Ipv4 or Ipv6 address of the given host or router.
      *
      * This function find an interface of host connected to destmod
      * then invokes getAddressFrom() to extract the IP address.
@@ -143,13 +143,13 @@ class INET_API L3AddressResolver
     virtual L3Address routerIdOf(cModule *host);
 
     /**
-     * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
-     * module. For IPv4, the first usable interface address is chosen.
+     * Returns the Ipv4 or Ipv6 address of the given host or router, given its IInterfaceTable
+     * module. For Ipv4, the first usable interface address is chosen.
      */
     virtual L3Address getAddressFrom(IInterfaceTable *ift, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
-     * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
+     * Returns the Ipv4 or Ipv6 address of the given interface (of a host or router).
      */
     virtual L3Address getAddressFrom(InterfaceEntry *ie, int addrType = DEFAULT_ADDR_TYPE);
 

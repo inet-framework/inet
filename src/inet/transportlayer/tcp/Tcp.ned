@@ -22,36 +22,36 @@ package inet.transportlayer.tcp;
 import inet.transportlayer.contract.ITcp;
 
 //
-// TCP protocol implementation.
-// See the ~ITcp for the TCP layer general informations.
+// Tcp protocol implementation.
+// See the ~ITcp for the Tcp layer general informations.
 //
 // This implementation supports:
 //   - RFC  793 - Transmission Control Protocol
-//   - RFC  896 - Congestion Control in IP/TCP Internetworks
+//   - RFC  896 - Congestion Control in IP/Tcp Internetworks
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-//   - RFC 1323 - TCP Extensions for High Performance
-//   - RFC 2018 - TCP Selective Acknowledgment Options
-//   - RFC 2581 - TCP Congestion Control
-//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
-//   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
-//   - RFC 3390 - Increasing TCP's Initial Window
+//   - RFC 1323 - Tcp Extensions for High Performance
+//   - RFC 2018 - Tcp Selective Acknowledgment Options
+//   - RFC 2581 - Tcp Congestion Control
+//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for Tcp
+//   - RFC 3042 - Enhancing Tcp's Loss Recovery Using Limited Transmit
+//   - RFC 3390 - Increasing Tcp's Initial Window
 //   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
-//                Algorithm for TCP
-//   - RFC 3782 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//                Algorithm for Tcp
+//   - RFC 3782 - The NewReno Modification to Tcp's Fast Recovery Algorithm
 //
-// This module is compatible with both ~IPv4 and ~IPv6.
+// This module is compatible with both ~Ipv4 and ~Ipv6.
 //
-// A TCP segment is represented by the class ~TcpHeader.
+// A Tcp segment is represented by the class ~TcpHeader.
 //
 // <b>Communication with clients</b>
 //
-// For communication between client applications and TCP, the ~TcpCommandCode
+// For communication between client applications and Tcp, the ~TcpCommandCode
 // and ~TcpStatusInd enums are used as message kinds, and ~TcpCommand
 // and its subclasses are used as control info.
 //
-// To open a connection from a client app, send a cMessage to TCP with
+// To open a connection from a client app, send a cMessage to Tcp with
 // TCP_C_OPEN_ACTIVE as message kind and a ~TcpOpenCommand object filled in
-// and attached to it as control info. (The peer TCP will have to be LISTENing;
+// and attached to it as control info. (The peer Tcp will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
 // message kind.) With passive open, there's a possibility to cause the connection
 // "fork" on an incoming connection, leaving the original connection LISTENing
@@ -59,37 +59,37 @@ import inet.transportlayer.contract.ITcp;
 //
 // The client app can send data by assigning the TCP_C_SEND message kind
 // and attaching a ~TCPSendCommand control info object to the data packet,
-// and sending it to TCP. The server app will receive data as messages
+// and sending it to Tcp. The server app will receive data as messages
 // with the TCP_I_DATA message kind and ~TCPSendCommand control info.
 //
-// To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
+// To close, the client sends a cMessage to Tcp with the TCP_C_CLOSE message kind
 // and ~TcpCommand control info.
 //
-// TCP sends notifications to the application whenever there's a significant
-// change in the state of the connection: established, remote TCP closed,
+// Tcp sends notifications to the application whenever there's a significant
+// change in the state of the connection: established, remote Tcp closed,
 // closed, timed out, connection refused, connection reset, etc. These
 // notifications are also cMessages with message kind TCP_I_xxx
 // (TCP_I_ESTABLISHED, etc.) and ~TcpCommand as control info.
 //
-// One TCP module can serve several application modules, and several
+// One Tcp module can serve several application modules, and several
 // connections per application. When talking to applications, a
 // connection is identified by the socketId that is assigned by the application in
 // the OPEN call.
 //
 // <b>Sockets</b>
 //
-// The TcpSocket C++ class is provided to simplify managing TCP connections
+// The TcpSocket C++ class is provided to simplify managing Tcp connections
 // from applications. TcpSocket handles the job of assembling and sending
-// command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
-// the task of dealing with packets and notification messages coming from TCP.
+// command messages (OPEN, CLOSE, etc) to Tcp, and it also simplifies
+// the task of dealing with packets and notification messages coming from Tcp.
 //
 // <b>Communication with the IP layer</b>
 //
-// The TCP model relies on sending and receiving ~Ipv4ControlInfo objects
-// attached to TCP segment objects as control info
+// The Tcp model relies on sending and receiving ~Ipv4ControlInfo objects
+// attached to Tcp segment objects as control info
 // (see cMessage::setControlInfo()).
 //
-// <b>Configuring TCP</b>
+// <b>Configuring Tcp</b>
 //
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled
 //      Limited Transmit algorithm (RFC 3042) integrated to TcpBaseAlg
@@ -102,7 +102,7 @@ import inet.transportlayer.contract.ITcp;
 //      TcpBaseAlg (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl
 //      but not for DumbTcp).
 //
-// The TCP flavour supported depends on the value of the tcpAlgorithmClass
+// The Tcp flavour supported depends on the value of the tcpAlgorithmClass
 // module parameter, e.g. "TcpTahoe" or "TcpReno". In the future, other
 // classes can be written which implement Vegas, LinuxTcp (which
 // differs from others) or other variants.
@@ -119,8 +119,8 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Standards</b>
 //
-// The TCP module itself implements the following:
-//  - all RFC 793 TCP states and state transitions
+// The Tcp module itself implements the following:
+//  - all RFC 793 Tcp states and state transitions
 //  - connection setup and teardown as in RFC 793
 //  - generally, RFC 793 compliant segment processing
 //  - all socked commands (except RECEIVE) and indications
@@ -128,16 +128,16 @@ import inet.transportlayer.contract.ITcp;
 //    to the user
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //  - The basic SACK implementation (RFC 2018 and RFC 2883) is located in
-//    TCP main (and not in flavours).
-//    This means that all existing TCP algorithm classes may be used with
+//    Tcp main (and not in flavours).
+//    This means that all existing Tcp algorithm classes may be used with
 //    SACK, although currently only TcpReno makes sense.
 //  - RFC 3517 - (SACK)-based Loss Recovery algorithm which is a conservative
 //    replacement of the fast recovery algorithm (RFC2581) integrated to
 //    TcpReno but not to TcpNewReno, TcpTahoe, TcpNoCongestionControl and DumbTcp.
 //  - changes from RFC 2001 to RFC 2581:
-//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
+//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a Tcp receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
-//  - TCP header options:
+//  - Tcp header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
@@ -173,9 +173,9 @@ import inet.transportlayer.contract.ITcp;
 //  - no RECEIVE command. Received data are always forwarded to the app as
 //    soon as possible, as if the app issued a very large RECEIVE request
 //    at the beginning. This means there's currently no flow control
-//    between TCP and the app.
+//    between Tcp and the app.
 //  - all timeouts are precisely calculated: timer granularity (which is caused
-//    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix TCP
+//    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix Tcp
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
 //
@@ -188,12 +188,12 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Tests</b>
 //
-// There are automated test cases (*.test files) for TCP -- see the <i>tests</i>
+// There are automated test cases (*.test files) for Tcp -- see the <i>tests</i>
 // directory in the source distribution.
 //
 // Please also see ChangeLog.
 //
-simple TCP like ITcp
+simple Tcp like ITcp
 {
     parameters:
         string crcMode @enum("declared", "computed") = default("declared");

@@ -1,5 +1,5 @@
 %description:
-Test for bug #463: IPv4: missing Icmp error 
+Test for bug #463: Ipv4: missing Icmp error 
 that initiated the packet causing the error.
 
 NClients example network is used, with one client.

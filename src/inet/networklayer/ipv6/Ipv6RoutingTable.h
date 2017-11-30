@@ -34,7 +34,7 @@ class InterfaceEntry;
 class Ipv6RoutingTable;
 
 /**
- * Represents the IPv6 routing table and neighbour discovery data structures.
+ * Represents the Ipv6 routing table and neighbour discovery data structures.
  * This object has one instance per host or router.
  *
  * See the NED documentation for general overview.
@@ -103,7 +103,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      *  RFC 3513: Section 2.8 A Node's Required Address
      *  Assign the various addresses to the node's respective interface. This
-     *  should be done when the IPv6 Protocol stack is created.
+     *  should be done when the Ipv6 Protocol stack is created.
      */
     virtual void assignRequiredNodeAddresses(InterfaceEntry *ie);
     // internal

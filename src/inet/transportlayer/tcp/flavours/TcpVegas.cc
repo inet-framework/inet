@@ -18,7 +18,7 @@
 
 #include <algorithm>    // min,max
 
-#include "inet/transportlayer/tcp/TCP.h"
+#include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/flavours/TcpVegas.h"
 
 namespace inet {

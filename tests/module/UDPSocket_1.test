@@ -69,11 +69,11 @@ C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)B
 C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UdpConnectCommand)
 
 %contains-regex: stdout
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 localPort=1025
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 localPort=1025
 .*
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=1025 remotePort=1000 remoteAddr=10\.0\.0\.1 multicastLoop=0
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=1025 remotePort=1000 remoteAddr=10\.0\.0\.1 multicastLoop=0
 .*
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
