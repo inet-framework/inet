@@ -1,7 +1,6 @@
 #!/bin/env python3
 
 import os
-import re
 import sys
 import time
 import subprocess
@@ -12,9 +11,10 @@ from botocore.exceptions import ClientError
 ec2 = boto3.resource("ec2")
 cloudformation = boto3.resource("cloudformation")
 autoscaling = boto3.client("autoscaling")
+cloudwatch = boto3.resource("cloudwatch")
 
 
-def importKeyPair(filename, keypair_name):
+def import_key_pair(key_file_name, key_pair_name):
     """ imports an existing local key into aws """
     pass
 
@@ -34,7 +34,29 @@ def create_add_key_pair(key_pair_name):
     subprocess.call(["ssh-add", key_pair_name + ".pem"])
 
 
-def createSwarm(stack_name, key_pair_name, num_workers=3):
+# which_asg is either "manager", or "worker".
+# It is compared case-insensitively, because the official template
+# named them "Manager" and "worker". And it bothers me.
+def _get_asg_name(stack_name, which_asg):
+
+    asgs = autoscaling.describe_auto_scaling_groups()
+
+    # find the real name of the first AutoScalingGroup which
+    # has the tag "Name" on it with the value stack_name + "-" + which_asg
+    asg_name = [
+        asg['AutoScalingGroupName']
+        for asg in asgs['AutoScalingGroups']
+        if [
+            tag
+            for tag in asg['Tags']
+            if tag['Key'] == 'Name' and tag['Value'].lower() == (stack_name + '-' + which_asg).lower()
+        ]
+    ][0]
+
+    return asg_name
+
+
+def create_swarm(stack_name, key_pair_name, num_workers=3, instance_type="c4.xlarge"):
     """ creates the various resources on AWS using the official "Docker for AWS" CloudFormation Template """
 
     stack = cloudformation.create_stack(
@@ -42,14 +64,19 @@ def createSwarm(stack_name, key_pair_name, num_workers=3):
         TemplateURL='https://editions-us-east-1.s3.amazonaws.com/aws/stable/Docker.tmpl',
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
-            {'ParameterKey': 'KeyName',             'ParameterValue': key_pair_name},
-            {'ParameterKey': 'InstanceType',        'ParameterValue': "c4.large"},
-            {'ParameterKey': 'ManagerInstanceType', 'ParameterValue': "c4.large"},
-            {'ParameterKey': 'ManagerSize',         'ParameterValue': '1'},
-            {'ParameterKey': 'ClusterSize',         'ParameterValue': str(num_workers)},
+            {'ParameterKey': 'KeyName',
+             'ParameterValue': key_pair_name},
+            {'ParameterKey': 'InstanceType',
+             'ParameterValue': instance_type},
+            {'ParameterKey': 'ManagerInstanceType',
+             'ParameterValue': instance_type},
+            {'ParameterKey': 'ManagerSize',
+             'ParameterValue': '1'},
+            {'ParameterKey': 'ClusterSize',
+             'ParameterValue': str(num_workers)},
         ])
 
-    print("Waiting for resources to be created... This will take about 10 minutes, and create about 42 resources.")
+    print("Waiting for resources to be created... This will take about 10 minutes")
     while stack.stack_status != 'CREATE_COMPLETE':
         time.sleep(5)
 
@@ -61,28 +88,50 @@ def createSwarm(stack_name, key_pair_name, num_workers=3):
         num_creating = sum(
             1 for r in resources if r.resource_status == 'CREATE_IN_PROGRESS')
 
+        # erase the current output line
         sys.stdout.write(u"\u001b[1000D\u001b[0K")
 
         print("|" + num_ready * "=" + num_creating * "+" +
               (42 - num_creating - num_ready) * " " + "|", end="", flush=True)
 
     print()
+
+    print("Creating alarm and scaling policy to terminate all instances after a long period of inactivity")
+
+    manager_asg_name = _get_asg_name(stack_name, "manager")
+    worker_asg_name = _get_asg_name(stack_name, "worker")
+
+    # shut down all instances if the alarm is fired
+    manager_scaling_policy = autoscaling.put_scaling_policy(
+        AutoScalingGroupName=manager_asg_name,
+        PolicyName='terminate-manager', PolicyType="SimpleScaling",
+        AdjustmentType="ExactCapacity", ScalingAdjustment=0)
+
+    worker_scaling_policy = autoscaling.put_scaling_policy(
+        AutoScalingGroupName=worker_asg_name,
+        PolicyName='terminate-workers', PolicyType="SimpleScaling",
+        AdjustmentType="ExactCapacity", ScalingAdjustment=0)
+
+    # alarm if in the last 12 consecutive 5-minute periods the maximum CPU utilization of the manager was below 10%
+    # and execute both terminate policies
+    metric = cloudwatch.Metric(namespace='AWS/EC2', name='CPUUtilization')
+    metric.put_alarm(
+        AlarmName=stack_name + "-manager-idle",
+        Dimensions=[{'Name': 'AutoScalingGroupName',
+                     'Value': manager_asg_name}],
+        Statistic="Maximum",
+        AlarmActions=[manager_scaling_policy["PolicyARN"],
+                      worker_scaling_policy["PolicyARN"]],
+        Period=5 * 60, EvaluationPeriods=12, ComparisonOperator='LessThanThreshold', Threshold=10)
+
     print("Done.")
 
-    # create a cloudwatch alarm for low cpu usage, then a scaling policy to shutdown the machines
 
-
-def connectToSwarm(stack_name):
+def connect_to_swarm(stack_name):
     """ creates an SSH tunnel to the manager machine, forwarding all necessary ports """
 
-    stack = cloudformation.Stack(stack_name)
+    manager_asg_name = _get_asg_name(stack_name, "manager")
 
-    output_managers = [
-        o for o in stack.outputs if o['OutputKey'] == 'Managers']
-    output_managers_value = output_managers[0]['OutputValue']
-
-    manager_asg_name = re.findall(
-        r"groupName=([-a-zA-Z0-9]+)", output_managers_value)[0]
     group_info = autoscaling.describe_auto_scaling_groups(
         AutoScalingGroupNames=[manager_asg_name])
 
@@ -95,25 +144,25 @@ def connectToSwarm(stack_name):
         "-L", "localhost:2374:/var/run/docker.sock", "-L", "9181:172.17.0.1:9181",
         "-L", "8080:172.17.0.1:8080", "-L", "27017:172.17.0.1:27017", "-L", "6379:172.17.0.1:6379"])
 
-    # from now on:  docker -H tcp://localhost:2374 info
+    # from now on you can do:  docker -H tcp://localhost:2374 info
 
-    print("DONE")
+    print("SSH exited, tunnel collapsed.")
 
 
-def deployApp():
+def deploy_app():
     subprocess.call(["docker", "-H", "tcp://localhost:2374", "stack", "up",
                      "--compose-file", "docker-compose-fingerprints.yml", "inet"])
 
 
-def haltSwarm():
+def halt_swarm():
     pass
 
 
-def continueSwarm():
+def resume_swarm():
     pass
 
 
-def removeSwarm(stack_name):
+def remove_swarm(stack_name):
     stack = cloudformation.Stack(stack_name)
 
     stack.delete()
@@ -126,6 +175,7 @@ def removeSwarm(stack_name):
             stack.reload()
             resources = list(stack.resource_summaries.iterator())
         except ClientError:
+            # the stack might not be there anymore
             break
 
         num_deleting = sum(
@@ -133,12 +183,14 @@ def removeSwarm(stack_name):
         num_remaining = sum(
             1 for r in resources if r.resource_status == 'CREATE_COMPLETE')
 
+        # erase the current output line
         sys.stdout.write(u"\u001b[1000D\u001b[0K")
 
         print("|" + num_remaining * "=" + num_deleting * "-" +
               (42 - num_remaining - num_deleting) * " " + "|", end="", flush=True)
 
     print()
-    print("Done.")
 
-    pass
+    # remove the cpu idle termination metrics/alarms/policies
+
+    print("Done.")
