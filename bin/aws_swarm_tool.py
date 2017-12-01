@@ -3,6 +3,8 @@
 import os
 import sys
 import time
+import psutil
+import tempfile
 import subprocess
 
 import boto3
@@ -152,21 +154,43 @@ def connect_to_swarm(stack_name="inet"):
     manager_public_ip = _get_manager_public_ip(stack_name)
 
     try:
-        print("Opening tunnel to " + manager_public_ip +
-              ", press Ctrl+C to close the connection.")
-        subprocess.call([
-            "ssh", "docker@" + manager_public_ip, "-N", "-o", "StrictHostKeyChecking=no",
-            "-L", "localhost:2374:/var/run/docker.sock", "-L", "9181:172.17.0.1:9181",
-            "-L", "8080:172.17.0.1:8080", "-L", "27017:172.17.0.1:27017", "-L", "6379:172.17.0.1:6379"])
+        print("Opening tunnel to the manager at " + manager_public_ip)
+
+        pid_file_name = os.path.join(tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
+
+        try:
+            with open(pid_file_name, "rt") as existing_pid_file:
+                existing_pid = int(existing_pid_file.readline().strip())
+                print("found a pid file for this stack, with pid " + str(existing_pid))
+                if existing_pid in psutil.pids():
+                    print("You are already connected.")
+                    return
+                else:
+                    print("But that process is no longer running. Starting a new one...")
+        except IOError:
+            # good, no such pid file yet
+            pass
+
+        ssh = subprocess.Popen([
+            "ssh", "docker@" + manager_public_ip, "-N",
+            "-o", "StrictHostKeyChecking=no", "-o", "ExitOnForwardFailure=yes",
+            "-L", "localhost:2374:/var/run/docker.sock",
+            "-L", "9181:172.17.0.1:9181", "-L", "8080:172.17.0.1:8080",
+            "-L", "27017:172.17.0.1:27017", "-L", "6379:172.17.0.1:6379"])
+
+        with open(pid_file_name, "wt") as pid_file:
+            pid_file.write(str(ssh.pid))
+
+        print("SSH started, its pid is " + str(ssh.pid) + ".")
 
         # from now on you can do:  docker -H tcp://localhost:2374 info
+
     except KeyboardInterrupt:
         pass
 
-    print("SSH exited, tunnel collapsed.")
-
 
 def deploy_app(stack_name="inet"):
+
     subprocess.call(["docker", "-H", "tcp://localhost:2374", "stack", "up",
                      "--compose-file", "docker-compose-fingerprints.yml", stack_name])
 
