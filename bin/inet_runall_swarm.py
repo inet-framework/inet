@@ -146,7 +146,7 @@ class Runall:
             # run the simulation
             workingdir = (remoteInetRoot + "/" + wd) if wd.startswith('/') else wd
 
-            command = "opp_run_release " + " -n '" + nedPath + "' -l " + inetLib + " -u Cmdenv " + \
+            command = "opp_run_release -s -n '" + nedPath + "' -l " + inetLib + " -u Cmdenv " + \
                 " ".join(opts.simProgArgs) + " -r " + str(rn)
 
             runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, command, workingdir, depends_on = buildJob)
