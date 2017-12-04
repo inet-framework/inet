@@ -1,1 +1,4 @@
-./runtest NeighborCache_Grid.test NeighborCache_NeighborList.test NeighborCache_Off.test NeighborCache_QuadTree.test pingapp_lifecycle_2.test pingapp_lifecycle_3.test pingapp_lifecycle_4.test pingapp_lifecycle_7.test pingapp_lifecycle_8.test
+./runtest \
+    ICMPv6_delivery.test IPv4_ICMPerror_NoProtocol.test \
+    UDP_tos_ipv4.test UDP_tos_ipv6.test
+

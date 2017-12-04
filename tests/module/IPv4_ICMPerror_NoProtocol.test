@@ -52,7 +52,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Transport protocol ID=17 not connected, discarding packet
-sending Icmp error Icmp-error-#1-type3-code2
+sending ICMP error ICMP-error-#1-type3-code2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

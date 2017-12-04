@@ -45,7 +45,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.eth[*].mac.duplexEnabled = true
 
 %contains: stdout
-Icmpv6 packet: passing it to higher layer
+ICMPv6 packet: passing it to higher layer
 %contains: stdout
 Ignoring UDP error report
 %#--------------------------------------------------------------------------------------------------------------

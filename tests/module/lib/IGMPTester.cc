@@ -263,7 +263,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             const char *sourcesStr = recordNode->getAttribute("sources");
             ASSERT(groupStr);
 
-            GroupRecord &record = msg->getGroupRecord(i);
+            GroupRecord &record = msg->getMutableGroupRecord(i);
             record.groupAddress = Ipv4Address(groupStr);
             parseIPv4AddressVector(sourcesStr, record.sourceList);
             record.recordType = recordTypeStr == "IS_IN" ? MODE_IS_INCLUDE :
