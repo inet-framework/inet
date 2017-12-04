@@ -34,8 +34,10 @@ uint16_t TCPIPchecksum::_checksum(const void *_addr, unsigned int count)
         count -= 2;
     }
 
-    if (count)
-        sum += *(const uint8_t *)addr;
+    if (count) {
+        uint16_t last_byte = (uint16_t) *(const uint8_t *)addr;
+        sum += last_byte << 8;
+    }
 
     while (sum >> 16)
         sum = (sum & 0xFFFF) + (sum >> 16);
