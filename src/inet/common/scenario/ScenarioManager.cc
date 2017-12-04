@@ -199,9 +199,12 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);
-    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+//    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
+//    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
+    cModule *module = moduleType->create(submoduleName, parentModule);
+//    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
+//    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
+//    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
     module->finalizeParameters();
     module->buildInside();
     module->callInitialize();
