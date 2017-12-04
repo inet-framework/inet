@@ -24,11 +24,11 @@ import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
-#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 }}
 
@@ -68,7 +68,7 @@ struct TcpStateVariables
     uint32_t rcv_adv;    // advertised window
 
     // SYN, SYN+ACK retransmission variables (handled separately
-    // because normal rexmit belongs to TCPAlgorithm)
+    // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count;    // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
 
@@ -141,7 +141,7 @@ struct TcpStateVariables
     uint32_t sendQueueLimit;
     bool queueUpdate;
 
-    // those counters would logically belong to TCPAlgorithm, but it's a lot easier to manage them here
+    // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32_t dupacks;    // current number of received consecutive duplicate ACKs
     uint32_t snd_sacks;    // number of sent sacks
     uint32_t rcv_sacks;    // number of received sacks

@@ -21,7 +21,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/queue/PassiveQueueBase.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"

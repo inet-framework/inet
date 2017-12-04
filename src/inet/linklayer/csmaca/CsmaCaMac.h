@@ -22,7 +22,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/queue/PacketQueue.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 

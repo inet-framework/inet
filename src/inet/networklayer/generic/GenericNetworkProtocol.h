@@ -24,7 +24,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/contract/IARP.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

@@ -17,9 +17,9 @@
 
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredReceiver.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskDecoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskDemodulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredReceiver.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
@@ -95,7 +95,7 @@ const IReceptionAnalogModel *ApskLayeredReceiver::createAnalogModel(const Layere
 
 std::ostream& ApskLayeredReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKLayeredReceiver";
+    stream << "ApskLayeredReceiver";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
                << ", carrierFrequency = " << carrierFrequency;

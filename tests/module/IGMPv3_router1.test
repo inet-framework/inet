@@ -18,7 +18,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmpType = "Igmpv3"
 **.IPForward = true
 **.multicastForwarding = true
 

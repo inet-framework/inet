@@ -17,7 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/routing/pim/modes/PIMBase.h"
+#include "inet/routing/pim/modes/PimBase.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -26,9 +26,9 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -85,7 +85,7 @@ void PimBase::initialize(int stage)
 
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMBase: containing node not found.");
+            throw cRuntimeError("PimBase: containing node not found.");
 
         hostname = host->getName();
 
@@ -155,7 +155,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 {
     EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getInterfaceName() << "'\n";
 
-    Packet *pk = new Packet("PIMHello");
+    Packet *pk = new Packet("PimHello");
     const auto& msg = makeShared<PimHello>();
 
     int byteLength = PIM_HEADER_LENGTH + 6 + 8;    // HoldTime + GenerationID option

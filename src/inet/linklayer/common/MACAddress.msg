@@ -20,7 +20,7 @@
 import inet.common.INETDefs;
 
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 }}
 
 namespace inet;

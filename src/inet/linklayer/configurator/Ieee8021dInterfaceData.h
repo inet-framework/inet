@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 

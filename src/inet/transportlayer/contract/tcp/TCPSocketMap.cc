@@ -18,7 +18,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 
 namespace inet {
 

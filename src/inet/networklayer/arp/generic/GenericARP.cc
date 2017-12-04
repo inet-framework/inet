@@ -17,7 +17,7 @@
  */
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/arp/generic/GenericARP.h"
+#include "inet/networklayer/arp/generic/GenericArp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

@@ -26,7 +26,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between IGMPMessage and binary (network byte order) IGMP message.
+ * Converts between IgmpMessage and binary (network byte order) IGMP message.
  */
 class INET_API IgmpHeaderSerializer : public FieldsChunkSerializer
 {

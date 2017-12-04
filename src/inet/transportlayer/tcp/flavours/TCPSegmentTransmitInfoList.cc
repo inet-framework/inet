@@ -19,7 +19,7 @@
 
 #include <algorithm>    // min,max
 
-#include "inet/transportlayer/tcp/flavours/TCPSegmentTransmitInfoList.h"
+#include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
 
 namespace inet {
 

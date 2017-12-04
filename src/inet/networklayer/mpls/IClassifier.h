@@ -18,18 +18,18 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/mpls/LibTable.h"
 
 namespace inet {
 
 /**
  * This is an abstract interface for packet classifiers in MPLS ingress routers.
- * The MPLS module holds a pointer to an IClassifier object, and uses it to
+ * The ~Mpls module holds a pointer to an ~IClassifier object, and uses it to
  * classify IPv4 datagrams and find the right label-switched path for them.
  *
- * A known sub-interface is IRSVPClassifier.
+ * A known sub-interface is ~IRsvpClassifier.
  *
- * Known concrete classifier classes are the LDP module class and (via IRSVPClassifier)
+ * Known concrete classifier classes are the ~Ldp module class and (via ~IRsvpClassifier)
  * RSVP_TE's SimpleClassifier module class.
  */
 class INET_API IClassifier

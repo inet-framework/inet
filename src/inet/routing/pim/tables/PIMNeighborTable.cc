@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "inet/routing/pim/tables/PIMNeighborTable.h"
+#include "inet/routing/pim/tables/PimNeighborTable.h"
 
 namespace inet {
 Register_Abstract_Class(PimNeighbor);
@@ -57,7 +57,7 @@ std::ostream& operator<<(std::ostream& os, const PimNeighborTable::PimNeighborVe
 std::string PimNeighbor::info() const
 {
     std::stringstream out;
-    out << "PIMNeighbor addr=" << address << ", iface=" << ie->getInterfaceName() << ", v=" << version << ", priority=" << this->drPriority << "}";
+    out << "PimNeighbor addr=" << address << ", iface=" << ie->getInterfaceName() << ", v=" << version << ", priority=" << this->drPriority << "}";
     return out.str();
 }
 
@@ -97,12 +97,12 @@ void PimNeighborTable::handleMessage(cMessage *msg)
             ASSERT(false);
     }
     else
-        throw cRuntimeError("PIMNeighborTable received a message although it does not have gates.");
+        throw cRuntimeError("PimNeighborTable received a message although it does not have gates.");
 }
 
 void PimNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 {
-    EV << "PIMNeighborTable::processNLTimer\n";
+    EV << "PimNeighborTable::processNLTimer\n";
     PimNeighbor *neighbor = check_and_cast<PimNeighbor *>((cObject *)livenessTimer->getContextPointer());
     Ipv4Address neighborAddress = neighbor->getAddress();
     deleteNeighbor(neighbor);

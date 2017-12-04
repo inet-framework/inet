@@ -55,7 +55,7 @@ import inet.applications.contract.IApp;
 //          See cTopology::extractByNedTypeName() function
 //          example: destaddresses = moduleListByNedType("inet.node.inet.StandardHost")
 //
-// The peer can be UDPSink or another UDPBasicBurst.
+// The peer can be UdpSink or another UdpBasicBurst.
 //
 // <b>Bursts:</b>
 //

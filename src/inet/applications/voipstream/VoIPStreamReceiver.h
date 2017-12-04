@@ -37,7 +37,7 @@ extern "C" {
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/applications/voipstream/VoIPStreamPacket_m.h"
 #include "inet/applications/voipstream/AudioOutFile.h"
 #include "inet/common/lifecycle/ILifecycle.h"

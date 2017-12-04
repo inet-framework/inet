@@ -18,7 +18,7 @@
 #ifndef __INET_LINKBREAKVISUALIZERBASE_H
 #define __INET_LINKBREAKVISUALIZERBASE_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/InterfaceFilter.h"

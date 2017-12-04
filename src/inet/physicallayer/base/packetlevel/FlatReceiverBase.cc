@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"

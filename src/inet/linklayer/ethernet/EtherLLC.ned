@@ -23,7 +23,7 @@ package inet.linklayer.ethernet;
 //
 // Expected environment:
 // - lowerLayerIn, lowerLayerOut gates should be connected
-//   to Ethernet ~EtherMAC
+//   to Ethernet ~EtherMac
 // - upperLayerIn[], upperLayerOut[] gates should be connected to
 //   higher layer protocols or applications
 //
@@ -33,9 +33,9 @@ package inet.linklayer.ethernet;
 // <a href="llc-app.html">Communication between LLC and higher layers</a>.
 // The following commands are supported:
 // - IEEE802CTRL_DATA: send a frame.
-//   Encapsulates packet into ~EtherFrameWithLLC. This includes assigning
+//   Encapsulates packet into ~EtherFrameWithLlc. This includes assigning
 //   dest address, ssap and dsap from the ~Ieee802Ctrl structure acompanying
-//   the message. Src address will be filled in by ~EtherMAC.
+//   the message. Src address will be filled in by ~EtherMac.
 // - IEEE802CTRL_REGISTER_DSAP: register application in LLC, as described in
 //   <a href="appreg.html">Application registration</a>.
 // - IEEE802CTRL_DEREGISTER_DSAP: deregister application, as described in
@@ -44,10 +44,10 @@ package inet.linklayer.ethernet;
 //   <a href="ether-pause.html">PAUSE frames</a>.
 //
 // Processing of packets received from the lower layers:
-// - decapsulate frames received from ~EtherMAC
+// - decapsulate frames received from ~EtherMac
 // - sends received frames to corresponding application, based on dsap.
 // - only servicetype=0 is implemented (connectionless)
-// - reception of non-~EtherFrameWithLLC objects (e.g. ~EthernetIIFrame,
+// - reception of non-~EtherFrameWithLlc objects (e.g. ~EthernetIIFrame,
 //   ~EtherFrameWithSNAP) will cause a runtime error.
 //
 simple EtherLlc

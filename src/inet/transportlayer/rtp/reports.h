@@ -17,7 +17,7 @@
 
 /** \file reports.h
  * This file declares the classes SenderReport and ReceptionReport as used
- * in RTCPSenderReportPacket and RTCPReceiverReportPacket.
+ * in RtcpSenderReportPacket and RtcpReceiverReportPacket.
  */
 
 #ifndef __INET_REPORTS_H
@@ -32,7 +32,7 @@ namespace rtp {
 
 /**
  * The class SenderReport represents an RTP sender report as contained
- * in an RTCPSenderReportPacket.
+ * in an RtcpSenderReportPacket.
  */
 class INET_API SenderReport : public SenderReport_Base
 {

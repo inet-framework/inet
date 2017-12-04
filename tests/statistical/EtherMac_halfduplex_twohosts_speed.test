@@ -24,7 +24,7 @@ module EtherHostQ extends EtherHost
 {
     parameters:
         queueType = "DropTailQueue";
-        macType = "EtherMAC";
+        macType = "EtherMac";
         mac.duplexMode = false;
 }
 

@@ -35,7 +35,7 @@ class TcpHeader;
 /**
  * TCP_LWIP send queue. In fact a single object
  * represents both the send queue and the retransmission queue
- * (no need to separate them). The TCPConnection object knows
+ * (no need to separate them). The TcpConnection object knows
  * which data in the queue have already been transmitted ("retransmission
  * queue") and which not ("send queue"). This class is not interested
  * in where's the boundary.
@@ -50,7 +50,7 @@ class TcpHeader;
  * "IMPLEMENTATION" note).
  *
  * To simulate a TCP that retains segment boundaries in retransmissions,
- * the appropriate TCPAlgorithm class should remember where the segment
+ * the appropriate TcpAlgorithm class should remember where the segment
  * boundaries were at the original transmission, and it should form identical
  * segments when retransmitting. The createSegmentWithBytes() send queue
  * method makes this possible.

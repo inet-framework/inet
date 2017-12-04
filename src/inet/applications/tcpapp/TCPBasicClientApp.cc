@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TCPBasicClientApp.h"
+#include "inet/applications/tcpapp/TcpBasicClientApp.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"

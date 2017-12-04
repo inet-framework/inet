@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/voip/SimpleVoIPReceiver.h"
+#include "inet/applications/voip/SimpleVoipReceiver.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"

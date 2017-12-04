@@ -18,7 +18,7 @@
 #ifndef __INET_IRX_H
 #define __INET_IRX_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"

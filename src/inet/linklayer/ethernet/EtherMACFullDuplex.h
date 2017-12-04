@@ -20,12 +20,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/ethernet/EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMacBase.h"
 
 namespace inet {
 
 /**
- * A simplified version of EtherMAC. Since modern Ethernets typically
+ * A simplified version of EtherMac. Since modern Ethernets typically
  * operate over duplex links where's no contention, the original CSMA/CD
  * algorithm is no longer needed. This simplified implementation doesn't
  * contain CSMA/CD, frames are just simply queued up and sent out one by one.

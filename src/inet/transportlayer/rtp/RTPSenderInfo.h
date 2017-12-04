@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPSenderInfo.h  -  description
+                          RtpSenderInfo.h  -  description
                              -------------------
     begin                : Wed Dec 5 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -18,7 +18,7 @@
 #ifndef __INET_RTPSENDERINFO_H
 #define __INET_RTPSENDERINFO_H
 
-#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 #include "inet/common/INETDefs.h"
 
@@ -27,7 +27,7 @@ namespace inet {
 namespace rtp {
 
 /**
- * The class RTPSenderInfo is used by an RTP end system for storing information
+ * The class RtpSenderInfo is used by an Rtp end system for storing information
  * about itself. With the stored information it can create a SenderReport.
  */
 class INET_API RtpSenderInfo : public RtpParticipantInfo
@@ -54,12 +54,12 @@ class INET_API RtpSenderInfo : public RtpParticipantInfo
     RtpSenderInfo& operator=(const RtpSenderInfo& senderInfo);
 
     /**
-     * Duplicates this RTPSenderInfo by calling the copy constructor.
+     * Duplicates this RtpSenderInfo by calling the copy constructor.
      */
     virtual RtpSenderInfo *dup() const override;
 
     /**
-     * Stores information about this outgoing RTPPacket.
+     * Stores information about this outgoing RtpPacket.
      */
     virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime) override;
 

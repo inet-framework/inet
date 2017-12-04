@@ -16,7 +16,7 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/applications/tcpapp/TCPSinkApp.h"
+#include "inet/applications/tcpapp/TcpSinkApp.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"

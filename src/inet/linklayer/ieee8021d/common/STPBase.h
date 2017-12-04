@@ -19,15 +19,15 @@
 #define __INET_STPBASE_H
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
 namespace inet {
 
 /**
- * Base class for STP and RSTP.
+ * Base class for Stp and Rstp.
  */
 class INET_API StpBase : public cSimpleModule, public ILifecycle, public cListener
 {

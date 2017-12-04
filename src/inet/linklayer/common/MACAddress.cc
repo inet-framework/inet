@@ -16,9 +16,9 @@
  */
 
 #include <ctype.h>
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -102,7 +102,7 @@ bool MacAddress::tryParse(const char *hexstr)
 void MacAddress::setAddress(const char *hexstr)
 {
     if (!tryParse(hexstr))
-        throw cRuntimeError("MACAddress: wrong address syntax '%s': 12 hex digits expected, with optional embedded spaces, hyphens or colons", hexstr);
+        throw cRuntimeError("MacAddress: wrong address syntax '%s': 12 hex digits expected, with optional embedded spaces, hyphens or colons", hexstr);
 }
 
 void MacAddress::getAddressBytes(unsigned char *addrbytes) const

@@ -41,14 +41,14 @@ class RtpHeader extends FieldsChunk
 
     chunkLength = B(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
 
-    // The rtp version of this ~RTPPacket.
+    // The rtp version of this ~RtpPacket.
     uint8 version = 2;      // 2 bits
 
-    // Set to 1 if padding is used in this ~RTPPacket, 0 otherwise.
+    // Set to 1 if padding is used in this ~RtpPacket, 0 otherwise.
     // This implementation doesn't use padding bytes, so it is always 0.
     bool padding = false;      // 1 bit
 
-    // Set to 1, if this ~RTPPacket contains an rtp header extension, 0 otherwise.
+    // Set to 1, if this ~RtpPacket contains an rtp header extension, 0 otherwise.
     // This implementation doesn't support rtp header extensions, so it is always 0.
     bool extension = false;      // 1 bit
 
@@ -57,16 +57,16 @@ class RtpHeader extends FieldsChunk
     // The marker.
     bool marker = false;      // 1 bit
 
-    // The type of payload carried in this ~RTPPacket.
+    // The type of payload carried in this ~RtpPacket.
     int8 payloadType;      // 7 bits
 
-    // The sequence number of this ~RTPPacket.
+    // The sequence number of this ~RtpPacket.
     uint16 sequenceNumber;      // 16 bits
 
-    // The rtp time stamp of this ~RTPPacket.
+    // The rtp time stamp of this ~RtpPacket.
     uint32 timeStamp;      // 32 bits
 
-    // The ssrc identifier of the creator of this ~RTPPacket.
+    // The ssrc identifier of the creator of this ~RtpPacket.
     uint32 ssrc;      // 32 bits
 
     // no mixers, no contributing sources

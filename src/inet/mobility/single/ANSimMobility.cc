@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/single/ANSimMobility.h"
+#include "inet/mobility/single/AnsimMobility.h"
 #include "inet/common/INETMath.h"
 
 namespace inet {
@@ -86,7 +86,7 @@ void AnsimMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
-    EV_TRACE << "initializing ANSimMobility stage " << stage << endl;
+    EV_TRACE << "initializing AnsimMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         nodeId = par("nodeId");
         if (nodeId == -1)

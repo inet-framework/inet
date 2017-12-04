@@ -17,7 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
+#include "inet/transportlayer/tcp_nsc/TcpNsc.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
@@ -35,7 +35,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
@@ -766,15 +766,15 @@ void TcpNsc::loadStack(const char *stacknameP, int bufferSizeP)
 
     pStackM = create(this, this, nullptr);
 
-    EV_DETAIL << "TCP_NSC " << this << " has stack " << pStackM << "\n";
+    EV_DETAIL << "TcpNsc " << this << " has stack " << pStackM << "\n";
 
-    EV_DETAIL << "TCP_NSC " << this << "Initializing stack, name=" << pStackM->get_name() << endl;
+    EV_DETAIL << "TcpNsc " << this << "Initializing stack, name=" << pStackM->get_name() << endl;
 
     pStackM->init(pStackM->get_hz());
 
     pStackM->buffer_size(bufferSizeP);
 
-    EV_INFO << "TCP_NSC " << this << "Stack initialized, name=" << pStackM->get_name() << endl;
+    EV_INFO << "TcpNsc " << this << "Stack initialized, name=" << pStackM->get_name() << endl;
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
@@ -801,7 +801,7 @@ void TcpNsc::send_callback(const void *dataP, int datalenP)
 }
 
 /*
-   void TCP_NSC::interrupt()
+   void TcpNsc::interrupt()
    {
    }
  */
@@ -1045,7 +1045,7 @@ void TcpNsc::process_OPEN_PASSIVE(TcpNscConnection& connP, TcpCommand *tcpComman
     TcpOpenCommand *openCmd = check_and_cast<TcpOpenCommand *>(tcpCommandP);
 
     if (!openCmd->getFork())
-        throw cRuntimeError("TCP_NSC supports Forking mode only");
+        throw cRuntimeError("TcpNsc supports Forking mode only");
 
     TcpNscConnection::SockPair inetSockPair, nscSockPair;
     inetSockPair.localM.ipAddrM = openCmd->getLocalAddr();

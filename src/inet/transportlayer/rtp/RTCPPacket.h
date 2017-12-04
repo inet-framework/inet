@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTCPPacket.h  -  description
+                       RtcpPacket.h  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -14,16 +14,16 @@
 *                                                                         *
 ***************************************************************************/
 
-/** \file RTCPPacket.h
+/** \file RtcpPacket.h
  * In this file all rtcp packet types are declared: There is a the superclass
- * RTCPPacket which is not intended to be used directly. It defines an enumeration
+ * RtcpPacket which is not intended to be used directly. It defines an enumeration
  * to distinguish the different rtcp packet types and also includes header
  * fields common to all types of rtcp packets.
- * Direct subclasses are RTCPReceiverReportPacket, RTCPSDESPacket and RTCPByePacket.
- * RTCPSenderReportPacket is declared as a subclass of RTCPReceiverReportPacket
+ * Direct subclasses are RtcpReceiverReportPacket, RtcpSdesPacket and RtcpByePacket.
+ * RtcpSenderReportPacket is declared as a subclass of RtcpReceiverReportPacket
  * because it only extends it with a sender report.
  * Application specific rtcp packets are not defined.
- * The class RTCPCompoundPacket isn't derived from RTCPPacket because it just
+ * The class RtcpCompoundPacket isn't derived from RtcpPacket because it just
  * acts as a container for rtcp packets. Only rtcp compound packets are sent
  * over the network.
  */

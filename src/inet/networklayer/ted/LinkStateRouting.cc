@@ -22,9 +22,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ted/TED.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ted/Ted.h"
 
 namespace inet {
 

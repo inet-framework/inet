@@ -46,14 +46,14 @@ import inet.physicallayer.contract.bitlevel.IPulseShaper;
 // of this model is to provide a basic infrastructure for further development and
 // experimentation.
 //
-// See also ~APSKEncoder, ~APSKModulator, and ~APSKLayeredReceiver.
+// See also ~ApskEncoder, ~ApskModulator, and ~ApskLayeredReceiver.
 //
 module ApskLayeredTransmitter like ITransmitter
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
-        string encoderType = default("APSKEncoder");
-        string modulatorType = default("APSKModulator");
+        string encoderType = default("ApskEncoder");
+        string modulatorType = default("ApskModulator");
         string pulseShaperType = default("");
         string digitalAnalogConverterType = default("");
         double bitrate @unit(bps); // net bitrate of the transmitter

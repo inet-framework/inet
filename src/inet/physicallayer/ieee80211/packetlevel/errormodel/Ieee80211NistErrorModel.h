@@ -24,7 +24,7 @@
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/dsss-error-rate-model.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 

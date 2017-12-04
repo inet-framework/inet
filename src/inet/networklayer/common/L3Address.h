@@ -20,9 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"
 #include "inet/networklayer/common/ModulePathAddress.h"
 
@@ -36,7 +36,7 @@ class IL3AddressType;
  * different address implementations should not subclass this class, they should rather provide
  * conversions to and from this class.
  *
- * @see IPv4Address, IPv6Address, MACAddress, ModulePathAddress, ModuleIdAddress
+ * @see Ipv4Address, Ipv6Address, MacAddress, ModulePathAddress, ModuleIdAddress
  */
 class INET_API L3Address
 {

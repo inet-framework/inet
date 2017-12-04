@@ -61,12 +61,12 @@ enum DhcpOptionCode
 
 //
 // Represents options in a DHCP message. In the DHCP protocol, options are
-// added to the message as tagged data items. In the simulation, this DHCPOptions
+// added to the message as tagged data items. In the simulation, this DhcpOptions
 // class statically holds the union of all options actually used by the DHCP
 // protocol models. Options absent from a packet are represented by empty/unfilled
-// DHCPOptions fields.
+// DhcpOptions fields.
 //
-// @see DHCPMessage, DHCPClient, DHCPServer
+// @see DhcpMessage, DhcpClient, DhcpServer
 //
 class DhcpOptions extends cObject
 {
@@ -89,18 +89,18 @@ class DhcpOptions extends cObject
 // Represents a DHCP message. DHCP (Dynamic Host Configuration Protocol, RFC 2131)
 // provides a framework for passing configuration information to hosts on a TCP/IP network.
 //
-// @see DHCPClient, DHCPServer
+// @see DhcpClient, DhcpServer
 //
 class DhcpMessage extends FieldsChunk
 {
     DhcpOpcode op; // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
-    int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
+    int htype; // hardware address type, see Arp section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)
     int hops; // client sets to zero, optionally used by relay agents when booting via a relay agent
     unsigned int xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
     int secs; // filled in by client, seconds elapsed since client began address acquisition or renewal process
     bool broadcast; // the broadcast bit in the flags field
-    Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests
+    Ipv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to Arp requests
     Ipv4Address yiaddr; // 'your' (client) IP address
     Ipv4Address giaddr; // relay agent IP address, used in booting via a relay agent
     MacAddress chaddr; // client hardware address (MAC)

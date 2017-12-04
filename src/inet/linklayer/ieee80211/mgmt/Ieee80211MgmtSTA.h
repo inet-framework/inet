@@ -101,7 +101,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
     bool isScanning;
     ScanningInfo scanning;
 
-    // APInfo list: we collect scanning results and keep track of ongoing authentications here
+    // ApInfo list: we collect scanning results and keep track of ongoing authentications here
     // Note: there can be several ongoing authentications simultaneously
     typedef std::list<ApInfo> AccessPointList;
     AccessPointList apList;

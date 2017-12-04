@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskDecoder.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 
 namespace inet {
@@ -55,7 +55,7 @@ void ApskDecoder::initialize(int stage)
 
 std::ostream& ApskDecoder::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKDecoder";
+    stream << "ApskDecoder";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", code = " << code;
     if (level <= PRINT_LEVEL_TRACE)

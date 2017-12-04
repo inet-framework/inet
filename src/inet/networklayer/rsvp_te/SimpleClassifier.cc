@@ -15,10 +15,10 @@
 #include <iostream>
 #include "inet/networklayer/rsvp_te/SimpleClassifier.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/mpls/LIBTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/rsvp_te/RSVP.h"
+#include "inet/networklayer/rsvp_te/Rsvp.h"
 
 namespace inet {
 
@@ -87,7 +87,7 @@ bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std:
     return false;
 }
 
-// IRSVPClassifier implementation (method invoked by RSVP)
+// IRsvpClassifier implementation (method invoked by RSVP)
 
 void SimpleClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
 {

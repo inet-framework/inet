@@ -20,14 +20,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPReno.
+ * State variables for TcpReno.
  */
 typedef TcpTahoeRenoFamilyStateVariables TcpRenoStateVariables;
 
@@ -39,7 +39,7 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
   protected:
     TcpRenoStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
-    /** Create and return a TCPRenoStateVariables object. */
+    /** Create and return a TcpRenoStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override
     {
         return new TcpRenoStateVariables();

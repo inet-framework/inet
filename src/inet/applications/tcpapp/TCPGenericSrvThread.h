@@ -20,12 +20,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tcpapp/TCPSrvHostApp.h"
+#include "inet/applications/tcpapp/TcpSrvHostApp.h"
 
 namespace inet {
 
 /**
- * Example server thread, to be used with TCPSrvHostApp.
+ * Example server thread, to be used with TcpSrvHostApp.
  */
 class INET_API TcpGenericSrvThread : public TcpServerThreadBase
 {

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/pim/PIMPacket.h"
+#include "inet/routing/pim/PimPacket.h"
 
 namespace inet {
 
@@ -119,7 +119,7 @@ void PimHello::parsimUnpack(cCommBuffer *b)
                 //case StateRefreshCapable: TODO  break;
                 //case AddressList: break;
                 default:
-                    throw cRuntimeError("PIMHello::parsimUnpack(): unknown option type: %sd.", type);
+                    throw cRuntimeError("PimHello::parsimUnpack(): unknown option type: %sd.", type);
             }
             if (options_var[i])
                 doParsimUnpacking(b, *options_var[i]);

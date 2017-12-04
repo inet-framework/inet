@@ -22,7 +22,7 @@
 #include <functional>
 #include <stdio.h>
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

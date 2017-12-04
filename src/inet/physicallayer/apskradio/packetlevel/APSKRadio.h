@@ -18,7 +18,7 @@
 #ifndef __INET_APSKRADIO_H
 #define __INET_APSKRADIO_H
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
 

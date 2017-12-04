@@ -17,7 +17,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -55,7 +55,7 @@ TcpSocket::TcpSocket(cMessage *msg)
     else if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
-        // However, for convenience we extract TCPConnectInfo already here, so that
+        // However, for convenience we extract TcpConnectInfo already here, so that
         // remote address/port can be read already after the ctor call.
 
         TcpConnectInfo *connectInfo = check_and_cast<TcpConnectInfo *>(msg->getControlInfo());
@@ -95,7 +95,7 @@ const char *TcpSocket::stateName(int state)
 void TcpSocket::sendToTCP(cMessage *msg, int connId)
 {
     if (!gateToTcp)
-        throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
+        throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
 
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
@@ -105,10 +105,10 @@ void TcpSocket::sendToTCP(cMessage *msg, int connId)
 void TcpSocket::bind(int lPort)
 {
     if (sockstate != NOT_BOUND)
-        throw cRuntimeError("TCPSocket::bind(): socket already bound");
+        throw cRuntimeError("TcpSocket::bind(): socket already bound");
 
     if (lPort < 0 || lPort > 65535)
-        throw cRuntimeError("TCPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("TcpSocket::bind(): invalid port number %d", lPort);
 
     localPrt = lPort;
     sockstate = BOUND;
@@ -117,11 +117,11 @@ void TcpSocket::bind(int lPort)
 void TcpSocket::bind(L3Address lAddr, int lPort)
 {
     if (sockstate != NOT_BOUND)
-        throw cRuntimeError("TCPSocket::bind(): socket already bound");
+        throw cRuntimeError("TcpSocket::bind(): socket already bound");
 
     // allow -1 here, to make it possible to specify address only
     if ((lPort < 0 || lPort > 65535) && lPort != -1)
-        throw cRuntimeError("TCPSocket::bind(): invalid port number %d", lPort);
+        throw cRuntimeError("TcpSocket::bind(): invalid port number %d", lPort);
 
     localAddr = lAddr;
     localPrt = lPort;
@@ -131,8 +131,8 @@ void TcpSocket::bind(L3Address lAddr, int lPort)
 void TcpSocket::listen(bool fork)
 {
     if (sockstate != BOUND)
-        throw cRuntimeError(sockstate == NOT_BOUND ? "TCPSocket: must call bind() before listen()"
-                : "TCPSocket::listen(): connect() or listen() already called");
+        throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
+                : "TcpSocket::listen(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
@@ -158,10 +158,10 @@ void TcpSocket::accept(int socketId)
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
-        throw cRuntimeError("TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
+        throw cRuntimeError("TcpSocket::connect(): connect() or listen() already called (need renewSocket()?)");
 
     if (remotePort < 0 || remotePort > 65535)
-        throw cRuntimeError("TCPSocket::connect(): invalid remote port number %d", remotePort);
+        throw cRuntimeError("TcpSocket::connect(): invalid remote port number %d", remotePort);
 
     cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
@@ -183,7 +183,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 void TcpSocket::send(cMessage *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
-        throw cRuntimeError("TCPSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
+        throw cRuntimeError("TcpSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
 
     msg->setKind(TCP_C_SEND);
     sendToTCP(msg);
@@ -197,7 +197,7 @@ void TcpSocket::sendCommand(cMessage *msg)
 void TcpSocket::close()
 {
     if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
-        throw cRuntimeError("TCPSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
+        throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
     cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
     TcpCommand *cmd = new TcpCommand();
@@ -288,9 +288,9 @@ void TcpSocket::processMessage(cMessage *msg)
         case TCP_I_ESTABLISHED:
             // Note: this code is only for sockets doing active open, and nonforking
             // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
-            // carries a new connId which won't match the connId of this TCPSocket,
+            // carries a new connId which won't match the connId of this TcpSocket,
             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
-            // want to create a new TCPSocket object via new TCPSocket(msg).
+            // want to create a new TcpSocket object via new TcpSocket(msg).
             sockstate = CONNECTED;
             connectInfo = check_and_cast<TcpConnectInfo *>(msg->getControlInfo());
             localAddr = connectInfo->getLocalAddr();
@@ -343,7 +343,7 @@ void TcpSocket::processMessage(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
+            throw cRuntimeError("TcpSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
                 msg->getKind());
     }
 }

@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        MoBANCoordinator.h
+ * file:        MoBanCoordinator.h
  *
  * author:      Majid Nabi <m.nabi@tue.nl>
  *
@@ -58,15 +58,15 @@ class MoBanLocal;
 
 /**
    *\page mobancpp MoBAN C++ reference
- * This is the C++ implementation reference for MoBAN, which is a configurable mobility model for wireless Body Area Networks. MoBANCoordinator and MoBANLocal
+ * This is the C++ implementation reference for MoBAN, which is a configurable mobility model for wireless Body Area Networks. MoBanCoordinator and MoBanLocal
  * classes describe the behavior of the Coordinator module and local mobility module of the MoBAN, respectively. There are two more classes which are used in the
  * coordinator module.
  *
- * Class Posture is responsible for maintaining an instance of defined posture for the WBAN. In the initialization phase, the MoBANCoordinator reads the input
+ * Class Posture is responsible for maintaining an instance of defined posture for the WBAN. In the initialization phase, the MoBanCoordinator reads the input
  * posture specification file (.xml) and makes a list of posture objects, each maintaining the information of one defined posture.
  *
  * Class PostureTransition is responsible for maintaining the configuration information regarding the spatial and temporal correlations in posture selection strategy of MoBAN.
- * In the initialization phase, the MoBANCoordinator reads the input configuration file and pass the given information about the area types, time domains, various
+ * In the initialization phase, the MoBanCoordinator reads the input configuration file and pass the given information about the area types, time domains, various
  * Markov transition matrices, and the setups which specify which matrix should be used in a particular space-time combination. During the simulation run, the class provides
  * a function that determines the proper Markov matrix for a given time and location.
  *

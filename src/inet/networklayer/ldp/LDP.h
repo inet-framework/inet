@@ -23,9 +23,9 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/ldp/LDPPacket_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -163,7 +163,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
 
     virtual void sendToPeer(Ipv4Address dest, cMessage *msg);
 
-    //bool matches(const FEC_TLV& a, const FEC_TLV& b);
+    //bool matches(const FecTlv& a, const FecTlv& b);
 
     FecVector::iterator findFecEntry(FecVector& fecs, Ipv4Address addr, int length);
     FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer);
@@ -205,7 +205,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     virtual void processLABEL_WITHDRAW(Packet *packet);
     virtual void processNOTIFICATION(Packet *packet);
 
-    /** @name TCPSocket::CallbackInterface callback methods */
+    /** @name TcpSocket::CallbackInterface callback methods */
     //@{
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;

@@ -27,7 +27,7 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ppp/PPP.h"
+#include "inet/linklayer/ppp/Ppp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

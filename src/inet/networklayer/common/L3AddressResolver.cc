@@ -26,14 +26,14 @@
 #include "inet/networklayer/common/ModuleIdAddress.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
@@ -435,17 +435,17 @@ IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
 {
     IIpv4RoutingTable *mod = findIPv4RoutingTableOf(host);
     if (!mod)
-        throw cRuntimeError("L3AddressResolver: IIPv4RoutingTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: IIpv4RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
 
 Ipv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
 {
-    // find IPv6RoutingTable
+    // find Ipv6RoutingTable
     Ipv6RoutingTable *mod = findIPv6RoutingTableOf(host);
     if (!mod)
-        throw cRuntimeError("L3AddressResolver: IPv6RoutingTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: Ipv6RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }

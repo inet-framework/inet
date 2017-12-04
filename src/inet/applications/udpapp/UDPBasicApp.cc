@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/udpapp/UDPBasicApp.h"
+#include "inet/applications/udpapp/UdpBasicApp.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

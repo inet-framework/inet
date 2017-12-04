@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulator.h"
 
 namespace inet {
 

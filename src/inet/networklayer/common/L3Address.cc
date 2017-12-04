@@ -16,9 +16,9 @@
 //
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/ipv4/IPv4AddressType.h"
-#include "inet/networklayer/contract/ipv6/IPv6AddressType.h"
-#include "inet/linklayer/common/MACAddressType.h"
+#include "inet/networklayer/contract/ipv4/Ipv4AddressType.h"
+#include "inet/networklayer/contract/ipv6/Ipv6AddressType.h"
+#include "inet/linklayer/common/MacAddressType.h"
 #include "inet/networklayer/common/ModuleIdAddressType.h"
 #include "inet/networklayer/common/ModulePathAddressType.h"
 
@@ -163,13 +163,13 @@ bool L3Address::isUnicast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::IPv4:
-            return !toIPv4().isMulticast() && !toIPv4().isLimitedBroadcastAddress();    // TODO: move to IPv4Address
+            return !toIPv4().isMulticast() && !toIPv4().isLimitedBroadcastAddress();    // TODO: move to Ipv4Address
 
         case L3Address::IPv6:
             return toIPv6().isUnicast();
 
         case L3Address::MAC:
-            return !toMAC().isBroadcast() && !toMAC().isMulticast();    // TODO: move to MACAddress
+            return !toMAC().isBroadcast() && !toMAC().isMulticast();    // TODO: move to MacAddress
 
         case L3Address::MODULEID:
             return toModuleId().isUnicast();
@@ -369,7 +369,7 @@ L3Address L3Address::getPrefix(int prefixLength) const
 
         case L3Address::MAC:
             if (prefixLength != 48)
-                throw cRuntimeError("mask not supported for MACAddress");
+                throw cRuntimeError("mask not supported for MacAddress");
             return *this;
 
         case L3Address::MODULEID:

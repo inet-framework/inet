@@ -24,10 +24,10 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/IARP.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -48,8 +48,8 @@ class INET_API GlobalArp : public cSimpleModule, public IArp, public ILifecycle,
     typedef std::map<L3Address, ArpCacheEntry *> ArpCache;
     typedef std::vector<cMessage *> MsgPtrVector;
 
-    // IPv4Address -> MACAddress table
-    // TBD should we key it on (IPv4Address, InterfaceEntry*)?
+    // Ipv4Address -> MacAddress table
+    // TBD should we key it on (Ipv4Address, InterfaceEntry*)?
     class ArpCacheEntry
     {
       public:

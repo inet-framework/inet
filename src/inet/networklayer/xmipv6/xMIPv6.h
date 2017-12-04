@@ -28,9 +28,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
-#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"    // for HAOpt & RH2
 
 namespace inet {
@@ -54,11 +54,11 @@ class Ipv6RoutingTable;
 #define KEY_HTOKEN_EXP       6 // home token expiry
 #define KEY_CTOKEN_EXP       7 // care-of token expiry
 
-#define TRANSMIT_TYPE_BU     51 // BUTransmitIfEntry
+#define TRANSMIT_TYPE_BU     51 // BuTransmitIfEntry
 #define TRANSMIT_TYPE_TI     52 // TestInitTransmitIfEntry
 
-#define EXPIRY_TYPE_BUL      61 // BULExpiryIfEntry
-#define EXPIRY_TYPE_BC       62 // BCExpiryIfEntry
+#define EXPIRY_TYPE_BUL      61 // BulExpiryIfEntry
+#define EXPIRY_TYPE_BC       62 // BcExpiryIfEntry
 
 #define EXPIRY_TYPE_TOKEN    63 // {Home, CareOf}TokenExpiryIfEntry
 
@@ -207,7 +207,7 @@ class INET_API xMIPv6 : public cSimpleModule
 
     /*
      * This method creates and starts a timer for an advertising interface over which BUs will be sent until it gets acknowledged
-     * by an appropriate BA. This routine also "intialises" the necessary variables in a struct BUTransmitIfEntry that is created to
+     * by an appropriate BA. This routine also "intialises" the necessary variables in a struct BuTransmitIfEntry that is created to
      * keep these variables for access.
      */
     void createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie);
@@ -237,12 +237,12 @@ class INET_API xMIPv6 : public cSimpleModule
     xMIPv6::BuTransmitIfEntry *fetchBUTransmitIfEntry(InterfaceEntry *ie, const Ipv6Address& dest);
 
     /**
-     * Append an IPv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the IPv6 Module
+     * Append an Ipv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the IPv6 Module
      */
     void sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
             const Ipv6Address& srcAddr = Ipv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
             simtime_t sendTime = 0);    // overloaded for use at CN - CB
-    //void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
+    //void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
 
     /**
      * Process a BU - only applicable to HAs and CNs.
@@ -324,13 +324,13 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Cancels the current existing timer and reschedules it with initial values.
      */
-    /*void resetTestInitIfEntry(const IPv6Address& dest, int interfaceID, int msgType);*/
+    /*void resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType);*/
 
     /**
      * Similiar to the other resetTestInitIfEntry() method, but this one searches for the appropriate
      * transmission structure first as the interfaceID is not known but needed as lookup key.
      */
-    //void resetTestInitIfEntry(const IPv6Address& dest, int msgType);
+    //void resetTestInitIfEntry(const Ipv6Address& dest, int msgType);
 
     /**
      * Reset the transmission structure for a BU and reschedule it for the provided time.

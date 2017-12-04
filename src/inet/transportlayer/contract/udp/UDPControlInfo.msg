@@ -26,15 +26,15 @@ namespace inet;
 // UDP command codes, sent by the application to ~UDP. These constants
 // should be set as message kind on messages sent to the ~UDP entity.
 //
-// @see ~UDPControlInfo, ~UDPStatusInd, ~UDP
+// @see ~UdpControlInfo, ~UdpStatusInd, ~UDP
 //
 enum UdpCommandCode
 {
     UDP_C_DATA = 0;      // send()/sendTo(); see ~UDPSendCommand
-    UDP_C_BIND = 1;      // bind(); see ~UDPBindCommand
-    UDP_C_CONNECT = 2;   // connect(); see ~UDPConnectCommand
-    UDP_C_SETOPTION = 3; // setsockopt(); see ~UDPSetTimeToLiveCommand,...
-    UDP_C_CLOSE = 4;     // close(); see ~UDPCloseCommand
+    UDP_C_BIND = 1;      // bind(); see ~UdpBindCommand
+    UDP_C_CONNECT = 2;   // connect(); see ~UdpConnectCommand
+    UDP_C_SETOPTION = 3; // setsockopt(); see ~UdpSetTimeToLiveCommand,...
+    UDP_C_CLOSE = 4;     // close(); see ~UdpCloseCommand
 }
 
 
@@ -42,7 +42,7 @@ enum UdpCommandCode
 // UDP indications, sent by ~UDP to the application. ~UDP will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see ~UDPControlInfo, ~UDPCommandCode, ~UDP
+// @see ~UdpControlInfo, ~UdpCommandCode, ~UDP
 //
 enum UdpStatusInd
 {
@@ -53,9 +53,9 @@ enum UdpStatusInd
 
 //
 // Base class for UDP control info classes. The most convenient way to handle
-// ~UDP is the UDPSocket class, which hides control info from you.
+// ~UDP is the UdpSocket class, which hides control info from you.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpControlInfo extends cObject
 {
@@ -64,12 +64,12 @@ class UdpControlInfo extends cObject
 //
 // Control info for binding an UDP socket. To create and bind a socket,
 // send a message to the ~UDP module with kind=UDP_C_BIND and an
-// ~UDPBindCommand attached.
+// ~UdpBindCommand attached.
 //
 // Both the address and the port may be left unset. If the port is
 // unset, ~UDP will assign an ephemeral port.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpBindCommand extends UdpControlInfo
 {
@@ -80,12 +80,12 @@ class UdpBindCommand extends UdpControlInfo
 //
 // Control info for connecting an UDP socket. To connect a socket,
 // send a message to the ~UDP module with kind=UDP_C_CONNECT and an
-// ~UDPConnectCommand attached. If the socket does not exist,
+// ~UdpConnectCommand attached. If the socket does not exist,
 // it will be created.
 //
 // Both the address and the port must be filled in.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpConnectCommand extends UdpControlInfo
 {
@@ -102,15 +102,15 @@ class UdpConnectCommand extends UdpControlInfo
 // If the socket is connected, tags not required, or destAddr/destPort may be left blank (send()),
 // otherwise it must contain the destination for the packet (sendto()).
 //
-// @see ~UDPCommandCode, ~PortsReq, ~L3AddressReq, ~InterfaceReq
+// @see ~UdpCommandCode, ~PortsReq, ~L3AddressReq, ~InterfaceReq
 //
 
 
 //
 // Control info for closing an UDP socket. To close a socket, send a message
-// to the ~UDP module with kind=UDP_C_CLOSE and an ~UDPCloseCommand attached.
+// to the ~UDP module with kind=UDP_C_CLOSE and an ~UdpCloseCommand attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpCloseCommand extends UdpControlInfo
 {
@@ -121,15 +121,15 @@ class UdpCloseCommand extends UdpControlInfo
 // Control info that is attached to received data packets, sent up from the
 // ~UDP module to the application with UDP_I_DATA as message kind.
 //
-// @see ~UDPCommandCode, ~L3AddressInd, ~PortsInd
+// @see ~UdpCommandCode, ~L3AddressInd, ~PortsInd
 //
 
 //
 // Control info that is sent up from the ~UDP module to the application with
-// UDP_I_ERROR as message kind when ~UDP receives an ICMP error for a packet
+// UDP_I_ERROR as message kind when ~UDP receives an Icmp error for a packet
 // previously sent from the socket.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpErrorIndication extends UdpControlInfo
 {
@@ -148,7 +148,7 @@ class UdpSetOptionCommand extends UdpControlInfo
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetTimeToLiveCommand extends UdpSetOptionCommand
 {
@@ -158,12 +158,12 @@ class UdpSetTimeToLiveCommand extends UdpSetOptionCommand
 //
 // Control info for setting the Type of Service (IPv4) or Traffic Class (IPv6)
 // header field on outgoing IPv4/IPv6 packets sent from an UDP socket.
-// This is an 8-bit field, the lowest 6 bits are the DSCP (DiffServ Code Point)
+// This is an 8-bit field, the lowest 6 bits are the Dscp (DiffServ Code Point)
 // and the highest 2 bits are the ECN (Explicit Congestion Notification).
 // To set the option, send a message to  the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetTypeOfServiceCommand extends UdpSetOptionCommand
 {
@@ -175,7 +175,7 @@ class UdpSetTypeOfServiceCommand extends UdpSetOptionCommand
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetBroadcastCommand extends UdpSetOptionCommand
 {
@@ -187,7 +187,7 @@ class UdpSetBroadcastCommand extends UdpSetOptionCommand
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetMulticastInterfaceCommand extends UdpSetOptionCommand
 {
@@ -201,7 +201,7 @@ class UdpSetMulticastInterfaceCommand extends UdpSetOptionCommand
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetMulticastLoopCommand extends UdpSetOptionCommand
 {
@@ -215,7 +215,7 @@ class UdpSetMulticastLoopCommand extends UdpSetOptionCommand
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpSetReuseAddressCommand extends UdpSetOptionCommand
 {
@@ -231,7 +231,7 @@ class UdpSetReuseAddressCommand extends UdpSetOptionCommand
 // When there are less interfaceIds than multicast addresses,
 // then -1 is assumed (meaning join on all interfaces).
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpJoinMulticastGroupsCommand extends UdpSetOptionCommand
 {
@@ -244,7 +244,7 @@ class UdpJoinMulticastGroupsCommand extends UdpSetOptionCommand
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
-// @see ~UDPCommandCode
+// @see ~UdpCommandCode
 //
 class UdpLeaveMulticastGroupsCommand extends UdpSetOptionCommand
 {

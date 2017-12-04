@@ -19,7 +19,7 @@
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/common/serializer/headers/in.h"
 #include "inet/common/serializer/ipv4/headers/ip.h"
-#include "inet/common/serializer/ipv4/IPv4HeaderSerializer.h"
+#include "inet/common/serializer/ipv4/Ipv4HeaderSerializer.h"
 
 namespace inet {
 
@@ -141,7 +141,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
         case IPOPTION_ROUTER_ALERT:
         case IPOPTION_SECURITY:
         default: {
-            throw cRuntimeError("Unknown IPv4Option type=%d (not in an TLVOptionRaw option)", type);
+            throw cRuntimeError("Unknown Ipv4Option type=%d (not in an TlvOptionRaw option)", type);
             break;
         }
     }

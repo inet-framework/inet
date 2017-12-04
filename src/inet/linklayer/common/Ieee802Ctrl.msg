@@ -34,12 +34,12 @@ enum Ieee802MessageKind
 
 class Ieee802RegisterDsapCommand extends cObject
 {
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
 class Ieee802DeregisterDsapCommand extends cObject
 {
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
 // used with IEEE802CTRL_SENDPAUSE

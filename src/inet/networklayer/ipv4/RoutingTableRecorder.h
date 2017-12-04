@@ -23,13 +23,13 @@
 #if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
 #include <map>
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IRoute.h"
 
 /**
  * Records interface table and routing table changes into the eventlog.
  *
- * @see IPv4RoutingTable, IPv4Route
+ * @see Ipv4RoutingTable, Ipv4Route
  */
 class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEventlogManager::cEventlogListener
 {
@@ -77,14 +77,14 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
 
 #else /*OMNETPP_VERSION*/
 
-#include "IIPv4RoutingTable.h"
+#include "IIpv4RoutingTable.h"
 
 namespace inet {
 
 /**
  * Records routing table changes into a file.
  *
- * @see IPv4RoutingTable, IPv4Route
+ * @see Ipv4RoutingTable, Ipv4Route
  */
 class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
 {

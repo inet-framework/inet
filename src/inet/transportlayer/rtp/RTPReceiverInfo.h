@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTPReceiverInfo.h  -  description
+                       RtpReceiverInfo.h  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -21,14 +21,14 @@
 #include <cassert>
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 namespace inet {
 
 namespace rtp {
 
 /**
- * This class, a subclass of RTPParticipantInfo, is used for storing information
+ * This class, a subclass of RtpParticipantInfo, is used for storing information
  * about other RTP endsystems.
  * This class processes RTP packets, rtcp sender reports and rtcp sdes chunks
  * originating from this endsystem.
@@ -58,12 +58,12 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     RtpReceiverInfo& operator=(const RtpReceiverInfo& receiverInfo);
 
     /**
-     * Duplicates this RTPReceiverInfo by calling the copy constructor.
+     * Duplicates this RtpReceiverInfo by calling the copy constructor.
      */
     virtual RtpReceiverInfo *dup() const override;
 
     /**
-     * Extracts information of the given RTPPacket.
+     * Extracts information of the given RtpPacket.
      * Also sets _inactiveIntervals to 0.
      */
     virtual void processRTPPacket(Packet *packet, int id, simtime_t arrivalTime) override;
@@ -74,7 +74,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     virtual void processSenderReport(SenderReport *report, simtime_t arrivalTime);
 
     /**
-     * Extracts information of the given SDESChunk.
+     * Extracts information of the given SdesChunk.
      */
     virtual void processSDESChunk(const SdesChunk *sdesChunk, simtime_t arrivalTime) override;
 
@@ -85,7 +85,7 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     virtual ReceptionReport *receptionReport(simtime_t now) override;
 
     /**
-     * Informs this RTPReceiverInfo that one rtcp interval has past.
+     * Informs this RtpReceiverInfo that one rtcp interval has past.
      */
     virtual void nextInterval(simtime_t now) override;
 
@@ -111,17 +111,17 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
 
   protected:
     /**
-     * The sequence number of the first RTPPacket received.
+     * The sequence number of the first RtpPacket received.
      */
     uint16 _sequenceNumberBase = 0;
 
     /**
-     * The highest sequence number of an RTPPacket received.
+     * The highest sequence number of an RtpPacket received.
      */
     uint16 _highestSequenceNumber = 0;
 
     /**
-     * The highest sequence number of an RTPPacket received
+     * The highest sequence number of an RtpPacket received
      * before the beginning of the current rtcp interval.
      */
     uint32 _highestSequenceNumberPrior = 0;
@@ -173,13 +173,13 @@ class INET_API RtpReceiverInfo : public RtpParticipantInfo
     uint64 _lastSenderReportNTPTimeStamp = 0;
 
     /**
-     * The RTP time stamp of the last RTPPacket received from this sender.
+     * The Rtp time stamp of the last RtpPacket received from this sender.
      * Needed for calculating the jitter.
      */
     uint32 _lastPacketRTPTimeStamp = 0;
 
     /**
-     * The arrival time of the last RTPPacket received from this sender.
+     * The arrival time of the last RtpPacket received from this sender.
      * Needed for calculating the jitter.
      */
     simtime_t _lastPacketArrivalTime;

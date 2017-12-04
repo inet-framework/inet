@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPPayloadReceiver.cc  -  description
+                          RtpPayloadReceiver.cc  -  description
                              -------------------
     begin                : Fri Nov 2 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -17,10 +17,10 @@
 
 #include <fstream>
 
-#include "inet/transportlayer/rtp/RTPPayloadReceiver.h"
+#include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 
@@ -59,7 +59,7 @@ void RtpPayloadReceiver::handleMessage(cMessage *msg)
     }
     else {
         //delete rinp;
-        throw cRuntimeError("RTPInnerPacket of wrong type received");
+        throw cRuntimeError("RtpInnerPacket of wrong type received");
     }
 }
 

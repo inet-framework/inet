@@ -17,10 +17,10 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKRadio.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskRadio.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
@@ -57,7 +57,7 @@ const ApskModulationBase *ApskRadio::getModulation() const
     else if (auto layeredTransmitter = dynamic_cast<const ApskLayeredTransmitter *>(transmitter)) {
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
-            // const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
+            // const ApskEncoder *apskEncoder = check_and_cast<const ApskEncoder *>(encoder);
             // TODO: forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
         }
         modulation = check_and_cast<const ApskModulationBase *>(layeredTransmitter->getModulator()->getModulation());

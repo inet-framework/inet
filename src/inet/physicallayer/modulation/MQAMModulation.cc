@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/MQAMModulation.h"
+#include "inet/physicallayer/modulation/MqamModulation.h"
 
 namespace inet {
 
@@ -53,7 +53,7 @@ MqamModulation::~MqamModulation()
 
 std::ostream& MqamModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "MQAMModulation";
+    stream << "MqamModulation";
     return ApskModulationBase::printToStream(stream, level);
 }
 

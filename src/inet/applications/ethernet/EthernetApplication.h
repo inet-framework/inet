@@ -14,7 +14,7 @@
 #define __INET_ETHERNETAPPLICATION_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 

@@ -31,7 +31,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.testHost.numApps = 2
 **.testHost.numTunInterfaces = 1
-**.testHost.app[0].typename = "UDPBasicApp"
+**.testHost.app[0].typename = "UdpBasicApp"
 **.testHost.app[0].sendInterval = 0.05s
 **.testHost.app[0].messageLength = 100B
 **.testHost.app[0].startTime = 1s

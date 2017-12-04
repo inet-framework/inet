@@ -22,13 +22,13 @@
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmTransmitter.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulator.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 #include "../mode/Ieee80211OfdmCode.h"
 #include "../mode/Ieee80211OfdmMode.h"
@@ -82,7 +82,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
 
 std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211LayeredOFDMTransmitter";
+    stream << "Ieee80211LayeredOfdmTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", levelOfDetail = " << levelOfDetail
                << ", mode = " << printObjectToString(mode, level + 1)

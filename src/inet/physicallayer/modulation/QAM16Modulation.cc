@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
 
 namespace inet {
 

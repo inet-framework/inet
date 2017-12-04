@@ -38,7 +38,7 @@ class INET_API Ted : public cSimpleModule, public ILifecycle
   public:
     /**
      * Only used internally, during shortest path calculation:
-     * vertex in the graph we build from links in TELinkStateInfoVector.
+     * vertex in the graph we build from links in TeLinkStateInfoVector.
      */
     struct vertex_t
     {
@@ -49,7 +49,7 @@ class INET_API Ted : public cSimpleModule, public ILifecycle
 
     /**
      * Only used internally, during shortest path calculation:
-     * edge in the graph we build from links in TELinkStateInfoVector.
+     * edge in the graph we build from links in TeLinkStateInfoVector.
      */
     struct edge_t
     {
@@ -59,7 +59,7 @@ class INET_API Ted : public cSimpleModule, public ILifecycle
     };
 
     /**
-     * The link state database. (TELinkStateInfoVector is defined in TED.msg)
+     * The link state database. (TeLinkStateInfoVector is defined in Ted.msg)
      */
     TeLinkStateInfoVector ted;
 

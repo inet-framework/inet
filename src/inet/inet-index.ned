@@ -42,35 +42,35 @@
 //  - network interfaces: ~EthernetInterface, ~PPPInterface, ~Ieee80211Nic
 //  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
 //    mode are supported
-//  - IPv4 layer: ~IPv4, ~ARP and ~ICMP; ~IPv4RoutingTable
-//  - IPv6 support: ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6, ~IPv6RoutingTable;
+//  - IPv4 layer: ~IPv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
+//  - IPv6 support: ~IPv6, ~Ipv6NeighbourDiscovery, ~Icmpv6, ~Ipv6RoutingTable;
 //    see <a href="ipv6overview.html">IPv6 model overview</a>
 //  - transport layer: ~TCP, ~UDP, ~SCTP
-//  - ~InterfaceTable and ~IPv4RoutingTable can be found in every
+//  - ~InterfaceTable and ~Ipv4RoutingTable can be found in every
 //    host and router model
 //  - queues in router network interfaces: ~DropTailQueue, ~DiffservQueue.
-//  - ~IPv4NetworkConfigurator automatically assigns IPv4 addresses and
+//  - ~Ipv4NetworkConfigurator automatically assigns IPv4 addresses and
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle
 //    of the simulation to study transient behaviour
 //  - message classes: ~Ipv4Header, ~TCPSegment, ~UdpHeader, ~EthernetIIFrame,
-//    ~ARPPacket, ~PPPFrame, ~GenericAppMsg, ~EtherAppReq, etc.
+//    ~ArpPacket, ~PPPFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
-//    ~IPv4ControlInfo, ~TCPCommand, ~UDPControlInfo, ~Ieee802Ctrl, etc.
-//  - application models: ~UDPVideoStreamSvr, ~UDPVideoStreamCli, ~UDPBasicApp, ~UDPEchoApp,
-//    ~TCPSessionApp, ~TCPBasicClientApp, ~TCPGenericSrvApp, ~TCPSinkApp,
-//    ~TCPSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, ~SimpleVoIPSender,
-//    ~SimpleVoIPReceiver etc.
+//    ~Ipv4ControlInfo, ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
+//  - application models: ~UdpVideoStreamSvr, ~UdpVideoStreamCli, ~UdpBasicApp, ~UdpEchoApp,
+//    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericSrvApp, ~TcpSinkApp,
+//    ~TcpSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, ~SimpleVoipSender,
+//    ~SimpleVoipReceiver etc.
 //  - wireless support: ~IRadioMedium, ~Ieee80211Nic
 //  - Mobility models: ~TurtleMobility,
-//    ~BonnMotionMobility, ~ANSimMobility, ~RandomWPMobility, ~MassMobility
-//  - MPLS models: the core modules are ~MPLS, ~LIBTable, ~LDP, ~RSVP, ~TED,
+//    ~BonnMotionMobility, ~AnsimMobility, ~RandomWpMobility, ~MassMobility
+//  - Mpls models: the core modules are ~Mpls, ~LibTable, ~Ldp, ~Rsvp, ~Ted,
 //    ~LinkStateRouting; MPLS-enabled routers are ~LDP_LSR, ~RSVP_LSR;
 //    see also the list of <a href="standards.html">implemented standards</a>
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
 //    daemon ported into the INET Framework, currently in a different project)
 //    used inside QuaggaRouter; alternatively one can run ~OSPFRouter which relies
-//    on the ~OSPFRouting module;
+//    on the ~OspfRouting module;
 //
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>

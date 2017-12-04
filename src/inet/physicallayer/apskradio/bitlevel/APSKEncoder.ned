@@ -27,7 +27,7 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 // the bit domain representation from the packet domain representation by applying
 // the configured scrambling, forward errror correction encoding, and interleaving.
 //
-// See also ~APSKDecoder, ~APSKLayeredReceiver.
+// See also ~ApskDecoder, ~ApskLayeredReceiver.
 //
 module ApskEncoder like IEncoder
 {

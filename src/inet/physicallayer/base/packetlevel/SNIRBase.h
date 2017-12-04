@@ -18,7 +18,7 @@
 #ifndef __INET_SNIRBASE_H
 #define __INET_SNIRBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/INoise.h"
 

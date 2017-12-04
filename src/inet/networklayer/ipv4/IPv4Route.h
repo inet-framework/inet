@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/IRoute.h"
 
 namespace inet {
@@ -29,9 +29,9 @@ class InterfaceEntry;
 class IIpv4RoutingTable;
 
 /**
- * IPv4 unicast route in IIPv4RoutingTable.
+ * IPv4 unicast route in IIpv4RoutingTable.
  *
- * @see IIPv4RoutingTable, IPv4RoutingTable
+ * @see IIpv4RoutingTable, Ipv4RoutingTable
  */
 class INET_API Ipv4Route : public cObject, public IRoute
 {
@@ -142,7 +142,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
 };
 
 /**
- * IPv4 multicast route in IIPv4RoutingTable.
+ * IPv4 multicast route in IIpv4RoutingTable.
  * Multicast routing protocols may extend this class to store protocol
  * specific fields.
  *
@@ -161,7 +161,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
  * routing tree), then the datagram is forwarded only if there are listeners
  * of the multicast group on that link (TRPB routing).
  *
- * @see IIPv4RoutingTable, IPv4RoutingTable
+ * @see IIpv4RoutingTable, Ipv4RoutingTable
  */
 class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 {

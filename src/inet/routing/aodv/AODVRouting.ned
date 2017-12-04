@@ -29,7 +29,7 @@ package inet.routing.aodv;
 //
 // This routing protocol communicates over UDP and used in ~AODVRouter
 // nodes as a routing submodule. ~AODVRouter is just a ~WirelessHost
-// extended with ~AODVRouting submodule.
+// extended with ~AodvRouting submodule.
 //
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.

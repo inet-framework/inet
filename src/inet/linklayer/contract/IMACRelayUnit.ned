@@ -40,7 +40,7 @@ package inet.linklayer.contract;
 // per second, amount of memory available in the switch, etc.)
 // C++ implementations can subclass from the class <tt>MACRelayUnitBase</tt>.
 //
-// Known implementations are ~MACRelayUnit and ~Ieee8021dRelay.
+// Known implementations are ~MacRelayUnit and ~Ieee8021dRelay.
 //
 moduleinterface IMACRelayUnit
 {

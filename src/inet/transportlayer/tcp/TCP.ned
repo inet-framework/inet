@@ -46,16 +46,16 @@ import inet.transportlayer.contract.ITCP;
 // <b>Communication with clients</b>
 //
 // For communication between client applications and TCP, the ~TcpCommandCode
-// and ~TcpStatusInd enums are used as message kinds, and ~TCPCommand
+// and ~TcpStatusInd enums are used as message kinds, and ~TcpCommand
 // and its subclasses are used as control info.
 //
 // To open a connection from a client app, send a cMessage to TCP with
-// TCP_C_OPEN_ACTIVE as message kind and a ~TCPOpenCommand object filled in
+// TCP_C_OPEN_ACTIVE as message kind and a ~TcpOpenCommand object filled in
 // and attached to it as control info. (The peer TCP will have to be LISTENing;
 // the server app can achieve this with a similar cMessage but TCP_C_OPEN_PASSIVE
 // message kind.) With passive open, there's a possibility to cause the connection
 // "fork" on an incoming connection, leaving the original connection LISTENing
-// on the port (see the fork field in ~TCPOpenCommand).
+// on the port (see the fork field in ~TcpOpenCommand).
 //
 // The client app can send data by assigning the TCP_C_SEND message kind
 // and attaching a ~TCPSendCommand control info object to the data packet,
@@ -63,13 +63,13 @@ import inet.transportlayer.contract.ITCP;
 // with the TCP_I_DATA message kind and ~TCPSendCommand control info.
 //
 // To close, the client sends a cMessage to TCP with the TCP_C_CLOSE message kind
-// and ~TCPCommand control info.
+// and ~TcpCommand control info.
 //
 // TCP sends notifications to the application whenever there's a significant
 // change in the state of the connection: established, remote TCP closed,
 // closed, timed out, connection refused, connection reset, etc. These
 // notifications are also cMessages with message kind TCP_I_xxx
-// (TCP_I_ESTABLISHED, etc.) and ~TCPCommand as control info.
+// (TCP_I_ESTABLISHED, etc.) and ~TcpCommand as control info.
 //
 // One TCP module can serve several application modules, and several
 // connections per application. When talking to applications, a
@@ -78,36 +78,36 @@ import inet.transportlayer.contract.ITCP;
 //
 // <b>Sockets</b>
 //
-// The TCPSocket C++ class is provided to simplify managing TCP connections
-// from applications. TCPSocket handles the job of assembling and sending
+// The TcpSocket C++ class is provided to simplify managing TCP connections
+// from applications. TcpSocket handles the job of assembling and sending
 // command messages (OPEN, CLOSE, etc) to TCP, and it also simplifies
 // the task of dealing with packets and notification messages coming from TCP.
 //
 // <b>Communication with the IP layer</b>
 //
-// The TCP model relies on sending and receiving ~IPv4ControlInfo objects
+// The TCP model relies on sending and receiving ~Ipv4ControlInfo objects
 // attached to TCP segment objects as control info
 // (see cMessage::setControlInfo()).
 //
 // <b>Configuring TCP</b>
 //
 //   -# use the module parameter (limitedTransmitEnabled) to enabled/disabled
-//      Limited Transmit algorithm (RFC 3042) integrated to TCPBaseAlg
-//      (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
-//      for DumbTCP).
+//      Limited Transmit algorithm (RFC 3042) integrated to TcpBaseAlg
+//      (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl but not
+//      for DumbTcp).
 //
 //   -# use the module parameter (increasedIWEnabled) to change Initial Window
 //      from one segment (RFC 2001) (based on MSS) to maximal four segments
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390) integrated to
-//      TCPBaseAlg (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl
-//      but not for DumbTCP).
+//      TcpBaseAlg (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl
+//      but not for DumbTcp).
 //
 // The TCP flavour supported depends on the value of the tcpAlgorithmClass
-// module parameter, e.g. "TCPTahoe" or "TCPReno". In the future, other
+// module parameter, e.g. "TcpTahoe" or "TcpReno". In the future, other
 // classes can be written which implement Vegas, LinuxTCP (which
 // differs from others) or other variants.
 //
-// Note that ~TCPOpenCommand allows tcpAlgorithmClass to be chosen per-connection.
+// Note that ~TcpOpenCommand allows tcpAlgorithmClass to be chosen per-connection.
 //
 // Notes:
 //  - if you do active OPEN, then send data and close before the connection
@@ -130,10 +130,10 @@ import inet.transportlayer.contract.ITCP;
 //  - The basic SACK implementation (RFC 2018 and RFC 2883) is located in
 //    TCP main (and not in flavours).
 //    This means that all existing TCP algorithm classes may be used with
-//    SACK, although currently only TCPReno makes sense.
+//    SACK, although currently only TcpReno makes sense.
 //  - RFC 3517 - (SACK)-based Loss Recovery algorithm which is a conservative
 //    replacement of the fast recovery algorithm (RFC2581) integrated to
-//    TCPReno but not to TCPNewReno, TCPTahoe, TCPNoCongestionControl and DumbTCP.
+//    TcpReno but not to TcpNewReno, TcpTahoe, TcpNoCongestionControl and DumbTcp.
 //  - changes from RFC 2001 to RFC 2581:
 //      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a TCP receiver SHOULD send an immediate ACK
 //        when the incoming segment fills in all or part of a gap in the sequence space."
@@ -154,18 +154,18 @@ import inet.transportlayer.contract.ITCP;
 //    is higher than free receiver buffer, the new segment will be dropped.
 //    Such drops are recorded in tcpRcvQueueDropsVector.
 //
-// The TCPNewReno, TCPReno and TCPTahoe algorithms implement:
+// The TcpNewReno, TcpReno and TcpTahoe algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
 //  - RFC 896 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
-//  - TCPTahoe (Fast Retransmit), TCPReno (Fast Retransmit and Fast Recovery), TCPNewReno (Fast Retransmit and Fast Recovery)
-//  - RFC 3390 - Increased Initial Window (optional) integrated to TCPBaseAlg
-//    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
-//    for DumbTCP).
-//  - RFC 3042 - Limited Transmit algorithm (optional) integrated to TCPBaseAlg
-//    (can be used for TCPNewReno, TCPReno, TCPTahoe and TCPNoCongestionControl but not
-//    for DumbTCP).
+//  - TcpTahoe (Fast Retransmit), TcpReno (Fast Retransmit and Fast Recovery), TcpNewReno (Fast Retransmit and Fast Recovery)
+//  - RFC 3390 - Increased Initial Window (optional) integrated to TcpBaseAlg
+//    (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl but not
+//    for DumbTcp).
+//  - RFC 3042 - Limited Transmit algorithm (optional) integrated to TcpBaseAlg
+//    (can be used for TcpNewReno, TcpReno, TcpTahoe and TcpNoCongestionControl but not
+//    for DumbTcp).
 //
 // Missing bits:
 //  - URG and PSH bits not handled. Receiver always acts as if PSH was set
@@ -179,7 +179,7 @@ import inet.transportlayer.contract.ITCP;
 //    implementations) is not simulated
 //  - new ECN flags (CWR and ECE). Need to be added to header by [RFC 3168].
 //
-// TCPNewReno/TCPReno/TCPTahoe issues and missing features:
+// TcpNewReno/TcpReno/TcpTahoe issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
 //  - Nagle's algorithm (RFC 896) possibly not precisely implemented
 //
@@ -200,14 +200,14 @@ simple TCP like ITCP
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
-        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TCPReno/TCPTahoe/TCPNewReno/TCPNoCongestionControl)
+        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor to the power of 2. -1 indicates that manual window scaling is turned off.
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (RFC 793) (header option)
-        string tcpAlgorithmClass @enum("TCPVegas", "TCPWestwood", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPNoCongestionControl") = default("TCPReno");
+        string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
         @display("i=block/wheelbarrow");

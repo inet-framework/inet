@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/networklayer/ipv4/IPv4FragBuf.h"
+#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
 
-#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 
 namespace inet {

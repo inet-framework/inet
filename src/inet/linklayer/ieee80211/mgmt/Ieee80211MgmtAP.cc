@@ -16,7 +16,7 @@
 //
 
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

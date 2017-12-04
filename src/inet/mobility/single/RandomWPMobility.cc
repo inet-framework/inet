@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/single/RandomWPMobility.h"
+#include "inet/mobility/single/RandomWpMobility.h"
 
 namespace inet {
 

@@ -16,11 +16,11 @@
 //
 
 #include "Ieee80211OfdmModulation.h"
-#include "inet/physicallayer/modulation/QBPSKModulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -32,7 +32,7 @@ Ieee80211OfdmModulation::Ieee80211OfdmModulation(const ApskModulationBase* subca
 
 std::ostream& Ieee80211OfdmModulation::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMModulation";
+    stream << "Ieee80211OfdmModulation";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level + 1);
     return stream;

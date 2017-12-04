@@ -14,7 +14,7 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/IInterfaceRegistrationListener.h"
 

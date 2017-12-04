@@ -18,7 +18,7 @@
 
 #include <stdlib.h>
 
-#include "inet/linklayer/ethernet/EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMacBase.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -177,7 +177,7 @@ void EtherMacBase::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerInterface();    // needs MAC address    //FIXME why not called in MACBase::initialize()?
+        registerInterface();    // needs MAC address    //FIXME why not called in MacBase::initialize()?
         initializeQueueModule();
         readChannelParameters(true);
     }
@@ -398,7 +398,7 @@ void EtherMacBase::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 }
 
-//FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
+//FIXME should use it in EtherMac, EtherMacFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
 bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;

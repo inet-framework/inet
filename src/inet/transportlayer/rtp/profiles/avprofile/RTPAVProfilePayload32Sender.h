@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPAVProfilePayload32Sender.h  -  description
+                          RtpAvProfilePayload32Sender.h  -  description
                              -------------------
     begin                : Wed Nov 28 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -20,19 +20,19 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/rtp/RTPPayloadSender.h"
+#include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 namespace inet {
 
 namespace rtp {
 
 /**
- * An RTPAVProfilePayload32Sender is a module for sending data of payload
+ * An RtpAvProfilePayload32Sender is a module for sending data of payload
  * type 32 in the rtp audio/video profile, which is mpeg video.
  * This implementation doesn't send real mpeg data it just reads the gdf
  * file created by Mpeg_Stat and sends rtp data packets which contain
  * an RTPMpegPacket.
- * The corresponding receiver module RTPAVProfilePayload32Receiver.
+ * The corresponding receiver module RtpAvProfilePayload32Receiver.
  */
 class INET_API RtpAvProfilePayload32Sender : public RtpPayloadSender
 {

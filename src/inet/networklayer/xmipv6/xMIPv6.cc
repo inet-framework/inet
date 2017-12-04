@@ -31,10 +31,10 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 #include "inet/networklayer/xmipv6/BindingCache.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -436,7 +436,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
 
     // Added by CB, 28.08.07
     if (!buIfEntry->homeRegistration) {    // this BU goes to a CN
-        //IPv6Address CoA = ie->ipv6()->globalAddress();
+        //Ipv6Address CoA = ie->ipv6()->globalAddress();
         Ipv6Address CoA = bul->getCoA(buDest);    // 24.9.07 - CB
         //TODO think of a good mechanism to obtain the appropriate/correct CoA
         // Problem 1: ie->ipv6()->globalAddress() retrieves the HoA
@@ -479,7 +479,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
 void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie, const uint buSeq, const uint lifeTime, const int bindAuthData)
 {
     EV_INFO << "Creating and sending Binding Update" << endl;
-    // TODO use the globalAddress(IPv6InterfaceData::CoA) in the address selection somewhere above (caller)
+    // TODO use the globalAddress(Ipv6InterfaceData::CoA) in the address selection somewhere above (caller)
     Ipv6Address CoA = ie->ipv6Data()->getGlobalAddress(Ipv6InterfaceData::CoA);    // source address of MN
 
     if (CoA.isUnspecified())
@@ -660,11 +660,11 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
 }
 
 /*
-   void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr)
+   void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr)
    {
     EV << "\n<<======THIS IS THE (SMALL) ROUTINE FOR APPENDING CONTROL INFO TO MOBILITY MESSAGES =====>>\n";
 
-    IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+    Ipv6ControlInfo *controlInfo = new Ipv6ControlInfo();
     controlInfo->setProtocol(IP_PROT_IPv6EXT_MOB); //specifies the next header value = 135 for the Mobility Header
     controlInfo->setDestAddr(destAddr);
     controlInfo->setHopLimit(255);
@@ -1077,9 +1077,9 @@ void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& d
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);    // To find the interface on which the BU was received
 
     // swapping src and destination for the ack packet
-    //IPv6Address source = ie->ipv6()->linkLocalAddress();
-    //IPv6Address destination = src;
-    //IPv6Address src = ie ->ipv6()->linkLocalAddress();
+    //Ipv6Address source = ie->ipv6()->linkLocalAddress();
+    //Ipv6Address destination = src;
+    //Ipv6Address src = ie ->ipv6()->linkLocalAddress();
 
     // uncommented the code above - we can use the swapped original src and
     // dest from the ctrlInfo as it is provided in the first two arguments
@@ -1604,7 +1604,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     //delete msg;
 }
 
-/*void xMIPv6::resetTestInitIfEntry(const IPv6Address& dest, int interfaceID, int msgType)
+/*void xMIPv6::resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
    {
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
@@ -1633,7 +1633,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     // TODO check for token expiry in BUL
    }*/
 
-/*void xMIPv6::resetTestInitIfEntry(const IPv6Address& dest, int msgType)
+/*void xMIPv6::resetTestInitIfEntry(const Ipv6Address& dest, int msgType)
    {
     ASSERT(msgType == KEY_HI || msgType == KEY_CI);
 
@@ -1647,7 +1647,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
     if (pos == transmitIfList.end())
         return;
 
-    // TODO refactor: call resetTestInitIfEntry(const IPv6Address& dest, int interfaceID, int msgType)
+    // TODO refactor: call resetTestInitIfEntry(const Ipv6Address& dest, int interfaceID, int msgType)
     TimerIfEntry* entry = (pos->second);
     ASSERT(entry);
 
@@ -1691,7 +1691,7 @@ void xMIPv6::resetBUIfEntry(const Ipv6Address& dest, int interfaceID, simtime_t 
 
     scheduleAt(entry->nextScheduledTime, entry->timer);
 
-    EV_INFO << "Updated BUTransmitIfEntry and corresponding timer.\n";
+    EV_INFO << "Updated BuTransmitIfEntry and corresponding timer.\n";
 }
 
 void xMIPv6::createAndSendHoTIMessage(const Ipv6Address& cnDest, InterfaceEntry *ie)
@@ -1771,7 +1771,7 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
         Ipv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
-        //IPv6Address& destAddr = ctrlInfo->destAddr();
+        //Ipv6Address& destAddr = ctrlInfo->destAddr();
         int interfaceID = inPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
 
@@ -1855,7 +1855,7 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
         EV_INFO << "CoT validation passed: updating BUL" << endl;
 
         Ipv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
-        //IPv6Address& destAddr = ctrlInfo->destAddr();
+        //Ipv6Address& destAddr = ctrlInfo->destAddr();
         auto ifTag = inPacket->getMandatoryTag<InterfaceInd>();
         int interfaceID = ifTag->getInterfaceId();
 
@@ -2331,7 +2331,7 @@ void xMIPv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
 
     // ...first for the HA
     Ipv6Address HA = ie->ipv6Data()->getHomeAgentAddress();
-    //IPv6Address HoA = ie->ipv6()->getMNHomeAddress();
+    //Ipv6Address HoA = ie->ipv6()->getMNHomeAddress();
 
     cancelTimerIfEntry(HA, interfaceId, KEY_BU);
     tunneling->destroyTunnel(CoA, HA);
@@ -2389,7 +2389,7 @@ void xMIPv6::createBRRTimer(const Ipv6Address& brDest, InterfaceEntry *ie, const
             cancelAndDelete(brIfEntry->timer);    // delete the corresponding timer
         }
         else
-            throw cRuntimeError("Expected BRTransmitIfEntry* !");
+            throw cRuntimeError("Expected BrTransmitIfEntry* !");
     }
     else {
         // we do not yet have an entry -> create a new one
@@ -2504,16 +2504,16 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
 
     bulExpiryMsg->setContextPointer(bulExpIfEntry);    // information in the bulExpIfEntry is required for handler when message fires
 
-    /*BULExpiryIfEntry* bulExpIfEntry = createBULEntryExpiryTimer(key, HA, HoA, CoA, ie);*/
+    /*BulExpiryIfEntry* bulExpIfEntry = createBULEntryExpiryTimer(key, HA, HoA, CoA, ie);*/
 
     scheduleAt(scheduledTime, bulExpiryMsg);
     EV_INFO << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
     // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
 }
 
-/*BULExpiryIfEntry* xMIPv6::createBULEntryExpiryTimer(Key& key, IPv6Adress& dest, IPv6Adress& HoA, IPv6Adress& CoA, InterfaceEntry* ie, cMessage* bulExpiryMsg)
+/*BulExpiryIfEntry* xMIPv6::createBULEntryExpiryTimer(Key& key, IPv6Adress& dest, IPv6Adress& HoA, IPv6Adress& CoA, InterfaceEntry* ie, cMessage* bulExpiryMsg)
    {
-    BULExpiryIfEntry* bulExpIfEntry = (BULExpiryIfEntry*) getTimerIfEntry(key, EXPIRY_TYPE_BUL);
+    BulExpiryIfEntry* bulExpIfEntry = (BulExpiryIfEntry*) getTimerIfEntry(key, EXPIRY_TYPE_BUL);
 
     bulExpIfEntry->dest = HA;
     bulExpIfEntry->HoA = HoA;

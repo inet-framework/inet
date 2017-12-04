@@ -17,9 +17,9 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKModulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
@@ -77,7 +77,7 @@ void ApskLayeredTransmitter::initialize(int stage)
 
 std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKLayeredTransmitter";
+    stream << "ApskLayeredTransmitter";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
                << ", carrierFrequency = " << carrierFrequency;

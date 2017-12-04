@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TCPGenericSrvApp.h"
+#include "inet/applications/tcpapp/TcpGenericSrvApp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"

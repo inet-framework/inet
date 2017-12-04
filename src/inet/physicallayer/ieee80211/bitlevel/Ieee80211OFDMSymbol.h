@@ -19,7 +19,7 @@
 #define __INET_IEEE80211OFDMSYMBOL_H
 
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 
 namespace inet {
 

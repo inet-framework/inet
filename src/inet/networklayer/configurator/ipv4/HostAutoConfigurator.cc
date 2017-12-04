@@ -23,10 +23,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

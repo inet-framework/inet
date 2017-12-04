@@ -25,11 +25,11 @@ package inet.networklayer.ipv4;
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over IPv4 from a higher layer protocol, the module should
-// fill in an ~IPv4ControlInfo object, attach it to the packet with cMessage's
+// fill in an ~Ipv4ControlInfo object, attach it to the packet with cMessage's
 // setControlInfo() method, the send it to the ~IPv4 module.
 //
 // When ~IPv4 sends up a packet to a higher layer protocol, it will also attach
-// an ~IPv4ControlInfo to the packet, with the source and destination IPv4 address,
+// an ~Ipv4ControlInfo to the packet, with the source and destination IPv4 address,
 // etc. of the IPv4 datagram in which the packet arrived.
 //
 // ~IPv4 can serve several higher-layer protocols. The higher layer protocols
@@ -39,29 +39,29 @@ package inet.networklayer.ipv4;
 //
 // <b>Routing and interfacing with lower layers</b>
 //
-// The routing table is stored in the module ~IPv4RoutingTable. When a datagram
-// needs to be routed, ~IPv4 queries ~IPv4RoutingTable for the output interface
+// The routing table is stored in the module ~Ipv4RoutingTable. When a datagram
+// needs to be routed, ~IPv4 queries ~Ipv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~IPv4RoutingTable.
-// No message exchange with ~IPv4RoutingTable takes place.
+// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~Ipv4RoutingTable.
+// No message exchange with ~Ipv4RoutingTable takes place.
 //
 // A routed datagram will be sent to the queueOut gate, with an
-// ~IPv4ControlInfo  object attached. queueOut is expected to be
+// ~Ipv4ControlInfo  object attached. queueOut is expected to be
 // connected to ~INic modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
-// and manipulate the route table by calling ~IPv4RoutingTable's methods in C++.
+// and manipulate the route table by calling ~Ipv4RoutingTable's methods in C++.
 //
-// <b>Working with ARP</b>
+// <b>Working with Arp</b>
 //
-// IPv4 module subscribe to completedARPResolution and failedARPResolution signals on ARP module.
-// The ARP module accessed via arpOut gate, should not insert any module between IPv4 and ARP.
-// Before IPv4 module send down a packet to lower layer, ask MACAddress of next hop from ARP via
-// method call. If MACAddress unspecified, then start address resolution via ARP method call and
+// IPv4 module subscribe to completedARPResolution and failedARPResolution signals on Arp module.
+// The Arp module accessed via arpOut gate, should not insert any module between IPv4 and Arp.
+// Before IPv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
+// method call. If MacAddress unspecified, then start address resolution via Arp method call and
 // insert packet to a queue specified by next hop addr.
 // When received a completedARPResolution, then send packets from queue of next hop addr.
 // When received a failedARPResolution, then drop packets from queue of next hop addr.
-// When IPv4 module received an ARP packet from Lower Layer on some queueIn gate,
+// When IPv4 module received an Arp packet from Lower Layer on some queueIn gate,
 // then send out this packet on arpOut gate. When received a packet on arpIn gate,
 // then send out this packet on the specified queueOut gate.
 //
@@ -77,7 +77,7 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~IPv4RoutingTable, ~IPv4ControlInfo, ~ARP
+// @see ~Ipv4RoutingTable, ~Ipv4ControlInfo, ~Arp
 //
 // @author Andras Varga
 //

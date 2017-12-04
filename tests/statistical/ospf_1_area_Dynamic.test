@@ -137,7 +137,7 @@ num-rngs = 2
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
 **.numApps = 2
-**.app[0].typename = "UDPBasicApp"
+**.app[0].typename = "UdpBasicApp"
 **.app[0].destPort = 1234
 **.app[0].messageLength = 32 bytes
 **.app[0].sendInterval = 1s
@@ -145,7 +145,7 @@ num-rngs = 2
 **.app[0].stopTime = this.startTime + 999.9s
 **.H2.app[0].destAddresses = "H1"
 **.H1.app[0].destAddresses = "H2"
-**.app[1].typename = "UDPEchoApp"
+**.app[1].typename = "UdpEchoApp"
 **.app[1].localPort = 1234
 
 **.arp.cacheTimeout = 1s

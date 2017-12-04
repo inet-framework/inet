@@ -26,10 +26,10 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/dhcp/DHCPMessage_m.h"
-#include "inet/applications/dhcp/DHCPLease.h"
+#include "inet/applications/dhcp/DhcpLease.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/networklayer/arp/ipv4/ARP.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/arp/ipv4/Arp.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -51,7 +51,7 @@ class INET_API DhcpServer : public cSimpleModule, public cListener, public ILife
     int serverPort = -1;    // server port
     int clientPort = -1;    // client port
 
-    /* Set by management, see DHCPServer NED file. */
+    /* Set by management, see DhcpServer NED file. */
     unsigned int maxNumOfClients = 0;
     unsigned int leaseTime = 0;
     Ipv4Address subnetMask;

@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 
@@ -104,7 +104,7 @@ TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
 
 TcpBaseAlg::~TcpBaseAlg()
 {
-    // Note: don't delete "state" here, it'll be deleted from TCPConnection
+    // Note: don't delete "state" here, it'll be deleted from TcpConnection
 
     // cancel and delete timers
     if (rexmitTimer)
@@ -241,7 +241,7 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
     // Also: abort connection after max 12 retries.
     //
     // However, retransmission is actually more complicated than that
-    // in RFC 793 above, we'll leave it to subclasses (e.g. TCPTahoe, TCPReno).
+    // in RFC 793 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
     //
     if (++state->rexmit_count > MAX_REXMIT_COUNT) {
         EV_DETAIL << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
@@ -299,7 +299,7 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
 
     //
     // Leave congestion window management and actual retransmission to
-    // subclasses (e.g. TCPTahoe, TCPReno).
+    // subclasses (e.g. TcpTahoe, TcpReno).
     //
     // That is, subclasses will redefine this method, call us, then perform
     // window adjustments and do the retransmission as they like.
@@ -601,7 +601,7 @@ void TcpBaseAlg::receivedDataAck(uint32 firstSeqAcked)
 
     //
     // Leave congestion window management and possible sending data to
-    // subclasses (e.g. TCPTahoe, TCPReno).
+    // subclasses (e.g. TcpTahoe, TcpReno).
     //
     // That is, subclasses will redefine this method, call us, then perform
     // window adjustments and send data (if there's room in the window).
@@ -617,7 +617,7 @@ void TcpBaseAlg::receivedDuplicateAck()
         conn->sendOneNewSegment(fullSegmentsOnly, state->snd_cwnd); // RFC 3042
 
     //
-    // Leave to subclasses (e.g. TCPTahoe, TCPReno) whatever they want to do
+    // Leave to subclasses (e.g. TcpTahoe, TcpReno) whatever they want to do
     // on duplicate Acks.
     //
     // That is, subclasses will redefine this method, call us, then perform

@@ -20,13 +20,13 @@
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 #include "../mode/Ieee80211OfdmModulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 
@@ -34,7 +34,7 @@ namespace physicallayer {
 
 std::ostream& Ieee80211OfdmEncoder::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMEncoder";
+    stream << "Ieee80211OfdmEncoder";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", convolutionalCoder = " << printObjectToString(convolutionalCoder, level + 1)
                << ", interleaver = " << printObjectToString(interleaver, level + 1)

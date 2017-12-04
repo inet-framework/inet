@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 
 namespace inet {
 namespace serializer {

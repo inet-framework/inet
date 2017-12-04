@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

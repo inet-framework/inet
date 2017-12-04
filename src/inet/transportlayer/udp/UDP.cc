@@ -30,7 +30,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -45,18 +45,18 @@
 #include "inet/transportlayer/udp/UdpHeader.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 
@@ -304,7 +304,7 @@ void UDP::processCommandFromApp(cMessage *msg)
                 setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), (UdpSourceFilterMode)cmd->getFilterMode(), sourceList);
             }
             else
-                throw cRuntimeError("Unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
+                throw cRuntimeError("Unknown subclass of UdpSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
         }
 
@@ -820,7 +820,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
-    // send payload with UDPControlInfo up to the application
+    // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<DispatchProtocolReq>();
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);

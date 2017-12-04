@@ -23,7 +23,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between ARPPacket and binary (network byte order)  ARP header.
+ * Converts between ArpPacket and binary (network byte order)  Arp header.
  */
 class INET_API ArpPacketSerializer : public FieldsChunkSerializer
 {

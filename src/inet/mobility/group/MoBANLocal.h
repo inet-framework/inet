@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        MoBANLocal.h
+ * file:        MoBanLocal.h
  *
  * author:      Majid Nabi <m.nabi@tue.nl>
  *
@@ -45,13 +45,13 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/mobility/base/LineSegmentsMobilityBase.h"
-#include "inet/mobility/group/MoBANCoordinator.h"
+#include "inet/mobility/group/MoBanCoordinator.h"
 
 namespace inet {
 
 /**
  * @brief This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN.
- * The NED parameter "coordinatorIndex" determines to which WBAN (MoBANCoordinator) it belongs.
+ * The NED parameter "coordinatorIndex" determines to which WBAN (MoBanCoordinator) it belongs.
  * The current implementation uses the Random Walk Mobility Model (RWMM) for individual (local) movement within a sphere around the node, with given speed
  * and sphere radius of the current posture. The reference point of the node in the current posture, the sphere radius, and the speed is given by the
  * corresponding coordinator. RWMM determines the location of the node at any time relative to the given reference point.

@@ -21,7 +21,7 @@ package inet.applications.ethernet;
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts Ieee80211Ctrl control info
 // on the packets. It generates ~EtherAppReq packets. It should be connected
-// directly to ~EtherLLC or a Ieee802NicXXX module.
+// directly to ~EtherLlc or a Ieee802NicXXX module.
 //
 simple EtherAppCli
 {

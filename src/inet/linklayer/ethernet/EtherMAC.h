@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ethernet/EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMacBase.h"
 
 namespace inet {
 
@@ -31,7 +31,7 @@ class IPassiveQueue;
 
 /**
  * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
- * operation. (See also EtherMACFullDuplex which has a considerably smaller
+ * operation. (See also EtherMacFullDuplex which has a considerably smaller
  * code with all the CSMA/CD complexity removed.)
  *
  * See NED file for more details.

@@ -22,19 +22,19 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4Route.h"    // not strictly required, but most clients will need it anyway
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"    // not strictly required, but most clients will need it anyway
 #include "inet/networklayer/contract/IRoutingTable.h"
 
 namespace inet {
 
 /**
- * A C++ interface to abstract the functionality of IIPv4RoutingTable.
- * Referring to IIPv4RoutingTable via this interface makes it possible to
- * transparently replace IIPv4RoutingTable with a different implementation,
+ * A C++ interface to abstract the functionality of IIpv4RoutingTable.
+ * Referring to IIpv4RoutingTable via this interface makes it possible to
+ * transparently replace IIpv4RoutingTable with a different implementation,
  * without any change to the base INET.
  *
- * @see IIPv4RoutingTable, IPv4Route
+ * @see IIpv4RoutingTable, Ipv4Route
  */
 class INET_API IIpv4RoutingTable : public IRoutingTable
 {

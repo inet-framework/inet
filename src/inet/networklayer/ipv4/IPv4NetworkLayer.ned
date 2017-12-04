@@ -27,7 +27,7 @@ import inet.networklayer.contract.INetworkLayer;
 //
 // Network layer of an IPv4 node.
 //
-// Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
+// Interfaces to transport layer: TCP, UDP, echo/ping, Rsvp
 //
 module IPv4NetworkLayer like INetworkLayer
 {
@@ -35,8 +35,8 @@ module IPv4NetworkLayer like INetworkLayer
         bool proxyARP = default(true);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
-        string igmpType = default("IGMPv2");
-        string arpType = default("ARP");
+        string igmpType = default("Igmpv2");
+        string arpType = default("Arp");
         string interfaceTableModule;
         *.forwarding = forwarding;
         *.multicastForwarding = multicastForwarding;

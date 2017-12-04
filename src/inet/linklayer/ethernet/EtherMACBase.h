@@ -27,8 +27,8 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/linklayer/base/MACBase.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace inet {
@@ -161,7 +161,7 @@ class INET_API EtherMacBase : public MacBase
     unsigned long numFramesReceivedOK = 0;
     unsigned long numBytesSent = 0;    // includes Ethernet frame bytes with padding and FCS
     unsigned long numBytesReceivedOK = 0;    // includes Ethernet frame bytes with padding and FCS
-    unsigned long numFramesFromHL = 0;    // packets received from higher layer (LLC or MACRelayUnit)
+    unsigned long numFramesFromHL = 0;    // packets received from higher layer (LLC or MacRelayUnit)
     unsigned long numDroppedPkFromHLIfaceDown = 0;    // packets from higher layer dropped because interface down or not connected
     unsigned long numDroppedIfaceDown = 0;    // packets from network layer dropped because interface down or not connected
     unsigned long numDroppedBitError = 0;    // frames dropped because of bit errors
@@ -228,7 +228,7 @@ class INET_API EtherMacBase : public MacBase
     /// Verify ethernet packet: check FCS and payload length
     bool verifyCrcAndLength(Packet *packet);
 
-    // MACBase
+    // MacBase
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;

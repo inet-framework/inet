@@ -25,7 +25,7 @@ import inet.networklayer.contract.IRoutingTable;
 // a StandardHost/Router etc. in order to be accessible by the
 // ~IPv6 and other modules
 //
-// @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
+// @see ~IPv6, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 simple Ipv6RoutingTable like IRoutingTable
 {

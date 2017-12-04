@@ -19,7 +19,7 @@
 #define __INET_BVHOBJECTCACHE_H
 
 #include "inet/common/IVisitor.h"
-#include "inet/common/geometry/container/BVHTree.h"
+#include "inet/common/geometry/container/BvhTree.h"
 #include "inet/environment/contract/IObjectCache.h"
 #include "inet/environment/contract/IPhysicalObject.h"
 #include "inet/environment/common/PhysicalEnvironment.h"

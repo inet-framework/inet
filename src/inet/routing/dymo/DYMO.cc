@@ -31,7 +31,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/routing/dymo/DYMO.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 
@@ -295,7 +295,7 @@ void DYMO::eraseRREQTimer(const L3Address& target)
 
 RreqWaitRrepTimer *DYMO::createRREQWaitRREPTimer(const L3Address& target, int retryCount)
 {
-    RreqWaitRrepTimer *message = new RreqWaitRrepTimer("RREQWaitRREPTimer");
+    RreqWaitRrepTimer *message = new RreqWaitRrepTimer("RreqWaitRrepTimer");
     message->setRetryCount(retryCount);
     message->setTarget(target);
     return message;
@@ -329,7 +329,7 @@ void DYMO::processRREQWaitRREPTimer(RreqWaitRrepTimer *message)
 
 RreqBackoffTimer *DYMO::createRREQBackoffTimer(const L3Address& target, int retryCount)
 {
-    RreqBackoffTimer *message = new RreqBackoffTimer("RREQBackoffTimer");
+    RreqBackoffTimer *message = new RreqBackoffTimer("RreqBackoffTimer");
     message->setRetryCount(retryCount);
     message->setTarget(target);
     return message;
@@ -360,7 +360,7 @@ simtime_t DYMO::computeRREQBackoffTime(int retryCount)
 
 RreqHolddownTimer *DYMO::createRREQHolddownTimer(const L3Address& target)
 {
-    RreqHolddownTimer *message = new RreqHolddownTimer("RREQHolddownTimer");
+    RreqHolddownTimer *message = new RreqHolddownTimer("RreqHolddownTimer");
     message->setTarget(target);
     return message;
 }

@@ -22,7 +22,7 @@
 
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {

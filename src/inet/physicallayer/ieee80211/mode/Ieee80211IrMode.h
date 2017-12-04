@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211IRMODE_H
 #define __INET_IEEE80211IRMODE_H
 
-#include "inet/physicallayer/base/packetlevel/PPMModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/PpmModulationBase.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
 
 namespace inet {

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPSenderInfo.cc  -  description
+                          RtpSenderInfo.cc  -  description
                              -------------------
     begin                : Wed Dec 5 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPSenderInfo.h"
+#include "inet/transportlayer/rtp/RtpSenderInfo.h"
 
 #include "inet/transportlayer/rtp/reports.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/linklayer/ethernet/EtherMAC.h"
+#include "inet/linklayer/ethernet/EtherMac.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -34,7 +34,7 @@
 
 namespace inet {
 
-// TODO: there is some code that is pretty much the same as the one found in EtherMACFullDuplex.cc (e.g. EtherMAC::beginSendFrames)
+// TODO: there is some code that is pretty much the same as the one found in EtherMacFullDuplex.cc (e.g. EtherMac::beginSendFrames)
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
 

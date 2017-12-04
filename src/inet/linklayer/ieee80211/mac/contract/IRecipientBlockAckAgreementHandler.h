@@ -18,7 +18,7 @@
 #ifndef __INET_IRECIPIENTBLOCKACKAGREEMENTHANDLER_H
 #define __INET_IRECIPIENTBLOCKACKAGREEMENTHANDLER_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"

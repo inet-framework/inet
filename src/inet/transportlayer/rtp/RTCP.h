@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTCP.h  -  description
+                       Rtcp.h  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -21,8 +21,8 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -40,9 +40,9 @@ class RtpParticipantInfo;
 class RtpSenderInfo;
 
 /**
- * The class RTCP is responsible for creating, receiving and
+ * The class Rtcp is responsible for creating, receiving and
  * processing of rtcp packets. It also keeps track of this and other
- * RTP end systems.
+ * Rtp end systems.
  */
 class INET_API Rtcp : public cSimpleModule, public ILifecycle
 {
@@ -64,7 +64,7 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
 
     /**
-     * Handles messages from the RTP module.
+     * Handles messages from the Rtp module.
      */
     virtual void handleMessageFromRTP(cMessage *msg);
 
@@ -89,18 +89,18 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     virtual void handleSenderModuleInitialized(RtpInnerPacket *rinp);
 
     /**
-     * Stores information about an outgoing RTP data packet.
+     * Stores information about an outgoing Rtp data packet.
      */
     virtual void handleDataOut(RtpInnerPacket *packet);
 
     /**
-     * Stores information about an outgoing RTP data packet.
+     * Stores information about an outgoing Rtp data packet.
      */
     virtual void handleDataIn(RtpInnerPacket *rinp);
 
     /**
-     * Makes the rtcp module send an RTCPByePacket in the next
-     * RTCPCompoundPacket to tell other participants in the RTP
+     * Makes the rtcp module send an RtcpByePacket in the next
+     * RtcpCompoundPacket to tell other participants in the Rtp
      * session that this end system leaves.
      */
     virtual void handleLeaveSession(RtpInnerPacket *rinp);
@@ -133,22 +133,22 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     virtual void scheduleInterval();
 
     /**
-     * Creates and sends an RTCPCompoundPacket.
+     * Creates and sends an RtcpCompoundPacket.
      */
     virtual void createPacket();
 
     /**
-     * Extracts information of a sent RTPPacket.
+     * Extracts information of a sent RtpPacket.
      */
     virtual void processOutgoingRTPPacket(Packet *packet);
 
     /**
-     * Extracts information of a received RTPPacket.
+     * Extracts information of a received RtpPacket.
      */
     virtual void processIncomingRTPPacket(Packet *packet, Ipv4Address address, int port);
 
     /**
-     * Extracts information of a received RTCPCompoundPacket.
+     * Extracts information of a received RtcpCompoundPacket.
      */
     virtual void processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int port);
     void processIncomingRTCPSenderReportPacket(const Ptr<const RtcpSenderReportPacket>& rtcpSenderReportPacket, Ipv4Address address, int port);
@@ -157,14 +157,14 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     void processIncomingRTCPByePacket(const Ptr<const RtcpByePacket>& rtcpByePacket, Ipv4Address address, int port);
 
     /**
-     * Returns the RTPParticipantInfo object used for storing information
-     * about the RTP end system with this ssrc identifier.
+     * Returns the RtpParticipantInfo object used for storing information
+     * about the Rtp end system with this ssrc identifier.
      * Returns nullptr if this end system is unknown.
      */
     virtual RtpParticipantInfo *findParticipantInfo(uint32 ssrc);
 
     /**
-     * Recalculates the average size of an RTCPCompoundPacket when
+     * Recalculates the average size of an RtcpCompoundPacket when
      * one of this size has been sent or received.
      */
     virtual void calculateAveragePacketSize(int size);
@@ -176,7 +176,7 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     int _mtu = 0;
 
     /**
-     * The bandwidth for this RTP session.
+     * The bandwidth for this Rtp session.
      */
     int _bandwidth = 0;
 
@@ -206,13 +206,13 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     bool _leaveSession = false;
 
     /**
-     * The RTPSenderInfo about this end system.
+     * The RtpSenderInfo about this end system.
      */
     RtpSenderInfo *_senderInfo = nullptr;
 
     /**
-     * Information about all known RTP end system participating in
-     * this RTP session.
+     * Information about all known Rtp end system participating in
+     * this Rtp session.
      */
     cArray _participantInfos;
 
@@ -228,7 +228,7 @@ class INET_API Rtcp : public cSimpleModule, public ILifecycle
     int _packetsCalculated = 0;
 
     /**
-     * The average size of an RTCPCompoundPacket.
+     * The average size of an RtcpCompoundPacket.
      */
     double _averagePacketSize = 0;
 

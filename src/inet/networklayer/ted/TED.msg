@@ -23,7 +23,7 @@ typedef std::vector<struct TeLinkStateInfo> TeLinkStateInfoVector;
 }}
 
 //
-// Represents a link in the ~TED and in ~LinkStateMsg packets.
+// Represents a link in the ~Ted and in ~LinkStateMsg packets.
 //
 struct TeLinkStateInfo
 {

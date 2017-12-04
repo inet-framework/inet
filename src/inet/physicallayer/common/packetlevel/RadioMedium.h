@@ -21,7 +21,7 @@
 #include "inet/common/IntervalTree.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"

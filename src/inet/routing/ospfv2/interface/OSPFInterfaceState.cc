@@ -93,7 +93,7 @@ void InterfaceState::changeState(Interface *intf, InterfaceState *newState, Inte
             intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         }
-        else {    // no neighbors on the network -> old NetworkLSA must be flushed
+        else {    // no neighbors on the network -> old NetworkLsa must be flushed
             NetworkLsa *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != nullptr) {

@@ -25,11 +25,11 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/routing/pim/PIMPacket_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/routing/pim/tables/PIMNeighborTable.h"
-#include "inet/routing/pim/tables/PIMInterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ipv4/IPv4Route.h"
-#include "inet/routing/pim/modes/PIMBase.h"
+#include "inet/routing/pim/tables/PimNeighborTable.h"
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/routing/pim/modes/PimBase.h"
 
 namespace inet {
 

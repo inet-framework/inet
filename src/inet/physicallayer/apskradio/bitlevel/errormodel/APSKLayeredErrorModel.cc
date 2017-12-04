@@ -16,10 +16,10 @@
 //
 
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
-#include "inet/physicallayer/apskradio/bitlevel/errormodel/APSKLayeredErrorModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/apskradio/bitlevel/errormodel/ApskLayeredErrorModel.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"

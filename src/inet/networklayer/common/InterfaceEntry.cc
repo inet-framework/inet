@@ -32,11 +32,11 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC

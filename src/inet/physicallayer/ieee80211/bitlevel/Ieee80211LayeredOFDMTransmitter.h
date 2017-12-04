@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 #define __INET_IEEE80211LAYEREDOFDMTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
 #include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
 #include "inet/physicallayer/contract/bitlevel/IEncoder.h"

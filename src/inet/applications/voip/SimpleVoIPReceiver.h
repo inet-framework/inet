@@ -26,7 +26,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 

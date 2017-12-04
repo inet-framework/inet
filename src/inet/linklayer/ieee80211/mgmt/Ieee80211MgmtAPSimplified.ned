@@ -27,7 +27,7 @@ package inet.linklayer.ieee80211.mgmt;
 // authentication and association -- it simply treats all stations
 // as associated all the time. This also means that you cannot use this
 // module in a simulation that involves handovers; for that you need
-// to use the full version, ~Ieee80211MgmtAP.
+// to use the full version, ~Ieee80211MgmtAp.
 //
 // When simulating an AP that has other (Ethernet or wireless) interfaces
 // as well, this module can be connected to a ~IMACRelayUnit which performs

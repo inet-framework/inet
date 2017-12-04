@@ -47,7 +47,7 @@ import inet.applications.contract.IApp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      This mode is not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TcpNsc yet.
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //

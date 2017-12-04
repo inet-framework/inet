@@ -18,7 +18,7 @@
 #ifndef __INET_IDEALSNIR_H
 #define __INET_IDEALSNIR_H
 
-#include "inet/physicallayer/base/packetlevel/SNIRBase.h"
+#include "inet/physicallayer/base/packetlevel/SnirBase.h"
 
 namespace inet {
 

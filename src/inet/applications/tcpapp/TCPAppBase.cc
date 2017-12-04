@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/applications/tcpapp/TcpAppBase.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 

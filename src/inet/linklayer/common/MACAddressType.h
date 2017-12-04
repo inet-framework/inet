@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class INET_API MacAddressType : public IL3AddressType
     virtual L3Address getBroadcastAddress() const override { return MacAddress::BROADCAST_ADDRESS; }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MacAddress(-109); }    // TODO: constant
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MacAddress(-9); }    // TODO: constant
-    virtual const Protocol *getNetworkProtocol() const override { throw cRuntimeError("address is MACAddress, unknown L3 protocol"); }
+    virtual const Protocol *getNetworkProtocol() const override { throw cRuntimeError("address is MacAddress, unknown L3 protocol"); }
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MacAddress::UNSPECIFIED_ADDRESS; }
 };
 

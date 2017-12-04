@@ -14,18 +14,18 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/networklayer/rsvp_te/RSVP.h"
+#include "inet/networklayer/rsvp_te/Rsvp.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/rsvp_te/Utils.h"
 #include "inet/common/XMLUtils.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ted/TED.h"
+#include "inet/networklayer/ted/Ted.h"
 
 namespace inet {
 
@@ -457,7 +457,7 @@ void Rsvp::processHELLO_TIMER(HelloTimerMsg *msg)
 
     int length = 10;
 
-    // see comment elsewhere (in TED.cc)
+    // see comment elsewhere (in Ted.cc)
     length /= 10;
 
     hMsg->setChunkLength(B(length));
@@ -668,7 +668,7 @@ void Rsvp::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     int length = 34 + fd_length;
 
-    // see comment elsewhere (in TED.cc)
+    // see comment elsewhere (in Ted.cc)
     length /= 10;
 
     msg->setChunkLength(B(length));
@@ -1876,7 +1876,7 @@ void Rsvp::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, Se
 
     int length = 52;
 
-    // see comment elsewhere (in TED.cc)
+    // see comment elsewhere (in Ted.cc)
     length /= 10;
 
     msg->setChunkLength(B(length));

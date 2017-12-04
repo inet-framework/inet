@@ -20,7 +20,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {

@@ -22,7 +22,7 @@ import inet.routing.aodv.AodvRouting;
 
 
 //
-// It models a ~WirelessHost extended with ~AODVRouting submodule.
+// It models a ~WirelessHost extended with ~AodvRouting submodule.
 //
 // AODV is an on-demand MANET routing protocol. Each node
 // works similar to a 'router': they manage their own routing
@@ -32,8 +32,8 @@ import inet.routing.aodv.AodvRouting;
 // Scenerios where AODV routing is desired use this module as a
 // host module.
 //
-// For more info about AODVRouting, see the corresponding module:
-// ~AODVRouting and its C++ implementation with the same name.
+// For more info about AodvRouting, see the corresponding module:
+// ~AodvRouting and its C++ implementation with the same name.
 //
 // The AODV v.2 (known as DYMO) is also implemented: ~DYMO,
 // ~DYMORouter.

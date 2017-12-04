@@ -19,8 +19,8 @@
 #define __INET_IEEE80211HRDSSSMODE_H
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeBase.h"
-#include "inet/physicallayer/modulation/DBPSKModulation.h"
-#include "inet/physicallayer/modulation/DQPSKModulation.h"
+#include "inet/physicallayer/modulation/DbpskModulation.h"
+#include "inet/physicallayer/modulation/DqpskModulation.h"
 
 namespace inet {
 

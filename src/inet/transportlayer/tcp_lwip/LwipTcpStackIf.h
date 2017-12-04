@@ -32,7 +32,7 @@ namespace tcp {
 struct pbuf;
 
 /**
- * Interface class between TCP_lwIP and LwipTcpLayer
+ * Interface class between TcpLwip and LwipTcpLayer
  */
 class LwipTcpStackIf
 {

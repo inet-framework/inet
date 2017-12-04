@@ -26,14 +26,14 @@ package inet.transportlayer.contract;
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending an UDP packet, the application should attach an ~UDPControlInfo
+// For sending an UDP packet, the application should attach an ~UdpControlInfo
 // object to the payload, and send it to ~UDP.
-// ~UDP will also attach an ~UDPControlInfo object to any payload
+// ~UDP will also attach an ~UdpControlInfo object to any payload
 // message in sends up to the application.
 //
 // For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
-// arbitrary message with message kind UDP_C_BIND and an ~UDPControlInfo
+// arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
 // attached with srcPort filled in.
 //
 // If there is only one app which doesn't bind to any port, it will
@@ -41,11 +41,11 @@ package inet.transportlayer.contract;
 //
 // <b>Communication with the IPv4 (IPv4/IPv6) layer</b>
 //
-// The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
+// The ~UDP model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
 // objects attached to ~UdpHeader objects as control info
 // (see cMessage::setControlInfo()).
 //
-// @see ~UDP, ~UdpHeader, ~UDPControlInfo, ~UDPCommandCode
+// @see ~UDP, ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
 //
 moduleinterface IUDP
 {

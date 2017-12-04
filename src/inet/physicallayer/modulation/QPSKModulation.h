@@ -18,7 +18,7 @@
 #ifndef __INET_QPSKMODULATION_H
 #define __INET_QPSKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/MQAMModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ class INET_API QpskModulation : public MqamModulationBase
   public:
     QpskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "QPSKModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "QpskModulation"; }
 };
 
 } // namespace physicallayer

@@ -18,13 +18,13 @@
 
 #include <string.h>
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
-#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
 
@@ -1196,7 +1196,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
         // which are thereby entirely acknowledged."
         if (state->ts_enabled)
             tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpseg));
-        // Note: If TS is disabled the RTT measurement is completed in TCPBaseAlg::receivedDataAck()
+        // Note: If TS is disabled the RTT measurement is completed in TcpBaseAlg::receivedDataAck()
 
         uint32 discardUpToSeq = state->snd_una;
 

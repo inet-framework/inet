@@ -22,11 +22,11 @@
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OFDMErrorModel.h"
+#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
+#include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
 
@@ -46,7 +46,7 @@ void Ieee80211OfdmErrorModel::initialize(int stage)
 
 std::ostream& Ieee80211OfdmErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMErrorModel";
+    stream << "Ieee80211OfdmErrorModel";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", signalSymbolErrorRate = " << signalSymbolErrorRate
                << ", dataSymbolErrorRate = " << dataSymbolErrorRate

@@ -15,7 +15,7 @@
  * description: this AnalogueModel models free-space pathloss
  ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/UWBIRStochasticPathLoss.h"
+#include "inet/physicallayer/pathloss/UwbIrStochasticPathLoss.h"
 
 namespace inet {
 
@@ -61,7 +61,7 @@ void UwbIrStochasticPathLoss::initialize(int stage)
 
 std::ostream& UwbIrStochasticPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "UWBIRStochasticPathLoss";
+    stream << "UwbIrStochasticPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", PL0 = " << PL0
                << ", muGamma = " << muGamma

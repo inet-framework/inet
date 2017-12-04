@@ -23,17 +23,17 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
-#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 
@@ -419,11 +419,11 @@ void TcpConnection::configureStateVariables()
     state->sack_support = tcpMain->par("sackSupport");    // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 
     if (state->sack_support) {
-        std::string algorithmName1 = "TCPReno";
+        std::string algorithmName1 = "TcpReno";
         std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
 
         if (algorithmName1 != algorithmName2) {    // TODO add additional checks for new SACK supporting algorithms here once they are implemented
-            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TCPReno\n";
+            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
 
             ASSERT(false);
         }
@@ -980,7 +980,7 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpseg)
                 break;
 
             // TODO add new TCPOptions here once they are implemented
-            // TODO delegate to TCPAlgorithm as well -- it may want to recognized additional options
+            // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
             default:
                 EV_ERROR << "ERROR: Unsupported TCP option kind " << kind << "\n";
@@ -1258,7 +1258,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         }
 
         // TODO add new TCPOptions here once they are implemented
-        // TODO delegate to TCPAlgorithm as well -- it may want to append additional options
+        // TODO delegate to TcpAlgorithm as well -- it may want to append additional options
     }
 
     if (tcpseg->getHeaderOptionArraySize() != 0) {

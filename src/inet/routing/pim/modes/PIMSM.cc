@@ -17,7 +17,7 @@
 // Authors: Tomas Prochazka (xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz)
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/routing/pim/modes/PIMSM.h"
+#include "inet/routing/pim/modes/PimSm.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
@@ -124,12 +124,12 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
 
     if (isEnabled) {
         if (rpAddr.isUnspecified())
-            throw cRuntimeError("PIMSM: missing RP address parameter.");
+            throw cRuntimeError("PimSm: missing RP address parameter.");
 
         // subscribe for notifications
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMDM: containing node not found.");
+            throw cRuntimeError("PimDm: containing node not found.");
         host->subscribe(NF_IPv4_NEW_MULTICAST, this);
         host->subscribe(NF_IPv4_MDATA_REGISTER, this);
         host->subscribe(NF_IPv4_DATA_ON_RPF, this);
@@ -162,7 +162,7 @@ void PimSm::stopPIMRouting()
     if (isEnabled) {
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMSM: containing node not found.");
+            throw cRuntimeError("PimSm: containing node not found.");
         host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
         host->unsubscribe(NF_IPv4_MDATA_REGISTER, this);
         host->unsubscribe(NF_IPv4_DATA_ON_RPF, this);
@@ -210,7 +210,7 @@ void PimSm::handleMessageWhenUp(cMessage *msg)
                 break;
 
             default:
-                throw cRuntimeError("PIMSM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
+                throw cRuntimeError("PimSm: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
         }
     }
     else {
@@ -269,7 +269,7 @@ void PimSm::handleMessageWhenUp(cMessage *msg)
                 break;
 
             default:
-                throw cRuntimeError("PIMSM: received unknown PIM packet: %s (%s)", pk->getName(), pk->getClassName());
+                throw cRuntimeError("PimSm: received unknown PIM packet: %s (%s)", pk->getName(), pk->getClassName());
         }
     }
 }
@@ -1465,7 +1465,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
     // only if (S,G exist)
     //if (getRouteFor(multDest,multSource))
     if (findRouteG(multGroup)) {
-        Packet *pk = new Packet("PIMRegister(Null)");
+        Packet *pk = new Packet("PimRegister(Null)");
         const auto& msg = makeShared<PimRegister>();
         msg->setType(Register);
         msg->setN(true);
@@ -1497,7 +1497,7 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
 
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
-    Packet *pk = new Packet("PIMRegister");
+    Packet *pk = new Packet("PimRegister");
     const auto& msg = makeShared<PimRegister>();
     msg->setType(Register);
     msg->setN(false);
@@ -1519,7 +1519,7 @@ void PimSm::sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Addres
     EV << "pimSM::sendPIMRegisterStop" << endl;
 
     // create PIM Register datagram
-    Packet *pk = new Packet("PIMRegisterStop");
+    Packet *pk = new Packet("PimRegisterStop");
     const auto& msg = makeShared<PimRegisterStop>();
 
     // set PIM packet
@@ -1542,7 +1542,7 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
 {
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getInterfaceName() << "'\n";
 
-    Packet *pk = new Packet("PIMAssert");
+    Packet *pk = new Packet("PimAssert");
     const auto& pkt = makeShared<PimAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);

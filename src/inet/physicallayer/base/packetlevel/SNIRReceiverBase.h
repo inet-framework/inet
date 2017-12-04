@@ -18,7 +18,7 @@
 #ifndef __INET_SNIRRECEIVERBASE_H
 #define __INET_SNIRRECEIVERBASE_H
 
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
 
 namespace inet {

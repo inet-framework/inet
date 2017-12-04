@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPPayloadSender.cc  -  description
+                          RtpPayloadSender.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPPayloadSender.h"
+#include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
 
 namespace inet {
 

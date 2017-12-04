@@ -2,7 +2,7 @@
 Test formLinkLocalAddress()
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 
 %global:

@@ -18,7 +18,7 @@
 #ifndef __INET_INTERFACETABLEVISUALIZERBASE_H
 #define __INET_INTERFACETABLEVISUALIZERBASE_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/Placement.h"

@@ -146,7 +146,7 @@ class Icmpv6ParamProblemMsg extends Icmpv6Header
 
 //
 // ICMPv6 Echo Request packet (RFC2463: Section 4).
-// Data is attached through encapsulation (see ICMPv6.cc)
+// Data is attached through encapsulation (see Icmpv6.cc)
 //
 class Icmpv6EchoRequestMsg extends Icmpv6Header
 {
@@ -154,11 +154,11 @@ class Icmpv6EchoRequestMsg extends Icmpv6Header
     int code = 0; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
-        //Data is attached through encapsulation. See ICMPv6.cc
+        //Data is attached through encapsulation. See Icmpv6.cc
 }
 
 //
-// ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ICMPv6.cc)
+// Icmpv6 Echo Reply packet. Data is attached through encapsulation (see Icmpv6.cc)
 //
 class Icmpv6EchoReplyMsg extends Icmpv6Header
 {

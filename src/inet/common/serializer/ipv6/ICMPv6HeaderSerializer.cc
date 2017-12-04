@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/ipv6/ICMPv6HeaderSerializer.h"
+#include "inet/common/serializer/ipv6/Icmpv6HeaderSerializer.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPAVProfilePayload32Receiver.cc  -  description
+                          RtpAvProfilePayload32Receiver.cc  -  description
                              -------------------
     begin                : Sun Jan 6 2002
     copyright            : (C) 2002 by Matthias Oppitz
@@ -15,16 +15,16 @@
 *                                                                         *
 ***************************************************************************/
 
-/** \file RTPAVProfilePayload32Receiver.cc
- *  * In this file member functions of RTPAVProfilePayload32Receiver are
+/** \file RtpAvProfilePayload32Receiver.cc
+ *  * In this file member functions of RtpAvProfilePayload32Receiver are
  *  * implemented.
  *  */
 
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Receiver.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Receiver.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 

@@ -52,12 +52,12 @@ module STest
 //      clients_NSC: SubTest {
 //          parameters:
 //              srvTcpType = srvTcpType;
-//             cliTcpType = "TCP_NSC";
+//             cliTcpType = "TcpNsc";
 //      }
         clients_LWIP: SubTest {
             parameters:
                 srvTcpType = srvTcpType;
-                cliTcpType = "TCP_lwIP";
+                cliTcpType = "TcpLwip";
         }
 }
 
@@ -70,11 +70,11 @@ network TcpSpeedTest
         }
 //      server_NSC: STest {
 //          parameters:
-//              srvTcpType = "TCP_NSC";
+//              srvTcpType = "TcpNsc";
 //      }
         server_LWIP: STest {
             parameters:
-                srvTcpType = "TCP_lwIP";
+                srvTcpType = "TcpLwip";
         }
         configurator: Ipv4NetworkConfigurator {
             @display("p=70,40");
@@ -95,8 +95,8 @@ tkenv-plugin-path = ../../../etc/plugins
 #sim-time-limit = 2s+20s
 sim-time-limit = 2s+10s+20s+1.2s
 
-**.server*.tcpApp[0].typename = "TCPEchoApp"
-**.client*.tcpApp[0].typename = "TCPSessionApp"
+**.server*.tcpApp[0].typename = "TcpEchoApp"
+**.client*.tcpApp[0].typename = "TcpSessionApp"
 
 #client app:
 **.client*.tcpApp[0].active = true

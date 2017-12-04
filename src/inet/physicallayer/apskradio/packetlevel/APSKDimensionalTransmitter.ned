@@ -24,7 +24,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // transmission power (that changes over time and/or frequency) in their analog
 // representation and the configured modulation.
 //
-// See also ~APSKDimensionalReceiver, ~APSKDimensionalRadio,
+// See also ~ApskDimensionalReceiver, ~APSKDimensionalRadio,
 // ~APSKDimensionalRadioMedium, and ~APSKDimensionalAnalogModel.
 //
 module ApskDimensionalTransmitter extends NarrowbandTransmitterBase

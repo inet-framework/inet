@@ -17,7 +17,7 @@
 
 #include <limits>
 #include <algorithm>
-#include "inet/common/geometry/container/BVHTree.h"
+#include "inet/common/geometry/container/BvhTree.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 
 namespace inet {

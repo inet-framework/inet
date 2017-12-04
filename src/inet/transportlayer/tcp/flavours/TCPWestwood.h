@@ -21,15 +21,15 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
-#include "inet/transportlayer/tcp/flavours/TCPSegmentTransmitInfoList.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPWestwood.
+ * State variables for TcpWestwood.
  */
 class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
 {

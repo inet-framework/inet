@@ -25,7 +25,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -34,7 +34,7 @@ namespace inet {
 struct RipRoute : public cObject
 {
     enum RouteType {
-        RIP_ROUTE_RTE,    // route learned from a RIPEntry
+        RIP_ROUTE_RTE,    // route learned from a RipEntry
         RIP_ROUTE_STATIC,    // static route
         RIP_ROUTE_DEFAULT,    // default route
         RIP_ROUTE_REDISTRIBUTE,    // route imported from another routing protocol
@@ -83,7 +83,7 @@ struct RipRoute : public cObject
 };
 
 /**
- * Enumerated parameter to control how the RIPRouting module
+ * Enumerated parameter to control how the RipRouting module
  * advertises the routes to its neighbors.
  */
 enum RipMode {
@@ -98,7 +98,7 @@ enum RipMode {
  * We could store this data in the InterfaceEntry* itself,
  * but it contains only 5 holes for protocol data, and they
  * are used by network layer protocols only. Therefore
- * RIPRouting manages its own table of these entries.
+ * RipRouting manages its own table of these entries.
  */
 struct RipInterfaceEntry
 {

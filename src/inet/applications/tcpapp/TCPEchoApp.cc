@@ -16,11 +16,11 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/applications/tcpapp/TCPEchoApp.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/applications/tcpapp/TcpEchoApp.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/Packet_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {

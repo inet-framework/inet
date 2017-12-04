@@ -26,7 +26,7 @@ import inet.applications.contract.IApp;
 // described in RFC 2131, provides configuration parameters to Internet hosts.
 // Requires UDP.
 //
-// @see DHCPClient, DHCPMessage
+// @see DhcpClient, DhcpMessage
 //
 simple DhcpServer like IApp
 {

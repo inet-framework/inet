@@ -19,7 +19,7 @@
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
 #include "inet/physicallayer/idealradio/IdealReception.h"
 #include "inet/physicallayer/idealradio/IdealNoise.h"
-#include "inet/physicallayer/idealradio/IdealSNIR.h"
+#include "inet/physicallayer/idealradio/IdealSnir.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 

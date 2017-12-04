@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UWBIRReceiver.h"
+#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrReceiver.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
@@ -43,7 +43,7 @@ void Ieee802154UwbIrReceiver::initialize(int stage)
 
 std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "Ieee802154UWBIRReceiver";
+    return stream << "Ieee802154UwbIrReceiver";
 }
 
 const IListening *Ieee802154UwbIrReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

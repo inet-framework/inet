@@ -24,15 +24,15 @@
 #include <algorithm>
 #include "inet/common/Topology.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
 /**
- * This module provides the global static configuration for the IPv4RoutingTable and
+ * This module provides the global static configuration for the Ipv4RoutingTable and
  * the IPv4 network interfaces of all nodes in the network.
  *
  * For more info please see the NED file.
@@ -91,8 +91,8 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
       public:
         int color;    // an index into an array representing the different route actions (gateway, interface, metric, etc.)
         bool enabled;    // allows turning of routes without removing them from the list
-        uint32 destination;    // originally copied from the IPv4Route
-        uint32 netmask;    // originally copied from the IPv4Route
+        uint32 destination;    // originally copied from the Ipv4Route
+        uint32 netmask;    // originally copied from the Ipv4Route
         std::vector<RouteInfo *> originalRouteInfos;    // routes that are routed by this one from the unoptimized original routing table, we keep track of this to be able to skip merge candidates with less computation
 
       public:

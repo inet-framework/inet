@@ -20,9 +20,9 @@ package inet.node.inet;
 //
 // Models a host with (default) one wireless (802.11) card in infrastructure mode.
 // This module is basically a ~StandardHost with an ~Ieee80211Nic with
-// mgmtType = ~Ieee80211MgmtSTA added.
+// mgmtType = ~Ieee80211MgmtSta added.
 // It should be used in conjunction with ~AccessPoint, or any other AP model
-// which contains ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAP.
+// which contains ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAp.
 //
 module WirelessHost extends StandardHost
 {

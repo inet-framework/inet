@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/applications/tcpapp/TcpAppBase.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 

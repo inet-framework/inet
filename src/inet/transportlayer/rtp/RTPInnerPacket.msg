@@ -23,14 +23,14 @@ import inet.transportlayer.rtp.RtpSenderControlMessage;
 import inet.transportlayer.rtp.RtpSenderStatusMessage;
 
 cplusplus {{
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 }}
 
 namespace inet::rtp;
 
 //
 // This enumeration is a list of all possibly types of
-// an ~RTPInnerPacket.
+// an ~RtpInnerPacket.
 //
 enum RtpInpType
 {
@@ -60,7 +60,7 @@ packet RtpInnerPacket
 {
     @customize;  // see the generated C++ header for more info
 
-    // The type of this ~RTPInnerPacket.
+    // The type of this ~RtpInnerPacket.
     RtpInpType type = RTP_INP_UNDEF;
 
     // The CNAME

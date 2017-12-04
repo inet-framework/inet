@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 
 namespace inet {
@@ -144,7 +144,7 @@ bool Ipv6Address::tryParseAddrWithPrefix(const char *addr, int& prefixLen)
 void Ipv6Address::set(const char *addr)
 {
     if (!tryParse(addr))
-        throw cRuntimeError("IPv6Address: cannot interpret address string `%s'", addr);
+        throw cRuntimeError("Ipv6Address: cannot interpret address string `%s'", addr);
 }
 
 // Helper: finds the longest sequence of zeroes in the address (at least with len=2)
@@ -377,7 +377,7 @@ bool Ipv6Address::matches(const Ipv6Address& prefix, int prefixLength) const
 int Ipv6Address::getMulticastScope() const
 {
     if ((d[0] & MULTICAST_MASK) != MULTICAST_PREFIX)
-        throw cRuntimeError("IPv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());
+        throw cRuntimeError("Ipv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());
     return (d[0] >> 16) & 0x0F;
 }
 

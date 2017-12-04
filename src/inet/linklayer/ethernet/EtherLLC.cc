@@ -15,7 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/linklayer/ethernet/EtherLLC.h"
+#include "inet/linklayer/ethernet/EtherLlc.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -66,7 +66,7 @@ void EtherLlc::initialize(int stage)
 void EtherLlc::handleMessage(cMessage *msg)
 {
     if (!isUp) {
-        EV << "EtherLLC is down -- discarding message\n";
+        EV << "EtherLlc is down -- discarding message\n";
         delete msg;
         return;
     }

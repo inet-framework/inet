@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 //
-// Required for MACAddress declarations
+// Required for MacAddress declarations
 //
 import inet.common.INETDefs;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtFrame;
@@ -27,7 +27,7 @@ namespace inet::ieee80211;
 // IEEE 802.11 command codes, sent by the agent to the management entity.
 // These constants should be set as message kind on the messages.
 //
-// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimRequestCode
 {
@@ -45,7 +45,7 @@ enum Ieee80211PrimRequestCode
 // in response to the agents's requests.
 // These constants should be set as message kind on the messages.
 //
-// @see ~Ieee80211PrimRequestCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimRequestCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimConfirmCode
 {
@@ -70,7 +70,7 @@ enum Ieee80211BssType
 // Values for the resultCode field in confirm primitives, sent from
 // the management entity to the agent.
 //
-// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimResultCode
 {

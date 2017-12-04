@@ -48,7 +48,7 @@ import inet.applications.contract.IApp;
 // The configuration file specifies the per interface parameters.
 // Each <interface> element configures one or more interfaces;
 // the @hosts, @names, @towards, @among attributes select the
-// configured interfaces (see ~IPv4NetworkConfigurator).
+// configured interfaces (see ~Ipv4NetworkConfigurator).
 // The other attributes sets parameters of the selected interfaces:
 //
 // - @metric: metric assigned to the link, default value is 1.

@@ -31,8 +31,8 @@
 #include <assert.h>
 #include <fstream>
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
 #include "NetPerfMeter_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"

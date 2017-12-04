@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 

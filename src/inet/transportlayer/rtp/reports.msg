@@ -13,7 +13,7 @@ namespace inet::rtp;
 
 //
 // Represents an RTP sender report as contained
-// in an ~RTCPSenderReportPacket.
+// in an ~RtcpSenderReportPacket.
 //
 class SenderReport extends cObject
 {

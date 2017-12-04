@@ -50,24 +50,24 @@ network CompareMACs
         }
         host_iq_2_F_A: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=70,210");
         }
         host_iq_2_F_B: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=210,210");
         }
         host_eq_2_F_A: EtherHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=70,280");
         }
         host_eq_2_F_B: EtherHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=210,280");
         }
 

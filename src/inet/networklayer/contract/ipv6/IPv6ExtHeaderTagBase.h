@@ -27,7 +27,7 @@ class Ipv6ExtensionHeader;
 
 /**
  *
- * See the IPv6ExtHeaderTagBase.msg file for more info.
+ * See the Ipv6ExtHeaderTagBase.msg file for more info.
  */
 class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
 {

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPInnerPacket.h  -  description
+                          RtpInnerPacket.h  -  description
                              -------------------
     begin                : Sat Oct 20 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -36,14 +36,14 @@ class INET_API RtpInnerPacket : public RtpInnerPacket_Base
     RtpInnerPacket& operator=(const RtpInnerPacket& other) { RtpInnerPacket_Base::operator=(other); return *this; }
     virtual RtpInnerPacket *dup() const override { return new RtpInnerPacket(*this); }
 
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTPInnerPacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtpInnerPacket_Base
     /**
-     * Writes a short info about this RTPInnerPacket into the given string.
+     * Writes a short info about this RtpInnerPacket into the given string.
      */
     virtual std::string info() const override;
 
     /**
-     * Writes a longer info about this RTPInnerPacket into the given output stream.
+     * Writes a longer info about this RtpInnerPacket into the given output stream.
      */
     virtual void dump(std::ostream& os) const;
 
@@ -100,19 +100,19 @@ class INET_API RtpInnerPacket : public RtpInnerPacket_Base
     virtual void setSessionLeftPkt();
 
     /**
-     * Capsulates the outgoing RTPPacket into this RTPInnerPacket to transport
+     * Capsulates the outgoing RtpPacket into this RtpInnerPacket to transport
      * it within the rtp layer.
      */
     virtual void setDataOutPkt(Packet *packet);
 
     /**
-     * Capsulates the incoming RTPPacket into this RTPInnerPacket to transport
+     * Capsulates the incoming RtpPacket into this RtpInnerPacket to transport
      * it within the rtp layer.
      */
     virtual void setDataInPkt(Packet *packet, Ipv4Address address, int port);
 
     /**
-     * Returns the maximum transmission unit stored in this RTPInnerPacket.
+     * Returns the maximum transmission unit stored in this RtpInnerPacket.
      */
     virtual int getMTU() const { return getMtu(); }
 };

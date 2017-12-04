@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTPProfile.h  -  description
+                       RtpProfile.h  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -28,21 +28,21 @@ namespace rtp {
 class RtpInnerPacket;
 
 /**
- * The class RTPProfile is a module which handles RTPPayloadSender and
- * RTPPayloadReceiver modules. It creates them dynamically on demand.
+ * The class RtpProfile is a module which handles RtpPayloadSender and
+ * RtpPayloadReceiver modules. It creates them dynamically on demand.
  * This class offers all functionality for the above tasks, subclasses
  * just need to set variables like profile name, rtcp percentage and
  * preferred port in their initialize() method.
  * The dynamically created sender and receiver modules must
  * have have following class names:
- * RTP<profileName>Payload<payloadType>Sender
- * RTP<profileName>Payload<payloadType>Receiver
+ * Rtp<profileName>Payload<payloadType>Sender
+ * Rtp<profileName>Payload<payloadType>Receiver
  */
 class INET_API RtpProfile : public cSimpleModule
 {
   protected:
     // helper class to store the association between an ssrc identifier
-    // and the gate which leads to the RTPPayloadReceiver module.
+    // and the gate which leads to the RtpPayloadReceiver module.
     // Note: in the original, this used to be a hundred lines, as RTPSSRCGate.cc/h,
     // but even this class is an overkill --Andras
     class SsrcGate : public cNamedObject    //FIXME why is it a namedObject?
@@ -150,7 +150,7 @@ class INET_API RtpProfile : public cSimpleModule
      * method to remove profile specific extension which are not handled
      * by the payload receiver module. In this implementation the packet
      * isn't changed.
-     * Important: This method works with RTPInnerPacket. So the rtp
+     * Important: This method works with RtpInnerPacket. So the rtp
      * packet must be decapsulated, changed and encapsulated again.
      */
     virtual void processIncomingPacket(RtpInnerPacket *rinp);
@@ -203,12 +203,12 @@ class INET_API RtpProfile : public cSimpleModule
     int _preferredPort = -1;
 
     /**
-     * The maximum size an RTPPacket can have.
+     * The maximum size an RtpPacket can have.
      */
     int _mtu = 0;
 
     /**
-     * If this is set true the RTPProfile automatically sets the output
+     * If this is set true the RtpProfile automatically sets the output
      * file name for payload receiver modules so the user is not bothered
      * to set them manually during simulation runtime.
      */

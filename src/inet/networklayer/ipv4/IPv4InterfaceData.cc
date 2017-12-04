@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -223,7 +223,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
         McastSourceFilterMode newFilterMode, const Ipv4AddressVector& newSourceList)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv4InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv4InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     HostMulticastGroupData *entry = findHostGroupData(multicastAddress);
     if (!entry) {
@@ -237,7 +237,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
     for (const auto & elem : oldSourceList) {
         auto count = counts->find(elem);
         if (count == counts->end())
-            throw cRuntimeError("Inconsistent reference counts in IPv4InterfaceData.");
+            throw cRuntimeError("Inconsistent reference counts in Ipv4InterfaceData.");
         else if (count->second == 1)
             counts->erase(count);
         else
@@ -360,7 +360,7 @@ bool Ipv4InterfaceData::hasMulticastListener(Ipv4Address multicastAddress, Ipv4A
 void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {
@@ -380,7 +380,7 @@ void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress
 void Ipv4InterfaceData::addMulticastListener(Ipv4Address multicastAddress, Ipv4Address sourceAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {
@@ -443,7 +443,7 @@ void Ipv4InterfaceData::removeMulticastListener(Ipv4Address multicastAddress, Ip
 void Ipv4InterfaceData::setMulticastListeners(Ipv4Address multicastAddress, McastSourceFilterMode filterMode, const Ipv4AddressVector& sourceList)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv4InterfaceData::setMulticastListeners(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv4InterfaceData::setMulticastListeners(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPReceiverInfo.cc  -  description
+                          RtpReceiverInfo.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPReceiverInfo.h"
+#include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 
 #include "inet/transportlayer/rtp/reports.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPParticipantInfo.h  -  description
+                          RtpParticipantInfo.h  -  description
                              -------------------
     begin                : Wed Oct 24 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -22,8 +22,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 #include "inet/transportlayer/rtp/sdes.h"
 
 namespace inet {
@@ -68,7 +68,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
     RtpParticipantInfo& operator=(const RtpParticipantInfo& participantInfo);
 
     /**
-     * Duplicates this RTPParticipantInfo by calling the copy constructor.
+     * Duplicates this RtpParticipantInfo by calling the copy constructor.
      */
     virtual RtpParticipantInfo *dup() const override;
 
@@ -163,8 +163,8 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
     virtual void setSsrc(uint32 ssrc) override;
 
     /**
-     * Creates a new SDESItem and adds it to the SDESChunk stored in
-     * this RTPParticipantInfo.
+     * Creates a new SdesItem and adds it to the SdesChunk stored in
+     * this RtpParticipantInfo.
      */
     virtual void addSDESItem(SdesItem::SdesItemType type, const char *content);
 
@@ -174,7 +174,7 @@ class INET_API RtpParticipantInfo : public RtpParticipantInfo_Base
     /**
      * This method returns the given 32 bit ssrc identifier as
      * an 8 character hexadecimal number which is used as name
-     * of an RTPParticipantInfo object.
+     * of an RtpParticipantInfo object.
      */
     static std::string ssrcToName(uint32 ssrc);
 

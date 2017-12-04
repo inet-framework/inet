@@ -25,7 +25,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MACBase.h"
+#include "inet/linklayer/base/MacBase.h"
 
 namespace inet {
 
@@ -70,7 +70,7 @@ class INET_API Ppp : public MacBase
     // cListener function
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-    // MACBase functions
+    // MacBase functions
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
     virtual void flushQueue() override;

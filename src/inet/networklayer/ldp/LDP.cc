@@ -19,20 +19,20 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ldp/LDP.h"
+#include "inet/networklayer/ldp/Ldp.h"
 
 //#include "inet/networklayer/mpls/ConstType.h"
-#include "inet/networklayer/mpls/LIBTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/Simsignals.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ted/TED.h"
+#include "inet/networklayer/ted/Ted.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 namespace inet {
@@ -518,7 +518,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
 void Ldp::processLDPHello(Packet *msg)
 {
     const auto& ldpHello = msg->peekHeader<LdpHello>();
-    //IPv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
+    //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
     int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete msg;
@@ -644,7 +644,7 @@ void Ldp::socketPeerClosed(int, void *yourPtr)
 
 /*
     // close the connection (if not already closed)
-    if (socket.getState()==TCPSocket::PEER_CLOSED)
+    if (socket.getState()==TcpSocket::PEER_CLOSED)
     {
         EV << "remote TCP closed, closing here as well\n";
         close();
@@ -738,7 +738,7 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
     //        break;
     //
     //if (i == rt->getNumRoutes())
-    //    return IPv4Address();  // Signal an NOTIFICATION of NO ROUTE
+    //    return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
     //
     InterfaceEntry *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
@@ -807,7 +807,7 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     return ie->getInterfaceName();
 }
 
-//bool LDP::matches(const FEC_TLV& a, const FEC_TLV& b)
+//bool Ldp::matches(const FecTlv& a, const FecTlv& b)
 //{
 //  return b.addr.prefixMatches(a, b.length);
 //}
@@ -1203,7 +1203,7 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
     // never match and always route via L3 if:
 
-    // OSPF traffic (TED)
+    // OSPF traffic (Ted)
     if (protocol == IP_PROT_OSPF)
         return false;
 

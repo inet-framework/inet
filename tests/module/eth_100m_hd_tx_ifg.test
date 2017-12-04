@@ -33,7 +33,7 @@ cmdenv-express-mode=false
 *.host2.app.script = ""
 *.host2.mac.address = "AA-00-00-00-00-02"
 
-*.host*.macType = "EtherMAC"    # ${"EtherMAC","EtherMACFullDuplex"}
+*.host*.macType = "EtherMac"    # ${"EtherMac","EtherMacFullDuplex"}
 *.host*.queueType = ${"", "DropTailQueue"}
 *.host*.mac.duplexMode = false     # Half duplex
 

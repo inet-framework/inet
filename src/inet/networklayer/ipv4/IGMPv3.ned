@@ -24,7 +24,7 @@ package inet.networklayer.ipv4;
 // physical networks.
 //
 // Hosts and routers are communicating with each other by sending
-// IGMP messages (see ~IGMPMessage). The IGMP messages are
+// IGMP messages (see ~IgmpMessage). The IGMP messages are
 // encapsulated and transported by the IP module connected to
 // the 'ipOut' and 'ipIn' gates. If a multicast routing
 // protocol module, which also uses IGMP messages (e.g. DVMRP),

@@ -19,8 +19,8 @@
 #define __INET_HTTPSERVER_H
 
 #include "inet/common/packet/ChunkQueue.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {

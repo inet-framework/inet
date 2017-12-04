@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/ipv4/ICMPHeaderSerializer.h"
+#include "inet/common/serializer/ipv4/IcmpHeaderSerializer.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 
 namespace inet {

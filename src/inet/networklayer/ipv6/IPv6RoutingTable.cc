@@ -20,12 +20,12 @@
 
 #include "inet/common/INETUtils.h"
 
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
@@ -93,7 +93,7 @@ void Ipv6RoutingTable::initialize(int stage)
         host->subscribe(NF_INTERFACE_IPv6CONFIG_CHANGED, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        // add IPv6InterfaceData to interfaces
+        // add Ipv6InterfaceData to interfaces
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             InterfaceEntry *ie = ift->getInterface(i);
             configureInterfaceForIPv6(ie);
@@ -261,7 +261,7 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
     //o  Its required Link-Local Address for each interface.
 
 #ifndef WITH_xMIPv6
-    //IPv6Address linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->getInterfaceToken());
+    //Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
     //ie->ipv6Data()->assignAddress(linkLocalAddr, true, 0, 0);
 #else /* WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
@@ -352,7 +352,7 @@ void Ipv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
         // 0 should be treated as infinity
         int pfxLen;
         if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(), pfxLen))
-            throw cRuntimeError("Element <%s> at %s: wrong IPv6Address/prefix syntax %s",
+            throw cRuntimeError("Element <%s> at %s: wrong Ipv6Address/prefix syntax %s",
                     node->getTagName(), node->getSourceLocation(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;
@@ -660,7 +660,7 @@ void Ipv6RoutingTable::addDefaultRoute(const Ipv6Address& nextHop, unsigned int 
 
 void Ipv6RoutingTable::addRoutingProtocolRoute(Ipv6Route *route)
 {
-    // TODO ASSERT(route->getSrc()==IPv6Route::ROUTING_PROT);
+    // TODO ASSERT(route->getSrc()==Ipv6Route::ROUTING_PROT);
     addRoute(route);
 }
 

@@ -20,7 +20,7 @@ package inet.physicallayer.ieee80211.bitlevel;
 import inet.physicallayer.contract.bitlevel.IDemodulator;
 
 //
-// @see ~Ieee80211OFDMModulator
+// @see ~Ieee80211OfdmModulator
 //
 simple Ieee80211OfdmDemodulator like IDemodulator
 {

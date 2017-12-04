@@ -26,7 +26,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # udp apps
 **.cli[*].numApps = 1
-**.cli[*].app[*].typename = "UDPBasicApp"
+**.cli[*].app[*].typename = "UdpBasicApp"
 **.cli[*].app[0].destAddresses = "aaaa:2:2::8aa:ff:fe00:8" # "srv" does not work
 **.cli[*].app[0].destPort = 1000
 **.cli[*].app[0].messageLength = 100B
@@ -36,7 +36,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.cli[*].app[0].sendInterval = 10s
 
 **.srv.numApps = 1
-**.srv.app[*].typename = "UDPSink"
+**.srv.app[*].typename = "UdpSink"
 **.srv.app[0].localPort = 1001
 
 # Ethernet NIC configuration

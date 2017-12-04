@@ -18,7 +18,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmpType = "Igmpv3"
 **.igmp.lastMemberQueryInterval = 1s
 **.igmp.lastMemberQueryCount = 1
 
@@ -31,12 +31,12 @@ network=TestIGMPNetwork
 %file: scenario.xml
 <scenario>
 
-<send t="1" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="1" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_EX" sources=""/>
 </send>
 <dump t="1.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
-<send t="2" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_IN" sources=""/>
 </send>
 

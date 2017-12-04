@@ -20,7 +20,7 @@ import inet.common.INETDefs;
 import inet.networklayer.contract.ipv6.Ipv6ExtHeaderTagBase;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
+#include "inet/networklayer/contract/ipv6/Ipv6ExtHeaderTagBase.h"
 }}
 
 namespace inet;

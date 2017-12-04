@@ -23,9 +23,9 @@
 //#include "inet/common/serializer/headers/defs.h"    // for endian macros
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
-#include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/common/INETUtils.h"
@@ -359,7 +359,7 @@ void TcpLwipConnection::do_SEND()
         }
         else {
             if (sent != ERR_MEM)
-                EV_ERROR << "TCP_lwIP connection: " << connIdM << ": Error do sending, err is " << sent << endl;
+                EV_ERROR << "TcpLwip connection: " << connIdM << ": Error do sending, err is " << sent << endl;
             break;
         }
     }

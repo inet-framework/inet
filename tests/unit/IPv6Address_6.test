@@ -2,7 +2,7 @@
 Test parsing IPv6 addresses with prefix
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 

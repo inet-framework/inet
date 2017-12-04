@@ -23,8 +23,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4Route.h"
-#include "inet/routing/pim/modes/PIMBase.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/routing/pim/modes/PimBase.h"
 
 namespace inet {
 
@@ -40,9 +40,9 @@ namespace inet {
  * Note that (*,*,RP) and (S,G,rpt) state is currently missing.
  *
  * The routes stored in the tables are not the same as the routes
- * of the IPv4RoutingTable. The RFC defines the terms "Tree Information Base" (TIB)
+ * of the Ipv4RoutingTable. The RFC defines the terms "Tree Information Base" (TIB)
  * and "Multicast Forwaring Information Base" (MFIB). According to this division,
- * TIB is the state of this module, while MFIB is stored by IPv4RoutingTable.
+ * TIB is the state of this module, while MFIB is stored by Ipv4RoutingTable.
  *
  * Incoming packets, notifications, and timer events may cause a change
  * of the TIB, and of the MFIB (if the forwarding rules change).

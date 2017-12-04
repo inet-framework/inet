@@ -14,7 +14,7 @@
 *              in the top level directory
 ***************************************************************************/
 
-#include "inet/physicallayer/pathloss/SUIPathLoss.h"
+#include "inet/physicallayer/pathloss/SuiPathLoss.h"
 
 namespace inet {
 
@@ -72,7 +72,7 @@ void SuiPathLoss::initialize(int stage)
 
 std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level) const
 {
-    stream << "SUIPathLoss";
+    stream << "SuiPathLoss";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", ht = " << ht
                << ", hr = " << hr;

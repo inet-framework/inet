@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211MIB_H
 #define __INET_IEEE80211MIB_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 

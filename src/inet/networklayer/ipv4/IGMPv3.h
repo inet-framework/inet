@@ -15,7 +15,7 @@
 //
 
 /**
- * @file IGMPv3.h
+ * @file Igmpv3.h
  * @author Adam Malik(towdie13@gmail.com), Vladimir Vesely (ivesely@fit.vutbr.cz), Tamas Borbely (tomi@omnetpp.org)
  * @date 12.5.2013
  */
@@ -25,10 +25,10 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IGMPMessage.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/IgmpMessage.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 #include <set>
 
@@ -130,7 +130,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         RouterGroupState state;
         cMessage *timer;
         SourceToSourceRecordMap sources;    // XXX should map source addresses to source timers
-                                            // i.e. map<IPv4Address,cMessage*>
+                                            // i.e. map<Ipv4Address,cMessage*>
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);
         virtual ~RouterGroupData();

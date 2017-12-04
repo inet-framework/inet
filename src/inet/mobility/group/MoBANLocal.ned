@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        MoBANLocal.ned
+//* file:        MoBanLocal.ned
 //*
 //* author:      Majid Nabi <m.nabi@tue.nl>
 //*
@@ -45,7 +45,7 @@ package inet.mobility.group;
 import inet.mobility.base.MovingMobilityBase;
 
 // This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN. The NED parameter "coordinatorIndex"
-// determine to which WBAN (MoBANCoordinator) it belongs.
+// determine to which WBAN (MoBanCoordinator) it belongs.
 // The current implementation uses the Random Walk Mobility Model (RWMM) for individual (local) movement with a sphere around the node, with given speed
 // and sphere radius of the current posture. The reference point of the node it the current posture, the sphere radius, and the speed is given by the
 // corresponding coordinator. RWMM determines the location of node at ant time relative to the given reference point.

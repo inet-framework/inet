@@ -27,7 +27,7 @@ import inet.linklayer.contract.IWiredNic;
 
 
 //
-// Ethernet network interface. Complements ~EtherMAC and ~EtherEncap
+// Ethernet network interface. Complements ~EtherMac and ~EtherEncap
 // with an output queue for QoS and RED support.
 //
 module EthernetInterface like IWiredNic
@@ -36,7 +36,7 @@ module EthernetInterface like IWiredNic
         @class(InterfaceEntry);
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
         string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
         string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic

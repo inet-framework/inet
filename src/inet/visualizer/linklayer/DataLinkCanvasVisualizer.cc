@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/base/MACBase.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/base/MacBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/visualizer/linklayer/DataLinkCanvasVisualizer.h"
 
 namespace inet {

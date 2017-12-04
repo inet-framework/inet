@@ -17,7 +17,7 @@
 package inet.applications.rtpapp;
 
 //
-// The RTPApplication is just a very simple sample for an application
+// The RtpApplication is just a very simple sample for an application
 // which uses RTP. It acts as a sender if the parameter fileName is
 // set, and as a receiver if the parameter is empty.
 //
@@ -26,7 +26,7 @@ simple RtpApplication
     parameters:
         @display("i=block/app");
         string commonName;  // the common name (CNAME) of this host
-        string profileName;  // which rtp profile is to be used (usually RTPAVProfile)
+        string profileName;  // which rtp profile is to be used (usually RtpAvProfile)
         double bandwidth;  // bandwidth in bytes per second for this session
         string destinationAddress;  // destination address (the L3AddressResolver class is used to resolve the address)
         int portNumber;  // used port

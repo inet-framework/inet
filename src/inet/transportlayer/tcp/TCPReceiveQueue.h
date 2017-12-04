@@ -28,7 +28,7 @@
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/ReorderBuffer.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
@@ -42,7 +42,7 @@ class TcpHeader;
 /**
  * Receive queue that manages Chunks.
  *
- * @see TCPSendQueue
+ * @see TcpSendQueue
  */
 class INET_API TcpReceiveQueue : public cObject
 {

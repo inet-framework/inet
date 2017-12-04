@@ -35,14 +35,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # udp apps
 **.numApps = 1
-**.client.app[0].typename = "UDPBasicApp"
+**.client.app[0].typename = "UdpBasicApp"
 **.client.app[0].startTime = 0s
 **.client.app[0].destAddresses = "10.0.0.2"
 **.client.app[0].destPort = 1000
 **.client.app[0].messageLength = 1000B 
 **.client.app[0].sendInterval = 100ms
 
-**.server.app[0].typename = "UDPSink"
+**.server.app[0].typename = "UdpSink"
 **.server.app[0].localPort = 1000
 
 %file: test.ned

@@ -25,13 +25,13 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/configurator/ipv4/IPv4NetworkConfigurator.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
 
 namespace inet {
 
 /**
- * This module provides the static configuration for the IPv4RoutingTable and
+ * This module provides the static configuration for the Ipv4RoutingTable and
  * the IPv4 network interfaces of a particular node in the network.
  *
  * For more info please see the NED file.

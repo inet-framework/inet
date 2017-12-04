@@ -24,8 +24,8 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 // OFDM PHY infrastructure (IEEE 802.11-2012, Clause 18).
 // OFDM means that the physical layer uses OFDM modulation.
 //
-// The Ieee80211OFDMErrorModel, depending of the level of detail
-// (see @see ~Ieee80211LayeredOFDMTransmitter and @see ~Ieee80211LayeredOFDMReceiver),
+// The Ieee80211OfdmErrorModel, depending of the level of detail
+// (see @see ~Ieee80211LayeredOfdmTransmitter and @see ~Ieee80211LayeredOfdmReceiver),
 // produces erroneous bits, symbols, samples or just simply
 // determines whether a packet is erroneous or not.
 //

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "APSKCode.h"
+#include "ApskCode.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ ApskCode::~ApskCode()
 
 std::ostream& ApskCode::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKCode";
+    stream << "ApskCode";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level + 1)
                << ", interleaving = " << printObjectToString(interleaving, level + 1)

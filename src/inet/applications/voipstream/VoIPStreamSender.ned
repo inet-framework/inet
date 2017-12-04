@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 
 
 //
-// VoIPStreamSender accepts an audio file and a destination IP address/port as
+// VoipStreamSender accepts an audio file and a destination IP address/port as
 // input, and will transmit the file's contents as voice traffic over UDP n
 // times (by default once). For transmission, the audio is resampled at the
 // specified frequency and depth, and encoded with the specified codec at the
@@ -31,7 +31,7 @@ import inet.applications.contract.IApp;
 // number of milliseconds of voice. Those values come from module parameters.
 // Packets that are all silence (all samples are below a given threshold in
 // absolute value) are transmitted as special "silence" packets. The module
-// does not simulate any particular VoIP protocol (e.g. RTP), but instead
+// does not simulate any particular VoIP protocol (e.g. Rtp), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
 simple VoipStreamSender like IApp
@@ -50,7 +50,7 @@ simple VoipStreamSender like IApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
-        @signal[sentPk](type=Packet);       // TODO first chunk is VoIPStreamPacket
+        @signal[sentPk](type=Packet);       // TODO first chunk is VoipStreamPacket
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:

@@ -20,14 +20,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPNoCongestionControl.
+ * State variables for TcpNoCongestionControl.
  */
 typedef TcpBaseAlgStateVariables TcpNoCongestionControlStateVariables;
 
@@ -40,7 +40,7 @@ class INET_API TcpNoCongestionControl : public TcpBaseAlg
   protected:
     TcpNoCongestionControlStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
-    /** Create and return a TCPNoCongestionControlStateVariables object. */
+    /** Create and return a TcpNoCongestionControlStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override
     {
         return new TcpNoCongestionControlStateVariables();

@@ -17,7 +17,7 @@
 //
 
 #include <algorithm>    // min,max
-#include "inet/transportlayer/tcp/flavours/TCPReno.h"
+#include "inet/transportlayer/tcp/flavours/TcpReno.h"
 #include "inet/transportlayer/tcp/TCP.h"
 
 namespace inet {

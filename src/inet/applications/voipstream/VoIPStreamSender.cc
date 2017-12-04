@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/voipstream/VoIPStreamSender.h"
+#include "inet/applications/voipstream/VoipStreamSender.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"

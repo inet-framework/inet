@@ -1,13 +1,13 @@
 #ifndef __TEST__TCPQUEUETESTER_FUNCTIONS
 
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 
 using namespace inet;
 using namespace tcp;
 
-// TCPSendQueue:
+// TcpSendQueue:
 
 void enqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
 void tryenqueue(TcpSendQueue *sq, const char *msgname, ulong numBytes);
@@ -16,7 +16,7 @@ void discardUpTo(TcpSendQueue *sq, uint32 seqNum);
 
 //////////////////////////////////////////////////////////////
 
-// TCPReceiveQueue:
+// TcpReceiveQueue:
 
 void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg);
 void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg);

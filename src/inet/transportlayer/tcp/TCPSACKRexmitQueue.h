@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
@@ -177,7 +177,7 @@ class INET_API TcpSackRexmitQueue
 
   protected:
     /*
-     * Returns if TCPSACKRexmitQueue is valid or not.
+     * Returns if TcpSackRexmitQueue is valid or not.
      */
     bool checkQueue() const;
 };

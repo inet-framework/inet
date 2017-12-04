@@ -22,7 +22,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 

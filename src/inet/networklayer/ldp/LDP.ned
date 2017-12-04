@@ -26,10 +26,10 @@ package inet.networklayer.ldp;
 //
 // Operations
 //
-// All LDP message types are subclassed from ~LDPPacket, and include
-// ~LDPHello, ~LDPNotify, ~LDPLabelRequest, ~LDPIni and ~LDPAddress.
+// All Ldp message types are subclassed from ~LdpPacket, and include
+// ~LdpHello, ~LdpNotify, ~LdpLabelRequest, ~LdpIni and ~LdpAddress.
 //
-// Message processing in the ~LDP module is explained in
+// Message processing in the ~Ldp module is explained in
 // <a href="ldp-processing.html">~LDP Message Processing</a>
 //
 // @author Andras Varga, Vojta Janota

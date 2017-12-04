@@ -23,20 +23,20 @@
 #include <vector>
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
 /**
  * IPv6 Neighbour Cache (RFC 2461 Neighbor Discovery for IPv6).
- * Used internally by the IPv6NeighbourDiscovery simple module.
+ * Used internally by the Ipv6NeighbourDiscovery simple module.
  *
- * This is just a plain container class -- the IPv6NeighbourDiscovery
+ * This is just a plain container class -- the Ipv6NeighbourDiscovery
  * module is free to manipulate the contents of the Neighbour entries
  * as it pleases.
  *
- * NOTE: IPv6NeighbourCache also stores the Default Router List.
+ * NOTE: Ipv6NeighbourCache also stores the Default Router List.
  * A router becomes a default router by calling
  * getDefaultRouterList().add(router) and stops to be a default router
  * after getDefaultRouterList().remove(router) has been called.
@@ -94,7 +94,7 @@ class INET_API Ipv6NeighbourCache
         // Router variables.
         // NOTE: we only store lifetime expiry. Other Router Advertisement
         // fields (reachableTime, retransTimer, MTU) update the interface
-        // configuration (IPv6InterfaceData). We won't have a timer message
+        // configuration (Ipv6InterfaceData). We won't have a timer message
         // for router lifetime; instead, we'll check the expirytime every time
         // we bump into a router entry (as nexthop in dest cache, or during
         // default router selection

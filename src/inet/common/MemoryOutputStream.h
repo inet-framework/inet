@@ -17,9 +17,9 @@
 #define __INET_MEMORYOUTPUTSTREAM_H_
 
 #include "inet/common/Units.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 

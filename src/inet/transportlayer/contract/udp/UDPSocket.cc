@@ -22,11 +22,11 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 namespace inet {
@@ -47,10 +47,10 @@ int UdpSocket::generateSocketId()
 void UdpSocket::sendToUDP(cMessage *msg)
 {
     if (!gateToUdp)
-        throw cRuntimeError("UDPSocket: setOutputGate() must be invoked before socket can be used");
+        throw cRuntimeError("UdpSocket: setOutputGate() must be invoked before socket can be used");
 
     cObject *ctrl = msg->getControlInfo();
-    EV_TRACE << "UDPSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
+    EV_TRACE << "UdpSocket: Send (" << msg->getClassName() << ")" << msg->getFullName();
     if (ctrl)
         EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
     EV_TRACE << endl;
@@ -68,7 +68,7 @@ void UdpSocket::bind(int localPort)
 void UdpSocket::bind(L3Address localAddr, int localPort)
 {
     if (localPort < -1 || localPort > 65535) // -1: ephemeral port
-        throw cRuntimeError("UDPSocket::bind(): invalid port number %d", localPort);
+        throw cRuntimeError("UdpSocket::bind(): invalid port number %d", localPort);
 
     UdpBindCommand *ctrl = new UdpBindCommand();
     ctrl->setLocalAddr(localAddr);
@@ -81,9 +81,9 @@ void UdpSocket::bind(L3Address localAddr, int localPort)
 void UdpSocket::connect(L3Address addr, int port)
 {
     if (addr.isUnspecified())
-        throw cRuntimeError("UDPSocket::connect(): unspecified remote address");
+        throw cRuntimeError("UdpSocket::connect(): unspecified remote address");
     if (port <= 0 || port > 65535)
-        throw cRuntimeError("UDPSocket::connect(): invalid remote port number %d", port);
+        throw cRuntimeError("UdpSocket::connect(): invalid remote port number %d", port);
 
     UdpConnectCommand *ctrl = new UdpConnectCommand();
     ctrl->setRemoteAddr(addr);

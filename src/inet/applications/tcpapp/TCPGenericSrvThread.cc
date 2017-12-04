@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TCPGenericSrvThread.h"
+#include "inet/applications/tcpapp/TcpGenericSrvThread.h"
 
 #include "GenericAppMsg_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -42,7 +42,7 @@ void TcpGenericSrvThread::dataArrived(Packet *msg, bool)
 
     if (appmsg->getReplyDelay() > 0)
         throw cRuntimeError("Cannot process (%s)%s: %s class doesn't support replyDelay field"
-                            " of GenericAppMsg, try to use TCPGenericSrvApp instead",
+                            " of GenericAppMsg, try to use TcpGenericSrvApp instead",
                 msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close

@@ -21,11 +21,11 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include "inet/routing/ospfv2/OSPFConfigReader.h"
+#include "inet/routing/ospfv2/OspfConfigReader.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"
@@ -450,7 +450,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
     }
 
-    EV_DEBUG << "OSPFConfigReader: Loading info for Router " << nodeFullPath << "\n";
+    EV_DEBUG << "OspfConfigReader: Loading info for Router " << nodeFullPath << "\n";
 
     bool rfc1583Compatible = getBoolAttrOrPar(*routerNode, "RFC1583Compatible");
     ospfRouter->setRFC1583Compatibility(rfc1583Compatible);

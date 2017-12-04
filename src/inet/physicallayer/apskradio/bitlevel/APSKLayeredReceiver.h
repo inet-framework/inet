@@ -19,8 +19,8 @@
 #define __INET_APSKLAYEREDRECEIVER_H
 
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"

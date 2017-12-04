@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/diffserv/DSCPMarker.h"
+#include "inet/networklayer/diffserv/DscpMarker.h"
 
 #include "inet/common/ProtocolTag_m.h"
 

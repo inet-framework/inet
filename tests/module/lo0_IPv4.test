@@ -38,10 +38,10 @@ total-stack = 7MiB
 
 # udp app configuration
 **.numApps = 5
-**.app[0].typename = "UDPEchoApp"
+**.app[0].typename = "UdpEchoApp"
 **.app[0].localPort = 100
 
-**.app[*].typename = "UDPBasicApp"
+**.app[*].typename = "UdpBasicApp"
 **.app[*].localPort = 200+index
 **.app[*].destPort = 100
 **.app[*].messageLength = 5000B

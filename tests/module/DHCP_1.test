@@ -59,10 +59,10 @@ network = DhcpExample
 
 **.numApps = 1
 
-**.cli[*].app[0].typename = "DHCPClient"
+**.cli[*].app[0].typename = "DhcpClient"
 **.cli[*].app[0].interface="eth0"   # interface toward dhcp server
 
-**.srv.app[0].typename = "DHCPServer"
+**.srv.app[0].typename = "DhcpServer"
 **.srv.app[0].numReservedAddresses = 100    # ip to start to lease
 **.srv.app[0].maxNumClients = 100     # number of ip to lease
 **.srv.app[0].dns = ""         # dns to assign

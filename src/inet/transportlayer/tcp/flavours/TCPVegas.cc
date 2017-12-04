@@ -19,7 +19,7 @@
 #include <algorithm>    // min,max
 
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/flavours/TCPVegas.h"
+#include "inet/transportlayer/tcp/flavours/TcpVegas.h"
 
 namespace inet {
 
@@ -74,7 +74,7 @@ TcpVegas::TcpVegas()
 {
 }
 
-// Same as TCPReno
+// Same as TcpReno
 void TcpVegas::recalculateSlowStartThreshold()
 {
     // RFC 2581, page 4:
@@ -281,7 +281,7 @@ void TcpVegas::receivedDataAck(uint32 firstSeqAcked)
             bool expired = unaFound && ((currentTime - unaFound->getFirstSentTime()) >= state->v_rtt_timeout);
 
             // added comprobation to check that received ACK do not acks all outstanding data. If not,
-            // TCPConnection::retransmitOneSegment will fail: ASSERT(bytes!=0), line 839), because bytes = snd_max-snd_una
+            // TcpConnection::retransmitOneSegment will fail: ASSERT(bytes!=0), line 839), because bytes = snd_max-snd_una
             if (expired && (state->snd_max - state->snd_una > 0)) {
                 state->dupacks = DUPTHRESH;
                 EV_DETAIL << "Vegas: retransmission (v_rtt_timeout) " << "\n";

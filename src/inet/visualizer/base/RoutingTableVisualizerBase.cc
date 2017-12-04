@@ -19,7 +19,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
 namespace inet {

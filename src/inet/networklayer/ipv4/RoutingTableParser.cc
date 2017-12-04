@@ -26,7 +26,7 @@
 #include "inet/networklayer/ipv4/RoutingTableParser.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -346,10 +346,10 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // parse flag-String to set flags
         for (int i = 0; str[i]; i++) {
             if (str[i] == 'H') {
-                // e->setType(IPv4Route::DIRECT);
+                // e->setType(Ipv4Route::DIRECT);
             }
             else if (str[i] == 'G') {
-                // e->setType(IPv4Route::REMOTE);
+                // e->setType(Ipv4Route::REMOTE);
             }
             else {
                 throw cRuntimeError("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);

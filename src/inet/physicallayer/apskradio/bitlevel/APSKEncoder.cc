@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/chunk/BitsChunk.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
 namespace inet {
@@ -55,7 +55,7 @@ void ApskEncoder::initialize(int stage)
 
 std::ostream& ApskEncoder::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKEncoder";
+    stream << "ApskEncoder";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", code = " << printObjectToString(code, level + 1);
     if (level <= PRINT_LEVEL_TRACE)

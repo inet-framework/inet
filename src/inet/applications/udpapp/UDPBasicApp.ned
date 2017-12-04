@@ -35,8 +35,8 @@ import inet.applications.contract.IApp;
 //
 // Received packets are discarded.
 //
-// The peer can be a ~UDPSink, another ~UDPBasicApp (it handles received packets
-// like ~UDPSink), or a ~UDPEchoApp. When used with ~UDPEchoApp, the rcvdPkLifetime
+// The peer can be a ~UdpSink, another ~UdpBasicApp (it handles received packets
+// like ~UdpSink), or a ~UdpEchoApp. When used with ~UdpEchoApp, the rcvdPkLifetime
 // statistic will contain the round-trip times.
 //
 simple UdpBasicApp like IApp

@@ -28,7 +28,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasUdp = default(true);
         bool hasTcp = default(true);
         bool hasSctp = default(false);
-        string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailableOrEmpty("TCP", "TcpLwip", "TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
         @figure[transportLayer](type=rectangle; pos=250,210; size=670,180; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);

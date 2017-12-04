@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TCPSessionApp.h"
+#include "inet/applications/tcpapp/TcpSessionApp.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"

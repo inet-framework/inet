@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        MoBANLocal.cc
+ * file:        MoBanLocal.cc
  *
  * author:      Majid Nabi <m.nabi@tue.nl>
  *
@@ -40,7 +40,7 @@
  **************************************************************************/
 
 #include "inet/common/INETMath.h"
-#include "inet/mobility/group/MoBANLocal.h"
+#include "inet/mobility/group/MoBanLocal.h"
 
 namespace inet {
 
@@ -59,7 +59,7 @@ void MoBanLocal::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
-    EV_TRACE << "initializing MoBANLocal stage " << stage << endl;
+    EV_TRACE << "initializing MoBanLocal stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         WATCH_PTR(coordinator);
         WATCH(referencePosition);

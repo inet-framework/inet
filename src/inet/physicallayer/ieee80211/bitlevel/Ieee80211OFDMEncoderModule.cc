@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211OFDMEncoderModule.h"
+#include "Ieee80211OfdmEncoderModule.h"
 
 namespace inet {
 

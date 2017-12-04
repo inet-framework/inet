@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"

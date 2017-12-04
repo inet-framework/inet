@@ -26,7 +26,7 @@
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {

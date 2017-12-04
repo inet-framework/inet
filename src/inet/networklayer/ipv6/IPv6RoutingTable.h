@@ -23,8 +23,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/ipv6/IPv6Route.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -258,7 +258,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * in the Router Advertisements.
      *
      * NOTE: This method does NOT update the lifetime of matching addresses
-     * in the IInterfaceTable (see IPv6InterfaceData); that has to be done
+     * in the IInterfaceTable (see Ipv6InterfaceData); that has to be done
      * separately.
      */
     virtual void addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength,
@@ -269,7 +269,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * with zero lifetime, or to purge an expired prefix.
      *
      * NOTE: This method does NOT remove the matching addresses from the
-     * IInterfaceTable (see IPv6InterfaceData); that has to be done separately.
+     * IInterfaceTable (see Ipv6InterfaceData); that has to be done separately.
      */
     virtual void deleteOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength);
 
@@ -298,7 +298,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Adds the given getRoute(which can be OSPF, BGP, RIP or any other route)
      * with src==ROUTING_PROT. To store additional information with the route,
-     * one can subclass from IPv6Route and add more fields.
+     * one can subclass from Ipv6Route and add more fields.
      */
     virtual void addRoutingProtocolRoute(Ipv6Route *route);
 
@@ -333,9 +333,9 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 #ifdef WITH_xMIPv6
     //================Added by Zarrar Yousaf ===================================
 
-    //void updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
-    //const IPv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
-    //const IPv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
+    //void updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha);//10.07.07 This updates the struct HomeNetwork Info{} with the MN's Home Address(HoA) and the global scope address of the MNs Home Agent (ha).
+    //const Ipv6Address& getHomeAgentAddress() {return homeInfo.homeAgentAddr;} // Zarrar 15.07.07 // return by reference - CB
+    //const Ipv6Address& getMNHomeAddress() {return homeInfo.HoA;} // Zarrar 15.07.07 // return by reference - CB
     const Ipv6Address& getHomeAddress();    // NEW, 14.01.08 - CB
 
     /**

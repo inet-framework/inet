@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        MoBANCoordinator.cc
+ * file:        MoBanCoordinator.cc
  *
  * author:      Majid Nabi <m.nabi@tue.nl>
  *
@@ -44,8 +44,8 @@
 #include <assert.h>
 
 #include "inet/common/INETMath.h"
-#include "inet/mobility/group/MoBANCoordinator.h"
-#include "inet/mobility/group/MoBANLocal.h"
+#include "inet/mobility/group/MoBanCoordinator.h"
+#include "inet/mobility/group/MoBanLocal.h"
 
 namespace inet {
 
@@ -79,7 +79,7 @@ void MoBanCoordinator::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
-    EV_TRACE << "initializing MoBANCoordinator stage " << stage << endl;
+    EV_TRACE << "initializing MoBanCoordinator stage " << stage << endl;
     if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         useMobilityPattern = par("useMobilityPattern").boolValue();
         collectLocalModules(getParentModule());

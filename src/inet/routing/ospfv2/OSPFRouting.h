@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -49,14 +49,14 @@ class OspfRouting : public cSimpleModule, public ILifecycle
 
     /**
      * Insert a route learn by BGP in OSPF routingTable as an external route.
-     * Used by the BGPRouting module.
+     * Used by the BgpRouting module.
      * @ifIndex: interface ID
      */
     void insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr);
 
     /**
      * Return true if the route is in OSPF external LSA Table, false else.
-     * Used by the BGPRouting module.
+     * Used by the BgpRouting module.
      */
     bool checkExternalRoute(const Ipv4Address& route);
 

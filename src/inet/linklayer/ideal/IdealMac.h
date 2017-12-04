@@ -22,8 +22,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 
@@ -77,7 +77,7 @@ class INET_API IdealMac : public MacProtocolBase
     //cListener:
     virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
 
-    /** implements MACProtocolBase functions */
+    /** implements MacProtocolBase functions */
     //@{
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;

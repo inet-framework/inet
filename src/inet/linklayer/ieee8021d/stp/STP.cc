@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ieee8021d/stp/STP.h"
+#include "inet/linklayer/ieee8021d/stp/Stp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -106,7 +106,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
         EV_INFO << "Configuration BPDU " << bpdu << " arrived from Root Switch." << endl;
 
         if (bpdu->getTcFlag()) {
-            EV_DEBUG << "MACAddressTable aging time set to " << currentFwdDelay << "." << endl;
+            EV_DEBUG << "MacAddressTable aging time set to " << currentFwdDelay << "." << endl;
             macTable->setAgingTime(currentFwdDelay);
 
             // config BPDU with TC flag

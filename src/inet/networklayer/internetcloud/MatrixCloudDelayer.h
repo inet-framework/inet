@@ -35,7 +35,7 @@ class PatternMatcher;
 class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:
-    //FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
+    //FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
     class Matcher
     {
       private:

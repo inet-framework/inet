@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/bitlevel/APSKModulator.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ void ApskModulator::initialize(int stage)
 
 std::ostream& ApskModulator::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKModulator";
+    stream << "ApskModulator";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", modulation = " << printObjectToString(modulation, level + 1);
     return stream;

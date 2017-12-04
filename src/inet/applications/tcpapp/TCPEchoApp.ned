@@ -45,7 +45,7 @@ import inet.applications.contract.IApp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      This mode is not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TcpNsc yet.
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
@@ -57,7 +57,7 @@ simple TcpEchoApp extends TcpSrvHostApp
         @class(TcpEchoApp);
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
-        serverThreadModuleType = default("inet.applications.tcpapp.TCPEchoAppThread"); // module type of "thread" module to launch on incoming connections
+        serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // module type of "thread" module to launch on incoming connections
         @signal[sentPk](type=Packet);
         @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

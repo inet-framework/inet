@@ -25,7 +25,7 @@ namespace inet {
 namespace physicallayer {
 
 /**
- * Implements the APSKErrorModel model, see the NED file for details.
+ * Implements the ApskErrorModel model, see the NED file for details.
  */
 class INET_API ApskErrorModel : public ErrorModelBase
 {

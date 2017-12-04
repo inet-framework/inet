@@ -21,7 +21,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
+#include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 
 namespace inet {
 

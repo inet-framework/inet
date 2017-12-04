@@ -23,7 +23,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -216,7 +216,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      * (HoA) and the HA's address and its prefix. The information from this list will be used by the MN in
      * sending BU towards HA for home registration while in visit network. This data will be updated as soon as
      * the MN processes the prefix information recieved in the RA from the HA and when it auto-configures its
-     * global scope address. This home network info is defined in the IPv6InterfaceData in order to support MN(s)
+     * global scope address. This home network info is defined in the Ipv6InterfaceData in order to support MN(s)
      * with multiple interfaces, where there could be a possibility that multiple interfaces in a single MN may
      * belong to different home networks. Therefore it is necessary to maintain home network info on a per
      * interface basis
@@ -225,7 +225,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     {
         Ipv6Address HoA;    // Home Address of the MN, configured while in the home network
         Ipv6Address homeAgentAddr;
-        //IPv6NDPrefixInformation prefix;
+        //Ipv6NdPrefixInformation prefix;
         Ipv6Address prefix;
     };
     friend std::ostream& operator<<(std::ostream& os, const HomeNetworkInfo& homeNetInfo);
@@ -460,8 +460,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *
      * WITH_xMIPv6:
      * Also takes into account the status of the H-Flag in the recieved RA.
-     * Called from  IPv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
-     *                      IPv6NDPrefixInformation& prefixInfo, InterfaceEntry* ie, bool hFlag).
+     * Called from  Ipv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf(
+     *                      Ipv6NdPrefixInformation& prefixInfo, InterfaceEntry* ie, bool hFlag).
      * Relevant only when MIPv6 is supported. (Zarrar Yousaf 20.07.07)
      */
     virtual void assignAddress(const Ipv6Address& addr, bool tentative,

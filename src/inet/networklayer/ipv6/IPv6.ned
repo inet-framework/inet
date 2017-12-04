@@ -28,11 +28,11 @@ package inet.networklayer.ipv6;
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over IPv6 from a higher layer protocol, the module should
-// fill in an ~IPv6ControlInfo object, attach it to the packet with cMessage's
+// fill in an ~Ipv6ControlInfo object, attach it to the packet with cMessage's
 // setControlInfo() method, the send it to the ~IPv6 module.
 //
 // When ~IPv6 sends up a packet to a higher layer protocol, it will also attach
-// an ~IPv6ControlInfo to the packet, with the source and destination IPv6 address,
+// an ~Ipv6ControlInfo to the packet, with the source and destination IPv6 address,
 // etc. of the IPv6 datagram in which the packet arrived.
 //
 // ~IPv6 can serve several higher-layer protocols. The higher layer protocols
@@ -42,16 +42,16 @@ package inet.networklayer.ipv6;
 //
 // <b>Routing and interfacing with lower layers</b>
 //
-// The routing table is stored in the module ~IPv6RoutingTable. When a datagram
-// needs to be routed, IPv6 queries ~IPv6RoutingTable for the output interface
+// The routing table is stored in the module ~Ipv6RoutingTable. When a datagram
+// needs to be routed, IPv6 queries ~Ipv6RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods of ~IPv6RoutingTable. No message exchange with ~IPv6RoutingTable
+// calling C++ methods of ~Ipv6RoutingTable. No message exchange with ~Ipv6RoutingTable
 // takes place.
 //
 //#FIXME TBD describe operation
 //
 // Routing protocol implementations can also query and manipulate the route table
-// by calling ~IPv6RoutingTable's methods in C++.
+// by calling ~Ipv6RoutingTable's methods in C++.
 //
 // <b>Performance model, QoS</b>
 //
@@ -59,7 +59,7 @@ package inet.networklayer.ipv6;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
-// @see ~IPv6RoutingTable, ~IPv6ControlInfo, ~IPv6NeighbourDiscovery, ~ICMPv6
+// @see ~Ipv6RoutingTable, ~Ipv6ControlInfo, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 // @author Andras Varga
 //

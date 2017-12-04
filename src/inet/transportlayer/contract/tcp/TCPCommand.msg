@@ -26,12 +26,12 @@ namespace inet;
 // TCP command codes, sent by the application to TCP. These constants
 // should be set as message kind on a message sent to the TCP entity.
 //
-// @see ~TCPCommand, ~TCPOpenCommand, ~ITCP
+// @see ~TcpCommand, ~TcpOpenCommand, ~ITCP
 //
 enum TcpCommandCode
 {
-    TCP_C_OPEN_ACTIVE = 1;   // active open (must carry ~TCPOpenCommand)
-    TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry ~TCPOpenCommand)
+    TCP_C_OPEN_ACTIVE = 1;   // active open (must carry ~TcpOpenCommand)
+    TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry ~TcpOpenCommand)
     TCP_C_ACCEPT = 3;        // accept connection
     TCP_C_SEND = 4;          // send data (set on data packet)
     TCP_C_CLOSE = 5;         // "I have no more data to send"
@@ -46,7 +46,7 @@ enum TcpCommandCode
 // TCP indications, sent by TCP to the application. TCP will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see ~TCPCommand, ~TCPStatusInfo, ~ITCP
+// @see ~TcpCommand, ~TcpStatusInfo, ~ITCP
 //
 enum TcpStatusInd
 {
@@ -59,7 +59,7 @@ enum TcpStatusInd
     TCP_I_CONNECTION_REFUSED = 7; // connection refused
     TCP_I_CONNECTION_RESET = 8;  // connection reset
     TCP_I_TIMED_OUT = 9;         // conn-estab timer went off, or max retransm. count reached
-    TCP_I_STATUS = 10;           // status info (will carry ~TCPStatusInfo)
+    TCP_I_STATUS = 10;           // status info (will carry ~TcpStatusInfo)
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
     TCP_I_DATA_NOTIFICATION = 12; // notify the upper layer that data has arrived
 }
@@ -85,7 +85,7 @@ enum TcpErrorCode
 //
 //# TODO explain userId
 //
-// @see ~TcpCommandCode, ~TcpStatusInd, ~TCPOpenCommand, ~TCPStatusInfo, ~ITCP
+// @see ~TcpCommandCode, ~TcpStatusInd, ~TcpOpenCommand, ~TcpStatusInfo, ~ITCP
 //
 class TcpCommand extends cObject
 {
@@ -113,7 +113,7 @@ class TcpErrorInfo extends TcpCommand
 // The fork parameter is used with passive open, and controls what happens
 // when an incoming connection is received. With fork=true, it emulates
 // the Unix accept(2) syscall semantics: a new connection structure
-// is created for the connection (with a new connId, see in ~TCPCommand),
+// is created for the connection (with a new connId, see in ~TcpCommand),
 // and the connection structure with the old connId remains listening.
 // With fork=false, all the above does not happen: the first connection
 // is accepted (with the original connId), and further incoming connections
@@ -121,7 +121,7 @@ class TcpErrorInfo extends TcpCommand
 //
 // The tcpAlgorithmClass field allows per-connection TCP configuration.
 // The tcpAlgorithmClass field may contain name of class subclassed from
-// TCPAlgorithm, respectively.
+// TcpAlgorithm, respectively.
 // If not set, module parameters with similar names are used.
 //
 // @see ~TcpCommandCode, ~ITCP
@@ -185,8 +185,8 @@ class TcpConnectInfo extends TcpCommand
 
 //
 // Sent with message kind TCP_I_STATUS, in response to command TCP_C_STATUS.
-// For explanation of variables, see RFC 793 or TCPStateVariables in
-// TCPConnection.h.
+// For explanation of variables, see RFC 793 or TcpStateVariables in
+// TcpConnection.h.
 //
 // @see ~TcpStatusInd, ~TcpCommandCode, ~ITCP
 //

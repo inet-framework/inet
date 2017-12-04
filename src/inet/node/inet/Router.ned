@@ -62,16 +62,16 @@ module Router extends ApplicationLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
+        ospf: <"OspfRouting"> like IIPRouting if hasOSPF {
             parameters:
                 @display("p=800,300,row");
         }
-        bgp: <"BGPRouting"> like IBGPRouting if hasBGP {
+        bgp: <"BgpRouting"> like IBGPRouting if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=600,100");
         }
-        rip: <"RIPRouting"> like IApp if hasRIP {
+        rip: <"RipRouting"> like IApp if hasRIP {
             parameters:
                 @display("p=700,100");
         }
@@ -79,7 +79,7 @@ module Router extends ApplicationLayerNodeBase
             parameters:
                 @display("p=700,300");
         }
-        dhcp: <"DHCPServer"> like IApp if hasDHCP {
+        dhcp: <"DhcpServer"> like IApp if hasDHCP {
             parameters:
                 @display("p=800,100");
         }

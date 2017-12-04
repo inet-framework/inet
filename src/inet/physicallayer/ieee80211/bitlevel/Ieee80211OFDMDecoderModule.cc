@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211OFDMDecoderModule.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
+#include "Ieee80211OfdmDecoderModule.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
 
 namespace inet {
 

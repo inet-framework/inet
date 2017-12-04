@@ -17,7 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/routing/pim/modes/PIMDM.h"
+#include "inet/routing/pim/modes/PimDm.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -80,7 +80,7 @@ bool PimDm::handleNodeStart(IDoneCallback *doneCallback)
     if (isEnabled) {
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMDM: containing node not found.");
+            throw cRuntimeError("PimDm: containing node not found.");
         host->subscribe(NF_IPv4_NEW_MULTICAST, this);
         host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
         host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
@@ -111,7 +111,7 @@ void PimDm::stopPIMRouting()
     if (isEnabled) {
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMDM: containing node not found.");
+            throw cRuntimeError("PimDm: containing node not found.");
         host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
         host->unsubscribe(NF_IPv4_MCAST_REGISTERED, this);
         host->unsubscribe(NF_IPv4_MCAST_UNREGISTERED, this);
@@ -164,14 +164,14 @@ void PimDm::handleMessageWhenUp(cMessage *msg)
                 break;
 
             default:
-                throw cRuntimeError("PIMDM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
+                throw cRuntimeError("PimDm: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
         }
     }
     else {
         Packet *pk = check_and_cast<Packet *>(msg);
         const auto& pkt = pk->peekHeader<PimPacket>();
         if (pkt == nullptr)
-            throw cRuntimeError("PIMDM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
+            throw cRuntimeError("PimDm: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
 
         if (!isEnabled) {
             EV_DETAIL << "PIM-DM is disabled, dropping packet.\n";
@@ -416,7 +416,7 @@ void PimDm::processGraftPacket(Packet *pk)
 }
 
 /**
- * The method is used to process PIMGraft packet. Packet means that downstream router wants to join to
+ * The method is used to process PimGraft packet. Packet means that downstream router wants to join to
  * multicast tree, so the packet cannot come to RPF interface. Router finds correct outgoig interface
  * towards downstream router. Change its state to forward if it was not before and cancel Prune Timer.
  * If route was in pruned state, router will send also Graft message to join multicast tree.
@@ -578,7 +578,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
 }
 
 /**
- * The method is used to process PIMStateRefresh packet. The method checks if there is route in mroute
+ * The method is used to process PimStateRefresh packet. The method checks if there is route in mroute
  * and that packet has came to RPF interface. Then it goes through all outgoing interfaces. If the
  * interface is pruned, it resets Prune Timer. For each interface State Refresh message is copied and
  * correct prune indicator is set according to state of outgoing interface (pruned/forwarding).
@@ -1130,7 +1130,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
 
     Ipv4Route *routeToSrc = rt->findBestMatchingRoute(source);
     if (!routeToSrc || !routeToSrc->getInterface()) {
-        EV << "ERROR: PIMDM::newMulticast(): cannot find RPF interface, routing information is missing.";
+        EV << "ERROR: PimDm::newMulticast(): cannot find RPF interface, routing information is missing.";
         return;
     }
 
@@ -1569,7 +1569,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
 {
     EV_INFO << "Sending Graft(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-    Packet *packet = new Packet("PIMGraft");
+    Packet *packet = new Packet("PimGraft");
     const auto& msg = makeShared<PimGraft>();
     msg->setHoldTime(0);
     msg->setUpstreamNeighborAddress(nextHop);
@@ -1622,7 +1622,7 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
     EV_INFO << "Sending StateRefresh(S=" << route->source << ", G=" << route->group
             << ") message on interface '" << downstream->ie->getInterfaceName() << "'\n";
 
-    Packet *packet = new Packet("PIMStateRefresh");
+    Packet *packet = new Packet("PimStateRefresh");
     const auto& msg = makeShared<PimStateRefresh>();
     msg->setGroupAddress(route->group);
     msg->setSourceAddress(route->source);
@@ -1649,7 +1649,7 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
 {
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getInterfaceName() << "'\n";
 
-    Packet *packet = new Packet("PIMAssert");
+    Packet *packet = new Packet("PimAssert");
     const auto& pkt = makeShared<PimAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);
@@ -1839,7 +1839,7 @@ void PimDm::UpstreamInterface::startSourceActiveTimer()
 }
 
 /**
- * The method is used to create PIMStateRefresh timer. The timer is set when source of multicast is
+ * The method is used to create PimStateRefresh timer. The timer is set when source of multicast is
  * connected directly to the router. If timer expires, router will send StateRefresh message, which
  * will propagate through all network and wil reset Prune Timer. It is set to (S,G).
  */

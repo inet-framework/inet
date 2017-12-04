@@ -32,8 +32,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -62,15 +62,15 @@ class IRoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations (e.g. OSPF).
  *
- * Entries in the route table are represented by IPv4Route objects.
- * IPv4Route objects can be polymorphic: if a routing protocol needs
- * to store additional data, it can simply subclass from IPv4Route,
+ * Entries in the route table are represented by Ipv4Route objects.
+ * Ipv4Route objects can be polymorphic: if a routing protocol needs
+ * to store additional data, it can simply subclass from Ipv4Route,
  * and add the derived object to the table.
  *
  * Uses RoutingTableParser to read routing files (.irt, .mrt).
  *
  *
- * @see InterfaceEntry, IPv4InterfaceData, IPv4Route
+ * @see InterfaceEntry, Ipv4InterfaceData, Ipv4Route
  */
 class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
 {

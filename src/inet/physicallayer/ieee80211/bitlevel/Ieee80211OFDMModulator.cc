@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulator.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 
@@ -49,7 +49,7 @@ Ieee80211OfdmModulator::Ieee80211OfdmModulator(const Ieee80211OfdmModulation *su
 
 std::ostream& Ieee80211OfdmModulator::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMModulator";
+    stream << "Ieee80211OfdmModulator";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level + 1);
     return stream;

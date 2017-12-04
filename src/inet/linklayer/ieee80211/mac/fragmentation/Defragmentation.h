@@ -18,7 +18,7 @@
 #ifndef __INET_DEFRAGMENTATION_H
 #define __INET_DEFRAGMENTATION_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 
 namespace inet {

@@ -18,7 +18,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmpType = "Igmpv3"
 **.IPForward = false
 **.multicastForwarding = false
 
@@ -31,11 +31,11 @@ network=TestIGMPNetwork
 
 <join t="2" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="10.0.0.1"/>
 <dump t="2" module="node.tester.mac" ifname="eth0" what="groups"/>
-<send t="2" module="node.tester.mac" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv3Query" maxRespCode="10"/>
 
 <set-filter t="3" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
 <dump t="3" module="node.tester.mac" ifname="eth0" what="groups"/>
-<send t="3" module="node.tester.mac" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+<send t="3" module="node.tester.mac" ifname="eth0" type="Igmpv3Query" maxRespCode="10"/>
 
 </scenario>
 

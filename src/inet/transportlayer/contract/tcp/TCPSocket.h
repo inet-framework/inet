@@ -29,12 +29,12 @@ namespace inet {
 class TcpStatusInfo;
 
 /**
- * TCPSocket is a convenience class, to make it easier to manage TCP connections
- * from your application models. You'd have one (or more) TCPSocket object(s)
+ * TcpSocket is a convenience class, to make it easier to manage TCP connections
+ * from your application models. You'd have one (or more) TcpSocket object(s)
  * in your application simple module class, and call its member functions
  * (bind(), listen(), connect(), etc.) to open, close or abort a TCP connection.
  *
- * TCPSocket chooses and remembers the connId for you, assembles and sends command
+ * TcpSocket chooses and remembers the connId for you, assembles and sends command
  * packets (such as OPEN_ACTIVE, OPEN_PASSIVE, CLOSE, ABORT, etc.) to TCP,
  * and can also help you deal with packets and notification messages arriving
  * from TCP.
@@ -44,7 +44,7 @@ class TcpStatusInfo;
  * (the code can be placed in your handleMessage() or activity()):
  *
  * <pre>
- *   TCPSocket socket;
+ *   TcpSocket socket;
  *   socket.connect(Address("10.0.0.2"), 2000);
  *
  *   msg = new cMessage("data1");
@@ -56,19 +56,19 @@ class TcpStatusInfo;
  *
  * Dealing with packets and notification messages coming from TCP is somewhat
  * more cumbersome. Basically you have two choices: you either process those
- * messages yourself, or let TCPSocket do part of the job. For the latter,
- * you give TCPSocket a callback object on which it'll invoke the appropriate
+ * messages yourself, or let TcpSocket do part of the job. For the latter,
+ * you give TcpSocket a callback object on which it'll invoke the appropriate
  * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of TCPSocket::CallbackInterface).,
+ * socketPeerClosed(), etc (these are methods of TcpSocket::CallbackInterface).,
  * The callback object can be your simple module class too.
  *
- * This code skeleton example shows how to set up a TCPSocket to use the module
+ * This code skeleton example shows how to set up a TcpSocket to use the module
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TCPSocket::CallbackInterface
+ * class MyModule : public cSimpleModule, public TcpSocket::CallbackInterface
  * {
- *     TCPSocket socket;
+ *     TcpSocket socket;
  *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
  *     virtual void socketFailure(int connId, void *yourPtr, int code);
  *     ...
@@ -101,16 +101,16 @@ class TcpStatusInfo;
  * </pre>
  *
  * If you need to manage a large number of sockets (e.g. in a server
- * application which handles multiple incoming connections), the TCPSocketMap
+ * application which handles multiple incoming connections), the TcpSocketMap
  * class may be useful. The following code fragment to handle incoming
- * connections is from the LDP module:
+ * connections is from the Ldp module:
  *
  * <pre>
- * TCPSocket *socket = socketMap.findSocketFor(msg);
+ * TcpSocket *socket = socketMap.findSocketFor(msg);
  * if (!socket)
  * {
  *     // not yet in socketMap, must be new incoming connection: add to socketMap
- *     socket = new TCPSocket(msg);
+ *     socket = new TcpSocket(msg);
  *     socket->setOutputGate(gate("tcpOut"));
  *     socket->setCallbackObject(this, nullptr);
  *     socketMap.addSocket(socket);
@@ -120,7 +120,7 @@ class TcpStatusInfo;
  * socket->processMessage(msg);
  * </pre>
  *
- * @see TCPSocketMap
+ * @see TcpSocketMap
  */
 class INET_API TcpSocket
 {
@@ -194,7 +194,7 @@ class INET_API TcpSocket
     /**
      * Returns the internal connection Id. TCP uses the (gate index, connId) pair
      * to identify the connection when it receives a command from the application
-     * (or TCPSocket).
+     * (or TcpSocket).
      */
     int getConnectionId() const { return connId; }
 
@@ -253,14 +253,14 @@ class INET_API TcpSocket
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
      * on the port you bound the socket to. Every incoming connection will
-     * get a new connId (and thus, must be handled with a new TCPSocket object),
+     * get a new connId (and thus, must be handled with a new TcpSocket object),
      * while the original connection (original connId) will keep listening on
-     * the port. The new TCPSocket object must be created with the
-     * TCPSocket(cMessage *msg) constructor.
+     * the port. The new TcpSocket object must be created with the
+     * TcpSocket(cMessage *msg) constructor.
      *
-     * If you need to handle multiple incoming connections, the TCPSocketMap
-     * class can also be useful, and TCPSrvHostApp shows how to put it all
-     * together. See also TCPOpenCommand documentation (neddoc) for more info.
+     * If you need to handle multiple incoming connections, the TcpSocketMap
+     * class can also be useful, and TcpSrvHostApp shows how to put it all
+     * together. See also TcpOpenCommand documentation (neddoc) for more info.
      */
     void listen() { listen(true); }
 
@@ -269,7 +269,7 @@ class INET_API TcpSocket
      * Non-forking means that TCP will accept the first incoming
      * connection, and refuse subsequent ones.
      *
-     * See TCPOpenCommand documentation (neddoc) for more info.
+     * See TcpOpenCommand documentation (neddoc) for more info.
      */
     void listenOnce() { listen(false); }
 
@@ -307,7 +307,7 @@ class INET_API TcpSocket
     void abort();
 
     /**
-     * Causes TCP to reply with a fresh TCPStatusInfo, attached to a dummy
+     * Causes TCP to reply with a fresh TcpStatusInfo, attached to a dummy
      * message as getControlInfo(). The reply message can be recognized by its
      * message kind TCP_I_STATUS, or (if a callback object is used)
      * the socketStatusArrived() method of the callback object will be
@@ -316,15 +316,15 @@ class INET_API TcpSocket
     void requestStatus();
 
     /**
-     * Required to re-connect with a "used" TCPSocket object.
-     * By default, a TCPSocket object is tied to a single TCP connection,
+     * Required to re-connect with a "used" TcpSocket object.
+     * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,
      * you cannot use the socket to connect again (by connect() or listen())
      * unless you obtain a new connectionId by calling this method.
      *
-     * BEWARE if you use TCPSocketMap! TCPSocketMap uses connectionId
+     * BEWARE if you use TcpSocketMap! TcpSocketMap uses connectionId
      * to find TCPSockets, so after calling this method you have to remove
-     * the socket from your TCPSocketMap, and re-add it. Otherwise TCPSocketMap
+     * the socket from your TcpSocketMap, and re-add it. Otherwise TcpSocketMap
      * will get confused.
      *
      * The reason why one must obtain a new connectionId is that TCP still
@@ -339,14 +339,14 @@ class INET_API TcpSocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a TCPCommand as getControlInfo(), and the connId in it matches
+     * has a TcpCommand as getControlInfo(), and the connId in it matches
      * that of the socket.)
      */
     bool belongsToSocket(cMessage *msg);
 
     /**
-     * Returns true if the message belongs to any TCPSocket instance.
-     * (This basically checks if the message has a TCPCommand attached to
+     * Returns true if the message belongs to any TcpSocket instance.
+     * (This basically checks if the message has a TcpCommand attached to
      * it as getControlInfo().)
      */
     static bool belongsToAnyTCPSocket(cMessage *msg);
@@ -357,16 +357,16 @@ class INET_API TcpSocket
      * multiply inherits from CallbackInterface too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TCPSocket::CallbackInterface
+     * class MyAppModule : public cSimpleModule, public TcpSocket::CallbackInterface
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
      *
-     * TCPSocket doesn't delete the callback object in the destructor
+     * TcpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      *
      * YourPtr is an optional pointer. It may contain any value you wish --
-     * TCPSocket will not look at it or do anything with it except passing
+     * TcpSocket will not look at it or do anything with it except passing
      * it back to you in the CallbackInterface calls. You may find it
      * useful if you maintain additional per-connection information:
      * in that case you don't have to look it up by connId in the callbacks,

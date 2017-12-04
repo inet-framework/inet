@@ -15,7 +15,7 @@
 //
 
 #include <map>
-#include "inet/linklayer/ethernet/switch/MACAddressTable.h"
+#include "inet/linklayer/ethernet/switch/MacAddressTable.h"
 
 namespace inet {
 
@@ -105,7 +105,7 @@ MacAddressTable::AddressTable *MacAddressTable::getTableForVid(unsigned int vid)
 
 int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int vid)
 {
-    Enter_Method("MACAddressTable::getPortForAddress()");
+    Enter_Method("MacAddressTable::getPortForAddress()");
 
     AddressTable *table = getTableForVid(vid);
     // VLAN ID vid does not exist
@@ -134,7 +134,7 @@ int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int v
 
 bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid)
 {
-    Enter_Method("MACAddressTable::updateTableWithAddress()");
+    Enter_Method("MacAddressTable::updateTableWithAddress()");
     if (address.isBroadcast())
         return false;
 
@@ -179,7 +179,7 @@ bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& addre
 
 void MacAddressTable::flush(int portno)
 {
-    Enter_Method("MACAddressTable::flush():  Clearing gate %d cache", portno);
+    Enter_Method("MacAddressTable::flush():  Clearing gate %d cache", portno);
     for (auto & elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto j = table->begin(); j != table->end(); ) {

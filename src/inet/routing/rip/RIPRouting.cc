@@ -32,7 +32,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/routing/rip/RIPPacket_m.h"
-#include "inet/routing/rip/RIPRouting.h"
+#include "inet/routing/rip/RipRouting.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
@@ -231,7 +231,7 @@ void RipRouting::initialize(int stage)
 }
 
 /**
- * Creates a RIPInterfaceEntry for each interface found in the interface table.
+ * Creates a RipInterfaceEntry for each interface found in the interface table.
  */
 void RipRouting::configureInterfaces(cXMLElement *config)
 {
@@ -315,7 +315,7 @@ void RipRouting::sendRIPRequest(const RipInterfaceEntry& ripInterface)
  */
 void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+    Enter_Method_Silent("RipRouting::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
 
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
@@ -586,7 +586,7 @@ void RipRouting::processUpdate(bool triggered)
  *
  * There are two cases:
  * - the request enumerates the requested prefixes
- *     There is an RIPEntry for each requested route in the packet.
+ *     There is an RipEntry for each requested route in the packet.
  *     The RIP module simply looks up the prefix in its table, and
  *     if it sets the metric field of the entry to the metric of the
  *     found route, or to infinity (16) if not found. Once all entries
@@ -595,7 +595,7 @@ void RipRouting::processUpdate(bool triggered)
  *     entries in the request, then no response is sent; the request is
  *     silently discarded.
  * - the whole routing table is requested
- *     In this case the RIPPacket contains only one entry, with addressFamilyId 0,
+ *     In this case the RipPacket contains only one entry, with addressFamilyId 0,
  *     and metric 16 (infinity). In this case the whole routing table is sent,
  *     using the normal output process (sendRoutes() method).
  */
@@ -739,7 +739,7 @@ void RipRouting::sendRoutes(const L3Address& address, int port, const RipInterfa
  * table with a wrong packet. Valid responses must come from a neighboring
  * RIP router.
  *
- * Next each RIPEntry is processed one by one. Check that destination address
+ * Next each RipEntry is processed one by one. Check that destination address
  * and metric are valid. Then compute the new metric by adding the metric
  * of the interface to the metric found in the entry.
  *
@@ -931,7 +931,7 @@ void RipRouting::addRoute(const L3Address& dest, int prefixLength, const Interfa
  */
 void RipRouting::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
-    //ASSERT(ripRoute && ripRoute->getType() == RIPRoute::RIP_ROUTE_RTE);
+    //ASSERT(ripRoute && ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
     //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
 
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "

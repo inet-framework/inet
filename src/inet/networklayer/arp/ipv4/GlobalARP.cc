@@ -20,11 +20,11 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/networklayer/arp/ipv4/GlobalARP.h"
+#include "inet/networklayer/arp/ipv4/GlobalArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -196,7 +196,7 @@ MacAddress GlobalArp::resolveL3Address(const L3Address& address, const Interface
     if (it != globalArpCache.end())
         return it->second->macAddress;
 
-    throw cRuntimeError("GlobalARP does not support dynamic address resolution");
+    throw cRuntimeError("GlobalArp does not support dynamic address resolution");
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
 

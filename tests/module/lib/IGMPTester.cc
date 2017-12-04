@@ -11,10 +11,10 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IGMPMessage.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/ipv4/IgmpMessage.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 using namespace std;
 
@@ -210,15 +210,15 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
     InterfaceEntry *ie = ifname ? ift->getInterfaceByName(ifname) : ift->getInterface(0);
     string type = node.getAttribute("type");
 
-    if (type == "IGMPv1Query")
+    if (type == "Igmpv1Query")
     {
         // TODO
     }
-    else if (type == "IGMPv2Query")
+    else if (type == "Igmpv2Query")
     {
         // TODO
     }
-    else if (type == "IGMPv3Query")
+    else if (type == "Igmpv3Query")
     {
         const char *groupStr = node.getAttribute("group");
         const char *maxRespCodeStr = node.getAttribute("maxRespCode");
@@ -229,7 +229,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         Ipv4AddressVector sources;
         parseIPv4AddressVector(sourcesStr, sources);
 
-        Packet *packet = new Packet("IGMPv3 query");
+        Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(group);
@@ -239,20 +239,20 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         packet->insertHeader(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
     }
-    else if (type == "IGMPv2Report")
+    else if (type == "Igmpv2Report")
     {
         // TODO
     }
-    else if (type == "IGMPv2Leave")
+    else if (type == "Igmpv2Leave")
     {
         // TODO
     }
-    else if (type == "IGMPv3Report")
+    else if (type == "Igmpv3Report")
     {
         cXMLElementList records = node.getElementsByTagName("record");
-        Packet *packet = new Packet("IGMPv3 report");
+        Packet *packet = new Packet("Igmpv3 report");
         const auto& msg = makeShared<Igmpv3Report>();
-        unsigned int byteLength = 8;   // IGMPv3Report header size
+        unsigned int byteLength = 8;   // Igmpv3Report header size
 
         msg->setGroupRecordArraySize(records.size());
         for (int i = 0; i < (int)records.size(); ++i)
@@ -274,7 +274,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
                                 recordTypeStr == "BLOCK" ? BLOCK_OLD_SOURCE : 0;
             ASSERT(record.groupAddress.isMulticast());
             ASSERT(record.recordType);
-            byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (IPv4Address)
+            byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
         }
         msg->setChunkLength(B(byteLength));
         packet->insertHeader(msg);

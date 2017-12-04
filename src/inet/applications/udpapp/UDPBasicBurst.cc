@@ -18,7 +18,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/applications/udpapp/UDPBasicBurst.h"
+#include "inet/applications/udpapp/UdpBasicBurst.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"

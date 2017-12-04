@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
@@ -42,8 +42,8 @@ class INET_API TcpAlgorithm : public cObject
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
-     * that every TCPAlgorithm subclass will have its own state block,
-     * subclassed from TCPStateVariables. This factory method should
+     * that every TcpAlgorithm subclass will have its own state block,
+     * subclassed from TcpStateVariables. This factory method should
      * create and return a "blank" state block of the appropriate type.
      */
     virtual TcpStateVariables *createStateVariables() = 0;
@@ -60,7 +60,7 @@ class INET_API TcpAlgorithm : public cObject
     virtual ~TcpAlgorithm() {}
 
     /**
-     * Assign this object to a TCPConnection. Its sendQueue and receiveQueue
+     * Assign this object to a TcpConnection. Its sendQueue and receiveQueue
      * must be set already at this time, because we cache their pointers here.
      */
     void setConnection(TcpConnection *_conn) { conn = _conn; }
@@ -78,7 +78,7 @@ class INET_API TcpAlgorithm : public cObject
 
     /**
      * Should be redefined to initialize the object: create timers, etc.
-     * This method is necessary because the TCPConnection ptr is not
+     * This method is necessary because the TcpConnection ptr is not
      * available in the constructor yet.
      */
     virtual void initialize() {}
@@ -98,8 +98,8 @@ class INET_API TcpAlgorithm : public cObject
     virtual void connectionClosed() = 0;
 
     /**
-     * Place to process timers specific to this TCPAlgorithm class.
-     * TCPConnection will invoke this method on any timer (self-message)
+     * Place to process timers specific to this TcpAlgorithm class.
+     * TcpConnection will invoke this method on any timer (self-message)
      * it doesn't recognize (that is, any timer other than the 2MSL,
      * CONN-ESTAB and FIN-WAIT-2 timers).
      *

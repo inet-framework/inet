@@ -30,7 +30,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
 

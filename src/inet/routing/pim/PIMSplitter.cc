@@ -17,7 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/routing/pim/PIMSplitter.h"
+#include "inet/routing/pim/PimSplitter.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -66,7 +66,7 @@ void PimSplitter::handleMessage(cMessage *msg)
             processPIMPacket(packet);
         }
         else
-            throw cRuntimeError("PIMSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
+            throw cRuntimeError("PimSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
     }
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
@@ -75,7 +75,7 @@ void PimSplitter::handleMessage(cMessage *msg)
         send(msg, ipOut);
     }
     else
-        throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
+        throw cRuntimeError("PimSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
 }
 
 void PimSplitter::processPIMPacket(Packet *pkt)
@@ -96,17 +96,17 @@ void PimSplitter::processPIMPacket(Packet *pkt)
 
     switch (pimInt->getMode()) {
         case PimInterface::DenseMode:
-            EV_INFO << "Sending packet to PIMDM.\n";
+            EV_INFO << "Sending packet to PimDm.\n";
             send(pkt, pimDMOut);
             break;
 
         case PimInterface::SparseMode:
-            EV_INFO << "Sending packet to PIMSM.\n";
+            EV_INFO << "Sending packet to PimSm.\n";
             send(pkt, pimSMOut);
             break;
 
         default:
-            throw cRuntimeError("PIMSplitter: PIM mode of interface '%s' is invalid.", ie->getInterfaceName());
+            throw cRuntimeError("PimSplitter: PIM mode of interface '%s' is invalid.", ie->getInterfaceName());
     }
 }
 }    // namespace inet

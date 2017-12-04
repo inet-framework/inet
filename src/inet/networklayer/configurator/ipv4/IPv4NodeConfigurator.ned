@@ -23,16 +23,16 @@ package inet.networklayer.configurator.ipv4;
 //
 // This module has one instance per network node, and it acts like a bridge
 // between the node and the network's global configurator module,
-// ~IPv4NetworkConfigurator.
+// ~Ipv4NetworkConfigurator.
 //
-// ~IPv4NetworkConfigurator only computes and remembers configuration data
+// ~Ipv4NetworkConfigurator only computes and remembers configuration data
 // (assigned IP addresses, static routes, etc), but doesn't configure the nodes'
 // routing tables and interfaces accordingly. The actual configuration is
 // carried out by this module, at network initialization time and also when
 // the node restarts (i.e. after a shutdown or a crash.)
 //
 // This module is needed because of failure/restart scenarios:
-// ~IPv4NetworkConfigurator would not be able to configure the node after
+// ~Ipv4NetworkConfigurator would not be able to configure the node after
 // a restart, because being a global module, it doesn't know about node
 // lifecycle events.
 //
@@ -42,7 +42,7 @@ simple Ipv4NodeConfigurator
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         // TODO: eventually rename to networkConfigurator
-        string networkConfiguratorModule = default("configurator"); // the absolute path to the IPv4NetworkConfigurator; use "" if there is no configurator
+        string networkConfiguratorModule = default("configurator"); // the absolute path to the Ipv4NetworkConfigurator; use "" if there is no configurator
         bool configureRoutingTable = default(true);     // add routing entries to routing table (uses the configurator module)
         @display("i=block/cogwheel");
 }

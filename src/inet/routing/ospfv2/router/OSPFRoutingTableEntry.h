@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
@@ -59,8 +59,8 @@ class INET_API RoutingTableEntry : public Ipv4Route
     Metric type2Cost = 0;
     const OspfLsa *linkStateOrigin = nullptr;
     std::vector<NextHop> nextHops;
-    // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
-    // IPv4Route::gateway is nextHops[0].hopAddress
+    // Ipv4Route::interfacePtr comes from nextHops[0].ifIndex
+    // Ipv4Route::gateway is nextHops[0].hopAddress
 
   public:
     RoutingTableEntry(IInterfaceTable *ift);

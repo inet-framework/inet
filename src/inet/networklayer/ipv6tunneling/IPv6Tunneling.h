@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * @file IPv6Tunneling.h
+ * @file Ipv6Tunneling.h
  * @brief Manage IP tunnels (RFC 2473) and Type 2 Routing Header/Home Address Option based routing as specified in MIPv6 (RFC 3775)
 
  * @author Christian
@@ -28,7 +28,7 @@
 #define __INET_IPV6TUNNELING_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -130,7 +130,7 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
 
   public:
     Ipv6Tunneling();
-    //virtual ~IPv6Tunneling();
+    //virtual ~Ipv6Tunneling();
 
     /**
      * Initialize tunnel manager.
@@ -159,8 +159,8 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
      * with given entry and exit point, which will be used for datagrams destined for destTrigger.
      * Returns virtual interface index.
      */
-    //int createPseudoTunnel(const IPv6Address& src, const IPv6Address& dest,
-    //        const IPv6Address& destTrigger, int tunnelType);
+    //int createPseudoTunnel(const Ipv6Address& src, const Ipv6Address& dest,
+    //        const Ipv6Address& destTrigger, int tunnelType);
 
     /**
      * Remove tunnel and the associated entries from destination cache
@@ -212,7 +212,7 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
      * This method is equivalent for getVIfIndexForDest() except that it
      * only searches for pseudo tunnels (T2RH, etc.).
      */
-    //int getVIfIndexForDestForPseudoTunnel(const IPv6Address& destAddress);
+    //int getVIfIndexForDestForPseudoTunnel(const Ipv6Address& destAddress);
 
     /**
      * Check if there exists a tunnel with exit equal to the provided address.

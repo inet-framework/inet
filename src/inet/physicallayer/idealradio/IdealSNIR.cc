@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/idealradio/IdealSNIR.h"
+#include "inet/physicallayer/idealradio/IdealSnir.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ IdealSnir::IdealSnir(const IReception *reception, const INoise *noise) :
 
 std::ostream& IdealSnir::printToStream(std::ostream& stream, int level) const
 {
-    stream << "IdealSNIR";
+    stream << "IdealSnir";
     return stream;
 }
 

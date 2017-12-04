@@ -18,7 +18,7 @@
 #ifndef __INET_DBPSKMODULATION_H
 #define __INET_DBPSKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/DPSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/DpskModulationBase.h"
 
 namespace inet {
 
@@ -32,7 +32,7 @@ class INET_API DbpskModulation : public DpskModulationBase
   public:
     DbpskModulation();
 
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "DBPSKModulation"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "DbpskModulation"; }
 };
 
 } // namespace physicallayer

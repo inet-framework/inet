@@ -25,7 +25,7 @@
 #include "inet/visualizer/util/PortFilter.h"
 
 #ifdef WITH_TCP_INET
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #else
 namespace inet { namespace tcp { class TcpConnection; } }
 #endif // WITH_TCP_INET

@@ -27,7 +27,7 @@
 namespace inet {
 
 /**
- * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.
+ * An entry of PimInterfaceTable holding PIM specific parameters and state of the interface.
  */
 class INET_API PimInterface : public cObject
 {
@@ -62,9 +62,9 @@ class INET_API PimInterface : public cObject
 };
 
 /**
- * PIMInterfaceTable contains an PIMInterface entry for each interface on which PIM is enabled.
+ * PimInterfaceTable contains an PimInterface entry for each interface on which PIM is enabled.
  * When interfaces are added to/deleted from the InterfaceTable, then the corresponding
- * PIMInterface entry is added/deleted automatically.
+ * PimInterface entry is added/deleted automatically.
  */
 class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
 {

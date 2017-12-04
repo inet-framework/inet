@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 
 namespace inet {
 

@@ -28,7 +28,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/contract/IARP.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/wiseroute/WiseRouteHeader.h"

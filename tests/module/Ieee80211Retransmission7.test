@@ -59,7 +59,7 @@ ned-path = .;../../../../src;../../lib
 **.radio.receiver.snirThreshold = 4dB
 
 # Arp
-**.arpType = "GlobalARP"
+**.arpType = "GlobalArp"
 
 # Sender
 **.sender.numApps = 1
@@ -72,7 +72,7 @@ ned-path = .;../../../../src;../../lib
 
 # Receiver
 **.receiver.numApps = 1
-**.receiver.app[0].typename = "UDPSink"
+**.receiver.app[0].typename = "UdpSink"
 **.receiver.app[0].localPort = 21
 **.sender.wlan[*].macType = "Ieee80211Mac"
 **.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B

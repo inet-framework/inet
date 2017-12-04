@@ -20,18 +20,18 @@
 
 #include <string.h>
 
-#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/ipv4/Icmp.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -276,7 +276,7 @@ void Icmp::sendToIP(Packet *msg, const Ipv4Address& dest)
 
 void Icmp::sendToIP(Packet *msg)
 {
-    // assumes IPv4ControlInfo is already attached
+    // assumes Ipv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);

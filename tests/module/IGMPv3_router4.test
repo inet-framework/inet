@@ -18,7 +18,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmpType = "Igmpv3"
 **.IPForward = true
 **.multicastForwarding = true
 
@@ -30,49 +30,49 @@ network=TestIGMPNetwork
 <scenario>
 
 <!-- INCLUDE() -> ALLOW(10.0.0.1,10.0.0.2) -> INCLUDE(10.0.0.1,10.0.0.2) -->
-<send t="1" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="1" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="ALLOW" sources="10.0.0.1 10.0.0.2"/>
 </send>
 <dump t="1.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- INCLUDE(10.0.0.1,10.0.0.2) -> BLOCK(10.0.0.1) -> INCLUDE(10.0.0.1,10.0.0.2) -->
-<send t="2" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="BLOCK" sources="10.0.0.1"/>
 </send>
 <dump t="2.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- INCLUDE(10.0.0.1,10.0.0.2) -> TO_IN(10.0.0.3) -> INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -->
-<send t="3" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="3" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_IN" sources="10.0.0.3"/>
 </send>
 <dump t="3.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3) -> TO_EX(10.0.0.3,10.0.0.4) -> EXCLUDE(10.0.0.3; 10.0.0.4) -->
-<send t="4" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="4" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_EX" sources="10.0.0.3 10.0.0.4"/>
 </send>
 <dump t="4.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- EXCLUDE(10.0.0.3; 10.0.0.4) -> ALLOW(10.0.0.4) -> EXCLUDE(10.0.0.3;) -->
-<send t="5" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="5" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="ALLOW" sources="10.0.0.4"/>
 </send>
 <dump t="5.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- EXCLUDE(10.0.0.3;) -> BLOCK(10.0.0.4) -> EXCLUDE(10.0.0.3,10.0.0.4;) -->
-<send t="6" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="6" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="BLOCK" sources="10.0.0.4"/>
 </send>
 <dump t="6.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- EXCLUDE(10.0.0.3,10.0.0.4;) -> TO_EX(10.0.0.1,10.0.0.3) -> EXCLUDE(10.0.0.1,10.0.0.3;) -->
-<send t="7" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="7" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_EX" sources="10.0.0.1 10.0.0.3"/>
 </send>
 <dump t="7.001" module="node.tester.mac" ifname="eth0" what="listeners"/>
 
 <!-- EXCLUDE(10.0.0.1,10.0.0.3;) -> TO_IN(10.0.0.1,10.0.0.2) -> EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;) -->
-<send t="8" module="node.tester.mac" ifname="eth0" type="IGMPv3Report">
+<send t="8" module="node.tester.mac" ifname="eth0" type="Igmpv3Report">
   <record group="225.0.0.1" type="TO_IN" sources="10.0.0.1 10.0.0.2"/>
 </send>
 <dump t="8.001" module="node.tester.mac" ifname="eth0" what="listeners"/>

@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        CSMA.cc
+ * file:        Csma.cc
  *
  * author:      Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
  *              Marc Loebbers, Yosia Hadisusanto, Andreas Koepke
@@ -24,7 +24,7 @@
  ***************************************************************************
  * part of:    Modifications to the MF-2 framework by CSEM
  **************************************************************************/
-#include "inet/linklayer/csma/CSMA.h"
+#include "inet/linklayer/csma/Csma.h"
 
 #include <cassert>
 

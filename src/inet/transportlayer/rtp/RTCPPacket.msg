@@ -56,7 +56,7 @@ class INET_API RtcpPacket : public RtcpPacket_Base
     RtcpPacket& operator=(const RtcpPacket& other) { RtcpPacket_Base::operator=(other); return *this; }
     virtual RtcpPacket *dup() const override { return new RtcpPacket(*this); }
 
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPPacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpPacket_Base
 
     // rtcpLength is the header field length
     // of an rtcp packet
@@ -84,7 +84,7 @@ class INET_API RtcpReceiverReportPacket : public RtcpReceiverReportPacket_Base
     RtcpReceiverReportPacket(const RtcpReceiverReportPacket& other) : RtcpReceiverReportPacket_Base(other) {}
     RtcpReceiverReportPacket& operator=(const RtcpReceiverReportPacket& other) { RtcpReceiverReportPacket_Base::operator=(other); return *this; }
     virtual RtcpReceiverReportPacket *dup() const override { return new RtcpReceiverReportPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPReceiverReportPacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpReceiverReportPacket_Base
     /**
      * Adds a receiver report to this receiver report packet.
      */
@@ -109,7 +109,7 @@ class INET_API RtcpSdesPacket : public RtcpSdesPacket_Base
     RtcpSdesPacket(const RtcpSdesPacket& other) : RtcpSdesPacket_Base(other) {}
     RtcpSdesPacket& operator=(const RtcpSdesPacket& other) { RtcpSdesPacket_Base::operator=(other); return *this; }
     virtual RtcpSdesPacket *dup() const override { return new RtcpSdesPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSDESPacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpSdesPacket_Base
     void addSDESChunk(SdesChunk *sdesChunk);
 };
 
@@ -132,7 +132,7 @@ class INET_API RtcpByePacket : public RtcpByePacket_Base
     RtcpByePacket(const RtcpByePacket& other) : RtcpByePacket_Base(other) {}
     RtcpByePacket& operator=(const RtcpByePacket& other) { RtcpByePacket_Base::operator=(other); return *this; }
     virtual RtcpByePacket *dup() const override { return new RtcpByePacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPByePacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpByePacket_Base
 };
 
 }}
@@ -153,7 +153,7 @@ class INET_API RtcpSenderReportPacket : public RtcpSenderReportPacket_Base
     RtcpSenderReportPacket(const RtcpSenderReportPacket& other) : RtcpSenderReportPacket_Base(other) {}
     RtcpSenderReportPacket& operator=(const RtcpSenderReportPacket& other) { RtcpSenderReportPacket_Base::operator=(other); return *this; }
     virtual RtcpSenderReportPacket *dup() const override { return new RtcpSenderReportPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
+    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpSenderReportPacket_Base
 };
 
 }}

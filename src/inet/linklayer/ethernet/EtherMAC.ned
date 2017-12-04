@@ -25,7 +25,7 @@ import inet.linklayer.contract.IEtherMAC;
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // See the ~IEtherMAC for the Ethernet MAC layer general informations.
-// Doesn't do encapsulation/decapsulation; see ~EtherLLC and ~EtherEncap for
+// Doesn't do encapsulation/decapsulation; see ~EtherLlc and ~EtherEncap for
 // that.
 //
 // Supported variations:
@@ -42,8 +42,8 @@ import inet.linklayer.contract.IEtherMAC;
 //
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
-// - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
-//   or ~MACRelayUnit (in a switch)
+// - upperLayerIn and upperLayerOut are usually connected to ~EtherLlc (in hosts)
+//   or ~MacRelayUnit (in a switch)
 //
 // <b>Operation</b>
 //
@@ -63,7 +63,7 @@ import inet.linklayer.contract.IEtherMAC;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EtherLLC or ~EtherEncap).
+// this is done by higher layers (~EtherLlc or ~EtherEncap).
 //
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
@@ -104,8 +104,8 @@ import inet.linklayer.contract.IEtherMAC;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMACFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLLC
-// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLLC, ~Ieee802Ctrl
+// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLlc
+// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
 simple EtherMac like IEtherMAC
 {
@@ -136,8 +136,8 @@ simple EtherMac like IEtherMAC
         @signal[packetReceivedFromUpper](type=Packet);
         @signal[collision](type=long);
         @signal[backoff](type=long);
-        @signal[transmitState](type=long); // enum=MACTransmitState
-        @signal[receiveState](type=long); // enum=MACReceiveState
+        @signal[transmitState](type=long); // enum=MacTransmitState
+        @signal[receiveState](type=long); // enum=MacReceiveState
 
         @statistic[txPk](title="packets transmitted"; source=txPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -152,8 +152,8 @@ simple EtherMac like IEtherMAC
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMACRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

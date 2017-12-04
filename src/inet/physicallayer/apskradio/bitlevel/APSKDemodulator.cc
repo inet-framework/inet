@@ -16,12 +16,12 @@
 //
 
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskDemodulator.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 
@@ -42,7 +42,7 @@ void ApskDemodulator::initialize(int stage)
 
 std::ostream& ApskDemodulator::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKDemodulator";
+    stream << "ApskDemodulator";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", modulation = " << printObjectToString(modulation, level + 1);
     return stream;

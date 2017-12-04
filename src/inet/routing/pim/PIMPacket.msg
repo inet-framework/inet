@@ -87,7 +87,7 @@ class GenerationIdOption extends HelloOption
 
 //class AddressListOption extends HelloOption
 //{
-//    IPv4Address secondaryAddresses[];
+//    Ipv4Address secondaryAddresses[];
 //}
 
 struct EncodedAddress
@@ -157,7 +157,7 @@ class PimGraft extends PimJoinPrune
 
 // GraftAck message
 // DM
-// create a PIMGraft, then set type = GraftAck
+// create a PimGraft, then set type = GraftAck
 
 // State Refresh message
 // DM

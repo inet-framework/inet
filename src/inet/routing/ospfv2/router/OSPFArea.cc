@@ -526,7 +526,7 @@ void Area::ageDatabase()
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
                     }
-                    else {    // no neighbors on the network -> old NetworkLSA must be flushed
+                    else {    // no neighbors on the network -> old NetworkLsa must be flushed
                         lsa->getMutableHeader().setLsAge(MAX_AGE);
                         lsa->incrementInstallTime();
                     }
@@ -566,7 +566,7 @@ void Area::ageDatabase()
 
                         floodLSA(lsa);
                     }
-                    else {    // no neighbors on the network -> old NetworkLSA must be deleted
+                    else {    // no neighbors on the network -> old NetworkLsa must be deleted
                         delete networkLSAs[i];
                     }
                 }
@@ -1831,7 +1831,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                 if (distance < entryCost) {
                     //FIXME remove
                     //if(parentRouter->getRouterID() == 0xC0A80302) {
-                    //    EV << "CHEAPER STUB LINK FOUND TO " << IPv4Address(destinationID).str() << "\n";
+                    //    EV << "CHEAPER STUB LINK FOUND TO " << Ipv4Address(destinationID).str() << "\n";
                     //}
                     entry->setCost(distance);
                     entry->clearNextHops();
@@ -1846,7 +1846,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                         }
                     }
                     else {
-                        throw cRuntimeError("Can not cast class '%s' to RouterLSA or NetworkLSA", lsOrigin->getClassName());
+                        throw cRuntimeError("Can not cast class '%s' to RouterLsa or NetworkLsa", lsOrigin->getClassName());
                     }
                 }
                 std::vector<NextHop> *newNextHops = calculateNextHops(link, routerVertex);    // (destination, parent)
@@ -1859,7 +1859,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
             else {
                 //FIXME remove
                 //if(parentRouter->getRouterID() == 0xC0A80302) {
-                //    EV << "STUB LINK FOUND TO " << IPv4Address(destinationID).str() << "\n";
+                //    EV << "STUB LINK FOUND TO " << Ipv4Address(destinationID).str() << "\n";
                 //}
                 entry = new RoutingTableEntry(ift);
 
@@ -2248,7 +2248,7 @@ bool Area::findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newR
 }
 
 /**
- * Returns a new RoutingTableEntry based on the input SummaryLSA, with the input cost
+ * Returns a new RoutingTableEntry based on the input SummaryLsa, with the input cost
  * and the borderRouterEntry's next hops.
  */
 RoutingTableEntry *Area::createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,

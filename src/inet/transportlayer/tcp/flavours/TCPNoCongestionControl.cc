@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TCPNoCongestionControl.h"
+#include "inet/transportlayer/tcp/flavours/TcpNoCongestionControl.h"
 #include "inet/transportlayer/tcp/TCP.h"
 
 namespace inet {

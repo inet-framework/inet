@@ -21,7 +21,7 @@ simple MacRelayUnit like IMACRelayUnit
 {
     parameters:
         @display("i=block/switch");
-        string macTableModule = default("^.macTable"); // The path to the MACAddressTable module
+        string macTableModule = default("^.macTable"); // The path to the MacAddressTable module
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);

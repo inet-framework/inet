@@ -34,7 +34,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # tcp apps
 **.client.numApps = 1
-**.client.app[0].typename = "TCPBasicClientApp"
+**.client.app[0].typename = "TcpBasicClientApp"
 **.client.app[0].startTime = 0s
 **.client.app[0].localPort = -1
 **.client.app[0].connectAddress = "server"
@@ -45,7 +45,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.client.app[0].thinkTime = 100ms
 
 **.server.numApps = 1
-**.server.app[0].typename = "TCPEchoApp"
+**.server.app[0].typename = "TcpEchoApp"
 **.server.app[0].localPort = 1000
 
 **.app[0].dataTransferMode = "bytecount"

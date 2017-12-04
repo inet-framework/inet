@@ -25,15 +25,15 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
 /**
  * Stream VBR video streams to clients.
  *
- * Cooperates with UDPVideoStreamCli. UDPVideoStreamCli requests a stream
- * and UDPVideoStreamSvr starts streaming to them. Capable of handling
+ * Cooperates with UdpVideoStreamCli. UdpVideoStreamCli requests a stream
+ * and UdpVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
 class INET_API UdpVideoStreamSvr : public ApplicationBase

@@ -20,12 +20,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/routing/bgpv4/BGPRoutingTableEntry.h"
 #include "inet/routing/bgpv4/BGPCommon.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
 #include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -57,7 +57,7 @@ class INET_API BgpRouting : public cSimpleModule, public ILifecycle, public TcpS
     virtual void socketClosed(int connId, void *yourPtr) override {}
 
     friend class BgpSession;
-    //functions used by the BGPSession class
+    //functions used by the BgpSession class
     void getScheduleAt(simtime_t t, cMessage *msg) { scheduleAt(t, msg); }
     simtime_t getSimTime() { return simTime(); }
     void getCancelAndDelete(cMessage *msg) { return cancelAndDelete(msg); }
@@ -70,7 +70,7 @@ class INET_API BgpRouting : public cSimpleModule, public ILifecycle, public TcpS
      */
     void listenConnectionFromPeer(SessionId sessionID);
     /**
-     * \brief active TCPConnection for a given session (used by fsm)
+     * \brief active TcpConnection for a given session (used by fsm)
      */
     void openTCPConnectionToPeer(SessionId sessionID);
     /**
@@ -78,11 +78,11 @@ class INET_API BgpRouting : public cSimpleModule, public ILifecycle, public TcpS
      */
     void updateSendProcess(const unsigned char decisionProcessResult, SessionId sessionIndex, RoutingTableEntry *entry);
     /**
-     * \brief find the next SessionID compared to his type and start this session if boolean is true
+     * \brief find the next SessionId compared to his type and start this session if boolean is true
      */
     SessionId findNextSession(BgpSessionType type, bool startSession = false);
     /**
-     * \brief check if the route is in OSPF external IPv4RoutingTable
+     * \brief check if the route is in OSPF external Ipv4RoutingTable
      *
      * \return true if it is, false else
      */

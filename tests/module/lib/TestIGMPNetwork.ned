@@ -32,7 +32,7 @@ network TestIGMPNetwork
         {
             parameters:
                 @networkNode;
-                string igmpType = default("IGMPv3");
+                string igmpType = default("Igmpv3");
                 *.interfaceTableModule = absPath(".interfaceTable");
                 *.routingTableModule = absPath(".routingTable");
             submodules:

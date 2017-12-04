@@ -68,7 +68,7 @@ void BindingCache::addOrUpdateBC(const Ipv6Address& hoa, const Ipv6Address& coa,
 uint BindingCache::readBCSequenceNumber(const Ipv6Address& HoA) const
 {
     //Reads the sequence number of the last received BU Message
-    /*IPv6Address HoA = bu->getHomeAddressMN();
+    /*Ipv6Address HoA = bu->getHomeAddressMN();
        uint seqNumber = bindingCache[HoA].sequenceNumber;
        return seqNumber;*/
 

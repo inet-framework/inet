@@ -20,14 +20,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPTahoeRenoFamily.
+ * State variables for TcpTahoeRenoFamily.
  */
 class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariables
 {
@@ -41,13 +41,13 @@ class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariable
 };
 
 /**
- * Provides utility functions to implement TCPTahoe, TCPReno and TCPNewReno.
- * (TCPVegas should inherit from TCPBaseAlg instead of this one.)
+ * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
+ * (TcpVegas should inherit from TcpBaseAlg instead of this one.)
  */
 class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
 {
   protected:
-    TcpTahoeRenoFamilyStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpTahoeRenoFamilyStateVariables *& state;    // alias to TcpAlgorithm's 'state'
 
   public:
     /** Ctor */

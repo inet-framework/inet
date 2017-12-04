@@ -23,8 +23,8 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 
 namespace inet {
 
@@ -63,18 +63,18 @@ class INET_API TcpSrvHostApp : public cSimpleModule, public ILifecycle
 };
 
 /**
- * Abstract base class for server processes to be used with TCPSrvHostApp.
+ * Abstract base class for server processes to be used with TcpSrvHostApp.
  * Subclasses need to be registered using the Register_Class() macro.
  *
- * @see TCPSrvHostApp
+ * @see TcpSrvHostApp
  */
 class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::CallbackInterface
 {
   protected:
     TcpSrvHostApp *hostmod;
-    TcpSocket *sock;    // ptr into socketMap managed by TCPSrvHostApp
+    TcpSocket *sock;    // ptr into socketMap managed by TcpSrvHostApp
 
-    // internal: TCPSocket::CallbackInterface methods
+    // internal: TcpSocket::CallbackInterface methods
     virtual void socketDataArrived(int, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
     virtual void socketEstablished(int, void *) override { established(); }
     virtual void socketPeerClosed(int, void *) override { peerClosed(); }
@@ -89,7 +89,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::Cal
     TcpServerThreadBase() { sock = nullptr; hostmod = nullptr; }
     virtual ~TcpServerThreadBase() {}
 
-    // internal: called by TCPSrvHostApp after creating this module
+    // internal: called by TcpSrvHostApp after creating this module
     virtual void init(TcpSrvHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
 
     /*

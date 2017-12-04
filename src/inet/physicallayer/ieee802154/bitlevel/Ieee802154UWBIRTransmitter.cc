@@ -20,7 +20,7 @@
  * 				Foundation under grant number 5005-67322.
  ***************************************************************************/
 
-#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UWBIRTransmitter.h"
+#include "inet/physicallayer/ieee802154/bitlevel/Ieee802154UwbIrTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 
@@ -44,7 +44,7 @@ void Ieee802154UwbIrTransmitter::initialize(int stage)
 
 std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "Ieee802154UWBIRTransmitter";
+    return stream << "Ieee802154UwbIrTransmitter";
 }
 
 simtime_t Ieee802154UwbIrTransmitter::getFrameDuration(int psduLength) const

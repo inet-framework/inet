@@ -25,10 +25,10 @@
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"    // TODO: remove?
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"    // TODO: remove?
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 
@@ -194,10 +194,10 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 #else /*OMNETPP_VERSION*/
 
 #include "inet/common/Simsignals.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/RoutingTableRecorder.h"
 

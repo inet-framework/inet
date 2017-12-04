@@ -24,7 +24,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/transportlayer/common/CRC_m.h"
 
@@ -33,7 +33,7 @@ namespace inet {
 class Ipv4Header;
 
 /**
- * ICMP module.
+ * Icmp module.
  */
 class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 {

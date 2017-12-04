@@ -30,7 +30,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/routing/dymo/DYMOdefs.h"
-#include "inet/routing/dymo/DYMORouteData.h"
+#include "inet/routing/dymo/DymoRouteData.h"
 #include "inet/routing/dymo/DYMO_m.h"
 
 namespace inet {

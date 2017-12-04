@@ -16,7 +16,7 @@
 //
 
 #include "Ieee80211OfdmCode.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 
 namespace inet {
@@ -31,7 +31,7 @@ Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode* convolutionalCode,
 
 std::ostream& Ieee80211OfdmCode::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKCode";
+    stream << "ApskCode";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level + 1)
                << ", interleaving = " << printObjectToString(interleaving, level + 1)

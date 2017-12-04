@@ -17,7 +17,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/udpapp/UDPVideoStreamCli.h"
+#include "inet/applications/udpapp/UdpVideoStreamCli.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"

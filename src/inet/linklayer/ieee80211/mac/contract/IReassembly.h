@@ -18,7 +18,7 @@
 #ifndef __INET_IREASSEMBLY_H
 #define __INET_IREASSEMBLY_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 namespace ieee80211 {

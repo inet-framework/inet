@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTPAVProfilePayload32Sender.cpp  -  description
+                       RtpAvProfilePayload32Sender.cpp  -  description
                              -------------------
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
@@ -19,9 +19,9 @@
 #include <string.h>
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfilePayload32Sender.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Sender.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RTPMpegPacket_m.h"
 
 namespace inet {
@@ -118,7 +118,7 @@ bool RtpAvProfilePayload32Sender::sendPacket()
 
     if (!_inputFileStream.eof()) {
         while (bytesRemaining > 0) {
-            Packet *packet = new Packet("RTPPacket");
+            Packet *packet = new Packet("RtpPacket");
             const auto& rtpHeader = makeShared<RtpHeader>();
             const auto& mpegHeader = makeShared<RtpMpegHeader>();
             const auto& mpegPayload = makeShared<ByteCountChunk>();

@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        CSMA.ned
+//* file:        Csma.ned
 //*
 //* author:      Jerome Rousselot, Marc Loebbers
 //*

@@ -38,7 +38,7 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         double stopTime @unit("s") = default(-1s);  // time of finishing sending, negative values mean forever
         volatile double sendInterval @unit("s") = default(10ms); // may be a random value, e.g. exponential(1)
         int numPackets = default(-1); // max number of packets to generate, -1 means forever
-        int protocol; // value for ~IPv4ControlInfo / ~IPv6ControlInfo protocol field
+        int protocol; // value for ~Ipv4ControlInfo / ~Ipv6ControlInfo protocol field
         volatile int packetLength @unit("B"); // packet length in bytes
         string destAddresses = default(""); // list of destination addresses, separated by spaces
         @display("i=block/source");

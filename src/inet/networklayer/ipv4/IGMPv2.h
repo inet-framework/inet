@@ -23,7 +23,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IGMPMessage_m.h"
 
 #include <set>
@@ -207,7 +207,7 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
     virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
-    //virtual void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);
+    //virtual void processV1Report(InterfaceEntry *ie, IgmpMessage *msg);
     virtual void processV2Report(InterfaceEntry *ie, Packet *packet);
     virtual void processLeave(InterfaceEntry *ie, Packet *packet);
 };

@@ -23,10 +23,10 @@
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #endif // WITH_GENERIC
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // WITH_IPv4
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // WITH_IPv6
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 

@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        MoBANCoordinator.ned
+//* file:        MoBanCoordinator.ned
 //*
 //* author:      Majid Nabi <m.nabi@tue.nl>
 //*

@@ -24,11 +24,11 @@ import inet.physicallayer.contract.bitlevel.IModulator;
 // the symbol domain representation from the bit domain representation by applying
 // the configured modulation.
 //
-// See also ~APSKDemodulator, ~APSKLayeredTransmitter.
+// See also ~ApskDemodulator, ~ApskLayeredTransmitter.
 //
 simple ApskModulator like IModulator
 {
     parameters:
-        string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see APSKModulationBase::findModulation)
+        string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see ApskModulationBase::findModulation)
         @display("i=block/mac");
 }

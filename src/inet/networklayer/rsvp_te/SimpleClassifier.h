@@ -21,11 +21,11 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/mpls/ConstType.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/common/scenario/IScriptable.h"
-#include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
-#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/rsvp_te/IRsvpClassifier.h"
+#include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 namespace inet {
@@ -70,7 +70,7 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
 
-    // IRSVPClassifier implementation
+    // IRsvpClassifier implementation
     virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
     virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) override;
 

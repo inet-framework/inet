@@ -24,11 +24,11 @@ package inet.physicallayer.apskradio.packetlevel;
 // conjunction with the ~APSKDimensionalRadioMedium model.
 //
 // See also ~APSKDimensionalRadioMedium, ~DimensionalAnalogModel,
-// ~APSKDimensionalTransmitter, and ~APSKDimensionalReceiver.
+// ~ApskDimensionalTransmitter, and ~ApskDimensionalReceiver.
 //
 module APSKDimensionalRadio extends ApskRadio
 {
     parameters:
-        transmitterType = default("APSKDimensionalTransmitter");
-        receiverType = default("APSKDimensionalReceiver");
+        transmitterType = default("ApskDimensionalTransmitter");
+        receiverType = default("ApskDimensionalReceiver");
 }

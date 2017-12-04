@@ -19,7 +19,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 

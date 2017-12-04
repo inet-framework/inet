@@ -21,7 +21,7 @@ package inet.linklayer.ethernet;
 // Performs Ethernet II or Ethernet with SNAP encapsulation/decapsulation.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMAC
+// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMac
 // - upperLayerIn, upperLayerOut gates should be connected to higher layer
 //   protocol or application
 //
@@ -30,12 +30,12 @@ package inet.linklayer.ethernet;
 //   or ~EtherFrameWithSNAP (depending on the useSNAP module parameter),
 //   and sent to MAC. ~EtherType is taken from the ~Ieee802Ctrl structure
 //   attached to the message as control info (see setControlInfo(),
-//   controlInfo() methods). The source address will be filled in by ~EtherMAC.
+//   controlInfo() methods). The source address will be filled in by ~EtherMac.
 // - also accepts SENDPAUSE command (message kind=IEEE802CTRL_SENDPAUSE) from
 //   higher layer: it will send a PAUSE frame, as described in
 //   <a href="ether-pause.html">PAUSE frames</a>.
 // - Ethernet frames arriving from MAC will be decapsulated, and sent up to the
-//   higher layers. Accepts ~EtherFrameWithLLC and ~EtherFrameWithSNAP too.
+//   higher layers. Accepts ~EtherFrameWithLlc and ~EtherFrameWithSNAP too.
 //
 simple EtherEncap like IEtherEncap
 {

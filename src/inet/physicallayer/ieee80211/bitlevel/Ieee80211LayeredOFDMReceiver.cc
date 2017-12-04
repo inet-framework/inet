@@ -28,17 +28,17 @@
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMReceiver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
 #include "../mode/Ieee80211OfdmMode.h"
 #include "../mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
 
 namespace inet {
 
@@ -89,7 +89,7 @@ const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(con
 
 std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211LayeredOFDMReceiver";
+    stream << "Ieee80211LayeredOfdmReceiver";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", levelOfDetail = " << levelOfDetail
                << ", mode = " << printObjectToString(mode, level + 1)

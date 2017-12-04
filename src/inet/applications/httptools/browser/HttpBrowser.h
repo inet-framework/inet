@@ -22,8 +22,8 @@
 
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/applications/httptools/browser/HttpBrowserBase.h"
 
@@ -38,7 +38,7 @@ namespace httptools {
  * tcpApp. See the INET documentation and examples for details.
  *
  * This component uses the TCP/IP modeling of the INET framework for transport.
- * Specifically, the TCPSocket class is used to interface with the TCP component from the INET framework.
+ * Specifically, the TcpSocket class is used to interface with the TCP component from the INET framework.
  * A light-weight module which uses direct message passing is also available (HttpBrowserDirect).
  *
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
@@ -53,7 +53,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::CallbackI
      * Data structure used to keep state for each opened socket.
      *
      * An instance of this struct is created for each opened socket and assigned to
-     * it as a myPtr. See the TCPSocket::CallbackInterface methods of HttpBrowser for more
+     * it as a myPtr. See the TcpSocket::CallbackInterface methods of HttpBrowser for more
      * details.
      */
     struct SockData
@@ -94,7 +94,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::CallbackI
      */
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 
-    // TCPSocket::CallbackInterface callback methods
+    // TcpSocket::CallbackInterface callback methods
     /*
      * Handler for socket established event.
      * Called by the socket->processMessage(msg) handler call in handleMessage.

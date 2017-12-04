@@ -18,9 +18,9 @@
 //          Tamas Borbely (tomi@omnetpp.org)
 
 #include "inet/networklayer/common/InterfaceMatcher.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/routing/pim/tables/PIMInterfaceTable.h"
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
 
 using namespace std;
 
@@ -68,7 +68,7 @@ void PimInterfaceTable::initialize(int stage)
 
         cModule *host = findContainingNode(this);
         if (!host)
-            throw cRuntimeError("PIMInterfaceTable: containing node not found.");
+            throw cRuntimeError("PimInterfaceTable: containing node not found.");
         host->subscribe(NF_INTERFACE_CREATED, this);
         host->subscribe(NF_INTERFACE_DELETED, this);
     }
@@ -105,7 +105,7 @@ PimInterface *PimInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement
     else if (strcmp(modeAttr, "sparse") == 0)
         mode = PimInterface::SparseMode;
     else
-        throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getInterfaceName());
+        throw cRuntimeError("PimInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getInterfaceName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     bool stateRefreshFlag = stateRefreshAttr && !strcmp(stateRefreshAttr, "true");

@@ -77,7 +77,7 @@ class INET_API TcpLwipConnection
 
     ~TcpLwipConnection();
 
-    /** Utility: sends TCP_I_AVAILABLE indication with TCPAvailableInfo to application */
+    /** Utility: sends TCP_I_AVAILABLE indication with TcpAvailableInfo to application */
     void sendAvailableIndicationToApp(int listenConnId);
 
     void sendEstablishedMsg();

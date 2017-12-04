@@ -56,7 +56,7 @@ package inet.networklayer.rsvp_te;
 //
 // In the route, <node> stands for strict hop, and <lnode> for loose hop.
 //
-// ~RSVP understands the "add-session" and "del-session" ~ScenarioManager
+// ~Rsvp understands the "add-session" and "del-session" ~ScenarioManager
 // commands. The contents of the <add-session> element can be the same
 // as the <session> element for the traffic.xml above.
 // The <del-command> element syntax is also similar, but only
@@ -90,11 +90,11 @@ package inet.networklayer.rsvp_te;
 // </scenario>
 // </pre>
 //
-// RSVP messages are subclassed from ~RSVPMessage, and include ~RSVPPathMsg,
-// ~RSVPPathTear, ~RSVPPathError, ~RSVPResvMsg and ~RSVPHelloMsg.
+// Rsvp messages are subclassed from ~RsvpMessage, and include ~RsvpPathMsg,
+// ~RsvpPathTear, ~RsvpPathError, ~RsvpResvMsg and ~RsvpHelloMsg.
 //
 // RSVP-TE communicates with the following components in the system:
-// ~TED, ~MPLS, and may receive commands from ~ScenarioManager.
+// ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
 simple Rsvp
 {

@@ -92,7 +92,7 @@ description = "Aodv Simple test"
 
 # udp apps (on)
 **.senderhost.numApps = 1
-**.senderhost.app[0].typename = "UDPBasicBurst"
+**.senderhost.app[0].typename = "UdpBasicBurst"
 
 **.app[0].destAddresses = "rcvrhost"
 **.app[0].localPort = 1234
@@ -108,7 +108,7 @@ description = "Aodv Simple test"
 **.app[0].destAddrRNG = 0
 
 **.rcvrhost.numApps = 1
-**.rcvrhost.app[0].typename = "UDPSink"
+**.rcvrhost.app[0].typename = "UdpSink"
 **.rcvrhost.app[0].localPort = 1234
 
 # ip settings

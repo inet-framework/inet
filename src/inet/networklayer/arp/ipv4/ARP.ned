@@ -30,7 +30,7 @@ import inet.networklayer.contract.IArp;
 // Communication Between ARP and IPv4 modules:
 // IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
 // of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
-// uses the ARP::startAddressResolution() method.
+// uses the Arp::startAddressResolution() method.
 // ARP emit a completedARPResolution signal, when added/modified an entry in ARP table.
 // ARP emit a failedARPResolution signal when an ARP request failed (ARP request sent
 // retryCount times and retryTimeout elapsed).
@@ -38,7 +38,7 @@ import inet.networklayer.contract.IArp;
 // ARP resolution is used over <i>broadcast</i> interfaces only,
 // that is, over interfaces that have the <tt>isBroadcast()</tt> flag set in
 // <tt>InterfaceEntry</tt> (see ~InterfaceTable). Since routing files
-// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~IPv4RoutingTable)
+// (<tt>.irt</tt> or <tt>.mrt</tt> files, given as parameter to ~Ipv4RoutingTable)
 // may modify the default interface configuration, you must take care that
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.

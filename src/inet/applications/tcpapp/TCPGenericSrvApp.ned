@@ -29,14 +29,14 @@ import inet.applications.contract.IApp;
 //
 // The module accepts any number of incoming TCP connections, and expects
 // to receive messages of class ~GenericAppMsg on them. A message should
-// contain how large the reply should be (number of bytes). ~TCPGenericSrvApp
+// contain how large the reply should be (number of bytes). ~TcpGenericSrvApp
 // will just change the length of the received message accordingly, and send
 // back the same message object. The reply can be delayed by a constant time
 // (replyDelay parameter).
 //
 // Compatible with both ~IPv4 and ~IPv6.
 //
-// @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
+// @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp
 //
 simple TcpGenericSrvApp like IApp
 {

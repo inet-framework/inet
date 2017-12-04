@@ -20,10 +20,10 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoder.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 
 namespace inet {

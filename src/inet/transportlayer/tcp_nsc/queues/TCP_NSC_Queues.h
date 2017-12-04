@@ -22,7 +22,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
+#include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"

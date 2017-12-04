@@ -21,7 +21,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {

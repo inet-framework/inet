@@ -45,7 +45,7 @@ class INET_API Router
     IInterfaceTable *ift;
     IIpv4RoutingTable *rt;
     RouterId routerID;    ///< The router ID assigned by the IP layer.
-    std::map<AreaId, Area *> areasByID;    ///< A map of the contained areas with the AreaID as key.
+    std::map<AreaId, Area *> areasByID;    ///< A map of the contained areas with the AreaId as key.
     std::vector<Area *> areas;    ///< A list of the contained areas.
     std::map<LsaKeyType, AsExternalLsa *, LsaKeyType_Less> asExternalLSAsByID;    ///< A map of the ASExternalLSAs advertised by this router.
     std::vector<AsExternalLsa *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
@@ -225,7 +225,7 @@ class INET_API Router
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
-     * updates) a new ASExternalLSA into the database.
+     * updates) a new AsExternalLsa into the database.
      * @param networkAddress        [in] The external route's network address.
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
@@ -249,9 +249,9 @@ class INET_API Router
 
     /**
      * Selects the preferred routing table entry for the input LSA(which is either
-     * an ASExternalLSA or a SummaryLSA) according to the algorithm defined in
+     * an AsExternalLsa or a SummaryLsa) according to the algorithm defined in
      * RFC2328 Section 16.4. points(1) through(3). This method is used when
-     * calculating the AS external routes and also when originating an SummaryLSA
+     * calculating the AS external routes and also when originating an SummaryLsa
      * for an AS Boundary Router.
      * @param lsa                [in] The LSA describing the destination for which
      *                                the preferred Routing Entry is sought for.
@@ -299,17 +299,17 @@ class INET_API Router
     AsExternalLsa *originateASExternalLSA(AsExternalLsa *lsa);
 
     /**
-     * Generates a unique LinkStateID for a given destination. This may require the
+     * Generates a unique LinkStateId for a given destination. This may require the
      * reorigination of an LSA already in the database(with a different
-     * LinkStateID).
+     * LinkStateId).
      * @param destination           [in] The destination for which a unique
-     *                                   LinkStateID is required.
+     *                                   LinkStateId is required.
      * @param destinationCost       [in] The path cost to the destination.
      * @param lsaToReoriginate      [out] The LSA to reoriginate(which was already
      *                                    in the database, and had to be changed).
      * @param externalMetricIsType2 [in] True if the destinationCost is given as a
      *                                   Type2 external metric.
-     * @return the LinkStateID for the destination.
+     * @return the LinkStateId for the destination.
      * @sa RFC2328 Appendix E.
      * @sa Area::getUniqueLinkStateID
      */

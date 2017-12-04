@@ -21,15 +21,15 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
-#include "inet/transportlayer/tcp/flavours/TCPSegmentTransmitInfoList.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPVegas.
+ * State variables for TcpVegas.
  */
 class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
 {
@@ -65,7 +65,7 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
 class INET_API TcpVegas : public TcpBaseAlg
 {
   protected:
-    TcpVegasStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpVegasStateVariables *& state;    // alias to TcpAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override

@@ -25,8 +25,8 @@ namespace inet {
 namespace rtp {
 
 /**
- * The class SDESItem is used for storing a source description item
- * (type of description, description string) for an RTP end system.
+ * The class SdesItem is used for storing a source description item
+ * (type of description, description string) for an Rtp end system.
  */
 class INET_API SdesItem : public cObject
 {
@@ -74,17 +74,17 @@ class INET_API SdesItem : public cObject
     SdesItem& operator=(const SdesItem& sdesItem);
 
     /**
-     * Duplicates theis SDESItem by calling the copy constructor.
+     * Duplicates theis SdesItem by calling the copy constructor.
      */
     virtual SdesItem *dup() const override;
 
     /**
-     * Writes a short info about this SDESItem into the given string.
+     * Writes a short info about this SdesItem into the given string.
      */
     virtual std::string info() const override;
 
     /**
-     * Writes an info about this SDESItem into the give output stream.
+     * Writes an info about this SdesItem into the give output stream.
      */
     virtual void dump(std::ostream& os) const;
 
@@ -99,7 +99,7 @@ class INET_API SdesItem : public cObject
     virtual const char *getContent() const;
 
     /**
-     * This method returns the size of this SDESItem in bytes as it
+     * This method returns the size of this SdesItem in bytes as it
      * would be in the real world.
      */
     virtual int getLength() const;
@@ -110,12 +110,12 @@ class INET_API SdesItem : public cObject
 
   protected:
     /**
-     * The type of this SDESItem.
+     * The type of this SdesItem.
      */
     SdesItemType _type;
 
     /**
-     * The length of this SDESItem.
+     * The length of this SdesItem.
      */
     int _length;
 
@@ -126,7 +126,7 @@ class INET_API SdesItem : public cObject
 };
 
 /**
- * The class SDESChunk is used for storing SDESItem objects
+ * The class SdesChunk is used for storing SdesItem objects
  * for one rtp end system.
  */
 class INET_API SdesChunk : public cArray
@@ -153,38 +153,38 @@ class INET_API SdesChunk : public cArray
     SdesChunk& operator=(const SdesChunk& sdesChunk);
 
     /**
-     * Duplicates this SDESChunk by calling the copy constructor.
+     * Duplicates this SdesChunk by calling the copy constructor.
      */
     virtual SdesChunk *dup() const override;
 
     /**
-     * Writes a short info about this SDESChunk into the given string.
+     * Writes a short info about this SdesChunk into the given string.
      */
     virtual std::string info() const override;
 
     /**
-     * Writes a longer info about this SDESChunk into the given stream.
+     * Writes a longer info about this SdesChunk into the given stream.
      */
     virtual void dump(std::ostream& os) const;
 
     /**
-     * Adds an SDESItem to this SDESChunk. If there is already an SDESItem
-     * of the same type in this SDESChunk it is replaced by the new one.
+     * Adds an SdesItem to this SdesChunk. If there is already an SdesItem
+     * of the same type in this SdesChunk it is replaced by the new one.
      */
     virtual void addSDESItem(SdesItem *item);
 
     /**
-     * Returns the ssrc identifier this SDESChunk is for.
+     * Returns the ssrc identifier this SdesChunk is for.
      */
     virtual uint32 getSsrc() const;
 
     /**
-     * Sets the ssrc identifier this SDESChunk is for.
+     * Sets the ssrc identifier this SdesChunk is for.
      */
     virtual void setSsrc(uint32 ssrc);
 
     /**
-     * Returns the length in bytes of this SDESChunk.
+     * Returns the length in bytes of this SdesChunk.
      */
     virtual int getLength() const;
 
@@ -193,12 +193,12 @@ class INET_API SdesChunk : public cArray
 
   protected:
     /**
-     * The ssrc identifier this SDESChunk is for.
+     * The ssrc identifier this SdesChunk is for.
      */
     uint32 _ssrc;
 
     /**
-     * The length in bytes of this SDESChunk.
+     * The length in bytes of this SdesChunk.
      */
     int _length;
 };

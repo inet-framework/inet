@@ -27,7 +27,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IClassifier.h"
-#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/mpls/MPLSPacket.h"
 
 namespace inet {

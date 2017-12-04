@@ -22,8 +22,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {

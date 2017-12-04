@@ -58,7 +58,7 @@ simple Stp like ISpanningTree
         // The path to the InterfaceTable module
         string interfaceTableModule = default("^.interfaceTable");
 
-        // The path to the MACAddressTable module
+        // The path to the MacAddressTable module
         string macTableModule = default("^.macTable");
 
         // Shows the spanning tree by coloring connections in the network graphics.

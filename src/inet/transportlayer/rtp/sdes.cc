@@ -79,13 +79,13 @@ SdesItem *SdesItem::dup() const
 std::string SdesItem::info() const
 {
     std::stringstream out;
-    out << "SDESItem=" << _content;
+    out << "SdesItem=" << _content;
     return out.str();
 }
 
 void SdesItem::dump(std::ostream& os) const
 {
-    os << "SDESItem:" << endl;
+    os << "SdesItem:" << endl;
     os << "  type = " << _type << endl;
     os << "  content = " << _content << endl;
 }
@@ -109,7 +109,7 @@ int SdesItem::getLength() const
 }
 
 //
-// SDESChunk
+// SdesChunk
 //
 
 Register_Class(SdesChunk);
@@ -152,13 +152,13 @@ SdesChunk *SdesChunk::dup() const
 std::string SdesChunk::info() const
 {
     std::stringstream out;
-    out << "SDESChunk.ssrc=" << _ssrc << " items=" << size();
+    out << "SdesChunk.ssrc=" << _ssrc << " items=" << size();
     return out.str();
 }
 
 void SdesChunk::dump(std::ostream& os) const
 {
-    os << "SDESChunk:" << endl;
+    os << "SdesChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
     for (int i = 0; i < size(); i++) {
         if (exist(i)) {

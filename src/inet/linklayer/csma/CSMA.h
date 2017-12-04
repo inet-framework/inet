@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        CSMA.h
+ * file:        Csma.h
  *
  * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
  *                Marc Loebbers, Yosia Hadisusanto
@@ -28,9 +28,9 @@
 #define __INET_CSMA_H
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMACProtocol.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 

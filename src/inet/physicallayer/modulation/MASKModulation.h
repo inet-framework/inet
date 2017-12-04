@@ -18,7 +18,7 @@
 #ifndef __INET_MASKMODULATION_H
 #define __INET_MASKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 

@@ -81,7 +81,7 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,400");
         }
-        iptunneling: <default(firstAvailable("IPv6Tunneling"))> like IIPv6Tunneling {
+        iptunneling: <default(firstAvailable("Ipv6Tunneling"))> like IIPv6Tunneling {
             parameters:
                 @display("p=600,400");
         }

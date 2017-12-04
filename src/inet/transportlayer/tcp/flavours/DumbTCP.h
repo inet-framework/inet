@@ -20,14 +20,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for DumbTCP.
+ * State variables for DumbTcp.
  */
 class INET_API DumbTcpStateVariables : public TcpStateVariables
 {
@@ -36,7 +36,7 @@ class INET_API DumbTcpStateVariables : public TcpStateVariables
 };
 
 /**
- * A very-very basic TCPAlgorithm implementation, with hardcoded
+ * A very-very basic TcpAlgorithm implementation, with hardcoded
  * retransmission timeout and no other sophistication. It can be
  * used to demonstrate what happened if there was no adaptive
  * timeout calculation, delayed acks, silly window avoidance,
@@ -50,7 +50,7 @@ class INET_API DumbTcp : public TcpAlgorithm
     cMessage *rexmitTimer;    // retransmission timer
 
   protected:
-    /** Creates and returns a DumbTCPStateVariables object. */
+    /** Creates and returns a DumbTcpStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override
     {
         return new DumbTcpStateVariables();

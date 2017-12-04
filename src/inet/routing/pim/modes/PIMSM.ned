@@ -28,7 +28,7 @@ package inet.routing.pim.modes;
 // It is also capable to switch to a shortest path tree, so that traffic from
 // sources to receivers do not have to pass through the RP.
 //
-// The module must access the ~PIMInterfaceTable and ~PIMNeighbortable
+// The module must access the ~PimInterfaceTable and ~PIMNeighbortable
 // modules, their path is given as the 'pimInterfaceTableModule' and
 // 'pimNeighborTableModule' parameters.
 //

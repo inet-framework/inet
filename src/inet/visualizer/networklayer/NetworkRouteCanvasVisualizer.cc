@@ -18,7 +18,7 @@
 #include "inet/visualizer/networklayer/NetworkRouteCanvasVisualizer.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+#include "inet/linklayer/ethernet/switch/MacRelayUnit.h"
 #endif
 
 #ifdef WITH_IEEE8021D

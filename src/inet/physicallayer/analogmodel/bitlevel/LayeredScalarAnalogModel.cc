@@ -21,7 +21,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 
 namespace inet {

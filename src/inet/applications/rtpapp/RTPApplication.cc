@@ -14,7 +14,7 @@
 // GNU General Public License for more details.
 //
 
-#include "inet/applications/rtpapp/RTPApplication.h"
+#include "inet/applications/rtpapp/RtpApplication.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
@@ -36,7 +36,7 @@ void RtpApplication::initialize(int stage)
         // the common name (CNAME) of this host
         commonName = par("commonName");
 
-        // which rtp profile is to be used (usually RTPAVProfile)
+        // which rtp profile is to be used (usually RtpAvProfile)
         profileName = par("profileName");
 
         // bandwidth in bytes per second for this session

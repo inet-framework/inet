@@ -22,19 +22,19 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
 /**
- * UDPSocket is a convenience class, to make it easier to send and receive
+ * UdpSocket is a convenience class, to make it easier to send and receive
  * UDP packets from your application models. You'd have one (or more)
- * UDPSocket object(s) in your application simple module class, and call
+ * UdpSocket object(s) in your application simple module class, and call
  * its member functions (bind(), connect(), sendTo(), etc.) to create and
  * configure a socket, and to send datagrams.
  *
- * UDPSocket chooses and remembers the sockId for you, assembles and sends command
+ * UdpSocket chooses and remembers the sockId for you, assembles and sends command
  * packets such as UDP_C_BIND to UDP, and can also help you deal with packets and
  * notification messages arriving from UDP.
  *
@@ -42,7 +42,7 @@ namespace inet {
  * over it (the code can be placed in your handleMessage() or activity()):
  *
  * <pre>
- *   UDPSocket socket;
+ *   UdpSocket socket;
  *   socket.setOutputGate(gate("udpOut"));
  *   socket.connect(Address("10.0.0.2"), 2000);
  *
@@ -56,7 +56,7 @@ namespace inet {
  * Processing messages sent up by the UDP module is relatively straightforward.
  * You only need to distinguish between data packets and error notifications,
  * by checking the message kind (should be either UDP_I_DATA or UDP_I_ERROR),
- * and casting the control info to UDPDataIndication or UDPErrorIndication.
+ * and casting the control info to UDPDataIndication or UdpErrorIndication.
  * USPSocket provides some help for this with the belongsToSocket() and
  * belongsToAnyUDPSocket() methods.
  */
@@ -243,14 +243,14 @@ class INET_API UdpSocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a UDPControlInfo as getControlInfo(), and the sockId in it matches
+     * has a UdpControlInfo as getControlInfo(), and the sockId in it matches
      * that of the socket.)
      */
     bool belongsToSocket(cMessage *msg);
 
     /**
-     * Returns true if the message belongs to any UDPSocket instance.
-     * (This basically checks if the message has an UDPControlInfo attached to
+     * Returns true if the message belongs to any UdpSocket instance.
+     * (This basically checks if the message has an UdpControlInfo attached to
      * it as getControlInfo().)
      */
     static bool belongsToAnyUDPSocket(cMessage *msg);

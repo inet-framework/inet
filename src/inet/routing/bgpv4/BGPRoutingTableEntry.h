@@ -18,7 +18,7 @@
 #ifndef __INET_BGPROUTINGTABLEENTRY_H
 #define __INET_BGPROUTINGTABLEENTRY_H
 
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/routing/bgpv4/BGPCommon.h"
 
 namespace inet {

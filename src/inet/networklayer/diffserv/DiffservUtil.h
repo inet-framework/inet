@@ -56,14 +56,14 @@ int parseIntAttribute(const char *attrValue, const char *attrName, bool isOption
 
 /**
  * Parses an IP protocol number.
- * Recognizes the names defined in IPProtocolId.msg (e.g. "UDP", "udp", "Tcp"),
+ * Recognizes the names defined in IpProtocolId.msg (e.g. "UDP", "udp", "Tcp"),
  * and accepts decimal/octal/hex/binary numbers.
  */
 int parseProtocol(const char *attrValue, const char *attrName);
 
 /**
  * Parses a Diffserv code point.
- * Recognizes the names defined in DSCP.msg (e.g. "BE", "AF11"),
+ * Recognizes the names defined in Dscp.msg (e.g. "BE", "AF11"),
  * and accepts decimal/octal/hex/binary numbers.
  */
 int parseDSCP(const char *attrValue, const char *attrName);

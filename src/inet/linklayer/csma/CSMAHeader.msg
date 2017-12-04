@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        CSMAHeader.msg
+// * file:        CsmaHeader.msg
 // *
 // * author:      Daniel Willkomm
 // *

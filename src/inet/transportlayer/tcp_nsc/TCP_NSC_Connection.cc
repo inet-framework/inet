@@ -17,16 +17,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
+#include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 
 #include <sim_interface.h>    // NSC header
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
-#include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
+#include "inet/transportlayer/tcp_nsc/TcpNsc.h"
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 #include <assert.h>
@@ -171,7 +171,7 @@ void TcpNscConnection::do_SEND()
                 allsent += sent;
             }
             else {
-                EV_WARN << "TCP_NSC connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
+                EV_WARN << "TcpNsc connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
                 break;
             }
         }

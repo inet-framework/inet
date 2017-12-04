@@ -31,8 +31,8 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 // It can be configured via the mgmtType parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
-// Potential mgmType values: Ieee80211MgmtSTASimplified, Ieee80211MgmtSTA
-// Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc.
+// Potential mgmType values: Ieee80211MgmtStaSimplified, Ieee80211MgmtSta
+// Ieee80211MgmtAp, Ieee80211MgmtApSimplified, Ieee80211MgmtAdhoc.
 //
 // A classifier is needed if you want to use QoS.
 //
@@ -44,12 +44,12 @@ module Ieee80211Nic like IWirelessNic
         string energySourceModule = default("");
         string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID
         string llcType = default("Ieee8022Llc");
-        string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
+        string mgmtType = default("Ieee80211MgmtSta"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
         string macType = default("Ieee80211CompatibleMac");   // choose from Ieee80211Mac and Ieee80211CompatibleMac, @see IIeee80211Mac
         string opMode @enum("a","b","g(erp)","g(mixed)","n","p") = default("g(mixed)");
         double bitrate @unit("bps") = default(-1bps);
-        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
+        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSta");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
         **.bitrate = bitrate;
         *.macModule = default(absPath(".mac"));

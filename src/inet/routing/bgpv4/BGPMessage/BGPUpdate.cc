@@ -36,16 +36,16 @@ unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathA
         + pathAttrs.getLocalPrefArraySize()
         + pathAttrs.getAtomicAggregateArraySize();
 
-    // BGPUpdatePathAttributes (4)
+    // BgpUpdatePathAttributes (4)
     unsigned short contentBytes = nb_path_attr * 4;
-    // BGPUpdatePathAttributesOrigin (1)
+    // BgpUpdatePathAttributesOrigin (1)
     contentBytes += 1;
-    // BGPUpdatePathAttributesASPath
+    // BgpUpdatePathAttributesAsPath
     for (unsigned int i = 0; i < pathAttrs.getAsPathArraySize(); i++)
         contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
-    // BGPUpdatePathAttributesNextHop (4)
+    // BgpUpdatePathAttributesNextHop (4)
     contentBytes += 4;
-    // BGPUpdatePathAttributesLocalPref (4)
+    // BgpUpdatePathAttributesLocalPref (4)
     contentBytes = 4 * pathAttrs.getLocalPrefArraySize();
     return contentBytes;
 }
@@ -63,7 +63,7 @@ void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pa
 
 void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
 {
-    setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + IPv4Address (4))
+    setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + Ipv4Address (4))
     BgpUpdateMessage_Base::NLRI = NLRI_var;
 }
 

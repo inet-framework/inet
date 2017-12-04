@@ -16,11 +16,11 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ted/TED.h"
+#include "inet/networklayer/ted/Ted.h"
 
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/Simsignals.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
@@ -68,7 +68,7 @@ void Ted::initializeTED()
     //
     // Extract initial TED contents from the routing table.
     //
-    // We need to create one TED entry (TELinkStateInfo) for each link,
+    // We need to create one TED entry (TeLinkStateInfo) for each link,
     // i.e. for each physical interface.
     //
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -468,7 +468,7 @@ Ipv4AddressVector Ted::getLocalAddress()
     return interfaceAddrs;
 }
 
-Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in RSVP::processHelloMsg
+Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in Rsvp::processHelloMsg
 {
     for (auto & elem : ted) {
         if (elem.local == localInf)

@@ -21,17 +21,17 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
 namespace rtp {
 
 /**
- * An RTP is the center of the RTP layer of an endsystem.
- * It creates the profile module, sends and receives RTP data packets
+ * An Rtp is the center of the Rtp layer of an endsystem.
+ * It creates the profile module, sends and receives Rtp data packets
  * and forwards messages.
  * It also communicates with the application.
  */

@@ -19,7 +19,7 @@ import inet.networklayer.rsvp_te.IntServ;
 import inet.networklayer.rsvp_te.RsvpPacket;
 
 cplusplus {{
-#include "inet/networklayer/rsvp_te/RSVPPacket.h"
+#include "inet/networklayer/rsvp_te/RsvpPacket.h"
 }}
 
 namespace inet;

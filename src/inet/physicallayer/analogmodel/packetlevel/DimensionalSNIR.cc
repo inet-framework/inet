@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 
 namespace inet {
 
@@ -30,7 +30,7 @@ DimensionalSnir::DimensionalSnir(const DimensionalReception *reception, const Di
 
 std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level) const
 {
-    stream << "DimensionalSNIR";
+    stream << "DimensionalSnir";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", minSNIR = " << minSNIR;
     return SnirBase::printToStream(stream, level);

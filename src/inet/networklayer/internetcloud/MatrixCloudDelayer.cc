@@ -52,7 +52,7 @@ bool getBoolAttribute(const cXMLElement& element, const char *name, const bool *
 }
 } // namespace {
 
-//FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
+//FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
 MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 {
     matchesany = isEmpty(pattern);

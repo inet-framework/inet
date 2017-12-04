@@ -18,7 +18,7 @@
 #ifndef __INET_QBPSKMODULATION_H
 #define __INET_QBPSKMODULATION_H
 
-#include "inet/physicallayer/base/packetlevel/MQAMModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class INET_API QbpskModulation : public MqamModulationBase
   public:
     QbpskModulation();
 
-    virtual void printToStream(std::ostream& stream) const { stream << "QBPSKModulation"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "QbpskModulation"; }
 
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;

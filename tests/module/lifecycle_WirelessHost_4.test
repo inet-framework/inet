@@ -25,7 +25,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 *.host.ipv4.configurator.networkConfiguratorModule = ""
 *.host.numApps = 1
-*.host.app[0].typename = "DHCPClient"
+*.host.app[0].typename = "DhcpClient"
 
 *.host.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m

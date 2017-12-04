@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPPayloadSender.h  -  description
+                          RtpPayloadSender.h  -  description
                              -------------------
     begin                : Wed Nov 28 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -30,7 +30,7 @@ namespace rtp {
 class RtpInnerPacket;
 
 /**
- * The class RTPPayloadSender is the base class for all modules creating
+ * The class RtpPayloadSender is the base class for all modules creating
  * RTP data packets. It provides functionality needed by every RTP data
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
@@ -155,7 +155,7 @@ class INET_API RtpPayloadSender : public cSimpleModule
     std::ifstream _inputFileStream;
 
     /**
-     * The maximum size of an RTPPacket.
+     * The maximum size of an RtpPacket.
      */
     int _mtu = 0;
 

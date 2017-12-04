@@ -11,7 +11,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "inet/transportlayer/tcp_common/TCPSpoof.h"
+#include "inet/transportlayer/tcp_common/TcpSpoof.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"

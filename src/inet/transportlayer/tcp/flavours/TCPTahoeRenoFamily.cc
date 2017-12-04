@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/flavours/TCPTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
 #include "inet/transportlayer/tcp/TCP.h"
 
 namespace inet {

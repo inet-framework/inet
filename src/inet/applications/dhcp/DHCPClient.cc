@@ -17,10 +17,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/dhcp/DHCPClient.h"
+#include "inet/applications/dhcp/DhcpClient.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -323,7 +323,7 @@ void DhcpClient::bindLease()
     host->bubble(banner.c_str());
 
     /*
-        The client SHOULD perform a final check on the parameters (ping, ARP).
+        The client SHOULD perform a final check on the parameters (ping, Arp).
         If the client detects that the address is already in use:
         EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
         sendDecline(lease->ip);

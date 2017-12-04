@@ -149,17 +149,17 @@ const simtime_t Ieee80211OfdmMode::getRxTxTurnaroundTime() const
 
 std::ostream& Ieee80211OfdmPreambleMode::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "Ieee80211OFDMPreambleMode";
+    return stream << "Ieee80211OfdmPreambleMode";
 }
 
 std::ostream& Ieee80211OfdmSignalMode::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "Ieee80211OFDMSignalMode";
+    return stream << "Ieee80211OfdmSignalMode";
 }
 
 std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMDataMode";
+    stream << "Ieee80211OfdmDataMode";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", netBitrate = " << netBitrate;
     return stream;
@@ -167,7 +167,7 @@ std::ostream& Ieee80211OfdmDataMode::printToStream(std::ostream& stream, int lev
 
 std::ostream& Ieee80211OfdmMode::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMMode";
+    stream << "Ieee80211OfdmMode";
     if (level <= PRINT_LEVEL_DEBUG)
         stream << ", preambleMode = " << printObjectToString(preambleMode, level + 1)
                << ", signalMode = " << printObjectToString(signalMode, level + 1);

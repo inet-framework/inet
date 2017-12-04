@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "inet/transportlayer/rtp/RTCPPacket.h"
+#include "inet/transportlayer/rtp/RtcpPacket.h"
 
 namespace inet {
 

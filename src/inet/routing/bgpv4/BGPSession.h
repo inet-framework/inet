@@ -23,8 +23,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/routing/bgpv4/BGPCommon.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/routing/bgpv4/BGPRouting.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/routing/bgpv4/BgpRouting.h"
 #include "inet/routing/bgpv4/BGPFSM.h"
 
 namespace inet {
@@ -49,7 +49,7 @@ class INET_API BgpSession : public cObject
     void openTCPConnectionToPeer() { _bgpRouting.openTCPConnectionToPeer(_info.sessionID); }
     SessionId findAndStartNextSession(BgpSessionType type) { return _bgpRouting.findNextSession(type, true); }
 
-    //setters for creating and editing the information in the BGPRouting session:
+    //setters for creating and editing the information in the BgpRouting session:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }

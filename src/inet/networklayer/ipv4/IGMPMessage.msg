@@ -61,7 +61,7 @@ class Igmpv1Report extends IgmpMessage
     Ipv4Address groupAddress;
 }
 
-class Igmpv2Query extends IgmpQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
+class Igmpv2Query extends IgmpQuery      //FIXME Igmpv1Query and Igmpv2Query differs only value of code field.
 {
     chunkLength = B(8);
     simtime_t maxRespTime;      // stored in `code` in units of 1/10 second, 0.1-25.5s
@@ -82,12 +82,12 @@ class Igmpv2Leave extends IgmpMessage
 }
 
 //
-// IGMPv3Query extends IGMPv2Query, because
-// IGMPv2 routers must accept IGMPv3Query packets.
+// Igmpv3Query extends Igmpv2Query, because
+// Igmpv2 routers must accept Igmpv3Query packets.
 //
-// Note: in IGMPv3Query the maxResponseTime field is
+// Note: in Igmpv3Query the maxResponseTime field is
 // renamed to maxResponseCode and it is interpreted
-// differently than in IGMPv2.
+// differently than in Igmpv2.
 class Igmpv3Query extends Igmpv2Query
 {
     @customize;

@@ -27,8 +27,8 @@
 //
 //  - ~Ieee80211Nic: a generic (configurable) NIC
 //  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAdhoc: for ad-hoc mode
-//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAP or ~Ieee80211MgmtAPSimplified: for use in an access point
-//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtSTA, ~Ieee80211MgmtSTASimplified: for use in an
+//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified: for use in an access point
+//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtSta, ~Ieee80211MgmtStaSimplified: for use in an
 //    infrastructure-mode station
 //
 // NICs consist of four layers, which are the following (in top-down order):
@@ -61,8 +61,8 @@
 //
 // The management layer has several implementations which differ in their role
 // (STA/AP/ad-hoc) and level of detail: ~Ieee80211MgmtAdhoc,
-// ~Ieee80211MgmtAP, ~Ieee80211MgmtAPSimplified, ~Ieee80211MgmtSTA,
-// ~Ieee80211MgmtSTASimplified. The ..Simplified ones differ from the others
+// ~Ieee80211MgmtAp, ~Ieee80211MgmtApSimplified, ~Ieee80211MgmtSta,
+// ~Ieee80211MgmtStaSimplified. The ..Simplified ones differ from the others
 // in that they do not model the scan-authenticate-associate process,
 // so they cannot be used in experiments involving handover.
 //
@@ -72,8 +72,8 @@
 // and association procedures, and reports back the results to the agent.
 //
 // The agent layer is currenly only present in the ~Ieee80211Nic with
-// mgmtType = ~Ieee80211MgmtSTA NIC module,
-// as an ~Ieee80211AgentSTA module. The managament entities in other NIC
+// mgmtType = ~Ieee80211MgmtSta NIC module,
+// as an ~Ieee80211AgentSta module. The managament entities in other NIC
 // variants do not have as much freedom as to need an agent to control them.
 //
 // By modifying or replacing the agent, one can alter the dynamic behaviour

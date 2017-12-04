@@ -17,8 +17,8 @@
 
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSNIR.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalReceiver.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalReceiver.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmission.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
@@ -35,7 +35,7 @@ ApskDimensionalReceiver::ApskDimensionalReceiver() :
 
 std::ostream& ApskDimensionalReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKDimensionalReceiver";
+    stream << "ApskDimensionalReceiver";
     return FlatReceiverBase::printToStream(stream, level);
 }
 

@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"

@@ -23,8 +23,8 @@ package inet.networklayer.configurator.generic;
 import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 
 //
-// Adds routes to a GenericRoutingTable similarly how IPv4NetworkConfigurator adds
-// static routes to IPv4RoutingTable.
+// Adds routes to a GenericRoutingTable similarly how Ipv4NetworkConfigurator adds
+// static routes to Ipv4RoutingTable.
 //
 simple GenericNetworkConfigurator extends NetworkConfiguratorBase
 {

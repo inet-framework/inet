@@ -28,7 +28,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -85,7 +85,7 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
  *
  * @see InterfaceEntry
  */
-// XXX pass IPv4Address parameters as values
+// XXX pass Ipv4Address parameters as values
 class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 {
   public:

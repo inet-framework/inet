@@ -46,32 +46,32 @@ class TcpReceiveQueue;
  * architecture of the TCP model.
  *
  * Usage and compliance with various RFCs are discussed in the corresponding
- * NED documentation for TCP. Also, you may want to check the TCPSocket
+ * NED documentation for TCP. Also, you may want to check the TcpSocket
  * class which makes it easier to use TCP from applications.
  *
  * The TCP protocol implementation is composed of several classes (discussion
  * follows below):
  *  - TCP: the module class
- *  - TCPConnection: manages a connection
- *  - TCPSendQueue, TCPReceiveQueue: abstract base classes for various types
+ *  - TcpConnection: manages a connection
+ *  - TcpSendQueue, TcpReceiveQueue: abstract base classes for various types
  *    of send and receive queues
  *  - TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
  *    queues with "virtual" bytes (byte counts only)
- *  - TCPAlgorithm: abstract base class for TCP algorithms, and subclasses:
- *    DumbTCP, TCPBaseAlg, TCPTahoeRenoFamily, TCPTahoe, TCPReno, TCPNewReno.
+ *  - TcpAlgorithm: abstract base class for TCP algorithms, and subclasses:
+ *    DumbTcp, TcpBaseAlg, TcpTahoeRenoFamily, TcpTahoe, TcpReno, TcpNewReno.
  *
  * TCP subclassed from cSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
- * TCPConnection object.
+ * TcpConnection object.
  *
- * TCPConnection manages the connection, with the help of other objects.
- * TCPConnection itself implements the basic TCP "machinery": takes care
+ * TcpConnection manages the connection, with the help of other objects.
+ * TcpConnection itself implements the basic TCP "machinery": takes care
  * of the state machine, stores the state variables (TCB), sends/receives
  * SYN, FIN, RST, ACKs, etc.
  *
- * TCPConnection internally relies on 3 objects. The first two are subclassed
- * from TCPSendQueue and TCPReceiveQueue. They manage the actual data stream,
- * so TCPConnection itself only works with sequence number variables.
+ * TcpConnection internally relies on 3 objects. The first two are subclassed
+ * from TcpSendQueue and TcpReceiveQueue. They manage the actual data stream,
+ * so TcpConnection itself only works with sequence number variables.
  * This makes it possible to easily accomodate need for various types of
  * simulated data transfer: real byte stream, "virtual" bytes (byte counts
  * only), and sequence of cMessage objects (where every message object is
@@ -81,17 +81,17 @@ class TcpReceiveQueue;
  * TCPVirtualDataSendQueue and TCPVirtualDataRcvQueue which implement
  * queues with "virtual" bytes (byte counts only).
  *
- * The third object is subclassed from TCPAlgorithm. Control over
+ * The third object is subclassed from TcpAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"
- * from TCPConnection into TCPAlgorithm: delayed acks, slow start, fast rexmit,
- * etc. are all implemented in TCPAlgorithm subclasses. This simplifies the
- * design of TCPConnection and makes it a lot easier to implement new TCP
- * variations such as NewReno, Vegas or LinuxTCP as TCPAlgorithm subclasses.
+ * from TcpConnection into TcpAlgorithm: delayed acks, slow start, fast rexmit,
+ * etc. are all implemented in TcpAlgorithm subclasses. This simplifies the
+ * design of TcpConnection and makes it a lot easier to implement new TCP
+ * variations such as NewReno, Vegas or LinuxTCP as TcpAlgorithm subclasses.
  *
- * Currently implemented TCPAlgorithm classes are TCPReno, TCPTahoe, TCPNewReno,
- * TCPNoCongestionControl and DumbTCP.
+ * Currently implemented TcpAlgorithm classes are TcpReno, TcpTahoe, TcpNewReno,
+ * TcpNoCongestionControl and DumbTcp.
  *
- * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
+ * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
 class INET_API TCP : public cSimpleModule, public ILifecycle
@@ -173,13 +173,13 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
   public:
     /**
-     * To be called from TCPConnection when a new connection gets created,
+     * To be called from TcpConnection when a new connection gets created,
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     /**
-     * To be called from TCPConnection when socket pair (key for TcpConnMap) changes
+     * To be called from TcpConnection when socket pair (key for TcpConnMap) changes
      * (e.g. becomes fully qualified).
      */
     virtual void updateSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
@@ -191,17 +191,17 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual void addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 
     /**
-     * To be called from TCPConnection: reserves an ephemeral port for the connection.
+     * To be called from TcpConnection: reserves an ephemeral port for the connection.
      */
     virtual ushort getEphemeralPort();
 
     /**
-     * To be called from TCPConnection: create a new send queue.
+     * To be called from TcpConnection: create a new send queue.
      */
     virtual TcpSendQueue *createSendQueue();
 
     /**
-     * To be called from TCPConnection: create a new receive queue.
+     * To be called from TcpConnection: create a new receive queue.
      */
     virtual TcpReceiveQueue *createReceiveQueue();
 

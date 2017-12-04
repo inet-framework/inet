@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/arp/ARPPacketSerializer.h"
+#include "inet/common/serializer/arp/ArpPacketSerializer.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"

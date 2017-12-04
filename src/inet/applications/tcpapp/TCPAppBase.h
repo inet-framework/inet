@@ -19,7 +19,7 @@
 #define __INET_TCPAPPBASE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -57,7 +57,7 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInte
     virtual void close();
     virtual void sendPacket(cPacket *pkt);
 
-    /* TCPSocket::CallbackInterface callback methods */
+    /* TcpSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;

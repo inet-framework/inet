@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/contract/packetlevel/IAPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 
@@ -45,7 +45,7 @@ Ieee80211OfdmDecoder::Ieee80211OfdmDecoder(const Ieee80211OfdmCode *code) :
 
 std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMDecoder";
+    stream << "Ieee80211OfdmDecoder";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", code = " << printObjectToString(code, level + 1)
                << ", descrambler = " << printObjectToString(descrambler, level + 1)

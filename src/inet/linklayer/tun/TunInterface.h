@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-// This file is based on the PPP.h of INET written by Andras Varga.
+// This file is based on the Ppp.h of INET written by Andras Varga.
 
 #ifndef __INET_TUNINTERFACE_H
 #define __INET_TUNINTERFACE_H
 
-#include "inet/linklayer/base/MACBase.h"
+#include "inet/linklayer/base/MacBase.h"
 
 namespace inet {
 

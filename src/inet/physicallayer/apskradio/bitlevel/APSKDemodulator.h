@@ -22,8 +22,8 @@
 #include "inet/physicallayer/contract/bitlevel/ISignalBitModel.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalSymbolModel.h"
 #include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 
 namespace inet {
 

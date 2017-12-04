@@ -19,12 +19,12 @@
 #define __INET_IMACADDRESSTABLE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
 /*
- * A C++ interface to abstract the functionality of IMACAddressTable.
+ * A C++ interface to abstract the functionality of IMacAddressTable.
  */
 class INET_API IMacAddressTable
 {

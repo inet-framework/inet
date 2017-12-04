@@ -19,12 +19,12 @@
 
 #include <algorithm>
 
-#include "inet/applications/dhcp/DHCPServer.h"
+#include "inet/applications/dhcp/DhcpServer.h"
 
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Simsignals.h"
@@ -136,7 +136,7 @@ void DhcpServer::handleMessage(cMessage *msg)
         if (packet->getKind() == UDP_I_DATA)
             processDHCPMessage(packet);
         else {
-            // note: unknown packets are likely ICMP errors in response to DHCP messages we sent out; just ignore them
+            // note: unknown packets are likely Icmp errors in response to DHCP messages we sent out; just ignore them
             EV_WARN << "Unknown packet '" << msg->getName() << "', kind = " << packet->getKind() << ", discarding it." << endl;
             delete msg;
         }
@@ -374,7 +374,7 @@ void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     else if (packet->getBroadcast())
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     else {
-        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MACAddress.
+        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MacAddress.
         // destAddr = lease->ip;
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     }
@@ -443,7 +443,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     else if (packet->getBroadcast())
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     else {
-        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MACAddress.
+        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MacAddress.
         // destAddr = lease->ip;
         destAddr = Ipv4Address::ALLONES_ADDRESS;
     }

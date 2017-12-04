@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/flavours/TCPBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
 
 namespace inet {
 

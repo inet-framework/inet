@@ -19,7 +19,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -123,7 +123,7 @@ Ipv6InterfaceData::Ipv6InterfaceData()
                 _getMaxRandomFactor(), getBaseReachableTime());
     hostVars.retransTimer = IPv6_RETRANS_TIMER;
 
-    //rtrVars.advSendAdvertisements is set in IPv6RoutingTable.cc:line 143
+    //rtrVars.advSendAdvertisements is set in Ipv6RoutingTable.cc:line 143
     rtrVars.maxRtrAdvInterval = IPv6_DEFAULT_MAX_RTR_ADV_INT;
     rtrVars.minRtrAdvInterval = 0.33 * rtrVars.maxRtrAdvInterval;
     rtrVars.advManagedFlag = false;
@@ -459,7 +459,7 @@ bool Ipv6InterfaceData::isMemberOfMulticastGroup(const Ipv6Address& multicastAdd
 void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv6InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
 
@@ -486,7 +486,7 @@ void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
 void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv6InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     Ipv6AddressVector& multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int>& refCounts = getHostData()->refCounts;
@@ -517,7 +517,7 @@ bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress
 void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("IPv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
     if (!hasMulticastListener(multicastAddress)) {
         getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
@@ -579,7 +579,7 @@ void Ipv6InterfaceData::deduceAdvPrefix()
 {
     for (int i = 0; i < getNumAdvPrefixes(); i++) {
         Ipv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
-        /*IPv6Address globalAddr = */
+        /*Ipv6Address globalAddr = */
         autoConfRouterGlobalScopeAddress(p);
         assignAddress(p.rtrAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
     }

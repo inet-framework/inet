@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/bgpv4/BGPRouting.h"
+#include "inet/routing/bgpv4/BgpRouting.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/routing/ospfv2/OSPFRouting.h"
-#include "inet/routing/bgpv4/BGPSession.h"
+#include "inet/routing/ospfv2/OspfRouting.h"
+#include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
 
@@ -50,7 +50,7 @@ void BgpRouting::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        // we must wait until IPv4RoutingTable is completely initialized
+        // we must wait until Ipv4RoutingTable is completely initialized
         _rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         _inft = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
@@ -218,7 +218,7 @@ void BgpRouting::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
         const auto& ptrHdr = msg->peekHeader<BgpHeader>();
         switch (ptrHdr->getType()) {
             case BGP_OPEN:
-                //BGPOpenMessage* ptrMsg = check_and_cast<BGPOpenMessage*>(msg);
+                //BgpOpenMessage* ptrMsg = check_and_cast<BgpOpenMessage*>(msg);
                 processMessage(*check_and_cast<const BgpOpenMessage *>(ptrHdr.get()));
                 break;
 

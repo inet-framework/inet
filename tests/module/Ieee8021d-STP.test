@@ -101,7 +101,7 @@ network = LargeNet
 **.host6.cli.destAddress = "LargeNet.host3"
 **.host*.cli.startTime = 10ms
 
-**.spanningTreeProtocol = "STP"
+**.spanningTreeProtocol = "Stp"
 
 %contains-regex: stdout
 

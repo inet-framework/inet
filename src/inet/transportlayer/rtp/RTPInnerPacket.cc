@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPInnerPacket.cc  -  description
+                          RtpInnerPacket.cc  -  description
                              -------------------
     begin                : Sat Oct 20 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -15,9 +15,9 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
 
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 
@@ -28,13 +28,13 @@ Register_Class(RtpInnerPacket);
 std::string RtpInnerPacket::info() const
 {
     std::stringstream out;
-    out << "RTPInnerPacket: type=" << type;
+    out << "RtpInnerPacket: type=" << type;
     return out.str();
 }
 
 void RtpInnerPacket::dump(std::ostream& os) const
 {
-    os << "RTPInnerPacket:" << endl;
+    os << "RtpInnerPacket:" << endl;
     os << "  type = " << type << endl;
     os << "  commonName = " << commonName << endl;
     os << "  mtu = " << mtu << endl;

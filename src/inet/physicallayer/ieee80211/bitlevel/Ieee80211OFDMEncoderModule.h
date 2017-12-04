@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211OFDMENCODERMODULE_H
 #define __INET_IEEE80211OFDMENCODERMODULE_H
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
 
 namespace inet {
 

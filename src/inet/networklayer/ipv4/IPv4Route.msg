@@ -17,7 +17,7 @@ import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
 cplusplus {{
-#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
 }}
 
 namespace inet;

@@ -23,12 +23,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/IARP.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -48,8 +48,8 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     typedef std::map<Ipv4Address, ArpCacheEntry *> ArpCache;
     typedef std::vector<cMessage *> MsgPtrVector;
 
-    // IPv4Address -> MACAddress table
-    // TBD should we key it on (IPv4Address, InterfaceEntry*)?
+    // Ipv4Address -> MacAddress table
+    // TBD should we key it on (Ipv4Address, InterfaceEntry*)?
     class ArpCacheEntry
     {
       public:
@@ -93,7 +93,7 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     virtual ~Arp();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    /// IARP implementation  @{
+    /// IArp implementation  @{
     virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}

@@ -20,9 +20,9 @@
 
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
 #include "inet/physicallayer/contract/bitlevel/IDecoder.h"
 #include "inet/physicallayer/contract/bitlevel/IDemodulator.h"
 #include "inet/physicallayer/contract/bitlevel/IPulseFilter.h"

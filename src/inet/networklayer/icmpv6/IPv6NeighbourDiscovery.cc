@@ -16,7 +16,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -25,10 +25,10 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 #ifdef WITH_xMIPv6
 #include "inet/networklayer/xmipv6/xMIPv6.h"
@@ -60,19 +60,19 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
     // Deleting the data structures my become unnecessary if the lists store the
     // structs themselves and not pointers.
 
-    //   RATimerList raTimerList;
+    //   RaTimerList raTimerList;
     for (const auto & elem : raTimerList) {
         cancelAndDelete(elem);
         delete (elem);
     }
 
-    //   DADList dadList;
+    //   DadList dadList;
     for (const auto & elem : dadList) {
         cancelAndDelete((elem)->timeoutMsg);
         delete (elem);
     }
 
-    //   RDList rdList;
+    //   RdList rdList;
     for (const auto & elem : rdList) {
         cancelAndDelete((elem)->timeoutMsg);
         delete (elem);
@@ -1320,7 +1320,7 @@ void Ipv6NeighbourDiscovery::processRAPacket(Packet *packet, const Ipv6RouterAdv
         processRAForRouterUpdates(packet, ra);    //See RFC2461: Section 6.3.4
 
         //Possible options
-        //MACAddress macAddress = ra->getSourceLinkLayerAddress();
+        //MacAddress macAddress = ra->getSourceLinkLayerAddress();
         //uint mtu = ra->getMTU();
         for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++) {
             const Ipv6NdPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
@@ -1641,8 +1641,8 @@ void Ipv6NeighbourDiscovery::createRATimer(InterfaceEntry *ie)
     // 20.9.07 - CB
     /*if ( rt6->isRouter() )
        {
-        ie->ipv6()->setMinRtrAdvInterval(IPv6NeighbourDiscovery::getMinRAInterval()); //should be 0.07 for MIPv6 Support
-        ie->ipv6()->setMaxRtrAdvInterval(IPv6NeighbourDiscovery::getMaxRAInterval()); //should be 0.03 for MIPv6 Support
+        ie->ipv6()->setMinRtrAdvInterval(Ipv6NeighbourDiscovery::getMinRAInterval()); //should be 0.07 for MIPv6 Support
+        ie->ipv6()->setMaxRtrAdvInterval(Ipv6NeighbourDiscovery::getMaxRAInterval()); //should be 0.03 for MIPv6 Support
        }*/
     // update 23.10.07 - CB
 
@@ -1910,7 +1910,7 @@ void Ipv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, const 
 {
     //Control Information
     Ipv6Address nsSrcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    //IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
+    //Ipv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
     //solicitation is processed as described in RFC2462:section 5.4.3
@@ -1936,7 +1936,7 @@ void Ipv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, const 
 void Ipv6NeighbourDiscovery::processNSForNonTentativeAddress(Packet *packet, const Ipv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
-    //MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
+    //MacAddress nsMacAddr = ns->getSourceLinkLayerAddress();
 
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
@@ -2568,7 +2568,7 @@ void Ipv6NeighbourDiscovery::routersUnreachabilityDetection(const InterfaceEntry
 
             // reset reachability state of this router
             //Neighbour* nbor = neighbourCache.lookup( (*it).first.address, (*it).first.interfaceID );
-            //nbor->reachabilityState = IPv6NeighbourCache::STALE;
+            //nbor->reachabilityState = Ipv6NeighbourCache::STALE;
             //initiateNeighbourUnreachabilityDetection(nbor);
         }
         else

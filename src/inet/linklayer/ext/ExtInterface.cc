@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-// This file is based on the PPP.cc of INET written by Andras Varga.
+// This file is based on the Ppp.cc of INET written by Andras Varga.
 
 #define WANT_WINSOCK2
 

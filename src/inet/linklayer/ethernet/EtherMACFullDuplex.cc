@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/EtherMACFullDuplex.h"
+#include "inet/linklayer/ethernet/EtherMacFullDuplex.h"
 
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/Simsignals.h"
@@ -44,7 +44,7 @@ void EtherMacFullDuplex::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         if (!par("duplexMode").boolValue())
-            throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
+            throw cRuntimeError("Half duplex operation is not supported by EtherMacFullDuplex, use the EtherMac module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         beginSendFrames();    //FIXME choose an another stage for it
@@ -230,7 +230,7 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
     }
 
     if (dynamic_cast<EthernetFilledIfgSignal *>(signal))
-        throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIFG is unexpected");
+        throw cRuntimeError("There is no burst mode in full-duplex operation: EtherFilledIfg is unexpected");
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;

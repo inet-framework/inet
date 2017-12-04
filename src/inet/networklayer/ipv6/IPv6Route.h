@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/contract/IRoute.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 

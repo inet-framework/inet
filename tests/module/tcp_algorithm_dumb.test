@@ -35,14 +35,14 @@ total-stack = 7MiB
 description = "inet_TCP <---> inet_TCP with algorithms"
 *.server*.tcpType = "TCP"
 *.client*.tcpType = "TCP"
-**.tcp.tcpAlgorithmClass = "DumbTCP"  # ${"DumbTCP", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPVegas", "TCPWestwood"}
+**.tcp.tcpAlgorithmClass = "DumbTcp"  # ${"DumbTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpVegas", "TcpWestwood"}
 *.per = 0.01 * ${0, 0.1, 0.2, 0.5, 1, 2, 5}
 
 
 
 ## tcp apps
 **.client.numApps = 1
-**.client.app[0].typename = "TCPSessionApp"
+**.client.app[0].typename = "TcpSessionApp"
 **.client.app[0].active = true
 **.client.app[0].localPort = -1
 **.client.app[0].connectAddress = "server"
@@ -54,7 +54,7 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 **.client.app[0].tClose = 25s
 
 **.server.numApps = 1
-**.server.app[0].typename="TCPSinkApp"
+**.server.app[0].typename="TcpSinkApp"
 **.server.app[0].localPort = 1000
 
 # NIC configuration

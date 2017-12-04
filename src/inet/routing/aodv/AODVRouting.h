@@ -26,8 +26,8 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/routing/aodv/AODVRouteData.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/routing/aodv/AodvRouteData.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 #include "inet/routing/aodv/AODVControlPackets_m.h"
 #include <map>

@@ -1324,7 +1324,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
     AsExternalLsa *asExternalLSA = new AsExternalLsa;
     OspfLsaHeader& lsaHeader = asExternalLSA->getMutableHeader();
     OspfOptions lsaOptions;
-    //LSAKeyType lsaKey;
+    //LsaKeyType lsaKey;
 
     unsigned long routingEntryNumber = rt->getNumRoutes();
     bool inRoutingTable = false;
@@ -1345,7 +1345,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
         entry->setInterface(ift->getInterfaceById(ifIndex));
         entry->setSourceType(IRoute::MANUAL);
         entry->setMetric(externalRouteContents.getRouteCost());
-        rt->addRoute(entry);    // IIPv4RoutingTable deletes entry pointer
+        rt->addRoute(entry);    // IIpv4RoutingTable deletes entry pointer
     }
 
     lsaHeader.setLsAge(0);
@@ -1353,7 +1353,7 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
     lsaOptions.E_ExternalRoutingCapability = true;
     lsaHeader.setLsOptions(lsaOptions);
     lsaHeader.setLsType(AS_EXTERNAL_LSA_TYPE);
-    lsaHeader.setLinkStateID(networkAddress);    // TODO: get unique LinkStateID
+    lsaHeader.setLinkStateID(networkAddress);    // TODO: get unique LinkStateId
     lsaHeader.setAdvertisingRouter(Ipv4Address(routerID));
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 

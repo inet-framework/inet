@@ -20,7 +20,7 @@ import inet.networklayer.ted.Ted;
 namespace inet;
 
 //
-// Packet for disseminating link state information (~TELinkStateInfo[]) by the
+// Packet for disseminating link state information (~TeLinkStateInfo[]) by the
 // ~LinkStateRouting module which implements a minimalistic link state routing
 // protocol.
 //

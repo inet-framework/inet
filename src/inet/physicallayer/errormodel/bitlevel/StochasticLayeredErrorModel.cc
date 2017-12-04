@@ -20,8 +20,8 @@
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 
 namespace inet {
 

@@ -20,9 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tcpapp/TCPSrvHostApp.h"
+#include "inet/applications/tcpapp/TcpSrvHostApp.h"
 #include "inet/common/INETMath.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 

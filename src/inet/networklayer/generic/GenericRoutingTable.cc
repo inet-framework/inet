@@ -105,7 +105,7 @@ void GenericRoutingTable::initialize(int stage)
 //        // do it later in a later stage, after network configurators configured the interfaces)
 //        const char *routerIdStr = par("routerId").stringValue();
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
-//            routerId = IPv4Address(routerIdStr);
+//            routerId = Ipv4Address(routerIdStr);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         // routerID selection must be after network autoconfiguration assigned interface addresses
@@ -190,9 +190,9 @@ void GenericRoutingTable::configureLoopback()
 //    InterfaceEntry *ie = ift->getFirstLoopbackInterface()
 //    // add IPv4 info. Set 127.0.0.1/8 as address by default --
 //    // we may reconfigure later it to be the routerId
-//    IPv4InterfaceData *d = new IPv4InterfaceData();
-//    d->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
-//    d->setNetmask(IPv4Address::LOOPBACK_NETMASK);
+//    Ipv4InterfaceData *d = new Ipv4InterfaceData();
+//    d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
+//    d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
 //    d->setMetric(1);
 //    ie->setIPv4Data(d);
 }

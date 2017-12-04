@@ -23,8 +23,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.numApps = 1
-**.client.app[0].typename = "DHCPClient"
-**.server.app[0].typename = "DHCPServer"
+**.client.app[0].typename = "DhcpClient"
+**.server.app[0].typename = "DhcpServer"
 **.server.status.initialStatus = "DOWN"
 
 **.server.app[0].numReservedAddresses = 100

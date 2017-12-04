@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/QAM256Modulation.h"
-#include "inet/physicallayer/modulation/MQAMModulation.h"
-#include "inet/physicallayer/modulation/MPSKModulation.h"
-#include "inet/physicallayer/modulation/DSSSOQPSK16Modulation.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/modulation/MqamModulation.h"
+#include "inet/physicallayer/modulation/MpskModulation.h"
+#include "inet/physicallayer/modulation/DsssOqpsk16Modulation.h"
 
 namespace inet {
 

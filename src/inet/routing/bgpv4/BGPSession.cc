@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/routing/bgpv4/BGPSession.h"
-#include "inet/routing/bgpv4/BGPRouting.h"
+#include "inet/routing/bgpv4/BgpSession.h"
+#include "inet/routing/bgpv4/BgpRouting.h"
 #include "inet/routing/bgpv4/BGPFSM.h"
 
 namespace inet {

@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 
-#include "inet/linklayer/base/MACBase.h"
+#include "inet/linklayer/base/MacBase.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Simsignals.h"

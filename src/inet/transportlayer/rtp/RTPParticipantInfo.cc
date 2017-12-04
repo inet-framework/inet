@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPParticipantInfo.cc  -  description
+                          RtpParticipantInfo.cc  -  description
                              -------------------
     begin                : Wed Oct 24 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -15,10 +15,10 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 
 #include "inet/transportlayer/rtp/reports.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ Register_Class(RtpParticipantInfo);
 
 RtpParticipantInfo::RtpParticipantInfo(uint32 ssrc) :
     RtpParticipantInfo_Base(),
-    _sdesChunk("SDESChunk", ssrc)
+    _sdesChunk("SdesChunk", ssrc)
 {
     setName(ssrcToName(ssrc).c_str());
     // because there haven't been sent any RTP packets

@@ -20,14 +20,14 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 
-#include "inet/networklayer/mpls/MPLS.h"
+#include "inet/networklayer/mpls/Mpls.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/networklayer/rsvp_te/Utils.h"
 
 // FIXME temporary fix
-#include "inet/networklayer/ldp/LDP.h"
+#include "inet/networklayer/ldp/Ldp.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -82,7 +82,7 @@ void Mpls::processPacketFromL3(Packet *msg)
 
     const auto& ipHeader = msg->peekHeader<Ipv4Header>();
 
-    // XXX temporary solution, until TCPSocket and IPv4 are extended to support nam tracing
+    // XXX temporary solution, until TcpSocket and IPv4 are extended to support nam tracing
     if (ipHeader->getProtocolId() == IP_PROT_TCP) {
         const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {

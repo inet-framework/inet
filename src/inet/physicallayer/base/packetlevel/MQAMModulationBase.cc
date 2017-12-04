@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/MQAMModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/MqamModulationBase.h"
 
 namespace inet {
 

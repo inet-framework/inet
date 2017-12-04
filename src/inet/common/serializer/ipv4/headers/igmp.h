@@ -65,7 +65,7 @@ struct igmp
 /*
  * Message types, including version number.
  */
-//A FIXME the following line conflicts with enum in IGMPMessage.msg, resolve!
+//A FIXME the following line conflicts with enum in IgmpMessage.msg, resolve!
 // #define IGMP_MEMBERSHIP_QUERY       0x11    /* membership query         */
 //#define IGMP_V1_MEMBERSHIP_REPORT          0x12    /* Ver. 1 membership report */
 //#define IGMP_V2_MEMBERSHIP_REPORT          0x16    /* Ver. 2 membership report */

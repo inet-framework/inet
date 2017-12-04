@@ -34,7 +34,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
 

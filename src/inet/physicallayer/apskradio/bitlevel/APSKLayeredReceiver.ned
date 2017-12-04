@@ -46,15 +46,15 @@ import inet.physicallayer.contract.bitlevel.IPulseFilter;
 // purpose of this model is to provide a basic infrastructure for further
 // development and experimentation.
 //
-// See also ~APSKDemodulator, ~APSKDecoder, and ~APSKLayeredTransmitter.
+// See also ~ApskDemodulator, ~ApskDecoder, and ~ApskLayeredTransmitter.
 //
 module ApskLayeredReceiver like IReceiver
 {
     parameters:
         string levelOfDetail @enum("packet", "bit", "symbol", "sample") = default("symbol");
-        string errorModelType = default("APSKLayeredErrorModel");
-        string decoderType = default("APSKDecoder");
-        string demodulatorType = default("APSKDemodulator");
+        string errorModelType = default("ApskLayeredErrorModel");
+        string decoderType = default("ApskDecoder");
+        string demodulatorType = default("ApskDemodulator");
         string pulseFilterType = default("");
         string analogDigitalConverterType = default("");
         double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W

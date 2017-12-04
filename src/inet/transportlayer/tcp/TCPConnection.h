@@ -110,7 +110,7 @@ enum TcpEventCode {
     TCP_E_TIMEOUT_FIN_WAIT_2,
 
     // All other timers (REXMT, PERSIST, DELAYED-ACK, KEEP-ALIVE, etc.),
-    // are handled in TCPAlgorithm.
+    // are handled in TcpAlgorithm.
 };
 
 /** @name Timeout values */
@@ -124,7 +124,7 @@ enum TcpEventCode {
 
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 #define TCP_MAX_WIN                   65535  // 65535 bytes, largest value (16 bit) for (unscaled) window size
-#define DUPTHRESH                     3  // used for TCPTahoe, TCPReno and SACK (RFC 3517)
+#define DUPTHRESH                     3  // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
 #define TCP_OPTIONS_MAX_SIZE          40  // 40 bytes, 15 * 4 bytes (15 is the largest number in 4 bits length data offset field), TCP_MAX_HEADER_OCTETS - TCP_HEADER_OCTETS = 40
 #define TCP_OPTION_SACK_MIN_SIZE      10  // 10 bytes, option length = 8 * n + 2 bytes (NOP)
@@ -136,15 +136,15 @@ typedef std::list<Sack> SackList;
 /**
  * Contains state variables ("TCB") for TCP.
  *
- * TCPStateVariables is effectively a "struct" -- it only contains
+ * TcpStateVariables is effectively a "struct" -- it only contains
  * public data members. (Only declared as a class so that we can use
  * cObject as base class and make it possible to inspect
  * it in Tkenv.)
  *
- * TCPStateVariables only contains variables needed to implement
+ * TcpStateVariables only contains variables needed to implement
  * the "base" (RFC 793) TCP. More advanced TCP variants are encapsulated
- * into TCPAlgorithm subclasses which can have their own state blocks,
- * subclassed from TCPStateVariables. See TCPAlgorithm::createStateVariables().
+ * into TcpAlgorithm subclasses which can have their own state blocks,
+ * subclassed from TcpStateVariables. See TcpAlgorithm::createStateVariables().
  */
 class INET_API TcpStateVariables : public cObject
 {
@@ -179,7 +179,7 @@ class INET_API TcpStateVariables : public cObject
     uint32 rcv_adv;    // advertised window
 
     // SYN, SYN+ACK retransmission variables (handled separately
-    // because normal rexmit belongs to TCPAlgorithm)
+    // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count;    // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout;    // current SYN/SYN+ACK retransmission timeout
 
@@ -252,7 +252,7 @@ class INET_API TcpStateVariables : public cObject
     uint32 sendQueueLimit;
     bool queueUpdate;
 
-    // those counters would logically belong to TCPAlgorithm, but it's a lot easier to manage them here
+    // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32 dupacks;    // current number of received consecutive duplicate ACKs
     uint32 snd_sacks;    // number of sent sacks
     uint32 rcv_sacks;    // number of received sacks
@@ -276,16 +276,16 @@ class INET_API TcpStateVariables : public cObject
  * of RFC 793. Code comments extensively quote RFC 793 to make it easier
  * to understand.
  *
- * TCPConnection objects are not used alone -- they are instantiated and managed
+ * TcpConnection objects are not used alone -- they are instantiated and managed
  * by a TCP module.
  *
- * TCPConnection "outsources" several tasks to objects subclassed from
- * TCPSendQueue, TCPReceiveQueue and TCPAlgorithm; see overview of this
+ * TcpConnection "outsources" several tasks to objects subclassed from
+ * TcpSendQueue, TcpReceiveQueue and TcpAlgorithm; see overview of this
  * with TCP documentation.
  *
- * Connection variables (TCB) are kept in TCPStateVariables. TCPAlgorithm
- * implementations can extend TCPStateVariables to add their own stuff
- * (see TCPAlgorithm::createStateVariables() factory method.)
+ * Connection variables (TCB) are kept in TcpStateVariables. TcpAlgorithm
+ * implementations can extend TcpStateVariables to add their own stuff
+ * (see TcpAlgorithm::createStateVariables() factory method.)
  *
  * The "entry points" of TCPConnnection from TCP are:
  *  - processTimer(cMessage *msg): handle self-messages which belong to the connection
@@ -301,7 +301,7 @@ class INET_API TcpStateVariables : public cObject
  *     etc., and processTCPSegment() dispatches to processSegmentInListen(),
  *     processSegmentInSynSent() or processSegment1stThru8th().
  *     Those methods will do the REAL JOB.
- *  -# after they return, we'll know the state machine event (TCPEventCode,
+ *  -# after they return, we'll know the state machine event (TcpEventCode,
  *     TCP_E_xxx) for sure, so we can:
  *  -# invoke performStateTransition() which executes the necessary state
  *     transition (for example, TCP_E_RCV_SYN will take the state machine
@@ -311,7 +311,7 @@ class INET_API TcpStateVariables : public cObject
  *     TCP_S_ESTABLISHED state), performStateTransition() invokes stateEntered(),
  *     which performs some necessary housekeeping (cancel the CONN-ESTAB timer).
  *
- * When the CLOSED state is reached, TCP will delete the TCPConnection object.
+ * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
  */
 class INET_API TcpConnection : public cObject
@@ -544,10 +544,10 @@ class INET_API TcpConnection : public cObject
     /** Utility: sends status indication (TCP_I_xxx) to application */
     virtual void sendIndicationToApp(int code, const int id = 0);
 
-    /** Utility: sends TCP_I_AVAILABLE indication with TCPAvailableInfo to application */
+    /** Utility: sends TCP_I_AVAILABLE indication with TcpAvailableInfo to application */
     virtual void sendAvailableIndicationToApp();
 
-    /** Utility: sends TCP_I_ESTABLISHED indication with TCPConnectInfo to application */
+    /** Utility: sends TCP_I_ESTABLISHED indication with TcpConnectInfo to application */
     virtual void sendEstabIndicationToApp();
 
     /** Utility: sends data or data notification to application */

@@ -14,7 +14,7 @@
 //
 
 #include <iostream>
-#include "inet/networklayer/mpls/LIBTable.h"
+#include "inet/networklayer/mpls/LibTable.h"
 #include "inet/common/XMLUtils.h"
 
 namespace inet {

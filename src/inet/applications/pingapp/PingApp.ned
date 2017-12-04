@@ -56,7 +56,7 @@ import inet.applications.contract.IApp;
 //
 // Uses ~PingPayload as payload for the ICMP(v6) Echo Request/Reply packets.
 //
-// @see ~PingPayload, ~ICMP, ~ICMPv6
+// @see ~PingPayload, ~Icmp, ~Icmpv6
 //
 simple PingApp like IApp
 {

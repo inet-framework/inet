@@ -17,8 +17,8 @@
 
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKScalarReceiver.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskScalarReceiver.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 
@@ -35,7 +35,7 @@ ApskScalarReceiver::ApskScalarReceiver() :
 
 std::ostream& ApskScalarReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKScalarReceiver";
+    stream << "ApskScalarReceiver";
     return FlatReceiverBase::printToStream(stream, level);
 }
 

@@ -18,12 +18,12 @@
 #include <string.h>
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/tcp/TCP.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
 
@@ -309,7 +309,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
 void TcpConnection::process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     if (state == nullptr)
-        throw cRuntimeError("Called process_QUEUE_BYTES_LIMIT on uninitialized TCPConnection!");
+        throw cRuntimeError("Called process_QUEUE_BYTES_LIMIT on uninitialized TcpConnection!");
 
     state->sendQueueLimit = tcpCommand->getUserId();    // Set queue size limit
     EV << "state->sendQueueLimit set to " << state->sendQueueLimit << "\n";

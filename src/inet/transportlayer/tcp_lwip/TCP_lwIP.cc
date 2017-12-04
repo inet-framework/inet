@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 
 //#include "headers/defs.h"   // for endian macros
 //#include "headers/in_systm.h"
@@ -38,7 +38,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -112,7 +112,7 @@ void TcpLwip::initialize(int stage)
 
         pLwipTcpLayerM = new LwipTcpLayer(*this);
         pLwipFastTimerM = new cMessage("lwip_fast_timer");
-        EV_INFO << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
+        EV_INFO << "TcpLwip " << this << " has stack " << pLwipTcpLayerM << "\n";
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         bool isOperational;
@@ -328,7 +328,7 @@ err_t TcpLwip::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *
 
     newConn->sendAvailableIndicationToApp(conn.connIdM);
 
-    EV_DETAIL << this << ": TCP_lwIP: got accept!\n";
+    EV_DETAIL << this << ": TcpLwip: got accept!\n";
     return err;
 }
 

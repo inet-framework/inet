@@ -29,7 +29,7 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 

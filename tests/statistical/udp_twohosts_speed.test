@@ -62,7 +62,7 @@ sim-time-limit = 20s
 
 ## UDP apps
 **.numApps = 2
-**.app[0].typename = "UDPBasicApp"
+**.app[0].typename = "UdpBasicApp"
 **.app[0].destPort = 1234
 **.host*snap.app[0].sendInterval = 1.719ms   #etherframe with snap and gap: 1074 bytes, 2 packets (sent, echoed): 1074*8/10000000*2 = 17.184ms
 **.host*snap.app[0].stopTime = 17.19s
@@ -74,14 +74,14 @@ sim-time-limit = 20s
 **.host1snap.app[0].destAddresses = "host2snap"
 **.host2snap.app[0].destAddresses = "host1snap"
 **.app[0].messageLength = 1000 bytes
-**.app[1].typename = "UDPEchoApp"
+**.app[1].typename = "UdpEchoApp"
 **.app[1].localPort = 1234
 
 **.host*snap.eth[*].useSNAP = true
 **.host*.eth[*].queue.frameCapacity = 1
 
 # Arp
-**.arpType = "GlobalARP"
+**.arpType = "GlobalArp"
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: Rscript check.r

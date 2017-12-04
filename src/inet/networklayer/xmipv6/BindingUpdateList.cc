@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
 

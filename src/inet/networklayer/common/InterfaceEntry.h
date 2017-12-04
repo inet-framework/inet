@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/common/Simsignals.h"
 
@@ -55,7 +55,7 @@ class INET_API MacEstimateCostProcess
 
 /**
  * Base class for protocol-specific data on an interface.
- * Notable subclasses are IPv4InterfaceData and IPv6InterfaceData.
+ * Notable subclasses are Ipv4InterfaceData and Ipv6InterfaceData.
  */
 class INET_API InterfaceProtocolData : public cObject
 {

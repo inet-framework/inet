@@ -323,7 +323,7 @@ class INET_API Ipv4Address
      * with the dotted notation ("192.66.86.1"), and false otherwise.
      *
      * This function can be used to verify an IPv4 address string before assigning
-     * it to an IPv4Address object (both its ctor and set() function raises an
+     * it to an Ipv4Address object (both its ctor and set() function raises an
      * error if the string has invalid format.)
      */
     static bool isWellFormed(const char *text);

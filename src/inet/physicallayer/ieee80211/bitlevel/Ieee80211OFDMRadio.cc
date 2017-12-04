@@ -17,8 +17,8 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMRadio.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmTransmitter.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmRadio.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {

@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-// This file is based on the PPP.h of INET written by Andras Varga.
+// This file is based on the Ppp.h of INET written by Andras Varga.
 
 #ifndef __INET_EXTINTERFACE_H
 #define __INET_EXTINTERFACE_H
@@ -27,7 +27,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/base/MACBase.h"
+#include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/ext/ExtFrame_m.h"
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 
@@ -65,7 +65,7 @@ class INET_API ExtInterface : public MacBase
     void displayIdle();
     virtual void refreshDisplay() const override;
 
-    // MACBase functions
+    // MacBase functions
     InterfaceEntry *createInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;

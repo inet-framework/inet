@@ -7,7 +7,7 @@ import inet.linklayer.ethernet.EtherQoSQueue;
 simple EthTestApp
 {
     parameters:
-        string destAddr;    // MACAddress
+        string destAddr;    // MacAddress
         string script;      // space separated sequence of seconds:bytes pairs
     gates:
         input in;
@@ -18,7 +18,7 @@ module EthTestHost
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
         @networkNode();

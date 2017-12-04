@@ -19,13 +19,13 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 module Ieee80211NicSTASimplified extends Ieee80211Nic
 {
     parameters:
-        mgmtType = "Ieee80211MgmtSTASimplified";
+        mgmtType = "Ieee80211MgmtStaSimplified";
 }
 
 module WirelessAPSimplified extends AccessPoint
 {
     parameters:
-        wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+        wlan[*].mgmtType = "Ieee80211MgmtApSimplified";
 }
 
 module ThroughputClient

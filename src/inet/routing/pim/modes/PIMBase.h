@@ -24,16 +24,16 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/routing/pim/tables/PIMNeighborTable.h"
-#include "inet/routing/pim/tables/PIMInterfaceTable.h"
-#include "inet/routing/pim/PIMPacket.h"
+#include "inet/routing/pim/tables/PimNeighborTable.h"
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
+#include "inet/routing/pim/PimPacket.h"
 
 namespace inet {
 
 /**
- * Base class of PIMSM and PIMDM modules.
+ * Base class of PimSm and PimDm modules.
  */
 class INET_API PimBase : public OperationalBase
 {

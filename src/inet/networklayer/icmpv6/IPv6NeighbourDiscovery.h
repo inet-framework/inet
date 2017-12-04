@@ -24,9 +24,9 @@
 #include <map>
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
-#include "inet/networklayer/icmpv6/IPv6NeighbourCache.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -67,7 +67,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *
      * If the neighbor cache does not contain this address or it's in the
      * state INCOMPLETE, this method will return the nullptr address, and the
-     * IPv6 module should then send the datagram here to IPv6NeighbourDiscovery
+     * IPv6 module should then send the datagram here to Ipv6NeighbourDiscovery
      * where it will be stored until neighbour resolution completes.
      *
      * If the neighbour cache entry is STALE (or REACHABLE but more than
@@ -75,7 +75,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      * the link-layer address is still returned and IPv6 can send the
      * datagram, but simultaneously, this call should trigger the Neighbour
      * Unreachability Detection procedure to start in the
-     * IPv6NeighbourDiscovery module.
+     * Ipv6NeighbourDiscovery module.
      */
     const MacAddress& resolveNeighbour(const Ipv6Address& nextHop, int interfaceId);
 
@@ -395,10 +395,10 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     /**
      *  RFC2463 Section 3.1: Destination Unreachable Message
      *  Send an unreachable message to the IPv6 module.
-     *  TODO: Relocate to ICMPv6 module
+     *  TODO: Relocate to Icmpv6 module
      */
     /*Icmpv6DestUnreachableMsg *createAndSendUnreachableMessage(
-        const IPv6Address& destAddress, InterfaceEntry *ie);*/
+        const Ipv6Address& destAddress, InterfaceEntry *ie);*/
 
 #ifdef WITH_xMIPv6
 

@@ -22,13 +22,13 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/contract/IARP.h"
-#include "inet/networklayer/ipv4/ICMP.h"
+#include "inet/networklayer/contract/IArp.h"
+#include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/ipv4/Ipv4Header.h"
-#include "inet/networklayer/ipv4/IPv4FragBuf.h"
+#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
 #include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
 
@@ -190,7 +190,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void reassembleAndDeliverFinish(Packet *packet);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
+     * Decapsulate and return encapsulated packet after attaching Ipv4ControlInfo.
      */
     virtual void decapsulate(Packet *packet);
 

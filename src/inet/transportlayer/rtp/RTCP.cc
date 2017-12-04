@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTCP.cc  -  description
+                       Rtcp.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -15,19 +15,19 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTCP.h"
+#include "inet/transportlayer/rtp/Rtcp.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/rtp/RTCPPacket.h"
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPParticipantInfo.h"
-#include "inet/transportlayer/rtp/RTPReceiverInfo.h"
-#include "inet/transportlayer/rtp/RTPSenderInfo.h"
+#include "inet/transportlayer/rtp/RtcpPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpParticipantInfo.h"
+#include "inet/transportlayer/rtp/RtpReceiverInfo.h"
+#include "inet/transportlayer/rtp/RtpSenderInfo.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -92,7 +92,7 @@ void Rtcp::handleMessage(cMessage *msg)
 
 void Rtcp::handleMessageFromRTP(cMessage *msg)
 {
-    // from the rtp module all messages are of type RTPInnerPacket
+    // from the rtp module all messages are of type RtpInnerPacket
     RtpInnerPacket *rinp = check_and_cast<RtpInnerPacket *>(msg);
 
     // distinguish by type
@@ -118,7 +118,7 @@ void Rtcp::handleMessageFromRTP(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("Unknown RTPInnerPacket type");
+            throw cRuntimeError("Unknown RtpInnerPacket type");
     }
 
     delete msg;
@@ -297,7 +297,7 @@ void Rtcp::createPacket()
     SdesChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
 
-    Packet *compoundPacket = new Packet("RTCPCompoundPacket");
+    Packet *compoundPacket = new Packet("RtcpCompoundPacket");
 
     compoundPacket->insertTrailer(reportPacket);
     compoundPacket->insertTrailer(sdesPacket);
@@ -386,7 +386,7 @@ void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int po
                     break;
 
                 default:
-                    throw cRuntimeError("unknown RTCP packet type");
+                    throw cRuntimeError("unknown Rtcp packet type");
                     break;
             }
         }

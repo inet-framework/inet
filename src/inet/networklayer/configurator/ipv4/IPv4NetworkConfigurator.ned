@@ -29,7 +29,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //
 // IMPORTANT: as of INET 2.2, this module does NOT assign addresses or add
 // routes directly, just stores them in its internal data structures.
-// Network nodes are supposed to contain an instance of ~IPv4NodeConfigurator
+// Network nodes are supposed to contain an instance of ~Ipv4NodeConfigurator
 // (normally part of the network layer compound module) that actually
 // configures the node's interface table and routing table based on the
 // information stored in the global network configurator module.
@@ -55,7 +55,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 // router, etc.) are expected to have the @networkNode property, becaue that's how the
 // configurator recognizes them in the model. All nodes must have their
 // interface table (~InterfaceTable module) as their "interfaceTable" submodule.
-// All routers must have their routing table (~IPv4RoutingTable module) as their
+// All routers must have their routing table (~Ipv4RoutingTable module) as their
 // "routingTable" or "networkLayer.routingTable" submodule.
 //
 // By default all interfaces in all nodes will have a unique IPv4 address

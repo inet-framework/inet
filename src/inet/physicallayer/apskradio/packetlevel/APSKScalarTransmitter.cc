@@ -19,7 +19,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmission.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskScalarTransmitter.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
@@ -35,7 +35,7 @@ ApskScalarTransmitter::ApskScalarTransmitter() :
 
 std::ostream& ApskScalarTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKScalarTransmitter";
+    stream << "ApskScalarTransmitter";
     return FlatTransmitterBase::printToStream(stream, level);
 }
 

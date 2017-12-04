@@ -17,7 +17,7 @@
 // Author: Benjamin Martin Seregi
 //
 
-#include "inet/linklayer/ieee8021d/tester/STPTester.h"
+#include "inet/linklayer/ieee8021d/tester/StpTester.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 

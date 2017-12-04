@@ -24,15 +24,15 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
@@ -236,7 +236,7 @@ void TCP::handleMessage(cMessage *msg)
             conn = createConnection(socketId);
 
             // add into appConnMap here; it'll be added to connMap during processing
-            // the OPEN command in TCPConnection's processAppCommand().
+            // the OPEN command in TcpConnection's processAppCommand().
             AppConnKey key;
             key.socketId = socketId;
             tcpAppConnMap[key] = conn;
@@ -441,7 +441,7 @@ ushort TCP::getEphemeralPort()
 
 void TCP::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
-    // update addresses/ports in TCPConnection
+    // update addresses/ports in TcpConnection
     SockPair key;
     key.localAddr = conn->localAddr = localAddr;
     key.remoteAddr = conn->remoteAddr = remoteAddr;

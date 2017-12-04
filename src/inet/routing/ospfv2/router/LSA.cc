@@ -111,11 +111,11 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
          << ", type=";
     switch (lsaHeader.getLsType()) {
         case ROUTERLSA_TYPE:
-            ostr << "RouterLSA";
+            ostr << "RouterLsa";
             break;
 
         case NETWORKLSA_TYPE:
-            ostr << "NetworkLSA";
+            ostr << "NetworkLsa";
             break;
 
         case SUMMARYLSA_NETWORKS_TYPE:
@@ -127,7 +127,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
             break;
 
         case AS_EXTERNAL_LSA_TYPE:
-            ostr << "ASExternalLSA";
+            ostr << "AsExternalLsa";
             break;
 
         default:
@@ -224,7 +224,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const ExternalTosInfo& tos)
 {
-    ostr << "TOSData: {" << tos.tosData
+    ostr << "TosData: {" << tos.tosData
          << "}, MetricType: " << tos.E_ExternalMetricType
          << ", fwAddr: " << tos.forwardingAddress
          << ", extRouteTag: " << tos.externalRouteTag;

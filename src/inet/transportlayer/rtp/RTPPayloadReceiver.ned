@@ -3,8 +3,8 @@ package inet.transportlayer.rtp;
 //
 // Interface for RTP Payload Receivers.
 //
-// These modules are internal to the ~RTP module; instances are created
-// and connected dynamically by ~RTPProfile.
+// These modules are internal to the ~Rtp module; instances are created
+// and connected dynamically by ~RtpProfile.
 //
 moduleinterface IRTPPayloadReceiver
 {

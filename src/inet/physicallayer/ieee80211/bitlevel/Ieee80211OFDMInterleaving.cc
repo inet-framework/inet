@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ Ieee80211OfdmInterleaving::Ieee80211OfdmInterleaving(int numberOfCodedBitsPerSym
 
 std::ostream& Ieee80211OfdmInterleaving::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211OFDMInterleaving";
+    stream << "Ieee80211OfdmInterleaving";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", numberOfCodedBitsPerSymbol = " << numberOfCodedBitsPerSymbol
                << ", numberOfCodedBitsPerSubcarrier = " << numberOfCodedBitsPerSubcarrier;

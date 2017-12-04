@@ -25,18 +25,18 @@ import inet.applications.contract.IApp;
 // This module hosts TCP-based server applications. It dynamically creates
 // and launches a new "thread" object for each incoming connection.
 //
-// Server threads should be subclassed from the TCPServerThreadBase
+// Server threads should be subclassed from the TcpServerThreadBase
 // C++ class, registered in the C++ code using the Define_Module() macro,
 // and the module type should be specified in the serverThreadModuleType
-// parameter of ~TCPSrvHostApp. The thread object will receive events
+// parameter of ~TcpSrvHostApp. The thread object will receive events
 // via a callback interface (methods like established(), dataArrived(),
-// peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
+// peerClosed(), timerExpired()), and can send packets via TcpSocket's send()
 // method.
 //
 // IMPORTANT: Before you try to use this module, make sure you actually need it!
-// In most cases, ~TCPGenericSrvApp and ~GenericAppMsg will be completely
+// In most cases, ~TcpGenericSrvApp and ~GenericAppMsg will be completely
 // enough, and they are a lot easier to handle. You'll want to subclass your
-// client from TCPGenericCliAppBase then; check ~TelnetApp and ~TCPBasicClientApp
+// client from TCPGenericCliAppBase then; check ~TelnetApp and ~TcpBasicClientApp
 // for examples.
 //
 // <b>Configuring App</b>
@@ -60,7 +60,7 @@ import inet.applications.contract.IApp;
 //      after the TCP entities have completed simulating the transmission
 //      of 1 megabyte over the connection. This is a different behaviour
 //      from TCPVirtualDataSendQueue/RcvQueue.
-//      This mode is not implemented in ~TCP_NSC yet.
+//      This mode is not implemented in ~TcpNsc yet.
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //

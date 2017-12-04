@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaving.h"
 
 namespace inet {
 

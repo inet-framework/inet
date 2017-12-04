@@ -24,13 +24,13 @@ network Dhcptest
         dhcpClient: StandardHost {
             parameters:
                 numApps = 1;
-                app[0].typename = "DHCPClient";
+                app[0].typename = "DhcpClient";
                 @display("p=66,76");
         }
         dhcpServer: StandardHost {
             parameters:
                 numApps = 1;
-                app[0].typename = "DHCPServer";
+                app[0].typename = "DhcpServer";
                 @display("p=277,76");
         }
     connections:
@@ -56,7 +56,7 @@ network = Dhcptest
 sim-time-limit = 10500s
 cmdenv-express-mode = false
 
-**.dhcpServer.app[0].typename = "DHCPServer"
+**.dhcpServer.app[0].typename = "DhcpServer"
 **.dhcpServer.app[0].numReservedAddresses = 100    # ip to start to lease
 **.dhcpServer.app[0].maxNumClients = 100     # number of ip to lease
 **.dhcpServer.app[0].dns = ""         # dns to assign

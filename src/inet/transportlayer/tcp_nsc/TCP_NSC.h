@@ -31,7 +31,7 @@
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
-#include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
+#include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
 
 namespace inet {
 
@@ -80,13 +80,13 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
             const TcpNscConnection::SockPair& inetSockPairP,
             const TcpNscConnection::SockPair& nscSockPairP);
 
-    // find a TCP_NSC_Connection by connection ID
+    // find a TcpNscConnection by connection ID
     TcpNscConnection *findAppConn(int connIdP);
 
-    // find a TCP_NSC_Connection by inet sockpair
+    // find a TcpNscConnection by inet sockpair
     TcpNscConnection *findConnByInetSockPair(TcpNscConnection::SockPair const& sockPairP);
 
-    // find a TCP_NSC_Connection by nsc sockpair
+    // find a TcpNscConnection by nsc sockpair
     TcpNscConnection *findConnByNscSockPair(TcpNscConnection::SockPair const& sockPairP);
 
     virtual void refreshDisplay() const override;
@@ -138,12 +138,12 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     void sendAvailableIndicationMsg(TcpNscConnection& connP);
 
     /**
-     * To be called from TCPConnection: create a new send queue.
+     * To be called from TcpConnection: create a new send queue.
      */
     virtual TcpNscSendQueue *createSendQueue();
 
     /**
-     * To be called from TCPConnection: create a new receive queue.
+     * To be called from TcpConnection: create a new receive queue.
      */
     virtual TcpNscReceiveQueue *createReceiveQueue();
 
@@ -151,7 +151,7 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
-    typedef std::map<int, TcpNscConnection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection
+    typedef std::map<int, TcpNscConnection> TcpAppConnMap;    // connId-to-TcpNscConnection
     typedef std::map<u_int32_t, L3Address> Nsc2RemoteMap;
     typedef std::map<L3Address, u_int32_t> Remote2NscMap;
     typedef std::map<TcpNscConnection::SockPair, int> SockPair2ConnIdMap;

@@ -16,7 +16,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/routing/aodv/AODVRouteData.h"
+#include "inet/routing/aodv/AodvRouteData.h"
 
 namespace inet {
 

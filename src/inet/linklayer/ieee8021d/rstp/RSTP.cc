@@ -21,7 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/ieee8021d/rstp/RSTP.h"
+#include "inet/linklayer/ieee8021d/rstp/Rstp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -872,7 +872,7 @@ void Rstp::flushOtherPorts(unsigned int portId)
     }
 }
 
-//void RSTP::receiveChangeNotification(int signalID, const cObject *obj)
+//void Rstp::receiveChangeNotification(int signalID, const cObject *obj)
 void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();

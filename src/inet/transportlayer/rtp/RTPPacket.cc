@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPPacket.cc  -  description
+                          RtpPacket.cc  -  description
                              -------------------
     begin                : Mon Oct 22 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -15,7 +15,7 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 

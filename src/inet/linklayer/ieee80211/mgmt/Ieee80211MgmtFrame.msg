@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 //
-// Required for MACAddress declarations
+// Required for MacAddress declarations
 //
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;

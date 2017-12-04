@@ -34,7 +34,7 @@
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 #include "inet/networklayer/ipv6/IPv6.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -557,12 +557,12 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
     }
 
     // check for local delivery
-    IPv6Address destAddress = datagram->getDestAddress();
+    Ipv6Address destAddress = datagram->getDestAddress();
     if (rt->isLocalMulticastAddress(destAddress))
     {
         IPv6Datagram *datagramCopy = datagram->dup();
 
-        // FIXME code from the MPLS model: set packet dest address to routerId (???)
+        // FIXME code from the Mpls model: set packet dest address to routerId (???)
         datagramCopy->setDestAddress(rt->getRouterId());
 
         localDeliver(datagramCopy, fromIE);
@@ -598,7 +598,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
                     datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6Data()->getIPAddress());
 
                 // send
-                IPv6Address nextHopAddr = routes[i].gateway;
+                Ipv6Address nextHopAddr = routes[i].gateway;
                 fragmentAndSend(datagramCopy, outputGateIndex, macAddr, fromHL);
             }
         }

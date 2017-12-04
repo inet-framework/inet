@@ -19,7 +19,7 @@
 #define __INET_IEEE80211HTSIGNALCODE_H
 
 #include "inet/physicallayer/contract/bitlevel/ICode.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211HTInterleaving.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211HtInterleaving.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 #include "Ieee80211OfdmModulation.h"
@@ -49,7 +49,7 @@ class INET_API Ieee80211HtCompliantCodes
 {
     public:
         // Convolutional codes (TODO: LDPC codes).
-        // Note: 1/2, 2/3, 3/4 rates are defined in Ieee80211OFDMCompliantCodes.
+        // Note: 1/2, 2/3, 3/4 rates are defined in Ieee80211OfdmCompliantCodes.
         static const Ieee80211ConvolutionalCode htConvolutionalCode5_6;
 
         static const Ieee80211HtCode *getCompliantCode(const Ieee80211ConvolutionalCode *convolutionalCode, const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation, Hz bandwidth, bool withScrambling = true);

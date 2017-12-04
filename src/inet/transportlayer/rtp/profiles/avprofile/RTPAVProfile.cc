@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPAVProfile.cc  -  description
+                          RtpAvProfile.cc  -  description
                              -------------------
     begin                : Thu Nov 29 2001
     copyright            : (C) 2001 by Matthias Oppitz
@@ -15,7 +15,7 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/profiles/avprofile/RTPAVProfile.h"
+#include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfile.h"
 
 namespace inet {
 

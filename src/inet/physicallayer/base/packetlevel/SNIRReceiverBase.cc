@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 
 namespace inet {

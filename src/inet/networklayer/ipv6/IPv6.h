@@ -23,14 +23,14 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
-#include "inet/networklayer/icmpv6/ICMPv6.h"
-#include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 
-#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/IPv6FragBuf.h"
+#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include "inet/common/ProtocolMap.h"
 
 namespace inet {
@@ -174,7 +174,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void localDeliver(Packet *packet, const InterfaceEntry *fromIE);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
+     * Decapsulate and return encapsulated packet after attaching Ipv6ControlInfo.
      */
     virtual void decapsulate(Packet *packet);
 

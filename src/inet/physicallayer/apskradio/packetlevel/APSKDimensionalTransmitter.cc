@@ -18,7 +18,7 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmission.h"
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmitter.h"
+#include "inet/physicallayer/apskradio/packetlevel/ApskDimensionalTransmitter.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
 namespace inet {
@@ -41,7 +41,7 @@ void ApskDimensionalTransmitter::initialize(int stage)
 
 std::ostream& ApskDimensionalTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "APSKDimensionalTransmitter";
+    stream << "ApskDimensionalTransmitter";
     FlatTransmitterBase::printToStream(stream, level);
     return DimensionalTransmitterBase::printToStream(stream, level);
 }

@@ -45,10 +45,10 @@ module EtherSwitch
         @display("i=device/switch;bgb=663,297");
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string spanningTreeProtocol = default("");
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MACRelayUnit")); // type of the ~IMACRelayUnit;
-        string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
+        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the ~IMACRelayUnit;
+        string macTableType = default("MacAddressTable"); // type of the ~IMacAddressTable
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;

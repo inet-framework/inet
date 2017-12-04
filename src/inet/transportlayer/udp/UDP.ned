@@ -28,14 +28,14 @@ import inet.transportlayer.contract.IUDP;
 // <b>Communication with clients (applications)</b>
 //
 // The module can (should) be connected to several applications.
-// For sending an UDP packet, the application should attach an ~UDPControlInfo
+// For sending an UDP packet, the application should attach an ~UdpControlInfo
 // object to the payload, and send it to ~UDP.
-// ~UDP will also attach an ~UDPControlInfo object to any payload
+// ~UDP will also attach an ~UdpControlInfo object to any payload
 // message in sends up to the application.
 //
 // For receiving UDP packets, the connected applications should first
 // "bind" to the given UDP port. This can be done by sending an
-// arbitrary message with message kind UDP_C_BIND and an ~UDPControlInfo
+// arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
 // attached with srcPort filled in.
 //
 // When UDP receives an ICMP error (~ICMPMessage or ~ICMPv6Message)
@@ -44,7 +44,7 @@ import inet.transportlayer.contract.IUDP;
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
-// The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
+// The ~UDP model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
 // objects attached to ~UdpHeader objects as control info.
 //
 // CRC operation modes for outgoing UDP packets (crcMode parameter in UDP module):
@@ -63,7 +63,7 @@ import inet.transportlayer.contract.IUDP;
 //    that is to be verified as defined by the RFC (serializable)
 // The incoming packet also fails the CRC verification if any relevant chunk is marked incorrect.
 //
-// @see ~UdpHeader, ~UDPControlInfo, ~UDPCommandCode
+// @see ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
 //
 simple UDP like IUDP
 {

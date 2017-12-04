@@ -1,5 +1,5 @@
 /***************************************************************************
-                       RTPPayloadReceiver.h  -  description
+                       RtpPayloadReceiver.h  -  description
                              -------------------
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/rtp/RTPPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket.h"
 
 namespace inet {
 
@@ -31,7 +31,7 @@ namespace rtp {
 //Forward declarations
 
 /**
- * The class RTPPayloadReceiver acts as a base class for modules
+ * The class RtpPayloadReceiver acts as a base class for modules
  * processing incoming RTP data packets.
  */
 class INET_API RtpPayloadReceiver : public cSimpleModule
@@ -52,12 +52,12 @@ class INET_API RtpPayloadReceiver : public cSimpleModule
 
     /**
      * Method for handling incoming packets. At the moment only RTPInnerPackets
-     * containing an encapsulated RTPPacket are handled.
+     * containing an encapsulated RtpPacket are handled.
      */
     virtual void handleMessage(cMessage *msg) override;
 
     /**
-     * Writes contents of this RTPPacket into the output file. Must be overwritten
+     * Writes contents of this RtpPacket into the output file. Must be overwritten
      * by subclasses.
      */
     virtual void processRtpPacket(Packet *packet);
@@ -86,7 +86,7 @@ class INET_API RtpPayloadReceiver : public cSimpleModule
     std::ofstream _outputLogLoss;
 
     /**
-     * The payload type this RTPPayloadReceiver module processes.
+     * The payload type this RtpPayloadReceiver module processes.
      */
     int _payloadType;
 

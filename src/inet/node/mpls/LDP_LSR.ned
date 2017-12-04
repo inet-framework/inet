@@ -44,7 +44,7 @@ module LDP_LSR
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
-        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string tcpType = default(firstAvailable("TCP","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~TCP, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.forwarding = true;
         *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));

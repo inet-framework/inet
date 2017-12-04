@@ -29,7 +29,7 @@ enum SapCode;
 
 //
 // Abstract base class for various Ethernet traffic types:
-// EtherJam, EtherFilledIFG and EtherPhyFrame.
+// EtherJam, EtherFilledIfg and EtherPhyFrame.
 //
 packet EthernetSignal
 {

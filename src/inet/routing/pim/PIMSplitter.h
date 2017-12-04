@@ -24,14 +24,14 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/routing/pim/tables/PIMInterfaceTable.h"
+#include "inet/routing/pim/tables/PimInterfaceTable.h"
 #include "inet/routing/pim/PIMPacket_m.h"
 
 namespace inet {
 
 /**
- * PIMSplitter register itself for PIM protocol (103) in the network layer,
- * and dispatches the received packets either to PIMDM or PIMSM according
+ * PimSplitter register itself for PIM protocol (103) in the network layer,
+ * and dispatches the received packets either to PimDm or PimSm according
  * to the PIM mode of the incoming interface.
  * Packets received from the PIM modules are simply forwarded to the
  * network layer.

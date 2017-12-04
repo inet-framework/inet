@@ -22,7 +22,7 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

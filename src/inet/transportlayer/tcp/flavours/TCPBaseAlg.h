@@ -21,14 +21,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/tcp/TCPAlgorithm.h"
+#include "inet/transportlayer/tcp/TcpAlgorithm.h"
 
 namespace inet {
 
 namespace tcp {
 
 /**
- * State variables for TCPBaseAlg.
+ * State variables for TcpBaseAlg.
  */
 class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
 {
@@ -95,7 +95,7 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
  *
  * Note: currently the timers and time calculations are done in double
  * and NOT in Unix (200ms or 500ms) ticks. It's possible to write another
- * TCPAlgorithm which uses ticks (or rather, factor out timer handling to
+ * TcpAlgorithm which uses ticks (or rather, factor out timer handling to
  * separate methods, and redefine only those).
  *
  * Congestion window is set to SMSS when the connection is established,
@@ -105,7 +105,7 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
 class INET_API TcpBaseAlg : public TcpAlgorithm
 {
   protected:
-    TcpBaseAlgStateVariables *& state;    // alias to TCPAlgorithm's 'state'
+    TcpBaseAlgStateVariables *& state;    // alias to TcpAlgorithm's 'state'
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;

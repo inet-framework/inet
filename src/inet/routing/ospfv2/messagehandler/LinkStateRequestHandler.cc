@@ -53,7 +53,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Nei
             const LsaRequest& request = lsRequestPacket->getRequests(i);
             LsaKeyType lsaKey;
 
-            EV_INFO << "    LSARequest: type=" << request.lsType
+            EV_INFO << "    LsaRequest: type=" << request.lsType
                     << ", LSID=" << request.linkStateID
                     << ", advertisingRouter=" << request.advertisingRouter
                     << "\n";

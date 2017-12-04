@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/voipstream/VoIPStreamReceiver.h"
+#include "inet/applications/voipstream/VoipStreamReceiver.h"
 
 #include "inet/common/INETEndians.h"
 #include "inet/common/ModuleAccess.h"
@@ -233,7 +233,7 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
             break;
 
         default:
-            throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
+            throw cRuntimeError("The received VoipStreamPacket has unknown type %d", vp->getType());
     }
     uint16_t newSeqNo = vp->getSeqNo();
     if (newSeqNo > curConn.seqNo + 1)

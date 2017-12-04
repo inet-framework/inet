@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
 

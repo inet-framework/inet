@@ -22,10 +22,10 @@
 #include <memory.h>
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/routing/ospfv2/OSPFRouting.h"
+#include "inet/routing/ospfv2/OspfRouting.h"
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
-#include "inet/routing/ospfv2/OSPFConfigReader.h"
+#include "inet/routing/ospfv2/OspfConfigReader.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"

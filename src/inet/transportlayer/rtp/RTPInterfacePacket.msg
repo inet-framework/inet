@@ -43,7 +43,7 @@ enum RtpIfpType
 };
 
 //
-// The next classes are used for communication between an ~RTPApplication
+// The next classes are used for communication between an ~RtpApplication
 // and an RTPLayer module. Its offers functionality for starting and stopping of an
 // rtp session, transmission of files and feedback about the success of the
 // operations.
@@ -65,7 +65,7 @@ class RtpSessionControlInfo extends RtpControlInfo
 };
 
 
-// App to ~RTP
+// App to ~Rtp
 class RtpCiEnterSession extends RtpControlInfo
 {
     type = RTP_IFP_ENTER_SESSION;
@@ -76,46 +76,46 @@ class RtpCiEnterSession extends RtpControlInfo
     int port;
 };
 
-// ~RTP to App
+// ~Rtp to App
 class RtpCiSessionEntered extends RtpSessionControlInfo
 {
     type = RTP_IFP_SESSION_ENTERED;
 };
 
-// App to ~RTP
+// App to ~Rtp
 class RtpCiSenderControl extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_CONTROL;
-    // from ~RTPSenderControlMessage:
+    // from ~RtpSenderControlMessage:
     RtpSenderControlMessageCommands command;
     float commandParameter1;
     float commandParameter2;
 }
 
-// ~RTP to App
+// ~Rtp to App
 class RtpCiSenderStatus extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_STATUS;
-    // from ~RTPSenderStatusMessage:
+    // from ~RtpSenderStatusMessage:
     RtpSenderStatus status;
     uint32 timeStamp;
 };
 
-// App to ~RTP
+// App to ~Rtp
 class RtpCiLeaveSession extends RtpControlInfo
 {
     type = RTP_IFP_LEAVE_SESSION;
     // TODO do I need any sesson identifier?
 };
 
-// ~RTP to App
+// ~Rtp to App
 class RtpCiSessionLeft extends RtpControlInfo
 {
     type = RTP_IFP_SESSION_LEFT;
     // TODO do I need any sesson identifier?
 };
 
-// App to ~RTP
+// App to ~Rtp
 class RtpCiCreateSenderModule extends RtpSessionControlInfo
 {
     type = RTP_IFP_CREATE_SENDER_MODULE;
@@ -123,19 +123,19 @@ class RtpCiCreateSenderModule extends RtpSessionControlInfo
     string fileName;
 };
 
-// ~RTP to App
+// ~Rtp to App
 class RtpCiSenderModuleCreated extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_CREATED;
 };
 
-// App to ~RTP
+// App to ~Rtp
 class RtpCiDeleteSenderModule extends RtpSessionControlInfo
 {
     type = RTP_IFP_DELETE_SENDER_MODULE;
 };
 
-// ~RTP to App
+// ~Rtp to App
 class RtpCiSenderModuleDeleted extends RtpSessionControlInfo
 {
     type = RTP_IFP_SENDER_MODULE_DELETED;

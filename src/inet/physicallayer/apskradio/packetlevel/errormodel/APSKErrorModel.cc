@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
-#include "inet/physicallayer/apskradio/packetlevel/errormodel/APSKErrorModel.h"
+#include "inet/physicallayer/apskradio/packetlevel/errormodel/ApskErrorModel.h"
 
 namespace inet {
 
@@ -27,7 +27,7 @@ Define_Module(ApskErrorModel);
 
 std::ostream& ApskErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "APSKErrorModel";
+    return stream << "ApskErrorModel";
 }
 
 double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const

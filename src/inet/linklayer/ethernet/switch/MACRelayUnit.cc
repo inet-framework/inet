@@ -13,11 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+#include "inet/linklayer/ethernet/switch/MacRelayUnit.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherMACBase.h"
+#include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"

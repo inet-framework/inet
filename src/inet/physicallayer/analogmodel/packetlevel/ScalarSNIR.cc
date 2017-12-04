@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioSignal.h"
 
@@ -32,7 +32,7 @@ ScalarSnir::ScalarSnir(const IReception *reception, const INoise *noise) :
 
 std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level) const
 {
-    stream << "ScalarSNIR";
+    stream << "ScalarSnir";
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", minSNIR = " << minSNIR;
     return stream;

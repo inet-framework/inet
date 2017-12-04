@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/TCPSendQueue.h"
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
 
 namespace inet {
 

@@ -21,15 +21,15 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/packet/ChunkQueue.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
- * request messages. Clients are usually subclassed from TCPAppBase.
+ * request messages. Clients are usually subclassed from TcpAppBase.
  *
- * @see GenericAppMsg, TCPAppBase
+ * @see GenericAppMsg, TcpAppBase
  */
 class INET_API TcpGenericSrvApp : public cSimpleModule, public ILifecycle
 {

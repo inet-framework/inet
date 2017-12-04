@@ -84,7 +84,7 @@ class INET_API TlvOptions : public TlvOptions_Base
      */
     int findByType(short int type, int firstPos=0) const;
 
-    // redefine and implement pure virtual functions from TLVOptions_Base
+    // redefine and implement pure virtual functions from TlvOptions_Base
     virtual void setTlvOptionArraySize(unsigned int size) override { throw cRuntimeError("Do not use it!"); }
     virtual unsigned int getTlvOptionArraySize() const override { return size(); }
     virtual const TlvOptionBase& getTlvOption(unsigned int k) const override { return *optionVector.at(k); }

@@ -23,7 +23,7 @@ module Ieee802154UWBIRRadio extends Radio
 {
     parameters:
         antennaType = default("IsotropicAntenna");
-        transmitterType = default("Ieee802154UWBIRTransmitter");
-        receiverType = default("Ieee802154UWBIRReceiver");
+        transmitterType = default("Ieee802154UwbIrTransmitter");
+        receiverType = default("Ieee802154UwbIrReceiver");
         @class(Radio);
 }

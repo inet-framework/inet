@@ -34,13 +34,13 @@
 // TODO
 //  - 8.: Tunnel Error Reporting and Processing
 
-#include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -97,7 +97,7 @@ void Ipv6Tunneling::handleMessage(cMessage *msg)
         encapsulateDatagram(packet);
     }
     else
-        throw cRuntimeError("IPv6Tunneling: Unknown gate: %s!", packet->getArrivalGate()->getFullName());
+        throw cRuntimeError("Ipv6Tunneling: Unknown gate: %s!", packet->getArrivalGate()->getFullName());
 }
 
 bool Ipv6Tunneling::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -571,7 +571,7 @@ bool Ipv6Tunneling::isTunnelExit(const Ipv6Address& exit)
 }
 
 /*
-   TunnelType IPv6Tunneling::getTunnelType(const int vIfIndex)
+   TunnelType Ipv6Tunneling::getTunnelType(const int vIfIndex)
    {
     auto i = tunnels.find(vIfIndex);
 

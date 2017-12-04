@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/udpapp/UDPEchoApp.h"
+#include "inet/applications/udpapp/UdpEchoApp.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"

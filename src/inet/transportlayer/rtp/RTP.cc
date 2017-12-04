@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTP.cc  -  description
+                          Rtp.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -15,21 +15,21 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RTP.h"
+#include "inet/transportlayer/rtp/Rtp.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
-#include "inet/transportlayer/rtp/RTPProfile.h"
+#include "inet/transportlayer/rtp/RtpProfile.h"
 #include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
 #include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 
 namespace inet {
 
@@ -112,7 +112,7 @@ void Rtp::handleMessageFromApp(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("Unknown RTPControlInfo type from application");
+            throw cRuntimeError("Unknown RtpControlInfo type from application");
     }
 }
 
@@ -146,7 +146,7 @@ void Rtp::handleMessageFromProfile(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("Unknown RTPInnerPacket type %d from profile", rinp->getType());
+            throw cRuntimeError("Unknown RtpInnerPacket type %d from profile", rinp->getType());
     }
     EV_DEBUG << "handleMessageFromProfile(cMessage *msg) Exit" << endl;
 }
@@ -165,7 +165,7 @@ void Rtp::handleMessageFromRTCP(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("Unknown RTPInnerPacket type %d from rtcp", rinp->getType());
+            throw cRuntimeError("Unknown RtpInnerPacket type %d from rtcp", rinp->getType());
     }
 }
 
@@ -299,11 +299,11 @@ void Rtp::senderModuleStatus(RtpInnerPacket *rinp)
 void Rtp::dataOut(RtpInnerPacket *rinp)
 {
     Packet *msg = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
-    // RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RTPPacket?
+    // RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
 
     _udpSocket.sendTo(msg, _destinationAddress, _port);
 
-    // RTCP module must be informed about sent rtp data packet
+    // Rtcp module must be informed about sent rtp data packet
     send(rinp, "rtcpOut");
 }
 

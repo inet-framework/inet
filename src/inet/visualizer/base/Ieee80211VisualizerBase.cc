@@ -18,8 +18,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #ifdef WITH_IEEE80211
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAP.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #endif // WITH_IEEE80211
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/Ieee80211VisualizerBase.h"

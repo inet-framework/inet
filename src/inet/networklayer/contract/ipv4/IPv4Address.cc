@@ -25,7 +25,7 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -254,7 +254,7 @@ int Ipv4Address::getNetmaskLength() const
 void Ipv4Address::_checkNetmaskLength(int length)
 {
     if (length < 0 || length > 32)
-        throw cRuntimeError("IPv4Address: wrong netmask length %d (not in 0..32)", length);
+        throw cRuntimeError("Ipv4Address: wrong netmask length %d (not in 0..32)", length);
 }
 
 bool Ipv4Address::maskedAddrAreEqual(const Ipv4Address& addr1,

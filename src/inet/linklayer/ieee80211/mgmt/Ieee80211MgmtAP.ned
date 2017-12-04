@@ -51,8 +51,8 @@ simple Ieee80211MgmtAp like IIeee80211Mgmt
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
-        @signal[NF_L2_AP_ASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
-        @signal[NF_L2_AP_DISASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
+        @signal[NF_L2_AP_ASSOCIATED](type="Ieee80211MgmtAp::NotificationInfoSta");
+        @signal[NF_L2_AP_DISASSOCIATED](type="Ieee80211MgmtAp::NotificationInfoSta");
     gates:
         input macIn @labels(Ieee80211MacHeader); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211MacHeader); // to ~Ieee80211Mac

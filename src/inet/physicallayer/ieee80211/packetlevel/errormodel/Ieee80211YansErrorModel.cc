@@ -22,10 +22,10 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211YansErrorModel.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 

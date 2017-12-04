@@ -21,11 +21,11 @@
 
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvp_te/IntServ_m.h"
-#include "RSVPPathMsg.h"
-#include "RSVPResvMsg.h"
-#include "RSVPHelloMsg.h"
+#include "RsvpPathMsg.h"
+#include "RsvpResvMsg.h"
+#include "RsvpHelloMsg.h"
 #include "SignallingMsg_m.h"
-#include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
+#include "inet/networklayer/rsvp_te/IRsvpClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
@@ -83,7 +83,7 @@ class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycl
         Ipv4Address Previous_Hop_Address;
 
         // Logical Interface Handle from PHOP object
-        //IPv4Address LIH;
+        //Ipv4Address LIH;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
         Ipv4Address OutInterface;

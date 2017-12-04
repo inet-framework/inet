@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211MAC_H
 #define __INET_IEEE80211MAC_H
 
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"

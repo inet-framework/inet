@@ -34,8 +34,8 @@ import inet.networklayer.common.InterfaceTable;
 // but that can also be configured by a parameter.
 //
 // The wlan[*].mgmtType can be configured for different management types
-// currently it can be: ~Ieee80211MgmtAPSimplified and ~Ieee80211MgmtAP.
-// By default it is ~Ieee80211MgmtAP. The Simplified version does not
+// currently it can be: ~Ieee80211MgmtApSimplified and ~Ieee80211MgmtAp.
+// By default it is ~Ieee80211MgmtAp. The Simplified version does not
 // support channel scanning, authentication and association .
 // In this case, nodes must explicitly specify the hardware address
 // of the wlan card they want to be associated with.
@@ -47,12 +47,12 @@ module AccessPoint
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MACRelayUnit")); // type of the IMACRelayUnit (MACRelayUnit, Ieee8021dRelay, etc)
-        string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
+        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the IMACRelayUnit (MacRelayUnit, Ieee8021dRelay, etc)
+        string macTableType = default("MacAddressTable"); // type of the ~IMacAddressTable
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
         wlan[*].llcType = default("Ieee80211Portal");
-        wlan[*].mgmtType = default("Ieee80211MgmtAP");
+        wlan[*].mgmtType = default("Ieee80211MgmtAp");
         eth[*].encapType = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:

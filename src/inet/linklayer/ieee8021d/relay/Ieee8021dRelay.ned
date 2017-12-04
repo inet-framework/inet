@@ -29,14 +29,14 @@ import inet.linklayer.contract.IMACRelayUnit;
 //     Handles BPDU frames.
 //     If relaying a message also checks the port's status in the InterfaceTable.
 //
-// @see EtherFrame, MACAddressTable, STP, RSTP
+// @see EtherFrame, MacAddressTable, Stp, Rstp
 //
 simple Ieee8021dRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
-        string macTableModule = default("^.macTable");             // The path to the MACAddressTable module
+        string macTableModule = default("^.macTable");             // The path to the MacAddressTable module
         string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);

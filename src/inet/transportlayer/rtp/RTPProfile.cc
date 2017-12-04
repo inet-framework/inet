@@ -1,5 +1,5 @@
 /***************************************************************************
-                          RTPProfile.cc  -  description
+                          RtpProfile.cc  -  description
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
@@ -17,11 +17,11 @@
 
 #include <string.h>
 
-#include "inet/transportlayer/rtp/RTPProfile.h"
+#include "inet/transportlayer/rtp/RtpProfile.h"
 
-#include "inet/transportlayer/rtp/RTPInnerPacket.h"
-#include "inet/transportlayer/rtp/RTPPayloadReceiver.h"
-#include "inet/transportlayer/rtp/RTPPayloadSender.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
+#include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 namespace inet {
 
@@ -99,7 +99,7 @@ void RtpProfile::handleMessageFromRTP(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("RTPInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
+            throw cRuntimeError("RtpInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
             break;
     }
 
@@ -124,7 +124,7 @@ void RtpProfile::handleMessageFromPayloadSender(cMessage *msg)
             break;
 
         default:
-            throw cRuntimeError("Profile received RTPInnerPacket from sender module with wrong type: %d", rinpIn->getType());
+            throw cRuntimeError("Profile received RtpInnerPacket from sender module with wrong type: %d", rinpIn->getType());
             break;
     }
 }
@@ -159,7 +159,7 @@ void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
 
     cModuleType *moduleType = cModuleType::find(moduleName);
     if (moduleType == nullptr)
-        throw cRuntimeError("RTPProfile: payload sender module '%s' not found", moduleName);
+        throw cRuntimeError("RtpProfile: payload sender module '%s' not found", moduleName);
 
     RtpPayloadSender *rtpPayloadSender = check_and_cast<RtpPayloadSender *>(moduleType->create(moduleName, this));
     rtpPayloadSender->finalizeParameters();
@@ -201,7 +201,7 @@ void RtpProfile::senderModuleControl(RtpInnerPacket *rinp)
 
 void RtpProfile::dataIn(RtpInnerPacket *rinp)
 {
-    EV_TRACE << "dataIn(RTPInnerPacket *rinp) Enter" << endl;
+    EV_TRACE << "dataIn(RtpInnerPacket *rinp) Enter" << endl;
     processIncomingPacket(rinp);
 
     Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket());
@@ -243,7 +243,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
     }
 
     send(rinp, ssrcGate->getGateId());
-    EV_TRACE << "dataIn(RTPInnerPacket *rinp) Exit" << endl;
+    EV_TRACE << "dataIn(RtpInnerPacket *rinp) Exit" << endl;
 }
 
 void RtpProfile::dataOut(RtpInnerPacket *rinp)

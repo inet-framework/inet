@@ -22,14 +22,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
 /**
- * Small utility class for managing a large number of TCPSocket objects.
+ * Small utility class for managing a large number of TcpSocket objects.
  */
-//TBD: need for lookup could be eliminated by adding a void *yourPtr into TCPConnection and TCPCommand
+//TBD: need for lookup could be eliminated by adding a void *yourPtr into TcpConnection and TcpCommand
 class INET_API TcpSocketMap
 {
   protected:
@@ -43,16 +43,16 @@ class INET_API TcpSocketMap
     TcpSocketMap() {}
 
     /**
-     * Destructor. Does NOT delete the TCPSocket objects.
+     * Destructor. Does NOT delete the TcpSocket objects.
      */
     ~TcpSocketMap() {}
 
     /**
      * Finds the socket (by connId) for the given message. The message
-     * must have arrived from TCP, and must contain a TCPCommand
+     * must have arrived from TCP, and must contain a TcpCommand
      * control info object. The method returns nullptr if the socket was
      * not found, and throws an error if the message doesn't contain
-     * a TCPCommand.
+     * a TcpCommand.
      */
     TcpSocket *findSocketFor(cMessage *msg);
 

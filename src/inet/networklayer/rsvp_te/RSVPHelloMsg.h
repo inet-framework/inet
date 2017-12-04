@@ -29,8 +29,8 @@ namespace inet {
 
 // XXX FIXME all RSVP message have kind=RSVP_TRAFFIC
 // to distinguish them:
-// if they are RSVPPacket: use packet->getRsvpKind()
-// if they are RSVPHelloMsg: only one type exists
+// if they are RsvpPacket: use packet->getRsvpKind()
+// if they are RsvpHelloMsg: only one type exists
 //
 // thus, we need dynamic_cast to find out what it is
 // that's not good. we don't use kind, because kind

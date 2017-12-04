@@ -24,7 +24,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 

@@ -21,7 +21,7 @@
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
 
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"
 #include "inet/routing/ospfv2/interface/OSPFInterfaceStateDown.h"

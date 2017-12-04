@@ -24,7 +24,7 @@ package inet.applications.sctpapp;
 // result in sending back the same message unmodified.) The reply can also be
 // delayed by a constant time (echoDelay parameter).
 //
-// When TCPEchoApp receives data packets from TCP (and such, when they can be
+// When TcpEchoApp receives data packets from TCP (and such, when they can be
 // echoed) depends on the sendQueue/receiveQueue setting of TCPMain.
 // With TCPVirtualBytesSendQueue/RcvQueue, TCP passes up data to us
 // as soon as a segment arrives, so it can be echoed immediately.

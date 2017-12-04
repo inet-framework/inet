@@ -18,14 +18,14 @@
 #ifndef __INET_TELNETAPP_H
 #define __INET_TELNETAPP_H
 
-#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/applications/tcpapp/TcpAppBase.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 
 /**
- * An example Telnet client application. The server app should be TCPGenericSrvApp.
+ * An example Telnet client application. The server app should be TcpGenericSrvApp.
  */
 class INET_API TelnetApp : public TcpAppBase, public ILifecycle
 {

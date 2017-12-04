@@ -52,7 +52,7 @@ namespace httptools {
  *   variables from the simulation and simplifies setup considerably. This mode should be used
  *   whenever the topology of the network and the resulting effects are not of interest. This is
  *   implemented in the derived HttpBrowserDirect class.
- * - Socket mode, in which the INET TCPSocket is used to handle messages sent and received.
+ * - Socket mode, in which the INET TcpSocket is used to handle messages sent and received.
  *   This mode uses the full INET TCP/IP simulation. Requires the network topology to be set
  *   up -- routers, links, etc. This is implemented in the derived HttpBrowser class.
  *

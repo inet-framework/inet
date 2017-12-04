@@ -21,8 +21,8 @@
 #include "inet/physicallayer/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include "../mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
