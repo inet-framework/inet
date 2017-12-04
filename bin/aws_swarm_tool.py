@@ -3,9 +3,11 @@
 import os
 import sys
 import time
-import psutil
 import tempfile
 import subprocess
+
+import psutil
+import argparse
 
 import boto3
 from botocore.exceptions import ClientError
@@ -302,7 +304,7 @@ def remove_swarm(stack_name="inet"):
             stack.reload()
             resources = list(stack.resource_summaries.iterator())
         except ClientError:
-            # the stack might not be there anymore
+            # the stack might not be there anymore, but it's fine
             break
 
         num_deleting = sum(
@@ -318,6 +320,28 @@ def remove_swarm(stack_name="inet"):
 
     print()
 
-    # remove the cpu idle termination metrics/alarms/policies
+    # The CPU idle alarm and scaling policies we added are also deleted automatically
 
     print("Done.")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Tool to manage an INET Swarm app on AWS")
+
+    parser.add_argument('command', metavar='COMMAND', choices=['init', 'connect', 'halt', 'resume', 'delete'])
+
+    args = parser.parse_args()
+
+    if args.command == "init":
+        create_add_key_pair()
+        create_swarm()
+        deploy_app()
+    elif args.command == "connect":
+        connect_to_swarm()
+    elif args.command == "halt":
+        halt_swarm()
+    elif args.command == "resume":
+        resume_swarm()
+    elif args.command == "delete":
+        remove_swarm()
+

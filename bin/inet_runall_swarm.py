@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-#
-# Generates a makefile that executes several simulation runs
-#
 
 import argparse
 import os
@@ -42,16 +39,14 @@ def localToRemoteInetPath(localPath):
 
 
 
-
 description = """\
-Execute a number of OMNeT++ simulation runs, making use of multiple CPUs and
-multiple processes. In the simplest case, you would invoke it like this:
+Execute a number of OMNeT++ simulation runs on an INET Swarm application.
+In the simplest case, you would invoke it like this:
 
-% opp_runall ./simprog -c Foo
+% inet_runall_swarm -c Foo
 
-where "simprog" is an OMNeT++ simulation program, and "Foo" is an omnetpp.ini
-configuration, containing iteration variables and/or specifying multiple
-repetitions.
+where "Foo" is an omnetpp.ini configuration, containing iteration variables
+and/or specifying multiple repetitions.
 
 The first positional (non-option) argument and all following arguments are
 treated as the simulation command (simulation program and its arguments).
@@ -60,15 +55,11 @@ Options intended for opp_runall should come before the the simulation command.
 To limit the set of simulation runs to be performed, add a -r <runfilter>
 argument to the simulation command.
 
-opp_run runs simulations in several batches, making sure to keep all CPUs
-busy. Runs of a batch execute sequentially, inside the same Cmdenv process.
-The batch size as well as the number of CPUs to use can be overridden.
-
 Command-line options:
 """
 
 epilog = """\
-Operation: opp_runall invokes "./simprog -c Foo" with the "-q runnumbers"
+Operation: inet_runall_swarm invokes "./simprog -c Foo" with the "-q runnumbers"
 extra command-line arguments to figure out how many (and which) simulation
 runs it needs to perform, then runs them using multiple Cmdenv processes.
 opp_runall exploits GNU Make's -j option to support multiple CPUs or cores:
@@ -84,9 +75,7 @@ def unzip_bytes(zip_bytes):
             zipf.extractall(".")
 
 
-
 class Runall:
-
 
     def __init__(self):
         print("connecting to the job queue")
