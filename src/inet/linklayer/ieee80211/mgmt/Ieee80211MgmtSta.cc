@@ -587,7 +587,7 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
     // check if more exchanges are needed for auth to be complete
     int statusCode = requestBody->getStatusCode();
 
-    if (statusCode == SC_SUCCESSFUL && !requestBody->getIsLast()) {
+    if (statusCode == SC_SUCCESSFUL && !requestBody->isLast()) {
         EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
