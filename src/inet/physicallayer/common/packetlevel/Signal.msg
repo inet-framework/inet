@@ -19,25 +19,18 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-cplusplus {{
-typedef const ITransmission ConstITransmission;
-typedef const IArrival ConstIArrival;
-typedef const IListening ConstIListening;
-typedef const IReception ConstIReception;
-}}
-
-class ConstITransmission { @existingClass; }
-class ConstIArrival { @existingClass; }
-class ConstIListening { @existingClass; }
-class ConstIReception { @existingClass; }
+class ITransmission { @existingClass; }
+class IArrival { @existingClass; }
+class IListening { @existingClass; }
+class IReception { @existingClass; }
 
 packet Signal
 {
     @existingClass;
     @descriptor(readonly);
-    ConstITransmission *transmission;
-    ConstIArrival *arrival;
-    ConstIListening *listening;
-    ConstIReception *reception;
+    const ITransmission *transmission;
+    const IArrival *arrival;
+    const IListening *listening;
+    const IReception *reception;
 }
 

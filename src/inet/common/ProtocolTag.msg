@@ -15,20 +15,19 @@ namespace inet;
 
 cplusplus{{
 typedef Ptr<const Chunk> ChunkPtr;
-typedef const Protocol ConstProtocol;
 
 using namespace units::values;      //FIXME Why? Units unused in this file.
 }}
 
 class ChunkPtr { @existingClass; }
-class ConstProtocol { @existingClass; }
+class Protocol { @existingClass; }
 
 //
 // This is an abstract base class that should not be directly added as a tag.
 //
 class ProtocolTagBase extends TagBase
 {
-    ConstProtocol *protocol @tostring("->info()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
+    const Protocol *protocol @tostring("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
 }
 
 //

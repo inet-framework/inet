@@ -35,8 +35,8 @@ class INET_API NetworkHeaderBase : public FieldsChunk
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const L3Address& address) = 0;
-    virtual ConstProtocol *getProtocol() const = 0;
-    virtual void setProtocol(ConstProtocol *protocol) = 0;
+    virtual const Protocol *getProtocol() const = 0;
+    virtual void setProtocol(const Protocol *protocol) = 0;
 };
 
 } // namespace inet
@@ -51,6 +51,6 @@ class NetworkHeaderBase extends FieldsChunk
 
     L3Address sourceAddress @byValue;
     L3Address destinationAddress @byValue;
-    ConstProtocol *protocol;
+    const Protocol *protocol;
 };
 

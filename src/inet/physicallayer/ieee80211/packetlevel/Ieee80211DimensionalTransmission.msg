@@ -28,6 +28,7 @@ class Ieee80211DimensionalTransmission extends DimensionalTransmission
 {
     @existingClass;
     @descriptor(readonly);
-    ConstIIeee80211Mode *mode;
-    ConstIeee80211Channel *channel;
+    const IIeee80211Mode *mode;
+    const Ieee80211Channel *channel;
 }
+

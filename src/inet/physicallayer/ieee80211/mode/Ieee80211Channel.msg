@@ -25,11 +25,6 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-cplusplus {{
-typedef const Ieee80211Channel ConstIeee80211Channel;
-typedef const IIeee80211Band ConstIIeee80211Band;
-}}
-
 class IIeee80211Band
 {
     @existingClass;
@@ -55,4 +50,3 @@ class Ieee80211Channel
     int channelNumber;
 }
 
-class ConstIeee80211Channel extends Ieee80211Channel { @existingClass; }

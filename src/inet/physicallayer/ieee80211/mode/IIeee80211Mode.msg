@@ -25,12 +25,6 @@ cplusplus {{
 
 namespace inet::physicallayer;
 
-cplusplus {{
-typedef const IIeee80211Mode ConstIIeee80211Mode;
-typedef const Ieee80211ModeSet ConstIeee80211ModeSet;
-typedef const IIeee80211Mode ConstIIeee80211Mode;
-}}
-
 class IIeee80211PreambleMode
 {
     @existingClass;
@@ -90,5 +84,3 @@ class Ieee80211ModeSet extends cObject
     int cwMax @editable(false);
 }
 
-class ConstIIeee80211Mode extends IIeee80211Mode { @existingClass; @editable(false); }
-class ConstIeee80211ModeSet extends Ieee80211ModeSet { @existingClass; @editable(false); }
