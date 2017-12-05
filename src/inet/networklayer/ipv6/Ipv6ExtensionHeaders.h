@@ -30,7 +30,7 @@ class INET_API Ipv6RoutingHeader : public Ipv6RoutingHeader_Base
     Ipv6RoutingHeader& operator=(const Ipv6RoutingHeader& other) { Ipv6RoutingHeader_Base::operator=(other); return *this; }
     virtual Ipv6RoutingHeader *dup() const override { return new Ipv6RoutingHeader(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from Ipv6RoutingHeader_Base
-    virtual void setAddressArraySize(unsigned int size) override;
+    virtual void setAddressArraySize(size_t size) override;
 };
 
 } // namespace inet

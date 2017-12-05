@@ -26,7 +26,7 @@ class INET_API PimHello : public PimHello_Base
 {
   protected:
     HelloOption **options_var;    // array ptr
-    unsigned int options_arraysize;
+    size_t options_arraysize;
 
   private:
     void copy(const PimHello& other);
@@ -45,11 +45,11 @@ class INET_API PimHello : public PimHello_Base
     virtual void parsimUnpack(cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual void setOptionsArraySize(unsigned int size) override;
-    virtual unsigned int getOptionsArraySize() const override;
-    virtual HelloOption *getMutableOptions(unsigned int k) override;
-    virtual const HelloOption *getOptions(unsigned int k) const override;
-    virtual void setOptions(unsigned int k, HelloOption *options) override;
+    virtual void setOptionsArraySize(size_t size) override;
+    virtual size_t getOptionsArraySize() const override;
+    virtual HelloOption *getMutableOptions(size_t k) override;
+    virtual const HelloOption *getOptions(size_t k) const override;
+    virtual void setOptions(size_t k, HelloOption *options) override;
 };
 
 }    // namespace inet

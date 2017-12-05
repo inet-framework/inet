@@ -85,11 +85,11 @@ class INET_API TlvOptions : public TlvOptions_Base
     int findByType(short int type, int firstPos=0) const;
 
     // redefine and implement pure virtual functions from TlvOptions_Base
-    virtual void setTlvOptionArraySize(unsigned int size) override { throw cRuntimeError("Do not use it!"); }
-    virtual unsigned int getTlvOptionArraySize() const override { return size(); }
-    virtual const TlvOptionBase& getTlvOption(unsigned int k) const override { return *optionVector.at(k); }
-    virtual TlvOptionBase& getMutableTlvOption(unsigned int k) override { return *optionVector.at(k); }
-    virtual void setTlvOption(unsigned int k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
+    virtual void setTlvOptionArraySize(size_t size) override { throw cRuntimeError("Do not use it!"); }
+    virtual size_t getTlvOptionArraySize() const override { return size(); }
+    virtual const TlvOptionBase& getTlvOption(size_t k) const override { return *optionVector.at(k); }
+    virtual TlvOptionBase& getMutableTlvOption(size_t k) override { return *optionVector.at(k); }
+    virtual void setTlvOption(size_t k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
 
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;

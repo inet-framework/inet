@@ -79,11 +79,11 @@ class INET_API MplsHeader : public MplsHeader_Base
 
     virtual b getChunkLength() const override { return b(32) * labels.size(); }
 
-    virtual void setLabelsArraySize(unsigned int size) override { throw cRuntimeError("do not use it"); }
-    virtual unsigned int getLabelsArraySize() const override { return labels.size(); }
-    virtual MplsLabel& getMutableLabels(unsigned int k) override { throw cRuntimeError("do not use it"); }
-    virtual const MplsLabel& getLabels(unsigned int k) const override { throw cRuntimeError("do not use it"); }
-    virtual void setLabels(unsigned int k, const MplsLabel& labels) override { throw cRuntimeError("do not use it"); }
+    virtual void setLabelsArraySize(size_t size) override { throw cRuntimeError("do not use it"); }
+    virtual size_t getLabelsArraySize() const override { return labels.size(); }
+    virtual MplsLabel& getMutableLabels(size_t k) override { throw cRuntimeError("do not use it"); }
+    virtual const MplsLabel& getLabels(size_t k) const override { throw cRuntimeError("do not use it"); }
+    virtual void setLabels(size_t k, const MplsLabel& labels) override { throw cRuntimeError("do not use it"); }
 };
 
 } // namespace inet

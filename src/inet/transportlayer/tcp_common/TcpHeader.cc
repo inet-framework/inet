@@ -121,17 +121,17 @@ void TcpHeader::addHeaderOption(TcpOption *option)
     setChunkLength(B(headerLength));
 }
 
-void TcpHeader::setHeaderOptionArraySize(unsigned int size)
+void TcpHeader::setHeaderOptionArraySize(size_t size)
 {
     throw cRuntimeError(this, "setHeaderOptionArraySize() not supported, use addHeaderOption()");
 }
 
-unsigned int TcpHeader::getHeaderOptionArraySize() const
+size_t TcpHeader::getHeaderOptionArraySize() const
 {
     return headerOptionList.size();
 }
 
-void TcpHeader::setHeaderOption(unsigned int k, TcpOption *headerOption)
+void TcpHeader::setHeaderOption(size_t k, TcpOption *headerOption)
 {
     throw cRuntimeError(this, "setHeaderOption() not supported, use addHeaderOption()");
 }

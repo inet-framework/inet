@@ -57,30 +57,30 @@ Ipv6ExtHeaderTagBase::~Ipv6ExtHeaderTagBase()
     clean();
 }
 
-unsigned int Ipv6ExtHeaderTagBase::getExtensionHeaderArraySize() const
+size_t Ipv6ExtHeaderTagBase::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(unsigned int size)
+void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(size_t size)
 {
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getMutableExtensionHeader(unsigned int k)
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getMutableExtensionHeader(size_t k)
 {
     handleChange();
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
-const Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeader(unsigned int k) const
+const Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeader(size_t k) const
 {
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
-void Ipv6ExtHeaderTagBase::setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var)
+void Ipv6ExtHeaderTagBase::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }

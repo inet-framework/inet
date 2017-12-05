@@ -49,19 +49,19 @@ class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int getExtensionHeaderArraySize() const override;
+    virtual size_t getExtensionHeaderArraySize() const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeaderArraySize(unsigned int size) override;
+    virtual void setExtensionHeaderArraySize(size_t size) override;
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual Ipv6ExtensionHeader *getMutableExtensionHeader(unsigned int k) override;
-    virtual const Ipv6ExtensionHeader *getExtensionHeader(unsigned int k) const override;
+    virtual Ipv6ExtensionHeader *getMutableExtensionHeader(size_t k) override;
+    virtual const Ipv6ExtensionHeader *getExtensionHeader(size_t k) const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var) override;
+    virtual void setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var) override;
 
     /**
      * Adds an extension header to the datagram, at the given position.

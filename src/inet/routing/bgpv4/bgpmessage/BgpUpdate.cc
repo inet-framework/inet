@@ -23,7 +23,7 @@ namespace bgp {
 
 Register_Class(BgpUpdateMessage)
 
-void BgpUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
+void BgpUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
 {
     unsigned short delta_size = size - getWithdrawnRoutesArraySize();
     unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
@@ -41,7 +41,7 @@ unsigned short BgpUpdateMessage::computePathAttributesBytes(const BgpUpdatePathA
     // BgpUpdatePathAttributesOrigin (1)
     contentBytes += 1;
     // BgpUpdatePathAttributesAsPath
-    for (unsigned int i = 0; i < pathAttrs.getAsPathArraySize(); i++)
+    for (size_t i = 0; i < pathAttrs.getAsPathArraySize(); i++)
         contentBytes += 2 + pathAttrs.getAsPath(i).getLength(); // type (1) + length (1) + value
     // BgpUpdatePathAttributesNextHop (4)
     contentBytes += 4;

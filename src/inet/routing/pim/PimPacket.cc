@@ -39,7 +39,7 @@ PimHello::PimHello(const PimHello& other) : PimHello_Base(other)
 PimHello::~PimHello()
 {
     if (options_var) {
-        for (unsigned int i = 0; i < options_arraysize; i++)
+        for (size_t i = 0; i < options_arraysize; i++)
             delete options_var[i];
     }
     delete[] options_var;
@@ -56,13 +56,13 @@ PimHello& PimHello::operator=(const PimHello& other)
 
 void PimHello::copy(const PimHello& other)
 {
-    for (unsigned int i = 0; i < options_arraysize; i++)
+    for (size_t i = 0; i < options_arraysize; i++)
         delete options_var[i];
     delete[] options_var;
 
     this->options_var = (other.options_arraysize == 0) ? nullptr : new HelloOption*[other.options_arraysize];
     options_arraysize = other.options_arraysize;
-    for (unsigned int i = 0; i < options_arraysize; i++)
+    for (size_t i = 0; i < options_arraysize; i++)
         this->options_var[i] = other.options_var[i]->dup();
 }
 
@@ -70,7 +70,7 @@ void PimHello::parsimPack(cCommBuffer *b) const
 {
     PimHello_Base::parsimPack(b);
     b->pack(options_arraysize);
-    for (unsigned int i = 0; i < options_arraysize; i++) {
+    for (size_t i = 0; i < options_arraysize; i++) {
         if (options_var[i]) {
             doParsimPacking(b, options_var[i]->getType());
             doParsimPacking(b, options_var[i]);
@@ -83,7 +83,7 @@ void PimHello::parsimPack(cCommBuffer *b) const
 void PimHello::parsimUnpack(cCommBuffer *b)
 {
     PimHello_Base::parsimUnpack(b);
-    for (unsigned int i = 0; i < options_arraysize; i++)
+    for (size_t i = 0; i < options_arraysize; i++)
         delete options_var[i];
     delete[] this->options_var;
     b->unpack(options_arraysize);
@@ -92,7 +92,7 @@ void PimHello::parsimUnpack(cCommBuffer *b)
     }
     else {
         this->options_var = new HelloOption*[options_arraysize];
-        for (unsigned int i = 0; i < options_arraysize; i++) {
+        for (size_t i = 0; i < options_arraysize; i++) {
             short int type;
             doParsimUnpacking(b, type);
             switch (type) {
@@ -127,38 +127,38 @@ void PimHello::parsimUnpack(cCommBuffer *b)
     }
 }
 
-void PimHello::setOptionsArraySize(unsigned int size)
+void PimHello::setOptionsArraySize(size_t size)
 {
     HelloOption **options_var2 = (size == 0) ? nullptr : new HelloOption*[size];
-    for (unsigned int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
         options_var2[i] = i < options_arraysize ? options_var[i] : nullptr;
-    for (unsigned int i = size; i < options_arraysize; i++)
+    for (size_t i = size; i < options_arraysize; i++)
         delete options_var[i];
     options_arraysize = size;
     delete[] options_var;
     this->options_var = options_var2;
 }
 
-unsigned int PimHello::getOptionsArraySize() const
+size_t PimHello::getOptionsArraySize() const
 {
     return options_arraysize;
 }
 
-HelloOption *PimHello::getMutableOptions(unsigned int k)
+HelloOption *PimHello::getMutableOptions(size_t k)
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     return options_var[k];
 }
 
-const HelloOption *PimHello::getOptions(unsigned int k) const
+const HelloOption *PimHello::getOptions(size_t k) const
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);
     return options_var[k];
 }
 
-void PimHello::setOptions(unsigned int k, HelloOption *options)
+void PimHello::setOptions(size_t k, HelloOption *options)
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);

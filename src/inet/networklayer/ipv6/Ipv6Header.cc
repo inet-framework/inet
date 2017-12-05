@@ -43,17 +43,17 @@ void Ipv6Header::copy(const Ipv6Header& other)
         addExtensionHeader((elem)->dup());
 }
 
-void Ipv6Header::setExtensionHeaderArraySize(unsigned int size)
+void Ipv6Header::setExtensionHeaderArraySize(size_t size)
 {
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-unsigned int Ipv6Header::getExtensionHeaderArraySize() const
+size_t Ipv6Header::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-Ipv6ExtensionHeader *Ipv6Header::getMutableExtensionHeader(unsigned int k)
+Ipv6ExtensionHeader *Ipv6Header::getMutableExtensionHeader(size_t k)
 {
     handleChange();
     if (k >= extensionHeaders.size())
@@ -61,7 +61,7 @@ Ipv6ExtensionHeader *Ipv6Header::getMutableExtensionHeader(unsigned int k)
     return extensionHeaders[k];
 }
 
-const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(unsigned int k) const
+const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(size_t k) const
 {
     if (k >= extensionHeaders.size())
         return nullptr;
@@ -92,7 +92,7 @@ const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId ex
     return nullptr;
 }
 
-void Ipv6Header::setExtensionHeader(unsigned int k, Ipv6ExtensionHeader *extensionHeader_var)
+void Ipv6Header::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
@@ -103,7 +103,7 @@ void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
         throw cRuntimeError(this, "addExtensionHeader() does not support atPos parameter.");
     ASSERT((eh->getByteLength() >= 1) && (eh->getByteLength() % 8 == 0));
     int thisOrder = getExtensionHeaderOrder(eh);
-    unsigned int i;
+    size_t i;
     for (i = 0; i < extensionHeaders.size(); i++) {
         int thatOrder = getExtensionHeaderOrder(extensionHeaders[i]);
         if (thisOrder != -1 && thatOrder > thisOrder)
@@ -190,7 +190,7 @@ int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 int Ipv6Header::calculateFragmentLength() const
 {
     int len = B(getChunkLength()).get() - IPv6_HEADER_BYTES;
-    unsigned int i;
+    size_t i;
     for (i = 0; i < extensionHeaders.size(); i++) {
         len -= extensionHeaders[i]->getByteLength();
         if (extensionHeaders[i]->getExtensionType() == IP_PROT_IPv6EXT_FRAGMENT)
@@ -213,7 +213,7 @@ Ipv6ExtensionHeader *Ipv6Header::removeFirstExtensionHeader()
 Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IpProtocolId extensionType)
 {
     handleChange();
-    for (unsigned int i = 0; i < extensionHeaders.size(); i++) {
+    for (size_t i = 0; i < extensionHeaders.size(); i++) {
         if (extensionHeaders[i]->getExtensionType() == extensionType) {
             Ipv6ExtensionHeader *eh = extensionHeaders[i];
             extensionHeaders.erase(extensionHeaders.begin() + i);
