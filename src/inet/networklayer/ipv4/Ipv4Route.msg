@@ -26,9 +26,9 @@ class Ipv4Route extends cNamedObject
 {
     @existingClass;
     @descriptor(readonly);
-    Ipv4Address destination;
-    Ipv4Address netmask;
-    Ipv4Address gateway;
+    Ipv4Address destination @byValue;
+    Ipv4Address netmask @byValue;
+    Ipv4Address gateway @byValue;
     int metric;
     int prefixLength;
     string interfaceName;
