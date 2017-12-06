@@ -18,28 +18,24 @@ import pymongo
 import gridfs
 
 
-localInetRoot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/..")
+REMOTE_INET_ROOT = "/opt/inet"
 
-remoteInetRoot = "/opt/inet"
+LOCAL_INET_ROOT = os.path.abspath(
+    os.path.dirname(os.path.realpath(__file__)) + "/..")
 
-sys.path.insert(0, localInetRoot + "/tests/fingerprint")
+NED_PATH = REMOTE_INET_ROOT + "/src;" + REMOTE_INET_ROOT + "/examples;" + REMOTE_INET_ROOT + \
+    "/showcases;" + REMOTE_INET_ROOT + "/tutorials;" + \
+    REMOTE_INET_ROOT + "/tests/networks;."
+INET_LIB = REMOTE_INET_ROOT + "/src/INET"
 
-import  fingerprints_worker
-
-
-
-nedPath = remoteInetRoot + "/src;" + remoteInetRoot + "/examples;" + remoteInetRoot + "/showcases;" + remoteInetRoot + "/tutorials;" + remoteInetRoot + "/tests/networks;."
-inetLib = remoteInetRoot + "/src/INET"
-cpuTimeLimit = "30000s"
 githash = ""
 
 
-def localToRemoteInetPath(localPath):
-    return remoteInetRoot + "/" + os.path.relpath(os.path.abspath(localPath), localInetRoot)
+def local_inet_path_to_remote(local_path):
+    return REMOTE_INET_ROOT + "/" + os.path.relpath(os.path.abspath(local_path), LOCAL_INET_ROOT)
 
 
-
-description = """\
+DESCRIPTION = """\
 Execute a number of OMNeT++ simulation runs on an INET Swarm application.
 In the simplest case, you would invoke it like this:
 
@@ -58,14 +54,10 @@ argument to the simulation command.
 Command-line options:
 """
 
-epilog = """\
+EPILOG = """\
 Operation: inet_runall_swarm invokes "./simprog -c Foo" with the "-q runnumbers"
 extra command-line arguments to figure out how many (and which) simulation
-runs it needs to perform, then runs them using multiple Cmdenv processes.
-opp_runall exploits GNU Make's -j option to support multiple CPUs or cores:
-the commands to perform the simulation runs are written into a temporary
-Makefile, and run using "make" with the appropriate -j option. The Makefile
-may be exported for inspection.
+runs it needs to perform, then ... magic happens. TODO
 """
 
 
@@ -80,9 +72,10 @@ class Runall:
     def __init__(self):
         print("connecting to the job queue")
         conn = redis.Redis(host="localhost")
-        self.build_q = rq.Queue("build", connection=conn, default_timeout=10*60*60)
-        self.run_q = rq.Queue("run", connection=conn, default_timeout=10*60*60)
-
+        self.build_q = rq.Queue("build", connection=conn,
+                                default_timeout=10 * 60 * 60)
+        self.run_q = rq.Queue("run", connection=conn,
+                              default_timeout=10 * 60 * 60)
 
     def run(self):
         opts = self.parseArgs()
@@ -91,21 +84,20 @@ class Runall:
         if opts.directory != None:
             self.changeDir(opts.directory)
 
-        runNumbers = self.resolveRunNumbers(opts.simProgArgs)
-
+        run_numbers = self.resolveRunNumbers(opts.sim_prog_args)
 
         global githash
 
-        buildStarted = time.perf_counter()
+        start_time = time.perf_counter()
         print("queueing build job")
 
-        buildJob = self.build_q.enqueue(fingerprints_worker.buildInet, githash)
+        build_job = self.build_q.enqueue("inet_worker.build_inet", githash)
 
         print("waiting for build job to end")
-        while not buildJob.is_finished:
-            if buildJob.is_failed:
-                buildJob.refresh()
-                print("ERROR: build job failed " + str(buildJob.exc_info))
+        while not build_job.is_finished:
+            if build_job.is_failed:
+                build_job.refresh()
+                print("ERROR: build job failed " + str(build_job.exc_info))
                 exit(1)
             try:
                 time.sleep(0.1)
@@ -113,128 +105,130 @@ class Runall:
                 print("interrupted, not running tests (the build will still finish)")
                 exit(1)
 
-        buildEnded = time.perf_counter()
+        end_time = time.perf_counter()
 
-        print("build finished, took " + str(buildEnded - buildStarted) + "s, result:" + str(buildJob.result))
-
-
+        print("build finished, took " + str(end_time -
+                                            start_time) + "s, result:" + str(build_job.result))
 
         rng = random.SystemRandom()
 
-        rng.shuffle(runNumbers)
+        rng.shuffle(run_numbers)
 
-
-        runJobs = []
-        for rn in runNumbers:
+        run_jobs = []
+        for rn in run_numbers:
             wd = os.getcwd()
 
-            #if not wd.startswith('/'):
-            wd = "/" + os.path.relpath(os.path.abspath(os.getcwd()), localInetRoot)
-
+            # if not wd.startswith('/'):
+            wd = "/" + \
+                os.path.relpath(os.path.abspath(os.getcwd()), LOCAL_INET_ROOT)
 
             # run the simulation
-            workingdir = (remoteInetRoot + "/" + wd) if wd.startswith('/') else wd
+            workingdir = (REMOTE_INET_ROOT + "/" +
+                          wd) if wd.startswith('/') else wd
 
-            command = "opp_run_release -s -n '" + nedPath + "' -l " + inetLib + " -u Cmdenv " + \
-                " ".join(opts.simProgArgs) + " -r " + str(rn)
+            command = "opp_run_release -s -n '" + NED_PATH + "' -l " + INET_LIB + " -u Cmdenv " + \
+                " ".join(opts.sim_prog_args) + " -r " + str(rn)
 
-            runJob = self.run_q.enqueue(fingerprints_worker.runSimulation, githash, command, workingdir, depends_on = buildJob)
+            runJob = self.run_q.enqueue(
+                "inet_worker.run_simulation", githash, command, workingdir, depends_on=build_job)
 
-            runJobs.append(runJob)
+            run_jobs.append(runJob)
 
-
-        print("queued " + str(len(runJobs)) + " jobs")
+        print("queued " + str(len(run_jobs)) + " jobs")
 
         stop = False
-        while runJobs and not stop:
+        while run_jobs and not stop:
             try:
-                for j in runJobs[:]:
+                for j in run_jobs[:]:
 
                     if j.status is None:
-                        print("Test " + "tst.title" + " was removed from the queue")
-                        runJobs.remove(j)
+                        print("Run " + "" + " was removed from the queue")
+                        run_jobs.remove(j)
                     elif j.status == rq.job.JobStatus.FAILED:
                         j.refresh()
-                        print("Test " + "tst.title" + " failed: " + str(j.exc_info))
-                        runJobs.remove(j)
+                        print("Run " + "" + " failed: " + str(j.exc_info))
+                        run_jobs.remove(j)
                     else:
                         if j.result is not None:
                             pprint.pprint(vars(j.result))
 
-                            with pymongo.MongoClient("localhost", socketTimeoutMS=10*60*1000, connectTimeoutMS=10*60*1000, serverSelectionTimeoutMS=10*60*1000) as client:
+                            with pymongo.MongoClient("localhost", socketTimeoutMS=10 * 60 * 1000, connectTimeoutMS=10 * 60 * 1000, serverSelectionTimeoutMS=10 * 60 * 1000) as client:
                                 gfs = gridfs.GridFS(client.opp)
                                 unzip_bytes(gfs.get(j.id).read())
 
-                            runJobs.remove(j)
+                            run_jobs.remove(j)
 
                 time.sleep(0.1)
             except KeyboardInterrupt:
                 stop = True
 
-        if runJobs:
-            print("Cancelling " + str(len([j for j in runJobs if j.status == 'queued' or j.status == 'deferred'])) + " pending jobs...")
-            for j in runJobs[:]:
+        if run_jobs:
+            print("Cancelling " + str(len([j for j in run_jobs if j.status ==
+                                           'queued' or j.status == 'deferred'])) + " pending jobs...")
+            for j in run_jobs[:]:
                 j.cancel()
 
-
         print("done")
-
 
         sys.exit(0)
 
     def parseArgs(self):
-        currentGitRef = subprocess.check_output(["git", "-C", localInetRoot, "rev-parse", "HEAD"]).decode("utf-8")
+        currentGitRef = subprocess.check_output(
+            ["git", "-C", LOCAL_INET_ROOT, "rev-parse", "HEAD"]).decode("utf-8")
 
-        parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
-        parser.add_argument('--commit', default=currentGitRef, metavar='commit')
-        parser.add_argument('-C', '--directory', metavar='DIR', help='Change to the given directory before doing anything.')
+        parser = argparse.ArgumentParser(
+            description=DESCRIPTION, epilog=EPILOG, formatter_class=argparse.RawDescriptionHelpFormatter)
+        parser.add_argument(
+            '--commit', default=currentGitRef, metavar='commit')
+        parser.add_argument('-C', '--directory', metavar='DIR',
+                            help='Change to the given directory before doing anything.')
 
         try:
             opts, argv = parser.parse_known_args()
-            print(opts)
-            print(argv)
-            opts.simProgArgs = argv
-
+            opts.sim_prog_args = argv
         except IOError as e:
             print(e)
             exit(1)
 
         global githash
-        githash = subprocess.check_output(["git", "-C", localInetRoot, "rev-parse", opts.commit.strip()]).decode("utf-8").strip()
+        githash = subprocess.check_output(
+            ["git", "-C", LOCAL_INET_ROOT, "rev-parse", opts.commit.strip()]).decode("utf-8").strip()
 
         print("running with commit " + githash)
 
         return opts
 
     def changeDir(self, directory):
-            print("changing into directory: " + directory)
-            try:
-                os.chdir(directory)
-            except IOError as e:
-                print("Cannot change directory: " + str(e))
-                exit(1)
-
-    def resolveRunNumbers(self, simProgArgs):
-        tmpArgs = ["opp_run_dbg"] + simProgArgs + ["-s", "-q", "runnumbers"]
-        print("running: " + " ".join(tmpArgs))
+        print("changing into directory: " + directory)
         try:
-            output = subprocess.check_output(tmpArgs)
-        except subprocess.CalledProcessError as e:
-            print(simProgArgs[0] + " [...] -q runnumbers returned nonzero exit status")
+            os.chdir(directory)
+        except IOError as exc:
+            print("Cannot change directory: " + str(exc))
             exit(1)
-        except IOError as e:
-            print("Cannot execute " + simProgArgs[0] + " [...] -q runnumbers: " + str(e))
+
+    def resolveRunNumbers(self, sim_prog_args):
+        tmp_args = ["opp_run_dbg"] + sim_prog_args + ["-s", "-q", "runnumbers"]
+        print("running: " + " ".join(tmp_args))
+        try:
+            output = subprocess.check_output(tmp_args)
+        except subprocess.CalledProcessError as exc:
+            print(
+                sim_prog_args[0] + " [...] -q runnumbers returned nonzero exit status")
+            exit(1)
+        except IOError as exc:
+            print("Cannot execute " +
+                  sim_prog_args[0] + " [...] -q runnumbers: " + str(exc))
             exit(1)
 
         try:
             output = output.decode("utf-8")
-            runNumbers = [int(num) for num in output.split()]
-            print("run numbers: " + str(runNumbers))
-            return runNumbers
+            run_numbers = [int(num) for num in output.split()]
+            print("run numbers: " + str(run_numbers))
+            return run_numbers
         except:
-            print("Error parsing output of " + simProgArgs[0] + " [...] -q runnumbers")
+            print("Error parsing output of " +
+                  sim_prog_args[0] + " [...] -q runnumbers")
             exit(1)
-
 
 
 tool = Runall()

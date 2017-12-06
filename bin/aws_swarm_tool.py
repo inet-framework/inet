@@ -5,9 +5,9 @@ import sys
 import time
 import tempfile
 import subprocess
+import argparse
 
 import psutil
-import argparse
 
 import boto3
 from botocore.exceptions import ClientError
@@ -155,40 +155,38 @@ def connect_to_swarm(stack_name="inet"):
 
     manager_public_ip = _get_manager_public_ip(stack_name)
 
+    print("Opening tunnel to the manager at " + manager_public_ip)
+
+    pid_file_name = os.path.join(tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
+
     try:
-        print("Opening tunnel to the manager at " + manager_public_ip)
-
-        pid_file_name = os.path.join(tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
-
-        try:
-            with open(pid_file_name, "rt") as existing_pid_file:
-                existing_pid = int(existing_pid_file.readline().strip())
-                print("found a pid file for this stack, with pid " + str(existing_pid))
-                if existing_pid in psutil.pids():
-                    print("You are already connected.")
-                    return
-                else:
-                    print("But that process is no longer running. Starting a new one...")
-        except IOError:
-            # good, no such pid file yet
-            pass
-
-        ssh = subprocess.Popen([
-            "ssh", "docker@" + manager_public_ip, "-N",
-            "-o", "StrictHostKeyChecking=no", "-o", "ExitOnForwardFailure=yes",
-            "-L", "localhost:2374:/var/run/docker.sock",
-            "-L", "9181:172.17.0.1:9181", "-L", "8080:172.17.0.1:8080",
-            "-L", "27017:172.17.0.1:27017", "-L", "6379:172.17.0.1:6379"])
-
-        with open(pid_file_name, "wt") as pid_file:
-            pid_file.write(str(ssh.pid))
-
-        print("SSH started, its pid is " + str(ssh.pid) + ".")
-
-        # from now on you can do:  docker -H tcp://localhost:2374 info
-
-    except KeyboardInterrupt:
+        with open(pid_file_name, "rt") as existing_pid_file:
+            existing_pid = int(existing_pid_file.readline().strip())
+            print("found a pid file for this stack, with pid " + str(existing_pid))
+            if existing_pid in psutil.pids():
+                print("You are already connected.")
+                return
+            else:
+                print("But that process is no longer running. Starting a new one...")
+    except IOError:
+        # good, no such pid file yet
         pass
+
+    ssh = subprocess.Popen([
+        "ssh", "docker@" + manager_public_ip, "-N",
+        "-o", "StrictHostKeyChecking=no", "-o", "ExitOnForwardFailure=yes",
+        "-L", "localhost:2374:/var/run/docker.sock",
+        "-L", "9181:172.17.0.1:9181", "-L", "8080:172.17.0.1:8080",
+        "-L", "27017:172.17.0.1:27017", "-L", "6379:172.17.0.1:6379"])
+
+    with open(pid_file_name, "wt") as pid_file:
+        pid_file.write(str(ssh.pid))
+
+    print("SSH started, its pid is " + str(ssh.pid) + ".")
+
+    # wait for the tunnel to come up?
+
+    # from now on you can do:  docker -H tcp://localhost:2374 info
 
 
 def deploy_app(stack_name="inet"):
@@ -209,6 +207,7 @@ def halt_swarm(stack_name="inet"):
         AutoScalingGroupName=worker_asg_name, MinSize=0, DesiredCapacity=0)
 
     print("Waiting for instances to terminate...")
+
     try:
         while True:
             time.sleep(5)
@@ -245,6 +244,8 @@ def resume_swarm(stack_name="inet", num_workers=3):
         AutoScalingGroupName=manager_asg_name, DesiredCapacity=1)
     autoscaling.update_auto_scaling_group(
         AutoScalingGroupName=worker_asg_name, DesiredCapacity=num_workers)
+
+    print("Waiting for instances to start...")
 
     try:
         while True:
@@ -328,7 +329,7 @@ def remove_swarm(stack_name="inet"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Tool to manage an INET Swarm app on AWS")
 
-    parser.add_argument('command', metavar='COMMAND', choices=['init', 'connect', 'halt', 'resume', 'delete'])
+    parser.add_argument('command', metavar='COMMAND', choices=['init', 'connect', 'deploy', 'halt', 'resume', 'delete'])
 
     args = parser.parse_args()
 
@@ -338,10 +339,14 @@ if __name__ == "__main__":
         deploy_app()
     elif args.command == "connect":
         connect_to_swarm()
+    elif args.command == "deploy":
+        deploy_app()
     elif args.command == "halt":
         halt_swarm()
     elif args.command == "resume":
         resume_swarm()
+        connect_to_swarm()
+        deploy_app()
     elif args.command == "delete":
         remove_swarm()
 
