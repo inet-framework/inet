@@ -20,6 +20,7 @@
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/common/TimeTag_m.h"
 #include "UnitTest_m.h"
 #include "UnitTest.h"
 
@@ -1450,8 +1451,73 @@ static void testReorderBuffer()
     ASSERT(buffer3.getExpectedOffset() == B(1030));
 }
 
+static void testChunkTags()
+{
+    // 1. source application creates packet
+    auto chunk1 = makeShared<ByteCountChunk>(B(1500));
+    auto tag1 = chunk1->addTag<CreationTimeTag>(B(0), B(1500));
+    tag1->setCreationTime(42);
+    // TODO: tag1->markImmutable();
+    chunk1->markImmutable();
+    Packet packet1;
+    packet1.append(chunk1);
+    // 2. source application sends packet to TCP, which enqueues data
+    ChunkQueue queue1;
+    queue1.push(packet1.peekData());
+    // 3. source TCP creates TCP segment
+    Packet packet2;
+    packet2.append(queue1.pop(B(1000)));
+    // 4. source TCP sends TCP segment, destination TCP enqueues data
+    ReorderBuffer buffer1;
+    buffer1.setExpectedOffset(B(0));
+    buffer1.replace(B(0), packet2.peekData());
+    // 5. destination TCP sends available data to application
+    Packet packet3;
+    packet3.append(buffer1.popAvailableData());
+    // 6. destination application processes received data
+    const auto& chunk2 = packet3.peekData();
+    auto regions1 = chunk2->getAllTags<CreationTimeTag>();
+    assert(regions1.size() == 1);
+    for (auto& region1 : regions1) {
+        assert(region1.getOffset() == B(0));
+        assert(region1.getLength() == B(1000));
+        assert(region1.getTag()->getCreationTime() == 42);
+    }
+
+    // 7. source application creates another packet
+    auto chunk3 = makeShared<ByteCountChunk>(B(1500));
+    auto tag2 = chunk3->addTag<CreationTimeTag>(B(0), B(1500));
+    tag2->setCreationTime(81);
+    // TODO: tag1->markImmutable();
+    chunk3->markImmutable();
+    Packet packet4;
+    packet4.append(chunk3);
+    // 8. source application sends packet to TCP, which enqueues data
+    queue1.push(packet4.peekData());
+    // 9. source TCP creates TCP segment
+    Packet packet5;
+    packet5.append(queue1.pop(B(1000)));
+    // 10. source TCP sends TCP segment, destination TCP enqueues data
+    buffer1.setExpectedOffset(B(1000));
+    buffer1.replace(B(1000), packet5.peekData());
+    // 11. destination TCP sends available data to application
+    Packet packet6;
+    packet6.append(buffer1.popAvailableData());
+    // 12. destination application processes received data
+    const auto& chunk4 = packet6.peekData();
+    auto regions2 = chunk4->getAllTags<CreationTimeTag>();
+    assert(regions2.size() == 2);
+    assert(regions2[0].getOffset() == B(0));
+    assert(regions2[0].getLength() == B(500));
+    assert(regions2[0].getTag()->getCreationTime() == 42);
+    assert(regions2[1].getOffset() == B(500));
+    assert(regions2[1].getLength() == B(500));
+    assert(regions2[1].getTag()->getCreationTime() == 81);
+}
+
 void UnitTest::initialize()
 {
+    testChunkTags();
     testMutable();
     testImmutable();
     testComplete();
