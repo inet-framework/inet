@@ -18,12 +18,13 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/Simsignals_m.h"
 #include "inet/common/ResultFilters.h"
+#include "inet/common/Simsignals_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
 
 namespace inet {
@@ -32,12 +33,14 @@ namespace utils {
 
 namespace filters {
 
+// TODO: rename packetAge
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
 void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto msg = dynamic_cast<cMessage *>(object))
-        fire(this, t, t - msg->getCreationTime(), details);
+    if (auto packet = dynamic_cast<Packet *>(object))
+        for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>())
+            fire(this, t, t - region.getTag()->getCreationTime(), details);
 }
 
 Register_ResultFilter("messageTSAge", MessageTsAgeFilter);
