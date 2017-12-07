@@ -34,8 +34,8 @@ class Ipv4Address
 {
     @existingClass;
     @opaque;
-    @tostring(.str());
-    @fromstring(Ipv4Address($));
+    @toString(.str());
+    @fromString(Ipv4Address($));
 }
 
 class Ipv4AddressVector
@@ -43,3 +43,4 @@ class Ipv4AddressVector
    @existingClass;
    //FIXME tostring, ...
 }
+

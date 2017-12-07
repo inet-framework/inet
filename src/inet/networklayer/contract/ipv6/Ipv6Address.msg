@@ -28,6 +28,6 @@ namespace inet;
 class Ipv6Address
 {
     @existingClass;
-    //FIXME @tostring, ...
+    //FIXME @toString, ...
 }
 

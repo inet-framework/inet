@@ -29,7 +29,7 @@ class MacAddress
 {
     @existingClass;
     @opaque;
-    @tostring(.str());
-    @fromstring(MacAddress($));
+    @toString(.str());
+    @fromString(MacAddress($));
 }
 

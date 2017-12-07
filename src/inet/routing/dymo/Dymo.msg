@@ -37,9 +37,9 @@ class DymoSequenceNumber
     @existingClass;
     @opaque;
     @byValue;
-    @fromstring(string2ulong($));
-    @tostring(ulong2string($));
-    @defaultvalue(0);
+    @fromString(string2ulong($));
+    @toString(ulong2string($));
+    @defaultValue(0);
 }
 
 //
