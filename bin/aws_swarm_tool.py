@@ -7,6 +7,10 @@ import tempfile
 import subprocess
 import argparse
 
+#import socket
+#import urllib.request
+#import http.client
+
 import psutil
 
 import boto3
@@ -157,7 +161,8 @@ def connect_to_swarm(stack_name="inet"):
 
     print("Opening tunnel to the manager at " + manager_public_ip)
 
-    pid_file_name = os.path.join(tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
+    pid_file_name = os.path.join(
+        tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
 
     try:
         with open(pid_file_name, "rt") as existing_pid_file:
@@ -173,7 +178,7 @@ def connect_to_swarm(stack_name="inet"):
         pass
 
     ssh = subprocess.Popen([
-        "ssh", "docker@" + manager_public_ip, "-N",
+        "ssh", "docker@" + manager_public_ip, "-N", "-q",
         "-o", "StrictHostKeyChecking=no", "-o", "ExitOnForwardFailure=yes",
         "-L", "localhost:2374:/var/run/docker.sock",
         "-L", "9181:172.17.0.1:9181", "-L", "8080:172.17.0.1:8080",
@@ -184,17 +189,60 @@ def connect_to_swarm(stack_name="inet"):
 
     print("SSH started, its pid is " + str(ssh.pid) + ".")
 
-    # wait for the tunnel to come up?
+    while True:
+        time.sleep(1)
+        exit_code = subprocess.call(["docker", "-H", "tcp://localhost:2374", "info"],
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if exit_code == 0:
+            break
+
+    print("Tunnel is up!")
 
     # from now on you can do:  docker -H tcp://localhost:2374 info
+
+def disconnect_from_swarm(stack_name="inet"):
+    pid_file_name = os.path.join(
+        tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
+
+    try:
+        with open(pid_file_name, "rt") as existing_pid_file:
+            existing_pid = int(existing_pid_file.readline().strip())
+            print("found a pid file for this stack, with pid " + str(existing_pid))
+            if existing_pid in psutil.pids():
+                # KILL PROC
+                print("Tunnel is down!")
+            else:
+                print("But that process is no longer running. Removing pid file...")
+    except IOError:
+        print("not connected")
+
+
+
 
 
 def deploy_app(stack_name="inet"):
 
-    subprocess.call(["docker", "-H", "tcp://localhost:2374", "stack", "up",
-                     "--compose-file", "docker-compose-fingerprints.yml", stack_name])
+    print("Deploying the stack...")
 
-    # wait for completion by polling the http services?
+    subprocess.call(["docker", "-H", "tcp://localhost:2374", "stack", "up",
+                     "--compose-file", "docker-compose.yml", stack_name])
+
+    print("Waiting for the services to start...")
+
+    """
+    # wait for completion by polling the visualizer http service - this does not seem to work
+    while True:
+        time.sleep(1)
+        try:
+            if urllib.request.urlopen("http://localhost:9181/queues.json", timeout=1).getcode() == 200:
+                break
+        except urllib.error.URLError:
+            pass
+        except http.client.HTTPException:
+            pass
+        except socket.timeout:
+            pass
+    """
 
 
 def halt_swarm(stack_name="inet"):
@@ -327,9 +375,11 @@ def remove_swarm(stack_name="inet"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Tool to manage an INET Swarm app on AWS")
+    parser = argparse.ArgumentParser(
+        description="Tool to manage an INET Swarm app on AWS")
 
-    parser.add_argument('command', metavar='COMMAND', choices=['init', 'connect', 'deploy', 'halt', 'resume', 'delete'])
+    parser.add_argument('command', metavar='COMMAND', choices=[
+                        'init', 'connect', 'disconnect', 'deploy', 'halt', 'resume', 'delete'])
 
     args = parser.parse_args()
 
@@ -339,6 +389,8 @@ if __name__ == "__main__":
         deploy_app()
     elif args.command == "connect":
         connect_to_swarm()
+    elif args.command == "disconnect":
+        disconnect_from_swarm()
     elif args.command == "deploy":
         deploy_app()
     elif args.command == "halt":
@@ -349,4 +401,3 @@ if __name__ == "__main__":
         deploy_app()
     elif args.command == "delete":
         remove_swarm()
-

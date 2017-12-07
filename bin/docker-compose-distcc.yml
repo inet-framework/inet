@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   distcc:
-    image: torokati44/distcc-worker
+    image: torokati44/distcc-server
     networks:
       buildnet:
     deploy:

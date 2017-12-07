@@ -19,7 +19,7 @@ import gridfs
 import flock
 
 
-INET_ROOT = "/opt/inet"
+INET_ROOT = "/opt/projects/inet-framework/inet"
 
 INET_LIB_CACHE_DIR = "/host-cache/inetlib"
 INET_LIB_FILE = INET_ROOT + "/src/libINET.so"
@@ -118,7 +118,7 @@ def switch_inet_to_commit(git_hash):
     LOGGER.info("switching inet to commit " + git_hash)
 
     current_hash = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=INET_ROOT).strip()
+        ["git", "rev-parse", "HEAD"], cwd=INET_ROOT).decode('utf-8').strip()
 
     LOGGER.info("we are currently on commit: " + current_hash)
 

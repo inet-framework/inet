@@ -35,7 +35,7 @@ services:
 
 
   builder:
-    image: torokati44/worker-fingerprints
+    image: torokati44/inet-worker
     networks:
       interlink:
       buildnet:
@@ -45,6 +45,10 @@ services:
       - mongo
     hostname: builder-{{.Node.Hostname}}-{{.Task.Slot}} # this only works on Docker 17.10 and up
     command: build -u redis://rds
+    environment:
+      # we use a lot of potential addresses, the offline/unavailable ones will be skipped automatically
+      # and we set 10 slots for each of them, the local servers will limit the actual number of concurrently running jobs
+      DISTCC_HOSTS: "13.37.42.1/10,lzo 13.37.42.2/10,lzo 13.37.42.3/10,lzo 13.37.42.4/10,lzo 13.37.42.5/10,lzo 13.37.42.6/10,lzo 13.37.42.7/10,lzo 13.37.42.8/10,lzo"
     deploy:
       placement: # always on the same node to take advantage of a persistent ccache dir on the host
         constraints: [node.role == manager]
@@ -56,7 +60,7 @@ services:
 
 
   runner:
-    image: torokati44/worker-fingerprints
+    image: torokati44/inet-worker
     networks:
       interlink:
     depends_on:
@@ -111,7 +115,7 @@ services:
 
 
   distcc:
-    image: torokati44/distcc-worker
+    image: torokati44/distcc-server
     networks:
       buildnet:
     deploy:

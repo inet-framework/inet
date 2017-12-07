@@ -18,7 +18,7 @@ import pymongo
 import gridfs
 
 
-REMOTE_INET_ROOT = "/opt/inet"
+REMOTE_INET_ROOT = "/opt/projects/inet-framework/inet"
 
 LOCAL_INET_ROOT = os.path.abspath(
     os.path.dirname(os.path.realpath(__file__)) + "/..")
@@ -112,7 +112,7 @@ class Runall:
 
         rng = random.SystemRandom()
 
-        rng.shuffle(run_numbers)
+        #rng.shuffle(run_numbers)
 
         run_jobs = []
         for rn in run_numbers:
@@ -150,7 +150,7 @@ class Runall:
                         run_jobs.remove(j)
                     else:
                         if j.result is not None:
-                            pprint.pprint(vars(j.result))
+                            pprint.pprint(j.result)
 
                             with pymongo.MongoClient("localhost", socketTimeoutMS=10 * 60 * 1000, connectTimeoutMS=10 * 60 * 1000, serverSelectionTimeoutMS=10 * 60 * 1000) as client:
                                 gfs = gridfs.GridFS(client.opp)
