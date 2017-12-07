@@ -17,9 +17,10 @@
 #define __INET_CHUNK_H_
 
 #include <memory>
-#include "inet/common/Ptr.h"
 #include "inet/common/MemoryInputStream.h"
 #include "inet/common/MemoryOutputStream.h"
+#include "inet/common/packet/tag/RegionTagSet.h"
+#include "inet/common/Ptr.h"
 #include "inet/common/Units.h"
 
 // checking chunk implementation is disabled by default
@@ -358,6 +359,10 @@ class INET_API Chunk : public cObject,
      * The boolean chunk flags are merged into a single integer.
      */
     int flags;
+    /**
+     * The set of region tags attached to the data represented by this chunk.
+     */
+    RegionTagSet tags;
 
   protected:
     virtual void handleChange() override;
@@ -570,13 +575,93 @@ class INET_API Chunk : public cObject,
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
         return checkPeekResult<T>(staticPtrCast<T>(chunk), flags);
     }
+    //@}
+
+    /** @name Tag related functions */
+    //@{
+    /**
+     * Returns the number of chunk tags.
+     */
+    int getNumTags() const {
+        return tags.getNumTags();
+    }
+
+    /**
+     * Returns the chunk tag at the given index.
+     */
+    cObject *getTag(int index) const {
+        return tags.getTag(index);
+    }
+
+    /**
+     * Clears the set of chunk tags in the given region.
+     */
+    void clearTags(b offset = b(0), b length = b(-1)) {
+        tags.clearTags(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
+     */
+    template<typename T> int findTag(b offset = b(0), b length = b(-1)) const {
+        return tags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
+     */
+    template<typename T> T *getTag(b offset = b(0), b length = b(-1)) const {
+        return tags.getTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns all chunk tags for the provided type and range.
+     */
+    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllTags(b offset = b(0), b length = b(-1)) const {
+        return tags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns a newly added chunk tag for the provided type and range, or throws an exception if such a chunk tag is already present.
+     */
+    template<typename T> T *addTag(b offset = b(0), b length = b(-1)) {
+        return tags.addTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Returns a newly added chunk tag for the provided type and range if absent, or returns the chunk tag that is already present.
+     */
+    template<typename T> T *addTagIfAbsent(b offset = b(0), b length = b(-1)) {
+        return tags.addTagIfAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Removes the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
+     */
+    template <typename T> T *removeTag(b offset, b length) {
+        return tags.removeTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Removes the chunk tag for the provided type and range if present, or returns nullptr if no such chunk tag is found.
+     */
+    template <typename T> T *removeTagIfPresent(b offset, b length) {
+        return tags.removeTagIfPresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
+     * Removes and returns all chunk tags for the provided type and range.
+     */
+    template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeAllTags(b offset, b length) {
+        return tags.removeAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+    //@}
 
     /**
      * Returns a human readable string representation of the data present in
      * this chunk.
      */
     virtual std::string str() const override;
-    //@}
 
   public:
     /** @name Chunk serialization related functions */

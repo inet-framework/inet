@@ -30,7 +30,8 @@ Chunk::Chunk() :
 
 Chunk::Chunk(const Chunk& other) :
     id(nextId++),
-    flags(other.flags & ~CF_IMMUTABLE)
+    flags(other.flags & ~CF_IMMUTABLE),
+    tags(other.tags)
 {
 }
 
