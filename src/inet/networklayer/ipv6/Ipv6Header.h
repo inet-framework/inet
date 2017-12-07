@@ -74,6 +74,8 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var) override;
 
+    /** Adds an extension header to the datagram, see addExtensionHeader(). */
+    virtual void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override;
     /**
      * Returns the number of extension headers in this datagram
      */

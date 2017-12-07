@@ -192,7 +192,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     if (headerLength > TCP_HEADER_OCTETS) {
         while (stream.getPosition() - position < B(headerLength)) {
             TcpOption *option = deserializeOption(stream);
-            tcpHeader->addHeaderOption(option);
+            tcpHeader->appendHeaderOption(option);
         }
     }
     tcpHeader->setHeaderLength(headerLength);

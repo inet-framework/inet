@@ -90,7 +90,7 @@ class INET_API TlvOptions : public TlvOptions_Base
     virtual const TlvOptionBase& getTlvOption(size_t k) const override { return *optionVector.at(k); }
     virtual TlvOptionBase& getMutableTlvOption(size_t k) override { return *optionVector.at(k); }
     virtual void setTlvOption(size_t k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
-
+    virtual void appendTlvOption(const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 };

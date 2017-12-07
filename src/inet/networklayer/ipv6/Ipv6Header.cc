@@ -97,6 +97,11 @@ void Ipv6Header::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHead
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
+void Ipv6Header::appendExtensionHeader(Ipv6ExtensionHeader *extensionHeader)
+{
+    addExtensionHeader(extensionHeader, -1);
+}
+
 void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
 {
     if (atPos != -1)

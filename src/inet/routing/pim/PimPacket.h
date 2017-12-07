@@ -50,6 +50,7 @@ class INET_API PimHello : public PimHello_Base
     virtual HelloOption *getMutableOptions(size_t k) override;
     virtual const HelloOption *getOptions(size_t k) const override;
     virtual void setOptions(size_t k, HelloOption *options) override;
+    virtual void appendOptions(HelloOption * options) override { throw cRuntimeError("appendOptions not implemented"); }
 };
 
 }    // namespace inet

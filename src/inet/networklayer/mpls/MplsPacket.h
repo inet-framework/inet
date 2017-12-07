@@ -61,6 +61,7 @@ class INET_API MplsHeader : public MplsHeader_Base
      * Pushes new label on the label stack
      */
     inline void pushLabel(MplsLabel newLabel) { labels.push_back(newLabel); }
+    virtual void appendLabels(const MplsLabel& label) override { pushLabel(label); }
 
     /**
      * Pops the top label

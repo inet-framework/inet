@@ -104,7 +104,7 @@ class INET_API TcpHeader : public TcpHeader_Base
     virtual void setHeaderOption(size_t k, TcpOption* headerOption) override;
 
     /** Adds a TCP option to the TCP segment */
-    virtual void addHeaderOption(TcpOption *headerOption);
+    virtual void appendHeaderOption(TcpOption *headerOption) override;
 
     /** Drops all TCP options of the TCP segment */
     virtual void dropHeaderOptions();

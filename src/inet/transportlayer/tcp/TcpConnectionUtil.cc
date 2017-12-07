@@ -696,7 +696,7 @@ void TcpConnection::sendSegment(uint32 bytes)
 
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
-        tcpseg->addHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
+        tcpseg->appendHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
 
     ASSERT(tcpseg->getHeaderLength() == tcpseg_temp->getHeaderLength());
 
@@ -1127,7 +1127,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         if (state->snd_mss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
             option->setMaxSegmentSize(state->snd_mss);
-            tcpseg->addHeaderOption(option);
+            tcpseg->appendHeaderOption(option);
             EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
         }
 
@@ -1136,7 +1136,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
             // 1 padding byte
-            tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+            tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
 
             // Update WS variables
             if (state->ws_manual_scale > -1) {
@@ -1156,7 +1156,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             state->snd_ws = true;
             state->ws_enabled = state->ws_support && state->snd_ws && state->rcv_ws;
             EV_INFO << "Tcp Header Option WS(=" << option->getWindowScale() << ") sent, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
-            tcpseg->addHeaderOption(option);
+            tcpseg->appendHeaderOption(option);
         }
 
         // SACK_PERMITTED header option
@@ -1165,11 +1165,11 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         {
             if (!state->ts_support) {    // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
             }
 
-            tcpseg->addHeaderOption(new TcpOptionSackPermitted());
+            tcpseg->appendHeaderOption(new TcpOptionSackPermitted());
 
             // Update SACK variables
             state->snd_sack_perm = true;
@@ -1183,8 +1183,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         {
             if (!state->sack_support) {    // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
             }
 
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
@@ -1205,7 +1205,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             state->snd_initial_ts = true;
             state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
-            tcpseg->addHeaderOption(option);
+            tcpseg->appendHeaderOption(option);
         }
 
         // TODO add new TCPOptions here once they are implemented
@@ -1218,8 +1218,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
         if (state->ts_enabled) {    // Is TS enabled?
             if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) {    // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
-                tcpseg->addHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
+                tcpseg->appendHeaderOption(new TcpOptionNop());    // NOP
             }
 
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
@@ -1238,7 +1238,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
             option->setEchoedTimestamp(tcpseg->getAckBit() ? state->ts_recent : 0);
 
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
-            tcpseg->addHeaderOption(option);
+            tcpseg->appendHeaderOption(option);
         }
 
         // SACK header option

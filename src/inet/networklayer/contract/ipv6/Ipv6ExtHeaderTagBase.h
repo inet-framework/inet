@@ -63,11 +63,13 @@ class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var) override;
 
+
     /**
      * Adds an extension header to the datagram, at the given position.
      * The default (atPos==-1) is to add the header at the end.
      */
     virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
+    virtual void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override { addExtensionHeader(extensionHeader); }
 
     /**
      * Remove the first extension header and return it.
