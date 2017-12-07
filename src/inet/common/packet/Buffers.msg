@@ -18,22 +18,51 @@ import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
-#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/ChunkBuffer.h"
+#include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/packet/ReassemblyBuffer.h"
+#include "inet/common/packet/ReorderBuffer.h"
 }}
 
 namespace inet;
 
 
-class Packet extends cPacket
+class ChunkQueue extends cNamedObject
 {
     @existingClass;
     @descriptor(readonly);
-    b totalLength;
-    b headerPoppedLength;
-    b dataLength;
-    b trailerPoppedLength;
-    Chunk* contents @packetData @getter(getContents);
-//    Chunk* header @packetData @getter(getHeaderPart);
-//    Chunk* data @packetData @getter(getDataPart);
-//    Chunk* trailer @packetData @getter(getTrailerPart);
+    b length;
+    Chunk* contents @getter(getContents);
 }
+
+class ChunkBuffer::Region
+{
+    @existingClass;
+    @descriptor(readonly);
+    b startOffset;
+    b endOffset;
+    Chunk* data @getter(getData);
+}
+
+class ChunkBuffer extends cNamedObject
+{
+    @existingClass;
+    @descriptor(readonly);
+    ChunkBuffer::Region* regions[] @getter(getRegion) @sizeGetter(getNumRegions);
+}
+
+class ReorderBuffer extends ChunkBuffer
+{
+    @existingClass;
+    @descriptor(readonly);
+    b expectedOffset;
+}
+
+class ReassemblyBuffer extends ChunkBuffer
+{
+    @existingClass;
+    @descriptor(readonly);
+    b expectedLength;
+    bool isComplete;
+}
+

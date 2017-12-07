@@ -19,6 +19,7 @@
 
 
 import inet.common.INETDefs;
+import inet.common.packet.Buffers;
 import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
 
@@ -34,7 +35,6 @@ cplusplus {{
 
 namespace inet::tcp;
 
-class ReorderBuffer extends cNamedObject { @existingClass; }
 class TcpSackRexmitQueue { @existingClass; }
 class TcpAlgorithm extends cObject { @existingClass; }
 
