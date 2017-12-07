@@ -158,7 +158,7 @@ class Runall:
 
                             run_jobs.remove(j)
 
-                time.sleep(0.1)
+                time.sleep(1)
             except KeyboardInterrupt:
                 stop = True
 
