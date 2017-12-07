@@ -1241,7 +1241,7 @@ static void testChunkQueue()
     ASSERT(applicationHeader2->getSomeData() == 42);
 }
 
-static void testChunkBuffer()
+static void testChunkBuffer(cRNG *rng)
 {
     // 1. single chunk
     ChunkBuffer buffer1;
@@ -1326,7 +1326,6 @@ static void testChunkBuffer()
 
     // 9. random test
     bool debug = false;
-    cLCG32 random;
     B bufferSize = B(1000);
     B maxChunkLength = B(100);
     ChunkBuffer buffer9;
@@ -1334,8 +1333,8 @@ static void testChunkBuffer()
     memset(buffer10, -1, bufferSize.get() * sizeof(int));
     for (int c = 0; c < 1000; c++) {
         // replace data
-        B chunkOffset = B(random.intRand((bufferSize - maxChunkLength).get()));
-        B chunkLength = B(random.intRand(maxChunkLength.get()) + 1);
+        B chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get()));
+        B chunkLength = B(rng->intRand(maxChunkLength.get()) + 1);
         auto chunk = makeShared<BytesChunk>();
         std::vector<uint8_t> bytes;
         for (B i = B(0); i < chunkLength; i++)
@@ -1349,8 +1348,8 @@ static void testChunkBuffer()
             *(buffer10 + chunkOffset.get() + i.get()) = i.get() & 0xFF;
 
         // clear data
-        chunkOffset = B(random.intRand((bufferSize - maxChunkLength).get()));
-        chunkLength = B(random.intRand(maxChunkLength.get()) + 1);
+        chunkOffset = B(rng->intRand((bufferSize - maxChunkLength).get()));
+        chunkLength = B(rng->intRand(maxChunkLength.get()) + 1);
         buffer9.clear(B(chunkOffset), chunkLength);
         for (B i = B(0); i < chunkLength; i++)
             *(buffer10 + chunkOffset.get() + i.get()) = -1;
@@ -1483,7 +1482,7 @@ void UnitTest::initialize()
     testPeeking();
     testSequence();
     testChunkQueue();
-    testChunkBuffer();
+    testChunkBuffer(getRNG(0));
     testReassemblyBuffer();
     testReorderBuffer();
 }
