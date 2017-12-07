@@ -18,6 +18,7 @@
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/tag/TagSet.h"
 
 namespace inet {
 
@@ -64,6 +65,7 @@ class INET_API Packet : public cPacket
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;
     b totalLength;
+    TagSet tags; // TODO: replace omnet API with this one
 
 #if 0
     //FIXME next cache variables needed for getHeader/Data/TrailerPart() functions
@@ -551,6 +553,72 @@ class INET_API Packet : public cPacket
      * Removes all popped headers and trailers, but the data part isn't affected.
      */
     void removePoppedChunks();
+    //@}
+
+    /** @name Tag related functions */
+    //@{
+    /**
+     * Returns the number of packet tags.
+     */
+    int _getNumTags() const {
+        return tags.getNumTags();
+    }
+
+    /**
+     * Returns the packet tag at the given index.
+     */
+    cObject *_getTag(int index) const {
+        return tags.getTag(index);
+    }
+
+    /**
+     * Clears the set of packet tags.
+     */
+    void _clearTags() {
+        tags.clearTags();
+    }
+
+    /**
+     * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
+     */
+    template<typename T> T *_findTag() const {
+        return tags.findTag<T>();
+    }
+
+    /**
+     * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
+     */
+    template<typename T> T *_getTag() const {
+        return tags.getTag<T>();
+    }
+
+    /**
+     * Returns a newly added packet tag for the provided type, or throws an exception if such a packet tag is already present.
+     */
+    template<typename T> T *_addTag() {
+        return tags.addTag<T>();
+    }
+
+    /**
+     * Returns a newly added packet tag for the provided type if absent, or returns the packet tag that is already present.
+     */
+    template<typename T> T *_addTagIfAbsent() {
+        return tags.addTagIfAbsent<T>();
+    }
+
+    /**
+     * Removes the packet tag for the provided type, or throws an exception if no such packet tag is found.
+     */
+    template<typename T> T *_removeTag() {
+        return tags.removeTag<T>();
+    }
+
+    /**
+     * Removes the packet tag for the provided type if present, or returns nullptr if no such packet tag is found.
+     */
+    template<typename T> T *_removeTagIfPresent() {
+        return tags.removeTagIfPresent<T>();
+    }
     //@}
 
     /**
