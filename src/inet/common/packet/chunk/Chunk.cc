@@ -99,6 +99,16 @@ const char *Chunk::getBytesAsString(int index)
     return asStringValue.c_str();
 }
 
+int Chunk::getTagsArraySize()
+{
+    return tags.getNumTags();
+}
+
+const RegionTagSet::RegionTag<cObject>& Chunk::getTags(int index)
+{
+    return tags.getRegionTag(index);
+}
+
 const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();

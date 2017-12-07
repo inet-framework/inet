@@ -372,6 +372,9 @@ class INET_API Chunk : public cObject,
     virtual const char *getBitsAsString(int index); // only for class descriptor
     virtual const char *getBytesAsString(int index); // only for class descriptor
 
+    virtual int getTagsArraySize(); // only for class descriptor
+    virtual const RegionTagSet::RegionTag<cObject>& getTags(int index); // only for class descriptor
+
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk. The designated part starts at the provided offset

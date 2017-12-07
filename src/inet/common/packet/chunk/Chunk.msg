@@ -28,6 +28,16 @@ cplusplus {{
 
 namespace inet;
 
+class RegionTagSet::cObjectRegionTag
+{
+    @existingClass;
+    @descriptor(readonly);
+    b startOffset;
+    b endOffset;
+    b length;
+    cObject* tag;
+}
+
 class Chunk extends cObject
 {
     @packetData;
@@ -41,6 +51,7 @@ class Chunk extends cObject
     b chunkLength @packetData(false);
     string bits[] @getter("getBitsAsString");
     string bytes[] @getter("getBytesAsString");
+    RegionTagSet::cObjectRegionTag tags[] @packetData(false);
 }
 
 class BitsChunk extends Chunk
