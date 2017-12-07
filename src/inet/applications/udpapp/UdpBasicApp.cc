@@ -16,13 +16,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/udpapp/UdpBasicApp.h"
-
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/applications/udpapp/UdpBasicApp.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/TagBase_m.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
@@ -110,6 +111,8 @@ void UdpBasicApp::sendPacket()
     payload->setChunkLength(B(par("messageLength").longValue()));
     payload->setSequenceNumber(numSent);
     payload->markImmutable();
+    auto creationTimeTag = payload->addTag<CreationTimeTag>();
+    creationTimeTag->setCreationTime(simTime());
     packet->append(payload);
     L3Address destAddr = chooseDestAddr();
     emit(sentPkSignal, packet);

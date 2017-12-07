@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TcpSessionApp.h"
-
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/applications/tcpapp/TcpSessionApp.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/TagBase_m.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
@@ -147,31 +148,30 @@ cPacket *TcpSessionApp::createDataPacket(long sendBytes)
 {
     Packet *packet = new Packet("data1");
     const char *dataTransferMode = par("dataTransferMode");
+    Ptr<Chunk> payload;
     if (!strcmp(dataTransferMode, "bytecount")) {
-        const auto& payload = makeShared<ByteCountChunk>(B(sendBytes));
-        payload->markImmutable();
-        packet->append(payload);
+        payload = makeShared<ByteCountChunk>(B(sendBytes));
     }
     else if (!strcmp(dataTransferMode, "object")) {
-        const auto& payload = makeShared<ApplicationPacket>();
-        payload->setChunkLength(B(sendBytes));
-        payload->markImmutable();
-        packet->append(payload);
+        const auto& applicationPacket = makeShared<ApplicationPacket>();
+        applicationPacket->setChunkLength(B(sendBytes));
+        payload = applicationPacket;
     }
     else if (!strcmp(dataTransferMode, "bytestream")) {
-        const auto& payload = makeShared<BytesChunk>();
-
+        const auto& bytesChunk = makeShared<BytesChunk>();
         std::vector<uint8_t> vec;
         vec.resize(sendBytes);
         for (int i = 0; i < sendBytes; i++)
             vec[i] = (bytesSent + i) & 0xFF;
-        payload->setBytes(vec);
-
-        payload->markImmutable();
-        packet->append(payload);
+        bytesChunk->setBytes(vec);
+        payload = bytesChunk;
     }
     else
         throw cRuntimeError("Invalid data transfer mode: %d", dataTransferMode);
+    auto creationTimeTag = payload->addTag<CreationTimeTag>();
+    creationTimeTag->setCreationTime(simTime());
+    payload->markImmutable();
+    packet->append(payload);
     return packet;
 }
 
