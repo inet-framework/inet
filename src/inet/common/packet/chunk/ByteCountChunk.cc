@@ -57,6 +57,7 @@ const Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConv
     // 3. peeking without conversion returns a ByteCountChunk
     if (converter == nullptr) {
         auto chunk = makeShared<ByteCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
+        chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
         chunk->markImmutable();
         return chunk;
     }
@@ -100,6 +101,8 @@ void ByteCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
+    tags.moveTags(byteCountChunk->length);
+    tags.copyTags(byteCountChunk->tags, b(0), b(0), byteCountChunk->length);
     length += byteCountChunk->length;
 }
 
@@ -108,6 +111,7 @@ void ByteCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
+    tags.copyTags(byteCountChunk->tags, b(0), length, byteCountChunk->length);
     length += byteCountChunk->length;
 }
 
@@ -116,6 +120,8 @@ void ByteCountChunk::removeFromBeginning(b length)
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
     handleChange();
     this->length -= B(length);
+    tags.clearTags(b(0), length);
+    tags.moveTags(-length);
 }
 
 void ByteCountChunk::removeFromEnd(b length)
@@ -123,6 +129,7 @@ void ByteCountChunk::removeFromEnd(b length)
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
     handleChange();
     this->length -= B(length);
+    tags.clearTags(this->length, length);
 }
 
 std::string ByteCountChunk::str() const
