@@ -19,7 +19,8 @@
 
 
 import inet.common.INETDefs;
-import inet.common.packet.Buffers;
+import inet.common.packet.ChunkBuffer;
+import inet.common.packet.ChunkQueue;
 import inet.common.packet.Packet;
 import inet.networklayer.common.L3Address;
 
