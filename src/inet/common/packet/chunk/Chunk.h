@@ -365,6 +365,8 @@ class INET_API Chunk : public cObject,
     RegionTagSet tags;
 
   protected:
+    void checkMutable() { CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable"); }
+
     virtual void handleChange() override;
 
     virtual int getBitsArraySize(); // only for class descriptor
@@ -600,6 +602,7 @@ class INET_API Chunk : public cObject,
      * Clears the set of chunk tags in the given region.
      */
     void clearTags(b offset = b(0), b length = b(-1)) {
+        checkMutable();
         tags.clearTags(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
@@ -628,6 +631,7 @@ class INET_API Chunk : public cObject,
      * Returns a newly added chunk tag for the provided type and range, or throws an exception if such a chunk tag is already present.
      */
     template<typename T> T *addTag(b offset = b(0), b length = b(-1)) {
+        checkMutable();
         return tags.addTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
@@ -635,6 +639,7 @@ class INET_API Chunk : public cObject,
      * Returns a newly added chunk tag for the provided type and range if absent, or returns the chunk tag that is already present.
      */
     template<typename T> T *addTagIfAbsent(b offset = b(0), b length = b(-1)) {
+        checkMutable();
         return tags.addTagIfAbsent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
@@ -642,6 +647,7 @@ class INET_API Chunk : public cObject,
      * Removes the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
     template <typename T> T *removeTag(b offset, b length) {
+        checkMutable();
         return tags.removeTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
@@ -649,6 +655,7 @@ class INET_API Chunk : public cObject,
      * Removes the chunk tag for the provided type and range if present, or returns nullptr if no such chunk tag is found.
      */
     template <typename T> T *removeTagIfPresent(b offset, b length) {
+        checkMutable();
         return tags.removeTagIfPresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
@@ -656,6 +663,7 @@ class INET_API Chunk : public cObject,
      * Removes and returns all chunk tags for the provided type and range.
      */
     template <typename T> std::vector<RegionTagSet::RegionTag<T>> removeAllTags(b offset, b length) {
+        checkMutable();
         return tags.removeAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
     //@}

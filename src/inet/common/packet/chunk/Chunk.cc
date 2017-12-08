@@ -37,7 +37,7 @@ Chunk::Chunk(const Chunk& other) :
 
 void Chunk::handleChange()
 {
-    CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable");
+    checkMutable();
 }
 
 int Chunk::getBitsArraySize()
