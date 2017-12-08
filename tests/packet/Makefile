@@ -66,7 +66,7 @@ LIBS += -Wl,-rpath,$(abspath ../../src)
 endif
 
 COPTS = $(CFLAGS) $(IMPORT_DEFINES)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
-MSGCOPTS = --msgimports $(INCLUDE_PATH)
+MSGCOPTS = $(INCLUDE_PATH)
 SMCOPTS =
 
 # we want to recompile everything if COPTS changes,
