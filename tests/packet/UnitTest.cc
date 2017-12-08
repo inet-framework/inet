@@ -1478,11 +1478,9 @@ static void testChunkTags()
     const auto& chunk2 = packet3.peekData();
     auto regions1 = chunk2->getAllTags<CreationTimeTag>();
     assert(regions1.size() == 1);
-    for (auto& region1 : regions1) {
-        assert(region1.getOffset() == B(0));
-        assert(region1.getLength() == B(1000));
-        assert(region1.getTag()->getCreationTime() == 42);
-    }
+    assert(regions1[0].getOffset() == B(0));
+    assert(regions1[0].getLength() == B(1000));
+    assert(regions1[0].getTag()->getCreationTime() == 42);
 
     // 7. source application creates another packet
     auto chunk3 = makeShared<ByteCountChunk>(B(1500));
@@ -1498,7 +1496,6 @@ static void testChunkTags()
     Packet packet5;
     packet5.append(queue1.pop(B(1000)));
     // 10. source TCP sends TCP segment, destination TCP enqueues data
-    buffer1.setExpectedOffset(B(1000));
     buffer1.replace(B(1000), packet5.peekData());
     // 11. destination TCP sends available data to application
     Packet packet6;
