@@ -6,8 +6,6 @@ services:
     image: redis
     networks:
       interlink:
-        aliases:
-          - rds
     ports:
       - "6379:6379"
     deploy:
@@ -22,8 +20,6 @@ services:
     image: mongo
     networks:
       interlink:
-        aliases:
-          - mng
     ports:
       - "27017:27017"
     deploy:
@@ -44,7 +40,7 @@ services:
       - redis
       - mongo
     hostname: builder-{{.Node.Hostname}}-{{.Task.Slot}} # this only works on Docker 17.10 and up
-    command: build -u redis://rds
+    command: build -u redis://redis
     environment:
       # we use a lot of potential addresses, the offline/unavailable ones will be skipped automatically
       # and we set 10 slots for each of them, the local servers will limit the actual number of concurrently running jobs
@@ -66,7 +62,7 @@ services:
     depends_on:
       - redis
       - mongo
-    command: run -u redis://rds
+    command: run -u redis://redis
     hostname: runner-{{.Node.Hostname}}-{{.Task.Slot}} # this only works on Docker 17.10 and up
     deploy:
 #      placement:
@@ -104,7 +100,7 @@ services:
     image: robbieclarken/lightweight-rq-dashboard
     networks:
       interlink:
-    command: -H rds
+    command: -H redis
     ports:
       - "9181:9181"
     depends_on:

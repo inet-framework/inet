@@ -18,15 +18,18 @@ import pymongo
 import gridfs
 import flock
 
+# project name is for example inet-framework/inet (as used on GitHub)
+def get_project_root_dir(project_name):
+    return "/opt/projects/" + project_name
 
-INET_ROOT = "/opt/projects/inet-framework/inet"
+def get_project_lib_file(project_name):
+    return get_project_root_dir(project_name) + "/src/libINET.so"
 
-INET_LIB_CACHE_DIR = "/host-cache/inetlib"
-INET_LIB_FILE = INET_ROOT + "/src/libINET.so"
+def get_project_github_url(project_name):
+    return "https://github.com/" + project_name + ".git"
 
-MONGO_HOST = "mng"  # discovered using swarm internal dns
-
-
+INET_LIB_CACHE_DIR = "/host-cache/inetlib" # /host-cache is mounted into the container from the host, so it will persist between redeployments
+MONGO_HOST = "mongo" # service name, resolved using the DNS server built into Docker Swarm
 LOGGER = logging.getLogger("rq.worker")
 
 
@@ -44,56 +47,68 @@ def run_program(command, workingdir):
     return (process.returncode, out)
 
 
-def checkout_git(git_hash):
-    (exitcode, output) = run_program("git fetch", INET_ROOT)
+def checkout_git(project_name, git_hash):
+    project_root = get_project_root_dir(project_name)
+
+    if not os.path.isdir(project_root):
+        git_url = get_project_github_url(project_name)
+        project_dir = get_project_root_dir(project_name)
+
+        (exitcode, output) = run_program("git clone --recursive " + git_url + " " + project_dir, "/opt")
+        if exitcode != 0:
+            raise Exception("Failed to clone git repo:\n" + output)
+
+    (exitcode, output) = run_program("git fetch --recurse-submodules", project_root)
     if exitcode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
-    (exitcode, output) = run_program("git reset --hard " + git_hash, INET_ROOT)
+    (exitcode, output) = run_program("git reset --hard " + git_hash, project_root)
     if exitcode != 0:
-        raise Exception("Failed to fetch git repo:\n" + output)
+        raise Exception("Failed to check out commit:\n" + output)
 
-    (exitcode, output) = run_program("git submodule update", INET_ROOT)
+    (exitcode, output) = run_program("git submodule update", project_root)
     if exitcode != 0:
-        raise Exception("Failed to fetch git repo:\n" + output)
+        raise Exception("Failed to update submodules:\n" + output)
 
 
 # this is the first kind of job
-def build_inet(git_hash):
-    checkout_git(git_hash)
+def build_project(project_name, git_hash):
+    checkout_git(project_name, git_hash)
+
+    project_root = get_project_root_dir(project_name)
 
     client = pymongo.MongoClient(MONGO_HOST)
     gfs = gridfs.GridFS(client.opp)
 
     if gfs.exists(git_hash):
-        return "INET build " + git_hash + " already exists, not rebuilding."
+        return "build " + git_hash + " already exists, not rebuilding."
 
-    (exitcode, output) = run_program("make makefiles", INET_ROOT)
+    (exitcode, output) = run_program("make makefiles", project_root)
     if exitcode != 0:
         raise Exception("Failed to make makefiles:\n" + output)
 
     (exitcode, output) = run_program(
-        "make -j $(distcc -j) MODE=release", INET_ROOT)
+        "make -j $(distcc -j) MODE=release", project_root)
     if exitcode != 0:
         raise Exception("Failed to build INET:\n" + output)
 
-    with open(INET_LIB_FILE, "rb") as inet_lib_file:
-        gfs.put(inet_lib_file, _id=git_hash)
+    with open(get_project_lib_file(project_name), "rb") as lib_file:
+        gfs.put(lib_file, _id=git_hash)
 
-    return "INET " + git_hash + " built and stored."
+    return project_name + " commit " + git_hash + " built and stored"
 
 
-def replace_inet_lib(git_hash):
+def replace_inet_lib(project_name, git_hash):
     directory = INET_LIB_CACHE_DIR + "/" + git_hash
 
     os.makedirs(directory, exist_ok=True)
 
     LOGGER.info("replacing inet lib with the one built from commit " + git_hash)
 
-    with open(directory + "/download.lock", "wb") as lf:
+    with open(directory + "/download.lock", "wb") as lock_file:
         LOGGER.info(
             "starting download, or waiting for the in-progress download to finish")
-        with flock.Flock(lf, flock.LOCK_EX):
+        with flock.Flock(lock_file, flock.LOCK_EX):
             LOGGER.info("download lock acquired")
             try:
                 with open(directory + "/libINET.so", "xb") as f:
@@ -109,16 +124,17 @@ def replace_inet_lib(git_hash):
             except FileExistsError:
                 LOGGER.info("the file was already downloaded")
 
-    shutil.copy(directory + "/libINET.so", INET_LIB_FILE)
+    shutil.copy(directory + "/libINET.so", get_project_lib_file(project_name))
     LOGGER.info("file copied to the right place")
 
 
-def switch_inet_to_commit(git_hash):
+def switch_project_to_commit(project_name, git_hash):
+    project_root = get_project_root_dir(project_name)
 
     LOGGER.info("switching inet to commit " + git_hash)
 
     current_hash = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=INET_ROOT).decode('utf-8').strip()
+        ["git", "rev-parse", "HEAD"], cwd=project_root).decode('utf-8').strip()
 
     LOGGER.info("we are currently on commit: " + current_hash)
 
@@ -126,8 +142,8 @@ def switch_inet_to_commit(git_hash):
     if git_hash != current_hash:
         LOGGER.info("actually doing it")
 
-        checkout_git(git_hash)
-        replace_inet_lib(git_hash)
+        checkout_git(project_name, git_hash)
+        replace_inet_lib(project_name, git_hash)
 
         LOGGER.info("done")
     else:
@@ -162,13 +178,13 @@ def submit_results(result_dir):
 
 
 # this is the second kind of job
-def run_simulation(git_hash, command, workingdir):
+def run_simulation(project_name, git_hash, command, workingdir):
 
     result_dir = "/results"
 
     os.makedirs(result_dir, exist_ok=True)
 
-    switch_inet_to_commit(git_hash)
+    switch_project_to_commit(project_name, git_hash)
 
     LOGGER.info("running simulation")
 

@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import signal
 import tempfile
 import subprocess
 import argparse
@@ -76,7 +77,14 @@ def _get_manager_public_ip(stack_name):
     group_info = autoscaling.describe_auto_scaling_groups(
         AutoScalingGroupNames=[manager_asg_name])
 
-    manager_instance_id = group_info['AutoScalingGroups'][0]['Instances'][0]['InstanceId']
+    try:
+        manager_instance_id = group_info['AutoScalingGroups'][0]['Instances'][0]['InstanceId']
+    except IndexError:
+        manager_instance_id = None
+
+    if manager_instance_id is None:
+        raise Exception("Swarm manager not found")
+
     manager_instance = ec2.Instance(manager_instance_id)
     manager_public_ip = manager_instance.public_ip_address
 
@@ -200,6 +208,7 @@ def connect_to_swarm(stack_name="inet"):
 
     # from now on you can do:  docker -H tcp://localhost:2374 info
 
+
 def disconnect_from_swarm(stack_name="inet"):
     pid_file_name = os.path.join(
         tempfile.gettempdir(), stack_name + "-ssh-tunnel.pid")
@@ -207,17 +216,17 @@ def disconnect_from_swarm(stack_name="inet"):
     try:
         with open(pid_file_name, "rt") as existing_pid_file:
             existing_pid = int(existing_pid_file.readline().strip())
-            print("found a pid file for this stack, with pid " + str(existing_pid))
-            if existing_pid in psutil.pids():
-                # KILL PROC
-                print("Tunnel is down!")
-            else:
-                print("But that process is no longer running. Removing pid file...")
-    except IOError:
-        print("not connected")
-
-
-
+        print("Found an SSH PID file for this stack, with PID " + str(existing_pid))
+        if existing_pid in psutil.pids():
+            print("Process still running, killing it...")
+            os.kill(existing_pid, signal.SIGTERM)
+            print("Tunnel is down!")
+            os.remove(pid_file_name)
+        else:
+            print("But that process is no longer running. Removing pid file...")
+            os.remove(pid_file_name)
+    except IOError as err:
+        print("Your are not connected.")
 
 
 def deploy_app(stack_name="inet"):
@@ -378,8 +387,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Tool to manage an INET Swarm app on AWS")
 
-    parser.add_argument('command', metavar='COMMAND', choices=[
-                        'init', 'connect', 'disconnect', 'deploy', 'halt', 'resume', 'delete'])
+    parser.add_argument('command', metavar='COMMAND',
+                        choices=['init', 'connect', 'disconnect', 'deploy', 'halt', 'resume', 'delete'])
 
     args = parser.parse_args()
 

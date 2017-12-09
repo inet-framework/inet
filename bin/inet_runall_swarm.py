@@ -91,7 +91,7 @@ class Runall:
         start_time = time.perf_counter()
         print("queueing build job")
 
-        build_job = self.build_q.enqueue("inet_worker.build_inet", githash)
+        build_job = self.build_q.enqueue("inet_worker.build_project", "inet-framework/inet", githash)
 
         print("waiting for build job to end")
         while not build_job.is_finished:
@@ -130,7 +130,7 @@ class Runall:
                 " ".join(opts.sim_prog_args) + " -r " + str(rn)
 
             runJob = self.run_q.enqueue(
-                "inet_worker.run_simulation", githash, command, workingdir, depends_on=build_job)
+                "inet_worker.run_simulation", "inet-framework/inet", githash, command, workingdir, depends_on=build_job)
 
             run_jobs.append(runJob)
 
