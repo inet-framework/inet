@@ -251,9 +251,8 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SequenceChunk>& chunk)
         doInsertToBeginning(*it);
 }
 
-void SequenceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 {
-    handleChange();
     if (chunk->getChunkType() == CT_SLICE)
         doInsertToBeginning(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
@@ -312,9 +311,8 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SequenceChunk>& chunk)
         doInsertToEnd(elementChunk);
 }
 
-void SequenceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
 {
-    handleChange();
     if (chunk->getChunkType() == CT_SLICE)
         doInsertToEnd(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
@@ -323,10 +321,8 @@ void SequenceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
         doInsertToEnd(chunk);
 }
 
-void SequenceChunk::removeFromBeginning(b length)
+void SequenceChunk::doRemoveFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
@@ -345,10 +341,8 @@ void SequenceChunk::removeFromBeginning(b length)
     chunks.erase(chunks.begin(), it);
 }
 
-void SequenceChunk::removeFromEnd(b length)
+void SequenceChunk::doRemoveFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;

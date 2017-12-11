@@ -377,6 +377,11 @@ class INET_API Chunk : public cObject,
     virtual int getTagsArraySize(); // only for class descriptor
     virtual const RegionTagSet::RegionTag<cObject>& getTags(int index); // only for class descriptor
 
+    virtual void doInsertAtBeginning(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doInsertAtEnd(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveFromBeginning(b length) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveFromEnd(b length) { throw cRuntimeError("Invalid operation"); }
+
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk. The designated part starts at the provided offset
@@ -486,12 +491,24 @@ class INET_API Chunk : public cObject,
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    void insertAtBeginning(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtBeginning(chunk));
+        handleChange();
+        auto length = chunk->getChunkLength();
+        tags.moveTags(length);
+        tags.copyTags(chunk->tags, b(0), b(0), length);
+        doInsertAtBeginning(chunk);
+    }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtEnd(chunk));
+        handleChange();
+        tags.copyTags(chunk->tags, b(0), getChunkLength(), chunk->getChunkLength());
+        doInsertAtEnd(chunk);
+    }
     //@}
 
     /** @name Removing data related functions */
@@ -507,14 +524,25 @@ class INET_API Chunk : public cObject,
     virtual bool canRemoveFromEnd(b length) const { return false; }
 
     /**
-     * Removes the requested part from the beginning of this chunk and returns.
+     * Removes the requested part from the beginning of this chunk.
      */
-    virtual void removeFromBeginning(b length) { throw cRuntimeError("Invalid operation"); }
+    void removeFromBeginning(b length) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        handleChange();
+        doRemoveFromBeginning(length);
+        tags.clearTags(b(0), length);
+        tags.moveTags(-length);
+    }
 
     /**
      * Removes the requested part from the end of this chunk.
      */
-    virtual void removeFromEnd(b length) { throw cRuntimeError("Invalid operation"); }
+    void removeFromEnd(b length) {
+        CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
+        handleChange();
+        doRemoveFromEnd(length);
+        tags.clearTags(getChunkLength(), length);
+    }
     //@}
 
     /** @name Chunk querying related functions */

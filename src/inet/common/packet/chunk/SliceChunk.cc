@@ -119,37 +119,29 @@ bool SliceChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
         return false;
 }
 
-void SliceChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void SliceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
-    handleChange();
     const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
     offset -= otherSliceChunk->length;
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
+void SliceChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
-    handleChange();
     const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::removeFromBeginning(b length)
+void SliceChunk::doRemoveFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= this->length, "length is invalid");
-    handleChange();
     this->offset += length;
     this->length -= length;
 }
 
-void SliceChunk::removeFromEnd(b length)
+void SliceChunk::doRemoveFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= this->length, "length is invalid");
-    handleChange();
     this->length -= length;
 }
 

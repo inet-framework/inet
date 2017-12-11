@@ -95,33 +95,25 @@ bool BitCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
-void BitCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void BitCountChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
-    handleChange();
     const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
+void BitCountChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITCOUNT);
-    handleChange();
     const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::removeFromBeginning(b length)
+void BitCountChunk::doRemoveFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     this->length -= length;
 }
 
-void BitCountChunk::removeFromEnd(b length)
+void BitCountChunk::doRemoveFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     this->length -= length;
 }
 

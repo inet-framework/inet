@@ -96,40 +96,26 @@ bool ByteCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-void ByteCountChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void ByteCountChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
-    handleChange();
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
-    tags.moveTags(byteCountChunk->length);
-    tags.copyTags(byteCountChunk->tags, b(0), b(0), byteCountChunk->length);
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
+void ByteCountChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
-    handleChange();
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
-    tags.copyTags(byteCountChunk->tags, b(0), length, byteCountChunk->length);
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::removeFromBeginning(b length)
+void ByteCountChunk::doRemoveFromBeginning(b length)
 {
-    CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
-    handleChange();
     this->length -= B(length);
-    tags.clearTags(b(0), length);
-    tags.moveTags(-length);
 }
 
-void ByteCountChunk::removeFromEnd(b length)
+void ByteCountChunk::doRemoveFromEnd(b length)
 {
-    CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= getChunkLength());
-    handleChange();
     this->length -= B(length);
-    tags.clearTags(this->length, length);
 }
 
 std::string ByteCountChunk::str() const

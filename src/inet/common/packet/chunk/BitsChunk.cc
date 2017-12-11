@@ -93,33 +93,25 @@ bool BitsChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
     return chunk->getChunkType() == CT_BITS;
 }
 
-void BitsChunk::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void BitsChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
-    handleChange();
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::insertAtEnd(const Ptr<const Chunk>& chunk)
+void BitsChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
 {
-    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
-    handleChange();
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::removeFromBeginning(b length)
+void BitsChunk::doRemoveFromBeginning(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     bits.erase(bits.begin(), bits.begin() + b(length).get());
 }
 
-void BitsChunk::removeFromEnd(b length)
+void BitsChunk::doRemoveFromEnd(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
-    handleChange();
     bits.erase(bits.end() - b(length).get(), bits.end());
 }
 
