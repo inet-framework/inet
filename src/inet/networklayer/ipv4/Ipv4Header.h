@@ -75,7 +75,7 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TlvOptionBase& getMutableOption(unsigned int k) { return *check_and_cast<TlvOptionBase *>(&(options.getMutableTlvOption(k))); }
+    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { return *check_and_cast<TlvOptionBase *>(&(options.getTlvOptionForUpdate(k))); }
     virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>(&(options.getTlvOption(k))); }
 
     /**

@@ -625,13 +625,13 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
         int oldHlen = ipv6Header->calculateHeaderByteLength();
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findMutableExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByTypeForUpdate(IP_PROT_IPv6EXT_HOP));
         if (hdr == nullptr) {
             hdr = new Ipv6HopByHopOptionsHeader();
             hdr->setByteLength(8);
             ipv6Header->addExtensionHeader(hdr);
         }
-        hdr->getMutableTlvOptions().add(gpsrOption);
+        hdr->getTlvOptionsForUpdate().add(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
         int newHlen = ipv6Header->calculateHeaderByteLength();
         ipv6Header->setChunkLength(ipv6Header->getChunkLength() + B(newHlen - oldHlen));
@@ -644,7 +644,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         auto gnpHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         int oldHlen = gnpHeader->getTlvOptions().getLength();
-        gnpHeader->getMutableTlvOptions().add(gpsrOption);
+        gnpHeader->getTlvOptionsForUpdate().add(gpsrOption);
         int newHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->setChunkLength(gnpHeader->getChunkLength() + B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::gnp, gnpHeader);
@@ -689,7 +689,7 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     return gpsrOption;
 }
 
-GpsrOption *Gpsr::findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader)
+GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader)
 {
     GpsrOption *gpsrOption = nullptr;
 
@@ -701,11 +701,11 @@ GpsrOption *Gpsr::findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeader
 #endif
 #ifdef WITH_IPv6
     if (auto ipv6Header = dynamicPtrCast<Ipv6Header>(networkHeader)) {
-        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findMutableExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
+        Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByTypeForUpdate(IP_PROT_IPv6EXT_HOP));
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)
-                gpsrOption = check_and_cast_nullable<GpsrOption *>(&(hdr->getMutableTlvOptions().at(i)));
+                gpsrOption = check_and_cast_nullable<GpsrOption *>(&(hdr->getTlvOptionsForUpdate().at(i)));
         }
     }
     else
@@ -714,7 +714,7 @@ GpsrOption *Gpsr::findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeader
     if (auto gnpHeader = dynamicPtrCast<GenericDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast_nullable<GpsrOption *>(&(gnpHeader->getMutableTlvOptions().at(i)));
+            gpsrOption = check_and_cast_nullable<GpsrOption *>(&(gnpHeader->getTlvOptionsForUpdate().at(i)));
     }
     else
 #endif
@@ -731,9 +731,9 @@ const GpsrOption *Gpsr::getGpsrOptionFromNetworkDatagram(const Ptr<const Network
     return gpsrOption;
 }
 
-GpsrOption *Gpsr::getMutableGpsrOptionFromNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader)
+GpsrOption *Gpsr::getGpsrOptionFromNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader)
 {
-    GpsrOption *gpsrOption = findMutableGpsrOptionInNetworkDatagram(networkHeader);
+    GpsrOption *gpsrOption = findGpsrOptionInNetworkDatagramForUpdate(networkHeader);
     if (gpsrOption == nullptr)
         throw cRuntimeError("Gpsr option not found in datagram!");
     return gpsrOption;

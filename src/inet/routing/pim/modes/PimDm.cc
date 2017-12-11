@@ -1515,10 +1515,10 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setPrunedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getMutablePrunedSourceAddress(0);
+    EncodedAddress& address = group.getPrunedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
@@ -1544,10 +1544,10 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getMutableJoinedSourceAddress(0);
+    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
@@ -1575,10 +1575,10 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     msg->setUpstreamNeighborAddress(nextHop);
 
     msg->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = msg->getMutableJoinPruneGroups(0);
+    JoinPruneGroup& group = msg->getJoinPruneGroupsForUpdate(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
-    EncodedAddress& address = group.getMutableJoinedSourceAddress(0);
+    EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));

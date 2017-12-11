@@ -113,11 +113,11 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader);
 
     // returns nullptr if not found
-    GpsrOption *findMutableGpsrOptionInNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
+    GpsrOption *findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader);
     const GpsrOption *findGpsrOptionInNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // throws an error when not found
-    GpsrOption *getMutableGpsrOptionFromNetworkDatagram(const Ptr<NetworkHeaderBase>& networkHeader);
+    GpsrOption *getGpsrOptionFromNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader);
     const GpsrOption *getGpsrOptionFromNetworkDatagram(const Ptr<const NetworkHeaderBase>& networkHeader) const;
 
     // configuration

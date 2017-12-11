@@ -407,28 +407,28 @@ void BgpRouting::updateSendProcess(const unsigned char type, SessionId sessionIn
 
             unsigned int nbAS = entry->getASCount();
             content.setAsPathArraySize(1);
-            content.getMutableAsPath(0).setValueArraySize(1);
-            content.getMutableAsPath(0).getMutableValue(0).setType(AS_SEQUENCE);
+            content.getAsPathForUpdate(0).setValueArraySize(1);
+            content.getAsPathForUpdate(0).getValueForUpdate(0).setType(AS_SEQUENCE);
             //RFC 4271 : set My AS in first position if it is not already
             if (entry->getAS(0) != _myAS) {
-                content.getMutableAsPath(0).getMutableValue(0).setAsValueArraySize(nbAS + 1);
-                content.getMutableAsPath(0).getMutableValue(0).setLength(1);
-                content.getMutableAsPath(0).getMutableValue(0).setAsValue(0, _myAS);
+                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
+                content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
+                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(0, _myAS);
                 for (unsigned int j = 1; j < nbAS + 1; j++) {
-                    content.getMutableAsPath(0).getMutableValue(0).setAsValue(j, entry->getAS(j - 1));
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
                 }
             }
             else {
-                content.getMutableAsPath(0).getMutableValue(0).setAsValueArraySize(nbAS);
-                content.getMutableAsPath(0).getMutableValue(0).setLength(1);
+                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
+                content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
                 for (unsigned int j = 0; j < nbAS; j++) {
-                    content.getMutableAsPath(0).getMutableValue(0).setAsValue(j, entry->getAS(j));
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
                 }
             }
 
             InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
-            content.getMutableOrigin().setValue((elem).second->getType());
-            content.getMutableNextHop().setValue(iftEntry->ipv4Data()->getIPAddress());
+            content.getOriginForUpdate().setValue((elem).second->getType());
+            content.getNextHopForUpdate().setValue(iftEntry->ipv4Data()->getIPAddress());
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();

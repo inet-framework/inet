@@ -695,10 +695,10 @@ void Neighbor::retransmitUpdatePacket()
 
                         unsigned short lsAge = updatePacket->getRouterLSAs(routerLSACount).getHeader().getLsAge();
                         if (lsAge < MAX_AGE - parentInterface->getTransmissionDelay()) {
-                            updatePacket->getMutableRouterLSAs(routerLSACount).getMutableHeader().setLsAge(lsAge + parentInterface->getTransmissionDelay());
+                            updatePacket->getRouterLSAsForUpdate(routerLSACount).getHeaderForUpdate().setLsAge(lsAge + parentInterface->getTransmissionDelay());
                         }
                         else {
-                            updatePacket->getMutableRouterLSAs(routerLSACount).getMutableHeader().setLsAge(MAX_AGE);
+                            updatePacket->getRouterLSAsForUpdate(routerLSACount).getHeaderForUpdate().setLsAge(MAX_AGE);
                         }
                     }
                     break;
@@ -712,10 +712,10 @@ void Neighbor::retransmitUpdatePacket()
 
                         unsigned short lsAge = updatePacket->getNetworkLSAs(networkLSACount).getHeader().getLsAge();
                         if (lsAge < MAX_AGE - parentInterface->getTransmissionDelay()) {
-                            updatePacket->getMutableNetworkLSAs(networkLSACount).getMutableHeader().setLsAge(lsAge + parentInterface->getTransmissionDelay());
+                            updatePacket->getNetworkLSAsForUpdate(networkLSACount).getHeaderForUpdate().setLsAge(lsAge + parentInterface->getTransmissionDelay());
                         }
                         else {
-                            updatePacket->getMutableNetworkLSAs(networkLSACount).getMutableHeader().setLsAge(MAX_AGE);
+                            updatePacket->getNetworkLSAsForUpdate(networkLSACount).getHeaderForUpdate().setLsAge(MAX_AGE);
                         }
                     }
                     break;
@@ -730,10 +730,10 @@ void Neighbor::retransmitUpdatePacket()
 
                         unsigned short lsAge = updatePacket->getSummaryLSAs(summaryLSACount).getHeader().getLsAge();
                         if (lsAge < MAX_AGE - parentInterface->getTransmissionDelay()) {
-                            updatePacket->getMutableSummaryLSAs(summaryLSACount).getMutableHeader().setLsAge(lsAge + parentInterface->getTransmissionDelay());
+                            updatePacket->getSummaryLSAsForUpdate(summaryLSACount).getHeaderForUpdate().setLsAge(lsAge + parentInterface->getTransmissionDelay());
                         }
                         else {
-                            updatePacket->getMutableSummaryLSAs(summaryLSACount).getMutableHeader().setLsAge(MAX_AGE);
+                            updatePacket->getSummaryLSAsForUpdate(summaryLSACount).getHeaderForUpdate().setLsAge(MAX_AGE);
                         }
                     }
                     break;
@@ -747,10 +747,10 @@ void Neighbor::retransmitUpdatePacket()
 
                         unsigned short lsAge = updatePacket->getAsExternalLSAs(asExternalLSACount).getHeader().getLsAge();
                         if (lsAge < MAX_AGE - parentInterface->getTransmissionDelay()) {
-                            updatePacket->getMutableAsExternalLSAs(asExternalLSACount).getMutableHeader().setLsAge(lsAge + parentInterface->getTransmissionDelay());
+                            updatePacket->getAsExternalLSAsForUpdate(asExternalLSACount).getHeaderForUpdate().setLsAge(lsAge + parentInterface->getTransmissionDelay());
                         }
                         else {
-                            updatePacket->getMutableAsExternalLSAs(asExternalLSACount).getMutableHeader().setLsAge(MAX_AGE);
+                            updatePacket->getAsExternalLSAsForUpdate(asExternalLSACount).getHeaderForUpdate().setLsAge(MAX_AGE);
                         }
                     }
                     break;

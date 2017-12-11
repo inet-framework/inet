@@ -589,8 +589,8 @@ b Dymo::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 const Ptr<RREQ> Dymo::createRREQ(const L3Address& target, int retryCount)
 {
     auto rreq = makeShared<RREQ>(); // TODO: "RREQ");
-    AddressBlock& originatorNode = rreq->getMutableOriginatorNode();
-    AddressBlock& targetNode = rreq->getMutableTargetNode();
+    AddressBlock& originatorNode = rreq->getOriginatorNodeForUpdate();
+    AddressBlock& targetNode = rreq->getTargetNodeForUpdate();
     // 7.3. RREQ Generation
     // 1. RREQ_Gen MUST increment its OwnSeqNum by one (1) according to the
     //    rules specified in Section 5.5.
@@ -715,8 +715,8 @@ const Ptr<RREP> Dymo::createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route)
 {
     DymoRouteData *routeData = check_and_cast<DymoRouteData *>(route->getProtocolData());
     auto rrep = makeShared<RREP>(); // TODO: "RREP");
-    AddressBlock& originatorNode = rrep->getMutableOriginatorNode();
-    AddressBlock& targetNode = rrep->getMutableTargetNode();
+    AddressBlock& originatorNode = rrep->getOriginatorNodeForUpdate();
+    AddressBlock& targetNode = rrep->getTargetNodeForUpdate();
     // 1. RREP_Gen first uses the routing information to update its route
     //    table entry for OrigNode if necessary as specified in Section 6.2.
     // NOTE: this is already done

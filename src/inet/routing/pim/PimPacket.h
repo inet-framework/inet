@@ -47,10 +47,12 @@ class INET_API PimHello : public PimHello_Base
     // field getter/setter methods
     virtual void setOptionsArraySize(size_t size) override;
     virtual size_t getOptionsArraySize() const override;
-    virtual HelloOption *getMutableOptions(size_t k) override;
+    virtual HelloOption *getOptionsForUpdate(size_t k) override;
     virtual const HelloOption *getOptions(size_t k) const override;
     virtual void setOptions(size_t k, HelloOption *options) override;
-    virtual void appendOptions(HelloOption * options) override { throw cRuntimeError("appendOptions not implemented"); }
+    virtual void insertOptions(HelloOption * options) override { throw cRuntimeError("insertOptions not implemented"); }
+    virtual void insertOptions(size_t k, HelloOption * options) override { throw cRuntimeError("insertOptions not implemented"); }
+    virtual void eraseOptions(size_t k) override { throw cRuntimeError("eraseOptions not implemented"); }
 };
 
 }    // namespace inet

@@ -96,7 +96,7 @@ class INET_API TcpHeader : public TcpHeader_Base
     virtual size_t getHeaderOptionArraySize() const override;
 
     /** Returns the kth TCP options in this TCP segment */
-    virtual TcpOption *getMutableHeaderOption(size_t k) override  { handleChange(); return headerOptionList.at(k); }
+    virtual TcpOption *getHeaderOptionForUpdate(size_t k) override  { handleChange(); return headerOptionList.at(k); }
 
     virtual const TcpOption *getHeaderOption(size_t k) const override  { return headerOptionList.at(k); }
 
@@ -104,7 +104,11 @@ class INET_API TcpHeader : public TcpHeader_Base
     virtual void setHeaderOption(size_t k, TcpOption* headerOption) override;
 
     /** Adds a TCP option to the TCP segment */
-    virtual void appendHeaderOption(TcpOption *headerOption) override;
+    virtual void insertHeaderOption(TcpOption *headerOption) override;
+    virtual void insertHeaderOption(size_t k, TcpOption *headerOption) override { throw cRuntimeError("Do not use it!"); }
+
+    /** Adds a TCP option to the TCP segment */
+    virtual void eraseHeaderOption(size_t k) override { throw cRuntimeError("Do not use it!"); }
 
     /** Drops all TCP options of the TCP segment */
     virtual void dropHeaderOptions();

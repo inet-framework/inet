@@ -75,7 +75,9 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     virtual void setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var) override;
 
     /** Adds an extension header to the datagram, see addExtensionHeader(). */
-    virtual void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override;
+    virtual void insertExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override { addExtensionHeader(extensionHeader); }
+    virtual void insertExtensionHeader(size_t k, Ipv6ExtensionHeader * extensionHeader) override { throw cRuntimeError("Do not use it!"); }
+
     /**
      * Returns the number of extension headers in this datagram
      */
@@ -84,7 +86,7 @@ class INET_API Ipv6Header : public Ipv6Header_Base
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual Ipv6ExtensionHeader *getMutableExtensionHeader(size_t k) override;
+    virtual Ipv6ExtensionHeader *getExtensionHeaderForUpdate(size_t k) override;
     virtual const Ipv6ExtensionHeader *getExtensionHeader(size_t k) const override;
 
     /**
@@ -93,15 +95,14 @@ class INET_API Ipv6Header : public Ipv6Header_Base
      * second extension is returned. (The datagram might
      * contain two Destination Options extension.)
      */
-    virtual Ipv6ExtensionHeader *findMutableExtensionHeaderByType(IpProtocolId extensionType, int index = 0);
+    virtual Ipv6ExtensionHeader *findExtensionHeaderByTypeForUpdate(IpProtocolId extensionType, int index = 0);
     virtual const Ipv6ExtensionHeader *findExtensionHeaderByType(IpProtocolId extensionType, int index = 0) const;
 
     /**
      * Adds an extension header to the datagram.
-     * The atPos parameter should not be used, the extension
-     * headers are stored in the order specified in RFC 2460 4.1.
+     * The extension headers are stored in the order specified in RFC 2460 4.1.
      */
-    virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
+    virtual void addExtensionHeader(Ipv6ExtensionHeader *eh);
 
     /**
      * Calculates the length of the Ipv6 header plus the extension
@@ -126,10 +127,13 @@ class INET_API Ipv6Header : public Ipv6Header_Base
      */
     virtual Ipv6ExtensionHeader *removeFirstExtensionHeader();
 
+
     /**
      * Removes and returns the first extension header with the given type.
      */
     virtual Ipv6ExtensionHeader *removeExtensionHeader(IpProtocolId extensionType);
+
+    virtual void eraseExtensionHeader(size_t k) override { throw cRuntimeError("Do not use it!"); }
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }

@@ -53,7 +53,7 @@ size_t Ipv6Header::getExtensionHeaderArraySize() const
     return extensionHeaders.size();
 }
 
-Ipv6ExtensionHeader *Ipv6Header::getMutableExtensionHeader(size_t k)
+Ipv6ExtensionHeader *Ipv6Header::getExtensionHeaderForUpdate(size_t k)
 {
     handleChange();
     if (k >= extensionHeaders.size())
@@ -68,7 +68,7 @@ const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(size_t k) const
     return extensionHeaders[k];
 }
 
-Ipv6ExtensionHeader *Ipv6Header::findMutableExtensionHeaderByType(IpProtocolId extensionType, int index)
+Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByTypeForUpdate(IpProtocolId extensionType, int index)
 {
     for (auto & elem : extensionHeaders)
         if ((elem)->getExtensionType() == extensionType) {
@@ -97,15 +97,8 @@ void Ipv6Header::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHead
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
-void Ipv6Header::appendExtensionHeader(Ipv6ExtensionHeader *extensionHeader)
+void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
 {
-    addExtensionHeader(extensionHeader, -1);
-}
-
-void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
-{
-    if (atPos != -1)
-        throw cRuntimeError(this, "addExtensionHeader() does not support atPos parameter.");
     ASSERT((eh->getByteLength() >= 1) && (eh->getByteLength() % 8 == 0));
     int thisOrder = getExtensionHeaderOrder(eh);
     size_t i;

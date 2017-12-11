@@ -363,7 +363,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
         for (unsigned short i = 0; i < numOptions; i++) {
             if (tcpHdr->getHeaderOption(i)->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
                 auto newTcpHdr = staticPtrCast<TcpHeader>(tcpHdr->dupShared());
-                TcpOption* option = newTcpHdr->getMutableHeaderOption(i);
+                TcpOption* option = newTcpHdr->getHeaderOptionForUpdate(i);
                 TcpOptionMaxSegmentSize *mssOption = check_and_cast<TcpOptionMaxSegmentSize *>(option);
                 unsigned int value = mssOption->getMaxSegmentSize();
                 value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);

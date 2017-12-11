@@ -144,7 +144,7 @@ size_t PimHello::getOptionsArraySize() const
     return options_arraysize;
 }
 
-HelloOption *PimHello::getMutableOptions(size_t k)
+HelloOption *PimHello::getOptionsForUpdate(size_t k)
 {
     if (k >= options_arraysize)
         throw cRuntimeError("Array of size %d indexed by %d", options_arraysize, k);

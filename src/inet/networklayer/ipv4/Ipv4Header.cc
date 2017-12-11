@@ -31,7 +31,7 @@ int Ipv4Header::getTotalLengthField() const
 TlvOptionBase *Ipv4Header::findMutableOptionByType(short int optionType, int index)
 {
     int i = options.findByType(optionType, index);
-    return i >= 0 ? &getMutableOption(i) : nullptr;
+    return i >= 0 ? &getOptionForUpdate(i) : nullptr;
 }
 
 const TlvOptionBase *Ipv4Header::findOptionByType(short int optionType, int index) const

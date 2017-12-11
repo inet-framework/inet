@@ -57,7 +57,7 @@ class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual Ipv6ExtensionHeader *getMutableExtensionHeader(size_t k) override;
+    virtual Ipv6ExtensionHeader *getExtensionHeaderForUpdate(size_t k) override;
     virtual const Ipv6ExtensionHeader *getExtensionHeader(size_t k) const override;
 
     /** Generated but unused method, should not be called. */
@@ -69,13 +69,15 @@ class INET_API Ipv6ExtHeaderTagBase : public Ipv6ExtHeaderTagBase_Base
      * The default (atPos==-1) is to add the header at the end.
      */
     virtual void addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos = -1);
-    virtual void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override { addExtensionHeader(extensionHeader); }
+    virtual void insertExtensionHeader(Ipv6ExtensionHeader * extensionHeader) override { addExtensionHeader(extensionHeader); }
+    virtual void insertExtensionHeader(size_t k, Ipv6ExtensionHeader * extensionHeader) override { addExtensionHeader(extensionHeader, k); }
 
     /**
      * Remove the first extension header and return it.
      */
     Ipv6ExtensionHeader *removeFirstExtensionHeader();
 
+    virtual void eraseExtensionHeader(size_t k) override { throw cRuntimeError("Do not use it!"); }
 };
 
 } // namespace inet

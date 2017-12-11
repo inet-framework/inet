@@ -1570,7 +1570,7 @@ void Rsvp::processResvMsg(Packet *pk)
         if (!psb) {
             EV_DETAIL << "matching PSB not found for lspid=" << msg->getFlowDescriptor()[m].Filter_Spec_Object.Lsp_Id << endl;
             // remove descriptor from message
-            msg->getMutableFlowDescriptor().erase(msg->getMutableFlowDescriptor().begin() + m);
+            msg->getFlowDescriptorForUpdate().erase(msg->getFlowDescriptorForUpdate().begin() + m);
             --m;
         }
     }

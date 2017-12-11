@@ -88,9 +88,11 @@ class INET_API TlvOptions : public TlvOptions_Base
     virtual void setTlvOptionArraySize(size_t size) override { throw cRuntimeError("Do not use it!"); }
     virtual size_t getTlvOptionArraySize() const override { return size(); }
     virtual const TlvOptionBase& getTlvOption(size_t k) const override { return *optionVector.at(k); }
-    virtual TlvOptionBase& getMutableTlvOption(size_t k) override { return *optionVector.at(k); }
+    virtual TlvOptionBase& getTlvOptionForUpdate(size_t k) override { return *optionVector.at(k); }
     virtual void setTlvOption(size_t k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
-    virtual void appendTlvOption(const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
+    virtual void insertTlvOption(const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
+    virtual void insertTlvOption(size_t k, const TlvOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
+    virtual void eraseTlvOption(size_t k) override { throw cRuntimeError("Do not use it!"); }
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 };

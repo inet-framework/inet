@@ -67,7 +67,7 @@ void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(size_t size)
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getMutableExtensionHeader(size_t k)
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeaderForUpdate(size_t k)
 {
     handleChange();
     ASSERT(k < extensionHeaders.size());

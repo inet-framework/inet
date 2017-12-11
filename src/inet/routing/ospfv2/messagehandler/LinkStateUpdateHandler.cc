@@ -214,18 +214,18 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
                     {
                         if (ackFlags.noLSAInstanceInDatabase) {
                             auto lsaCopy = currentLSA->dup();
-                            lsaCopy->getMutableHeader().setLsAge(MAX_AGE);
+                            lsaCopy->getHeaderForUpdate().setLsAge(MAX_AGE);
                             router->floodLSA(lsaCopy, areaID);
                         }
                         else {
                             if (ackFlags.lsaIsNewer) {
                                 long sequenceNumber = currentLSA->getHeader().getLsSequenceNumber();
                                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                                    lsaInDatabase->getMutableHeader().setLsAge(MAX_AGE);
+                                    lsaInDatabase->getHeaderForUpdate().setLsAge(MAX_AGE);
                                     router->floodLSA(lsaInDatabase, areaID);
                                 }
                                 else {
-                                    lsaInDatabase->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
+                                    lsaInDatabase->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
                                     router->floodLSA(lsaInDatabase, areaID);
                                 }
                             }

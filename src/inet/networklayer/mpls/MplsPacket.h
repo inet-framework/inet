@@ -61,7 +61,7 @@ class INET_API MplsHeader : public MplsHeader_Base
      * Pushes new label on the label stack
      */
     inline void pushLabel(MplsLabel newLabel) { labels.push_back(newLabel); }
-    virtual void appendLabels(const MplsLabel& label) override { pushLabel(label); }
+    virtual void insertLabels(const MplsLabel& label) override { pushLabel(label); }
 
     /**
      * Pops the top label
@@ -82,9 +82,11 @@ class INET_API MplsHeader : public MplsHeader_Base
 
     virtual void setLabelsArraySize(size_t size) override { throw cRuntimeError("do not use it"); }
     virtual size_t getLabelsArraySize() const override { return labels.size(); }
-    virtual MplsLabel& getMutableLabels(size_t k) override { throw cRuntimeError("do not use it"); }
+    virtual MplsLabel& getLabelsForUpdate(size_t k) override { throw cRuntimeError("do not use it"); }
     virtual const MplsLabel& getLabels(size_t k) const override { throw cRuntimeError("do not use it"); }
     virtual void setLabels(size_t k, const MplsLabel& labels) override { throw cRuntimeError("do not use it"); }
+    virtual void insertLabels(size_t k, const MplsLabel& label) override { throw cRuntimeError("Do not use it!"); }
+    virtual void eraseLabels(size_t k) override { throw cRuntimeError("Do not use it!"); }
 };
 
 } // namespace inet

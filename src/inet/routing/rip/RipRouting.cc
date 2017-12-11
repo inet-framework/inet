@@ -300,7 +300,7 @@ void RipRouting::sendRIPRequest(const RipInterfaceEntry& ripInterface)
     const  auto& packet = makeShared<RipPacket>();
     packet->setCommand(RIP_REQUEST);
     packet->setEntryArraySize(1);
-    RipEntry& entry = packet->getMutableEntry(0);
+    RipEntry& entry = packet->getEntryForUpdate(0);
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
     packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
@@ -617,7 +617,7 @@ void RipRouting::processRequest(Packet *packet)
     EV_INFO << "received request from " << srcAddr << "\n";
 
     for (int i = 0; i < numEntries; ++i) {
-        RipEntry& entry = ripPacket->getMutableEntry(i);
+        RipEntry& entry = ripPacket->getEntryForUpdate(i);
         switch (entry.addressFamilyId) {
             case RIP_AF_NONE:
                 if (numEntries == 1 && entry.metric == RIP_INFINITE_METRIC) {
@@ -694,7 +694,7 @@ void RipRouting::sendRoutes(const L3Address& address, int port, const RipInterfa
                  << " metric=" << metric << std::endl;
 
         // fill next entry
-        RipEntry& entry = packet->getMutableEntry(k++);
+        RipEntry& entry = packet->getEntryForUpdate(k++);
         entry.addressFamilyId = RIP_AF_INET;
         entry.address = ripRoute->getDestination();
         entry.prefixLength = ripRoute->getPrefixLength();

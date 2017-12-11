@@ -202,7 +202,7 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
             return false;
         }
         else {
-            lsaIt->second->getMutableHeader().setLsAge(MAX_AGE);
+            lsaIt->second->getHeaderForUpdate().setLsAge(MAX_AGE);
             floodLSA(lsaIt->second, BACKBONE_AREAID);
             lsaIt->second->incrementInstallTime();
             ownLSAFloodedOut = true;
@@ -301,7 +301,7 @@ void Router::ageDatabase()
         AsExternalLsa *lsa = asExternalLSAs[i];
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
-            lsa->getMutableHeader().setLsAge(lsAge + 1);
+            lsa->getHeaderForUpdate().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->validateLSChecksum()) {
                     EV_ERROR << "Invalid LS checksum. Memory error detected!\n";
@@ -311,21 +311,21 @@ void Router::ageDatabase()
         }
         if (selfOriginated && (lsAge == (LS_REFRESH_TIME - 1))) {
             if (unreachable) {
-                lsa->getMutableHeader().setLsAge(MAX_AGE);
+                lsa->getHeaderForUpdate().setLsAge(MAX_AGE);
                 floodLSA(lsa, BACKBONE_AREAID);
                 lsa->incrementInstallTime();
             }
             else {
                 long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                    lsa->getMutableHeader().setLsAge(MAX_AGE);
+                    lsa->getHeaderForUpdate().setLsAge(MAX_AGE);
                     floodLSA(lsa, BACKBONE_AREAID);
                     lsa->incrementInstallTime();
                 }
                 else {
                     AsExternalLsa *newLSA = originateASExternalLSA(lsa);
 
-                    newLSA->getMutableHeader().setLsSequenceNumber(sequenceNumber + 1);
+                    newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -334,7 +334,7 @@ void Router::ageDatabase()
             }
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
-            lsa->getMutableHeader().setLsAge(MAX_AGE);
+            lsa->getHeaderForUpdate().setLsAge(MAX_AGE);
             floodLSA(lsa, BACKBONE_AREAID);
             lsa->incrementInstallTime();
         }
@@ -364,7 +364,7 @@ void Router::ageDatabase()
                         AsExternalLsa *newLSA = originateASExternalLSA(lsa);
                         long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
-                        newLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+                        newLSA->getHeaderForUpdate().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -477,7 +477,7 @@ bool Router::hasAddressRange(const Ipv4AddressRange& addressRange) const
 AsExternalLsa *Router::originateASExternalLSA(AsExternalLsa *lsa)
 {
     AsExternalLsa *asExternalLSA = new AsExternalLsa(*lsa);
-    OspfLsaHeader& lsaHeader = asExternalLSA->getMutableHeader();
+    OspfLsaHeader& lsaHeader = asExternalLSA->getHeaderForUpdate();
     OspfOptions lsaOptions;
 
     lsaHeader.setLsAge(0);
@@ -1097,11 +1097,11 @@ LinkStateId Router::getUniqueLinkStateID(const Ipv4AddressRange& destination,
 
             long sequenceNumber = asExternalLSA->getHeader().getLsSequenceNumber();
 
-            asExternalLSA->getMutableHeader().setLsAge(0);
-            asExternalLSA->getMutableHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-            asExternalLSA->getMutableContents().setNetworkMask(destination.mask);
-            asExternalLSA->getMutableContents().setE_ExternalMetricType(externalMetricIsType2);
-            asExternalLSA->getMutableContents().setRouteCost(destinationCost);
+            asExternalLSA->getHeaderForUpdate().setLsAge(0);
+            asExternalLSA->getHeaderForUpdate().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
+            asExternalLSA->getContentsForUpdate().setNetworkMask(destination.mask);
+            asExternalLSA->getContentsForUpdate().setE_ExternalMetricType(externalMetricIsType2);
+            asExternalLSA->getContentsForUpdate().setRouteCost(destinationCost);
 
             lsaToReoriginate = asExternalLSA;
 
@@ -1245,7 +1245,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& ol
                                 else {    // no more entries in this range -> delete it
                                     std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                                     if (deletedIt == deletedLSAMap.end()) {
-                                        summaryLSA->getMutableHeader().setLsAge(MAX_AGE);
+                                        summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
 //                                        floodLSA(summaryLSA, BACKBONE_AREAID);
                                         floodLSA(summaryLSA, areas[i]->getAreaID());
 
@@ -1306,7 +1306,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& ol
                         else {    // no more entries in this range -> delete it
                             std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                             if (deletedIt == deletedLSAMap.end()) {
-                                summaryLSA->getMutableHeader().setLsAge(MAX_AGE);
+                                summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                                 floodLSA(summaryLSA, BACKBONE_AREAID);
 
                                 deletedLSAMap[lsaKey] = true;
@@ -1322,7 +1322,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& ol
 void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex)
 {
     AsExternalLsa *asExternalLSA = new AsExternalLsa;
-    OspfLsaHeader& lsaHeader = asExternalLSA->getMutableHeader();
+    OspfLsaHeader& lsaHeader = asExternalLSA->getHeaderForUpdate();
     OspfOptions lsaOptions;
     //LsaKeyType lsaKey;
 
@@ -1408,7 +1408,7 @@ void Router::removeExternalRoute(Ipv4Address networkAddress)
 
     auto lsaIt = asExternalLSAsByID.find(lsaKey);
     if (lsaIt != asExternalLSAsByID.end()) {
-        lsaIt->second->getMutableHeader().setLsAge(MAX_AGE);
+        lsaIt->second->getHeaderForUpdate().setLsAge(MAX_AGE);
         lsaIt->second->setPurgeable();
         floodLSA(lsaIt->second, BACKBONE_AREAID);
     }

@@ -113,7 +113,7 @@ void TcpHeader::parsimUnpack(cCommBuffer *b)
     }
 }
 
-void TcpHeader::appendHeaderOption(TcpOption *option)
+void TcpHeader::insertHeaderOption(TcpOption *option)
 {
     handleChange();
     headerOptionList.push_back(option);

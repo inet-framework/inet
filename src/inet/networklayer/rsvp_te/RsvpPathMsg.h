@@ -39,12 +39,12 @@ class INET_API RsvpPathMsg : public RsvpPathMsg_Base
     inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
-    inline SenderTemplateObj& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
+    inline SenderTemplateObj& getSenderTemplateForUpdate() { return getSender_descriptorForUpdate().Sender_Template_Object; }
     inline const SenderTemplateObj& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj& s) { getSender_descriptorForUpdate().Sender_Template_Object = s; }
+    inline SenderTspecObj& getSenderTspecForUpdate() { return getSender_descriptorForUpdate().Sender_Tspec_Object; }
     inline const SenderTspecObj& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
+    inline void setSenderTspec(const SenderTspecObj& s) { getSender_descriptorForUpdate().Sender_Tspec_Object = s; }
 };
 
 /**
@@ -85,12 +85,12 @@ class INET_API RsvpPathError : public RsvpPathError_Base
     inline int getLspId() { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
 
-    inline SenderTemplateObj& getMutableSenderTemplate() { return getMutableSender_descriptor().Sender_Template_Object; }
+    inline SenderTemplateObj& getSenderTemplateForUpdate() { return getSender_descriptorForUpdate().Sender_Template_Object; }
     inline const SenderTemplateObj& getSenderTemplate() const { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj& s) { getMutableSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj& getMutableSenderTspec() { return getMutableSender_descriptor().Sender_Tspec_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj& s) { getSender_descriptorForUpdate().Sender_Template_Object = s; }
+    inline SenderTspecObj& getSenderTspecForUpdate() { return getSender_descriptorForUpdate().Sender_Tspec_Object; }
     inline const SenderTspecObj& getSenderTspec() const { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj& s) { getMutableSender_descriptor().Sender_Tspec_Object = s; }
+    inline void setSenderTspec(const SenderTspecObj& s) { getSender_descriptorForUpdate().Sender_Tspec_Object = s; }
 };
 
 } // namespace inet

@@ -540,28 +540,28 @@ void DhcpClient::sendRequest()
     request->setChaddr(macAddress);    // my mac address;
     request->setSname("");    // no server name given
     request->setFile("");    // no file given
-    request->getMutableOptions().setMessageType(DHCPREQUEST);
-    request->getMutableOptions().setClientIdentifier(macAddress);
+    request->getOptionsForUpdate().setMessageType(DHCPREQUEST);
+    request->getOptionsForUpdate().setClientIdentifier(macAddress);
 
     // set the parameters to request
-    request->getMutableOptions().setParameterRequestListArraySize(4);
-    request->getMutableOptions().setParameterRequestList(0, SUBNET_MASK);
-    request->getMutableOptions().setParameterRequestList(1, ROUTER);
-    request->getMutableOptions().setParameterRequestList(2, DNS);
-    request->getMutableOptions().setParameterRequestList(3, NTP_SRV);
+    request->getOptionsForUpdate().setParameterRequestListArraySize(4);
+    request->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
+    request->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
+    request->getOptionsForUpdate().setParameterRequestList(2, DNS);
+    request->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
     L3Address destAddr;
 
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
-        request->getMutableOptions().setRequestedIp(lease->ip);
+        request->getOptionsForUpdate().setRequestedIp(lease->ip);
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
     }
     else if (clientState == REQUESTING) {
-        request->getMutableOptions().setServerIdentifier(lease->serverId);
-        request->getMutableOptions().setRequestedIp(lease->ip);
+        request->getOptionsForUpdate().setServerIdentifier(lease->serverId);
+        request->getOptionsForUpdate().setRequestedIp(lease->ip);
         request->setCiaddr(Ipv4Address());    // zero
         destAddr = Ipv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
@@ -601,16 +601,16 @@ void DhcpClient::sendDiscover()
     discover->setChaddr(macAddress);    // my mac address
     discover->setSname("");    // no server name given
     discover->setFile("");    // no file given
-    discover->getMutableOptions().setMessageType(DHCPDISCOVER);
-    discover->getMutableOptions().setClientIdentifier(macAddress);
-    discover->getMutableOptions().setRequestedIp(Ipv4Address());
+    discover->getOptionsForUpdate().setMessageType(DHCPDISCOVER);
+    discover->getOptionsForUpdate().setClientIdentifier(macAddress);
+    discover->getOptionsForUpdate().setRequestedIp(Ipv4Address());
 
     // set the parameters to request
-    discover->getMutableOptions().setParameterRequestListArraySize(4);
-    discover->getMutableOptions().setParameterRequestList(0, SUBNET_MASK);
-    discover->getMutableOptions().setParameterRequestList(1, ROUTER);
-    discover->getMutableOptions().setParameterRequestList(2, DNS);
-    discover->getMutableOptions().setParameterRequestList(3, NTP_SRV);
+    discover->getOptionsForUpdate().setParameterRequestListArraySize(4);
+    discover->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
+    discover->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
+    discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
+    discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
     discover->markImmutable();
     packet->append(discover);
@@ -635,8 +635,8 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     decline->setChaddr(macAddress);    // my MAC address
     decline->setSname("");    // no server name given
     decline->setFile("");    // no file given
-    decline->getMutableOptions().setMessageType(DHCPDECLINE);
-    decline->getMutableOptions().setRequestedIp(declinedIp);
+    decline->getOptionsForUpdate().setMessageType(DHCPDECLINE);
+    decline->getOptionsForUpdate().setRequestedIp(declinedIp);
 
     decline->markImmutable();
     packet->append(decline);
