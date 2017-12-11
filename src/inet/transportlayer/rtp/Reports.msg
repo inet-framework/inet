@@ -17,8 +17,6 @@ namespace inet::rtp;
 //
 class SenderReport extends cObject
 {
-    @customize;
-
     // The ntp time stamp.
     uint64 NTPTimeStamp;
 
@@ -32,14 +30,26 @@ class SenderReport extends cObject
     uint32 byteCount;
 };
 
+cplusplus(SenderReport) {{
+  public:
+    /**
+     * Writes a short info about this SenderReport into the given string.
+     */
+    virtual std::string info() const override;
+
+    /**
+     * Writes a longer info about this SenderReport into the given stream.
+     */
+    virtual void dump(std::ostream& os) const;
+}}
+
+
 //
 // Rrepresents an RTP receiver report stored
 // in an RTPSenderReportPacket or RTPReceiverReport.
 //
 class ReceptionReport extends cObject
 {
-    @customize;
-
     // The ssrc identifier of the sender this ~ReceptionReport is for.
     uint32 ssrc;
 
@@ -62,4 +72,17 @@ class ReceptionReport extends cObject
     // received in units of 1/65536 seconds.
     int delaySinceLastSR;
 };
+
+cplusplus(ReceptionReport) {{
+  public:
+    /**
+     * Writes a short info about this ReceptionReport into the given string.
+     */
+    virtual std::string info() const override;
+
+    /**
+     * Writes a longer info about this ReceptionReport into the given stream.
+     */
+    virtual void dump(std::ostream& os) const;
+}}
 

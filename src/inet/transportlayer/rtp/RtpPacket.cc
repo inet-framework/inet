@@ -15,13 +15,11 @@
 *                                                                         *
 ***************************************************************************/
 
-#include "inet/transportlayer/rtp/RtpPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
 
 namespace rtp {
-
-Register_Class(RtpHeader);
 
 std::string RtpHeader::info() const
 {

@@ -20,7 +20,7 @@
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
 #include "inet/transportlayer/rtp/RtpInnerPacket.h"
-#include "inet/transportlayer/rtp/RtpPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
 

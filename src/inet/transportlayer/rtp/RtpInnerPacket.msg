@@ -23,7 +23,7 @@ import inet.transportlayer.rtp.RtpSenderControlMessage;
 import inet.transportlayer.rtp.RtpSenderStatusMessage;
 
 cplusplus {{
-#include "inet/transportlayer/rtp/RtpPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket_m.h"
 }}
 
 namespace inet::rtp;

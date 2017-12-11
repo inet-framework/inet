@@ -18,7 +18,6 @@ import inet.common.packet.chunk.Chunk;
 import inet.transportlayer.rtp.Reports;
 
 cplusplus{{
-#include "inet/transportlayer/rtp/Reports.h"
 #include "inet/transportlayer/rtp/Sdes.h"
 }}
 

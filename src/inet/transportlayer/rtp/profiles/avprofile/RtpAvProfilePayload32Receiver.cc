@@ -24,7 +24,7 @@
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"
-#include "inet/transportlayer/rtp/RtpPacket.h"
+#include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
 

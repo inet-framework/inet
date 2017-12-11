@@ -37,8 +37,6 @@ enum RtpHeaderEnums
 //
 class RtpHeader extends FieldsChunk
 {
-    @customize;  // see the generated C++ header for more info
-
     chunkLength = B(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
 
     // The rtp version of this ~RtpPacket.
@@ -72,3 +70,17 @@ class RtpHeader extends FieldsChunk
     // no mixers, no contributing sources
     uint32 csrc[];      // cc * 32 bits
 };
+
+cplusplus(RtpHeader) {{
+  public:
+    /**
+     * Writes a one line info about this RtpHeader into the given string.
+     */
+    virtual std::string info() const override;
+
+    /**
+     * Writes a longer description about this RtpHeader into the given stream.
+     */
+    virtual void dump() const;
+}}
+
