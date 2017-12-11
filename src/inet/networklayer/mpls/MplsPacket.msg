@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2017 OpenSim Ltd.
+//
 // This library is free software, you can redistribute it
 // and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -30,7 +32,41 @@ class MplsLabel extends cObject
 
 class MplsHeader extends FieldsChunk
 {
-    @customize;
-    abstract MplsLabel labels[];
+    MplsLabel labels[];
 }
+
+cplusplus(MplsHeader) {{
+  public:
+    /**
+     * Returns a string with the labels, starting with the top of stack.
+     */
+    virtual std::string info() const override;
+
+    /**
+     * Swap Label operation
+     */
+    inline void swapLabel(MplsLabel newLabel) { ASSERT(labels_arraysize > 0); labels[labels_arraysize - 1] = newLabel; }
+
+    /**
+     * Pushes new label on the label stack
+     */
+    inline void pushLabel(MplsLabel newLabel) { insertLabels(newLabel); }
+
+    /**
+     * Pops the top label
+     */
+    inline void popLabel() { ASSERT(labels_arraysize > 0); eraseLabels(labels_arraysize - 1); }
+
+    /**
+     * Returns true if the label stack is not empty
+     */
+    inline bool hasLabel() { return labels_arraysize > 0; }
+
+    /**
+     * Returns the top label
+     */
+    inline MplsLabel getTopLabel() { ASSERT(labels_arraysize > 0); return labels[labels_arraysize - 1]; }
+
+    virtual b getChunkLength() const override { return b(32) * labels_arraysize; }
+}}
 

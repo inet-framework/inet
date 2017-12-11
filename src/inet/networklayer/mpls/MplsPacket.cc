@@ -15,24 +15,14 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/mpls/MplsPacket.h"
+#include "inet/networklayer/mpls/MplsPacket_m.h"
 
 namespace inet {
-
-// assignment operator
-MplsHeader& MplsHeader::operator=(const MplsHeader& other)
-{
-    if (this == &other)
-        return *this;
-    MplsHeader_Base::operator=(other);
-    copy(other);
-    return *this;
-}
 
 std::string MplsHeader::info() const
 {
     std::stringstream out;
-    for (int i = (int)labels.size() - 1; i >= 0; i--)
+    for (int i = (int)labels_arraysize - 1; i >= 0; i--)
         out << labels[i].getLabel() << (i == 0 ? "" : " ");
     return out.str();
 }
