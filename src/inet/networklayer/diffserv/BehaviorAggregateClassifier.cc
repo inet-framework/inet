@@ -30,7 +30,7 @@
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_TCP_COMMON

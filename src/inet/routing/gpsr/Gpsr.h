@@ -30,7 +30,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/routing/gpsr/PositionTable.h"
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/routing/gpsr/Gpsr_m.h"
 
 namespace inet {

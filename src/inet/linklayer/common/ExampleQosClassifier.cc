@@ -32,7 +32,7 @@
 #  include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #endif
 #ifdef WITH_UDP
-#  include "inet/transportlayer/udp/UdpHeader.h"
+#  include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 #ifdef WITH_TCP_COMMON
 #  include "inet/transportlayer/tcp_common/TcpHeader.h"

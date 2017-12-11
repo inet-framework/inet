@@ -21,7 +21,7 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 #ifdef WITH_SCTP
 //TODO

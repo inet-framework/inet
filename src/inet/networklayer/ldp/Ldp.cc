@@ -26,7 +26,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/Simsignals.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"

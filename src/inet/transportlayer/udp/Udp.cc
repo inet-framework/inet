@@ -42,7 +42,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"

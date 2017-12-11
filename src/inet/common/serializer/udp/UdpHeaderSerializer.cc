@@ -15,7 +15,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/udp/UdpHeaderSerializer.h"
-#include "inet/transportlayer/udp/UdpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 

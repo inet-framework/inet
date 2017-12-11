@@ -32,7 +32,6 @@ enum UdpConstants {
 //
 class UdpHeader extends TransportHeaderBase
 {
-    @customize;
     unsigned short srcPort;
     unsigned short destPort;
     chunkLength = B(UDP_HEADER_BYTES);
@@ -40,4 +39,12 @@ class UdpHeader extends TransportHeaderBase
     uint16_t crc = 0;
     CrcMode crcMode = (CrcMode)-1;
 }
+
+cplusplus(UdpHeader) {{
+  public:
+    virtual unsigned int getSourcePort() const override { return getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
+}}
 
