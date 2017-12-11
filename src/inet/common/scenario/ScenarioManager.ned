@@ -76,7 +76,7 @@ simple ScenarioManager
 {
     parameters:
         xml script = default(xml("<script></script>"));
-        @display("i=block/control");
+        @display("i=block/control_s");
         @labels(node,mpls-node);
 }
 
