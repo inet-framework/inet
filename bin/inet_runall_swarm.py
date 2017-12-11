@@ -5,6 +5,7 @@ import os
 import sys
 import subprocess
 
+import re
 import io
 import zipfile
 
@@ -18,21 +19,45 @@ import pymongo
 import gridfs
 
 
-REMOTE_INET_ROOT = "/opt/projects/inet-framework/inet"
-
 LOCAL_INET_ROOT = os.path.abspath(
     os.path.dirname(os.path.realpath(__file__)) + "/..")
 
-NED_PATH = REMOTE_INET_ROOT + "/src;" + REMOTE_INET_ROOT + "/examples;" + REMOTE_INET_ROOT + \
-    "/showcases;" + REMOTE_INET_ROOT + "/tutorials;" + \
-    REMOTE_INET_ROOT + "/tests/networks;."
-INET_LIB = REMOTE_INET_ROOT + "/src/INET"
+
+def guess_project_name():
+    origin_url = subprocess.check_output(
+        ["git", "-C", LOCAL_INET_ROOT, "config", "--get", "remote.origin.url"]
+    ).decode("utf-8").strip()
+
+    match = re.match(r"^(git@|https://)github\.com[:/]([-a-zA-Z0-9]+/[-a-zA-Z0-9]+)\.git$", origin_url)
+
+    return match.group(2)
+
+
+def get_remote_inet_root(project_name):
+    return "/opt/projects/" + project_name
+
+
+def get_remote_ned_path(project_name):
+    remote_inet_root = get_remote_inet_root(project_name)
+
+    subdirectories = ["src", "examples",
+                      "showcases", "tutorials", "tests/networks"]
+
+    directories = [remote_inet_root + "/" +
+                   directory for directory in subdirectories]
+
+    return ";".join(directories)
+
+
+def get_remote_inet_lib(project_name):
+    return get_remote_inet_root(project_name) + "/src/INET"
+
 
 githash = ""
 
 
-def local_inet_path_to_remote(local_path):
-    return REMOTE_INET_ROOT + "/" + os.path.relpath(os.path.abspath(local_path), LOCAL_INET_ROOT)
+def local_inet_path_to_remote(project_name, local_path):
+    return get_remote_inet_root(project_name) + "/" + os.path.relpath(os.path.abspath(local_path), LOCAL_INET_ROOT)
 
 
 DESCRIPTION = """\
@@ -78,6 +103,10 @@ class Runall:
                               default_timeout=10 * 60 * 60)
 
     def run(self):
+
+        project_name = guess_project_name()
+        print("guessed project name: " + project_name)
+
         opts = self.parseArgs()
 
         origwd = os.getcwd()
@@ -91,7 +120,8 @@ class Runall:
         start_time = time.perf_counter()
         print("queueing build job")
 
-        build_job = self.build_q.enqueue("inet_worker.build_project", "inet-framework/inet", githash)
+        build_job = self.build_q.enqueue(
+            "inet_worker.build_project", project_name, githash)
 
         print("waiting for build job to end")
         while not build_job.is_finished:
@@ -110,9 +140,13 @@ class Runall:
         print("build finished, took " + str(end_time -
                                             start_time) + "s, result:" + str(build_job.result))
 
+
+
+        remote_inet_root = get_remote_inet_root(project_name)
+
         rng = random.SystemRandom()
 
-        #rng.shuffle(run_numbers)
+        # rng.shuffle(run_numbers)
 
         run_jobs = []
         for rn in run_numbers:
@@ -123,14 +157,14 @@ class Runall:
                 os.path.relpath(os.path.abspath(os.getcwd()), LOCAL_INET_ROOT)
 
             # run the simulation
-            workingdir = (REMOTE_INET_ROOT + "/" +
+            workingdir = (remote_inet_root + "/" +
                           wd) if wd.startswith('/') else wd
 
-            command = "opp_run_release -s -n '" + NED_PATH + "' -l " + INET_LIB + " -u Cmdenv " + \
+            command = "opp_run_release -s -n '" + get_remote_ned_path(project_name) + "' -l " + get_remote_inet_lib(project_name) + " -u Cmdenv " + \
                 " ".join(opts.sim_prog_args) + " -r " + str(rn)
 
             runJob = self.run_q.enqueue(
-                "inet_worker.run_simulation", "inet-framework/inet", githash, command, workingdir, depends_on=build_job)
+                "inet_worker.run_simulation", project_name, githash, command, workingdir, depends_on=build_job)
 
             run_jobs.append(runJob)
 
