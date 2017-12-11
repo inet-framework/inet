@@ -20,6 +20,7 @@ import inet.common.TlvOptions;
 import inet.networklayer.contract.NetworkHeaderBase;
 
 cplusplus {{
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/TlvOptions.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -44,11 +45,20 @@ enum GenericTlvOptionTypes
 //
 class GenericDatagramHeader extends NetworkHeaderBase
 {
-    @customize;
     L3Address srcAddr;
     L3Address destAddr;
     IpProtocolId protocolId = IP_PROT_NONE;
     short hopLimit;
     TlvOptions tlvOptions;
 }
+
+cplusplus(GenericDatagramHeader) {{
+  public:
+    virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& addr) override { setSrcAddr(addr); }
+    virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& addr) override { setDestAddr(addr); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+}}
 

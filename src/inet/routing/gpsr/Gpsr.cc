@@ -41,7 +41,7 @@
 #endif
 
 #ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericDatagram.h"
+#include "inet/networklayer/generic/GenericDatagram_m.h"
 #endif
 
 namespace inet {

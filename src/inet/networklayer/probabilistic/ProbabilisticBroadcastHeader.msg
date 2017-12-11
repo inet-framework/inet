@@ -19,12 +19,14 @@ import inet.common.INETDefs;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 
+cplusplus {{
+#include "inet/common/ProtocolGroup.h"
+}}
+
 namespace inet;
 
 class ProbabilisticBroadcastHeader extends NetworkHeaderBase
 {
-    @customize;
-
     L3Address   srcAddr;
     L3Address   destAddr;
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
@@ -34,4 +36,14 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;
 }
+
+cplusplus(ProbabilisticBroadcastHeader) {{
+  public:
+    virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
+    virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+}}
 

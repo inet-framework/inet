@@ -30,7 +30,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericDatagram.h"
+#include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/common/ProtocolMap.h"
 
 namespace inet {

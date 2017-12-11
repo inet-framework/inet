@@ -20,14 +20,28 @@ import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.common.L3Address;
 import inet.networklayer.common.IpProtocolId;
 
+cplusplus {{
+#include "inet/common/ProtocolGroup.h"
+}}
+
 namespace inet;
 
 class FloodHeader extends NetworkHeaderBase
 {
-    @customize;
     L3Address     srcAddr;
     L3Address     destAddr;
     int           ttl = 1;    // time to live field
     unsigned long seqNum = 0; // sequence number
     IpProtocolId  protocolId = (IpProtocolId)-1;
 }
+
+cplusplus(FloodHeader) {{
+  public:
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+}}
+

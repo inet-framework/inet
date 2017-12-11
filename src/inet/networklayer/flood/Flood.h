@@ -28,7 +28,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/flood/FloodHeader.h"
+#include "inet/networklayer/flood/FloodHeader_m.h"
 
 namespace inet {
 
