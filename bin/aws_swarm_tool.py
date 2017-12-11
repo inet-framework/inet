@@ -111,6 +111,7 @@ def create_swarm(stack_name="inet", key_pair_name="inet_key", num_workers=3, ins
              'ParameterValue': str(num_workers)},
         ])
 
+    # This could be done properly with a boto3 Waiter...
     print("Waiting for resources to be created... This will take about 10 minutes")
     while stack.stack_status != 'CREATE_COMPLETE':
         time.sleep(5)

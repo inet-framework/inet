@@ -1,9 +1,5 @@
 #!/bin/env python3
 
-"""
-This is it
-"""
-
 import subprocess
 import os
 import shutil
@@ -18,7 +14,7 @@ import pymongo
 import gridfs
 import flock
 
-# project name is for example inet-framework/inet (as used on GitHub)
+# project name is for example "inet-framework/inet" (as used on GitHub)
 def get_project_root_dir(project_name):
     return "/opt/projects/" + project_name
 
@@ -34,7 +30,7 @@ LOGGER = logging.getLogger("rq.worker")
 
 
 def run_program(command, workingdir):
-    LOGGER.info("running command: " + str(command))
+    LOGGER.info("running command: '" + str(command) + "' in directory: '" + workingdir + "'")
 
     process = subprocess.Popen(
         command, shell=True, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -62,11 +58,17 @@ def checkout_git(project_name, git_hash):
     if exitcode != 0:
         raise Exception("Failed to fetch git repo:\n" + output)
 
-    (exitcode, output) = run_program("git reset --hard " + git_hash, project_root)
+    (exitcode, output) = run_program("git checkout -f " + git_hash, project_root)
     if exitcode != 0:
         raise Exception("Failed to check out commit:\n" + output)
 
-    (exitcode, output) = run_program("git submodule update", project_root)
+    (exitcode, output) = run_program("git reset --hard " + git_hash, project_root)
+    if exitcode != 0:
+        raise Exception("Failed to reset to commit:\n" + output)
+
+    # should also add a "git clean" maybe?
+
+    (exitcode, output) = run_program("git submodule update --init", project_root)
     if exitcode != 0:
         raise Exception("Failed to update submodules:\n" + output)
 
@@ -131,7 +133,11 @@ def replace_inet_lib(project_name, git_hash):
 def switch_project_to_commit(project_name, git_hash):
     project_root = get_project_root_dir(project_name)
 
-    LOGGER.info("switching inet to commit " + git_hash)
+    if not os.path.isdir(project_root):
+        LOGGER.info("repo doesn't exist yet, checking out " + project_name + " at " + git_hash)
+        checkout_git(project_name, git_hash)
+
+    LOGGER.info("switching project to commit " + git_hash)
 
     current_hash = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=project_root).decode('utf-8').strip()
@@ -143,11 +149,12 @@ def switch_project_to_commit(project_name, git_hash):
         LOGGER.info("actually doing it")
 
         checkout_git(project_name, git_hash)
-        replace_inet_lib(project_name, git_hash)
 
         LOGGER.info("done")
     else:
         LOGGER.info("not switching, already on it")
+
+    replace_inet_lib(project_name, git_hash)
 
 
 def zip_directory(directory, exclude_dirs=[]):
