@@ -97,10 +97,10 @@ services:
 
 
   dashboard:
-    image: robbieclarken/lightweight-rq-dashboard
+    image: torokati44/rq-dashboard
     networks:
       interlink:
-    command: -H redis
+    command: rq-dashboard -H redis
     ports:
       - "9181:9181"
     depends_on:
