@@ -117,7 +117,9 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     MemoryOutputStream outputStream;
     serialize(outputStream, chunk, offset, length);
     MemoryInputStream inputStream(outputStream.getData());
-    return deserialize(inputStream, typeInfo);
+    const auto& result = deserialize(inputStream, typeInfo);
+    result->tags.copyTags(chunk->tags, offset, b(0), length);
+    return result;
 }
 
 void Chunk::moveIterator(Iterator& iterator, b length) const
