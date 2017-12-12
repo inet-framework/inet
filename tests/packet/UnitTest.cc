@@ -1477,10 +1477,10 @@ static void testChunkTags()
     // 6. destination application processes received data
     const auto& chunk2 = packet3.peekData();
     auto regions1 = chunk2->getAllTags<CreationTimeTag>();
-    assert(regions1.size() == 1);
-    assert(regions1[0].getOffset() == B(0));
-    assert(regions1[0].getLength() == B(1000));
-    assert(regions1[0].getTag()->getCreationTime() == 42);
+    ASSERT(regions1.size() == 1);
+    ASSERT(regions1[0].getOffset() == B(0));
+    ASSERT(regions1[0].getLength() == B(1000));
+    ASSERT(regions1[0].getTag()->getCreationTime() == 42);
 
     // 7. source application creates another packet
     auto chunk3 = makeShared<ByteCountChunk>(B(1500));
@@ -1503,13 +1503,13 @@ static void testChunkTags()
     // 12. destination application processes received data
     const auto& chunk4 = packet6.peekData();
     auto regions2 = chunk4->getAllTags<CreationTimeTag>();
-    assert(regions2.size() == 2);
-    assert(regions2[0].getOffset() == B(0));
-    assert(regions2[0].getLength() == B(500));
-    assert(regions2[0].getTag()->getCreationTime() == 42);
-    assert(regions2[1].getOffset() == B(500));
-    assert(regions2[1].getLength() == B(500));
-    assert(regions2[1].getTag()->getCreationTime() == 81);
+    ASSERT(regions2.size() == 2);
+    ASSERT(regions2[0].getOffset() == B(0));
+    ASSERT(regions2[0].getLength() == B(500));
+    ASSERT(regions2[0].getTag()->getCreationTime() == 42);
+    ASSERT(regions2[1].getOffset() == B(500));
+    ASSERT(regions2[1].getLength() == B(500));
+    ASSERT(regions2[1].getTag()->getCreationTime() == 81);
 }
 
 void UnitTest::initialize()
