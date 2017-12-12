@@ -38,7 +38,7 @@ class INET_API TagSet : public cObject
     cObject *removeTag(int index);
 
     int getTagIndex(const std::type_info& typeInfo) const;
-    template <typename T> int getTagIndex();
+    template <typename T> int getTagIndex() const;
 
   public:
     TagSet();
@@ -106,7 +106,7 @@ inline cObject *TagSet::getTag(int index) const
 }
 
 template <typename T>
-inline int TagSet::getTagIndex()
+inline int TagSet::getTagIndex() const
 {
     return getTagIndex(typeid(T));
 }
@@ -141,7 +141,7 @@ inline T *TagSet::addTag()
 template <typename T>
 inline T *TagSet::addTagIfAbsent()
 {
-    T *tag = getTag<T>();
+    T *tag = findTag<T>();
     if (tag == nullptr)
         addTag(tag = new T());
     return tag;
