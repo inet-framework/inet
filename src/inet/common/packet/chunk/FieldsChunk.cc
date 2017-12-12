@@ -63,6 +63,7 @@ const Ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekConvert
     if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == b(0)) {
         auto copy = staticPtrCast<FieldsChunk>(dupShared());
         copy->setChunkLength(length);
+        copy->tags.copyTags(tags, iterator.getPosition(), b(0), length);
         copy->markIncomplete();
         return copy;
     }

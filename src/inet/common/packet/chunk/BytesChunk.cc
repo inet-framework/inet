@@ -52,6 +52,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
     // 3. peeking without conversion returns a BytesChunk
     if (converter == nullptr) {
         auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + B(iterator.getPosition()).get(), length == b(-1) ? bytes.end() : bytes.begin() + B(iterator.getPosition() + length).get()));
+        chunk->tags.copyTags(tags, iterator.getPosition(), b(0), chunk->getChunkLength());
         chunk->markImmutable();
         return chunk;
     }

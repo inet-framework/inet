@@ -57,6 +57,7 @@ const Ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, PeekConve
     // 3. peeking without conversion returns a BitCountChunk
     if (converter == nullptr) {
         auto result = makeShared<BitCountChunk>(length == b(-1) ? chunkLength - iterator.getPosition() : length);
+        result->tags.copyTags(tags, iterator.getPosition(), b(0), result->getChunkLength());
         result->markImmutable();
         return result;
     }
