@@ -1451,6 +1451,96 @@ static void testReorderBuffer()
     ASSERT(buffer3.getExpectedOffset() == B(1030));
 }
 
+static void testTagSet()
+{
+    // 1. getNumTags
+    TagSet tagSet1;
+    ASSERT(tagSet1.getNumTags() == 0);
+    tagSet1.addTag<CreationTimeTag>();
+    ASSERT(tagSet1.getNumTags() == 1);
+    tagSet1.removeTag<CreationTimeTag>();
+    ASSERT(tagSet1.getNumTags() == 0);
+
+    // 2. getTag
+    TagSet tagSet2;
+    const auto& tag1 = tagSet2.addTag<CreationTimeTag>();
+    const auto& tag2 = tagSet2.getTag(0);
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+
+    // 3. clearTags
+    TagSet tagSet3;
+    tagSet3.clearTags();
+    ASSERT(tagSet3.getNumTags() == 0);
+    tagSet3.addTag<CreationTimeTag>();
+    tagSet3.clearTags();
+    ASSERT(tagSet3.getNumTags() == 0);
+
+    // 4. findTag
+    TagSet tagSet4;
+    ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
+    const auto& tag3 = tagSet4.addTag<CreationTimeTag>();
+    const auto& tag4 = tagSet4.findTag<CreationTimeTag>();
+    ASSERT(tag4 != nullptr);
+    ASSERT(tag4 == tag3);
+    tagSet4.removeTag<CreationTimeTag>();
+    ASSERT(tagSet4.findTag<CreationTimeTag>() == nullptr);
+
+    // 5. getTag
+    TagSet tagSet5;
+    ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
+    const auto& tag5 = tagSet5.addTag<CreationTimeTag>();
+    const auto& tag6 = tagSet5.getTag<CreationTimeTag>();
+    ASSERT(tag6 != nullptr);
+    ASSERT(tag6 == tag5);
+    tagSet5.removeTag<CreationTimeTag>();
+    ASSERT_ERROR(tagSet5.getTag<CreationTimeTag>(), "is absent");
+
+    // 6. addTag
+    TagSet tagSet6;
+    const auto& tag7 = tagSet6.addTag<CreationTimeTag>();
+    ASSERT(tag7 != nullptr);
+    ASSERT(tagSet6.getNumTags() == 1);
+    ASSERT_ERROR(tagSet6.addTag<CreationTimeTag>(), "is present");
+
+    // 7. addTagIfAbsent
+    TagSet tagSet7;
+    const auto& tag8 = tagSet7.addTagIfAbsent<CreationTimeTag>();
+    const auto& tag9 = tagSet7.addTagIfAbsent<CreationTimeTag>();
+    ASSERT(tag9 != nullptr);
+    ASSERT(tag9 == tag8);
+    ASSERT(tagSet7.getNumTags() == 1);
+
+    // 8. removeTag
+    TagSet tagSet8;
+    ASSERT_ERROR(tagSet8.removeTag<CreationTimeTag>(), "is absent");
+    const auto& tag10 = tagSet8.addTag<CreationTimeTag>();
+    const auto& tag11 = tagSet8.removeTag<CreationTimeTag>();
+    ASSERT(tag11 != nullptr);
+    ASSERT(tag11 == tag10);
+    ASSERT(tagSet8.getNumTags() == 0);
+
+    // 9. removeTagIfPresent
+    TagSet tagSet9;
+    tagSet9.removeTagIfPresent<CreationTimeTag>();
+    const auto& tag12 = tagSet9.addTag<CreationTimeTag>();
+    const auto& tag13 = tagSet9.removeTagIfPresent<CreationTimeTag>();
+    ASSERT(tag13 != nullptr);
+    ASSERT(tag13 == tag12);
+    ASSERT(tagSet9.getNumTags() == 0);
+    ASSERT(tagSet9.removeTagIfPresent<CreationTimeTag>() == nullptr);
+}
+
+static void testRegionTagSet()
+{
+    RegionTagSet regionTagSet1;
+}
+
+static void testPacketTags()
+{
+    Packet packet1;
+}
+
 static void testChunkTags()
 {
     // 1. source application creates packet
@@ -1548,6 +1638,10 @@ void UnitTest::initialize()
     testChunkBuffer(getRNG(0));
     testReassemblyBuffer();
     testReorderBuffer();
+    testTagSet();
+    testRegionTagSet();
+    testPacketTags();
+    testChunkTags();
 }
 
 } // namespace
