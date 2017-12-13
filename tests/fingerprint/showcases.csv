@@ -24,7 +24,7 @@
 /showcases/visualizer/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            cb71-ccd3/tplx, PASS,
 # /showcases/visualizer/linkbreak/,    -f omnetpp.ini -c LinkBreak1 -r 0,                                         500s,            0000-0000/tplx, PASS, # postponed
 /showcases/visualizer/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            54a1-0f8d/tplx, PASS,
-/showcases/visualizer/networknode/,  -f omnetpp.ini -c VisualizingNodes -r 0,                                   500s,            0000-0000/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c VisualizingNodes -r 0,                                   500s,            07ed-0015/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            9f43-7e0a/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            b42b-614c/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c Mobile -r 0,                                      500s,            31ab-8ecd/tplx, PASS,
