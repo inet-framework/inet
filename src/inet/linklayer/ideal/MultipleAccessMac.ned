@@ -22,15 +22,14 @@ package inet.linklayer.ideal;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 
-
 //
-// Implements a trivial MAC layer for use in ~IdealWirelessNic.
+// This module implements a trivial MAC protocol for use in ~IdealWirelessNic.
 //
-// This module only provides encapsulation/decapsulation (into IdealMacFrame),
-// but no real medium access protocol.
-//
-// Higher layer packets should have Ieee802Ctrl attached to them as
-// control info.
+// The implementation provides packet encapsulation and decapsulation, but it
+// doesn't have a real medium access protocol. It doesn't provide carrier sense
+// mechanism, collision avoidance, collision detection, but it provides optional
+// out of bound acknowledgement. Higher layer packets should have MacAddressReq
+// tag.
 //
 // See ~IdealWirelessNic for rationale and details.
 //
