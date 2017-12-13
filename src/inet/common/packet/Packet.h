@@ -579,6 +579,13 @@ class INET_API Packet : public cPacket
     }
 
     /**
+     * Copies the set of packet tags from the other packet.
+     */
+    void copyTags(const Packet& source) {
+        tags.copyTags(source.tags);
+    }
+
+    /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
     template<typename T> T *_findTag() const {

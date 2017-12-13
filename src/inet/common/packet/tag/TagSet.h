@@ -65,6 +65,11 @@ class INET_API TagSet : public cObject
     void clearTags();
 
     /**
+     * Copies the set of tags from the other set.
+     */
+    void copyTags(const TagSet& other);
+
+    /**
      * Returns the tag for the provided type, or returns nullptr if no such tag is present.
      */
     template <typename T> T *findTag() const;

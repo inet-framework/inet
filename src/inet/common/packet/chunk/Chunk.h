@@ -635,6 +635,14 @@ class INET_API Chunk : public cObject,
     }
 
     /**
+     * Copies the set of chunk tags from the source region to the provided region.
+     */
+    void copyTags(const Chunk& source, b sourceOffset = b(0), b offset = b(0), b length = b(-1)) {
+        checkMutable();
+        tags.copyTags(source.tags, sourceOffset, offset, length == b(-1) ? getChunkLength() - offset : length);
+    }
+
+    /**
      * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
      */
     template<typename T> int findTag(b offset = b(0), b length = b(-1)) const {

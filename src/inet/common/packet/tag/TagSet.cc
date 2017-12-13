@@ -104,6 +104,21 @@ void TagSet::clearTags()
     }
 }
 
+void TagSet::copyTags(const TagSet& source)
+{
+    clearTags();
+    if (source.tags != nullptr) {
+        int numTags = source.tags->size();
+        tags = new std::vector<cObject *>(numTags);
+        for (int index = 0; index < numTags; index++) {
+            cObject *tag = (*source.tags)[index]->dup();
+            if (tag->isOwnedObject())
+                take(static_cast<cOwnedObject *>(tag));
+            (*tags)[index] = tag;
+        }
+    }
+}
+
 int TagSet::getTagIndex(const std::type_info& typeInfo) const
 {
     if (tags == nullptr)
