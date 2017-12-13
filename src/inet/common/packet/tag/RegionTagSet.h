@@ -213,9 +213,9 @@ inline T *RegionTagSet::addTag(b offset, b length)
 template <typename T>
 inline T *RegionTagSet::addTagIfAbsent(b offset, b length)
 {
-    T *tag = getTag<T>(offset, length);
+    T *tag = findTag<T>(offset, length);
     if (tag == nullptr)
-        addTag(tag = new T());
+        addTag(offset, length, tag = new T());
     return tag;
 }
 
