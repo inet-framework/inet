@@ -1544,99 +1544,99 @@ static void testTagSet()
 static void testRegionTagSet()
 {
     { // 1. getNumTags
-    RegionTagSet regionTagSet1;
-    ASSERT(regionTagSet1.getNumTags() == 0);
-    regionTagSet1.addTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(regionTagSet1.getNumTags() == 1);
-    regionTagSet1.removeTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(regionTagSet1.getNumTags() == 0);
+    RegionTagSet regionTagSet;
+    ASSERT(regionTagSet.getNumTags() == 0);
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(regionTagSet.getNumTags() == 1);
+    regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(regionTagSet.getNumTags() == 0);
     }
 
     { // 2. getTag
-    RegionTagSet regionTagSet2;
-    const auto& tag1 = regionTagSet2.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag2 = regionTagSet2.getTag(0);
+    RegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.getTag(0);
     ASSERT(tag2 != nullptr);
     ASSERT(tag2 == tag1);
     }
 
     { // 3. clearTags
-    RegionTagSet regionTagSet3;
-    regionTagSet3.clearTags(b(0), b(1000));
-    ASSERT(regionTagSet3.getNumTags() == 0);
-    regionTagSet3.addTag<CreationTimeTag>(b(0), b(1000));
-    regionTagSet3.clearTags(b(0), b(1000));
-    ASSERT(regionTagSet3.getNumTags() == 0);
+    RegionTagSet regionTagSet;
+    regionTagSet.clearTags(b(0), b(1000));
+    ASSERT(regionTagSet.getNumTags() == 0);
+    regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet.clearTags(b(0), b(1000));
+    ASSERT(regionTagSet.getNumTags() == 0);
     }
 
     { // 4. findTag
-    RegionTagSet regionTagSet4;
-    ASSERT(regionTagSet4.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
-    const auto& tag3 = regionTagSet4.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag4 = regionTagSet4.findTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag4 != nullptr);
-    ASSERT(tag4 == tag3);
-    regionTagSet4.removeTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(regionTagSet4.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
+    RegionTagSet regionTagSet;
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.findTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+    regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(regionTagSet.findTag<CreationTimeTag>(b(0), b(1000)) == nullptr);
     }
 
     { // 5. getTag
-    RegionTagSet regionTagSet5;
-    ASSERT_ERROR(regionTagSet5.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
-    const auto& tag5 = regionTagSet5.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag6 = regionTagSet5.getTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag6 != nullptr);
-    ASSERT(tag6 == tag5);
-    regionTagSet5.removeTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT_ERROR(regionTagSet5.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
+    RegionTagSet regionTagSet;
+    ASSERT_ERROR(regionTagSet.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.getTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+    regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT_ERROR(regionTagSet.getTag<CreationTimeTag>(b(0), b(1000)), "is absent");
     }
 
     { // 6. addTag
-    RegionTagSet regionTagSet6;
-    const auto& tag7 = regionTagSet6.addTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag7 != nullptr);
-    ASSERT(regionTagSet6.getNumTags() == 1);
-    ASSERT_ERROR(regionTagSet6.addTag<CreationTimeTag>(b(0), b(1000)), "is present");
+    RegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag1 != nullptr);
+    ASSERT(regionTagSet.getNumTags() == 1);
+    ASSERT_ERROR(regionTagSet.addTag<CreationTimeTag>(b(0), b(1000)), "is present");
     }
 
     { // 7. addTagIfAbsent
-    RegionTagSet regionTagSet7;
-    const auto& tag8 = regionTagSet7.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
-    const auto& tag9 = regionTagSet7.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag9 != nullptr);
-    ASSERT(tag9 == tag8);
-    ASSERT(regionTagSet7.getNumTags() == 1);
+    RegionTagSet regionTagSet;
+    const auto& tag1 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.addTagIfAbsent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+    ASSERT(regionTagSet.getNumTags() == 1);
     }
 
     { // 8. removeTag
-    RegionTagSet regionTagSet8;
-    ASSERT_ERROR(regionTagSet8.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
-    const auto& tag10 = regionTagSet8.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag11 = regionTagSet8.removeTag<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag11 != nullptr);
-    ASSERT(tag11 == tag10);
-    ASSERT(regionTagSet8.getNumTags() == 0);
+    RegionTagSet regionTagSet;
+    ASSERT_ERROR(regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000)), "is absent");
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.removeTag<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+    ASSERT(regionTagSet.getNumTags() == 0);
     }
 
     { // 9. removeTagIfPresent
-    RegionTagSet regionTagSet9;
-    regionTagSet9.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
-    const auto& tag12 = regionTagSet9.addTag<CreationTimeTag>(b(0), b(1000));
-    const auto& tag13 = regionTagSet9.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
-    ASSERT(tag13 != nullptr);
-    ASSERT(tag13 == tag12);
-    ASSERT(regionTagSet9.getNumTags() == 0);
-    ASSERT(regionTagSet9.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
+    RegionTagSet regionTagSet;
+    regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
+    const auto& tag1 = regionTagSet.addTag<CreationTimeTag>(b(0), b(1000));
+    const auto& tag2 = regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000));
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2 == tag1);
+    ASSERT(regionTagSet.getNumTags() == 0);
+    ASSERT(regionTagSet.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
     }
 
     { // 10. copyTags
-    RegionTagSet regionTagSet10;
-    RegionTagSet regionTagSet11;
-    regionTagSet11.copyTags(regionTagSet10, b(0), b(0), b(1000));
-    ASSERT(regionTagSet11.getNumTags() == 0);
-    regionTagSet10.addTag<CreationTimeTag>(b(0), b(1000));
-    regionTagSet11.copyTags(regionTagSet10, b(0), b(0), b(1000));
-    ASSERT(regionTagSet11.getNumTags() == 1);
+    RegionTagSet regionTagSet1;
+    RegionTagSet regionTagSet2;
+    regionTagSet2.copyTags(regionTagSet1, b(0), b(0), b(1000));
+    ASSERT(regionTagSet2.getNumTags() == 0);
+    regionTagSet1.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet2.copyTags(regionTagSet1, b(0), b(0), b(1000));
+    ASSERT(regionTagSet2.getNumTags() == 1);
     }
 }
 
