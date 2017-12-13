@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.IAnalogModel;
 // based on the distance between the transmitter and the receiver. It doesn't
 // support noise and signal to noise ratio calculations.
 //
-// See also ~IdealRadio, ~IdealRadioMedium, ~IdealTransmitter, and
+// See also ~UnitDiskRadio, ~IdealRadioMedium, ~IdealTransmitter, and
 // ~IdealReceiver.
 //
 module IdealAnalogModel like IAnalogModel

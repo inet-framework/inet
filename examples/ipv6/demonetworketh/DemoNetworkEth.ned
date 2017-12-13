@@ -19,7 +19,7 @@
 
 package inet.examples.ipv6.demonetworketh;
 
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -36,7 +36,7 @@ network DemoNetworkEth
             datarate = 10Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
+        configurator: Ipv6FlatNetworkConfigurator;
         r1: Router6;
         r2: Router6;
         cli[n]: StandardHost6;

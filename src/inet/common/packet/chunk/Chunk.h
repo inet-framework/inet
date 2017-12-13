@@ -119,14 +119,14 @@ using namespace units::values;
  *
  * - IpHeader is a FieldsChunk subclass
  *   - mandatory fields are directly represented in the IpHeader chunk
- *   - each IpOption is added as an optional structure inside an array
+ *   - each Ipv4Option is added as an optional structure inside an array
  *
  * - IpHeader is a FieldsChunk subclass
  * - IpOptions is a SequenceChunk subclass
- *   - each IpOption is a FieldsChunk subclass inside the SequenceChunk
+ *   - each Ipv4Option is a FieldsChunk subclass inside the SequenceChunk
  *
  * - IpHeader is a FieldsChunk subclass
- * - each IpOption is added as a separate FieldsChunk subclass
+ * - each Ipv4Option is added as a separate FieldsChunk subclass
  *
  * Communication protocol headers also often contain CRC or checksum fields. In
  * network simulations, most of the time it's unnecessary to compute the correct

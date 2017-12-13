@@ -21,10 +21,10 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 
 //
 // This radio medium model provides a very simple but fast and predictable
-// physical layer behavior. It must be used in conjunction with the ~IdealRadio
+// physical layer behavior. It must be used in conjunction with the ~UnitDiskRadio
 // model.
 //
-// See also ~IdealRadio, ~IdealAnalogModel, ~IdealTransmitter, and
+// See also ~UnitDiskRadio, ~IdealAnalogModel, ~IdealTransmitter, and
 // ~IdealReceiver.
 //
 module IdealRadioMedium extends RadioMedium

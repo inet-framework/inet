@@ -17,7 +17,7 @@ package inet.examples.mpls.testte_routing;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.StandardHost;
-import inet.node.mpls.RSVP_LSR;
+import inet.node.mpls.RsvpRouter;
 
 
 //
@@ -31,49 +31,49 @@ network RSVPTE4
         **.ipv4.configurator.networkConfiguratorModule = "";
 
     submodules:
-        LSR1: RSVP_LSR {
+        LSR1: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1";
                 @display("p=160,167");
             gates:
                 pppg[5];
         }
-        LSR2: RSVP_LSR {
+        LSR2: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=254,255");
             gates:
                 pppg[3];
         }
-        LSR3: RSVP_LSR {
+        LSR3: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=253,78");
             gates:
                 pppg[3];
         }
-        LSR4: RSVP_LSR {
+        LSR4: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=358,167");
             gates:
                 pppg[3];
         }
-        LSR5: RSVP_LSR {
+        LSR5: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp3 ppp4";
                 @display("p=460,167");
             gates:
                 pppg[5];
         }
-        LSR6: RSVP_LSR {
+        LSR6: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1";
                 @display("p=400,300");
             gates:
                 pppg[2];
         }
-        LSR7: RSVP_LSR {
+        LSR7: RsvpRouter {
             parameters:
                 peers = "ppp0 ppp1";
                 @display("p=400,50");

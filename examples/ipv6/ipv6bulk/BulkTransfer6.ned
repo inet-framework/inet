@@ -22,7 +22,7 @@
 
 package inet.examples.ipv6.ipv6bulk;
 
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -57,7 +57,7 @@ network BulkTransfer6
             parameters:
                 @display("p=239,156");
         }
-        configurator: FlatNetworkConfigurator6 {
+        configurator: Ipv6FlatNetworkConfigurator {
             parameters:
                 @display("p=62,119");
         }

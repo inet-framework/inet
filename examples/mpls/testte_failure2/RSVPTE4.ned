@@ -18,7 +18,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.mpls.RSVP_LSR;
+import inet.node.mpls.RsvpRouter;
 
 
 //
@@ -33,31 +33,31 @@ network RSVPTE4
             parameters:
                 @display("p=115,50");
         }
-        LSR1: RSVP_LSR {
+        LSR1: RsvpRouter {
             parameters:
                 @display("p=160,167");
         }
-        LSR2: RSVP_LSR {
+        LSR2: RsvpRouter {
             parameters:
                 @display("p=254,255");
         }
-        LSR3: RSVP_LSR {
+        LSR3: RsvpRouter {
             parameters:
                 @display("p=253,78");
         }
-        LSR4: RSVP_LSR {
+        LSR4: RsvpRouter {
             parameters:
                 @display("p=358,167");
         }
-        LSR5: RSVP_LSR {
+        LSR5: RsvpRouter {
             parameters:
                 @display("p=460,167");
         }
-        LSR6: RSVP_LSR {
+        LSR6: RsvpRouter {
             parameters:
                 @display("p=400,300");
         }
-        LSR7: RSVP_LSR {
+        LSR7: RsvpRouter {
             parameters:
                 @display("p=400,50");
         }

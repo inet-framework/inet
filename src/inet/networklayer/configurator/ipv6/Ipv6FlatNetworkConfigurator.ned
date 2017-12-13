@@ -28,9 +28,9 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //
 // FIXME: add documentation!
 //
-// @see ~FlatNetworkConfigurator
+// @see ~Ipv4FlatNetworkConfigurator
 //
-simple FlatNetworkConfigurator6 like INetworkConfigurator
+simple Ipv6FlatNetworkConfigurator like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

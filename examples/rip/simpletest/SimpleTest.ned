@@ -4,7 +4,7 @@ package inet.examples.rip.simpletest;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
@@ -73,7 +73,7 @@ network SimpleTest
                 addDefaultRoutes = false;
                 @display("p=75,31");
         }
-        configurator6: FlatNetworkConfigurator6 {
+        configurator6: Ipv6FlatNetworkConfigurator {
             @display("p=184,31;is=s");
         }
     connections:

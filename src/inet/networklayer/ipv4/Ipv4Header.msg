@@ -53,7 +53,7 @@ const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 //
 // Ipv4 options class
 //
-enum IpOptionClass
+enum Ipv4OptionClass
 {
     IPOPTION_CLASS_CONTROL = 0;
     IPOPTION_CLASS_RESERVED = 1;
@@ -64,7 +64,7 @@ enum IpOptionClass
 //
 // Ipv4 option types
 //
-enum IpOption
+enum Ipv4OptionType
 {
     IPOPTION_END_OF_OPTIONS = 0;
     IPOPTION_NO_OPTION = 1;

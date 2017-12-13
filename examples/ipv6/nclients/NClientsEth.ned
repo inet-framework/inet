@@ -19,7 +19,7 @@
 
 package inet.examples.ipv6.nclients;
 
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -41,7 +41,7 @@ network NClientsEth
             datarate = 10Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
+        configurator: Ipv6FlatNetworkConfigurator;
         r1: Router6;
         r2: Router6;
         r3: Router6;
@@ -57,7 +57,7 @@ network NClientsEth
 
         //XXX
         // Mixing ethernet and ppp currently doesn't work, due to a bug in
-        // FlatNetworkConfigurator6::determineGateIndex.
+        // Ipv6FlatNetworkConfigurator::determineGateIndex.
         //
         // r1.pppg++ <--> fiberline <--> r2.pppg++;
         // r2.pppg++ <--> fiberline <--> r3.pppg++;

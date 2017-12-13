@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.IReceiver;
 // range. It also supports an ideal communication channel with configuring the
 // receiver to ignore interfering transmissions.
 //
-// See also ~IdealTransmitter, ~IdealRadio, ~IdealRadioMedium, and
+// See also ~IdealTransmitter, ~UnitDiskRadio, ~IdealRadioMedium, and
 // ~IdealAnalogModel.
 //
 module IdealReceiver like IReceiver

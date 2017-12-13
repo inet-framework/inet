@@ -581,7 +581,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
      *  to change as specified in RFC2461:section 10 depending on different link
      *  layer operation. Getters and setters have been implemented for protocol
      *  constants so that a wireless interface may be set to a different set of
-     *  constant values. (ie. changed by the FlatNetworkConfigurator) Such a design
+     *  constant values. (ie. changed by the Ipv4FlatNetworkConfigurator) Such a design
      *  allows both wired and wireless networks to co-exist within a simulation run.
      */
     /************Getters for Router Protocol Constants*************************/
@@ -755,7 +755,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     /**
      * This function autoconfigures a global scope address for the router only,
      * if and only the prefix is provided via some exernal method, For instance
-     * FlatNetworkConfigurator6 assigning prefixes to routers interfaces during
+     * Ipv6FlatNetworkConfigurator assigning prefixes to routers interfaces during
      * initialization.
      */
     const Ipv6Address autoConfRouterGlobalScopeAddress(int i);    // // removed return-by-reference - CB

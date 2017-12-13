@@ -21,7 +21,7 @@
 
 package inet.examples.ipv6.nclients;
 
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -38,7 +38,7 @@ network NClientsPPP
             datarate = 512Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6;
+        configurator: Ipv6FlatNetworkConfigurator;
         r1: Router6;
         r2: Router6;
         r3: Router6;

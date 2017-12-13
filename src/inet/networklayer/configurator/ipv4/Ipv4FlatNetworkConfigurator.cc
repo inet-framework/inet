@@ -19,7 +19,7 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/configurator/ipv4/FlatNetworkConfigurator.h"
+#include "inet/networklayer/configurator/ipv4/Ipv4FlatNetworkConfigurator.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
@@ -27,9 +27,9 @@ namespace inet {
 
 typedef cTopology WeightedTopology;
 
-Define_Module(FlatNetworkConfigurator);
+Define_Module(Ipv4FlatNetworkConfigurator);
 
-void FlatNetworkConfigurator::initialize(int stage)
+void Ipv4FlatNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -56,7 +56,7 @@ void FlatNetworkConfigurator::initialize(int stage)
     }
 }
 
-void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // extract topology
     topo.extractByProperty("networkNode");
@@ -76,7 +76,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     }
 }
 
-void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // assign Ipv4 addresses
     uint32 networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
@@ -106,7 +106,7 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
     }
 }
 
-void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i = 0; i < topo.getNumNodes(); i++) {
@@ -146,7 +146,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
     }
 }
 
-void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // fill in routing tables with static routes
     for (int i = 0; i < topo.getNumNodes(); i++) {
@@ -201,12 +201,12 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
     }
 }
 
-void FlatNetworkConfigurator::handleMessage(cMessage *msg)
+void Ipv4FlatNetworkConfigurator::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
     for (int i = 0; i < topo.getNumNodes(); i++)

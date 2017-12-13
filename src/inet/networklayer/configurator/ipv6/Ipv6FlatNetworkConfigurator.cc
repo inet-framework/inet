@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/configurator/ipv6/FlatNetworkConfigurator6.h"
+#include "inet/networklayer/configurator/ipv6/Ipv6FlatNetworkConfigurator.h"
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -29,9 +29,9 @@ namespace inet {
 
 // FIXME UPDATE DOCU!!!!!!!
 
-Define_Module(FlatNetworkConfigurator6);
+Define_Module(Ipv6FlatNetworkConfigurator);
 
-void FlatNetworkConfigurator6::initialize(int stage)
+void Ipv6FlatNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -49,12 +49,12 @@ void FlatNetworkConfigurator6::initialize(int stage)
     }
 }
 
-void FlatNetworkConfigurator6::handleMessage(cMessage *)
+void Ipv6FlatNetworkConfigurator::handleMessage(cMessage *)
 {
     throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNodes)
+void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPNodes)
 {
     // update display string
     char buf[80];
@@ -62,13 +62,13 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
+bool Ipv6FlatNetworkConfigurator::isIPNode(cTopology::Node *node)
 {
     return L3AddressResolver().findIPv6RoutingTableOf(node->getModule()) != nullptr
            && L3AddressResolver().findInterfaceTableOf(node->getModule()) != nullptr;
 }
 
-void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
 {
     // assign advertised prefixes to all router interfaces
     for (int i = 0; i < topo.getNumNodes(); i++) {
@@ -106,7 +106,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
             Ipv6InterfaceData::AdvPrefix p;
             p.prefix = prefix;
             p.prefixLength = 64;
-            // RFC 2461:6.2.1. Only default values are used in FlatNetworkConfigurator6
+            // RFC 2461:6.2.1. Only default values are used in Ipv6FlatNetworkConfigurator
             // Default: 2592000 seconds (30 days), fixed (i.e., stays the same in
             // consecutive advertisements).
             p.advValidLifetime = 2592000;
@@ -129,7 +129,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
     }
 }
 
-void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
 {
     // add globally routable prefixes to routing table
     for (int i = 0; i < topo.getNumNodes(); i++) {
@@ -170,7 +170,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
 // XXX !isRouter nodes are not used as source/destination of routes
 //     but can be internal nodes of the generated shortest paths.
 //     the same problem with non-ipv6 nodes
-void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
 {
     int numIPNodes = 0;
 

@@ -928,7 +928,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     //sendUnsolicitedNA(ie);
 
     // =================================Start: Zarrar Yousaf 08.07.07 ===============================================
-    /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the FlatNetworkConfigurator6 assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
+    /* == Calling the routine to assign global scope adddresses to the the routers only. At present during the simulation initialization, the Ipv6FlatNetworkConfigurator assigns a 64 bit prefix to the routers but for xMIPv6 operation, we need full 128bit global scope address, only for routers. The call to  autoConfRouterGlobalScopeAddress() will autoconfigure the full 128 bit global scope address, which will be used by the MN in its BU message destination address, especially for home registeration.
      */
     if (rt6->isRouter() && !(ie->isLoopback())) {
         for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++) {

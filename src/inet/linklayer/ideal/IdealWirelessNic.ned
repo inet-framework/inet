@@ -46,7 +46,7 @@ module IdealWirelessNic like IWirelessNic
         string energySourceModule = default("");
         double bitrate @unit("bps");
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
-        string radioType = default("IdealRadio");
+        string radioType = default("UnitDiskRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
         **.bitrate = bitrate;

@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2005 Eric Wu
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -15,54 +16,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLATNETWORKCONFIGURATOR_H
-#define __INET_FLATNETWORKCONFIGURATOR_H
+#ifndef __INET_FLATNETWORKCONFIGURATOR6_H
+#define __INET_FLATNETWORKCONFIGURATOR6_H
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-
 namespace inet {
 
-class IInterfaceTable;
-class IIpv4RoutingTable;
-
 /**
- * Configures Ipv4 addresses and routing tables for a "flat" network,
+ * Configures Ipv6 addresses and routing tables for a "flat" network,
  * "flat" meaning that all hosts and routers will have the same
  * network address.
  *
  * For more info please see the NED file.
  */
-class INET_API FlatNetworkConfigurator : public cSimpleModule
+class INET_API Ipv6FlatNetworkConfigurator : public cSimpleModule
 {
-  protected:
-    class NodeInfo
-    {
-      public:
-        bool isIPNode = false;
-        IInterfaceTable *ift = nullptr;
-        IIpv4RoutingTable *rt = nullptr;
-        Ipv4Address address;
-        bool usesDefaultRoute = false;
-        bool ipForwardEnabled = false;
-    };
-    typedef std::vector<NodeInfo> NodeInfoVector;
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void configureAdvPrefixes(cTopology& topo);
+    virtual void addOwnAdvPrefixRoutes(cTopology& topo);
+    virtual void addStaticRoutes(cTopology& topo);
 
-    virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
+    virtual bool isIPNode(cTopology::Node *node);
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_FLATNETWORKCONFIGURATOR_H
+#endif // ifndef __INET_FLATNETWORKCONFIGURATOR6_H
 

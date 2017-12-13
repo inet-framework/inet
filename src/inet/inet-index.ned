@@ -63,9 +63,9 @@
 //    ~SimpleVoipReceiver etc.
 //  - wireless support: ~IRadioMedium, ~Ieee80211Nic
 //  - Mobility models: ~TurtleMobility,
-//    ~BonnMotionMobility, ~AnsimMobility, ~RandomWpMobility, ~MassMobility
+//    ~BonnMotionMobility, ~AnsimMobility, ~RandomWaypointMobility, ~MassMobility
 //  - Mpls models: the core modules are ~Mpls, ~LibTable, ~Ldp, ~Rsvp, ~Ted,
-//    ~LinkStateRouting; MPLS-enabled routers are ~LDP_LSR, ~RSVP_LSR;
+//    ~LinkStateRouting; MPLS-enabled routers are ~LdpRouter, ~RsvpRouter;
 //    see also the list of <a href="standards.html">implemented standards</a>
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
 //    daemon ported into the INET Framework, currently in a different project)

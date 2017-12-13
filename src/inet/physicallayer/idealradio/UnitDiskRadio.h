@@ -15,38 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/physicallayer/idealradio/IdealPhyHeader_m.h"
-#include "inet/physicallayer/idealradio/IdealRadio.h"
-#include "inet/physicallayer/idealradio/IdealTransmitter.h"
+#ifndef __INET_IDEALRADIO_H
+#define __INET_IDEALRADIO_H
+
+#include "inet/physicallayer/common/packetlevel/Radio.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(IdealRadio);
-
-IdealRadio::IdealRadio() :
-    Radio()
+class INET_API UnitDiskRadio : public Radio
 {
-}
+  protected:
+    virtual void encapsulate(Packet *packet) const override;
+    virtual void decapsulate(Packet *packet) const override;
 
-void IdealRadio::encapsulate(Packet *packet) const
-{
-    auto idealTransmitter = check_and_cast<const IdealTransmitter *>(transmitter);
-    auto phyHeader = makeShared<IdealPhyHeader>();
-    phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
-    phyHeader->markImmutable();
-    packet->pushHeader(phyHeader);
-}
-
-void IdealRadio::decapsulate(Packet *packet) const
-{
-    packet->popHeader<IdealPhyHeader>();
-}
+  public:
+    UnitDiskRadio();
+};
 
 } // namespace physicallayer
 
 } // namespace inet
+
+#endif // ifndef __INET_IDEALRADIO_H
 

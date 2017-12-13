@@ -48,7 +48,7 @@
 //
 // Not all modules implement protocols though. There are modules which hold
 // data (for example ~Ipv4RoutingTable), perform autoconfiguration of a network
-// (~FlatNetworkConfigurator), move a mobile node around (for example
+// (~Ipv4FlatNetworkConfigurator), move a mobile node around (for example
 // ~ConstSpeedMobility), and perform housekeeping associated with radio channels
 // in wireless simulations (~IRadioMedium).
 //
@@ -96,7 +96,7 @@
 //
 // Some modules have only one instance, at global network level:
 //
-// - ~FlatNetworkConfigurator assigns IP addresses to hosts and routers,
+// - ~Ipv4FlatNetworkConfigurator assigns IP addresses to hosts and routers,
 //   and sets up static routing.
 //
 // - ~ScenarioManager makes simulations scriptable. Modules can be made to support

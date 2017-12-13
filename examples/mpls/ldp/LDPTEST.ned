@@ -17,7 +17,7 @@ package inet.examples.mpls.ldp;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.StandardHost;
-import inet.node.mpls.LDP_LSR;
+import inet.node.mpls.LdpRouter;
 import ned.DatarateChannel;
 
 
@@ -44,35 +44,35 @@ network LDPTEST
         }
 
     submodules:
-        LSR1: LDP_LSR {
+        LSR1: LdpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=150,200");
             gates:
                 pppg[4];
         }
-        LSR2: LDP_LSR {
+        LSR2: LdpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2 ppp3";
                 @display("p=250,200");
             gates:
                 pppg[4];
         }
-        LSR3: LDP_LSR {
+        LSR3: LdpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=350,200");
             gates:
                 pppg[4];
         }
-        LSR4: LDP_LSR {
+        LSR4: LdpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=250,100");
             gates:
                 pppg[4];
         }
-        LSR5: LDP_LSR {
+        LSR5: LdpRouter {
             parameters:
                 peers = "ppp0 ppp1 ppp2";
                 @display("p=250,300");

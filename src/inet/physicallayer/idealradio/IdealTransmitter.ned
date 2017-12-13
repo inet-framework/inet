@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.ITransmitter;
 // supports an ideal communication channel with configuring the range parameters
 // to infinity.
 //
-// See also ~IdealReceiver, ~IdealRadio, ~IdealRadioMedium, and
+// See also ~IdealReceiver, ~UnitDiskRadio, ~IdealRadioMedium, and
 // ~IdealAnalogModel.
 //
 module IdealTransmitter like ITransmitter

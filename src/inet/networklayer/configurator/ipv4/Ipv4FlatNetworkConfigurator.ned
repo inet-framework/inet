@@ -59,7 +59,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple FlatNetworkConfigurator like INetworkConfigurator
+simple Ipv4FlatNetworkConfigurator like INetworkConfigurator
 {
     parameters:
         string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)

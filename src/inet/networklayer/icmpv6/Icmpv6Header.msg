@@ -62,7 +62,7 @@ enum Icmpv6Type
 //
 // ICMPv6 "codes" for type ICMPv6_DESTINATION_UNREACHABLE
 //
-enum Icmpv6DestUn
+enum Icmpv6DestUnav
 {
 
     NO_ROUTE_TO_DEST = 0;
@@ -86,7 +86,7 @@ enum Icmpv6TimeEx
 //
 // ICMPv6 "codes" for type ICMPv6_PARAMETER_PROBLEM
 //
-enum Icmpv6ParameterProb
+enum Icmpv6ParameterProblem
 {
 
     ERROREOUS_HDR_FIELD = 0;
@@ -121,7 +121,7 @@ class Icmpv6Header extends FieldsChunk
 class Icmpv6DestUnreachableMsg extends Icmpv6Header
 {
     type = ICMPv6_DESTINATION_UNREACHABLE;
-    Icmpv6DestUn code;
+    Icmpv6DestUnav code;
     // unused 4 bytes
 }
 
@@ -141,7 +141,7 @@ class Icmpv6TimeExceededMsg extends Icmpv6Header
 class Icmpv6ParamProblemMsg extends Icmpv6Header
 {
     type = ICMPv6_PARAMETER_PROBLEM;
-    Icmpv6ParameterProb code;
+    Icmpv6ParameterProblem code;
 }
 
 //

@@ -6,7 +6,7 @@ Testing manetrouting with AODV routing protocol, UDP forwarding
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator;
 import inet.node.aodv.AodvRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -47,7 +47,7 @@ network Net80211_aodv_test
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: Ipv4FlatNetworkConfigurator {
             parameters:
                 networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";

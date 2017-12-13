@@ -35,7 +35,7 @@ import inet.physicallayer.common.packetlevel.Radio;
 // See also ~IdealRadioMedium, ~IdealAnalogModel, ~IdealTransmitter, and
 // ~IdealReceiver.
 //
-module IdealRadio extends Radio
+module UnitDiskRadio extends Radio
 {
     parameters:
         antennaType = default("IsotropicAntenna");
@@ -43,5 +43,5 @@ module IdealRadio extends Radio
         receiverType = default("IdealReceiver");
         separateTransmissionParts = default(false);
         separateReceptionParts = default(false);
-        @class(IdealRadio);
+        @class(UnitDiskRadio);
 }

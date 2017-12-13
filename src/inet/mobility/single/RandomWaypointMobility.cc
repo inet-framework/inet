@@ -16,18 +16,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/single/RandomWpMobility.h"
+#include "inet/mobility/single/RandomWaypointMobility.h"
 
 namespace inet {
 
-Define_Module(RandomWpMobility);
+Define_Module(RandomWaypointMobility);
 
-RandomWpMobility::RandomWpMobility()
+RandomWaypointMobility::RandomWaypointMobility()
 {
     nextMoveIsWait = false;
 }
 
-void RandomWpMobility::initialize(int stage)
+void RandomWaypointMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
@@ -36,7 +36,7 @@ void RandomWpMobility::initialize(int stage)
     }
 }
 
-void RandomWpMobility::setTargetPosition()
+void RandomWaypointMobility::setTargetPosition()
 {
     if (nextMoveIsWait) {
         simtime_t waitTime = par("waitTime");
@@ -52,13 +52,13 @@ void RandomWpMobility::setTargetPosition()
     nextMoveIsWait = !nextMoveIsWait;
 }
 
-void RandomWpMobility::move()
+void RandomWaypointMobility::move()
 {
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
 
-double RandomWpMobility::getMaxSpeed() const
+double RandomWaypointMobility::getMaxSpeed() const
 {
     return NaN;
 }

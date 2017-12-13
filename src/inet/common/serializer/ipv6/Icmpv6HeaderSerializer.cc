@@ -157,7 +157,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
         case ICMPv6_DESTINATION_UNREACHABLE: {
             auto destUnreach = makeShared<Icmpv6DestUnreachableMsg>(); icmpv6Header = destUnreach;
             destUnreach->setType(type);
-            destUnreach->setCode((Icmpv6DestUn)subcode);
+            destUnreach->setCode((Icmpv6DestUnav)subcode);
             stream.readUint32Be();        // unused
             break;
         }

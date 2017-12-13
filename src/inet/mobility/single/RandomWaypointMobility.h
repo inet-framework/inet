@@ -32,7 +32,7 @@ namespace inet {
  *  Universitaet Karlsruhe, http://www.tm.uka.de, 2004-2005
  * @author Andras Varga (generalized, ported to LineSegmentsMobilityBase)
  */
-class INET_API RandomWpMobility : public LineSegmentsMobilityBase
+class INET_API RandomWaypointMobility : public LineSegmentsMobilityBase
 {
   protected:
     bool nextMoveIsWait;
@@ -50,7 +50,7 @@ class INET_API RandomWpMobility : public LineSegmentsMobilityBase
     virtual void move() override;
 
   public:
-    RandomWpMobility();
+    RandomWaypointMobility();
     virtual double getMaxSpeed() const override;
 };
 
