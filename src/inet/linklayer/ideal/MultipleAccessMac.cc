@@ -27,7 +27,7 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ideal/IdealMac.h"
+#include "inet/linklayer/ideal/MultipleAccessMac.h"
 #include "inet/linklayer/ideal/IdealMacHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -35,19 +35,19 @@ namespace inet {
 
 using namespace inet::physicallayer;
 
-Define_Module(IdealMac);
+Define_Module(MultipleAccessMac);
 
-IdealMac::IdealMac()
+MultipleAccessMac::MultipleAccessMac()
 {
 }
 
-IdealMac::~IdealMac()
+MultipleAccessMac::~MultipleAccessMac()
 {
     delete lastSentPk;
     cancelAndDelete(ackTimeoutMsg);
 }
 
-void IdealMac::flushQueue()
+void MultipleAccessMac::flushQueue()
 {
     ASSERT(queueModule);
     while (!queueModule->isEmpty()) {
@@ -60,13 +60,13 @@ void IdealMac::flushQueue()
     queueModule->clear();    // clear request count
 }
 
-void IdealMac::clearQueue()
+void MultipleAccessMac::clearQueue()
 {
     ASSERT(queueModule);
     queueModule->clear();
 }
 
-void IdealMac::initialize(int stage)
+void MultipleAccessMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -101,7 +101,7 @@ void IdealMac::initialize(int stage)
     }
 }
 
-void IdealMac::initializeMACAddress()
+void MultipleAccessMac::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
@@ -117,7 +117,7 @@ void IdealMac::initializeMACAddress()
     }
 }
 
-InterfaceEntry *IdealMac::createInterfaceEntry()
+InterfaceEntry *MultipleAccessMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -139,7 +139,7 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
     return e;
 }
 
-void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void MultipleAccessMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {
@@ -153,7 +153,7 @@ void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long valu
     }
 }
 
-void IdealMac::startTransmitting(Packet *msg)
+void MultipleAccessMac::startTransmitting(Packet *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
@@ -174,7 +174,7 @@ void IdealMac::startTransmitting(Packet *msg)
     sendDown(msg);
 }
 
-void IdealMac::getNextMsgFromHL()
+void MultipleAccessMac::getNextMsgFromHL()
 {
     ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
     if (outStandingRequests == 0) {
@@ -184,7 +184,7 @@ void IdealMac::getNextMsgFromHL()
     ASSERT(outStandingRequests <= 1);
 }
 
-void IdealMac::handleUpperPacket(Packet *packet)
+void MultipleAccessMac::handleUpperPacket(Packet *packet)
 {
     outStandingRequests--;
     if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
@@ -198,7 +198,7 @@ void IdealMac::handleUpperPacket(Packet *packet)
     }
 }
 
-void IdealMac::handleLowerPacket(Packet *packet)
+void MultipleAccessMac::handleLowerPacket(Packet *packet)
 {
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     if (packet->hasBitError()) {
@@ -212,7 +212,7 @@ void IdealMac::handleLowerPacket(Packet *packet)
 
     if (!dropFrameNotForUs(packet)) {
         int senderModuleId = idealMacHeader->getSrcModuleId();
-        IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
+        MultipleAccessMac *senderMac = dynamic_cast<MultipleAccessMac *>(getSimulation()->getModule(senderModuleId));
         // TODO: this whole out of bounds ack mechanism is fishy
         if (senderMac && senderMac->useAck)
             senderMac->acked(packet);
@@ -223,10 +223,10 @@ void IdealMac::handleLowerPacket(Packet *packet)
     }
 }
 
-void IdealMac::handleSelfMessage(cMessage *message)
+void MultipleAccessMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
-        EV_DETAIL << "IdealMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
+        EV_DETAIL << "MultipleAccessMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
         auto idealMacHeader = lastSentPk->popHeader<IdealMacHeader>();
         lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
         // packet lost
@@ -240,12 +240,12 @@ void IdealMac::handleSelfMessage(cMessage *message)
     }
 }
 
-void IdealMac::acked(Packet *frame)
+void MultipleAccessMac::acked(Packet *frame)
 {
     Enter_Method_Silent();
     ASSERT(useAck);
 
-    EV_DEBUG << "IdealMac::acked(" << frame->getFullName() << ") is ";
+    EV_DEBUG << "MultipleAccessMac::acked(" << frame->getFullName() << ") is ";
 
     if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId()) {
         EV_DEBUG << "accepted\n";
@@ -258,7 +258,7 @@ void IdealMac::acked(Packet *frame)
         EV_DEBUG << "unaccepted\n";
 }
 
-void IdealMac::encapsulate(Packet *packet)
+void MultipleAccessMac::encapsulate(Packet *packet)
 {
     auto idealMacHeader = makeShared<IdealMacHeader>();
     idealMacHeader->setChunkLength(B(headerLength));
@@ -275,7 +275,7 @@ void IdealMac::encapsulate(Packet *packet)
     packet->pushHeader(idealMacHeader);
 }
 
-bool IdealMac::dropFrameNotForUs(Packet *packet)
+bool MultipleAccessMac::dropFrameNotForUs(Packet *packet)
 {
     auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     // Current implementation does not support the configuration of multicast
@@ -302,7 +302,7 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
     return true;
 }
 
-void IdealMac::decapsulate(Packet *packet)
+void MultipleAccessMac::decapsulate(Packet *packet)
 {
     const auto& idealMacHeader = packet->popHeader<IdealMacHeader>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();

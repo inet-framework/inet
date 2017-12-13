@@ -259,7 +259,7 @@ class INET_API TcpSocket
      * TcpSocket(cMessage *msg) constructor.
      *
      * If you need to handle multiple incoming connections, the TcpSocketMap
-     * class can also be useful, and TcpSrvHostApp shows how to put it all
+     * class can also be useful, and TcpServerHostApp shows how to put it all
      * together. See also TcpOpenCommand documentation (neddoc) for more info.
      */
     void listen() { listen(true); }

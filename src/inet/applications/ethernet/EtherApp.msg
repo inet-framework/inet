@@ -21,7 +21,7 @@ import inet.common.packet.chunk.Chunk;
 namespace inet;
 
 //
-// Request packet sent by ~EtherAppCli. Contains the number of bytes to be
+// Request packet sent by ~EtherAppClient. Contains the number of bytes to be
 // sent back as response; if this value is greater than ~1400, the reply
 // will consist of several Ethernet frames. See also ~EtherAppResp.
 //
@@ -32,7 +32,7 @@ class EtherAppReq extends FieldsChunk
 }
 
 //
-// Packet sent back by ~EtherAppSrv in response to an ~EtherAppReq.
+// Packet sent back by ~EtherAppServer in response to an ~EtherAppReq.
 //
 class EtherAppResp extends FieldsChunk
 {

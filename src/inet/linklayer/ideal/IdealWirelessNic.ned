@@ -59,7 +59,7 @@ module IdealWirelessNic like IWirelessNic
             parameters:
                 @display("p=23,125;q=l2queue");
         }
-        mac: IdealMac {
+        mac: MultipleAccessMac {
             parameters:
                 @display("p=98,207");
         }

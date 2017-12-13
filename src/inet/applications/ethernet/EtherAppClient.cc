@@ -19,7 +19,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "inet/applications/ethernet/EtherAppCli.h"
+#include "inet/applications/ethernet/EtherAppClient.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -31,14 +31,14 @@
 
 namespace inet {
 
-Define_Module(EtherAppCli);
+Define_Module(EtherAppClient);
 
-EtherAppCli::~EtherAppCli()
+EtherAppClient::~EtherAppClient()
 {
     cancelAndDelete(timerMsg);
 }
 
-void EtherAppCli::initialize(int stage)
+void EtherAppClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -74,7 +74,7 @@ void EtherAppCli::initialize(int stage)
     }
 }
 
-void EtherAppCli::handleMessage(cMessage *msg)
+void EtherAppClient::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
@@ -96,7 +96,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
         receivePacket(check_and_cast<cPacket *>(msg));
 }
 
-bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherAppClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -116,17 +116,17 @@ bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage,
     return true;
 }
 
-bool EtherAppCli::isNodeUp()
+bool EtherAppClient::isNodeUp()
 {
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-bool EtherAppCli::isGenerator()
+bool EtherAppClient::isGenerator()
 {
     return par("destAddress").stringValue()[0];
 }
 
-void EtherAppCli::scheduleNextPacket(bool start)
+void EtherAppClient::scheduleNextPacket(bool start)
 {
     simtime_t cur = simTime();
     simtime_t next;
@@ -142,13 +142,13 @@ void EtherAppCli::scheduleNextPacket(bool start)
         scheduleAt(next, timerMsg);
 }
 
-void EtherAppCli::cancelNextPacket()
+void EtherAppClient::cancelNextPacket()
 {
     if (timerMsg)
         cancelEvent(timerMsg);
 }
 
-MacAddress EtherAppCli::resolveDestMACAddress()
+MacAddress EtherAppClient::resolveDestMACAddress()
 {
     MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
@@ -169,7 +169,7 @@ MacAddress EtherAppCli::resolveDestMACAddress()
     return destMACAddress;
 }
 
-void EtherAppCli::registerDSAP(int dsap)
+void EtherAppClient::registerDSAP(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
@@ -181,7 +181,7 @@ void EtherAppCli::registerDSAP(int dsap)
     send(msg, "out");
 }
 
-void EtherAppCli::sendPacket()
+void EtherAppClient::sendPacket()
 {
     seqNum++;
 
@@ -212,7 +212,7 @@ void EtherAppCli::sendPacket()
     packetsSent++;
 }
 
-void EtherAppCli::receivePacket(cPacket *msg)
+void EtherAppClient::receivePacket(cPacket *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 
@@ -221,7 +221,7 @@ void EtherAppCli::receivePacket(cPacket *msg)
     delete msg;
 }
 
-void EtherAppCli::finish()
+void EtherAppClient::finish()
 {
     cancelAndDelete(timerMsg);
     timerMsg = nullptr;

@@ -24,7 +24,7 @@ import inet.linklayer.common.MacAddress;
 namespace inet;
 
 //
-// Packet for ~IdealMac. Packet size is configurable
+// Packet for ~MultipleAccessMac. Packet size is configurable
 // in the MAC layer. 
 //
 class IdealMacHeader extends FieldsChunk

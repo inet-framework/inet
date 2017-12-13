@@ -25,7 +25,7 @@
 // bus and hub models ((~EtherBus for modelling coaxial cable, and ~EtherHub);
 // a switch model (~EtherSwitch) with various relay units (~IMacRelayUnit,
 // ~MacRelayUnit and ~Ieee8021dRelay); some traffic generators
-// (~EtherTrafGen, ~EtherAppCli/~EtherAppSrv); and example host models
+// (~EtherTrafGen, ~EtherAppClient/~EtherAppServer); and example host models
 // (~EtherHost, ~EtherHost2). In INET hosts, an Ethernet interface is
 // represented by ~EthernetInterface.
 //

@@ -36,7 +36,7 @@ class IPassiveQueue;
  *
  * See the NED file for details.
  */
-class INET_API IdealMac : public MacProtocolBase
+class INET_API MultipleAccessMac : public MacProtocolBase
 {
   protected:
     // parameters
@@ -69,7 +69,7 @@ class INET_API IdealMac : public MacProtocolBase
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
     virtual void initializeMACAddress();
-    virtual void acked(Packet *packet);    // called by other IdealMac module, when receiving a packet with my moduleID
+    virtual void acked(Packet *packet);    // called by other MultipleAccessMac module, when receiving a packet with my moduleID
 
     // get MSG from queue
     virtual void getNextMsgFromHL();
@@ -85,8 +85,8 @@ class INET_API IdealMac : public MacProtocolBase
     //@}
 
   public:
-    IdealMac();
-    virtual ~IdealMac();
+    MultipleAccessMac();
+    virtual ~MultipleAccessMac();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

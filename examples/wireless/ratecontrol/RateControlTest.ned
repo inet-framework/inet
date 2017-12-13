@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.ratecontrol;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
 import inet.environment.common.PhysicalEnvironment;
 import inet.linklayer.ieee80211.Ieee80211Nic;
@@ -67,7 +67,7 @@ module Client
 
     submodules:
         interfaceTable: InterfaceTable;
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");

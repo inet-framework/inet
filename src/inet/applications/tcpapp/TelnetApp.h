@@ -25,7 +25,7 @@
 namespace inet {
 
 /**
- * An example Telnet client application. The server app should be TcpGenericSrvApp.
+ * An example Telnet client application. The server app should be TcpGenericServerApp.
  */
 class INET_API TelnetApp : public TcpAppBase, public ILifecycle
 {

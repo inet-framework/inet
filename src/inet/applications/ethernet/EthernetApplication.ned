@@ -3,7 +3,7 @@ package inet.applications.ethernet;
 //******************************************************
 // @file EthernetApplication.cc
 // @brief Simple traffic generator.
-// It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
+// It generates Etherapp requests and responses. Based in EtherAppClient and EtherAppServer.
 //
 // @author Juan Luis Garrote Molinero
 // @version 1.0

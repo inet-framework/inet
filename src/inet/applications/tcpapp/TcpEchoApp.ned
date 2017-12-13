@@ -51,7 +51,7 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpEchoApp extends TcpSrvHostApp
+simple TcpEchoApp extends TcpServerHostApp
 {
     parameters:
         @class(TcpEchoApp);

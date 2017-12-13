@@ -30,7 +30,7 @@ import inet.applications.contract.IApp;
 // requests (always waiting for the complete reply to arrive before
 // sending a new request), and closes the connection.
 //
-// The server app should be ~TcpGenericSrvApp; the model sends ~GenericAppMsg
+// The server app should be ~TcpGenericServerApp; the model sends ~GenericAppMsg
 // messages.
 //
 // Example settings:
@@ -86,7 +86,7 @@ import inet.applications.contract.IApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-// @see ~TcpGenericSrvApp, ~GenericAppMsg, ~TelnetApp
+// @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp
 //
 simple TcpBasicClientApp like IApp
 {

@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tcpapp/TcpSrvHostApp.h"
+#include "inet/applications/tcpapp/TcpServerHostApp.h"
 #include "inet/common/INETMath.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -30,7 +30,7 @@ namespace inet {
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TcpEchoApp : public TcpSrvHostApp
+class INET_API TcpEchoApp : public TcpServerHostApp
 {
   protected:
     simtime_t delay;
@@ -75,7 +75,7 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
      */
     virtual void timerExpired(cMessage *timer) override;
 
-    virtual void init(TcpSrvHostApp *hostmodule, TcpSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
 };
 
 } // namespace inet

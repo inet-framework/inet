@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
@@ -36,7 +36,7 @@ module ThroughputClient
         input radioIn @directIn;
 
     submodules:
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");

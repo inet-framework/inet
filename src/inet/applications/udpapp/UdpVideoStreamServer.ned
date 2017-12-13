@@ -22,7 +22,7 @@ import inet.applications.contract.IApp;
 
 
 //
-// Video stream server. To be used with ~UdpVideoStreamCli.
+// Video stream server. To be used with ~UdpVideoStreamClient.
 //
 // The server will wait for incoming "video streaming requests".
 // When a request arrives, it draws a random video stream size
@@ -40,9 +40,9 @@ import inet.applications.contract.IApp;
 // reqStreamBytes: statistic of bytelength of requested video streams.
 // sentPkBytes: statistic of sent packets and sent bytes.
 //
-// @see ~UdpVideoStreamCli
+// @see ~UdpVideoStreamClient
 //
-simple UdpVideoStreamSvr like IApp
+simple UdpVideoStreamServer like IApp
 {
     parameters:
         int localPort; // port to listen on

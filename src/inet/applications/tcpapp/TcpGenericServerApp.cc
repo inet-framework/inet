@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TcpGenericSrvApp.h"
+#include "inet/applications/tcpapp/TcpGenericServerApp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
@@ -28,9 +28,9 @@
 
 namespace inet {
 
-Define_Module(TcpGenericSrvApp);
+Define_Module(TcpGenericServerApp);
 
-void TcpGenericSrvApp::initialize(int stage)
+void TcpGenericServerApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -61,7 +61,7 @@ void TcpGenericSrvApp::initialize(int stage)
     }
 }
 
-void TcpGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
+void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 {
     if (delay == 0)
         sendBack(msg);
@@ -69,7 +69,7 @@ void TcpGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
         scheduleAt(simTime() + delay, msg);
 }
 
-void TcpGenericSrvApp::sendBack(cMessage *msg)
+void TcpGenericServerApp::sendBack(cMessage *msg)
 {
     cPacket *packet = dynamic_cast<cPacket *>(msg);
 
@@ -88,7 +88,7 @@ void TcpGenericSrvApp::sendBack(cMessage *msg)
     send(msg, "socketOut");
 }
 
-void TcpGenericSrvApp::handleMessage(cMessage *msg)
+void TcpGenericServerApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         sendBack(msg);
@@ -158,14 +158,14 @@ void TcpGenericSrvApp::handleMessage(cMessage *msg)
     }
 }
 
-void TcpGenericSrvApp::refreshDisplay() const
+void TcpGenericServerApp::refreshDisplay() const
 {
     char buf[64];
     sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TcpGenericSrvApp::finish()
+void TcpGenericServerApp::finish()
 {
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";

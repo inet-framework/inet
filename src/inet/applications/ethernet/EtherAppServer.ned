@@ -15,26 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 package inet.applications.ethernet;
 
 //
-// A simple traffic generator for the Ethernet model and the 802.11 model,
-// and generally for any L2 model that accepts Ieee80211Ctrl control info
-// on the packets. It generates ~EtherAppReq packets. It should be connected
-// directly to ~EtherLlc or a Ieee802NicXXX module.
+// Server side of the EtherCli model -- generates ~EtherAppResp packets
+// with the number of bytes requested by the client in ~EtherAppReq.
+// It should be connected directly to ~EtherLlc or a Ieee802NicXXX module.
 //
-simple EtherAppCli
+simple EtherAppServer
 {
     parameters:
-        string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        double startTime @unit(s) = default(this.sendInterval);  // time of sending the first request
-        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
-        int localSAP = default(0xf0);
-        int remoteSAP = default(0xf1);
-        volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
-        volatile int reqLength @unit(B) = default(100B);  // length of request packets
-        volatile int respLength @unit(B) = default(1KiB);  // length of response packets
-        bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        int localSAP = default(0xf1);
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
@@ -45,4 +38,3 @@ simple EtherAppCli
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
-

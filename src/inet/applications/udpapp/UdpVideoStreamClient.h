@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Andras Varga
+//
 // Based on the video streaming app of the similar name by Johnny Lai.
 //
 // This program is free software; you can redistribute it and/or
@@ -16,10 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_UDPVIDEOSTREAMSVR_H
-#define __INET_UDPVIDEOSTREAMSVR_H
-
-#include <map>
+#ifndef __INET_UDPVIDEOSTREAMCLI_H
+#define __INET_UDPVIDEOSTREAMCLI_H
 
 #include "inet/common/INETDefs.h"
 
@@ -30,63 +29,39 @@
 namespace inet {
 
 /**
- * Stream VBR video streams to clients.
+ * A "Realtime" VideoStream client application.
  *
- * Cooperates with UdpVideoStreamCli. UdpVideoStreamCli requests a stream
- * and UdpVideoStreamSvr starts streaming to them. Capable of handling
- * streaming to multiple clients.
+ * Basic video stream application. Clients connect to server and get a stream of
+ * video back.
  */
-class INET_API UdpVideoStreamSvr : public ApplicationBase
+class INET_API UdpVideoStreamClient : public ApplicationBase
 {
-  public:
-    struct VideoStreamData
-    {
-        cMessage *timer = nullptr;    // self timer msg
-        L3Address clientAddr;    // client address
-        int clientPort = -1;    // client UDP port
-        long videoSize = 0;    // total size of video
-        long bytesLeft = 0;    // bytes left to transmit
-        long numPkSent = 0;    // number of packets sent
-    };
-
   protected:
-    typedef std::map<long int, VideoStreamData> VideoStreamMap;
 
     // state
-    VideoStreamMap streams;
     UdpSocket socket;
+    cMessage *selfMsg = nullptr;
 
-    // parameters
-    int localPort = -1;
-    cPar *sendInterval = nullptr;
-    cPar *packetLen = nullptr;
-    cPar *videoSize = nullptr;
-
-    // statistics
-    unsigned int numStreams = 0;    // number of video streams served
-    unsigned long numPkSent = 0;    // total number of packets sent
-    static simsignal_t reqStreamBytesSignal;    // length of video streams served
-
-    virtual void processStreamRequest(Packet *msg);
-    virtual void sendStreamData(cMessage *timer);
-
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
-    virtual void clearStreams();
+    virtual void requestStream();
+    virtual void receiveStream(Packet *msg);
 
+    // ApplicationBase:
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
   public:
-    UdpVideoStreamSvr() {}
-    virtual ~UdpVideoStreamSvr();
+    UdpVideoStreamClient() { }
+    virtual ~UdpVideoStreamClient() { cancelAndDelete(selfMsg); }
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_UDPVIDEOSTREAMSVR_H
+#endif // ifndef __INET_UDPVIDEOSTREAMCLI_H
 

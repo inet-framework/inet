@@ -1,6 +1,6 @@
 %description:
 
-Test shutdown and startup operations on EtherAppCli/EtherAppSrv/EtherLlc modules.
+Test shutdown and startup operations on EtherAppClient/EtherAppServer/EtherLlc modules.
 The EtherSwitch, EtherMac modules tested, too.
 
 sender[0] and recip start at down
@@ -97,7 +97,7 @@ network Test
 %# sender[0]
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  t=[01](\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=[01](\.d+)?   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -118,60 +118,60 @@ Test\.sender\[0\] started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=2   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[0\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=2\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-2'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=3   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-3'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=3\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-4'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=4   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-5'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=4\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-6'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-7'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=5\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-8'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=6   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=6\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-10'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=7   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-11'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=7\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-12'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=8   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-13'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=8\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.5   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -190,43 +190,43 @@ Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  t=9(\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=9(\.d+)?   Test\.sender\[0\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %# sender[1]
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=1.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=1.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=1\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=1\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-2'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=2\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-3'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-4'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=3\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-5'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=3\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-6'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=4\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-7'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-8'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -245,7 +245,7 @@ Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  t=5(\.d+)?   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5(\.d+)?   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -266,28 +266,28 @@ Test.sender\[1\] started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=6\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=6\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-10'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=7\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-11'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=7\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-12'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=8\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.1   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-13'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  t=8\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.6   Test\.sender\[1\]\.cli \(EtherAppClient, id=\d+\)
 Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout

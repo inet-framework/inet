@@ -15,69 +15,48 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERAPPCLI_H
-#define __INET_ETHERAPPCLI_H
+#ifndef __INET_ETHERAPPSRV_H
+#define __INET_ETHERAPPSRV_H
 
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
+#define MAX_REPLY_CHUNK_SIZE    1497
+
 /**
- * Simple traffic generator for the Ethernet model.
+ * Server-side process EtherAppClient.
  */
-class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
+class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
 {
   protected:
-    enum Kinds { START = 100, NEXT };
-
-    // send parameters
-    long seqNum = 0;
-    cPar *reqLength = nullptr;
-    cPar *respLength = nullptr;
-    cPar *sendInterval = nullptr;
-
-    int localSAP = -1;
-    int remoteSAP = -1;
-    MacAddress destMACAddress;
+    int localSAP = 0;
     NodeStatus *nodeStatus = nullptr;
 
-    // self messages
-    cMessage *timerMsg = nullptr;
-    simtime_t startTime;
-    simtime_t stopTime;
-
-    // receive statistics
+    // statistics
     long packetsSent = 0;
     long packetsReceived = 0;
 
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void startApp();
+    virtual void stopApp();
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-
-    virtual bool isNodeUp();
-    virtual bool isGenerator();
-    virtual void scheduleNextPacket(bool start);
-    virtual void cancelNextPacket();
-
-    virtual MacAddress resolveDestMACAddress();
-
-    virtual void sendPacket();
-    virtual void receivePacket(cPacket *msg);
-    virtual void registerDSAP(int dsap);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
-  public:
-    EtherAppCli() {}
-    virtual ~EtherAppCli();
+    virtual bool isNodeUp();
+    void registerDSAP(int dsap);
+    void sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap);
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPCLI_H
+#endif // ifndef __INET_ETHERAPPSRV_H
 

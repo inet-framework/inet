@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TcpSrvHostApp.h"
+#include "inet/applications/tcpapp/TcpServerHostApp.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
@@ -24,9 +24,9 @@
 
 namespace inet {
 
-Define_Module(TcpSrvHostApp);
+Define_Module(TcpServerHostApp);
 
-void TcpSrvHostApp::initialize(int stage)
+void TcpServerHostApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -37,7 +37,7 @@ void TcpSrvHostApp::initialize(int stage)
     }
 }
 
-void TcpSrvHostApp::start()
+void TcpServerHostApp::start()
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
@@ -47,7 +47,7 @@ void TcpSrvHostApp::start()
     serverSocket.listen();
 }
 
-void TcpSrvHostApp::stop()
+void TcpServerHostApp::stop()
 {
     //FIXME close sockets?
 
@@ -56,21 +56,21 @@ void TcpSrvHostApp::stop()
         removeThread(*threadSet.begin());
 }
 
-void TcpSrvHostApp::crash()
+void TcpServerHostApp::crash()
 {
     // remove and delete threads
     while (!threadSet.empty())
         removeThread(*threadSet.begin());
 }
 
-void TcpSrvHostApp::refreshDisplay() const
+void TcpServerHostApp::refreshDisplay() const
 {
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TcpSrvHostApp::handleMessage(cMessage *msg)
+void TcpServerHostApp::handleMessage(cMessage *msg)
 {
     if (!isNodeUp()) {
         //TODO error?
@@ -111,12 +111,12 @@ void TcpSrvHostApp::handleMessage(cMessage *msg)
     }
 }
 
-void TcpSrvHostApp::finish()
+void TcpServerHostApp::finish()
 {
     stop();
 }
 
-void TcpSrvHostApp::removeThread(TcpServerThreadBase *thread)
+void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 {
     // remove socket
     socketMap.removeSocket(thread->getSocket());
@@ -126,7 +126,7 @@ void TcpSrvHostApp::removeThread(TcpServerThreadBase *thread)
     delete thread;
 }
 
-bool TcpSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TcpServerHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {

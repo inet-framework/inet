@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/applications/ethernet/EtherAppSrv.h"
+#include "inet/applications/ethernet/EtherAppServer.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -31,9 +31,9 @@
 
 namespace inet {
 
-Define_Module(EtherAppSrv);
+Define_Module(EtherAppServer);
 
-void EtherAppSrv::initialize(int stage)
+void EtherAppServer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -54,12 +54,12 @@ void EtherAppSrv::initialize(int stage)
     }
 }
 
-bool EtherAppSrv::isNodeUp()
+bool EtherAppServer::isNodeUp()
 {
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void EtherAppSrv::startApp()
+void EtherAppServer::startApp()
 {
     EV_INFO << "Starting application\n";
     bool registerSAP = par("registerSAP");
@@ -67,12 +67,12 @@ void EtherAppSrv::startApp()
         registerDSAP(localSAP);
 }
 
-void EtherAppSrv::stopApp()
+void EtherAppServer::stopApp()
 {
     EV_INFO << "Stop the application\n";
 }
 
-void EtherAppSrv::handleMessage(cMessage *msg)
+void EtherAppServer::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
@@ -90,7 +90,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
 
-    // send back packets asked by EtherAppCli side
+    // send back packets asked by EtherAppClient side
     for (int k = 0; replyBytes > 0; k++) {
         int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
@@ -113,7 +113,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void EtherAppSrv::sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap)
+void EtherAppServer::sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap)
 {
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
     auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();
@@ -125,7 +125,7 @@ void EtherAppSrv::sendPacket(cPacket *datapacket, const MacAddress& destAddr, in
     packetsSent++;
 }
 
-void EtherAppSrv::registerDSAP(int dsap)
+void EtherAppServer::registerDSAP(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
@@ -137,7 +137,7 @@ void EtherAppSrv::registerDSAP(int dsap)
     send(msg, "out");
 }
 
-bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherAppServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
@@ -157,7 +157,7 @@ bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage,
     return true;
 }
 
-void EtherAppSrv::finish()
+void EtherAppServer::finish()
 {
 }
 

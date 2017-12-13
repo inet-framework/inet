@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.testnewmac;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
@@ -41,7 +41,7 @@ module ThroughputClient
             parameters:
                 @display("p=50,50;is=s");
         }
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");

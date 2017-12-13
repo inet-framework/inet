@@ -20,17 +20,17 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/applications/tcpapp/TcpSrvHostApp.h"
+#include "inet/applications/tcpapp/TcpServerHostApp.h"
 
 namespace inet {
 
 /**
- * Example server thread, to be used with TcpSrvHostApp.
+ * Example server thread, to be used with TcpServerHostApp.
  */
-class INET_API TcpGenericSrvThread : public TcpServerThreadBase
+class INET_API TcpGenericServerThread : public TcpServerThreadBase
 {
   public:
-    TcpGenericSrvThread() {}
+    TcpGenericServerThread() {}
 
     virtual void established() override;
     virtual void dataArrived(Packet *msg, bool urgent) override;

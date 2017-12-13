@@ -18,8 +18,8 @@
 
 package inet.node.ethernet;
 
-import inet.applications.ethernet.EtherAppCli;
-import inet.applications.ethernet.EtherAppSrv;
+import inet.applications.ethernet.EtherAppClient;
+import inet.applications.ethernet.EtherAppServer;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.ethernet.EtherLlc;
@@ -51,12 +51,12 @@ module EtherHost
         status: NodeStatus if hasStatus {
             @display("p=50,50;is=s");
         }
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = true;
                 @display("p=120,58,col");
         }
-        srv: EtherAppSrv {
+        srv: EtherAppServer {
             parameters:
                 registerSAP = true;
                 @display("p=310,58,col");

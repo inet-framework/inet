@@ -30,7 +30,7 @@ namespace inet;
 // e.g. HTTP, SMB, database protocol) needs only to be present in
 // the client, and the server model can be kept simple and dumb.
 //
-// @see ~TcpGenericSrvApp, TCPGenericCliAppBase (C++ only)
+// @see ~TcpGenericServerApp, TCPGenericCliAppBase (C++ only)
 //
 class GenericAppMsg extends FieldsChunk
 {

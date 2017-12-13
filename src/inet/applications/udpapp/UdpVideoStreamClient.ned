@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
+// Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,25 +16,38 @@
 //
 
 
-package inet.applications.ethernet;
+package inet.applications.udpapp;
+
+import inet.applications.contract.IApp;
+
 
 //
-// Server side of the EtherCli model -- generates ~EtherAppResp packets
-// with the number of bytes requested by the client in ~EtherAppReq.
-// It should be connected directly to ~EtherLlc or a Ieee802NicXXX module.
+// Video streaming client.
 //
-simple EtherAppSrv
+// This module sends one "video streaming request" to serverAddress:serverPort at time startTime
+// and receives stream from ~UdpVideoStreamServer server.
+//
+// Statistics:
+//
+// rcvdPkBytes: statistic of received packets and received bytes.
+// endToEndDelay: statistic of delays of incoming packets.
+//
+// @see ~UdpVideoStreamServer
+//
+simple UdpVideoStreamClient like IApp
 {
     parameters:
-        bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
-        int localSAP = default(0xf1);
+        int localPort = default(-1);  // local port (-1: use ephemeral port)
+        string serverAddress;  // server address
+        int serverPort;  // server port
+        double startTime @unit(s) = default(1s);
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=vector);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input in @labels(Ieee802Ctrl/up);
-        output out @labels(Ieee802Ctrl/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }
+

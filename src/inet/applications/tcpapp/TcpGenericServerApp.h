@@ -31,7 +31,7 @@ namespace inet {
  *
  * @see GenericAppMsg, TcpAppBase
  */
-class INET_API TcpGenericSrvApp : public cSimpleModule, public ILifecycle
+class INET_API TcpGenericServerApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TcpSocket socket;

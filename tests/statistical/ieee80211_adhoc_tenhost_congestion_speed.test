@@ -7,7 +7,7 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
@@ -35,7 +35,7 @@ module ThroughputClient
         input radioIn @directIn;
 
     submodules:
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);

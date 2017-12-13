@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/tcpapp/TcpGenericSrvThread.h"
+#include "inet/applications/tcpapp/TcpGenericServerThread.h"
 
 #include "GenericAppMsg_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {
 
-Register_Class(TcpGenericSrvThread);
+Register_Class(TcpGenericServerThread);
 
-void TcpGenericSrvThread::established()
+void TcpGenericServerThread::established()
 {
     // no initialization needed
 }
 
-void TcpGenericSrvThread::dataArrived(Packet *msg, bool)
+void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 {
     const auto& appmsg = msg->peekDataAt<GenericAppMsg>(B(0), B(msg->getByteLength()));
 
@@ -42,7 +42,7 @@ void TcpGenericSrvThread::dataArrived(Packet *msg, bool)
 
     if (appmsg->getReplyDelay() > 0)
         throw cRuntimeError("Cannot process (%s)%s: %s class doesn't support replyDelay field"
-                            " of GenericAppMsg, try to use TcpGenericSrvApp instead",
+                            " of GenericAppMsg, try to use TcpGenericServerApp instead",
                 msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close
@@ -63,7 +63,7 @@ void TcpGenericSrvThread::dataArrived(Packet *msg, bool)
         getSocket()->close();
 }
 
-void TcpGenericSrvThread::timerExpired(cMessage *timer)
+void TcpGenericServerThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }

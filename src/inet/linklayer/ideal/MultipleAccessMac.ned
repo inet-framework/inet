@@ -34,7 +34,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple IdealMac extends MacProtocolBase like ILinkLayer
+simple MultipleAccessMac extends MacProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
@@ -48,7 +48,7 @@ simple IdealMac extends MacProtocolBase like ILinkLayer
         bool useAck = default(true);
         double ackTimeout @unit("s") = default(100ms);
 
-        @class(IdealMac);
+        @class(MultipleAccessMac);
         @signal[linkBreak](type=Packet);
         @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

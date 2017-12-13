@@ -39,7 +39,7 @@ TcpEchoApp::~TcpEchoApp()
 
 void TcpEchoApp::initialize(int stage)
 {
-    TcpSrvHostApp::initialize(stage);
+    TcpServerHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("echoDelay");

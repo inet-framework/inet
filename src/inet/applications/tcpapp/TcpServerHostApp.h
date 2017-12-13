@@ -36,7 +36,7 @@ class TcpServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TcpSrvHostApp : public cSimpleModule, public ILifecycle
+class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TcpSocket serverSocket;
@@ -58,21 +58,21 @@ class INET_API TcpSrvHostApp : public cSimpleModule, public ILifecycle
     virtual void crash();
 
   public:
-    virtual ~TcpSrvHostApp() { socketMap.deleteSockets(); }
+    virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }
     virtual void removeThread(TcpServerThreadBase *thread);
 };
 
 /**
- * Abstract base class for server processes to be used with TcpSrvHostApp.
+ * Abstract base class for server processes to be used with TcpServerHostApp.
  * Subclasses need to be registered using the Register_Class() macro.
  *
- * @see TcpSrvHostApp
+ * @see TcpServerHostApp
  */
 class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::CallbackInterface
 {
   protected:
-    TcpSrvHostApp *hostmod;
-    TcpSocket *sock;    // ptr into socketMap managed by TcpSrvHostApp
+    TcpServerHostApp *hostmod;
+    TcpSocket *sock;    // ptr into socketMap managed by TcpServerHostApp
 
     // internal: TcpSocket::CallbackInterface methods
     virtual void socketDataArrived(int, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
@@ -89,8 +89,8 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::Cal
     TcpServerThreadBase() { sock = nullptr; hostmod = nullptr; }
     virtual ~TcpServerThreadBase() {}
 
-    // internal: called by TcpSrvHostApp after creating this module
-    virtual void init(TcpSrvHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
+    // internal: called by TcpServerHostApp after creating this module
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) { hostmod = hostmodule; sock = socket; }
 
     /*
      * Returns the socket object
@@ -100,7 +100,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::Cal
     /*
      * Returns pointer to the host module
      */
-    virtual TcpSrvHostApp *getHostModule() { return hostmod; }
+    virtual TcpServerHostApp *getHostModule() { return hostmod; }
 
     /**
      * Called when connection is established. To be redefined.

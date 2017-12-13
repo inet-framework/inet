@@ -17,7 +17,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/udpapp/UdpVideoStreamCli.h"
+#include "inet/applications/udpapp/UdpVideoStreamClient.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
@@ -25,9 +25,9 @@
 
 namespace inet {
 
-Define_Module(UdpVideoStreamCli);
+Define_Module(UdpVideoStreamClient);
 
-void UdpVideoStreamCli::initialize(int stage)
+void UdpVideoStreamClient::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
@@ -36,12 +36,12 @@ void UdpVideoStreamCli::initialize(int stage)
     }
 }
 
-void UdpVideoStreamCli::finish()
+void UdpVideoStreamClient::finish()
 {
     ApplicationBase::finish();
 }
 
-void UdpVideoStreamCli::handleMessageWhenUp(cMessage *msg)
+void UdpVideoStreamClient::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         requestStream();
@@ -59,7 +59,7 @@ void UdpVideoStreamCli::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void UdpVideoStreamCli::requestStream()
+void UdpVideoStreamClient::requestStream()
 {
     int svrPort = par("serverPort");
     int localPort = par("localPort");
@@ -83,14 +83,14 @@ void UdpVideoStreamCli::requestStream()
     socket.sendTo(pk, svrAddr, svrPort);
 }
 
-void UdpVideoStreamCli::receiveStream(Packet *pk)
+void UdpVideoStreamClient::receiveStream(Packet *pk)
 {
     EV_INFO << "Video stream packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);
     delete pk;
 }
 
-bool UdpVideoStreamCli::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpVideoStreamClient::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t startTimePar = par("startTime");
     simtime_t startTime = std::max(startTimePar, simTime());
@@ -98,14 +98,14 @@ bool UdpVideoStreamCli::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpVideoStreamCli::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpVideoStreamClient::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-void UdpVideoStreamCli::handleNodeCrash()
+void UdpVideoStreamClient::handleNodeCrash()
 {
     cancelEvent(selfMsg);
 }

@@ -57,9 +57,9 @@
 //    ~ArpPacket, ~PppFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
 //    ~Ipv4ControlInfo, ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
-//  - application models: ~UdpVideoStreamSvr, ~UdpVideoStreamCli, ~UdpBasicApp, ~UdpEchoApp,
-//    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericSrvApp, ~TcpSinkApp,
-//    ~TcpSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, ~SimpleVoipSender,
+//  - application models: ~UdpVideoStreamServer, ~UdpVideoStreamClient, ~UdpBasicApp, ~UdpEchoApp,
+//    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericServerApp, ~TcpSinkApp,
+//    ~TcpServerHostApp, ~EtherAppClient, ~EtherAppServer, ~PingApp, ~SimpleVoipSender,
 //    ~SimpleVoipReceiver etc.
 //  - wireless support: ~IRadioMedium, ~Ieee80211Nic
 //  - Mobility models: ~TurtleMobility,

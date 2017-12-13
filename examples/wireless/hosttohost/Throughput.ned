@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
@@ -37,7 +37,7 @@ module ThroughputClient
     gates:
         input radioIn @directIn;
     submodules:
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
