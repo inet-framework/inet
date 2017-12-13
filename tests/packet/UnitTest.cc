@@ -1530,6 +1530,15 @@ static void testTagSet()
     ASSERT(tag13 == tag12);
     ASSERT(tagSet9.getNumTags() == 0);
     ASSERT(tagSet9.removeTagIfPresent<CreationTimeTag>() == nullptr);
+
+    // 10. copyTags
+    TagSet tagSet10;
+    TagSet tagSet11;
+    tagSet11.copyTags(tagSet10);
+    ASSERT(tagSet11.getNumTags() == 0);
+    tagSet10.addTag<CreationTimeTag>();
+    tagSet11.copyTags(tagSet10);
+    ASSERT(tagSet11.getNumTags() == 1);
 }
 
 static void testRegionTagSet()
@@ -1610,6 +1619,15 @@ static void testRegionTagSet()
     ASSERT(tag13 == tag12);
     ASSERT(regionTagSet9.getNumTags() == 0);
     ASSERT(regionTagSet9.removeTagIfPresent<CreationTimeTag>(b(0), b(1000)) == nullptr);
+
+    // 10. copyTags
+    RegionTagSet regionTagSet10;
+    RegionTagSet regionTagSet11;
+    regionTagSet11.copyTags(regionTagSet10, b(0), b(0), b(1000));
+    ASSERT(regionTagSet11.getNumTags() == 0);
+    regionTagSet10.addTag<CreationTimeTag>(b(0), b(1000));
+    regionTagSet11.copyTags(regionTagSet10, b(0), b(0), b(1000));
+    ASSERT(regionTagSet11.getNumTags() == 1);
 }
 
 static void testPacketTags()
