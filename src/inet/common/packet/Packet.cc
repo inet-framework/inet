@@ -38,7 +38,7 @@ Packet::Packet(const char *name, const Ptr<const Chunk>& contents) :
     trailerIterator(Chunk::BackwardIterator(b(0), 0)),
     totalLength(contents->getChunkLength())
 {
-    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+    constPtrCast<Chunk>(contents)->markImmutable();
 }
 
 Packet::Packet(const Packet& other) :
@@ -74,6 +74,12 @@ const Ptr<const Chunk> Packet::peekHeader(b length, int flags) const
         return contents->peek(headerIterator, dataLength, flags);
 }
 
+void Packet::insertHeader(const Ptr<const Chunk>& chunk)
+{
+    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    insertAtBeginning(chunk);
+}
+
 const Ptr<const Chunk> Packet::popHeader(b length, int flags)
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
@@ -94,19 +100,6 @@ const Ptr<Chunk> Packet::removeHeader(b length, int flags)
     return makeExclusivelyOwnedMutableChunk(chunk);
 }
 
-void Packet::pushHeader(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    insertAtBeginning(chunk);
-}
-
-void Packet::insertHeader(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    constPtrCast<Chunk>(chunk)->markImmutable();
-    insertAtBeginning(chunk);
-}
-
 void Packet::setTrailerPopOffset(b offset)
 {
     CHUNK_CHECK_USAGE(headerIterator.getPosition() <= offset, "offset is out of range");
@@ -123,6 +116,12 @@ const Ptr<const Chunk> Packet::peekTrailer(b length, int flags) const
         return chunk;
     else
         return contents->peek(trailerIterator, dataLength, flags);
+}
+
+void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
+{
+    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    insertAtEnd(chunk);
 }
 
 const Ptr<const Chunk> Packet::popTrailer(b length, int flags)
@@ -145,19 +144,6 @@ const Ptr<Chunk> Packet::removeTrailer(b length, int flags)
     return makeExclusivelyOwnedMutableChunk(chunk);
 }
 
-void Packet::pushTrailer(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    insertAtEnd(chunk);
-}
-
-void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    constPtrCast<Chunk>(chunk)->markImmutable();
-    insertAtEnd(chunk);
-}
-
 const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
@@ -178,8 +164,8 @@ const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
 void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
+    constPtrCast<Chunk>(chunk)->markImmutable();
     if (contents == EmptyChunk::singleton) {
         contents = chunk;
         totalLength = contents->getChunkLength();
@@ -207,8 +193,8 @@ void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
 void Packet::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0) && (trailerIterator.getIndex() == 0 || trailerIterator.getIndex() == -1), "popped trailer length is non-zero");
+    constPtrCast<Chunk>(chunk)->markImmutable();
     if (contents == EmptyChunk::singleton) {
         contents = chunk;
         totalLength = contents->getChunkLength();

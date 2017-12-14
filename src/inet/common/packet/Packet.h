@@ -31,7 +31,7 @@ namespace inet {
  *
  * Internally, packet stores the data in different kind of chunks. See the
  * Chunk class and its subclasses for details. All chunks are immutable in a
- * packet. Chunks are automatically merged as they are pushed into a packet,
+ * packet. Chunks are automatically merged as they are inserted into a packet,
  * and they are also shared among packets when duplicating.
  *
  * Packets are conceptually divided into three parts during processing: headers,
@@ -158,6 +158,13 @@ class INET_API Packet : public cPacket
     const Ptr<const Chunk> peekHeader(b length = b(-1), int flags = 0) const;
 
     /**
+     * Inserts the provided header at the beginning of the packet. The inserted
+     * header is automatically marked immutable. The popped header length must
+     * be zero before calling this function.
+     */
+    void insertHeader(const Ptr<const Chunk>& chunk);
+
+    /**
      * Pops the designated header and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
@@ -171,20 +178,6 @@ class INET_API Packet : public cPacket
      * header length must be zero before calling this function.
      */
     const Ptr<Chunk> removeHeader(b length = b(-1), int flags = 0);
-
-    /**
-     * Pushes the provided header at the beginning of the packet. The header
-     * must be immutable and the popped header length must be zero before
-     * calling this function.
-     */
-    void pushHeader(const Ptr<const Chunk>& chunk);
-
-    /**
-     * Pushes the provided header at the beginning of the packet. The pushed
-     * header is automatically marked immutable. The popped header length must
-     * be zero before calling this function.
-     */
-    void insertHeader(const Ptr<const Chunk>& chunk);
 
     /**
      * Returns true if the designated header is available in the requested
@@ -272,6 +265,13 @@ class INET_API Packet : public cPacket
     const Ptr<const Chunk> peekTrailer(b length = b(-1), int flags = 0) const;
 
     /**
+     * Inserts the provided trailer at the end of the packet. The inserted trailer
+     * is automatically marked immutable. The popped trailer length must be zero
+     * before calling this function.
+     */
+    void insertTrailer(const Ptr<const Chunk>& chunk);
+
+    /**
      * Pops the designated trailer and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
@@ -285,20 +285,6 @@ class INET_API Packet : public cPacket
      * trailer length must be zero before calling this function.
      */
     const Ptr<Chunk> removeTrailer(b length = b(-1), int flags = 0);
-
-    /**
-     * Pushes the provided trailer at the end of the packet. The trailer must be
-     * immutable and the popped trailer length must be zero before calling this
-     * function.
-     */
-    void pushTrailer(const Ptr<const Chunk>& chunk);
-
-    /**
-     * Pushes the provided trailer at the end of the packet. The pushed trailer
-     * is automatically marked immutable. The popped trailer length must be zero
-     * before calling this function.
-     */
-    void insertTrailer(const Ptr<const Chunk>& chunk);
 
     /**
      * Returns true if the designated trailer is available in the requested
