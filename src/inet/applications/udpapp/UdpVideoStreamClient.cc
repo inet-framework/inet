@@ -79,7 +79,7 @@ void UdpVideoStreamClient::requestStream()
     Packet *pk = new Packet("VideoStrmReq");
     const auto& payload = makeShared<ByteCountChunk>(B(1));    //FIXME set packet length
     payload->markImmutable();
-    pk->append(payload);
+    pk->insertAtEnd(payload);
     socket.sendTo(pk, svrAddr, svrPort);
 }
 

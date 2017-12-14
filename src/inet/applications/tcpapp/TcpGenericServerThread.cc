@@ -55,7 +55,7 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
         Packet *outPacket = new Packet(msg->getName());
         const auto& payload = makeShared<ByteCountChunk>(B(requestedBytes));
         payload->markImmutable();
-        outPacket->append(payload);
+        outPacket->insertAtEnd(payload);
         getSocket()->send(outPacket);
     }
 

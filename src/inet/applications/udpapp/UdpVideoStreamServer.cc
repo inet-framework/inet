@@ -120,7 +120,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
         pktLen = d->bytesLeft;
     const auto& payload = makeShared<ByteCountChunk>(B(pktLen));
     payload->markImmutable();
-    pkt->append(payload);
+    pkt->insertAtEnd(payload);
 
     emit(sentPkSignal, pkt);
     socket.sendTo(pkt, d->clientAddr, d->clientPort);

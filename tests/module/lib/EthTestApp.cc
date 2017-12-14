@@ -63,13 +63,13 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
     hdr->setDest(destAddr);
     hdr->setChunkLength(B(14));
     hdr->markImmutable();
-    packet->prepend(hdr);
+    packet->insertAtBeginning(hdr);
     const auto& payload = makeShared<ByteCountChunk>(B(bytes-14-4));
     payload->markImmutable();
-    packet->append(payload);
+    packet->insertAtEnd(payload);
     const auto& fcs = makeShared<EthernetFcs>();
     fcs->markImmutable();
-    packet->append(fcs);
+    packet->insertAtEnd(fcs);
     ASSERT(packet->getByteLength() == bytes);
     //TODO set packet->destAddr
     scheduleAt(t, packet);

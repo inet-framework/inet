@@ -146,7 +146,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     payload->setExpectedReplyLength(expectedReplyBytes);
     payload->setServerClose(false);
     payload->markImmutable();
-    packet->append(payload);
+    packet->insertAtEnd(payload);
 
     sendPacket(packet);
 }

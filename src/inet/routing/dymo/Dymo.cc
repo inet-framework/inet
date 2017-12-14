@@ -426,7 +426,7 @@ void Dymo::sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     udpHeader->markImmutable();
     udpPacket->pushHeader(udpHeader);
     packet->markImmutable();
-    udpPacket->append(packet);
+    udpPacket->insertAtEnd(packet);
     sendUDPPacket(udpPacket, delay);
 }
 

@@ -579,7 +579,7 @@ void DhcpClient::sendRequest()
     else
         throw cRuntimeError("Invalid state");
     request->markImmutable();
-    packet->append(request);
+    packet->insertAtEnd(request);
     sendToUDP(packet, clientPort, destAddr, serverPort);
 }
 
@@ -613,7 +613,7 @@ void DhcpClient::sendDiscover()
     discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
     discover->markImmutable();
-    packet->append(discover);
+    packet->insertAtEnd(discover);
 
     EV_INFO << "Sending DHCPDISCOVER." << endl;
     sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
@@ -639,7 +639,7 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     decline->getOptionsForUpdate().setRequestedIp(declinedIp);
 
     decline->markImmutable();
-    packet->append(decline);
+    packet->insertAtEnd(decline);
 
     EV_INFO << "Sending DHCPDECLINE." << endl;
     sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);

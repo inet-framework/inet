@@ -987,7 +987,7 @@ void Ipv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
     //Construct a Router Solicitation message
     auto packet = new Packet("RSpacket");
     rs->markImmutable();
-    packet->append(rs);
+    packet->insertAtEnd(rs);
     sendPacketToIPv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
@@ -1285,7 +1285,7 @@ void Ipv6NeighbourDiscovery::createAndSendRAPacket(const Ipv6Address& destAddr, 
 
         auto packet = new Packet("RApacket");
         ra->markImmutable();
-        packet->append(ra);
+        packet->insertAtEnd(ra);
         sendPacketToIPv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
     }
 }
@@ -1826,7 +1826,7 @@ void Ipv6NeighbourDiscovery::createAndSendNSPacket(const Ipv6Address& nsTargetAd
 
     auto packet = new Packet("NSpacket");
     ns->markImmutable();
-    packet->append(ns);
+    packet->insertAtEnd(ns);
     sendPacketToIPv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
 }
@@ -2066,7 +2066,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, const Ipv6Neighbour
 
     auto naPacket = new Packet("NApacket");
     na->markImmutable();
-    naPacket->append(na);
+    naPacket->insertAtEnd(na);
     sendPacketToIPv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
@@ -2152,7 +2152,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 #ifdef WITH_xMIPv6
     auto packet = new Packet("NApacket");
     na->markImmutable();
-    packet->append(na);
+    packet->insertAtEnd(na);
     sendPacketToIPv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* WITH_xMIPv6 */
 }

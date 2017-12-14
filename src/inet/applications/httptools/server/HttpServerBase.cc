@@ -323,7 +323,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
 
     replymsg->setChunkLength(B(size));
     replymsg->markImmutable();
-    replyPk->append(replymsg);
+    replyPk->insertAtEnd(replymsg);
 
     EV_DEBUG << "Serving a HTML document of length " << replyPk->getByteLength() << " bytes" << endl;
 
@@ -364,7 +364,7 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     replymsg->setContentType(category);    // Emulates the content-type header field
     replymsg->setChunkLength(B(size)); // Set the resource size
     replymsg->markImmutable();
-    replyPk->append(replymsg);
+    replyPk->insertAtEnd(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     sprintf(szReply, "RESOURCE-BODY:%s", resource.c_str());
@@ -385,7 +385,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
     replymsg->markImmutable();
-    replyPk->append(replymsg);
+    replyPk->insertAtEnd(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;

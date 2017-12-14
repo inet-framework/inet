@@ -171,7 +171,7 @@ cPacket *TcpSessionApp::createDataPacket(long sendBytes)
     auto creationTimeTag = payload->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     payload->markImmutable();
-    packet->append(payload);
+    packet->insertAtEnd(payload);
     return packet;
 }
 

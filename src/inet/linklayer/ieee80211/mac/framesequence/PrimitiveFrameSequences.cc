@@ -54,7 +54,7 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
-            rtsPacket->append(rtsFrame);
+            rtsPacket->insertAtEnd(rtsFrame);
             rtsPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(dataOrMgmtPacket, rtsPacket, context->getIfs());
         }
@@ -271,7 +271,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtHeader);
             auto rtsPacket = new Packet("RTS");
             rtsFrame->markImmutable();
-            rtsPacket->append(rtsFrame);
+            rtsPacket->insertAtEnd(rtsFrame);
             rtsPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(packet, rtsPacket, context->getIfs());
         }

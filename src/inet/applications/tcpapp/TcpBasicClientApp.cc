@@ -109,7 +109,7 @@ void TcpBasicClientApp::sendRequest()
     payload->setExpectedReplyLength(replyLength);
     payload->setServerClose(false);
     payload->markImmutable();
-    packet->append(payload);
+    packet->insertAtEnd(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
             << "remaining " << numRequestsToSend - 1 << " request\n";

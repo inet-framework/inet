@@ -128,7 +128,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         hdr->setChunkLength(B(hdr->calculateUnfragmentableHeaderByteLength()));
         hdr->markImmutable();
         pk->pushHeader(hdr);
-        pk->append(payload);
+        pk->insertAtEnd(payload);
         delete buf->packet;
         bufs.erase(i);
         return pk;

@@ -886,7 +886,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
         fragHdr->setChunkLength(B(headerLength + fh->getByteLength()));      //FIXME KLUDGE
         fragHdr->markImmutable();
         fragPk->pushHeader(fragHdr);
-        fragPk->append(packet->peekDataAt(B(offset), B(thisFragmentLength)));
+        fragPk->insertAtEnd(packet->peekDataAt(B(offset), B(thisFragmentLength)));
 
         ASSERT(fragPk->getByteLength() == headerLength + fh->getByteLength() + thisFragmentLength);
 

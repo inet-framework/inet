@@ -186,7 +186,7 @@ void Flood::handleLowerPacket(Packet *packet)
                    << " > 1 -> forward\n";
                 decapsulate(packet);
                 auto packetCopy = new Packet();
-                packetCopy->append(packet->peekDataAt(b(0), packet->getDataLength()));
+                packetCopy->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
                 auto floodHeaderCopy = staticPtrCast<FloodHeader>(floodHeader->dupShared());
                 floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
                 floodHeaderCopy->markImmutable();

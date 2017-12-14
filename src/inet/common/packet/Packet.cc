@@ -97,14 +97,14 @@ const Ptr<Chunk> Packet::removeHeader(b length, int flags)
 void Packet::pushHeader(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    prepend(chunk);
+    insertAtBeginning(chunk);
 }
 
 void Packet::insertHeader(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     constPtrCast<Chunk>(chunk)->markImmutable();
-    prepend(chunk);
+    insertAtBeginning(chunk);
 }
 
 void Packet::setTrailerPopOffset(b offset)
@@ -148,14 +148,14 @@ const Ptr<Chunk> Packet::removeTrailer(b length, int flags)
 void Packet::pushTrailer(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    append(chunk);
+    insertAtEnd(chunk);
 }
 
 void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     constPtrCast<Chunk>(chunk)->markImmutable();
-    append(chunk);
+    insertAtEnd(chunk);
 }
 
 const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
@@ -175,7 +175,7 @@ const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
     return contents->peek(Chunk::Iterator(true, offset, -1), peekLength, flags);
 }
 
-void Packet::prepend(const Ptr<const Chunk>& chunk)
+void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
@@ -204,7 +204,7 @@ void Packet::prepend(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
 }
 
-void Packet::append(const Ptr<const Chunk>& chunk)
+void Packet::insertAtEnd(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");

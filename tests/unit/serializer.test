@@ -242,7 +242,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         outPk = new Packet("inet");
         if (pk->getDataLength() > b(0)) {
             const auto& chunk = pk->popHeader(pk->getDataLength());
-            outPk->append(chunk);
+            outPk->insertAtEnd(chunk);
         }
     }
     else if (*protocol == Protocol::ethernet) {
@@ -326,7 +326,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
     else {
         const auto& chunk = pk->popHeader(pk->getDataLength());
         outPk = new Packet("inet");
-        outPk->append(chunk);
+        outPk->insertAtEnd(chunk);
     }
     return outPk;
 }

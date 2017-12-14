@@ -514,13 +514,13 @@ class INET_API Packet : public cPacket
      * Inserts the provided chunk at the beginning of the packet. The popped
      * header length must be zero before calling this function.
      */
-    void prepend(const Ptr<const Chunk>& chunk);
+    void insertAtBeginning(const Ptr<const Chunk>& chunk);
 
     /**
      * Inserts the provided chunk at the end of the packet. The popped trailer
      * length must be zero before calling this function.
      */
-    void append(const Ptr<const Chunk>& chunk);
+    void insertAtEnd(const Ptr<const Chunk>& chunk);
     //@}
 
     /** @name Removing data related functions */

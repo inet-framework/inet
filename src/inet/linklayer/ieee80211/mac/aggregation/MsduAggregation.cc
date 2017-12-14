@@ -74,13 +74,13 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
         setSubframeAddress(msduSubframeHeader, header);
         msduSubframeHeader->markImmutable();
-        aggregatedFrame->append(msduSubframeHeader);
-        aggregatedFrame->append(msdu);
+        aggregatedFrame->insertAtEnd(msduSubframeHeader);
+        aggregatedFrame->insertAtEnd(msdu);
         int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
             auto padding = makeShared<ByteCountChunk>(B(paddingLength));
             padding->markImmutable();
-            aggregatedFrame->append(padding);
+            aggregatedFrame->insertAtEnd(padding);
         }
         if (i != 0)
             aggregatedName.append("+");

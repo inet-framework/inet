@@ -1482,7 +1482,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setHeaderLength(IP_HEADER_BYTES);
         ipv4Header->setTotalLengthField(IP_HEADER_BYTES);
         ipv4Header->markImmutable();
-        pk->append(ipv4Header);
+        pk->insertAtEnd(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);
 
@@ -1506,7 +1506,7 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
     msg->markImmutable();
 
-    pk->append(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
+    pk->insertAtEnd(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
     pk->pushHeader(msg);
 
     emit(sentRegisterPkSignal, pk);

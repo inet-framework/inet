@@ -597,7 +597,7 @@ void Rstp::sendTCNtoRoot()
                     frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
                 frame->markImmutable();
-                packet->append(frame);
+                packet->insertAtEnd(frame);
 
                 auto macAddressReq = packet->ensureTag<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
@@ -664,7 +664,7 @@ void Rstp::sendBPDU(int interfaceId)
             frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
         frame->markImmutable();
-        packet->append(frame);
+        packet->insertAtEnd(frame);
 
         auto macAddressReq = packet->ensureTag<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);

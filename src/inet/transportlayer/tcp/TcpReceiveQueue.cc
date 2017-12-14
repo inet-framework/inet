@@ -104,7 +104,7 @@ cPacket *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
 
     if (chunk) {
         Packet *msg = new Packet("data");
-        msg->append(chunk);
+        msg->insertAtEnd(chunk);
         return msg;
     }
 

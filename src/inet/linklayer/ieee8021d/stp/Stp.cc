@@ -144,7 +144,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
 
     if (!isRoot) {
         Packet *outPacket = new Packet(packet->getName());
-        outPacket->append(tcn);
+        outPacket->insertAtEnd(tcn);
         outPacket->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
         outPacket->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
         outPacket->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
@@ -188,7 +188,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     }
 
     bpdu->markImmutable();
-    packet->append(bpdu);
+    packet->insertAtEnd(bpdu);
     send(packet, "relayOut");
 }
 
@@ -211,7 +211,7 @@ void Stp::generateTCN()
             packet->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
             tcn->markImmutable();
-            packet->append(tcn);
+            packet->insertAtEnd(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(packet, "relayOut");
         }

@@ -886,7 +886,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         const auto& fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());
         const auto& fragData = packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength));
         ASSERT(B(fragData->getChunkLength()).get() == thisFragmentLength);
-        fragment->append(fragData);
+        fragment->insertAtEnd(fragData);
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true
         if (!lastFragment)
@@ -897,7 +897,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
 
 
         fraghdr->markImmutable();
-        fragment->prepend(fraghdr);
+        fragment->insertAtBeginning(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
         sendDatagramToOutput(fragment);
         offset += thisFragmentLength;

@@ -362,7 +362,7 @@ Packet *VoipStreamSender::generatePacket()
     vp->setSamplesPerPacket(samplesPerPacket);
     vp->setTransmitBitrate(compressedBitRate);
     vp->markImmutable();
-    pk->append(vp);
+    pk->insertAtEnd(vp);
 
     pktID++;
 

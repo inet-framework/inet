@@ -150,7 +150,7 @@ cPacket *TcpNscReceiveQueue::extractBytesUpTo()
         dataMsg = new Packet("DATA");
         dataMsg->setKind(TCP_I_DATA);
         const auto& data = dataBuffer.pop<Chunk>(queueLength);
-        dataMsg->append(data);
+        dataMsg->insertAtEnd(data);
     }
 
     return dataMsg;

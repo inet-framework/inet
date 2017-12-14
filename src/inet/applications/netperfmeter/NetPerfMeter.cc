@@ -890,7 +890,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
       tcpMessage->setCreationTime(simTime());
       tcpMessage->setChunkLength(B(frameSize));
       tcpMessage->markImmutable();
-      pk->append(tcpMessage);
+      pk->insertAtEnd(tcpMessage);
       pk->setKind(TCP_C_SEND);
 
       if(IncomingSocketTCP) {
@@ -962,7 +962,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             dataMessage->setCreationTime(simTime());
             dataMessage->setChunkLength(B(msgSize));
             dataMessage->markImmutable();
-            packet->append(dataMessage);
+            packet->insertAtEnd(dataMessage);
             SocketUDP->send(packet);
 
             SenderStatistics* senderStatistics = getSenderStatistics(0);

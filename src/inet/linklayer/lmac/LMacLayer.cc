@@ -506,7 +506,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet();
-                data->append(macQueue.front()->peekAt(b(headerLength)));
+                data->insertAtEnd(macQueue.front()->peekAt(b(headerLength)));
                 data->setKind(LMAC_DATA);
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);

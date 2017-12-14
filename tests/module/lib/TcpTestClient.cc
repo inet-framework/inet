@@ -194,7 +194,7 @@ void TcpTestClient::scheduleNextSend()
     Packet *msg = new Packet(makeMsgName().c_str(),TEST_SEND);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
     bytes->markImmutable();
-    msg->append(bytes);
+    msg->insertAtEnd(bytes);
     scheduleAt(cmd.tSend, msg);
 }
 

@@ -117,7 +117,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         pkt->setIsFlood(1);
         pkt->markImmutable();
         auto packet = new Packet("route-flood", ROUTE_FLOOD);
-        packet->append(pkt);
+        packet->insertAtEnd(pkt);
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         sendDown(packet);
         nbFloodsSent++;
@@ -169,7 +169,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
+                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
@@ -198,7 +198,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
+                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
@@ -222,7 +222,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
-                p->append(packet->peekDataAt(b(0), packet->getDataLength()));
+                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);

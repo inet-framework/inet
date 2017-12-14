@@ -730,7 +730,7 @@ void AodvRouting::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3A
     auto className = packet->getClassName();
     Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
     packet->markImmutable();
-    udpPacket->append(packet);
+    udpPacket->insertAtEnd(packet);
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);

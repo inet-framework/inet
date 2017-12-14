@@ -576,7 +576,7 @@ void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double 
         msg->setMaxRespTime(maxRespTime);
         msg->setChunkLength(B(8));
         msg->markImmutable();
-        packet->prepend(msg);
+        packet->insertAtBeginning(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
 
         numQueriesSent++;
@@ -597,7 +597,7 @@ void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
     msg->markImmutable();
-    packet->prepend(msg);
+    packet->insertAtBeginning(msg);
     sendToIP(packet, ie, group->groupAddr);
     numReportsSent++;
 }
@@ -612,7 +612,7 @@ void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
     msg->markImmutable();
-    packet->prepend(msg);
+    packet->insertAtBeginning(msg);
     sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
     numLeavesSent++;
 }

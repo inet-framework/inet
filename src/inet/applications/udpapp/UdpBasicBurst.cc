@@ -111,7 +111,7 @@ Packet *UdpBasicBurst::createPacket()
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
     payload->markImmutable();
-    pk->append(payload);
+    pk->insertAtEnd(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;
 

@@ -91,8 +91,8 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
         hdr->markImmutable();
-        pk->prepend(hdr);
-        pk->append(payload);
+        pk->insertAtBeginning(hdr);
+        pk->insertAtEnd(payload);
         bufs.erase(i);
         return pk;
     }

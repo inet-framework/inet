@@ -127,7 +127,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     icmpHeader->setCode(code);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->append(packet->peekDataAt(B(0), B(ipv4Header->getHeaderLength() + 8)));
+    errorPacket->insertAtEnd(packet->peekDataAt(B(0), B(ipv4Header->getHeaderLength() + 8)));
     insertCrc(icmpHeader,errorPacket);
     errorPacket->insertHeader(icmpHeader);
 
@@ -253,7 +253,7 @@ void Icmp::processEchoRequest(Packet *request)
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     Ipv4Address src = addressInd->getSrcAddress().toIPv4();
     Ipv4Address dest = addressInd->getDestAddress().toIPv4();
-    reply->append(request->peekData());
+    reply->insertAtEnd(request->peekData());
     insertCrc(icmpReply, reply);
     reply->insertHeader(icmpReply);
 

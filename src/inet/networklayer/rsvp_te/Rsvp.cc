@@ -462,7 +462,7 @@ void Rsvp::processHELLO_TIMER(HelloTimerMsg *msg)
 
     hMsg->setChunkLength(B(length));
     hMsg->markImmutable();
-    pk->append(hMsg);
+    pk->insertAtEnd(hMsg);
 
     sendToIP(pk, peer);
 
@@ -581,7 +581,7 @@ void Rsvp::refreshPath(PathStateBlock *psbEle)
 
     pm->setChunkLength(B(length));
     pm->markImmutable();
-    pk->append(pm);
+    pk->insertAtEnd(pm);
 
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
@@ -673,7 +673,7 @@ void Rsvp::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     msg->setChunkLength(B(length));
     msg->markImmutable();
-    pk->append(msg);
+    pk->insertAtEnd(msg);
 
     sendToIP(pk, PHOP);
 }
@@ -1854,7 +1854,7 @@ void Rsvp::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, co
     int length = 44;
     msg->setChunkLength(B(length));
     msg->markImmutable();
-    pk->append(msg);
+    pk->insertAtEnd(msg);
 
     sendToIP(pk, peerIP);
 }
@@ -1881,7 +1881,7 @@ void Rsvp::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, Se
 
     msg->setChunkLength(B(length));
     msg->markImmutable();
-    pk->append(msg);
+    pk->insertAtEnd(msg);
 
     sendToIP(pk, nextHop);
 }

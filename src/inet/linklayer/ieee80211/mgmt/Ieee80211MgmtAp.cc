@@ -119,7 +119,7 @@ void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211M
     packet->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
     packet->ensureTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     body->markImmutable();
-    packet->append(body);
+    packet->insertAtEnd(body);
     sendDown(packet);
 }
 

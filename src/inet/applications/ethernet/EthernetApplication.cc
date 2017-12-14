@@ -98,7 +98,7 @@ void EthernetApplication::sendPacket()
     long respLen = respLength->longValue();
     data->setResponseBytes(respLen);
     data->markImmutable();
-    datapacket->append(data);
+    datapacket->insertAtEnd(data);
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
     send(datapacket, "out");
     packetsSent++;
@@ -134,7 +134,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
             outPayload->setRequestId(requestId);
             outPayload->setChunkLength(B(l));
             outPayload->markImmutable();
-            outPacket->append(outPayload);
+            outPacket->insertAtEnd(outPayload);
 
             sendPacket(outPacket, srcAddr);
             packetsSent++;

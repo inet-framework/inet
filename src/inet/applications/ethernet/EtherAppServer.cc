@@ -103,7 +103,7 @@ void EtherAppServer::handleMessage(cMessage *msg)
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
         outPayload->markImmutable();
-        outPacket->append(outPayload);
+        outPacket->insertAtEnd(outPayload);
 
         EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
 

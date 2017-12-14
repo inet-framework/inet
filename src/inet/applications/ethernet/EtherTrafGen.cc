@@ -184,7 +184,7 @@ void EtherTrafGen::sendBurstPackets()
         long len = packetLength->longValue();
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         payload->markImmutable();
-        datapacket->append(payload);
+        datapacket->insertAtEnd(payload);
         datapacket->removeTag<PacketProtocolTag>();
 //        datapacket->ensureTag<PacketProtocolTag>()->setProtocol(nullptr);
         datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);

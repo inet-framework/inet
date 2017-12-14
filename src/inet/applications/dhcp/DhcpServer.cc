@@ -302,7 +302,7 @@ void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
     nak->getOptionsForUpdate().setMessageType(DHCPNAK);
 
     nak->markImmutable();
-    pk->append(nak);
+    pk->insertAtEnd(nak);
     /* RFC 2131, 4.1
      *
      * In all cases, when 'giaddr' is zero, the server broadcasts any DHCPNAK
@@ -349,7 +349,7 @@ void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     // add the server ID as the RFC says
     ack->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     ack->markImmutable();
-    pk->append(ack);
+    pk->insertAtEnd(ack);
 
     // register the lease time
     lease->leaseTime = simTime();
@@ -421,7 +421,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
     offer->markImmutable();
-    pk->append(offer);
+    pk->insertAtEnd(offer);
 
     /* RFC 2131, 4.1
      * If the 'giaddr' field in a DHCP message from a client is non-zero,

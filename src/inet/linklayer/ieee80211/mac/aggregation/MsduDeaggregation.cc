@@ -69,7 +69,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         auto frame = new Packet();
         frame->setName(tokenizer.nextToken());
-        frame->append(msdu);
+        frame->insertAtEnd(msdu);
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));

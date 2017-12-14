@@ -200,7 +200,7 @@ void EtherAppClient::sendPacket()
     long respLen = respLength->longValue();
     data->setResponseBytes(respLen);
     data->markImmutable();
-    datapacket->append(data);
+    datapacket->insertAtEnd(data);
 
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
     auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();

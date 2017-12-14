@@ -332,8 +332,8 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
     Packet *packet = new Packet(name);
-    packet->append(signalFieldPacketModel->getPacket()->peekAll());
-    packet->append(dataFieldPacketModel->getPacket()->peekAll());
+    packet->insertAtEnd(signalFieldPacketModel->getPacket()->peekAll());
+    packet->insertAtEnd(dataFieldPacketModel->getPacket()->peekAll());
     return new ReceptionPacketModel(packet, bps(NaN));
 }
 

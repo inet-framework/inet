@@ -68,8 +68,8 @@ void EchoProtocol::processEchoRequest(Packet *request)
     echoReply->setIdentifier(echoReq->getIdentifier());
     echoReply->setSeqNumber(echoReq->getSeqNumber());
     echoReply->markImmutable();
-    reply->append(echoReply);
-    reply->append(request->peekData());
+    reply->insertAtEnd(echoReply);
+    reply->insertAtEnd(request->peekData());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
 
     // swap src and dest

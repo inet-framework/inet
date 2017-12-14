@@ -154,7 +154,7 @@ void SimpleVoipSender::sendVoIPPacket()
     voice->setVoiceDuration(packetizationInterval);
     voice->setChunkLength(B(talkPacketSize));
     voice->markImmutable();
-    packet->append(voice);
+    packet->insertAtEnd(voice);
 
     EV_INFO << "TALKSPURT " << talkspurtID - 1 << " sending packet " << packetID << "\n";
 

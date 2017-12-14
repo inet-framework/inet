@@ -130,7 +130,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 payload->setExpectedReplyLength(0);
                 payload->setReplyDelay(0);
                 payload->markImmutable();
-                outPacket->append(payload);
+                outPacket->insertAtEnd(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }
             if (appmsg->getServerClose()) {

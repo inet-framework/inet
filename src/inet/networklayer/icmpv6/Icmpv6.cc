@@ -166,7 +166,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     auto replyHeader = makeShared<Icmpv6EchoReplyMsg>();
     replyHeader->setIdentifier(requestHeader->getIdentifier());
     replyHeader->setSeqNumber(requestHeader->getSeqNumber());
-    replyPacket->append(requestPacket->peekData());
+    replyPacket->insertAtEnd(requestPacket->peekData());
     insertCrc(replyHeader, replyPacket);
     replyPacket->insertHeader(replyHeader);
 
@@ -227,7 +227,7 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     // A workaround is to avoid decapsulation, or to manually set the
     // errorMessage length to be larger than the encapsulated message.
     b copyLength =  B(IPv6_MIN_MTU) - errorMsg->getTotalLength();
-    errorMsg->append(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
+    errorMsg->insertAtEnd(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
 
     auto icmpHeader = errorMsg->removeHeader<Icmpv6Header>();
     insertCrc(icmpHeader, errorMsg);
@@ -275,7 +275,7 @@ Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUnav code)
     errorMsg->setCode(code);
     auto packet = new Packet("Dest Unreachable");
     errorMsg->markImmutable();
-    packet->append(errorMsg);
+    packet->insertAtEnd(errorMsg);
     return packet;
 }
 
@@ -287,7 +287,7 @@ Packet *Icmpv6::createPacketTooBigMsg(int mtu)
     errorMsg->setMTU(mtu);
     auto packet = new Packet("Packet Too Big");
     errorMsg->markImmutable();
-    packet->append(errorMsg);
+    packet->insertAtEnd(errorMsg);
     return packet;
 }
 
@@ -298,7 +298,7 @@ Packet *Icmpv6::createTimeExceededMsg(Icmpv6TimeEx code)
     errorMsg->setCode(code);
     auto packet = new Packet("Time Exceeded");
     errorMsg->markImmutable();
-    packet->append(errorMsg);
+    packet->insertAtEnd(errorMsg);
     return packet;
 }
 
@@ -310,7 +310,7 @@ Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProblem code)
     //TODO: What Pointer? section 3.4
     auto packet = new Packet("Parameter Problem");
     errorMsg->markImmutable();
-    packet->append(errorMsg);
+    packet->insertAtEnd(errorMsg);
     return packet;
 }
 

@@ -212,7 +212,7 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
     int length = out->getLinkInfoArraySize() * 72;
     out->setChunkLength(B(length));
     out->markImmutable();
-    pk->append(out);
+    pk->insertAtEnd(out);
 
     sendToIP(pk, peer);
 }
