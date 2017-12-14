@@ -423,7 +423,6 @@ void Dymo::sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     addresses->setDestAddress(nextHop);
     // The Ipv4 TTL (Ipv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
     udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
-    packet->markImmutable();
     udpPacket->insertHeader(udpHeader);
     udpPacket->insertAtEnd(packet);
     sendUDPPacket(udpPacket, delay);
