@@ -370,7 +370,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
                 mssOption->setMaxSegmentSize(value);
                 packet->popHeader<TcpHeader>();
                 packet->removePoppedChunks();
-                packet->pushHeader(newTcpHdr);
+                packet->insertHeader(newTcpHdr);
                 break;
             }
         }
@@ -893,7 +893,7 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
         fp->removePoppedHeaders();
         int64_t numBytes = fp->getByteLength();
         ASSERT(numBytes == 0);
-        fp->pushHeader(tcpHdr);
+        fp->insertHeader(tcpHdr);
 
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }

@@ -438,7 +438,7 @@ void BgpRouting::updateSendProcess(const unsigned char type, SessionId sessionIn
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
-                pk->pushHeader(updateMsg);
+                pk->insertHeader(updateMsg);
                 (elem).second->getSocket()->send(pk);
                 (elem).second->addUpdateMsgSent();
             }

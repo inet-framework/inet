@@ -37,8 +37,8 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
-        packet->pushHeader(tcpHeader);
-        packet->pushHeader(networkHeader);
+        packet->insertHeader(tcpHeader);
+        packet->insertHeader(networkHeader);
     }
     return ACCEPT;
 }

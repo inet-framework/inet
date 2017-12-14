@@ -83,8 +83,8 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
     cPacket *payload = new cPacket("payload");
     payload->setByteLength(udp_payload_bytes);
     UdpHeader *udpHeader = new UdpHeader("UDPInject");
-    udpPacket->pushHeader(udpHeader);
-    udpPacket->pushTrailer(new PacketChunk(payload));
+    udpPacket->insertHeader(udpHeader);
+    udpPacket->insertTrailer(new PacketChunk(payload));
     Ipv4Header *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
     if (direction == DIRECTION_INBOUND) {
         udpHeader->setSourcePort(app->getRemotePort());

@@ -269,9 +269,9 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         }
         outPk = deserialize(protocol, pk);
         if (llcHeader)
-            outPk->pushHeader(llcHeader);
-        outPk->pushHeader(header);
-        outPk->pushTrailer(fcs);
+            outPk->insertHeader(llcHeader);
+        outPk->insertHeader(header);
+        outPk->insertTrailer(fcs);
     }
     else if (*protocol == Protocol::ipv4) {
         const auto& header = pk->popHeader<Ipv4Header>();
@@ -281,45 +281,45 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
             trailer = pk->popTrailer(trailerLength);
         protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
         if (trailer != nullptr)
-            outPk->pushTrailer(trailer);
+            outPk->insertTrailer(trailer);
     }
     else if (*protocol == Protocol::ipv6) {
         const auto& header = pk->popHeader<Ipv6Header>();
         protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
     else if (*protocol == Protocol::tcp) {
         const auto& header = pk->popHeader<tcp::TcpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
     else if (*protocol == Protocol::udp) {
         const auto& header = pk->popHeader<UdpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
     else if (*protocol == Protocol::arp) {
         const auto& header = pk->popHeader<ArpPacket>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
     else if (*protocol == Protocol::icmpv4) {
         const auto& header = pk->popHeader<IcmpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
     else if (*protocol == Protocol::icmpv6) {
         const auto& header = pk->popHeader<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->pushHeader(header);
+        outPk->insertHeader(header);
     }
 //    else if (*protocol == Protocol::) {
 //    }

@@ -233,7 +233,7 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
     arp->setDestIPAddress(ipAddress);
-    packet->pushHeader(arp);
+    packet->insertHeader(arp);
 
     sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
     numRequestsSent++;
@@ -381,7 +381,6 @@ void Arp::processARPPacket(Packet *packet)
                 Ipv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
-                Packet *outPk = new Packet("arpREPLY");
                 const auto& arpReply = makeShared<ArpPacket>();
                 Ipv4Address origDestAddress = arp->getDestIPAddress();
                 arpReply->setDestIPAddress(srcIPAddress);
@@ -389,7 +388,8 @@ void Arp::processARPPacket(Packet *packet)
                 arpReply->setSrcIPAddress(origDestAddress);
                 arpReply->setSrcMACAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
-                outPk->pushHeader(arpReply);
+                Packet *outPk = new Packet("arpREPLY");
+                outPk->insertHeader(arpReply);
                 sendPacketToNIC(outPk, ie, srcMACAddress);
                 numRepliesSent++;
                 emit(sentReplySignal, 1L);

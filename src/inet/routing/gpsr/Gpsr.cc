@@ -234,7 +234,7 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpPacket->pushHeader(udpHeader);
+    udpPacket->insertHeader(udpHeader);
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());

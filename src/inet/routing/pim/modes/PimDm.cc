@@ -1522,7 +1522,7 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->pushHeader(msg);
+    packet->insertHeader(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1550,7 +1550,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->pushHeader(msg);
+    packet->insertHeader(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1580,7 +1580,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->pushHeader(msg);
+    packet->insertHeader(msg);
 
     emit(sentGraftPkSignal, packet);
 
@@ -1606,7 +1606,7 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
     Packet *packet = new Packet("PIMGraftAck");
     auto msg = dynamicPtrCast<PimGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
-    packet->pushHeader(msg);
+    packet->insertHeader(msg);
 
     emit(sentGraftAckPkSignal, packet);
 
@@ -1633,7 +1633,7 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 12));
-    packet->pushHeader(msg);
+    packet->insertHeader(msg);
 
     emit(sentStateRefreshPkSignal, packet);
 
@@ -1656,7 +1656,7 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));
-    packet->pushHeader(pkt);
+    packet->insertHeader(pkt);
 
     emit(sentAssertPkSignal, packet);
 

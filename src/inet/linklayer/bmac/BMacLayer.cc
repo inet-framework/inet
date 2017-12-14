@@ -211,7 +211,7 @@ void BMacLayer::sendPreamble()
     //attach signal and send down
     auto packet = new Packet();
     packet->setKind(BMAC_PREAMBLE);
-    packet->pushHeader(preamble);
+    packet->insertHeader(preamble);
     attachSignal(packet);
     sendDown(packet);
     nbTxPreambles++;
@@ -230,7 +230,7 @@ void BMacLayer::sendMacAck()
     //attach signal and send down
     auto packet = new Packet();
     packet->setKind(BMAC_ACK);
-    packet->pushHeader(ack);
+    packet->insertHeader(ack);
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;
@@ -766,7 +766,7 @@ void BMacLayer::encapsulate(Packet *packet)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    packet->pushHeader(pkt);
+    packet->insertHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }
 

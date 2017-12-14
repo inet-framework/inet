@@ -126,7 +126,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
         hdr->setChunkLength(B(hdr->calculateUnfragmentableHeaderByteLength()));
-        pk->pushHeader(hdr);
+        pk->insertHeader(hdr);
         pk->insertAtEnd(payload);
         delete buf->packet;
         bufs.erase(i);

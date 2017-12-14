@@ -85,7 +85,7 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
     const auto& tcpHdr = packet->popHeader<TcpHeader>();
     packet->removePoppedHeaders();
     int64_t numBytes = packet->getByteLength();
-    packet->pushHeader(tcpHdr);
+    packet->insertHeader(tcpHdr);
 
 //    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
 //    const auto& tcpHdr = (payload->Chunk::peek<TcpHeader>(byte(0)));

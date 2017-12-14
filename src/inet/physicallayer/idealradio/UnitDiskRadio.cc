@@ -37,7 +37,7 @@ void UnitDiskRadio::encapsulate(Packet *packet) const
     auto idealTransmitter = check_and_cast<const IdealTransmitter *>(transmitter);
     auto phyHeader = makeShared<IdealPhyHeader>();
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
-    packet->pushHeader(phyHeader);
+    packet->insertHeader(phyHeader);
 }
 
 void UnitDiskRadio::decapsulate(Packet *packet) const

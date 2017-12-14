@@ -94,7 +94,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         // before inserting message, update source address (for this hop, not the initial source)
         macHeader->setSrcAddr(myNetwAddr);
-        packet->pushHeader(macHeader);
+        packet->insertHeader(macHeader);
         insertNewMessage(packet);
 
         // until a subscription mechanism is implemented, duplicate and pass all received packets
@@ -238,7 +238,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(msgDesc->pkt->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     msgDesc->pkt->removePoppedChunks();
     macHeader->setAppTtl(macHeader->getAppTtl() - bcastDelay);
-    msgDesc->pkt->pushHeader(macHeader);
+    msgDesc->pkt->insertHeader(macHeader);
     // insert message ID in ID list.
     knownMsgIds.insert(macHeader->getId());
     // insert key value pair <broadcast time, pointer to message> in message queue.
@@ -292,7 +292,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     delete controlInfo;
 
     //encapsulate the application packet
-    packet->pushHeader(pkt);
+    packet->insertHeader(pkt);
 
     setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
 }

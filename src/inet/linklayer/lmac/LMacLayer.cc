@@ -490,7 +490,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 
                 Packet *packet = new Packet();
                 packet->setKind(LMAC_CONTROL);
-                packet->pushHeader(control);
+                packet->insertHeader(control);
                 sendDown(packet);
                 if ((macQueue.size() > 0) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
@@ -513,7 +513,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 for (int i = 0; i < numSlots; i++)
                     lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
 
-                data->pushHeader(lmacHeader);
+                data->insertHeader(lmacHeader);
                 EV << "Sending down data packet\n";
                 sendDown(data);
                 delete macQueue.front();
@@ -696,7 +696,7 @@ void LMacLayer::encapsulate(Packet *netwPkt)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    netwPkt->pushHeader(pkt);
+    netwPkt->insertHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }
 

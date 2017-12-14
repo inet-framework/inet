@@ -169,7 +169,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                p->pushHeader(wiseRouteHeader);
+                p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -197,7 +197,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                p->pushHeader(wiseRouteHeader);
+                p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -220,7 +220,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                p->pushHeader(wiseRouteHeader);
+                p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -283,7 +283,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericArp module.");
     }
-    packet->pushHeader(pkt);
+    packet->insertHeader(pkt);
     packet->setKind(DATA);
     setDownControlInfo(packet, nextHopMacAddr);
     sendDown(packet);

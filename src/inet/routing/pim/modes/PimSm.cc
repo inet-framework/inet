@@ -1413,7 +1413,7 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
             + 4
             + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    pk->pushHeader(msg);
+    pk->insertHeader(msg);
 
     emit(sentJoinPrunePkSignal, pk);
 
@@ -1448,7 +1448,7 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
             + 4
             + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    pk->pushHeader(msg);
+    pk->insertHeader(msg);
 
     emit(sentJoinPrunePkSignal, pk);
 
@@ -1469,7 +1469,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         msg->setN(true);
         msg->setB(false);
         msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
-        pk->pushHeader(msg);
+        pk->insertHeader(msg);
 
         // set encapsulated packet (Ipv4 header only)
         const auto& ipv4Header = makeShared<Ipv4Header>();
@@ -1502,7 +1502,7 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
 
     pk->insertAtEnd(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
-    pk->pushHeader(msg);
+    pk->insertHeader(msg);
 
     emit(sentRegisterPkSignal, pk);
 
@@ -1523,7 +1523,7 @@ void PimSm::sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Addres
     msg->setGroupAddress(multGroup);
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
-    pk->pushHeader(msg);
+    pk->insertHeader(msg);
 
     emit(sentRegisterStopPkSignal, pk);
 
@@ -1548,7 +1548,7 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));
-    pk->pushHeader(pkt);
+    pk->insertHeader(pkt);
 
     emit(sentAssertPkSignal, pk);
 

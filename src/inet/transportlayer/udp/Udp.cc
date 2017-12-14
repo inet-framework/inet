@@ -592,7 +592,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
 
     //push back network protocol header
     udpPacket->removePoppedChunks();
-    udpPacket->pushHeader(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
+    udpPacket->insertHeader(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
     auto inIe = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
@@ -1255,8 +1255,8 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
-        packet->pushHeader(udpHeader);
-        packet->pushHeader(networkHeader);
+        packet->insertHeader(udpHeader);
+        packet->insertHeader(networkHeader);
     }
     return ACCEPT;
 }

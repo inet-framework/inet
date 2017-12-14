@@ -611,7 +611,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         packet->removePoppedHeaders();
         int64_t numBytes = packet->getByteLength();
         ASSERT(numBytes == 0);
-        packet->pushHeader(tcpHdr);
+        packet->insertHeader(tcpHdr);
     }
 
     ASSERT(packet);

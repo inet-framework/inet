@@ -236,7 +236,7 @@ void Csma::handleUpperPacket(Packet *packet)
 
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
-    packet->pushHeader(macPkt);
+    packet->insertHeader(macPkt);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
     executeMac(EV_SEND_REQUEST, packet);
 }
@@ -894,7 +894,7 @@ void Csma::handleLowerPacket(Packet *packet)
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));
                 ackMessage = new Packet("CSMA-Ack");
-                ackMessage->pushHeader(csmaHeader);
+                ackMessage->insertHeader(csmaHeader);
                 //Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end()) {
                     //no record of current child -> add expected next number to map

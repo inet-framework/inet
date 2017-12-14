@@ -271,7 +271,7 @@ void MultipleAccessMac::encapsulate(Packet *packet)
     else
         idealMacHeader->setSrcModuleId(getId());
     idealMacHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    packet->pushHeader(idealMacHeader);
+    packet->insertHeader(idealMacHeader);
 }
 
 bool MultipleAccessMac::dropFrameNotForUs(Packet *packet)

@@ -733,7 +733,7 @@ void AodvRouting::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3A
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
-    udpPacket->pushHeader(udpHeader);
+    udpPacket->insertHeader(udpHeader);
     // TODO: was udpPacket->transferTagsFrom(packet);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
