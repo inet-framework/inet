@@ -38,7 +38,6 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     }
     defragmentedHeader->setFragmentNumber(0);
     defragmentedHeader->setMoreFragments(false);
-    defragmentedHeader->markImmutable();
     defragmentedFrame->insertHeader(defragmentedHeader);
     defragmentedFrame->insertTrailer(makeShared<Ieee80211MacTrailer>());
     return defragmentedFrame;

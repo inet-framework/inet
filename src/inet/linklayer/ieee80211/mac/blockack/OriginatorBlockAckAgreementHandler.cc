@@ -55,7 +55,6 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
             MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
-            delba->markImmutable();
             auto delbaPacket = new Packet("Delba", delba);
             procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
         }
@@ -136,7 +135,6 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
         auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
         createAgreement(addbaReq);
-        addbaReq->markImmutable();
         auto addbaPacket = new Packet("AddbaReq", addbaReq);
         callback->processMgmtFrame(addbaPacket, addbaReq);
     }

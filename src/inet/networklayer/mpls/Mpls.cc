@@ -132,7 +132,6 @@ bool Mpls::tryLabelAndForwardIPv4Datagram(Packet *packet)
         sendToL2(packet);
     }
     else {
-        mplsHeader->markImmutable();
         packet->removePoppedChunks();
         packet->pushHeader(mplsHeader);
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
@@ -249,7 +248,6 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
     if (mplsHeader->hasLabel()) {
         // forward labeled packet
         packet->removePoppedChunks();
-        mplsHeader->markImmutable();
         packet->pushHeader(mplsHeader);
 
         EV_INFO << "forwarding packet to " << outInterface << endl;

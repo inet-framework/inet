@@ -81,7 +81,6 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
     ASSERT(tcpDataP);
 
     const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
-    bytes->markImmutable();
     auto packet = new Packet(nullptr, bytes);
     const auto& tcpHdr = packet->popHeader<TcpHeader>();
     packet->removePoppedHeaders();
@@ -135,7 +134,6 @@ void TcpNscReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
 void TcpNscReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
     const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
-    bytes->markImmutable();
     dataBuffer.push(bytes);
 }
 

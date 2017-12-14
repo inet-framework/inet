@@ -115,7 +115,6 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         pkt->setSeqNum(floodSeqNumber);
         floodSeqNumber++;
         pkt->setIsFlood(1);
-        pkt->markImmutable();
         auto packet = new Packet("route-flood", ROUTE_FLOOD);
         packet->insertAtEnd(pkt);
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
@@ -170,7 +169,6 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
@@ -199,7 +197,6 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
@@ -223,7 +220,6 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
-                wiseRouteHeader->markImmutable();
                 p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
                 sendDown(p);
@@ -287,7 +283,6 @@ void WiseRoute::handleUpperPacket(Packet *packet)
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericArp module.");
     }
-    pkt->markImmutable();
     packet->pushHeader(pkt);
     packet->setKind(DATA);
     setDownControlInfo(packet, nextHopMacAddr);

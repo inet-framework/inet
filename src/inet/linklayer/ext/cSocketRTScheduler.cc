@@ -202,7 +202,6 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     uint32_t pklen = hdr->caplen - headerLength;
     Packet *notificationMsg = new Packet("rtEvent");
     const auto& bytesChunk = makeShared<BytesChunk>(bytes + headerLength, pklen);
-    bytesChunk->markImmutable();
     notificationMsg->insertAtEnd(bytesChunk);
 
     // signalize new incoming packet to the interface via cMessage

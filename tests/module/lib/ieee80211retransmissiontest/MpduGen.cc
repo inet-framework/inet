@@ -71,7 +71,6 @@ void MpduGen::sendPackets()
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
-        payload->markImmutable();
         packet->insertAtEnd(payload);
         emit(sentPkSignal, packet);
         socket.sendTo(packet, destAddr, destPort);

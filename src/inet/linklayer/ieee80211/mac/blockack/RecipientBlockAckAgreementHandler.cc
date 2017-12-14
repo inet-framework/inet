@@ -66,7 +66,6 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
             MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
-            delba->markImmutable();
             auto delbaPacket = new Packet("Delba", delba);
             procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
         }
@@ -170,7 +169,6 @@ void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<co
         EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
         EV_DETAIL << "Building Addba Response" << endl;
         auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
-        addbaResponse->markImmutable();
         auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
         callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
     }

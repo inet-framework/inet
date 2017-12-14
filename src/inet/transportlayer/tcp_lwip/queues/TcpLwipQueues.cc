@@ -82,7 +82,6 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
     ASSERT(tcpDataP);
 
     const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
-    bytes->markImmutable();
     auto packet = new Packet(nullptr, bytes);
     auto tcpHdr = packet->removeHeader<TcpHeader>();
     int64_t numBytes = packet->getByteLength();
@@ -135,7 +134,6 @@ void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, u
 void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
 {
     const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
-    bytes->markImmutable();
     dataBuffer.push(bytes);
 }
 

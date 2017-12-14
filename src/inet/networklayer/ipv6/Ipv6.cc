@@ -822,7 +822,6 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
         auto ipv6HeaderCopy = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
         // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
         ipv6HeaderCopy->setSrcAddress(srcAddr);
-        ipv6HeaderCopy->markImmutable();
         packet->pushHeader(ipv6HeaderCopy);
         ipv6Header = ipv6HeaderCopy;
 
@@ -884,7 +883,6 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
         fh->setMoreFragments(!lastFragment);
         fragHdr->addExtensionHeader(fh);
         fragHdr->setChunkLength(B(headerLength + fh->getByteLength()));      //FIXME KLUDGE
-        fragHdr->markImmutable();
         fragPk->pushHeader(fragHdr);
         fragPk->insertAtEnd(packet->peekDataAt(B(offset), B(thisFragmentLength)));
 

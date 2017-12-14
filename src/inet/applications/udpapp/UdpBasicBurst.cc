@@ -110,7 +110,6 @@ Packet *UdpBasicBurst::createPacket()
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));
     payload->setSequenceNumber(numSent);
-    payload->markImmutable();
     pk->insertAtEnd(payload);
     pk->addPar("sourceId") = getId();
     pk->addPar("msgId") = numSent;

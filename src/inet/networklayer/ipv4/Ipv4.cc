@@ -896,7 +896,6 @@ void Ipv4::fragmentAndSend(Packet *packet)
         fraghdr->setTotalLengthField(headerLength + thisFragmentLength);
 
 
-        fraghdr->markImmutable();
         fragment->insertAtBeginning(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
         sendDatagramToOutput(fragment);

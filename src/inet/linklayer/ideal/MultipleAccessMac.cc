@@ -271,7 +271,6 @@ void MultipleAccessMac::encapsulate(Packet *packet)
     else
         idealMacHeader->setSrcModuleId(getId());
     idealMacHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    idealMacHeader->markImmutable();
     packet->pushHeader(idealMacHeader);
 }
 

@@ -236,7 +236,6 @@ void Csma::handleUpperPacket(Packet *packet)
 
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
-    macPkt->markImmutable();
     packet->pushHeader(macPkt);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
     executeMac(EV_SEND_REQUEST, packet);
@@ -894,7 +893,6 @@ void Csma::handleLowerPacket(Packet *packet)
                 csmaHeader->setSrcAddr(address);
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));
-                csmaHeader->markImmutable();
                 ackMessage = new Packet("CSMA-Ack");
                 ackMessage->pushHeader(csmaHeader);
                 //Check for duplicates by checking expected seqNr of sender

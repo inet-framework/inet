@@ -34,7 +34,6 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
             blockAck->setDuration(ackPolicy->computeBasicBlockAckDurationField(blockAckPacketReq, basicBlockAckReq));
-            blockAck->markImmutable();
             auto blockAckPacket = new Packet("BasicBlockAck", blockAck);
             callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacketReq, basicBlockAckReq);
         }

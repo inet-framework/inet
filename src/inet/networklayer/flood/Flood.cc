@@ -189,7 +189,6 @@ void Flood::handleLowerPacket(Packet *packet)
                 packetCopy->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
                 auto floodHeaderCopy = staticPtrCast<FloodHeader>(floodHeader->dupShared());
                 floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
-                floodHeaderCopy->markImmutable();
                 packetCopy->pushHeader(floodHeaderCopy);
                 // needs to set the next hop address again to broadcast
                 cObject *const pCtrlInfo = packetCopy->removeControlInfo();
@@ -314,7 +313,6 @@ void Flood::encapsulate(Packet *appPkt)
     //encapsulate the application packet
     setDownControlInfo(appPkt, MacAddress::BROADCAST_ADDRESS);
 
-    pkt->markImmutable();
     appPkt->pushHeader(pkt);
     EV << " pkt encapsulated\n";
 }

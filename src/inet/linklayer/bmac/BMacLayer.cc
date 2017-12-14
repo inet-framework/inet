@@ -207,7 +207,6 @@ void BMacLayer::sendPreamble()
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(b(headerLength));
-    preamble->markImmutable();
 
     //attach signal and send down
     auto packet = new Packet();
@@ -767,7 +766,6 @@ void BMacLayer::encapsulate(Packet *packet)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    pkt->markImmutable();
     packet->pushHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }

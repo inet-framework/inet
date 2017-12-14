@@ -241,7 +241,6 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 
     requestMsg->setReceiverAddress(dest);
     requestMsg->setSenderAddress(rt->getRouterId());
-    requestMsg->markImmutable();
     pk->insertAtEnd(requestMsg);
 
     sendToPeer(dest, pk);
@@ -433,7 +432,6 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
     //hello->setTbit(...);
-    hello->markImmutable();
     pk->insertAtEnd(hello);
     pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
@@ -848,7 +846,6 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     fec.length = length;
 
     lnMessage->setFec(fec);
-    lnMessage->markImmutable();
     packet->insertAtEnd(lnMessage);
 
     sendToPeer(dest, packet);
@@ -870,7 +867,6 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     fec.length = length;
 
     lmMessage->setFec(fec);
-    lmMessage->markImmutable();
     packet->insertAtEnd(lmMessage);
 
     sendToPeer(dest, packet);

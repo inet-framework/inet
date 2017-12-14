@@ -53,7 +53,6 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
             auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekHeader<Ieee80211DataOrMgmtHeader>());
             auto rtsPacket = new Packet("RTS");
-            rtsFrame->markImmutable();
             rtsPacket->insertAtEnd(rtsFrame);
             rtsPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(dataOrMgmtPacket, rtsPacket, context->getIfs());
@@ -270,7 +269,6 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
             auto dataOrMgmtHeader = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtHeader);
             auto rtsPacket = new Packet("RTS");
-            rtsFrame->markImmutable();
             rtsPacket->insertAtEnd(rtsFrame);
             rtsPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new RtsTransmitStep(packet, rtsPacket, context->getIfs());
@@ -409,7 +407,6 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            blockAckReq->markImmutable();
             auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
             blockAckPacket->insertTrailer(makeShared<Ieee80211MacTrailer>());
             return new TransmitStep(blockAckPacket, context->getIfs());

@@ -183,7 +183,6 @@ void EtherTrafGen::sendBurstPackets()
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = packetLength->longValue();
         const auto& payload = makeShared<ByteCountChunk>(B(len));
-        payload->markImmutable();
         datapacket->insertAtEnd(payload);
         datapacket->removeTag<PacketProtocolTag>();
 //        datapacket->ensureTag<PacketProtocolTag>()->setProtocol(nullptr);

@@ -301,7 +301,6 @@ void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
     nak->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     nak->getOptionsForUpdate().setMessageType(DHCPNAK);
 
-    nak->markImmutable();
     pk->insertAtEnd(nak);
     /* RFC 2131, 4.1
      *
@@ -348,7 +347,6 @@ void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
 
     // add the server ID as the RFC says
     ack->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
-    ack->markImmutable();
     pk->insertAtEnd(ack);
 
     // register the lease time
@@ -420,7 +418,6 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
 
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
-    offer->markImmutable();
     pk->insertAtEnd(offer);
 
     /* RFC 2131, 4.1

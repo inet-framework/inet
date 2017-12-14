@@ -370,7 +370,6 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
                 mssOption->setMaxSegmentSize(value);
                 packet->popHeader<TcpHeader>();
                 packet->removePoppedChunks();
-                newTcpHdr->markImmutable();
                 packet->pushHeader(newTcpHdr);
                 break;
             }
@@ -889,7 +888,6 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
     }
     else {
         const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
-        bytes->markImmutable();
         fp = new Packet(nullptr, bytes);
         const auto& tcpHdr = fp->popHeader<TcpHeader>();
         fp->removePoppedHeaders();

@@ -94,7 +94,6 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         // before inserting message, update source address (for this hop, not the initial source)
         macHeader->setSrcAddr(myNetwAddr);
-        macHeader->markImmutable();
         packet->pushHeader(macHeader);
         insertNewMessage(packet);
 
@@ -239,7 +238,6 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(msgDesc->pkt->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     msgDesc->pkt->removePoppedChunks();
     macHeader->setAppTtl(macHeader->getAppTtl() - bcastDelay);
-    macHeader->markImmutable();
     msgDesc->pkt->pushHeader(macHeader);
     // insert message ID in ID list.
     knownMsgIds.insert(macHeader->getId());
@@ -294,7 +292,6 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     delete controlInfo;
 
     //encapsulate the application packet
-    pkt->markImmutable();
     packet->pushHeader(pkt);
 
     setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);

@@ -28,7 +28,6 @@ void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<const
     if (ackPolicy->isAckNeeded(dataOrMgmtHeader)) {
         auto ackFrame = buildAck(dataOrMgmtHeader);
         ackFrame->setDuration(ackPolicy->computeAckDurationField(packet, dataOrMgmtHeader));
-        ackFrame->markImmutable();
         auto ackPacket = new Packet("ACK", ackFrame);
         callback->transmitControlResponseFrame(ackPacket, ackFrame, packet, dataOrMgmtHeader);
     }

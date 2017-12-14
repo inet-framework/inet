@@ -90,7 +90,6 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
         hdr->setTotalLengthField(hdr->getHeaderLength() + B(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
-        hdr->markImmutable();
         pk->insertAtBeginning(hdr);
         pk->insertAtEnd(payload);
         bufs.erase(i);

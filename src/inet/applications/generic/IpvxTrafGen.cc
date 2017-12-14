@@ -181,7 +181,6 @@ void IpvxTrafGen::sendPacket()
 
     Packet *packet = new Packet(msgName);
     const auto& payload = makeShared<ByteCountChunk>(B(packetLengthPar->longValue()));
-    payload->markImmutable();
     packet->insertAtEnd(payload);
 
     L3Address destAddr = chooseDestAddr();

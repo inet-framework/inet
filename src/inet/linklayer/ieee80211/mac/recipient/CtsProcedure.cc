@@ -28,7 +28,6 @@ void CtsProcedure::processReceivedRts(Packet *rtsPacket, const Ptr<const Ieee802
     if (ctsPolicy->isCtsNeeded(rtsFrame)) {
         auto ctsFrame = buildCts(rtsFrame);
         ctsFrame->setDuration(ctsPolicy->computeCtsDurationField(rtsPacket, rtsFrame));
-        ctsFrame->markImmutable();
         auto ctsPacket = new Packet("CTS", ctsFrame);
         callback->transmitControlResponseFrame(ctsPacket, ctsFrame, rtsPacket, rtsFrame);
     }

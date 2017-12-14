@@ -187,7 +187,6 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
         }
     }
 
-    bpdu->markImmutable();
     packet->insertAtEnd(bpdu);
     send(packet, "relayOut");
 }
@@ -210,7 +209,6 @@ void Stp::generateTCN()
             packet->ensureTag<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
             packet->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
-            tcn->markImmutable();
             packet->insertAtEnd(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(packet, "relayOut");

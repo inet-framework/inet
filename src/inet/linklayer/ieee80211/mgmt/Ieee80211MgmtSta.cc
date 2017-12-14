@@ -238,7 +238,6 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
     auto packet = new Packet(name);
     packet->ensureTag<MacAddressReq>()->setDestAddress(address);
     packet->ensureTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
-    body->markImmutable();
     packet->insertAtEnd(body);
     sendDown(packet);
 }

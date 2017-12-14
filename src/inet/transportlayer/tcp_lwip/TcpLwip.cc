@@ -606,7 +606,6 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     }
     else {
         const auto& bytes = makeShared<BytesChunk>((const uint8_t*)dataP, lenP);
-        bytes->markImmutable();
         packet = new Packet(nullptr, bytes);
         const auto& tcpHdr = packet->popHeader<TcpHeader>();
         packet->removePoppedHeaders();

@@ -596,7 +596,6 @@ void Rstp::sendTCNtoRoot()
                 if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
                     frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
-                frame->markImmutable();
                 packet->insertAtEnd(frame);
 
                 auto macAddressReq = packet->ensureTag<MacAddressReq>();
@@ -663,7 +662,6 @@ void Rstp::sendBPDU(int interfaceId)
         if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
             frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
-        frame->markImmutable();
         packet->insertAtEnd(frame);
 
         auto macAddressReq = packet->ensureTag<MacAddressReq>();

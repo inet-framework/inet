@@ -69,10 +69,8 @@ void Ieee80211SymbolDomainTest::test() const
     const auto& dataField = makeShared<BytesChunk>(std::vector<uint8_t>(input.getNumberOfBytes() - 3));
     for (unsigned int i = 0; i < 3; i++)
         signalField->setByte(i, input.getBytes()[i]);
-    signalField->markImmutable();
     for (unsigned int i = 3; i < input.getNumberOfBytes(); i++)
         dataField->setByte(i - 3, input.getBytes()[i]);
-    dataField->markImmutable();
     auto signalPacket = new Packet("signal", signalField);
     auto dataPacket = new Packet("data", dataField);
     TransmissionPacketModel signalPacketModel(signalPacket, bps(NaN));

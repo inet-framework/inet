@@ -37,7 +37,6 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
-        tcpHeader->markImmutable();
         packet->pushHeader(tcpHeader);
         packet->pushHeader(networkHeader);
     }
@@ -89,7 +88,6 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
         pseudoHeader->setChunkLength(B(40));
     else
         throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
-    pseudoHeader->markImmutable();
     auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
     // Excerpt from RFC 768:
     // Checksum is the 16-bit one's complement of the one's complement sum of a

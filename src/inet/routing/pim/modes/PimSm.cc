@@ -1413,7 +1413,6 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
             + 4
             + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    msg->markImmutable();
     pk->pushHeader(msg);
 
     emit(sentJoinPrunePkSignal, pk);
@@ -1449,7 +1448,6 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
             + 4
             + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    msg->markImmutable();
     pk->pushHeader(msg);
 
     emit(sentJoinPrunePkSignal, pk);
@@ -1471,7 +1469,6 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         msg->setN(true);
         msg->setB(false);
         msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
-        msg->markImmutable();
         pk->pushHeader(msg);
 
         // set encapsulated packet (Ipv4 header only)
@@ -1481,7 +1478,6 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setProtocolId(IP_PROT_PIM);
         ipv4Header->setHeaderLength(IP_HEADER_BYTES);
         ipv4Header->setTotalLengthField(IP_HEADER_BYTES);
-        ipv4Header->markImmutable();
         pk->insertAtEnd(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);
@@ -1504,7 +1500,6 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
     msg->setB(false);
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
-    msg->markImmutable();
 
     pk->insertAtEnd(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
     pk->pushHeader(msg);
@@ -1528,7 +1523,6 @@ void PimSm::sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Addres
     msg->setGroupAddress(multGroup);
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
-    msg->markImmutable();
     pk->pushHeader(msg);
 
     emit(sentRegisterStopPkSignal, pk);
@@ -1554,7 +1548,6 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));
-    pkt->markImmutable();
     pk->pushHeader(pkt);
 
     emit(sentAssertPkSignal, pk);

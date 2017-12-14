@@ -578,7 +578,6 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTime(maxRespTime);
         msg->setChunkLength(B(12));
-        msg->markImmutable();
         packet->insertAtBeginning(msg);
         sendQueryToIP(packet, interfaceData->ie, Ipv4Address::ALL_HOSTS_MCAST);
 
@@ -608,7 +607,6 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
-        msg->markImmutable();
         packet->insertAtBeginning(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
@@ -634,7 +632,6 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
-        msg->markImmutable();
         packet->insertAtBeginning(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
@@ -727,7 +724,6 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
 
     if (counter != 0) {    //if no record created, dont need to send report
         EV_INFO << "Sending response to a General Query on interface '" << ie->getInterfaceName() << "'.\n";
-        report->markImmutable();
         outPacket->insertAtBeginning(report);
         sendReportToIP(outPacket, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
@@ -997,7 +993,6 @@ void Igmpv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
         byteLength += 8 + records[i].sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
     }
     msg->setChunkLength(B(byteLength));
-    msg->markImmutable();
     packet->insertAtBeginning(msg);
     sendReportToIP(packet, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     numReportsSent++;

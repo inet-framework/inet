@@ -177,7 +177,6 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     }
 
     msg->setChunkLength(B(byteLength));
-    msg->markImmutable();
     pk->pushHeader(msg);
     pk->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());

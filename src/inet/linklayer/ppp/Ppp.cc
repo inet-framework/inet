@@ -368,10 +368,8 @@ Packet *Ppp::encapsulate(cPacket *msg)
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    pppHeader->markImmutable();
     packet->pushHeader(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
-    pppTrailer->markImmutable();
     packet->pushTrailer(pppTrailer);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
     return packet;

@@ -487,7 +487,6 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
-                control->markImmutable();
 
                 Packet *packet = new Packet();
                 packet->setKind(LMAC_CONTROL);
@@ -513,7 +512,6 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
-                lmacHeader->markImmutable();
 
                 data->pushHeader(lmacHeader);
                 EV << "Sending down data packet\n";
@@ -698,7 +696,6 @@ void LMacLayer::encapsulate(Packet *netwPkt)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    pkt->markImmutable();
     netwPkt->pushHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }

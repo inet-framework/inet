@@ -413,7 +413,6 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setChunkLength(B(requestLength + size));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
-    msg->markImmutable();
     outPk->insertAtEnd(msg);
     outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
@@ -466,7 +465,6 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setChunkLength(B(requestLength));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
-    msg->markImmutable();
     outPk->insertAtEnd(msg);
     outPk->setKind(HTTPT_REQUEST_MESSAGE);
 

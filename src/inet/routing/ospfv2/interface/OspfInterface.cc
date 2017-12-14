@@ -169,7 +169,6 @@ void Interface::sendHelloPacket(Ipv4Address destination, short ttl)
     }
 
     helloPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount * 4));
-    helloPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(helloPacket);
 
@@ -193,7 +192,6 @@ void Interface::sendLSAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Addres
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
     lsAckPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
-    lsAckPacket->markImmutable();
     Packet *pk = new Packet();
     pk->pushHeader(lsAckPacket);
 
@@ -526,7 +524,6 @@ Packet *Interface::createUpdatePacket(const OspfLsa *lsa)
         }
 
         updatePacket->setChunkLength(B(packetLength));
-        updatePacket->markImmutable();
         Packet *pk = new Packet();
         pk->pushHeader(updatePacket);
 
@@ -588,7 +585,6 @@ void Interface::sendDelayedAcknowledgements()
                 }
 
                 ackPacket->setChunkLength(B(packetSize - IP_MAX_HEADER_BYTES));
-                ackPacket->markImmutable();
                 Packet *pk = new Packet();
                 pk->pushHeader(ackPacket);
 

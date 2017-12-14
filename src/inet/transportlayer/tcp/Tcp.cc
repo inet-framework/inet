@@ -151,7 +151,6 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
                 pseudoHeader->setChunkLength(B(40));
             else
                 throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
-            pseudoHeader->markImmutable();
             auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
             auto pseudoHeaderLength = pseudoHeaderBytes.size();
             auto tcpDataLength =  tcpBytes.size();

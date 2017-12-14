@@ -359,7 +359,6 @@ void PingApp::sendPingRequest()
 
     Packet *outPacket = new Packet(name);
     auto payload = makeShared<ByteCountChunk>(B(packetSize));
-    payload->markImmutable();
 
     switch (destAddr.getType()) {
         case L3Address::Ipv4: {

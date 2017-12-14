@@ -199,7 +199,6 @@ void EtherAppClient::sendPacket()
 
     long respLen = respLength->longValue();
     data->setResponseBytes(respLen);
-    data->markImmutable();
     datapacket->insertAtEnd(data);
 
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);

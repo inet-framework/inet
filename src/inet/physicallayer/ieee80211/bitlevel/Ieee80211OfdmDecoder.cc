@@ -83,7 +83,6 @@ const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVe
     Packet *packet;
     if (decodedBits->getSize() % 8 == 0) {
         const auto& bytesChunk = makeShared<BytesChunk>(decodedBits->getBytes());
-        bytesChunk->markImmutable();
         packet = new Packet(nullptr, bytesChunk);
     }
     else {
@@ -91,7 +90,6 @@ const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVe
         for (int i = 0; i < (int)decodedBits->getSize(); i++)
             bits.push_back(decodedBits->getBit(i));
         const auto& bitsChunk = makeShared<BitsChunk>(bits);
-        bitsChunk->markImmutable();
         packet = new Packet(nullptr, bitsChunk);
     }
     delete decodedBits;

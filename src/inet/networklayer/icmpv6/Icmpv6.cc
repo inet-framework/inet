@@ -274,7 +274,6 @@ Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUnav code)
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
     errorMsg->setCode(code);
     auto packet = new Packet("Dest Unreachable");
-    errorMsg->markImmutable();
     packet->insertAtEnd(errorMsg);
     return packet;
 }
@@ -286,7 +285,6 @@ Packet *Icmpv6::createPacketTooBigMsg(int mtu)
     errorMsg->setCode(0);    //Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
     auto packet = new Packet("Packet Too Big");
-    errorMsg->markImmutable();
     packet->insertAtEnd(errorMsg);
     return packet;
 }
@@ -297,7 +295,6 @@ Packet *Icmpv6::createTimeExceededMsg(Icmpv6TimeEx code)
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
     errorMsg->setCode(code);
     auto packet = new Packet("Time Exceeded");
-    errorMsg->markImmutable();
     packet->insertAtEnd(errorMsg);
     return packet;
 }
@@ -309,7 +306,6 @@ Packet *Icmpv6::createParamProblemMsg(Icmpv6ParameterProblem code)
     errorMsg->setCode(code);
     //TODO: What Pointer? section 3.4
     auto packet = new Packet("Parameter Problem");
-    errorMsg->markImmutable();
     packet->insertAtEnd(errorMsg);
     return packet;
 }

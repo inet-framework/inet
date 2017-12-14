@@ -233,7 +233,6 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
     arp->setDestIPAddress(ipAddress);
-    arp->markImmutable();
     packet->pushHeader(arp);
 
     sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
@@ -390,7 +389,6 @@ void Arp::processARPPacket(Packet *packet)
                 arpReply->setSrcIPAddress(origDestAddress);
                 arpReply->setSrcMACAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
-                arpReply->markImmutable();
                 outPk->pushHeader(arpReply);
                 sendPacketToNIC(outPk, ie, srcMACAddress);
                 numRepliesSent++;

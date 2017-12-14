@@ -119,7 +119,6 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
     const auto& payload = makeShared<ByteCountChunk>(B(pktLen));
-    payload->markImmutable();
     pkt->insertAtEnd(payload);
 
     emit(sentPkSignal, pkt);

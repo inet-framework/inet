@@ -230,12 +230,10 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     Packet *udpPacket = new Packet("GPRSBeacon");
-    beacon->markImmutable();
     udpPacket->insertAtEnd(beacon);
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpHeader->markImmutable();
     udpPacket->pushHeader(udpHeader);
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());

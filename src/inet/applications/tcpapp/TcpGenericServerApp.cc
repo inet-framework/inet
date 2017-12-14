@@ -129,7 +129,6 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
                 payload->setChunkLength(B(requestedBytes));
                 payload->setExpectedReplyLength(0);
                 payload->setReplyDelay(0);
-                payload->markImmutable();
                 outPacket->insertAtEnd(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }
