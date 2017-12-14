@@ -56,7 +56,7 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
             return result;
     }
     // 3. peeking a part represented by an element chunk with its index returns that element chunk
-    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
+    if (iterator.getIndex() != -1 && iterator.getIndex() != (int)chunks.size()) {
         // KLUDGE: TODO: constPtrCast<Chunk>
         const auto& chunk = constPtrCast<Chunk>(getElementChunk(iterator));
         if (length == b(-1) || chunk->getChunkLength() == length) {
@@ -194,7 +194,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, b offset) const
 void SequenceChunk::moveIterator(Iterator& iterator, b length) const
 {
     iterator.setPosition(iterator.getPosition() + length);
-    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getChunkLength() == length)
+    if (iterator.getIndex() != -1 && iterator.getIndex() != (int)chunks.size() && getElementChunk(iterator)->getChunkLength() == length)
         iterator.setIndex(iterator.getIndex() + 1);
     else
         iterator.setIndex(-1);

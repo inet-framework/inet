@@ -32,7 +32,7 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     auto startPosition = stream.getLength();
     struct ip iphdr;
     const auto& ipv4Header = staticPtrCast<const Ipv4Header>(chunk);
-    unsigned int headerLength = ipv4Header->getHeaderLength();
+    int headerLength = ipv4Header->getHeaderLength();
     ASSERT((headerLength & 3) == 0 && headerLength >= IP_HEADER_BYTES && headerLength <= IP_MAX_HEADER_BYTES);
     ASSERT(headerLength <= ipv4Header->getTotalLengthField());
     iphdr.ip_hl = headerLength >> 2;
