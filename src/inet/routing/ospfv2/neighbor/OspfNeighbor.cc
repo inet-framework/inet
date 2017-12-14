@@ -242,7 +242,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
 
     ddPacket->setChunkLength(B(packetSize));
     Packet *pk = new Packet();
-    pk->pushHeader(ddPacket);
+    pk->insertAtEnd(ddPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
@@ -372,7 +372,7 @@ void Neighbor::sendLinkStateRequestPacket()
 
     requestPacket->setChunkLength(B(packetSize));
     Packet *pk = new Packet();
-    pk->pushHeader(requestPacket);
+    pk->insertAtEnd(requestPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
@@ -763,7 +763,7 @@ void Neighbor::retransmitUpdatePacket()
 
     updatePacket->setChunkLength(B(packetLength - IP_MAX_HEADER_BYTES));
     Packet *pk = new Packet();
-    pk->pushHeader(updatePacket);
+    pk->insertAtEnd(updatePacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;

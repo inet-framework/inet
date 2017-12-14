@@ -346,7 +346,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
 
         ackPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
         Packet *pk = new Packet();
-        pk->pushHeader(ackPacket);
+        pk->insertAtEnd(ackPacket);
 
         int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
