@@ -91,13 +91,19 @@ int RegionTagSet::getTagIndex(const std::type_info& typeInfo, b offset, b length
         return -1;
     else {
         int numRegionTags = regionTags->size();
+        b getStartOffset = offset;
+        b getEndOffset = offset + length;
         for (int index = 0; index < numRegionTags; index++) {
             auto& regionTag = (*regionTags)[index];
-            if (regionTag.getOffset() == offset && regionTag.getLength() == length) {
+            if (getEndOffset <= regionTag.getStartOffset() || regionTag.getEndOffset() <= getStartOffset)
+                continue;
+            else if (regionTag.getOffset() == offset && regionTag.getLength() == length) {
                 const cObject *tag = regionTag.getTag();
                 if (typeInfo == typeid(*tag))
                     return index;
             }
+            else
+                throw cRuntimeError("Overlapping tag is present");
         }
         return -1;
     }
