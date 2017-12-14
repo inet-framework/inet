@@ -1732,6 +1732,33 @@ static void testRegionTagSet()
     }
 }
 
+static void testChunkTags()
+{
+    // FieldsChunk
+    auto chunk1 = makeShared<IpHeader>();
+    auto tag1 = chunk1->addTag<CreationTimeTag>(B(0), B(20));
+    tag1->setCreationTime(42);
+    chunk1->markImmutable();
+    const auto& tag2 = chunk1->getTag<CreationTimeTag>();
+    ASSERT(tag2 != nullptr);
+    ASSERT(tag2->getCreationTime() == 42);
+
+    // SliceChunk
+    const auto& sliceChunk1 = chunk1->peek(B(10), B(10));
+    ASSERT(sliceChunk1->getNumTags() == 1);
+    const auto& tag3 = sliceChunk1->getTag<CreationTimeTag>();
+    ASSERT(tag3 != nullptr);
+    ASSERT(tag3->getCreationTime() == 42);
+
+    // SequenceChunk
+    auto sequenceChunk = makeShared<SequenceChunk>();
+    sequenceChunk->insertAtEnd(chunk1);
+    ASSERT(sequenceChunk->getNumTags() == 1);
+    const auto& tag4 = sequenceChunk->getTag<CreationTimeTag>();
+    ASSERT(tag4 != nullptr);
+    ASSERT(tag4->getCreationTime() == 42);
+}
+
 static void testPacketTags()
 {
     // 1. application creates packet
@@ -1750,8 +1777,9 @@ static void testPacketTags()
     ASSERT(tag3 == tag2);
 }
 
-static void testChunkTags()
+static void testRegionTags()
 {
+    { // scenario showing how TCP could compute end to end delay
     // 1. source application creates packet
     auto chunk1 = makeShared<ByteCountChunk>(B(1500));
     auto tag1 = chunk1->addTag<CreationTimeTag>(B(0), B(1500));
@@ -1809,11 +1837,11 @@ static void testChunkTags()
     ASSERT(regions2[1].getOffset() == B(500));
     ASSERT(regions2[1].getLength() == B(500));
     ASSERT(regions2[1].getTag()->getCreationTime() == 81);
+    }
 }
 
 void UnitTest::initialize()
 {
-    testChunkTags();
     testMutable();
     testImmutable();
     testComplete();
@@ -1849,8 +1877,9 @@ void UnitTest::initialize()
     testReorderBuffer();
     testTagSet();
     testRegionTagSet();
-    testPacketTags();
     testChunkTags();
+    testPacketTags();
+    testRegionTags();
 }
 
 } // namespace
