@@ -553,6 +553,11 @@ class INET_API Packet : public cPacket
      * Removes all popped headers and trailers, but the data part isn't affected.
      */
     void removePoppedChunks();
+
+    /**
+     * Removes all data from packet.
+     */
+    void removeAll();
     //@}
 
     /** @name Tag related functions */
@@ -628,10 +633,6 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /**
-     * Removes all data from packet
-     */
-    void removeAll();
     /**
      * Returns a human readable string representation.
      */
