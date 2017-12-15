@@ -273,7 +273,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     EV_DEBUG << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX LATENESS MEASURED: " << maxLateness << "\n\n";
 
-    if (par("adaptivePlayoutDelay").boolValue()) {
+    if (par("adaptivePlayoutDelay")) {
         playoutDelay += maxLateness;
         if (playoutDelay < 0.0)
             playoutDelay = 0.0;

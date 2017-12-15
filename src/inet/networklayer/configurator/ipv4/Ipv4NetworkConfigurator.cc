@@ -120,16 +120,16 @@ void Ipv4NetworkConfigurator::ensureConfigurationComputed(Topology& topology)
 void Ipv4NetworkConfigurator::dumpConfiguration()
 {
     // print topology to module output
-    if (par("dumpTopology").boolValue())
+    if (par("dumpTopology"))
         TIME(dumpTopology(topology));
     // print links to module output
-    if (par("dumpLinks").boolValue())
+    if (par("dumpLinks"))
         TIME(dumpLinks(topology));
     // print unicast and multicast addresses and other interface data to module output
-    if (par("dumpAddresses").boolValue())
+    if (par("dumpAddresses"))
         TIME(dumpAddresses(topology));
     // print routes to module output
-    if (par("dumpRoutes").boolValue())
+    if (par("dumpRoutes"))
         TIME(dumpRoutes(topology));
     // print current configuration to an XML file
     if (!isEmpty(par("dumpConfig")))

@@ -46,7 +46,7 @@ Define_Module(Ieee80211LayeredOfdmTransmitter);
 void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        isCompliant = par("isCompliant").boolValue();
+        isCompliant = par("isCompliant");
         dataEncoder = dynamic_cast<const IEncoder *>(getSubmodule("dataEncoder"));
         signalEncoder = dynamic_cast<const IEncoder *>(getSubmodule("signalEncoder"));
         dataModulator = dynamic_cast<const IModulator *>(getSubmodule("dataModulator"));

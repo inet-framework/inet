@@ -46,7 +46,7 @@ void EtherEncap::initialize(int stage)
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
-        useSNAP = par("useSNAP").boolValue();
+        useSNAP = par("useSNAP");
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);

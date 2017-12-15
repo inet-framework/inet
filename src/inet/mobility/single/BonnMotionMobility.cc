@@ -63,7 +63,7 @@ void BonnMotionMobility::initialize(int stage)
 
     EV_TRACE << "initializing BonnMotionMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        is3D = par("is3D").boolValue();
+        is3D = par("is3D");
         int nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();

@@ -85,7 +85,7 @@ void SCTPNatPeer::initialize()
     const char *addressesString = par("localAddress");
     AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
-    echo = par("echo").boolValue();
+    echo = par("echo");
     delay = par("echoDelay");
     outboundStreams = par("outboundStreams");
     inboundStreams = par("inboundStreams");

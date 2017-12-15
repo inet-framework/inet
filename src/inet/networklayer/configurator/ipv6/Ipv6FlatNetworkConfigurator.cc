@@ -88,7 +88,7 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
             continue;
 
         // skip hosts
-        if (!rt->par("isRouter").boolValue())
+        if (!rt->par("isRouter"))
             continue;
 
         // assign prefix to interfaces
@@ -147,7 +147,7 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
             continue;
 
         // skip hosts
-        if (!rt->par("isRouter").boolValue())
+        if (!rt->par("isRouter"))
             continue;
 
         // add globally routable prefixes to routing table
@@ -195,7 +195,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             continue;
 
         // don't add routes towards hosts
-        if (!destRt->par("isRouter").boolValue())
+        if (!destRt->par("isRouter"))
             continue;
 
         // get a list of globally routable prefixes from the dest node
@@ -236,7 +236,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
                 continue;
 
             // skip hosts' routing tables
-            if (!rt->par("isRouter").boolValue())
+            if (!rt->par("isRouter"))
                 continue;
 
             // determine the local interface id

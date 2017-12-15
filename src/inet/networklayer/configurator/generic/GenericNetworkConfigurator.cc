@@ -35,13 +35,13 @@ void GenericNetworkConfigurator::initialize(int stage)
         // extract topology into the Topology object, then fill in a LinkInfo[] vector
         TIME(extractTopology(topology));
         // dump the result if requested
-        if (par("dumpTopology").boolValue())
+        if (par("dumpTopology"))
             TIME(dumpTopology(topology));
         // calculate shortest paths, and add corresponding static routes
-        if (par("addStaticRoutes").boolValue())
+        if (par("addStaticRoutes"))
             TIME(addStaticRoutes(topology));
         // dump routes to module output
-        if (par("dumpRoutes").boolValue())
+        if (par("dumpRoutes"))
             TIME(dumpRoutes(topology));
         printElapsedTime("initialize", initializeStartTime);
     }

@@ -125,7 +125,7 @@ void UdpBasicBurst::processStart()
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
-    bool excludeLocalDestAddresses = par("excludeLocalDestAddresses").boolValue();
+    bool excludeLocalDestAddresses = par("excludeLocalDestAddresses");
 
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 

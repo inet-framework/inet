@@ -111,7 +111,7 @@ void SCTPPeer::initialize(int stage)
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
         inboundStreams = par("inboundStreams");
-        ordered = par("ordered").boolValue();
+        ordered = par("ordered");
         queueSize = par("queueSize");
         timeoutMsg = new cMessage("SrvAppTimer");
         listeningSocket.setOutputGate(gate("socketOut"));

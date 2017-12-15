@@ -81,7 +81,7 @@ void InterfaceTable::refreshDisplay() const
     sprintf(buf, "%d interfaces", getNumInterfaces());
     getDisplayString().setTagArg("t", 0, buf);
 
-    if (par("displayAddresses").boolValue()) {
+    if (par("displayAddresses")) {
         for (auto & elem : idToInterface) {
             InterfaceEntry *ie = elem;
             if (ie)

@@ -81,7 +81,7 @@ void MoBanCoordinator::initialize(int stage)
 
     EV_TRACE << "initializing MoBanCoordinator stage " << stage << endl;
     if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
-        useMobilityPattern = par("useMobilityPattern").boolValue();
+        useMobilityPattern = par("useMobilityPattern");
         collectLocalModules(getParentModule());
 
         // preparing output mobility pattern log file

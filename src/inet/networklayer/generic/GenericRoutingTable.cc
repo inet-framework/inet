@@ -71,7 +71,7 @@ void GenericRoutingTable::initialize(int stage)
             addressType = L3Address::MODULEID;
         else
             throw cRuntimeError("Unknown address type");
-        forwarding = par("forwarding").boolValue();
+        forwarding = par("forwarding");
         multicastForwarding = par("multicastForwarding");
 
         WATCH_PTRVECTOR(routes);

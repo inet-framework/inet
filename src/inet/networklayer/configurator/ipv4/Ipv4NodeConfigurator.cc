@@ -131,7 +131,7 @@ void Ipv4NodeConfigurator::configureInterface()
 void Ipv4NodeConfigurator::configureRoutingTable()
 {
     ASSERT(networkConfigurator);
-    if (par("configureRoutingTable").boolValue())
+    if (par("configureRoutingTable"))
         networkConfigurator->configureRoutingTable(routingTable);
 }
 

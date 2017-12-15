@@ -32,7 +32,7 @@ simsignal_t NetAnimTrace::mobilityStateChangedSignal = registerSignal("mobilityS
 
 void NetAnimTrace::initialize()
 {
-    if (!par("enabled").boolValue())
+    if (!par("enabled"))
         return;
 
     const char *filename = par("filename");

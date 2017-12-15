@@ -102,7 +102,7 @@ void Ieee80211Mac::initialize(int stage)
 
 const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 {
-    // if (!par("multiMac").boolValue())
+    // if (!par("multiMac"))
     //    return MacAddress::UNSPECIFIED_ADDRESS;
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)

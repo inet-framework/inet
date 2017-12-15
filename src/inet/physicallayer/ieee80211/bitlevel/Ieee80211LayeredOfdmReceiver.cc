@@ -63,7 +63,7 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         bandwidth = Hz(par("bandwidth"));
         snirThreshold = math::dB2fraction(par("snirThreshold"));
         channelSpacing = Hz(par("channelSpacing"));
-        isCompliant = par("isCompliant").boolValue();
+        isCompliant = par("isCompliant");
         if (isCompliant && (dataDecoder || signalDecoder || dataDemodulator || signalDemodulator || pulseFilter || analogDigitalConverter))
         {
             throw cRuntimeError("In compliant mode it is forbidden to the following parameters: dataDecoder, signalDecoder, dataDemodulator, signalDemodulator, pulseFilter, analogDigitalConverter.");

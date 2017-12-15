@@ -43,7 +43,7 @@ void EtherMacFullDuplex::initialize(int stage)
     EtherMacBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        if (!par("duplexMode").boolValue())
+        if (!par("duplexMode"))
             throw cRuntimeError("Half duplex operation is not supported by EtherMacFullDuplex, use the EtherMac module for that! (Please enable csmacdSupport on EthernetInterface)");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

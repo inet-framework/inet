@@ -47,11 +47,11 @@ void SCTPServer::initialize(int stage)
         WATCH(numRequestsToSend);
 
         // parameters
-        finishEndsSimulation = par("finishEndsSimulation").boolValue();
+        finishEndsSimulation = par("finishEndsSimulation");
 
         inboundStreams = par("inboundStreams");
         outboundStreams = par("outboundStreams");
-        ordered = par("ordered").boolValue();
+        ordered = par("ordered");
         queueSize = par("queueSize");
         timeoutMsg = new cMessage("SrvAppTimer");
         delayTimer = new cMessage("delayTimer");
@@ -83,7 +83,7 @@ void SCTPServer::initialize(int stage)
         else
             socket->bindx(addresses, port);
 
-        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient"), messagesToPush);
+        socket->listen(true, par("streamReset"), par("numPacketsToSendPerClient"), messagesToPush);
         EV_INFO << "SCTPServer::initialized listen port=" << port << "\n";
         cStringTokenizer tokenizer(par("streamPriorities").stringValue());
         for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++) {

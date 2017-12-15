@@ -101,7 +101,7 @@ void MobilityBase::setInitialPosition()
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
     auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
-    if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue() && visualRepresentation) {
+    if (hasPar("initFromDisplayString") && par("initFromDisplayString") && visualRepresentation) {
         const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
         if (s && *s)
             throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"

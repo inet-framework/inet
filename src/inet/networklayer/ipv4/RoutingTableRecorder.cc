@@ -59,7 +59,7 @@ void RoutingTableRecorder::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER) {
-        if (par("enabled").boolValue())
+        if (par("enabled"))
             hookListeners();
     }
 }
@@ -221,7 +221,7 @@ void RoutingTableRecorder::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER) {
-        if (par("enabled").boolValue())
+        if (par("enabled"))
             hookListeners();
     }
 }

@@ -99,8 +99,8 @@ void EtherMac::initializeFlags()
 {
     EtherMacBase::initializeFlags();
 
-    duplexMode = par("duplexMode").boolValue();
-    frameBursting = !duplexMode && par("frameBursting").boolValue();
+    duplexMode = par("duplexMode");
+    frameBursting = !duplexMode && par("frameBursting");
     physInGate->setDeliverOnReceptionStart(true);
 }
 

@@ -96,8 +96,8 @@ void PingApp::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-        printPing = par("printPing").boolValue();
-        continuous = par("continuous").boolValue();
+        printPing = par("printPing");
+        continuous = par("continuous");
 
         const char *crcModeString = par("crcMode");
         if (!strcmp(crcModeString, "declared"))

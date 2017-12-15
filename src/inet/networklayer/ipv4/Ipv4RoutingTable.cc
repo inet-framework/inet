@@ -75,7 +75,7 @@ void Ipv4RoutingTable::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         netmaskRoutes = par("netmaskRoutes");
-        forwarding = par("forwarding").boolValue();
+        forwarding = par("forwarding");
         multicastForward = par("multicastForwarding");
         useAdminDist = par("useAdminDist");
 

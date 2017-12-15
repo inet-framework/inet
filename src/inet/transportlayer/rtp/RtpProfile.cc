@@ -43,7 +43,7 @@ void RtpProfile::initialize()
     // how many gates to payload receivers do we have
     _maxReceivers = gateSize("payloadReceiverOut");
     _ssrcGates.clear();
-    _autoOutputFileNames = par("autoOutputFileNames").boolValue();
+    _autoOutputFileNames = par("autoOutputFileNames");
     EV_TRACE << "initialize() Exit" << endl;
 }
 

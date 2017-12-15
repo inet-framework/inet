@@ -76,9 +76,9 @@ void SCTPClient::initialize(int stage)
 
     EV_DEBUG << "initialize SCTP Client stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        echo = par("echo").boolValue();
-        ordered = par("ordered").boolValue();
-        finishEndsSimulation = par("finishEndsSimulation").boolValue();
+        echo = par("echo");
+        ordered = par("ordered");
+        finishEndsSimulation = par("finishEndsSimulation");
         queueSize = par("queueSize");
         WATCH(numRequestsToSend);
         recordScalar("ums", (int)par("requestLength"));

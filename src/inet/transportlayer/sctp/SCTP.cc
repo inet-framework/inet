@@ -110,7 +110,7 @@ void SCTP::initialize(int stage)
         registerProtocol(Protocol::sctp, gate("appOut"));
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
-        if (par("udpEncapsEnabled").boolValue()) {
+        if (par("udpEncapsEnabled")) {
             bindPortForUDP();
         }
     }

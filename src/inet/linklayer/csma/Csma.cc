@@ -49,7 +49,7 @@ void Csma::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        useMACAcks = par("useMACAcks").boolValue();
+        useMACAcks = par("useMACAcks");
         queueLength = par("queueLength");
         sifs = par("sifs");
         headerLength = par("headerLength");

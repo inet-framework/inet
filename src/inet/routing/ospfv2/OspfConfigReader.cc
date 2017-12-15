@@ -160,7 +160,7 @@ bool OspfConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char 
             return false;
         throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
     }
-    return par(name).boolValue();
+    return par(name);
 }
 
 const char *OspfConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
