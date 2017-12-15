@@ -126,7 +126,7 @@ void SCTPPeer::initialize(int stage)
             listeningSocket.bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
-        listeningSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
+        listeningSocket.listen(true, par("streamReset"), par("numPacketsToSendPerClient"));
         EV_DEBUG << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("socketOut"));
@@ -273,7 +273,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 //delete connectInfo;
                 delete msg;
 
-                if (par("numPacketsToSendPerClient").longValue() > 0) {
+                if (par("numPacketsToSendPerClient").intValue() > 0) {
                     auto i = sentPacketsPerAssoc.find(serverAssocId);
                     numRequestsToSend = i->second;
                     if (par("thinkTime").doubleValue() > 0) {
@@ -367,7 +367,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 packetsRcvd++;
 
                 if (!echo) {
-                    if (par("numPacketsToReceivePerClient").longValue() > 0) {
+                    if (par("numPacketsToReceivePerClient").intValue() > 0) {
                         auto i = rcvdPacketsPerAssoc.find(id);
                         i->second--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
@@ -704,7 +704,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
         clientSocket.sendMsg(cmsg);
     }
 
-    if (par("numPacketsToReceive").longValue() > 0) {
+    if (par("numPacketsToReceive").intValue() > 0) {
         numPacketsToReceive--;
         if (numPacketsToReceive == 0) {
             setStatusString("closing");

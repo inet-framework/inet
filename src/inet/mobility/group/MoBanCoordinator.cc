@@ -719,7 +719,7 @@ void MoBanCoordinator::collectLocalModules(cModule *module)
         cModule *submodule = *it;
         collectLocalModules(submodule);
         MoBanLocal *localModule = dynamic_cast<MoBanLocal *>(submodule);
-        if (localModule && localModule->par("coordinatorIndex").longValue() == getIndex()) {
+        if (localModule && localModule->par("coordinatorIndex").intValue() == getIndex()) {
             localModule->setCoordinator(this);
             localModules.push_back(localModule);
         }

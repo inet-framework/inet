@@ -75,10 +75,10 @@ void CsmaCaMac::initialize(int stage)
         maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
-        headerLength = B(par("headerLength").longValue());
+        headerLength = B(par("headerLength"));
         if (headerLength < makeShared<CsmaCaMacDataHeader>()->getChunkLength())
             throw cRuntimeError("The specified headerLength is too short");
-        ackLength = B(par("ackLength").longValue());
+        ackLength = B(par("ackLength"));
         if (ackLength < makeShared<CsmaCaMacAckHeader>()->getChunkLength())
             throw cRuntimeError("The specified ackLength is too short");
         ackTimeout = par("ackTimeout");

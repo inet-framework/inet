@@ -105,7 +105,7 @@ Packet *UdpBasicBurst::createPacket()
 {
     char msgName[32];
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
-    long msgByteLength = messageLengthPar->longValue();
+    long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();
     payload->setChunkLength(B(msgByteLength));

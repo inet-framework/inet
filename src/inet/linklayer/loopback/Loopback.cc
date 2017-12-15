@@ -63,7 +63,7 @@ InterfaceEntry *Loopback::createInterfaceEntry()
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    ie->setMtu(par("mtu").longValue());
+    ie->setMtu(par("mtu"));
     ie->setLoopback(true);
 
     return ie;

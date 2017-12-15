@@ -93,9 +93,9 @@ void EthernetApplication::sendPacket()
     Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
     const auto& data = makeShared<EtherAppReq>();
     data->setRequestId(seqNum);
-    long len = reqLength->longValue();
+    long len = *reqLength;
     data->setChunkLength(B(len));
-    long respLen = respLength->longValue();
+    long respLen = *respLength;
     data->setResponseBytes(respLen);
     datapacket->insertAtEnd(data);
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);

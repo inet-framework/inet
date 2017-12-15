@@ -310,7 +310,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         bubble("copy: removing original");
         dump(seg, pk->getByteLength(), fromA, "copy: removing original");
-        int n = numCopies->longValue();
+        int n = *numCopies;
         for (int i=0; i<n; i++)
         {
             double d = delay->doubleValue();

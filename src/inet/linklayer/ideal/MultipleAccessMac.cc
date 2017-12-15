@@ -73,7 +73,7 @@ void MultipleAccessMac::initialize(int stage)
         outStandingRequests = 0;
 
         bitrate = par("bitrate").doubleValue();
-        headerLength = par("headerLength").longValue();
+        headerLength = par("headerLength");
         promiscuous = par("promiscuous");
         fullDuplex = par("fullDuplex");
         useAck = par("useAck");
@@ -130,7 +130,7 @@ InterfaceEntry *MultipleAccessMac::createInterfaceEntry()
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu"));
 
     // capabilities
     e->setMulticast(true);

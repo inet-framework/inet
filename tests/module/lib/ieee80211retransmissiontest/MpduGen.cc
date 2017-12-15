@@ -64,10 +64,10 @@ void MpduGen::sendPackets()
         Packet *packet = new Packet(str.str().c_str());
         auto payload = makeShared<ByteCountChunk>();
         if (packets[i] == 'L') {
-            payload->setLength(B(par("longPacketSize").longValue()));
+            payload->setLength(B(par("longPacketSize")));
         }
         else if (packets[i] == 'S') {
-            payload->setLength(B(par("shortPacketSize").longValue()));
+            payload->setLength(B(par("shortPacketSize")));
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);

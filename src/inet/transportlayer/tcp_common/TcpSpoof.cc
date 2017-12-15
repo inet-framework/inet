@@ -50,7 +50,7 @@ void TcpSpoof::sendSpoofPacket()
     int srcPort = par("srcPort");
     int destPort = par("destPort");
     bool isSYN = par("isSYN");
-    unsigned long seq = par("seqNo").longValue() == -1 ? chooseInitialSeqNum() : par("seqNo").longValue();
+    unsigned long seq = par("seqNo").intValue() == -1 ? chooseInitialSeqNum() : par("seqNo");
 
     // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);

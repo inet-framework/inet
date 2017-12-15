@@ -173,7 +173,7 @@ MacAddress EtherTrafGen::resolveDestMACAddress()
 
 void EtherTrafGen::sendBurstPackets()
 {
-    int n = numPacketsPerBurst->longValue();
+    int n = *numPacketsPerBurst;
     for (int i = 0; i < n; i++) {
         seqNum++;
 
@@ -181,7 +181,7 @@ void EtherTrafGen::sendBurstPackets()
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
-        long len = packetLength->longValue();
+        long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         datapacket->insertAtEnd(payload);
         datapacket->removeTag<PacketProtocolTag>();

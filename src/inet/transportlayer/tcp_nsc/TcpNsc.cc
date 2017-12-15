@@ -236,7 +236,7 @@ void TcpNsc::initialize(int stage)
 
         // load the stack
         const char *stackName = this->par(stackNameParamNameS).stringValue();
-        int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+        int bufferSize = this->par(bufferSizeParamNameS);
         loadStack(stackName, bufferSize);
         pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
         pStackM->add_default_gateway(localInnerGwS.str().c_str());

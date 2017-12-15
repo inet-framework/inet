@@ -395,7 +395,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 
 void TcpConnection::configureStateVariables()
 {
-    long advertisedWindowPar = tcpMain->par("advertisedWindow").longValue();
+    long advertisedWindowPar = tcpMain->par("advertisedWindow");
     state->ws_support = tcpMain->par("windowScalingSupport");    // if set, this means that current host supports WS (RFC 1323)
     state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for Tcp validation
     if (!state->ws_support && (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0))
@@ -414,7 +414,7 @@ void TcpConnection::configureStateVariables()
     state->nagle_enabled = tcpMain->par("nagleEnabled");    // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled");    // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled");    // Increased Initial Window (RFC 3390) enabled/disabled
-    state->snd_mss = tcpMain->par("mss").longValue();    // Maximum Segment Size (RFC 793)
+    state->snd_mss = tcpMain->par("mss");    // Maximum Segment Size (RFC 793)
     state->ts_support = tcpMain->par("timestampSupport");    // if set, this means that current host supports TS (RFC 1323)
     state->sack_support = tcpMain->par("sackSupport");    // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
 

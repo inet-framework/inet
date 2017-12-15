@@ -83,7 +83,7 @@ void SCTPServer::initialize(int stage)
         else
             socket->bindx(addresses, port);
 
-        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue(), messagesToPush);
+        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient"), messagesToPush);
         EV_INFO << "SCTPServer::initialized listen port=" << port << "\n";
         cStringTokenizer tokenizer(par("streamPriorities").stringValue());
         for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++) {
@@ -195,7 +195,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 assocId = command->getSocketId();
                 serverAssocStatMap[assocId].peerClosed = true;
-                if (par("numPacketsToReceivePerClient").longValue() == 0) {
+                if (par("numPacketsToReceivePerClient").intValue() == 0) {
                     if (serverAssocStatMap[assocId].abortSent == false) {
                         sendOrSchedule(makeAbortNotification(command->dup()));
                         serverAssocStatMap[assocId].abortSent = true;
@@ -241,7 +241,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 
                 delete connectInfo;
                 delete msg;
-                if (par("numPacketsToSendPerClient").longValue() > 0) {
+                if (par("numPacketsToSendPerClient").intValue() > 0) {
                     auto i = serverAssocStatMap.find(assocId);
                     numRequestsToSend = i->second.sentPackets;
                     if (par("thinkTime").doubleValue() > 0) {
@@ -340,7 +340,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 k->second->record(j->second.rcvdBytes);
 
                 if (!echo) {
-                    if (par("numPacketsToReceivePerClient").longValue() > 0) {
+                    if (par("numPacketsToReceivePerClient").intValue() > 0) {
                         j->second.rcvdPackets--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                         auto m = endToEndDelay.find(id);
@@ -398,7 +398,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 id = command->getSocketId();
                 EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 auto i = serverAssocStatMap.find(id);
-                if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").longValue() == 0) {
+                if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").intValue() == 0) {
                     cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                     SCTPInfo *qinfo = new SCTPInfo("Info3");
                     cmsg->setKind(SCTP_C_NO_OUTSTANDING);

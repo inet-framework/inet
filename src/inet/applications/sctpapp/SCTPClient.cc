@@ -333,7 +333,7 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
         socket.sendMsg(cmsg);
     }
 
-    if (par("numPacketsToReceive").longValue() > 0) {
+    if (par("numPacketsToReceive").intValue() > 0) {
         numPacketsToReceive--;
         if (numPacketsToReceive == 0)
             close();

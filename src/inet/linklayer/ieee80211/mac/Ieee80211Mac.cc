@@ -123,7 +123,7 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     // address
     e->setMACAddress(mib->address);
     e->setInterfaceToken(mib->address.formInterfaceIdentifier());
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu"));
     // capabilities
     e->setBroadcast(true);
     e->setMulticast(true);

@@ -82,7 +82,7 @@ void MeterTestApp::handleMessage(cMessage *msg)
       ostringstream packetName;
       packetName << "packet-" << (++counter);
       cPacket *packet = new cPacket(packetName.str().c_str());     //FIXME its was created an IPv4Datagram
-      packet->setByteLength(par("packetSize").longValue());
+      packet->setByteLength(par("packetSize"));
       send(packet, "out");
 
       if ((numPackets == 0 || counter < numPackets) &&

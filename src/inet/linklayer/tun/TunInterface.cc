@@ -39,7 +39,7 @@ void TunInterface::initialize(int stage)
 InterfaceEntry *TunInterface::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu"));
     return e;
 }
 

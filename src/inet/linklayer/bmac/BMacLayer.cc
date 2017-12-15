@@ -174,7 +174,7 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
 

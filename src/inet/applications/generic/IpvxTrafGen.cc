@@ -180,7 +180,7 @@ void IpvxTrafGen::sendPacket()
     sprintf(msgName, "appData-%d", numSent);
 
     Packet *packet = new Packet(msgName);
-    const auto& payload = makeShared<ByteCountChunk>(B(packetLengthPar->longValue()));
+    const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
     packet->insertAtEnd(payload);
 
     L3Address destAddr = chooseDestAddr();

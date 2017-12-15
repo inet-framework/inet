@@ -108,7 +108,7 @@ void UdpBasicApp::sendPacket()
     str << packetName << "-" << numSent;
     Packet *packet = new Packet(str.str().c_str());
     const auto& payload = makeShared<ApplicationPacket>();
-    payload->setChunkLength(B(par("messageLength").longValue()));
+    payload->setChunkLength(B(par("messageLength")));
     payload->setSequenceNumber(numSent);
     auto creationTimeTag = payload->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
