@@ -76,7 +76,7 @@ cplusplus(RtpHeader) {{
     /**
      * Writes a one line info about this RtpHeader into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer description about this RtpHeader into the given stream.

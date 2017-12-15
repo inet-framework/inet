@@ -90,7 +90,7 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<const 
 {
     EV_INFO << "Seg arrived: ";
     printSegmentBrief(packet, tcpseg);
-    EV_DETAIL << "TCB: " << state->info() << "\n";
+    EV_DETAIL << "TCB: " << state->str() << "\n";
 
     if (rcvSeqVector)
         rcvSeqVector->record(tcpseg->getSequenceNo());

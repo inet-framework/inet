@@ -40,7 +40,7 @@ class INET_API RtpInnerPacket : public RtpInnerPacket_Base
     /**
      * Writes a short info about this RtpInnerPacket into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer info about this RtpInnerPacket into the given output stream.

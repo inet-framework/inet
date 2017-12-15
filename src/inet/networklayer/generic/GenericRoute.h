@@ -52,7 +52,7 @@ class INET_API GenericRoute : public cObject, public IRoute
         source(nullptr), protocolData(nullptr), metric(0) {}
     virtual ~GenericRoute() { delete protocolData; }
 
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     bool equals(const IRoute& route) const;
@@ -123,7 +123,7 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     GenericMulticastRoute() {}    //TODO
     virtual ~GenericMulticastRoute() {}
 
-    virtual std::string info() const;
+    virtual std::string str() const;
     virtual std::string detailedInfo() const;
 
     virtual void setEnabled(bool enabled) { this->enabled = enabled; }

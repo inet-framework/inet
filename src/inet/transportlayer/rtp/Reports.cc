@@ -27,7 +27,7 @@ namespace rtp {
 
 Register_Class(SenderReport);
 
-std::string SenderReport::info() const
+std::string SenderReport::str() const
 {
     std::stringstream out;
     out << "SenderReport.timeStamp=" << getRTPTimeStamp();
@@ -49,7 +49,7 @@ void SenderReport::dump(std::ostream& os) const
 
 Register_Class(ReceptionReport);
 
-std::string ReceptionReport::info() const
+std::string ReceptionReport::str() const
 {
     std::stringstream out;
     out << "ReceptionReport.ssrc=" << getSsrc();

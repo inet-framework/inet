@@ -55,9 +55,9 @@ void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
         ownerp->changed(signalID, fieldId);
 }
 
-std::string InterfaceEntryChangeDetails::info() const
+std::string InterfaceEntryChangeDetails::str() const
 {
-    return ie->info();
+    return ie->str();
 }
 
 std::string InterfaceEntryChangeDetails::detailedInfo() const
@@ -85,7 +85,7 @@ void InterfaceEntry::initialize(int stage)
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
 }
 
-std::string InterfaceEntry::info() const
+std::string InterfaceEntry::str() const
 {
     std::stringstream out;
     out << getInterfaceName();
@@ -109,11 +109,11 @@ std::string InterfaceEntry::info() const
 
 #ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ipv4data->info();
+        out << " " << ipv4data->str();
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ipv6data->info();
+        out << " " << ipv6data->str();
 #endif // ifdef WITH_IPv6
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str(); // Khmm...

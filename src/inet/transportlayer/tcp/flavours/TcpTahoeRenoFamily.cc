@@ -37,10 +37,10 @@ void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32 newLimit){
     ssthresh = sendQueueLimit;
 }
 
-std::string TcpTahoeRenoFamilyStateVariables::info() const
+std::string TcpTahoeRenoFamilyStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::info();
+    out << TcpBaseAlgStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }

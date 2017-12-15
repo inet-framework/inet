@@ -41,13 +41,13 @@ Define_Module(Ipv4RoutingTable);
 
 std::ostream& operator<<(std::ostream& os, const Ipv4Route& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 
 std::ostream& operator<<(std::ostream& os, const Ipv4MulticastRoute& e)
 {
-    os << e.info();
+    os << e.str();
     return os;
 };
 
@@ -590,7 +590,7 @@ void Ipv4RoutingTable::internalAddRoute(Ipv4Route *entry)
 void Ipv4RoutingTable::addRoute(Ipv4Route *entry)
 {
     Enter_Method("addRoute(...)");
-    EV_INFO << "add route " << entry->info() << "\n";
+    EV_INFO << "add route " << entry->str() << "\n";
 
     internalAddRoute(entry);
 
@@ -616,7 +616,7 @@ Ipv4Route *Ipv4RoutingTable::removeRoute(Ipv4Route *entry)
     entry = internalRemoveRoute(entry);
 
     if (entry != nullptr) {
-        EV_INFO << "remove route " << entry->info() << "\n";
+        EV_INFO << "remove route " << entry->str() << "\n";
         invalidateCache();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_ROUTE_DELETED, entry);
@@ -632,7 +632,7 @@ bool Ipv4RoutingTable::deleteRoute(Ipv4Route *entry)    //TODO this is almost du
     entry = internalRemoveRoute(entry);
 
     if (entry != nullptr) {
-        EV_INFO << "delete route " << entry->info() << "\n";
+        EV_INFO << "delete route " << entry->str() << "\n";
         invalidateCache();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_ROUTE_DELETED, entry);

@@ -51,7 +51,7 @@ struct INET_API Ipv4MulticastSourceList
     bool contains(Ipv4Address source);
     bool add(Ipv4Address source);
     bool remove(Ipv4Address source);
-    std::string info() const;
+    std::string str() const;
     std::string detailedInfo() const;
 };
 
@@ -118,7 +118,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
         HostMulticastGroupVector joinedMulticastGroups;    // multicast groups this interface joined
 
         virtual ~HostMulticastData();
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -140,7 +140,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
         RouterMulticastData() : multicastTtlThreshold(0) {}
         virtual ~RouterMulticastData();
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -169,7 +169,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
   public:
     Ipv4InterfaceData();
     virtual ~Ipv4InterfaceData();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     /** @name Getters */

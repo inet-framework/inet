@@ -81,7 +81,7 @@ class INET_API SdesItem : public cObject
     /**
      * Writes a short info about this SdesItem into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes an info about this SdesItem into the give output stream.
@@ -160,7 +160,7 @@ class INET_API SdesChunk : public cArray
     /**
      * Writes a short info about this SdesChunk into the given string.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Writes a longer info about this SdesChunk into the given stream.

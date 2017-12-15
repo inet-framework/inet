@@ -52,10 +52,10 @@ TcpVegasStateVariables::~TcpVegasStateVariables()
 {
 }
 
-std::string TcpVegasStateVariables::info() const
+std::string TcpVegasStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::info();
+    out << TcpBaseAlgStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }

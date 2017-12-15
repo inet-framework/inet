@@ -79,7 +79,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     Ipv4Route() : rt(nullptr), interfacePtr(nullptr), sourceType(MANUAL), adminDist(dUnknown),
         metric(0), source(nullptr), protocolData(nullptr) {}
     virtual ~Ipv4Route();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     bool operator==(const Ipv4Route& route) const { return equals(route); }
@@ -191,7 +191,7 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
   public:
     Ipv4MulticastRoute() : rt(nullptr), inInterface(nullptr), sourceType(MANUAL), source(nullptr), metric(0) {}
     virtual ~Ipv4MulticastRoute();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     /** To be called by the routing table when this route is added or removed from it */

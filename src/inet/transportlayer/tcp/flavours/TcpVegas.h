@@ -36,7 +36,7 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
   public:
     TcpVegasStateVariables();
     ~TcpVegasStateVariables();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     uint32 v_recoverypoint;

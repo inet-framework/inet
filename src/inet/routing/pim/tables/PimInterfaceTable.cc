@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, const PimInterface *e)
     return os;
 };
 
-std::string PimInterface::info() const
+std::string PimInterface::str() const
 {
     std::stringstream out;
     out << this;

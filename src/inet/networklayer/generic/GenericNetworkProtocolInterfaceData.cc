@@ -22,7 +22,7 @@
 
 namespace inet {
 
-std::string GenericNetworkProtocolInterfaceData::info() const
+std::string GenericNetworkProtocolInterfaceData::str() const
 {
     std::stringstream out;
     out << "generic addr:" << getAddress();

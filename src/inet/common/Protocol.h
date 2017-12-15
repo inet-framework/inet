@@ -42,7 +42,7 @@ class INET_API Protocol
     int getId() const { return id; }
     const char *getName() const { return name; }
 
-    std::string info() const;
+    std::string str() const;
 
     static const Protocol *findProtocol(int id);
     static const Protocol *getProtocol(int id);

@@ -33,7 +33,7 @@ class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariable
 {
   public:
     TcpTahoeRenoFamilyStateVariables();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
     virtual void setSendQueueLimit(uint32 newLimit);
 

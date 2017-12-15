@@ -117,7 +117,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
         Ipv6AddressVector joinedMulticastGroups;
         std::vector<int> refCounts;
 
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -125,7 +125,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     {
         Ipv6AddressVector reportedMulticastGroups;    ///< multicast groups that have listeners on the link connected to this interface
 
-        std::string info();
+        std::string str();
         std::string detailedInfo();
     };
 
@@ -443,7 +443,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
   public:
     Ipv6InterfaceData();
     virtual ~Ipv6InterfaceData();
-    std::string info() const override;
+    std::string str() const override;
     std::string detailedInfo() const override;
 
     /** @name Addresses */

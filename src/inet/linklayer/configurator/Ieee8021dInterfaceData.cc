@@ -45,7 +45,7 @@ Ieee8021dInterfaceData::Ieee8021dInterfaceData()
 {
 }
 
-std::string Ieee8021dInterfaceData::info() const
+std::string Ieee8021dInterfaceData::str() const
 {
     std::stringstream out;
     out << "role:" << getRoleName() << " state:" << getStateName();

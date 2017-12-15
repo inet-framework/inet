@@ -119,7 +119,7 @@ TcpStateVariables::TcpStateVariables()
     queueUpdate = true;
 }
 
-std::string TcpStateVariables::info() const
+std::string TcpStateVariables::str() const
 {
     std::stringstream out;
     out << "snd_una=" << snd_una;

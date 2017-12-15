@@ -50,7 +50,7 @@ class INET_API PimInterface : public cObject
   public:
     PimInterface(InterfaceEntry *ie, PimMode mode, bool stateRefreshFlag)
         : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }

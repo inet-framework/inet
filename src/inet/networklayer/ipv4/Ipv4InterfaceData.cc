@@ -65,7 +65,7 @@ bool Ipv4MulticastSourceList::remove(Ipv4Address source)
     return sources.size() != oldSize;
 }
 
-std::string Ipv4MulticastSourceList::info() const
+std::string Ipv4MulticastSourceList::str() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "I" : "E");
@@ -91,7 +91,7 @@ Ipv4InterfaceData::HostMulticastData::~HostMulticastData()
     joinedMulticastGroups.clear();
 }
 
-std::string Ipv4InterfaceData::HostMulticastData::info()
+std::string Ipv4InterfaceData::HostMulticastData::str()
 {
     std::stringstream out;
     if (!joinedMulticastGroups.empty()) {
@@ -99,7 +99,7 @@ std::string Ipv4InterfaceData::HostMulticastData::info()
         for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i) {
             out << (i > 0 ? "," : "") << joinedMulticastGroups[i]->multicastGroup;
             if (!joinedMulticastGroups[i]->sourceList.containsAll())
-                out << " " << joinedMulticastGroups[i]->sourceList.info();
+                out << " " << joinedMulticastGroups[i]->sourceList.str();
         }
     }
     return out.str();
@@ -124,7 +124,7 @@ Ipv4InterfaceData::RouterMulticastData::~RouterMulticastData()
     reportedMulticastGroups.clear();
 }
 
-std::string Ipv4InterfaceData::RouterMulticastData::info()
+std::string Ipv4InterfaceData::RouterMulticastData::str()
 {
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
@@ -132,7 +132,7 @@ std::string Ipv4InterfaceData::RouterMulticastData::info()
         for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i) {
             out << (i > 0 ? "," : "") << reportedMulticastGroups[i]->multicastGroup;
             if (!reportedMulticastGroups[i]->sourceList.containsAll())
-                out << " " << reportedMulticastGroups[i]->sourceList.info();
+                out << " " << reportedMulticastGroups[i]->sourceList.str();
         }
     }
     if (multicastTtlThreshold > 0)
@@ -167,14 +167,14 @@ Ipv4InterfaceData::~Ipv4InterfaceData()
     delete routerData;
 }
 
-std::string Ipv4InterfaceData::info() const
+std::string Ipv4InterfaceData::str() const
 {
     std::stringstream out;
     out << "Ipv4:{inet_addr:" << getIPAddress() << "/" << getNetmask().getNetmaskLength();
     if (hostData)
-        out << hostData->info();
+        out << hostData->str();
     if (routerData)
-        out << routerData->info();
+        out << routerData->str();
     out << "}";
     return out.str();
 }

@@ -23,7 +23,7 @@ namespace inet {
 
 Register_Class(GenericRoute);
 
-std::string GenericRoute::info() const
+std::string GenericRoute::str() const
 {
     std::stringstream out;
 
@@ -77,7 +77,7 @@ IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
 
 #if 0    /*FIXME TODO!!!! */
 
-std::string GenericMulticastRoute::info() const
+std::string GenericMulticastRoute::str() const
 {
     return "";    //TODO
 }

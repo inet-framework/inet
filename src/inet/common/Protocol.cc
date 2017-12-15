@@ -31,7 +31,7 @@ Protocol::Protocol(const char *name) :
     nameToProtocol[name] = this;
 }
 
-std::string Protocol::info() const
+std::string Protocol::str() const
 {
     std::ostringstream os;
     os << getName() << "(" << id << ")";

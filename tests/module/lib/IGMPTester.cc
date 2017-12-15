@@ -372,7 +372,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             Ipv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
             const Ipv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
-            EV << (i==0 ? "" : ", ") << group << " " << sourceList.info();
+            EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
         }
     }
     else if (what == "listeners")
@@ -381,7 +381,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             Ipv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
             const Ipv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
-            EV << (i==0 ? "" : ", ") << group << " " << sourceList.info();
+            EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
         }
     }
 

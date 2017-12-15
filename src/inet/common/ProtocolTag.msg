@@ -27,7 +27,7 @@ class Protocol { @existingClass; }
 //
 class ProtocolTagBase extends TagBase
 {
-    const Protocol *protocol @toString("->info()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
+    const Protocol *protocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
 }
 
 //

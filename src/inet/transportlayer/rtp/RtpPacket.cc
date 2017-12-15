@@ -21,7 +21,7 @@ namespace inet {
 
 namespace rtp {
 
-std::string RtpHeader::info() const
+std::string RtpHeader::str() const
 {
     std::stringstream out;
     out << "RtpHeader: payloadType=" << payloadType;

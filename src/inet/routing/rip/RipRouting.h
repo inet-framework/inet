@@ -56,7 +56,7 @@ struct RipRoute : public cObject
 
   public:
     RipRoute(IRoute *route, RouteType type, int metric, uint16 tag);
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     RouteType getType() const { return type; }
     IRoute *getRoute() const { return route; }

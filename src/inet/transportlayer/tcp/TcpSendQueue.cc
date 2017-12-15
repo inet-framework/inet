@@ -47,7 +47,7 @@ std::string TcpSendQueue::str() const
 
 void TcpSendQueue::enqueueAppData(Packet *msg)
 {
-    //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
+    //tcpEV << "sendQ: " << str() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
     end += msg->getByteLength();
     if (seqLess(end, begin))
@@ -67,7 +67,7 @@ uint32 TcpSendQueue::getBufferEndSeq()
 
 Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
-    //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
+    //tcpEV << "sendQ: " << str() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
 
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
@@ -83,7 +83,7 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 
 void TcpSendQueue::discardUpTo(uint32 seqNum)
 {
-    //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
+    //tcpEV << "sendQ: " << str() << " discardUpTo(seq=" << seqNum << ")\n";
 
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 

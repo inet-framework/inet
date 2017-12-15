@@ -39,7 +39,7 @@ Ipv4Route::~Ipv4Route()
     delete protocolData;
 }
 
-std::string Ipv4Route::info() const
+std::string Ipv4Route::str() const
 {
     std::stringstream out;
 
@@ -114,7 +114,7 @@ Ipv4MulticastRoute::~Ipv4MulticastRoute()
     outInterfaces.clear();
 }
 
-std::string Ipv4MulticastRoute::info() const
+std::string Ipv4MulticastRoute::str() const
 {
     std::stringstream out;
 
@@ -157,7 +157,7 @@ std::string Ipv4MulticastRoute::info() const
 
 std::string Ipv4MulticastRoute::detailedInfo() const
 {
-    return info();
+    return str();
 }
 
 void Ipv4MulticastRoute::setInInterface(InInterface *_inInterface)

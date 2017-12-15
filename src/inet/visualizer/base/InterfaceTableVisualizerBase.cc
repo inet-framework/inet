@@ -93,7 +93,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             result = interfaceEntry->getNetworkAddress().str();
             break;
         case 'i':
-            result = interfaceEntry->info();
+            result = interfaceEntry->str();
             break;
         case 's':
             result = interfaceEntry->str();

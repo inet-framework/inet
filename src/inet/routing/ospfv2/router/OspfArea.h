@@ -123,7 +123,7 @@ class INET_API Area : public cObject
     void calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
     void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
 
-    std::string info() const override;
+    std::string str() const override;
     std::string detailedInfo() const override;
 
   private:

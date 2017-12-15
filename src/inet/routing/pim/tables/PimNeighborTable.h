@@ -51,7 +51,7 @@ class INET_API PimNeighbor : public cObject
   public:
     PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version);
     virtual ~PimNeighbor();
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     int getInterfaceId() const { return ie->getInterfaceId(); }
     InterfaceEntry *getInterfacePtr() const { return ie; }

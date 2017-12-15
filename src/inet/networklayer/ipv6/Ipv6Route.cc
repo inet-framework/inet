@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Abstract_Class(Ipv6Route);
 
-std::string Ipv6Route::info() const
+std::string Ipv6Route::str() const
 {
     std::stringstream out;
     out << getDestPrefix() << "/" << getPrefixLength() << " --> ";

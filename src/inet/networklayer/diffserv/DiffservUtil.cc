@@ -220,7 +220,7 @@ class ColorAttribute : public cObject
   public:
     ColorAttribute(int color) : color(color) {}
     virtual const char *getName() const override { return "dscolor"; }
-    virtual std::string info() const override { return colorToString(color); }
+    virtual std::string str() const override { return colorToString(color); }
     virtual cObject *dup() const override { return new ColorAttribute(color); }
 };
 

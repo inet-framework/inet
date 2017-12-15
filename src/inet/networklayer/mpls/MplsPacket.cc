@@ -19,7 +19,7 @@
 
 namespace inet {
 
-std::string MplsHeader::info() const
+std::string MplsHeader::str() const
 {
     std::stringstream out;
     for (int i = (int)labels_arraysize - 1; i >= 0; i--)
