@@ -48,18 +48,20 @@ std::string TcpSackRexmitQueue::str() const
     return out.str();
 }
 
-void TcpSackRexmitQueue::info() const
+std::string TcpSackRexmitQueue::detailedInfo() const
 {
-    EV_DETAIL << str() << endl;
+    std::stringstream out;
+    out << str() << endl;
 
     uint j = 1;
 
     for (const auto & elem : rexmitQueue) {
-        EV_DETAIL << j << ". region: [" << elem.beginSeqNum << ".." << elem.endSeqNum
-                  << ") \t sacked=" << elem.sacked << "\t rexmitted=" << elem.rexmitted
-                  << endl;
+        out << j << ". region: [" << elem.beginSeqNum << ".." << elem.endSeqNum
+            << ") \t sacked=" << elem.sacked << "\t rexmitted=" << elem.rexmitted
+            << endl;
         j++;
     }
+    return out.str();
 }
 
 void TcpSackRexmitQueue::discardUpTo(uint32 seqNum)
@@ -149,8 +151,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
     ASSERT(fromSeqNum == toSeqNum);
 
     if (!found) {
-        EV_DEBUG << "Not found enqueueSentData(" << fromSeqNum << ", " << toSeqNum << ")\nThe Queue is:\n";
-        info();
+        EV_DEBUG << "Not found enqueueSentData(" << fromSeqNum << ", " << toSeqNum << ")\nThe Queue is:\n" << detailedInfo();
     }
 
     ASSERT(found);
@@ -178,8 +179,7 @@ bool TcpSackRexmitQueue::checkQueue() const
     f = f && (b == end);
 
     if (!f) {
-        EV_DEBUG << "Invalid Queue\nThe Queue is:\n";
-        info();
+        EV_DEBUG << "Invalid Queue\nThe Queue is:\n" << detailedInfo();
     }
 
     return f;

@@ -83,7 +83,7 @@ class INET_API TcpSackRexmitQueue
     /**
      * Prints the current rexmitQueue status for debug purposes.
      */
-    virtual void info() const;
+    virtual std::string detailedInfo() const;
 
     /**
      * Returns the sequence number of the first byte stored in the buffer.

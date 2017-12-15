@@ -640,7 +640,7 @@ void TcpConnection::sendSegment(uint32 bytes)
             EV_INFO << "sendSegment(" << bytes << ") forwarded " << forward << " bytes of snd_nxt from " << state->snd_nxt;
             state->snd_nxt += forward;
             EV_INFO << " to " << state->snd_nxt << endl;
-            rexmitQueue->info();
+            EV_DETAIL << rexmitQueue->detailedInfo();
         }
     }
 
