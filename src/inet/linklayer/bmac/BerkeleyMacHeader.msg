@@ -20,7 +20,7 @@ import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;
 
-class BMacHeader extends MacHeaderBase
+class BerkeleyMacHeader extends MacHeaderBase
 {
 }
 

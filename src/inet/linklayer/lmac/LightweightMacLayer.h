@@ -16,7 +16,7 @@
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
-#include "inet/linklayer/lmac/LMacHeader_m.h"
+#include "inet/linklayer/lmac/LightweightMacHeader_m.h"
 
 namespace inet {
 
@@ -58,18 +58,18 @@ namespace inet {
  *
  * @ingroup macLayer
  **/
-class INET_API LMacLayer : public MacProtocolBase, public IMacProtocol
+class INET_API LightweightMacLayer : public MacProtocolBase, public IMacProtocol
 {
   private:
     /** @brief Copy constructor is not allowed.
      */
-    LMacLayer(const LMacLayer&);
+    LightweightMacLayer(const LightweightMacLayer&);
     /** @brief Assignment operator is not allowed.
      */
-    LMacLayer& operator=(const LMacLayer&);
+    LightweightMacLayer& operator=(const LightweightMacLayer&);
 
   public:
-    LMacLayer()
+    LightweightMacLayer()
         : MacProtocolBase()
         , SETUP_PHASE(true)
         , slotChange()
@@ -95,7 +95,7 @@ class INET_API LMacLayer : public MacProtocolBase, public IMacProtocol
         , bitrate(0)
     {}
     /** @brief Clean up messges.*/
-    virtual ~LMacLayer();
+    virtual ~LightweightMacLayer();
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int) override;

@@ -19,8 +19,8 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/bmac/BMacHeader_m.h"
-#include "inet/linklayer/bmac/BMacLayer.h"
+#include "inet/linklayer/bmac/BerkeleyMacHeader_m.h"
+#include "inet/linklayer/bmac/BerkeleyMacLayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
@@ -28,9 +28,9 @@ namespace inet {
 
 using namespace physicallayer;
 
-Define_Module(BMacLayer);
+Define_Module(BerkeleyMacLayer);
 
-void BMacLayer::initialize(int stage)
+void BerkeleyMacLayer::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -111,7 +111,7 @@ void BMacLayer::initialize(int stage)
     }
 }
 
-BMacLayer::~BMacLayer()
+BerkeleyMacLayer::~BerkeleyMacLayer()
 {
     cancelAndDelete(wakeup);
     cancelAndDelete(data_timeout);
@@ -131,7 +131,7 @@ BMacLayer::~BMacLayer()
     macQueue.clear();
 }
 
-void BMacLayer::finish()
+void BerkeleyMacLayer::finish()
 {
     recordScalar("nbTxDataPackets", nbTxDataPackets);
     recordScalar("nbTxPreambles", nbTxPreambles);
@@ -146,7 +146,7 @@ void BMacLayer::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-void BMacLayer::initializeMACAddress()
+void BerkeleyMacLayer::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
@@ -162,7 +162,7 @@ void BMacLayer::initializeMACAddress()
     }
 }
 
-InterfaceEntry *BMacLayer::createInterfaceEntry()
+InterfaceEntry *BerkeleyMacLayer::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -186,7 +186,7 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
  * packet. Then initiate sending of the packet, if the node is sleeping. Do
  * nothing, if node is working.
  */
-void BMacLayer::handleUpperPacket(Packet *packet)
+void BerkeleyMacLayer::handleUpperPacket(Packet *packet)
 {
     bool pktAdded = addToQueue(packet);
     if (!pktAdded)
@@ -201,9 +201,9 @@ void BMacLayer::handleUpperPacket(Packet *packet)
 /**
  * Send one short preamble packet immediately.
  */
-void BMacLayer::sendPreamble()
+void BerkeleyMacLayer::sendPreamble()
 {
-    auto preamble = makeShared<BMacHeader>();
+    auto preamble = makeShared<BerkeleyMacHeader>();
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(b(headerLength));
@@ -220,9 +220,9 @@ void BMacLayer::sendPreamble()
 /**
  * Send one short preamble packet immediately.
  */
-void BMacLayer::sendMacAck()
+void BerkeleyMacLayer::sendMacAck()
 {
-    auto ack = makeShared<BMacHeader>();
+    auto ack = makeShared<BerkeleyMacHeader>();
     ack->setSrcAddr(address);
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(b(headerLength));
@@ -249,7 +249,7 @@ void BMacLayer::sendMacAck()
  * BMAC_TIMEOUT_DATA: timeout the node after a false busy channel alarm. Go
  * back to sleep.
  */
-void BMacLayer::handleSelfMessage(cMessage *msg)
+void BerkeleyMacLayer::handleSelfMessage(cMessage *msg)
 {
     switch (macState) {
         case INIT:
@@ -427,7 +427,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress src = mac->peekHeader<BMacHeader>()->getSrcAddr();
+                const MacAddress src = mac->peekHeader<BerkeleyMacHeader>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -471,7 +471,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_DATA) {
                 nbRxDataPackets++;
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = mac->peekHeader<BMacHeader>();
+                const auto bmacHeader = mac->peekHeader<BerkeleyMacHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
@@ -559,7 +559,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle BMAC preambles and received data packets.
  */
-void BMacLayer::handleLowerPacket(Packet *packet)
+void BerkeleyMacLayer::handleLowerPacket(Packet *packet)
 {
     if (packet->hasBitError()) {
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
@@ -574,17 +574,17 @@ void BMacLayer::handleLowerPacket(Packet *packet)
         handleSelfMessage(packet);
 }
 
-void BMacLayer::sendDataPacket()
+void BerkeleyMacLayer::sendDataPacket()
 {
     nbTxDataPackets++;
     Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    lastDataPktDestAddr = pkt->peekHeader<BMacHeader>()->getDestAddr();
+    lastDataPktDestAddr = pkt->peekHeader<BerkeleyMacHeader>()->getDestAddr();
     pkt->setKind(BMAC_DATA);
     sendDown(pkt);
 }
 
-void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void BerkeleyMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::radioModeChangedSignal) {
@@ -616,10 +616,10 @@ void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
 }
 
 /**
- * Encapsulates the received network-layer packet into a BMacHeader and set all
+ * Encapsulates the received network-layer packet into a BerkeleyMacHeader and set all
  * needed header fields.
  */
-bool BMacLayer::addToQueue(cMessage *msg)
+bool BerkeleyMacLayer::addToQueue(cMessage *msg)
 {
     if (macQueue.size() >= queueLength) {
         // queue is full, message has to be deleted
@@ -642,18 +642,18 @@ bool BMacLayer::addToQueue(cMessage *msg)
     return true;
 }
 
-void BMacLayer::flushQueue()
+void BerkeleyMacLayer::flushQueue()
 {
     // TODO:
     macQueue.clear();
 }
 
-void BMacLayer::clearQueue()
+void BerkeleyMacLayer::clearQueue()
 {
     macQueue.clear();
 }
 
-void BMacLayer::attachSignal(Packet *macPkt)
+void BerkeleyMacLayer::attachSignal(Packet *macPkt)
 {
     //calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;
@@ -664,7 +664,7 @@ void BMacLayer::attachSignal(Packet *macPkt)
 /**
  * Change the color of the node for animation purposes.
  */
-void BMacLayer::refreshDisplay() const
+void BerkeleyMacLayer::refreshDisplay() const
 {
     if (!animation)
         return;
@@ -699,7 +699,7 @@ void BMacLayer::refreshDisplay() const
     }
 }
 
-/*void BMacLayer::changeMacState(States newState)
+/*void BerkeleyMacLayer::changeMacState(States newState)
    {
     switch (macState)
     {
@@ -736,9 +736,9 @@ void BMacLayer::refreshDisplay() const
     macState = newState;
    }*/
 
-void BMacLayer::decapsulate(Packet *packet)
+void BerkeleyMacLayer::decapsulate(Packet *packet)
 {
-    const auto& bmacHeader = packet->popHeader<BMacHeader>();
+    const auto& bmacHeader = packet->popHeader<BerkeleyMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
@@ -747,9 +747,9 @@ void BMacLayer::decapsulate(Packet *packet)
     EV_DETAIL << " message decapsulated " << endl;
 }
 
-void BMacLayer::encapsulate(Packet *packet)
+void BerkeleyMacLayer::encapsulate(Packet *packet)
 {
-    auto pkt = makeShared<BMacHeader>();
+    auto pkt = makeShared<BerkeleyMacHeader>();
     pkt->setChunkLength(b(headerLength));
 
     // copy dest address from the Control Info attached to the network
