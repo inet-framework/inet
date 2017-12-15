@@ -134,6 +134,7 @@ void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, u
 void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
 {
     const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
+    bytes->markImmutable();
     dataBuffer.push(bytes);
 }
 
