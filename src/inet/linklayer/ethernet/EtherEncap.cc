@@ -211,7 +211,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
 void EtherEncap::processFrameFromMAC(Packet *packet)
 {
     // decapsulate and attach control info
-    const auto& ethHeader = decapsulateMacLlcSnap(packet);
+    decapsulateMacLlcSnap(packet);
 
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     if (protocol)

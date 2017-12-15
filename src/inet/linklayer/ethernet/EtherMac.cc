@@ -877,7 +877,7 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
 
 void EtherMac::processReceivedControlFrame(Packet *packet)
 {
-    const auto& header = packet->popHeader<EthernetMacHeader>();
+    packet->popHeader<EthernetMacHeader>();
     const auto& controlFrame = packet->peekHeader<EthernetControlFrame>();
 
     if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
