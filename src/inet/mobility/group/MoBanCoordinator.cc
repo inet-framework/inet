@@ -350,7 +350,7 @@ bool MoBanCoordinator::readMobilityPatternFile()
  */
 bool MoBanCoordinator::readPostureSpecificationFile()
 {
-    cXMLElement *xmlPosture = par("postureSpecFile").xmlValue();
+    cXMLElement *xmlPosture = par("postureSpecFile");
     if (xmlPosture == nullptr)
         return false;
 
@@ -439,7 +439,7 @@ bool MoBanCoordinator::readPostureSpecificationFile()
  */
 bool MoBanCoordinator::readConfigurationFile()
 {
-    cXMLElement *xmlConfig = par("configFile").xmlValue();
+    cXMLElement *xmlConfig = par("configFile");
     if (xmlConfig == nullptr)
         return false;
 

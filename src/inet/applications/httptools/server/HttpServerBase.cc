@@ -61,7 +61,7 @@ void HttpServerBase::initialize(int stage)
 
         httpProtocol = par("httpProtocol");
 
-        cXMLElement *rootelement = par("config").xmlValue();
+        cXMLElement *rootelement = par("config");
         if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 

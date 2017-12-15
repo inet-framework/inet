@@ -140,7 +140,7 @@ void MatrixCloudDelayer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        cXMLElement *configEntity = par("config").xmlValue();
+        cXMLElement *configEntity = par("config");
         // parse XML config
         if (strcmp(configEntity->getTagName(), "internetCloud"))
             throw cRuntimeError("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),

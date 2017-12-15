@@ -64,7 +64,7 @@ void PimInterfaceTable::initialize(int stage)
         WATCH_VECTOR(pimInterfaces);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
-        configureInterfaces(par("pimConfig").xmlValue());
+        configureInterfaces(par("pimConfig"));
 
         cModule *host = findContainingNode(this);
         if (!host)
@@ -152,7 +152,7 @@ void PimInterfaceTable::addInterface(InterfaceEntry *ie)
 {
     ASSERT(findInterface(ie) == pimInterfaces.end());
 
-    cXMLElement *config = par("pimConfig").xmlValue();
+    cXMLElement *config = par("pimConfig");
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
 

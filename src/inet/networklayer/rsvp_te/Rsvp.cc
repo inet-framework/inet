@@ -91,7 +91,7 @@ void Rsvp::initialize(int stage)
             setupHello();
 
         // process traffic configuration
-        readTrafficFromXML(par("traffic").xmlValue());
+        readTrafficFromXML(par("traffic"));
         registerProtocol(Protocol::rsvp, gate("ipOut"));
     }
 }

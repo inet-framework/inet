@@ -64,7 +64,7 @@ void OspfRouting::createOspfRouter()
     ospfRouter = new Router(rt->getRouterId(), this, ift, rt);
 
     // read the OSPF AS configuration
-    cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
+    cXMLElement *ospfConfig = par("ospfConfig");
     OspfConfigReader configReader(this, ift);
     if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
         throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());

@@ -55,7 +55,7 @@ void BgpRouting::initialize(int stage)
         _inft = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         // read BGP configuration
-        cXMLElement *bgpConfig = par("bgpConfig").xmlValue();
+        cXMLElement *bgpConfig = par("bgpConfig");
         loadConfigFromXML(bgpConfig);
         createWatch("myAutonomousSystem", _myAS);
         WATCH_PTRVECTOR(_BGPRoutingTable);

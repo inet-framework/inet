@@ -48,7 +48,7 @@ void HttpController::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
-        cXMLElement *rootelement = par("config").xmlValue();
+        cXMLElement *rootelement = par("config");
         if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 

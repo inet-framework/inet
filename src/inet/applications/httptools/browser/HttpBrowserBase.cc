@@ -49,7 +49,7 @@ void HttpBrowserBase::initialize(int stage)
     HttpNodeBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        cXMLElement *rootelement = par("config").xmlValue();
+        cXMLElement *rootelement = par("config");
         if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 

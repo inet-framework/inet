@@ -456,7 +456,7 @@ void RipRouting::startRIPRouting()
     addressType = rt->getRouterIdAsGeneric().getAddressType();
 
     // configure interfaces
-    configureInterfaces(par("ripConfig").xmlValue());
+    configureInterfaces(par("ripConfig"));
 
     // import interface routes
     configureInitialRoutes();

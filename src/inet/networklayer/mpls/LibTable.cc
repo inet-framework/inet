@@ -31,7 +31,7 @@ void LibTable::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration
-        readTableFromXML(par("config").xmlValue());
+        readTableFromXML(par("config"));
     }
 }
 

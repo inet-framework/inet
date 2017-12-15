@@ -42,7 +42,7 @@ void SimpleClassifier::initialize(int stage)
 
         rsvp = getModuleFromPar<Rsvp>(par("rsvpModule"), this);
 
-        readTableFromXML(par("config").xmlValue());
+        readTableFromXML(par("config"));
     }
 }
 
