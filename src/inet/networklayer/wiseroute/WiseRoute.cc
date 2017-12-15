@@ -52,7 +52,7 @@ void WiseRoute::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
         headerLength = par("headerLength");
-        rssiThreshold = par("rssiThreshold").doubleValue();
+        rssiThreshold = par("rssiThreshold");
         rssiThreshold = math::dBm2mW(rssiThreshold);
         routeFloodsInterval = par("routeFloodsInterval");
 

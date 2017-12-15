@@ -138,7 +138,7 @@ void EtherTrafGen::scheduleNextPacket(simtime_t previous)
         timerMsg->setKind(START);
     }
     else {
-        next = previous + sendInterval->doubleValue();
+        next = previous + *sendInterval;
         timerMsg->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)

@@ -57,7 +57,7 @@ void Ieee80211AgentSta::initialize(int stage)
         default_ssid = par("default_ssid").stdstringValue();
 
         // start up: send scan request
-        simtime_t startingTime = par("startingTime").doubleValue();
+        simtime_t startingTime = par("startingTime");
         if (startingTime < SIMTIME_ZERO)
             startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
         scheduleAt(simTime() + startingTime, new cMessage("startUp", MK_STARTUP));

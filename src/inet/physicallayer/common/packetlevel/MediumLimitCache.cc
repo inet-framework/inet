@@ -209,12 +209,12 @@ m MediumLimitCache::computeMaxInterferenceRange() const
 
 const simtime_t MediumLimitCache::computeMinInterferenceTime() const
 {
-    return par("minInterferenceTime").doubleValue();
+    return simtime_t(par("minInterferenceTime"));
 }
 
 const simtime_t MediumLimitCache::computeMaxTransmissionDuration() const
 {
-    return par("maxTransmissionDuration").doubleValue();
+    return simtime_t(par("maxTransmissionDuration"));
 }
 
 Coord MediumLimitCache::computeMinConstraintArea() const

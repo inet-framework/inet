@@ -135,7 +135,7 @@ void EtherAppClient::scheduleNextPacket(bool start)
         timerMsg->setKind(START);
     }
     else {
-        next = cur + sendInterval->doubleValue();
+        next = cur + *sendInterval;
         timerMsg->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)

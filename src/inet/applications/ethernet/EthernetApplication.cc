@@ -46,7 +46,7 @@ void EthernetApplication::initialize(int stage)
             return;
 
         cMessage *timermsg = new cMessage("generateNextPacket");
-        simtime_t d = par("startTime").doubleValue();
+        simtime_t d(par("startTime"));
         scheduleAt(simTime() + d, timermsg);
     }
 }
@@ -74,7 +74,7 @@ void EthernetApplication::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         sendPacket();
-        simtime_t d = waitTime->doubleValue();
+        simtime_t d(*waitTime);
         scheduleAt(simTime() + d, msg);
     }
     else {

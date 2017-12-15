@@ -47,8 +47,8 @@ void UdpBasicApp::initialize(int stage)
 
         localPort = par("localPort");
         destPort = par("destPort");
-        startTime = par("startTime").doubleValue();
-        stopTime = par("stopTime").doubleValue();
+        startTime = par("startTime");
+        stopTime = par("stopTime");
         packetName = par("packetName");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
@@ -154,7 +154,7 @@ void UdpBasicApp::processStart()
 void UdpBasicApp::processSend()
 {
     sendPacket();
-    simtime_t d = simTime() + par("sendInterval").doubleValue();
+    simtime_t d = simTime() + par("sendInterval");
     if (stopTime < SIMTIME_ZERO || d < stopTime) {
         selfMsg->setKind(SEND);
         scheduleAt(d, selfMsg);

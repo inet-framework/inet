@@ -113,7 +113,7 @@ bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
     if (isEnabled) {
         EV_INFO << "PIM is enabled on device " << hostname << endl;
         helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
-        scheduleAt(simTime() + par("triggeredHelloDelay").doubleValue(), helloTimer);
+        scheduleAt(simTime() + par("triggeredHelloDelay"), helloTimer);
     }
 
     return true;

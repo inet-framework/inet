@@ -40,7 +40,7 @@ void Delayer::handleMessage(cMessage *msg)
     else {
         emit(rcvdPkSignal, msg);
 
-        simtime_t delay = delayPar->doubleValue();
+        simtime_t delay(*delayPar);
         emit(delaySignal, delay);
         scheduleAt(simTime() + delay, msg);
     }

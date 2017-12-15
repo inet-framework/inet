@@ -302,7 +302,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
     {
         bubble("delay: removing original");
         dump(seg, pk->getByteLength(), fromA, "delay: removing original");
-        double d = delay->doubleValue();
+        double d = *delay;
         pk->setContextPointer((void*)fromA);
         scheduleAt(simTime()+d, pk);
     }
@@ -313,7 +313,7 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
         int n = *numCopies;
         for (int i=0; i<n; i++)
         {
-            double d = delay->doubleValue();
+            double d = *delay;
             Packet *segcopy = pk->dup();
             segcopy->setContextPointer((void *)fromA);
             scheduleAt(simTime()+d, segcopy);

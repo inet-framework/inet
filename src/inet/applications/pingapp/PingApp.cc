@@ -327,9 +327,9 @@ void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
     if (previous < SIMTIME_ZERO)
         next = simTime() <= startTime ? startTime : simTime();
     else {
-        next = previous + sendIntervalPar->doubleValue();
+        next = previous + *sendIntervalPar;
         if (withSleep)
-            next += sleepDurationPar->doubleValue();
+            next += *sleepDurationPar;
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
         scheduleAt(next, timer);

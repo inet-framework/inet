@@ -126,7 +126,7 @@ void Ted::initializeTED()
             entry.UnResvBandwidth[j] = entry.MaxBandwidth;
         entry.state = true;
 
-        // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
+        // use g->getChannel()->par("delay") for shortest delay calculation
         entry.metric = ie->ipv4Data()->getMetric();
 
         EV_INFO << "metric set to=" << entry.metric << endl;

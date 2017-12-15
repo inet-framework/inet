@@ -27,7 +27,7 @@ Define_Module(TcpSpoof);
 
 void TcpSpoof::initialize()
 {
-    simtime_t t = par("t").doubleValue();
+    simtime_t t = par("t");
     scheduleAt(t, new cMessage("timer"));
 }
 

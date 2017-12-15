@@ -146,7 +146,7 @@ void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
         timer->setKind(START);
     }
     else {
-        next = previous + sendIntervalPar->doubleValue();
+        next = previous + *sendIntervalPar;
         timer->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)

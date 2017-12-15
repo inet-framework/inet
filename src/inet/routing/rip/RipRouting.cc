@@ -209,10 +209,10 @@ void RipRouting::initialize(int stage)
             throw cRuntimeError("Unrecognized 'mode' parameter: %s", m);
 
         ripUdpPort = par("udpPort");
-        updateInterval = par("updateInterval").doubleValue();
-        routeExpiryTime = par("routeExpiryTime").doubleValue();
-        routePurgeTime = par("routePurgeTime").doubleValue();
-        shutdownTime = par("shutdownTime").doubleValue();
+        updateInterval = par("updateInterval");
+        routeExpiryTime = par("routeExpiryTime");
+        routePurgeTime = par("routePurgeTime");
+        shutdownTime = par("shutdownTime");
 
         updateTimer = new cMessage("RIP-timer");
         triggeredUpdateTimer = new cMessage("RIP-trigger");
@@ -226,7 +226,7 @@ void RipRouting::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isOperational)
-            scheduleAt(simTime() + par("startupTime").doubleValue(), startupTimer);
+            scheduleAt(simTime() + par("startupTime"), startupTimer);
     }
 }
 
@@ -418,7 +418,7 @@ bool RipRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             isOperational = true;
             cancelEvent(startupTimer);
-            scheduleAt(simTime() + par("startupTime").doubleValue(), startupTimer);
+            scheduleAt(simTime() + par("startupTime"), startupTimer);
             return true;
         }
     }

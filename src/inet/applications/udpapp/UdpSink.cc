@@ -40,8 +40,8 @@ void UdpSink::initialize(int stage)
         WATCH(numReceived);
 
         localPort = par("localPort");
-        startTime = par("startTime").doubleValue();
-        stopTime = par("stopTime").doubleValue();
+        startTime = par("startTime");
+        stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("UDPSinkTimer");

@@ -18,13 +18,6 @@
 
 #include "inet/common/INETDefs.h"
 
-// compatibility for pre-4.2b3 omnetpp
-#ifndef Define_NED_Math_Function
-#define cNEDValue           cDynamicExpression::Value
-#define stringValue()       s.c_str()
-#define stdstringValue()    s
-#endif // ifndef Define_NED_Math_Function
-
 namespace inet {
 
 namespace utils {

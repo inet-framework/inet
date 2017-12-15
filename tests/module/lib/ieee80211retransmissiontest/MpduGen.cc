@@ -36,7 +36,7 @@ void MpduGen::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         selfMsg = new cMessage("Self msg");
-        scheduleAt(simTime() + par("startTime").doubleValue(), selfMsg);
+        scheduleAt(simTime() + par("startTime"), selfMsg);
     }
 }
 

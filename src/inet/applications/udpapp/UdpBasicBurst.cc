@@ -264,16 +264,16 @@ void UdpBasicBurst::generateBurst()
     if (nextPkt < now)
         nextPkt = now;
 
-    double sendInterval = sendIntervalPar->doubleValue();
+    double sendInterval = *sendIntervalPar;
     if (sendInterval <= 0.0)
         throw cRuntimeError("The sendInterval parameter must be bigger than 0");
     nextPkt += sendInterval;
 
     if (activeBurst && nextBurst <= now) {    // new burst
-        double burstDuration = burstDurationPar->doubleValue();
+        double burstDuration = *burstDurationPar;
         if (burstDuration < 0.0)
             throw cRuntimeError("The burstDuration parameter mustn't be smaller than 0");
-        double sleepDuration = sleepDurationPar->doubleValue();
+        double sleepDuration = *sleepDurationPar;
 
         if (burstDuration == 0.0)
             activeBurst = false;

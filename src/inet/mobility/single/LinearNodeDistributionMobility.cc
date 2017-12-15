@@ -36,10 +36,10 @@ void LinearNodeDistributionMobility::initialize(int stage)
 
     EV_TRACE << "initializing LinearNodeDistributionMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        initialX = par("initialX").doubleValue();
-        initialY = par("initialY").doubleValue();
-        separation = par("separation").doubleValue();
-        orientation = par("orientation").doubleValue();
+        initialX = par("initialX");
+        initialY = par("initialY");
+        separation = par("separation");
+        orientation = par("orientation");
     }
 }
 

@@ -32,7 +32,7 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         delayedAckPolicySupported = par("delayedAckPolicySupported");
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
-        blockAckTimeoutValue = par("blockAckTimeoutValue").doubleValue();
+        blockAckTimeoutValue = par("blockAckTimeoutValue");
         // TODO: addbaFailureTimeout = par("addbaFailureTimeout");
     }
 }

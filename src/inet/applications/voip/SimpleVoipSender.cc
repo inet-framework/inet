@@ -53,7 +53,7 @@ void SimpleVoipSender::initialize(int stage)
         talkspurtNumPackets = 0;
         packetID = 0;
         talkPacketSize = par("talkPacketSize");
-        packetizationInterval = par("packetizationInterval").doubleValue();
+        packetizationInterval = par("packetizationInterval");
         selfSender = new cMessage("selfSender");
         localPort = par("localPort");
         destPort = par("destPort");
@@ -71,8 +71,8 @@ void SimpleVoipSender::initialize(int stage)
         EV_INFO << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
 
         // calculating traffic starting time
-        simtime_t startTime = par("startTime").doubleValue();
-        stopTime = par("stopTime").doubleValue();
+        simtime_t startTime(par("startTime"));
+        stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
@@ -118,7 +118,7 @@ void SimpleVoipSender::selectTalkOrSilenceInterval()
         return;
 
     if (isTalk) {
-        silenceDuration = par("silenceDuration").doubleValue();
+        silenceDuration = par("silenceDuration");
         EV_DEBUG << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
         simtime_t endSilence = now + silenceDuration;
         if (stopTime >= SIMTIME_ZERO && endSilence > stopTime)
@@ -127,7 +127,7 @@ void SimpleVoipSender::selectTalkOrSilenceInterval()
         isTalk = false;
     }
     else {
-        talkspurtDuration = par("talkspurtDuration").doubleValue();
+        talkspurtDuration = par("talkspurtDuration");
         EV_DEBUG << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
         simtime_t endTalk = now + talkspurtDuration;
         if (stopTime >= SIMTIME_ZERO && endTalk > stopTime) {

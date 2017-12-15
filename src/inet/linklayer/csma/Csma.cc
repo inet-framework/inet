@@ -65,11 +65,11 @@ void Csma::initialize(int stage)
         backoffValues = 0;
         macMaxCSMABackoffs = par("macMaxCSMABackoffs");
         macMaxFrameRetries = par("macMaxFrameRetries");
-        macAckWaitDuration = par("macAckWaitDuration").doubleValue();
-        aUnitBackoffPeriod = par("aUnitBackoffPeriod").doubleValue();
-        ccaDetectionTime = par("ccaDetectionTime").doubleValue();
-        rxSetupTime = par("rxSetupTime").doubleValue();
-        aTurnaroundTime = par("aTurnaroundTime").doubleValue();
+        macAckWaitDuration = par("macAckWaitDuration");
+        aUnitBackoffPeriod = par("aUnitBackoffPeriod");
+        ccaDetectionTime = par("ccaDetectionTime");
+        rxSetupTime = par("rxSetupTime");
+        aTurnaroundTime = par("aTurnaroundTime");
         bitrate = par("bitrate");
         ackLength = par("ackLength");
         ackMessage = nullptr;
@@ -117,7 +117,7 @@ void Csma::initialize(int stage)
         //aTurnaroundTime should match (be equal or bigger) the RX to TX
         //switching time of the radio
         if (radioModule->hasPar("timeRXToTX")) {
-            simtime_t rxToTx = radioModule->par("timeRXToTX").doubleValue();
+            simtime_t rxToTx = radioModule->par("timeRXToTX");
             if (rxToTx > aTurnaroundTime) {
                 throw cRuntimeError("Parameter \"aTurnaroundTime\" (%f) does not match"
                             " the radios RX to TX switching time (%f)! It"

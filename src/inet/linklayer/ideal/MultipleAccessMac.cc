@@ -72,7 +72,7 @@ void MultipleAccessMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         outStandingRequests = 0;
 
-        bitrate = par("bitrate").doubleValue();
+        bitrate = par("bitrate");
         headerLength = par("headerLength");
         promiscuous = par("promiscuous");
         fullDuplex = par("fullDuplex");

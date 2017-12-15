@@ -313,8 +313,8 @@ std::vector<Rsvp::traffic_path_t>::iterator Rsvp::findPath(traffic_session_t *se
 
 void Rsvp::setupHello()
 {
-    helloInterval = par("helloInterval").doubleValue();
-    helloTimeout = par("helloTimeout").doubleValue();
+    helloInterval = par("helloInterval");
+    helloTimeout = par("helloTimeout");
 
     cStringTokenizer tokenizer(par("peers"));
     const char *token;

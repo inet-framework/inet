@@ -90,7 +90,7 @@ void AodvRouting::initialize(int stage)
             // the delay between consecutive transmissions of messages of the same type is
             // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
             if (isOperational)
-                scheduleAt(simTime() + helloInterval - periodicJitter->doubleValue(), helloMsgTimer);
+                scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
         }
 
         expungeTimer = new cMessage("ExpungeTimer");
@@ -334,7 +334,7 @@ void AodvRouting::sendRREQ(const Ptr<AodvRreq>& rreq, const L3Address& destAddr,
     scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
 
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
-    sendAODVPacket(rreq, destAddr, timeToLive, jitterPar->doubleValue());
+    sendAODVPacket(rreq, destAddr, timeToLive, *jitterPar);
     rreqCount++;
 }
 
@@ -1098,7 +1098,7 @@ void AodvRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 
     // broadcast
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, jitterPar->doubleValue());
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);
 }
 
 const Ptr<AodvRerr> AodvRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
@@ -1191,7 +1191,7 @@ bool AodvRouting::handleOperationStage(LifecycleOperation *operation, int stage,
             rebootTime = simTime();
 
             if (useHelloMessages)
-                scheduleAt(simTime() + helloInterval - periodicJitter->doubleValue(), helloMsgTimer);
+                scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
 
             scheduleAt(simTime() + 1, counterTimer);
         }
@@ -1272,13 +1272,13 @@ void AodvRouting::forwardRREP(const Ptr<AodvRrep>& rrep, const L3Address& destAd
     // When a node forwards a message, it SHOULD be jittered by delaying it
     // by a random duration.  This delay SHOULD be generated uniformly in an
     // interval between zero and MAXJITTER.
-    sendAODVPacket(rrep, destAddr, 100, jitterPar->doubleValue());
+    sendAODVPacket(rrep, destAddr, 100, *jitterPar);
 }
 
 void AodvRouting::forwardRREQ(const Ptr<AodvRreq>& rreq, unsigned int timeToLive)
 {
     EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
-    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, jitterPar->doubleValue());
+    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, *jitterPar);
 }
 
 void AodvRouting::completeRouteDiscovery(const L3Address& target)
@@ -1370,7 +1370,7 @@ void AodvRouting::sendHelloMessagesIfNeeded()
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
     }
 
-    scheduleAt(simTime() + helloInterval - periodicJitter->doubleValue(), helloMsgTimer);
+    scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
 }
 
 void AodvRouting::handleHelloMessage(const Ptr<AodvRrep>& helloMessage)
@@ -1573,7 +1573,7 @@ void AodvRouting::sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr)
 
     rerrCount++;
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, jitterPar->doubleValue());    // TODO: unicast if there exists a route to the source
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, *jitterPar);    // TODO: unicast if there exists a route to the source
 }
 
 void AodvRouting::cancelRouteDiscovery(const L3Address& destAddr)

@@ -109,8 +109,8 @@ void Ldp::initialize(int stage)
     //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
     if (stage == INITSTAGE_LOCAL) {
-        holdTime = par("holdTime").doubleValue();
-        helloInterval = par("helloInterval").doubleValue();
+        holdTime = par("holdTime");
+        helloInterval = par("helloInterval");
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
