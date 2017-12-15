@@ -168,7 +168,7 @@ const char *OspfConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const
     const char *attrStr = ifConfig.getAttribute(name);
     if (attrStr && *attrStr)
         return attrStr;
-    return par(name).stringValue();
+    return par(name);
 }
 
 void OspfConfigReader::joinMulticastGroups(int interfaceId)

@@ -727,7 +727,7 @@ void Ipv4NetworkConfigurator::dumpRoutes(Topology& topology)
 void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
 {
     FILE *f;
-    f = fopen(par("dumpConfig").stringValue(), "w");
+    f = fopen(par("dumpConfig"), "w");
     if (!f)
         throw cRuntimeError("Cannot write configurator output file");
     fprintf(f, "<config>\n");

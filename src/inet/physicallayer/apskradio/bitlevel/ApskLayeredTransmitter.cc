@@ -55,7 +55,7 @@ void ApskLayeredTransmitter::initialize(int stage)
         bitrate = bps(par("bitrate"));
         bandwidth = Hz(par("bandwidth"));
         carrierFrequency = Hz(par("carrierFrequency"));
-        const char *levelOfDetailStr = par("levelOfDetail").stringValue();
+        const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;
         else if (strcmp("bit", levelOfDetailStr) == 0)

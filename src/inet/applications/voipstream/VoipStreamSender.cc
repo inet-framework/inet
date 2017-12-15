@@ -75,7 +75,7 @@ void VoipStreamSender::initialize(int stage)
         voipHeaderSize = par("voipHeaderSize");
         voipSilenceThreshold = par("voipSilenceThreshold");
         sampleRate = par("sampleRate");
-        codec = par("codec").stringValue();
+        codec = par("codec");
         compressedBitRate = par("compressedBitRate");
         packetTimeLength = par("packetTimeLength");
 
@@ -86,9 +86,9 @@ void VoipStreamSender::initialize(int stage)
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
         EV_INFO << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
-        soundFile = par("soundFile").stringValue();
+        soundFile = par("soundFile");
         repeatCount = par("repeatCount");
-        traceFileName = par("traceFileName").stringValue();
+        traceFileName = par("traceFileName");
 
         pReSampleCtx = nullptr;
         localPort = par("localPort");
@@ -111,7 +111,7 @@ void VoipStreamSender::initialize(int stage)
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
 
-        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
+        destAddress = L3AddressResolver().resolve(par("destAddress"));
         socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
 

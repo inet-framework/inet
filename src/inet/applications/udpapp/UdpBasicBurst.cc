@@ -74,7 +74,7 @@ void UdpBasicBurst::initialize(int stage)
         nextPkt = startTime;
 
         destAddrRNG = par("destAddrRNG");
-        const char *addrModeStr = par("chooseDestAddrMode").stringValue();
+        const char *addrModeStr = par("chooseDestAddrMode");
         int addrMode = cEnum::get("inet::ChooseDestAddrMode")->lookup(addrModeStr);
         if (addrMode == -1)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);

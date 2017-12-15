@@ -55,7 +55,7 @@ void Ieee80211MgmtAp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         // read params and init vars
-        ssid = par("ssid").stringValue();
+        ssid = par("ssid").stdstringValue();
         beaconInterval = par("beaconInterval");
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)

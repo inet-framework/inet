@@ -143,7 +143,7 @@ void SimpleVoipSender::selectTalkOrSilenceInterval()
 void SimpleVoipSender::sendVoIPPacket()
 {
     if (destAddress.isUnspecified())
-        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
+        destAddress = L3AddressResolver().resolve(par("destAddress"));
 
     Packet *packet = new Packet("VoIP");
     const auto& voice = makeShared<SimpleVoipPacket>();

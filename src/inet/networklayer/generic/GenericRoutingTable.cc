@@ -103,7 +103,7 @@ void GenericRoutingTable::initialize(int stage)
 //TODO
 //        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
 //        // do it later in a later stage, after network configurators configured the interfaces)
-//        const char *routerIdStr = par("routerId").stringValue();
+//        const char *routerIdStr = par("routerId");
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = Ipv4Address(routerIdStr);
     }
@@ -143,7 +143,7 @@ void GenericRoutingTable::routeChanged(GenericRoute *entry, int fieldCode)
 void GenericRoutingTable::configureRouterId()
 {
     if (routerId.isUnspecified()) {    // not yet configured
-        const char *routerIdStr = par("routerId").stringValue();
+        const char *routerIdStr = par("routerId");
         if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled in earlier stage
             // choose highest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {

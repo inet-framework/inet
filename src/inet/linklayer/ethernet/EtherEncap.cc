@@ -42,7 +42,7 @@ simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 void EtherEncap::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        fcsMode = parseEthernetFcsMode(par("fcsMode").stringValue());
+        fcsMode = parseEthernetFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;

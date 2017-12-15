@@ -50,7 +50,7 @@ void EtherBus::initialize()
     outputGateBaseId = gateBaseId("ethg$o");
 
     // read positions and check if positions are defined in order (we're lazy to sort...)
-    std::vector<double> pos = cStringTokenizer(par("positions").stringValue()).asDoubleVector();
+    std::vector<double> pos = cStringTokenizer(par("positions")).asDoubleVector();
     int numPos = pos.size();
 
     if (numPos > numTaps)

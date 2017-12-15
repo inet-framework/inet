@@ -26,7 +26,7 @@ Define_Module(Ieee80211TesterMac);
 
 void Ieee80211TesterMac::handleLowerPacket(Packet *packet)
 {
-    actions = par("actions").stringValue();
+    actions = par("actions");
     int len = strlen(actions);
     if (msgCounter >= len)
         throw cRuntimeError("No action is defined for this msg %s", packet->getName());

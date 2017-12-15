@@ -85,7 +85,7 @@ void SCTPServer::initialize(int stage)
 
         socket->listen(true, par("streamReset"), par("numPacketsToSendPerClient"), messagesToPush);
         EV_INFO << "SCTPServer::initialized listen port=" << port << "\n";
-        cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+        cStringTokenizer tokenizer(par("streamPriorities"));
         for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++) {
             const char *token = tokenizer.nextToken();
             socket->setStreamPriority(streamNum, (unsigned int)atoi(token));

@@ -520,7 +520,7 @@ void DhcpServer::startApp()
     Ipv4InterfaceData *ipv4data = ie->ipv4Data();
     if (ipv4data == nullptr)
         throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
-    const char *gatewayStr = par("gateway").stringValue();
+    const char *gatewayStr = par("gateway");
     gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIPv4() : ipv4data->getIPAddress();
     subnetMask = ipv4data->getNetmask();
     long numReservedAddresses = par("numReservedAddresses");

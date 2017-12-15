@@ -75,7 +75,7 @@ void Ieee80211Mac::initialize(int stage)
             addressString = par("address");
         }
         mib->address.setAddress(addressString);
-        modeSet = Ieee80211ModeSet::getModeSet(par("modeSet").stringValue());
+        modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
         const char *fcsModeString = par("fcsMode");
         if (!strcmp(fcsModeString, "declared"))
             fcsMode = FCS_DECLARED;

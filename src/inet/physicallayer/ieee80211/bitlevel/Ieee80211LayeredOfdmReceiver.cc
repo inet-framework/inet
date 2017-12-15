@@ -68,7 +68,7 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
         {
             throw cRuntimeError("In compliant mode it is forbidden to the following parameters: dataDecoder, signalDecoder, dataDemodulator, signalDemodulator, pulseFilter, analogDigitalConverter.");
         }
-        const char *levelOfDetailStr = par("levelOfDetail").stringValue();
+        const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("bit", levelOfDetailStr) == 0)
             levelOfDetail = BIT_DOMAIN;
         else if (strcmp("symbol", levelOfDetailStr) == 0)

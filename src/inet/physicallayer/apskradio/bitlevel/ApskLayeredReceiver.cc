@@ -67,7 +67,7 @@ void ApskLayeredReceiver::initialize(int stage)
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         snirThreshold = math::dB2fraction(par("snirThreshold"));
-        const char *levelOfDetailStr = par("levelOfDetail").stringValue();
+        const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("packet", levelOfDetailStr) == 0)
             levelOfDetail = PACKET_DOMAIN;
         else if (strcmp("bit", levelOfDetailStr) == 0)

@@ -176,7 +176,7 @@ void SCTPClient::connect()
     }
 
     unsigned int streamNum = 0;
-    cStringTokenizer ratioTokenizer(par("streamRequestRatio").stringValue());
+    cStringTokenizer ratioTokenizer(par("streamRequestRatio"));
     while (ratioTokenizer.hasMoreTokens()) {
         const char *token = ratioTokenizer.nextToken();
         streamRequestRatioMap[streamNum] = atoi(token);

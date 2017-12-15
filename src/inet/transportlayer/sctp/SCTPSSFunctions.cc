@@ -460,7 +460,7 @@ int32 SCTPAssociation::pathStreamSchedulerManual(SCTPPathVariables *path, bool p
 
         // Fill Stream to Path map
         uint16 streamNum = 0;
-        cStringTokenizer prioTokenizer(sctpMain->par("streamsToPaths").stringValue());
+        cStringTokenizer prioTokenizer(sctpMain->par("streamsToPaths"));
         while (prioTokenizer.hasMoreTokens()) {
             const char *token = prioTokenizer.nextToken();
             state->ssStreamToPathMap[streamNum] = (uint32)atoi(token);

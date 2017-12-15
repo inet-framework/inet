@@ -92,7 +92,7 @@ void Ipv4RoutingTable::initialize(int stage)
         if (isNodeUp) {
             // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
             // do it later in a later stage, after network configurators configured the interfaces)
-            const char *routerIdStr = par("routerId").stringValue();
+            const char *routerIdStr = par("routerId");
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
                 routerId = Ipv4Address(routerIdStr);
         }
@@ -118,7 +118,7 @@ void Ipv4RoutingTable::initialize(int stage)
 void Ipv4RoutingTable::configureRouterId()
 {
     if (routerId.isUnspecified()) {    // not yet configured
-        const char *routerIdStr = par("routerId").stringValue();
+        const char *routerIdStr = par("routerId");
         if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled earlier
             // choose highest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {

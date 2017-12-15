@@ -216,7 +216,7 @@ void SCTPPeer::connect()
     }
 
     unsigned int streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+    cStringTokenizer tokenizer(par("streamPriorities"));
     while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
         clientSocket.setStreamPriority(streamNum, (unsigned int)atoi(token));

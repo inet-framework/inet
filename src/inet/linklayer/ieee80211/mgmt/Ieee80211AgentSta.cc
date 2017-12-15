@@ -54,7 +54,7 @@ void Ieee80211AgentSta::initialize(int stage)
         host->subscribe(NF_L2_BEACON_LOST, this);
 
         // JcM add: get the default ssid, if there is one.
-        default_ssid = par("default_ssid").stringValue();
+        default_ssid = par("default_ssid").stdstringValue();
 
         // start up: send scan request
         simtime_t startingTime = par("startingTime").doubleValue();

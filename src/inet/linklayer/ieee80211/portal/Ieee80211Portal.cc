@@ -38,7 +38,7 @@ void Ieee80211Portal::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 #ifdef WITH_ETHERNET
-        fcsMode = parseEthernetFcsMode(par("fcsMode").stringValue());
+        fcsMode = parseEthernetFcsMode(par("fcsMode"));
 #endif // ifdef WITH_ETHERNET
     }
 }

@@ -316,7 +316,7 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
     assoc->state = assoc->sctpAlgorithm->createStateVariables();
 
     if ((bool)sctpMain->par("auth")) {
-        const char *chunks = sctpMain->par("chunks").stringValue();
+        const char *chunks = sctpMain->par("chunks");
         bool asc = false;
         bool asca = false;
         char *chunkscopy = (char *)malloc(strlen(chunks) + 1);
@@ -481,7 +481,7 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
     state = sctpAlgorithm->createStateVariables();
 
     if ((bool)sctpMain->par("auth")) {
-        const char *chunks = sctpMain->par("chunks").stringValue();
+        const char *chunks = sctpMain->par("chunks");
         bool asc = false;
         bool asca = false;
         char *chunkscopy = (char *)malloc(strlen(chunks) + 1);

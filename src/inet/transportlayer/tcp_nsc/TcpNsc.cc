@@ -235,7 +235,7 @@ void TcpNsc::initialize(int stage)
         WATCH_MAP(tcpAppConnMapM);
 
         // load the stack
-        const char *stackName = this->par(stackNameParamNameS).stringValue();
+        const char *stackName = this->par(stackNameParamNameS);
         int bufferSize = this->par(bufferSizeParamNameS);
         loadStack(stackName, bufferSize);
         pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);

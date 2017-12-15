@@ -53,10 +53,10 @@ void HostAutoConfigurator::setupNetworkLayer()
 {
     EV_INFO << "host auto configuration started" << std::endl;
 
-    std::string interfaces = par("interfaces").stringValue();
+    std::string interfaces = par("interfaces");
     Ipv4Address addressBase = Ipv4Address(par("addressBase").stringValue());
     Ipv4Address netmask = Ipv4Address(par("netmask").stringValue());
-    std::string mcastGroups = par("mcastGroups").stringValue();
+    std::string mcastGroups = par("mcastGroups").stdstringValue();
 
     // get our host module
     cModule *host = getContainingNode(this);

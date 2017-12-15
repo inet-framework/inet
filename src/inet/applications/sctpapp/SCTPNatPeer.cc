@@ -174,7 +174,7 @@ void SCTPNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
         scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
     }
     uint32 streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+    cStringTokenizer tokenizer(par("streamPriorities"));
     while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
         clientSocket.setStreamPriority(streamNum, (uint32)atoi(token));
@@ -203,7 +203,7 @@ void SCTPNatPeer::connect(L3Address connectAddress, int32 connectPort)
         scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
     }
     uint32 streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+    cStringTokenizer tokenizer(par("streamPriorities"));
     while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
         clientSocket.setStreamPriority(streamNum, (uint32)atoi(token));

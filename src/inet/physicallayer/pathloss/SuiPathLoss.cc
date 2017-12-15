@@ -43,7 +43,7 @@ void SuiPathLoss::initialize(int stage)
          * Terrain B - Intermediate path loss. Suburban area.
          * Terrain C - Minimum path loss. Flat areas or rural with light vegetation.
          */
-        const char *terrain = par("terrain").stringValue();
+        const char *terrain = par("terrain");
         if (!strcmp(terrain, "TerrainA")) {
             a = 4.6;
             b = 0.0075;

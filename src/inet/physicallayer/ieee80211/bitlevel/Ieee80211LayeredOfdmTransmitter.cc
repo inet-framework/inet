@@ -62,7 +62,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
         {
             throw cRuntimeError("In compliant mode it is forbidden to set the following parameters: dataEncoder, signalEncoder, modulator, signalModulator, pulseShaper, digitalAnalogConverter, bandwidth, channelSpacing");
         }
-        const char *levelOfDetailStr = par("levelOfDetail").stringValue();
+        const char *levelOfDetailStr = par("levelOfDetail");
         if (strcmp("bit", levelOfDetailStr) == 0)
             levelOfDetail = BIT_DOMAIN;
         else if (strcmp("symbol", levelOfDetailStr) == 0)
