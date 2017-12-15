@@ -51,10 +51,10 @@ simple Flood extends NetworkProtocolBase like INetworkProtocol
         int headerLength @unit(bit) = default(100b); // length of the network packet header (in bits)
         bool plainFlooding = default(true); // flag whether to use plain flooding
         // Max number of entries in the list of already broadcasted messages
-        double bcMaxEntries = default(100);
+        int bcMaxEntries = default(100);
         // Time after which an entry for an already broadcasted msg can be deleted
         double bcDelTime @unit(s) = default(100 s);
-        double defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
+        int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
 
         @class(Flood);
 }

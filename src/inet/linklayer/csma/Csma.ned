@@ -70,7 +70,7 @@ simple Csma extends MacProtocolBase like IMacProtocol
         // Complete MAC ack message length (in bits)
         // (! headerLength is not added to this),
         // only used when usage of MAC acks is enabled.
-        double ackLength @unit(bit) = default(40 bit);
+        int ackLength @unit(bit) = default(40 bit);
         // Simple interframe space (12 symbols). Time to wait between receiving a frame and acknowledging it.
         // Should be bigger than the maximum time for switching between Tx and Rx at the receiver.
         // Only used when usage of MAC acks is enabled.
@@ -86,9 +86,9 @@ simple Csma extends MacProtocolBase like IMacProtocol
         // (for linear and constant backoff method only)
         int contentionWindow = default(2);
         // minimum backoff exponent (for exponential backoff method only)
-        double macMinBE = default(3);
+        int macMinBE = default(3);
         // maximum backoff exponent (for exponential backoff method only)
-        double macMaxBE = default(8);
+        int macMaxBE = default(8);
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 

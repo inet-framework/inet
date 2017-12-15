@@ -176,14 +176,14 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
 
     bool enabled;
     int robustness;
-    double queryInterval;
+    double queryInterval; //TODO these should probably be simtime_t
     double queryResponseInterval;
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
     double startupQueryInterval;
-    double startupQueryCount;
+    int startupQueryCount;
     double lastMemberQueryInterval;
-    double lastMemberQueryCount;
+    int lastMemberQueryCount;
     double lastMemberQueryTime;
     double unsolicitedReportInterval;
 
