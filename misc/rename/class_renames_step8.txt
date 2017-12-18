@@ -1,3 +1,6 @@
 Csma -> Ieee802154Mac
 CsmaHeader -> Ieee802154MacHeader
-MultipleAccessMac -> ????
+
+MultipleAccessMac -> ????Mac
+IdealMacHeader -> ????MacHeader
+IdealWirelessNic -> ????Nic
