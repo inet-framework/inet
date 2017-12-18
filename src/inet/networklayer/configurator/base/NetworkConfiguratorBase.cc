@@ -485,8 +485,9 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
     if (radio != nullptr) {
-        const cModule *mediumModule = check_and_cast<const cModule *>(radio->getMedium());
-        return mediumModule->getFullName();
+        const cModule *mediumModule = dynamic_cast<const cModule *>(radio->getMedium());
+        if (mediumModule != nullptr)
+            return mediumModule->getFullName();
     }
 #endif
 
