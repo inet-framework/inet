@@ -23,6 +23,7 @@ ChunkQueue::ChunkQueue(const char *name, const Ptr<const Chunk>& contents) :
     contents(contents),
     iterator(Chunk::ForwardIterator(b(0), 0))
 {
+    constPtrCast<Chunk>(contents)->markImmutable();
 }
 
 ChunkQueue::ChunkQueue(const ChunkQueue& other) :
@@ -30,6 +31,7 @@ ChunkQueue::ChunkQueue(const ChunkQueue& other) :
     contents(other.contents),
     iterator(other.iterator)
 {
+    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
 void ChunkQueue::remove(b length)
@@ -90,7 +92,7 @@ void ChunkQueue::clear()
 void ChunkQueue::push(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
+    constPtrCast<Chunk>(chunk)->markImmutable();
     pushedLength += chunk->getChunkLength();
     if (contents == EmptyChunk::singleton)
         contents = chunk;
