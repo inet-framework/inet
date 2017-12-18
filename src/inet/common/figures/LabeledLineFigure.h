@@ -18,7 +18,7 @@
 #ifndef __INET_LABELEDLINEFIGURE_H
 #define __INET_LABELEDLINEFIGURE_H
 
-#include "inet/common/figures/cPanelFigure.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

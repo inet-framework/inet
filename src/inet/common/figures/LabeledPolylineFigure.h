@@ -18,7 +18,8 @@
 #ifndef __INET_LABELEDPOLYLINEFIGURE_H
 #define __INET_LABELEDPOLYLINEFIGURE_H
 
-#include "inet/common/figures/cPanelFigure.h"
+#include "inet/common/INETDefs.h"
+
 
 namespace inet {
 
