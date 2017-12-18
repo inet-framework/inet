@@ -21,6 +21,8 @@ package inet.linklayer.ideal;
 
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
+import inet.linklayer.contract.IMacProtocol;
+
 
 //
 // This module implements a trivial MAC protocol for use in ~IdealWirelessNic.
@@ -33,7 +35,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple MultipleAccessMac extends MacProtocolBase like ILinkLayer
+simple MultipleAccessMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
