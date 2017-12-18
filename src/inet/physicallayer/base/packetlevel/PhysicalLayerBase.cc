@@ -15,9 +15,37 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
 
 namespace inet {
+
+void PhysicalLayerBase::initialize(int stage)
+{
+    LayeredProtocolBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        upperLayerInGateId = findGate("upperLayerIn");
+        upperLayerOutGateId = findGate("upperLayerOut");
+        radioInGateId = findGate("radioIn");
+    }
+}
+
+void PhysicalLayerBase::sendUp(cMessage *message)
+{
+    if (message->isPacket())
+        emit(packetSentToUpperSignal, message);
+    send(message, upperLayerOutGateId);
+}
+
+bool PhysicalLayerBase::isUpperMessage(cMessage *message)
+{
+    return message->getArrivalGateId() == upperLayerInGateId;
+}
+
+bool PhysicalLayerBase::isLowerMessage(cMessage *message)
+{
+    return message->getArrivalGateId() == radioInGateId;
+}
 
 } // namespace inet
 

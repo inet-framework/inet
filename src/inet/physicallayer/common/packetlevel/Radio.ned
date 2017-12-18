@@ -17,11 +17,13 @@
 
 package inet.physicallayer.common.packetlevel;
 
-import inet.physicallayer.contract.packetlevel.IRadio;
+import inet.physicallayer.base.packetlevel.PhysicalLayerBase;
 import inet.physicallayer.contract.packetlevel.IAntenna;
+import inet.physicallayer.contract.packetlevel.IRadio;
 import inet.physicallayer.contract.packetlevel.IReceiver;
 import inet.physicallayer.contract.packetlevel.ITransmitter;
 import inet.power.contract.IEnergyConsumer;
+
 
 //
 // The radio model describes the physical device that is capable of transmitting
@@ -48,7 +50,7 @@ import inet.power.contract.IEnergyConsumer;
 // The first entry of the switchingTimes string indicates the
 // time-related metric prefix and it MUST be s, ms or ns.
 //
-module Radio like IRadio
+module Radio extends PhysicalLayerBase like IRadio
 {
     parameters:
         string antennaType;                      // NED type of the antenna model
@@ -72,7 +74,6 @@ module Radio like IRadio
         *.energySourceModule = default(absPath(energySourceModule));
 
         @class(Radio);
-        @display("i=block/wrxtx");
 
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
@@ -99,11 +100,6 @@ module Radio like IRadio
         @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate; record=histogram);
         @statistic[bitErrorRate](title="Bit error rate"; source=bitErrorRate; record=histogram);
         @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate; record=histogram);
-
-    gates:
-        input upperLayerIn @labels(ILinkLayerFrame/down);
-        output upperLayerOut @labels(ILinkLayerFrame/up);
-        input radioIn @labels(ISignal);
 
     submodules:
         antenna: <antennaType> like IAntenna {

@@ -181,15 +181,14 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void initialize(int stage) override;
 
     virtual void handleMessageWhenDown(cMessage *message) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleSwitchTimer(cMessage *message);
     virtual void handleTransmissionTimer(cMessage *message);
     virtual void handleReceptionTimer(cMessage *message);
-    virtual void handleUpperCommand(cMessage *command);
-    virtual void handleLowerCommand(cMessage *command);
-    virtual void handleUpperPacket(Packet *packet);
-    virtual void handleLowerPacket(Signal *packet);
+    virtual void handleUpperCommand(cMessage *command) override;
+    virtual void handleLowerCommand(cMessage *command) override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleLowerPacket(Packet *packet) override;
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
