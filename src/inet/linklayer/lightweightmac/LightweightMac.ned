@@ -10,7 +10,7 @@
 //  Converted to MiXiM by Kapourniotis Theodoros
 //
 
-package inet.linklayer.lmac;
+package inet.linklayer.lightweightmac;
 
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
@@ -22,7 +22,7 @@ import inet.linklayer.contract.IMacProtocol;
 //
 // See C++ documentation for details
 //
-simple LightweightMacLayer extends MacProtocolBase like IMacProtocol
+simple LightweightMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -45,7 +45,7 @@ simple LightweightMacLayer extends MacProtocolBase like IMacProtocol
         int numSlots = default(64);
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
-        @class(LightweightMacLayer);
+        @class(LightweightMac);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

@@ -47,24 +47,24 @@ namespace inet {
  * A paper describing this implementation can be found at:
  * http://www.omnet-workshop.org/2011/uploads/slides/OMNeT_WS2011_S5_C1_Foerster.pdf
  *
- * @class BerkeleyMacLayer
+ * @class BerkeleyMac
  * @ingroup macLayer
  * @author Anna Foerster
  *
  */
-class INET_API BerkeleyMacLayer : public MacProtocolBase, public IMacProtocol
+class INET_API BerkeleyMac : public MacProtocolBase, public IMacProtocol
 {
   private:
     /** @brief Copy constructor is not allowed.
      */
-    BerkeleyMacLayer(const BerkeleyMacLayer&);
+    BerkeleyMac(const BerkeleyMac&);
     /** @brief Assignment operator is not allowed.
      */
-    BerkeleyMacLayer& operator=(const BerkeleyMacLayer&);
+    BerkeleyMac& operator=(const BerkeleyMac&);
 
   public:
-    BerkeleyMacLayer() {}
-    virtual ~BerkeleyMacLayer();
+    BerkeleyMac() {}
+    virtual ~BerkeleyMac();
 
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

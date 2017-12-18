@@ -1036,7 +1036,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.linklayer.bmac
+                       inet.linklayer.berkeleymac
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_BMAC"
@@ -1050,7 +1050,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.linklayer.lmac
+                       inet.linklayer.lightweightmac
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_LMAC"

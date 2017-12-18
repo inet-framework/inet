@@ -9,14 +9,14 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "inet/linklayer/lmac/LightweightMacLayer.h"
+#include "inet/linklayer/lightweightmac/LightweightMac.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/lmac/LightweightMacHeader_m.h"
+#include "inet/linklayer/lightweightmac/LightweightMacHeader_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -26,14 +26,14 @@ namespace inet {
 
 using namespace physicallayer;
 
-Define_Module(LightweightMacLayer)
+Define_Module(LightweightMac)
 
 #define myId    (getParentModule()->getParentModule()->getIndex())
 
-const MacAddress LightweightMacLayer::LMAC_NO_RECEIVER = MacAddress(-2);
-const MacAddress LightweightMacLayer::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
+const MacAddress LightweightMac::LMAC_NO_RECEIVER = MacAddress(-2);
+const MacAddress LightweightMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
-void LightweightMacLayer::initialize(int stage)
+void LightweightMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -101,7 +101,7 @@ void LightweightMacLayer::initialize(int stage)
     }
 }
 
-LightweightMacLayer::~LightweightMacLayer()
+LightweightMac::~LightweightMac()
 {
     delete slotChange;
     cancelAndDelete(timeout);
@@ -118,7 +118,7 @@ LightweightMacLayer::~LightweightMacLayer()
     macQueue.clear();
 }
 
-void LightweightMacLayer::initializeMACAddress()
+void LightweightMac::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
@@ -134,7 +134,7 @@ void LightweightMacLayer::initializeMACAddress()
     }
 }
 
-InterfaceEntry *LightweightMacLayer::createInterfaceEntry()
+InterfaceEntry *LightweightMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -157,7 +157,7 @@ InterfaceEntry *LightweightMacLayer::createInterfaceEntry()
  * Check whether the queue is not full: if yes, print a warning and drop the packet.
  * Sending of messages is automatic.
  */
-void LightweightMacLayer::handleUpperPacket(Packet *packet)
+void LightweightMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
 
@@ -190,7 +190,7 @@ void LightweightMacLayer::handleUpperPacket(Packet *packet)
  * LMAC_WAKEUP: wake up the node and either check the channel before sending a control packet or wait for control packets.
  * LMAC_TIMEOUT: go back to sleep after nothing happened.
  */
-void LightweightMacLayer::handleSelfMessage(cMessage *msg)
+void LightweightMac::handleSelfMessage(cMessage *msg)
 {
     switch (macState) {
         case INIT:
@@ -588,7 +588,7 @@ void LightweightMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle LMAC control packets and data packets. Recognize collisions, change own slot if necessary and remember who is using which slot.
  */
-void LightweightMacLayer::handleLowerPacket(Packet *packet)
+void LightweightMac::handleLowerPacket(Packet *packet)
 {
     if (packet->hasBitError()) {
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
@@ -605,7 +605,7 @@ void LightweightMacLayer::handleLowerPacket(Packet *packet)
 /**
  * Handle transmission over messages: send the data packet or don;t do anyhting.
  */
-void LightweightMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LightweightMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
@@ -637,7 +637,7 @@ void LightweightMacLayer::receiveSignal(cComponent *source, simsignal_t signalID
 /**
  * Try to find a new slot after collision. If not possible, set own slot to -1 (not able to send anything)
  */
-void LightweightMacLayer::findNewSlot()
+void LightweightMac::findNewSlot()
 {
     // pick a random slot at the beginning and schedule the next wakeup
     // free the old one first
@@ -661,7 +661,7 @@ void LightweightMacLayer::findNewSlot()
     slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
 }
 
-void LightweightMacLayer::decapsulate(Packet *packet)
+void LightweightMac::decapsulate(Packet *packet)
 {
     const auto& lmacHeader = packet->popHeader<LightweightMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
@@ -677,7 +677,7 @@ void LightweightMacLayer::decapsulate(Packet *packet)
  * header fields.
  */
 
-void LightweightMacLayer::encapsulate(Packet *netwPkt)
+void LightweightMac::encapsulate(Packet *netwPkt)
 {
     auto pkt = makeShared<LightweightMacHeader>();
     pkt->setChunkLength(b(headerLength));
@@ -700,18 +700,18 @@ void LightweightMacLayer::encapsulate(Packet *netwPkt)
     EV_DETAIL << "pkt encapsulated\n";
 }
 
-void LightweightMacLayer::flushQueue()
+void LightweightMac::flushQueue()
 {
     // TODO:
     macQueue.clear();
 }
 
-void LightweightMacLayer::clearQueue()
+void LightweightMac::clearQueue()
 {
     macQueue.clear();
 }
 
-void LightweightMacLayer::attachSignal(Packet *macPkt)
+void LightweightMac::attachSignal(Packet *macPkt)
 {
     //calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;

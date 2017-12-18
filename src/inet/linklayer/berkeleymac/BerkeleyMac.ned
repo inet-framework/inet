@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.linklayer.bmac;
+package inet.linklayer.berkeleymac;
 
 //***************************************************************************
-//* file:        BerkeleyMacLayer.ned
+//* file:        BerkeleyMac.ned
 //*
 //* author:      Anna Foerster
 //* 
@@ -41,7 +41,7 @@ import inet.linklayer.contract.IMacProtocol;
 // LPL).
 // See C++ documentation for details.
 //
-simple BerkeleyMacLayer extends MacProtocolBase like IMacProtocol
+simple BerkeleyMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -77,7 +77,7 @@ simple BerkeleyMacLayer extends MacProtocolBase like IMacProtocol
 
         int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
 
-        @class(BerkeleyMacLayer);
+        @class(BerkeleyMac);
         @signal[linkBreak](type=Packet);
         @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
