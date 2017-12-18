@@ -87,8 +87,6 @@ void MultipleAccessMac::initialize(int stage)
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
-        if (!queueModule)
-            throw cRuntimeError("Missing queueModule");
 
         initializeMACAddress();
     }
@@ -96,7 +94,8 @@ void MultipleAccessMac::initialize(int stage)
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        getNextMsgFromHL();
+        if (queueModule != nullptr)
+            getNextMsgFromHL();
         registerInterface();
     }
 }
@@ -146,7 +145,7 @@ void MultipleAccessMac::receiveSignal(cComponent *source, simsignal_t signalID, 
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-            if (!lastSentPk)
+            if (!lastSentPk && queueModule != nullptr)
                 getNextMsgFromHL();
         }
         transmissionState = newRadioTransmissionState;
@@ -233,7 +232,8 @@ void MultipleAccessMac::handleSelfMessage(cMessage *message)
         emit(linkBreakSignal, lastSentPk);
         delete lastSentPk;
         lastSentPk = nullptr;
-        getNextMsgFromHL();
+        if (queueModule != nullptr)
+            getNextMsgFromHL();
     }
     else {
         MacProtocolBase::handleSelfMessage(message);
@@ -252,7 +252,8 @@ void MultipleAccessMac::acked(Packet *frame)
         cancelEvent(ackTimeoutMsg);
         delete lastSentPk;
         lastSentPk = nullptr;
-        getNextMsgFromHL();
+        if (queueModule != nullptr)
+            getNextMsgFromHL();
     }
     else
         EV_DEBUG << "unaccepted\n";
