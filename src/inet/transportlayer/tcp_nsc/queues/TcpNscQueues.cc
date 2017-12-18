@@ -133,9 +133,7 @@ void TcpNscReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
 
 void TcpNscReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
-    const auto& bytes = makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP);
-    bytes->markImmutable();
-    dataBuffer.push(bytes);
+    dataBuffer.push(makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP));
 }
 
 cPacket *TcpNscReceiveQueue::extractBytesUpTo()
