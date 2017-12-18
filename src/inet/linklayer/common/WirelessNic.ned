@@ -44,13 +44,13 @@ module WirelessNic like IWirelessNic
         mac: <macType> like IMacProtocol {
                 @display("p=150,100");
         }
-        radio: <radioType> like IRadio {
+        radio: <radioType> like IRadio if radioType != "" {
                 @display("p=150,200");
         }
-    connections:
-        radioIn --> { @display("m=s"); } --> radio.radioIn;
-        radio.upperLayerIn <-- mac.lowerLayerOut;
-        radio.upperLayerOut --> mac.lowerLayerIn;
+    connections allowunconnected:
+        radioIn --> { @display("m=s"); } --> radio.radioIn if radioType != "";
+        radio.upperLayerIn <-- mac.lowerLayerOut if radioType != "";
+        radio.upperLayerOut --> mac.lowerLayerIn if radioType != "";
 
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
         mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
