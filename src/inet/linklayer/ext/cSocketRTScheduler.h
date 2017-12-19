@@ -24,8 +24,6 @@
 #include <platdep/sockets.h>
 #include "inet/common/INETDefs.h"
 
-#include <omnetpp/platdep/timeutil.h>
-
 // prevent pcap.h to redefine int8_t,... types on Windows
 #include "inet/common/serializer/headers/bsdint.h"
 #define HAVE_U_INT8_T
@@ -44,7 +42,7 @@ class INET_API cSocketRTScheduler : public cScheduler
     int fd;
 
     virtual bool receiveWithTimeout(long usec);
-    virtual int receiveUntil(const timeval& targetTime);
+    virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
   public:
     /**
@@ -60,7 +58,7 @@ class INET_API cSocketRTScheduler : public cScheduler
     static std::vector<pcap_t *> pds;
     static std::vector<int> datalinks;
     static std::vector<int> headerLengths;
-    static timeval baseTime;
+    static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
     /**
      * Called at the beginning of a simulation run.
