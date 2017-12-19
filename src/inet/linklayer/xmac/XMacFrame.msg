@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2017 Jan Peter Drees
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
@@ -27,7 +25,7 @@ namespace inet;
 class noncobject MACAddress;
 
 //
-// Packet for ~IdealMac. Packet size is configurable
+// Frame for ~XMac. Frame size is configurable
 // in the MAC layer. 
 //
 packet XMacFrame
