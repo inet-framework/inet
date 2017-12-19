@@ -51,9 +51,7 @@ double AnimationPosition::getTime(TimeType type) const
 
 double AnimationPosition::computeRealTime() const
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec + tv.tv_usec / 1.0E+6;
+    return opp_get_monotonic_clock_usecs() / 1.0E+6;
 }
 
 AnimationPosition& AnimationPosition::operator=(const AnimationPosition& other)
