@@ -1,6 +1,19 @@
 Csma -> Ieee802154Mac
 CsmaHeader -> Ieee802154MacHeader
 
-MultipleAccessMac -> ????Mac
-IdealMacHeader -> ????MacHeader
-IdealWirelessNic -> ????Nic
+MultipleAccessMac -> AckingMac
+IdealMacHeader -> AckingMacHeader
+IdealWirelessNic -> AckingWirelessNic
+
+IdealAnalogModel -> UnitDiskAnalogModel
+IdealListening -> UnitDiskListening
+IdealNoise -> UnitDiskNoise
+IdealPhyHeader -> UnitDiskPhyHeader
+IdealRadioMedium -> UnitDiskRadioMedium
+IdealReceiver -> UnitDiskReceiver
+IdealReception -> UnitDiskReception
+IdealSnir -> UnitDiskSnir
+IdealTransmission -> UnitDiskTransmission
+IdealTransmitter -> UnitDiskTransmitter
+
+WITH_IDEALWIRELESS -> WITH_ACKINGWIRELESS

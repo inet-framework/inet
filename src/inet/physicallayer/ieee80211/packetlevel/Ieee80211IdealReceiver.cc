@@ -18,9 +18,9 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/idealradio/IdealNoise.h"
-#include "inet/physicallayer/idealradio/IdealReception.h"
-#include "inet/physicallayer/idealradio/IdealTransmission.h"
+#include "inet/physicallayer/unitdisk/UnitDiskNoise.h"
+#include "inet/physicallayer/unitdisk/UnitDiskReception.h"
+#include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealReceiver.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -33,7 +33,7 @@ namespace physicallayer {
 Define_Module(Ieee80211IdealReceiver);
 
 Ieee80211IdealReceiver::Ieee80211IdealReceiver() :
-    IdealReceiver()
+    UnitDiskReceiver()
 {
 }
 
@@ -46,13 +46,13 @@ void Ieee80211IdealReceiver::initialize(int stage)
 std::ostream& Ieee80211IdealReceiver::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211IdealReceiver";
-    return IdealReceiver::printToStream(stream, level);
+    return UnitDiskReceiver::printToStream(stream, level);
 }
 
 const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
-    auto receptionResult = IdealReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
+    auto receptionResult = UnitDiskReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
     auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ChannelInd>();

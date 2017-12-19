@@ -22,7 +22,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AodvRouter;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 
 network AODVNetwork
@@ -30,7 +30,7 @@ network AODVNetwork
     parameters:
         int numHosts;
     submodules:
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
                 @display("p=50,50");
         }

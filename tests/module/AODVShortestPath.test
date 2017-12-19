@@ -8,7 +8,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AodvRouter;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 network AODVTest
@@ -16,7 +16,7 @@ network AODVTest
     parameters:
         @display("bgb=961,662");
     submodules:
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
                 @display("p=50,50");
         }
@@ -105,7 +105,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sender.app[0].destAddr = "receiver(ipv4)"
 
 # nic settings
-**.wlan[*].typename = "IdealWirelessNic"
+**.wlan[*].typename = "AckingWirelessNic"
 **.wlan[*].radio.transmitter.communicationRange = 240m
 **.wlan[*].radio.transmitter.headerBitLength = 4b
 **.wlan[*].bitrate = 2Mbps

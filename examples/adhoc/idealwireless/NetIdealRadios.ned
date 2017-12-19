@@ -20,8 +20,9 @@ package inet.examples.adhoc.idealwireless;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
+
 
 network Net
 {
@@ -37,7 +38,7 @@ network Net
             parameters:
                 @display("p=100,150");
         }
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
                 @display("p=100,250");
         }

@@ -18,9 +18,7 @@
 
 package inet.linklayer.ieee802154;
 
-import inet.linklayer.csma.Csma;
-
-simple Ieee802154NarrowbandMac extends Csma
+simple Ieee802154NarrowbandMac extends Ieee802154Mac
 {
     parameters:
         useMACAcks = true;

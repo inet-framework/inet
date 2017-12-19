@@ -455,7 +455,7 @@
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            1061-45c2/tplx, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000/tplx, ERROR, wireless # AbstractIdealMac extended
-/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       10s,               d302-86a3/tplx, PASS, wireless
+/examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,       10s,               d302-86a3/tplx, PASS, wireless
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               9c71-423d/tplx, PASS, wireless
 /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                ca14-f089/tplx, PASS, wireless
 

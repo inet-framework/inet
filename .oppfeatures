@@ -709,7 +709,7 @@
         name="IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio idealwireless"
+        requires = "mobility radio ackingwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -726,7 +726,7 @@
         name="IEEE 802.15.4"
         description = "Provides IEEE 802.15.4 Narrowband and Ultra-Wideband NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio apskradio CSMA idealwireless"
+        requires = "mobility radio apskradio ackingwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee802154
@@ -750,22 +750,22 @@
         linkerFlags = ""
         />
     <feature
-        id="idealwireless"
-        name="Ideal Wireless"
+        id="ackingwireless"
+        name="Acking Wireless"
         description = "Provides a simple wireless interface that consists
                 of a unit disk radio and no real MAC protocol. It offers simplicity
                 for scenarios where Layer 1 and 2 effects can be completely ignored.
-                Parts: IdealWirelessNic (IdealWirelessMac plus IdealRadio), and
-                IdealRadioMedium."
+                Parts: AckingWirelessNic (AckingWirelessMac plus UnitDiskRadio), and
+                UnitDiskRadioMedium."
         initiallyEnabled = "true"
         requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
-                       inet.linklayer.ideal
-                       inet.physicallayer.idealradio
+                       inet.linklayer.acking
+                       inet.physicallayer.unitdisk
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_IDEALWIRELESS"
+        compileFlags = "-DWITH_ACKINGWIRELESS"
         linkerFlags = ""
         />
     <feature
@@ -773,7 +773,7 @@
         name="Wireless examples"
         description = "Provides various wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio idealwireless physicalenvironment AODV CSMA"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 Ieee802154 apskradio ackingwireless physicalenvironment AODV"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
@@ -1036,7 +1036,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.linklayer.berkeleymac
+                       inet.linklayer.berkeley
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_BMAC"
@@ -1050,24 +1050,10 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.linklayer.lightweightmac
+                       inet.linklayer.lightweight
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_LMAC"
-        linkerFlags = ""
-        />
-    <feature
-        id="CSMA"
-        name="CSMA"
-        description = "A CSMA (Carrier Sense Multiple Access) MAC protocol, similar to 802.15.4"
-        initiallyEnabled = "true"
-        requires = ""
-        labels = ""
-        nedPackages = "
-                       inet.linklayer.csma
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_CSMA"
         linkerFlags = ""
         />
     <feature
@@ -1090,7 +1076,7 @@
         name="Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
         initiallyEnabled = "true"
-        requires = "physicalenvironment apskradio idealwireless Ieee80211 IPv4 UDP AODV"
+        requires = "physicalenvironment apskradio ackingwireless Ieee80211 IPv4 UDP AODV"
         labels = "tutorial wireless"
         nedPackages = "inet.tutorials.wireless"
         extraSourceFolders = ""

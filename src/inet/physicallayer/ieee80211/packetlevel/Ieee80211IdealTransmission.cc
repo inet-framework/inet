@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 Ieee80211IdealTransmission::Ieee80211IdealTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange, const IIeee80211Mode *mode, const Ieee80211Channel *channel) :
-    IdealTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange),
+    UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange),
     Ieee80211TransmissionBase(mode, channel)
 {
 }
@@ -31,7 +31,7 @@ std::ostream& Ieee80211IdealTransmission::printToStream(std::ostream& stream, in
 {
     stream << "Ieee80211IdealTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);
-    return IdealTransmission::printToStream(stream, level);
+    return UnitDiskTransmission::printToStream(stream, level);
 }
 
 } // namespace physicallayer

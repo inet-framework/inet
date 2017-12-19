@@ -37,7 +37,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initialZ = 0m
 
 # nic
-*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].typename = "AckingWirelessNic"
 *.host.wlan[*].bitrate = 54Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
@@ -52,14 +52,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 import inet.common.lifecycle.LifecycleController;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 
 network Test
 {
     submodules:
-        radioMedium: IdealRadioMedium;
+        radioMedium: UnitDiskRadioMedium;
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
         host: AccessPoint;

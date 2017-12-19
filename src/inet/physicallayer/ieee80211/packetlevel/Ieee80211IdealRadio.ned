@@ -19,10 +19,10 @@ package inet.physicallayer.ieee80211.packetlevel;
 
 //
 // This radio model uses ideal analog representation.
-// It must be used in conjunction with the ~IdealRadioMedium model.
+// It must be used in conjunction with the ~UnitDiskRadioMedium model.
 //
-// See also ~IdealRadioMedium, ~Ieee80211IdealTransmitter,
-// ~IdealReceiver, and ~IdealAnalogModel.
+// See also ~UnitDiskRadioMedium, ~Ieee80211IdealTransmitter,
+// ~UnitDiskReceiver, and ~UnitDiskAnalogModel.
 //
 module Ieee80211IdealRadio extends Ieee80211Radio
 {

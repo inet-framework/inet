@@ -18,14 +18,14 @@
 #ifndef __INET_IEEE80211IDEALRECEIVER_H
 #define __INET_IEEE80211IDEALRECEIVER_H
 
-#include "inet/physicallayer/idealradio/IdealReceiver.h"
+#include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 // TODO: Ieee80211ReceiverBase
-class INET_API Ieee80211IdealReceiver : public IdealReceiver
+class INET_API Ieee80211IdealReceiver : public UnitDiskReceiver
 {
   protected:
     virtual void initialize(int stage) override;

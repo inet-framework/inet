@@ -38,8 +38,8 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #endif
 
-#ifdef WITH_IDEALWIRELESS
-#include "inet/physicallayer/idealradio/IdealPhyHeader_m.h"
+#ifdef WITH_ACKINGWIRELESS
+#include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
 #endif
 
 namespace inet {

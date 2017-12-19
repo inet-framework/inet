@@ -18,7 +18,7 @@
 package inet.physicallayer.ieee80211.packetlevel;
 
 //
-// See also ~Ieee80211IdealReceiver, ~Ieee80211IdealRadio, and ~IdealRadioMedium.
+// See also ~Ieee80211IdealReceiver, ~Ieee80211IdealRadio, and ~UnitDiskRadioMedium.
 //
 module Ieee80211IdealTransmitter extends Ieee80211TransmitterBase
 {
