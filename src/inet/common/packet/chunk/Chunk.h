@@ -367,7 +367,7 @@ class INET_API Chunk : public cObject,
   protected:
     void checkMutable() { CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable"); }
 
-    virtual void handleChange() override;
+    virtual void handleChange();
 
     virtual int getBitsArraySize(); // only for class descriptor
     virtual int getBytesArraySize(); // only for class descriptor

@@ -69,7 +69,7 @@ void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(size_t size)
 
 Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeaderForUpdate(size_t k)
 {
-    handleChange();
+    //handleChange(); // ??? Where to declare this, if it's not in cObject?
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
