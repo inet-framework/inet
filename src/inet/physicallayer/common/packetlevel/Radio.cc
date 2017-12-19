@@ -274,9 +274,8 @@ void Radio::handleUpperPacket(Packet *packet)
     }
 }
 
-void Radio::handleLowerPacket(Packet *packet)
+void Radio::handleSignal(Signal *signal)
 {
-    Signal *signal = check_and_cast<Signal *>(packet);
     auto receptionTimer = createReceptionTimer(signal);
     if (separateReceptionParts)
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_PREAMBLE);

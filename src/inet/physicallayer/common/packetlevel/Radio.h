@@ -188,7 +188,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void handleUpperCommand(cMessage *command) override;
     virtual void handleLowerCommand(cMessage *command) override;
     virtual void handleUpperPacket(Packet *packet) override;
-    virtual void handleLowerPacket(Packet *packet) override;
+    virtual void handleSignal(Signal *signal) override;
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;

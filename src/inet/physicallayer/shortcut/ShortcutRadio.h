@@ -50,7 +50,6 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
   public:
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
-    virtual void handleLowerPacket(Packet *packet) override;
 
     virtual const cGate *getRadioGate() const override { return gate("radioIn"); }
     virtual RadioMode getRadioMode() const override { return radioMode; }

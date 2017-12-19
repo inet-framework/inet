@@ -74,11 +74,6 @@ void ShortcutRadio::handleUpperPacket(Packet *packet)
     }
 }
 
-void ShortcutRadio::handleLowerPacket(Packet *packet)
-{
-    throw cRuntimeError("Received lower packet is unexpected");
-}
-
 ShortcutRadio *ShortcutRadio::findPeer(MacAddress address)
 {
     auto it = shortcutRadios.find(address);
