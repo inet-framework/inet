@@ -29,11 +29,14 @@ class INET_API LayeredProtocolBase : public OperationalBase
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);
 
+    virtual void handleUpperMessage(cMessage *message);
+    virtual void handleLowerMessage(cMessage *message);
+
     virtual void handleUpperCommand(cMessage *message);
     virtual void handleLowerCommand(cMessage *message);
 
-    virtual void handleUpperPacket(Packet *packet) = 0;
-    virtual void handleLowerPacket(Packet *packet) = 0;
+    virtual void handleUpperPacket(Packet *packet);
+    virtual void handleLowerPacket(Packet *packet);
 
     virtual bool isUpperMessage(cMessage *message) = 0;
     virtual bool isLowerMessage(cMessage *message) = 0;
