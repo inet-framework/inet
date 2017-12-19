@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace physicallayer {
+
 void PhysicalLayerBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
@@ -28,6 +30,21 @@ void PhysicalLayerBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         radioInGateId = findGate("radioIn");
     }
+}
+
+void PhysicalLayerBase::handleLowerMessage(cMessage *message)
+{
+    if (!message->isPacket())
+        handleLowerCommand(message);
+    else {
+        emit(packetReceivedFromLowerSignal, message);
+        handleSignal(check_and_cast<Signal *>(message));
+    }
+}
+
+void PhysicalLayerBase::handleSignal(Signal *signal)
+{
+    throw cRuntimeError("Signal '%s' is not handled.", signal->getName());
 }
 
 void PhysicalLayerBase::sendUp(cMessage *message)
@@ -46,6 +63,8 @@ bool PhysicalLayerBase::isLowerMessage(cMessage *message)
 {
     return message->getArrivalGateId() == radioInGateId;
 }
+
+} // namespace physicallayer
 
 } // namespace inet
 
