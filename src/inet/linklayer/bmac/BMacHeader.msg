@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 OpenSim Ltd.
+// Copyright (C) 2012 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,15 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.lightweight;
+import inet.common.INETDefs;
+import inet.linklayer.base.MacHeaderBase;
 
-import inet.linklayer.common.WirelessNic;
+namespace inet;
 
-
-module LightweightNic extends WirelessNic
+class BMacHeader extends MacHeaderBase
 {
-    parameters:
-        radioType = default("ApskScalarRadio");
-        macType = "LightweightMac";
 }
 

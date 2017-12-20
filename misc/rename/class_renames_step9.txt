@@ -1,0 +1,7 @@
+BerkeleyMac -> BMac
+BerkeleyMacHeader -> BMacHeader
+BerkeleyMacLayer -> BMacLayer
+
+LightweightMac -> LMac
+LightweightMacHeader -> LMacHeader
+LightweightMacLayer -> LMacLayer

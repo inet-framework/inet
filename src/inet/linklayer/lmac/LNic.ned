@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.berkeley;
+package inet.linklayer.lmac;
 
 import inet.linklayer.common.WirelessNic;
 
 
-module BerkeleyNic extends WirelessNic
+module LNic extends WirelessNic
 {
     parameters:
         radioType = default("ApskScalarRadio");
-        macType = "BerkeleyMac";
+        macType = "LMac";
 }
 

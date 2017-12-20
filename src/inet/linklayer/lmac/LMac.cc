@@ -9,14 +9,14 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "inet/linklayer/lightweight/LightweightMac.h"
+#include "inet/linklayer/lmac/LMac.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/lightweight/LightweightMacHeader_m.h"
+#include "inet/linklayer/lmac/LMacHeader_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -26,14 +26,14 @@ namespace inet {
 
 using namespace physicallayer;
 
-Define_Module(LightweightMac)
+Define_Module(LMac)
 
 #define myId    (getParentModule()->getParentModule()->getIndex())
 
-const MacAddress LightweightMac::LMAC_NO_RECEIVER = MacAddress(-2);
-const MacAddress LightweightMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
+const MacAddress LMac::LMAC_NO_RECEIVER = MacAddress(-2);
+const MacAddress LMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
-void LightweightMac::initialize(int stage)
+void LMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -101,7 +101,7 @@ void LightweightMac::initialize(int stage)
     }
 }
 
-LightweightMac::~LightweightMac()
+LMac::~LMac()
 {
     delete slotChange;
     cancelAndDelete(timeout);
@@ -118,7 +118,7 @@ LightweightMac::~LightweightMac()
     macQueue.clear();
 }
 
-void LightweightMac::initializeMACAddress()
+void LMac::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
@@ -134,7 +134,7 @@ void LightweightMac::initializeMACAddress()
     }
 }
 
-InterfaceEntry *LightweightMac::createInterfaceEntry()
+InterfaceEntry *LMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -157,7 +157,7 @@ InterfaceEntry *LightweightMac::createInterfaceEntry()
  * Check whether the queue is not full: if yes, print a warning and drop the packet.
  * Sending of messages is automatic.
  */
-void LightweightMac::handleUpperPacket(Packet *packet)
+void LMac::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
 
@@ -190,7 +190,7 @@ void LightweightMac::handleUpperPacket(Packet *packet)
  * LMAC_WAKEUP: wake up the node and either check the channel before sending a control packet or wait for control packets.
  * LMAC_TIMEOUT: go back to sleep after nothing happened.
  */
-void LightweightMac::handleSelfMessage(cMessage *msg)
+void LMac::handleSelfMessage(cMessage *msg)
 {
     switch (macState) {
         case INIT:
@@ -284,7 +284,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LightweightMacHeader>();
+                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
@@ -342,7 +342,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = mac->peekHeader<LightweightMacHeader>()->getDestAddr();
+                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -390,7 +390,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LightweightMacHeader>();
+                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
@@ -475,9 +475,9 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == LMAC_SEND_CONTROL) {
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
-                auto control = makeShared<LightweightMacHeader>();
+                auto control = makeShared<LMacHeader>();
                 if ((macQueue.size() > 0) && !SETUP_PHASE)
-                    control->setDestAddr(macQueue.front()->peekHeader<LightweightMacHeader>()->getDestAddr());
+                    control->setDestAddr(macQueue.front()->peekHeader<LMacHeader>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
@@ -507,7 +507,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
                 Packet *data = new Packet();
                 data->insertAtEnd(macQueue.front()->peekAt(b(headerLength)));
                 data->setKind(LMAC_DATA);
-                const auto& lmacHeader = staticPtrCast<LightweightMacHeader>(macQueue.front()->peekHeader<LightweightMacHeader>()->dupShared());
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
@@ -547,7 +547,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = mac->peekHeader<LightweightMacHeader>()->getDestAddr();
+                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
@@ -588,7 +588,7 @@ void LightweightMac::handleSelfMessage(cMessage *msg)
 /**
  * Handle LMAC control packets and data packets. Recognize collisions, change own slot if necessary and remember who is using which slot.
  */
-void LightweightMac::handleLowerPacket(Packet *packet)
+void LMac::handleLowerPacket(Packet *packet)
 {
     if (packet->hasBitError()) {
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
@@ -605,7 +605,7 @@ void LightweightMac::handleLowerPacket(Packet *packet)
 /**
  * Handle transmission over messages: send the data packet or don;t do anyhting.
  */
-void LightweightMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void LMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
@@ -637,7 +637,7 @@ void LightweightMac::receiveSignal(cComponent *source, simsignal_t signalID, lon
 /**
  * Try to find a new slot after collision. If not possible, set own slot to -1 (not able to send anything)
  */
-void LightweightMac::findNewSlot()
+void LMac::findNewSlot()
 {
     // pick a random slot at the beginning and schedule the next wakeup
     // free the old one first
@@ -661,9 +661,9 @@ void LightweightMac::findNewSlot()
     slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
 }
 
-void LightweightMac::decapsulate(Packet *packet)
+void LMac::decapsulate(Packet *packet)
 {
-    const auto& lmacHeader = packet->popHeader<LightweightMacHeader>();
+    const auto& lmacHeader = packet->popHeader<LMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
@@ -677,9 +677,9 @@ void LightweightMac::decapsulate(Packet *packet)
  * header fields.
  */
 
-void LightweightMac::encapsulate(Packet *netwPkt)
+void LMac::encapsulate(Packet *netwPkt)
 {
-    auto pkt = makeShared<LightweightMacHeader>();
+    auto pkt = makeShared<LMacHeader>();
     pkt->setChunkLength(b(headerLength));
 
     // copy dest address from the Control Info attached to the network
@@ -700,18 +700,18 @@ void LightweightMac::encapsulate(Packet *netwPkt)
     EV_DETAIL << "pkt encapsulated\n";
 }
 
-void LightweightMac::flushQueue()
+void LMac::flushQueue()
 {
     // TODO:
     macQueue.clear();
 }
 
-void LightweightMac::clearQueue()
+void LMac::clearQueue()
 {
     macQueue.clear();
 }
 
-void LightweightMac::attachSignal(Packet *macPkt)
+void LMac::attachSignal(Packet *macPkt)
 {
     //calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;
