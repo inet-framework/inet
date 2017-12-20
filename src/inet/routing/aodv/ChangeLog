@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AODVControlPacket renamed to AodvControlPacket
+	    AODVControlPacketType renamed to AodvControlPacketType
+	    AODVRERR renamed to AodvRerr
+	    AODVRREP renamed to AodvRrep
+	    AODVRREPACK renamed to AodvRrepAck
+	    AODVRREQ renamed to AodvRreq
+	    AODVRouteData renamed to AodvRouteData
+	    AODVRouter renamed to AodvRouter
+	    AODVRouting renamed to AodvRouting
+	    IPv4 renamed to Ipv4
+	    IPv4Route renamed to Ipv4Route
+	    RREQIdentifier renamed to RreqIdentifier
+	    RREQIdentifierCompare renamed to RreqIdentifierCompare
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPSocket renamed to UdpSocket
+	    WaitForRREP renamed to WaitForRrep
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue() calls.

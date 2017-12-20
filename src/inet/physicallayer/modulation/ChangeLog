@@ -1,5 +1,36 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    16PPMModulation renamed to 16PpmModulation
+	    2GFSKModulation renamed to 2GfskModulation
+	    4GFSKModulation renamed to 4GfskModulation
+	    4PPMModulation renamed to 4PpmModulation
+	    APSKModulationBase renamed to ApskModulationBase
+	    APSKSymbol renamed to ApskSymbol
+	    BPSKModulation renamed to BpskModulation
+	    DBPSKModulation renamed to DbpskModulation
+	    DPSKModulationBase renamed to DpskModulationBase
+	    DQPSKModulation renamed to DqpskModulation
+	    DSSSOQPSK16Modulation renamed to DsssOqpsk16Modulation
+	    GFSKModulationBase renamed to GfskModulationBase
+	    MASKModulation renamed to MaskModulation
+	    MFSKModulation renamed to MfskModulation
+	    MPSKModulation renamed to MpskModulation
+	    MQAMModulation renamed to MqamModulation
+	    MQAMModulationBase renamed to MqamModulationBase
+	    PPMModulationBase renamed to PpmModulationBase
+	    QAM16Modulation renamed to Qam16Modulation
+	    QAM256Modulation renamed to Qam256Modulation
+	    QAM64Modulation renamed to Qam64Modulation
+	    QBPSKModulation renamed to QbpskModulation
+	    QPSKModulation renamed to QpskModulation
+	    _16PPMModulation renamed to _16PpmModulation
+	    _2GFSKModulation renamed to _2GfskModulation
+	    _4GFSKModulation renamed to _4GfskModulation
+	    _4PPMModulation renamed to _4PpmModulation
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-06-30  Florian Kauer

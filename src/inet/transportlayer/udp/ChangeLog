@@ -1,5 +1,43 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ICMP renamed to Icmp
+	    ICMPv6 renamed to Icmpv6
+	    ICMPv6Header renamed to Icmpv6Header
+	    IPv4 renamed to Ipv4
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv6 renamed to Ipv6
+	    IPv6ControlInfo renamed to Ipv6ControlInfo
+	    IPv6ExtensionHeaders renamed to Ipv6ExtensionHeaders
+	    IPv6Header renamed to Ipv6Header
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    IUDP renamed to IUdp
+	    TCPIPchecksum renamed to TcpIpChecksum
+	    UDP renamed to Udp
+	    UDPBindCommand renamed to UdpBindCommand
+	    UDPBlockMulticastSourcesCommand renamed to UdpBlockMulticastSourcesCommand
+	    UDPCommandCode renamed to UdpCommandCode
+	    UDPConnectCommand renamed to UdpConnectCommand
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPErrorIndication renamed to UdpErrorIndication
+	    UDPJoinMulticastGroupsCommand renamed to UdpJoinMulticastGroupsCommand
+	    UDPJoinMulticastSourcesCommand renamed to UdpJoinMulticastSourcesCommand
+	    UDPLeaveMulticastGroupsCommand renamed to UdpLeaveMulticastGroupsCommand
+	    UDPLeaveMulticastSourcesCommand renamed to UdpLeaveMulticastSourcesCommand
+	    UDPSetBroadcastCommand renamed to UdpSetBroadcastCommand
+	    UDPSetMulticastInterfaceCommand renamed to UdpSetMulticastInterfaceCommand
+	    UDPSetMulticastLoopCommand renamed to UdpSetMulticastLoopCommand
+	    UDPSetMulticastSourceFilterCommand renamed to UdpSetMulticastSourceFilterCommand
+	    UDPSetOptionCommand renamed to UdpSetOptionCommand
+	    UDPSetReuseAddressCommand renamed to UdpSetReuseAddressCommand
+	    UDPSetTimeToLiveCommand renamed to UdpSetTimeToLiveCommand
+	    UDPSetTypeOfServiceCommand renamed to UdpSetTypeOfServiceCommand
+	    UDPSourceFilterMode renamed to UdpSourceFilterMode
+	    UDPUnblockMulticastSourcesCommand renamed to UdpUnblockMulticastSourcesCommand
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.

@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ARP renamed to Arp
+	    ARPCache renamed to ArpCache
+	    ARPCacheEntry renamed to ArpCacheEntry
+	    ARPOpcode renamed to ArpOpcode
+	    ARPPacket renamed to ArpPacket
+	    GlobalARP renamed to GlobalArp
+	    IARP renamed to IArp
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    MACAddress renamed to MacAddress
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.

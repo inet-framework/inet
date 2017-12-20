@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection renamed to IQosRateSelection
+	    IRecipientQoSAckPolicy renamed to IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService renamed to IRecipientQosMacDataService
+	    MACAddress renamed to MacAddress
+	    QoSCtsPolicy renamed to QosCtsPolicy
+	    RecipientQoSAckPolicy renamed to RecipientQosAckPolicy
+	    RecipientQoSMacDataService renamed to RecipientQosMacDataService
+
 2017-12-14  Levente Mészáros
 
 	Removed unnecessary markImmutable() calls.

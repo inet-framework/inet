@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MACBase renamed to MacBase
+	    PPP renamed to Ppp
+
 2017-12-14  Levente Mészáros
 
 	Removed unnecessary markImmutable() calls.

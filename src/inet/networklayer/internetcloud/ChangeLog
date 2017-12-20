@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IDPair renamed to IdPair
+	    IDPairToDescriptorMap renamed to IdPairToDescriptorMap
+	    IPv4 renamed to Ipv4
+	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::xmlValue() calls.

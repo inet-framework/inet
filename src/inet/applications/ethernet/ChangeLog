@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EtherAppCli renamed to EtherAppClient
+	    EtherAppSrv renamed to EtherAppServer
+	    EtherLLC renamed to EtherLlc
+	    MACAddress renamed to MacAddress
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue(), cPar::longValue() calls.

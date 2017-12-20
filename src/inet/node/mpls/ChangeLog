@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkLayer renamed to Ipv4NetworkLayer
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    ITCP renamed to ITcp
+	    IUDP renamed to IUdp
+	    LDP renamed to Ldp
+	    LDP_LSR renamed to LdpRouter
+	    LIBTable renamed to LibTable
+	    MPLS renamed to Mpls
+	    PPPFrame renamed to PppFrame
+	    PPPInterface renamed to PppInterface
+	    RSVP renamed to Rsvp
+	    RSVP_LSR renamed to RsvpRouter
+	    TCP renamed to Tcp
+	    TCPSpoof renamed to TcpSpoof
+	    TCP_NSC renamed to TcpNsc
+	    TCP_lwIP renamed to TcpLwip
+	    TED renamed to Ted
+	    UDP renamed to Udp
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-08-25  Zoltan Bojthe

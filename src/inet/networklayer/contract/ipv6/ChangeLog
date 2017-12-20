@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 renamed to Ipv4
+	    IPv6 renamed to Ipv6
+	    IPv6Address renamed to Ipv6Address
+	    IPv6AddressType renamed to Ipv6AddressType
+	    IPv6ExtHeaderInd renamed to Ipv6ExtHeaderInd
+	    IPv6ExtHeaderReq renamed to Ipv6ExtHeaderReq
+	    IPv6ExtHeaderTagBase renamed to Ipv6ExtHeaderTagBase
+	    IPv6ExtHeaderTagBase_Base renamed to Ipv6ExtHeaderTagBase_Base
+	    IPv6Header renamed to Ipv6Header
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+
 2017-12-11  Zoltan Bojthe
 
 	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.

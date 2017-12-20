@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCPCommand renamed to TcpCommand
+	    TCPSocket renamed to TcpSocket
+	    TCPSocketMap renamed to TcpSocketMap
+	    TCPStatusInfo renamed to TcpStatusInfo
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::xmlValue() calls.

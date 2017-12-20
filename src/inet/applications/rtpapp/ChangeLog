@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Address renamed to Ipv4Address
+	    RTPAVProfile renamed to RtpAvProfile
+	    RTPApplication renamed to RtpApplication
+	    RTPCICreateSenderModule renamed to RtpCiCreateSenderModule
+	    RTPCIEnterSession renamed to RtpCiEnterSession
+	    RTPCILeaveSession renamed to RtpCiLeaveSession
+	    RTPCISenderControl renamed to RtpCiSenderControl
+	    RTPCISenderStatus renamed to RtpCiSenderStatus
+	    RTPCISessionEntered renamed to RtpCiSessionEntered
+	    RTPControlInfo renamed to RtpControlInfo
+	    RTPControlMsg renamed to RtpControlMsg
+	    RTPInterfacePacket renamed to RtpInterfacePacket
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue(), cPar::longValue() calls.

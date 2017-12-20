@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCP renamed to Tcp
+	    TCPOption renamed to TcpOption
+	    TCPOptionEnd renamed to TcpOptionEnd
+	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
+	    TCPOptionNop renamed to TcpOptionNop
+	    TCPOptionNumbers renamed to TcpOptionNumbers
+	    TCPOptionSack renamed to TcpOptionSack
+	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
+	    TCPOptionTimestamp renamed to TcpOptionTimestamp
+	    TCPOptionUnknown renamed to TcpOptionUnknown
+	    TCPOptionWindowScale renamed to TcpOptionWindowScale
+	    TCPSegment renamed to TcpHeader
+
 2017-12-11  Zoltan Bojthe
 
 	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.

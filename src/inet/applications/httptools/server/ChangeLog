@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCPSocket renamed to TcpSocket
+	    TCPSocketMap renamed to TcpSocketMap
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::xmlValue() calls.

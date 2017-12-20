@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    RTPAVProfile renamed to RtpAvProfile
+	    RTPAVProfilePayload32Receiver renamed to RtpAvProfilePayload32Receiver
+	    RTPAVProfilePayload32Sender renamed to RtpAvProfilePayload32Sender
+	    RTPInnerPacket renamed to RtpInnerPacket
+	    RTPMpegHeader renamed to RtpMpegHeader
+	    RTPMpegPacket renamed to RtpMpegPacket
+	    RTPPacket renamed to RtpPacket
+	    RTPPayloadReceiver renamed to RtpPayloadReceiver
+	    RTPPayloadSender renamed to RtpPayloadSender
+	    RTPProfile renamed to RtpProfile
+
 2017-12-11  Zoltan Bojthe
 
 	Removed some unnecessary @customize from MSG files.

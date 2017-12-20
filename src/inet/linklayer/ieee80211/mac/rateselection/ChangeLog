@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection renamed to IQosRateSelection
+	    MACAddress renamed to MacAddress
+	    QoSRateSelection renamed to QosRateSelection
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-27  Levente Mészáros

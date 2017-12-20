@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    GenericARP renamed to GenericArp
+	    GenericTLVOptionTypes renamed to GenericTlvOptionTypes
+	    IARP renamed to IArp
+	    IPProtocolId renamed to IpProtocolId
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    MACAddress renamed to MacAddress
+	    TCPSegment renamed to TcpHeader
+	    TLVOption renamed to TlvOptions
+	    TLVOptions renamed to TlvOptions
+
 2017-12-15  Zoltan Bojthe
 
 	Renamed deprecated info() to str().

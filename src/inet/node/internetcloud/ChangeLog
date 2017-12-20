@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ARP renamed to Arp
+	    ICMP renamed to Icmp
+	    IPv4 renamed to Ipv4
+	    IPv4NodeConfigurator renamed to Ipv4NodeConfigurator
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 ====== inet-3.x ======

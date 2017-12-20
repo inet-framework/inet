@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DISTR_TYPE renamed to DistrType
+	    LOG_FORMAT renamed to LogFormat
+
 2017-11-23  Levente Mészáros
 
 	Removed all @omitGetVerb and @fieldNameSuffix properties.

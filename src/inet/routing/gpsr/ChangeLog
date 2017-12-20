@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    GPSR renamed to Gpsr
+	    GPSRBeacon renamed to GpsrBeacon
+	    GPSRDefs renamed to GpsrDefs
+	    GPSRForwardingMode renamed to GpsrForwardingMode
+	    GPSROption renamed to GpsrOption
+	    GPSRPlanarizationMode renamed to GpsrPlanarizationMode
+	    IPv6 renamed to Ipv6
+	    IPv6ExtensionHeaders renamed to Ipv6ExtensionHeaders
+	    IPv6Header renamed to Ipv6Header
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    TLVOption renamed to TlvOptions
+	    TLVOptionBase renamed to TlvOptionBase
+	    TLVOptions renamed to TlvOptions
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.

@@ -1,5 +1,73 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AODVRouteData renamed to AodvRouteData
+	    ARP renamed to Arp
+	    ARPPacket renamed to ArpPacket
+	    IARP renamed to IArp
+	    ICMP renamed to Icmp
+	    ICMPCode renamed to IcmpCode
+	    ICMPDestinationUnreachableCodes renamed to IcmpDestinationUnreachableCodes
+	    ICMPEchoReply renamed to IcmpEchoReply
+	    ICMPEchoRequest renamed to IcmpEchoRequest
+	    ICMPParameterProblemSubcodes renamed to IcmpParameterProblemSubcodes
+	    ICMPRedirectSubcodes renamed to IcmpRedirectSubcodes
+	    ICMPTimeExceededSubcodes renamed to IcmpTimeExceededSubcodes
+	    ICMPType renamed to IcmpType
+	    IGMPHostTimerContext renamed to IgmpHostTimerContext
+	    IGMPMessage renamed to IgmpMessage
+	    IGMPQuery renamed to IgmpQuery
+	    IGMPRouterTimerContext renamed to IgmpRouterTimerContext
+	    IGMPTimerKind renamed to IgmpTimerKind
+	    IGMPType renamed to IgmpType
+	    IGMPv1Query renamed to Igmpv1Query
+	    IGMPv1Report renamed to Igmpv1Report
+	    IGMPv2 renamed to Igmpv2
+	    IGMPv2Leave renamed to Igmpv2Leave
+	    IGMPv2Query renamed to Igmpv2Query
+	    IGMPv2Report renamed to Igmpv2Report
+	    IGMPv3 renamed to Igmpv3
+	    IGMPv3Query renamed to Igmpv3Query
+	    IGMPv3Report renamed to Igmpv3Report
+	    IIGMP renamed to IIgmp
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPAddressVector renamed to Ipv4AddressVector
+	    IPOption renamed to Ipv4OptionType
+	    IPOptionClass renamed to Ipv4OptionClass
+	    IPProtocolId renamed to IpProtocolId
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressVector renamed to Ipv4AddressVector
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv4FragBuf renamed to Ipv4FragBuf
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4MulticastGroupInfo renamed to Ipv4MulticastGroupInfo
+	    IPv4MulticastGroupSourceInfo renamed to Ipv4MulticastGroupSourceInfo
+	    IPv4MulticastRoute renamed to Ipv4MulticastRoute
+	    IPv4MulticastSourceList renamed to Ipv4MulticastSourceList
+	    IPv4NetworkLayer renamed to Ipv4NetworkLayer
+	    IPv4NodeConfigurator renamed to Ipv4NodeConfigurator
+	    IPv4Option renamed to Ipv4Option
+	    IPv4OptionEnd renamed to Ipv4OptionEnd
+	    IPv4OptionNop renamed to Ipv4OptionNop
+	    IPv4OptionRecordRoute renamed to Ipv4OptionRecordRoute
+	    IPv4OptionStreamId renamed to Ipv4OptionStreamId
+	    IPv4OptionTimestamp renamed to Ipv4OptionTimestamp
+	    IPv4OptionUnknown renamed to Ipv4OptionUnknown
+	    IPv4Route renamed to Ipv4Route
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    IPv6 renamed to Ipv6
+	    IPv6RoutingTable renamed to Ipv6RoutingTable
+	    MACAddress renamed to MacAddress
+	    RouterID renamed to RouterId
+	    TCPIPchecksum renamed to TcpIpChecksum
+	    TCPSegment renamed to TcpHeader
+	    TLVOption renamed to TlvOptions
+	    TLVOptionBase renamed to TlvOptionBase
+	    TLVOptions renamed to TlvOptions
+
 2017-12-15  Andras Varga
 
 	Fixed int/double type mismatch between NED parameter and C++ usage.

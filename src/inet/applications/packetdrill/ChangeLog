@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Address renamed to Ipv4Address
+	    IPv6Address renamed to Ipv6Address
+	    TCPCommand renamed to TcpCommand
+	    TCPConnection renamed to TcpConnection
+	    TCPOption renamed to TcpOption
+	    TCPOptionEnd renamed to TcpOptionEnd
+	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
+	    TCPOptionNop renamed to TcpOptionNop
+	    TCPOptionSack renamed to TcpOptionSack
+	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
+	    TCPOptionTimestamp renamed to TcpOptionTimestamp
+	    TCPOptionUnknown renamed to TcpOptionUnknown
+	    TCPOptionWindowScale renamed to TcpOptionWindowScale
+	    TCPSegment renamed to TcpHeader
+	    TCPSessionApp renamed to TcpSessionApp
+	    TCPSocket renamed to TcpSocket
+	    UDPSocket renamed to UdpSocket
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.

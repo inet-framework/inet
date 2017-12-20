@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    RTCP renamed to Rtcp
+	    RTP renamed to Rtp
+	    RTPApplication renamed to RtpApplication
+	    RTPHost renamed to RtpHost
+	    UDP renamed to Udp
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-08-25  Zoltan Bojthe

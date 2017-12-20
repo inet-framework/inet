@@ -1,5 +1,37 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ASID renamed to AsId
+	    BGPCommon renamed to BgpCommon
+	    BGPFSM renamed to BgpFsm
+	    BGPHeader renamed to BgpHeader
+	    BGPKeepAliveMessage renamed to BgpKeepAliveMessage
+	    BGPOpenMessage renamed to BgpOpenMessage
+	    BGPPathSegmentType renamed to BgpPathSegmentType
+	    BGPRouting renamed to BgpRouting
+	    BGPRoutingTableEntry renamed to BgpRoutingTableEntry
+	    BGPSession renamed to BgpSession
+	    BGPSessionType renamed to BgpSessionType
+	    BGPUpdate renamed to BgpUpdate
+	    BGPUpdateMessage renamed to BgpUpdateMessage
+	    BGPUpdateNLRI renamed to BgpUpdateNlri
+	    BGPUpdatePathAttributeList renamed to BgpUpdatePathAttributeList
+	    IBGPRouting renamed to IBgpRouting
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressRange renamed to Ipv4AddressRange
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4Route renamed to Ipv4Route
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    OSPFRouting renamed to OspfRouting
+	    SessionID renamed to SessionId
+	    TCPConnection renamed to TcpConnection
+	    TCPSocket renamed to TcpSocket
+	    TCPSocketMap renamed to TcpSocketMap
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::xmlValue() calls.

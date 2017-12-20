@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DYMO renamed to Dymo
+	    DYMORouter renamed to DymoRouter
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-05-31  Levente Mészáros

@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DADEntry renamed to DadEntry
+	    DADGlobalEntry renamed to DadGlobalEntry
+	    DADGlobalList renamed to DadGlobalList
+	    DADList renamed to DadList
+	    FlatNetworkConfigurator6 renamed to Ipv6FlatNetworkConfigurator
+	    ICMPv6 renamed to Icmpv6
+	    ICMPv6DEST_UN renamed to Icmpv6DestUnav
+	    ICMPv6Header renamed to Icmpv6Header
+	    ICMPv6Type renamed to Icmpv6Type
+	    ICMPv6_PARAMETER_PROB renamed to Icmpv6ParameterProblem
+	    ICMPv6_TIME_EX renamed to Icmpv6TimeEx
+	    IPv6 renamed to Ipv6
+	    IPv6Address renamed to Ipv6Address
+	    IPv6ControlInfo renamed to Ipv6ControlInfo
+	    IPv6Header renamed to Ipv6Header
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    IPv6NDControlInfo renamed to Ipv6NdControlInfo
+	    IPv6NDMessage renamed to Ipv6NdMessage
+	    IPv6NDOptionLength renamed to Ipv6NdOptionLength
+	    IPv6NDOptionTypes renamed to Ipv6NdOptionTypes
+	    IPv6NDPrefixInformation renamed to Ipv6NdPrefixInformation
+	    IPv6NeighbourAdvertisement renamed to Ipv6NeighbourAdvertisement
+	    IPv6NeighbourCache renamed to Ipv6NeighbourCache
+	    IPv6NeighbourDiscovery renamed to Ipv6NeighbourDiscovery
+	    IPv6Redirect renamed to Ipv6Redirect
+	    IPv6Route renamed to Ipv6Route
+	    IPv6RouterAdvertisement renamed to Ipv6RouterAdvertisement
+	    IPv6RouterSolicitation renamed to Ipv6RouterSolicitation
+	    IPv6RoutingTable renamed to Ipv6RoutingTable
+	    MACAddress renamed to MacAddress
+	    MIPv6HAInformation renamed to Mipv6HaInformation
+	    MIPv6NDAdvertisementInterval renamed to Mipv6NdAdvertisementInterval
+	    RATimerList renamed to RaTimerList
+	    RDEntry renamed to RdEntry
+	    RDList renamed to RdList
+	    TCPIPchecksum renamed to TcpIpChecksum
+
 2017-12-14  Levente Mészáros
 
 	Removed unnecessary markImmutable() calls.

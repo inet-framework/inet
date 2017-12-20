@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR renamed to ISnir
+	    WITH_IDEALWIRELESS renamed to WITH_ACKINGWIRELESS
+
 2017-12-18  Levente Mészáros
 
 	Changed NetworkConfiguratorBase to support ShortcutMac by allow

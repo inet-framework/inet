@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPProtocolId renamed to IpProtocolId
+	    ITCP renamed to ITcp
+	    LDP renamed to Ldp
+	    TCPAcceptCommand renamed to TcpAcceptCommand
+	    TCPAlgorithm renamed to TcpAlgorithm
+	    TCPAvailableInfo renamed to TcpAvailableInfo
+	    TCPCommand renamed to TcpCommand
+	    TCPConnectInfo renamed to TcpConnectInfo
+	    TCPConnection renamed to TcpConnection
+	    TCPErrorCode renamed to TcpErrorCode
+	    TCPErrorInfo renamed to TcpErrorInfo
+	    TCPOpenCommand renamed to TcpOpenCommand
+	    TCPSocket renamed to TcpSocket
+	    TCPSocketMap renamed to TcpSocketMap
+	    TCPSrvHostApp renamed to TcpServerHostApp
+	    TCPStateVariables renamed to TcpStateVariables
+	    TCPStatusInfo renamed to TcpStatusInfo
+
 2017-11-14  Zoltan Bojthe
 
 	Replaced "int foo @enum(FooEnum)" to FooEnum foo in MSG files.

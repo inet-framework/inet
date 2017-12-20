@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR renamed to ISnir
+	    IdealAnalogModel renamed to UnitDiskAnalogModel
+	    IdealListening renamed to UnitDiskListening
+	    IdealNoise renamed to UnitDiskNoise
+	    IdealPhyHeader renamed to UnitDiskPhyHeader
+	    IdealRadio renamed to UnitDiskRadio
+	    IdealRadioMedium renamed to UnitDiskRadioMedium
+	    IdealReceiver renamed to UnitDiskReceiver
+	    IdealReception renamed to UnitDiskReception
+	    IdealSNIR renamed to UnitDiskSnir
+	    IdealTransmission renamed to UnitDiskTransmission
+	    IdealTransmitter renamed to UnitDiskTransmitter
+	    SNIRBase renamed to SnirBase
+
 2017-12-15  Andras Varga
 
 	Fixed int/double type mismatch between NED parameter and C++ usage.

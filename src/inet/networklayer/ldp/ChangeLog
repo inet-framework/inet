@@ -1,5 +1,35 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    FEC_TLV renamed to FecTlv
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4Route renamed to Ipv4Route
+	    LDP renamed to Ldp
+	    LDPAddress renamed to LdpAddress
+	    LDPHello renamed to LdpHello
+	    LDPIni renamed to LdpIni
+	    LDPLabelMapping renamed to LdpLabelMapping
+	    LDPLabelRequest renamed to LdpLabelRequest
+	    LDPNotify renamed to LdpNotify
+	    LDPPacket renamed to LdpPacket
+	    LDP_MESSAGE_TYPES renamed to LdpMessageTypes
+	    LDP_STATUS_TYPES renamed to LdpStatusTypes
+	    LIBTable renamed to LibTable
+	    TCPCommand renamed to TcpCommand
+	    TCPSegment renamed to TcpHeader
+	    TCPSocket renamed to TcpSocket
+	    TCPSocketMap renamed to TcpSocketMap
+	    TCPStatusInfo renamed to TcpStatusInfo
+	    TED renamed to Ted
+	    TEDChangeInfo renamed to TedChangeInfo
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPSocket renamed to UdpSocket
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue() calls.

@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Option renamed to Ipv4Option
+
 2017-12-11  Levente Mészáros
 
 	Added doInsert* and doRemove* to Chunk in order to reuse tag maintaining code.

@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv6 renamed to Ipv6
+	    UDP renamed to Udp
+	    UDPBasicApp renamed to UdpBasicApp
+	    UDPBasicBurst renamed to UdpBasicBurst
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPEchoApp renamed to UdpEchoApp
+	    UDPSink renamed to UdpSink
+	    UDPSocket renamed to UdpSocket
+	    UDPVideoStreamCli renamed to UdpVideoStreamClient
+	    UDPVideoStreamSvr renamed to UdpVideoStreamServer
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue(), cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.

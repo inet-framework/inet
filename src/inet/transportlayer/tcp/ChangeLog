@@ -1,5 +1,48 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DumbTCP renamed to DumbTcp
+	    IPv4 renamed to Ipv4
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv6 renamed to Ipv6
+	    IPv6ControlInfo renamed to Ipv6ControlInfo
+	    ITCP renamed to ITcp
+	    LinuxTCP renamed to LinuxTcp
+	    TCP renamed to Tcp
+	    TCPAcceptCommand renamed to TcpAcceptCommand
+	    TCPAlgorithm renamed to TcpAlgorithm
+	    TCPAvailableInfo renamed to TcpAvailableInfo
+	    TCPBaseAlg renamed to TcpBaseAlg
+	    TCPCommand renamed to TcpCommand
+	    TCPConnectInfo renamed to TcpConnectInfo
+	    TCPConnection renamed to TcpConnection
+	    TCPEventCode renamed to TcpEventCode
+	    TCPIPchecksum renamed to TcpIpChecksum
+	    TCPNewReno renamed to TcpNewReno
+	    TCPNoCongestionControl renamed to TcpNoCongestionControl
+	    TCPOpenCommand renamed to TcpOpenCommand
+	    TCPOption renamed to TcpOption
+	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
+	    TCPOptionNop renamed to TcpOptionNop
+	    TCPOptionSack renamed to TcpOptionSack
+	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
+	    TCPOptionTimestamp renamed to TcpOptionTimestamp
+	    TCPOptionWindowScale renamed to TcpOptionWindowScale
+	    TCPReceiveQueue renamed to TcpReceiveQueue
+	    TCPReno renamed to TcpReno
+	    TCPSACKRexmitQueue renamed to TcpSackRexmitQueue
+	    TCPSegment renamed to TcpHeader
+	    TCPSendQueue renamed to TcpSendQueue
+	    TCPSocket renamed to TcpSocket
+	    TCPStateVariables renamed to TcpStateVariables
+	    TCPStatusInfo renamed to TcpStatusInfo
+	    TCPTahoe renamed to TcpTahoe
+	    TCPTahoeRenoFamily renamed to TcpTahoeRenoFamily
+	    TCPVegas renamed to TcpVegas
+	    TCPWestwood renamed to TcpWestwood
+
 2017-12-15  Zoltan Bojthe
 
 	Renamed deprecated info() to str().

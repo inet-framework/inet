@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EtherFrameWithLLC renamed to EtherFrameWithLlc
+	    ExampleQoSClassifier renamed to ExampleQosClassifier
+	    IIeee8021QoSClassifier renamed to IIeee8021dQosClassifier
+	    IIeee8021dQoSClassifier renamed to IIeee8021dQosClassifier
+	    IMACProtocol renamed to IMacProtocol
+	    IPv4Address renamed to Ipv4Address
+	    IPv6Header renamed to Ipv6Header
+	    MACAddress renamed to MacAddress
+	    MACAddressType renamed to MacAddressType
+	    RandomQoSClassifier renamed to RandomQosClassifier
+	    SAPCode renamed to SapCode
+	    TCPSegment renamed to TcpHeader
+
 2017-12-18  Levente Mészáros
 
 	Changed WirelessNic to allow omitting the radio.

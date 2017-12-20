@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IMACAddressTable renamed to IMacAddressTable
+	    IMACRelayUnit renamed to IMacRelayUnit
+	    Ieee80211MgmtAP renamed to Ieee80211MgmtAp
+	    Ieee80211MgmtAPSimplified renamed to Ieee80211MgmtApSimplified
+	    MACAddressTable renamed to MacAddressTable
+	    MACRelayUnit renamed to MacRelayUnit
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-05-31  Levente Mészáros

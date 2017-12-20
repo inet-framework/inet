@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR renamed to ISnir
+	    MACAddress renamed to MacAddress
+
 2017-12-19  Levente Mészáros
 
 	Replaced handleLowerPacket with handleSignal in Radio.

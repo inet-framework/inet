@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
+	    RIPCommand renamed to RipCommand
+	    RIPEntry renamed to RipEntry
+	    RIPInterfaceEntry renamed to RipInterfaceEntry
+	    RIPMode renamed to RipMode
+	    RIPPacket renamed to RipPacket
+	    RIPRoute renamed to RipRoute
+	    RIPRouting renamed to RipRouting
+	    RIP_AF renamed to RipAf
+	    UDP renamed to Udp
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPSocket renamed to UdpSocket
+
 2017-12-15  Zoltan Bojthe
 
 	Renamed deprecated info() to str().

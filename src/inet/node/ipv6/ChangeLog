@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv6 renamed to Ipv6
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-06-16  Levente Mészáros

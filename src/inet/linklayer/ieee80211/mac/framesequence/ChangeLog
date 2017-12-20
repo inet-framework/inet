@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MACAddress renamed to MacAddress
+	    OriginatorQoSAckPolicy renamed to OriginatorQosAckPolicy
+	    QoSRtsPolicy renamed to QosRtsPolicy
+
 2017-12-14  Levente Mészáros
 
 	Removed unnecessary markImmutable() calls.

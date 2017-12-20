@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    FIFOQueue renamed to FifoQueue
+	    REDDropper renamed to RedDropper
+	    WRRScheduler renamed to WrrScheduler
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue() calls.

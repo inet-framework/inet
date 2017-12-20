@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPAddressVector renamed to Ipv4AddressVector
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressVector renamed to Ipv4AddressVector
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4Route renamed to Ipv4Route
+	    RSVP renamed to Rsvp
+	    TED renamed to Ted
+	    TEDChangeInfo renamed to TedChangeInfo
+	    TELinkStateInfo renamed to TeLinkStateInfo
+	    TELinkStateInfoVector renamed to TeLinkStateInfoVector
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue() calls.

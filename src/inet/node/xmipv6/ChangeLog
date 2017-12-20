@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv6 renamed to Ipv6
+	    TCP renamed to Tcp
+	    UDP renamed to Udp
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-05-30  Levente Mészáros

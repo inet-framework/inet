@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    BDPUType renamed to BdpuType
+	    BPDU renamed to Bpdu
+	    MACAddress renamed to MacAddress
+	    MACAddressTable renamed to MacAddressTable
+	    STP renamed to Stp
+	    STPBase renamed to StpBase
+
 2017-12-14  Levente Mészáros
 
 	Removed unnecessary markImmutable() calls.

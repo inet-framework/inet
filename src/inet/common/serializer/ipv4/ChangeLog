@@ -1,5 +1,35 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ICMPEchoReply renamed to IcmpEchoReply
+	    ICMPEchoRequest renamed to IcmpEchoRequest
+	    ICMPHeaderSerializer renamed to IcmpHeaderSerializer
+	    ICMPType renamed to IcmpType
+	    IGMPHeaderSerializer renamed to IgmpHeaderSerializer
+	    IGMPMessage renamed to IgmpMessage
+	    IGMPQuery renamed to IgmpQuery
+	    IGMPv1Query renamed to Igmpv1Query
+	    IGMPv1Report renamed to Igmpv1Report
+	    IGMPv2Leave renamed to Igmpv2Leave
+	    IGMPv2Query renamed to Igmpv2Query
+	    IGMPv2Report renamed to Igmpv2Report
+	    IGMPv3Query renamed to Igmpv3Query
+	    IGMPv3Report renamed to Igmpv3Report
+	    IPProtocolId renamed to IpProtocolId
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4HeaderSerializer renamed to Ipv4HeaderSerializer
+	    IPv4Option renamed to Ipv4Option
+	    IPv4OptionEnd renamed to Ipv4OptionEnd
+	    IPv4OptionNop renamed to Ipv4OptionNop
+	    IPv4OptionRecordRoute renamed to Ipv4OptionRecordRoute
+	    IPv4OptionStreamId renamed to Ipv4OptionStreamId
+	    IPv4OptionTimestamp renamed to Ipv4OptionTimestamp
+	    TLVOptionBase renamed to TlvOptionBase
+	    TLVOptionRaw renamed to TlvOptionRaw
+
 2017-12-14  Levente Mészáros
 
 	Fixed a few compiler warnings.

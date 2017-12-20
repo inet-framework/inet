@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIeee8021QoSClassifier renamed to IIeee8021dQosClassifier
+	    IIeee8021dQoSClassifier renamed to IIeee8021dQosClassifier
+	    IMACProtocol renamed to IMacProtocol
+	    Ieee80211AgentSTA renamed to Ieee80211AgentSta
+	    Ieee80211MgmtAP renamed to Ieee80211MgmtAp
+	    Ieee80211MgmtAPSimplified renamed to Ieee80211MgmtApSimplified
+	    Ieee80211MgmtSTA renamed to Ieee80211MgmtSta
+	    Ieee80211MgmtSTASimplified renamed to Ieee80211MgmtStaSimplified
+
 2017-11-28  Levente Mészáros
 
 	Renamed TODO files to start with an underscore.

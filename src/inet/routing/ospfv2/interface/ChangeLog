@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AreaID renamed to AreaId
+	    DesignatedRouterID renamed to DesignatedRouterId
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressRange renamed to Ipv4AddressRange
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    LSAKeyType renamed to LsaKeyType
+	    LSAType renamed to LsaType
+	    LinkStateID renamed to LinkStateId
+	    NetworkLSA renamed to NetworkLsa
+	    OSPFASExternalLSA renamed to OspfAsExternalLsa
+	    OSPFArea renamed to OspfArea
+	    OSPFHelloPacket renamed to OspfHelloPacket
+	    OSPFInterface renamed to OspfInterface
+	    OSPFInterfaceState renamed to OspfInterfaceState
+	    OSPFInterfaceStateBackup renamed to OspfInterfaceStateBackup
+	    OSPFInterfaceStateDesignatedRouter renamed to OspfInterfaceStateDesignatedRouter
+	    OSPFInterfaceStateDown renamed to OspfInterfaceStateDown
+	    OSPFInterfaceStateLoopback renamed to OspfInterfaceStateLoopback
+	    OSPFInterfaceStateNotDesignatedRouter renamed to OspfInterfaceStateNotDesignatedRouter
+	    OSPFInterfaceStatePointToPoint renamed to OspfInterfaceStatePointToPoint
+	    OSPFInterfaceStateWaiting renamed to OspfInterfaceStateWaiting
+	    OSPFInterfaceType renamed to OspfInterfaceType
+	    OSPFLSA renamed to OspfLsa
+	    OSPFLSAHeader renamed to OspfLsaHeader
+	    OSPFLinkStateAcknowledgementPacket renamed to OspfLinkStateAcknowledgementPacket
+	    OSPFLinkStateUpdatePacket renamed to OspfLinkStateUpdatePacket
+	    OSPFNeighbor renamed to OspfNeighbor
+	    OSPFNetworkLSA renamed to OspfNetworkLsa
+	    OSPFOptions renamed to OspfOptions
+	    OSPFRouter renamed to OspfRouter
+	    OSPFRouterLSA renamed to OspfRouterLsa
+	    OSPFSummaryLSA renamed to OspfSummaryLsa
+	    OSPFTimer renamed to OspfTimer
+	    OSPFcommon renamed to OspfCommon
+	    RouterID renamed to RouterId
+	    RouterLSA renamed to RouterLsa
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader with insertAtEnd because these chunks are not headers.

@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IMACProtocol renamed to IMacProtocol
+	    MACAddress renamed to MacAddress
+	    MACProtocolBase renamed to MacProtocolBase
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue(), cPar::longValue() calls.

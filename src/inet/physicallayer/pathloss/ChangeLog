@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    SUIPathLoss renamed to SuiPathLoss
+	    UWBIRStochasticPathLoss renamed to UwbIrStochasticPathLoss
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue() calls.

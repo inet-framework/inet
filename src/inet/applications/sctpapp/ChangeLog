@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Address renamed to Ipv4Address
+	    TCPEchoApp renamed to TcpEchoApp
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.

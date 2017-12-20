@@ -1,5 +1,54 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    16PPMModulation renamed to 16PpmModulation
+	    2GFSKModulation renamed to 2GfskModulation
+	    4GFSKModulation renamed to 4GfskModulation
+	    4PPMModulation renamed to 4PpmModulation
+	    APSKCode renamed to ApskCode
+	    APSKModulationBase renamed to ApskModulationBase
+	    BPSKModulation renamed to BpskModulation
+	    DBPSKModulation renamed to DbpskModulation
+	    DPSKModulationBase renamed to DpskModulationBase
+	    DQPSKModulation renamed to DqpskModulation
+	    GFSKModulationBase renamed to GfskModulationBase
+	    Ieee80211HTCode renamed to Ieee80211HtCode
+	    Ieee80211HTCompliantCodes renamed to Ieee80211HtCompliantCodes
+	    Ieee80211HTCompliantModes renamed to Ieee80211HtCompliantModes
+	    Ieee80211HTDataMode renamed to Ieee80211HtDataMode
+	    Ieee80211HTInterleaving renamed to Ieee80211HtInterleaving
+	    Ieee80211HTMCS renamed to Ieee80211Htmcs
+	    Ieee80211HTMCSTable renamed to Ieee80211HtmcsTable
+	    Ieee80211HTMode renamed to Ieee80211HtMode
+	    Ieee80211HTModeBase renamed to Ieee80211HtModeBase
+	    Ieee80211HTPreambleMode renamed to Ieee80211HtPreambleMode
+	    Ieee80211HTSignalMode renamed to Ieee80211HtSignalMode
+	    Ieee80211HTTimingRelatedParametersBase renamed to Ieee80211HtTimingRelatedParametersBase
+	    Ieee80211OFDMCode renamed to Ieee80211OfdmCode
+	    Ieee80211OFDMCompliantCodes renamed to Ieee80211OfdmCompliantCodes
+	    Ieee80211OFDMCompliantModes renamed to Ieee80211OfdmCompliantModes
+	    Ieee80211OFDMCompliantModulations renamed to Ieee80211OfdmCompliantModulations
+	    Ieee80211OFDMDataMode renamed to Ieee80211OfdmDataMode
+	    Ieee80211OFDMDefs renamed to Ieee80211OfdmDefs
+	    Ieee80211OFDMInterleaving renamed to Ieee80211OfdmInterleaving
+	    Ieee80211OFDMMode renamed to Ieee80211OfdmMode
+	    Ieee80211OFDMModeBase renamed to Ieee80211OfdmModeBase
+	    Ieee80211OFDMModulation renamed to Ieee80211OfdmModulation
+	    Ieee80211OFDMPreambleMode renamed to Ieee80211OfdmPreambleMode
+	    Ieee80211OFDMSignalMode renamed to Ieee80211OfdmSignalMode
+	    Ieee80211OFDMTimingRelatedParametersBase renamed to Ieee80211OfdmTimingRelatedParametersBase
+	    PPMModulationBase renamed to PpmModulationBase
+	    QAM16Modulation renamed to Qam16Modulation
+	    QAM64Modulation renamed to Qam64Modulation
+	    QBPSKModulation renamed to QbpskModulation
+	    QPSKModulation renamed to QpskModulation
+	    _16PPMModulation renamed to _16PpmModulation
+	    _2GFSKModulation renamed to _2GfskModulation
+	    _4GFSKModulation renamed to _4GfskModulation
+	    _4PPMModulation renamed to _4PpmModulation
+
 2017-12-05  Zoltan Bojthe
 
 	Replaced "typedef const Foo ConstFoo" statements in MSG files with proper const support.

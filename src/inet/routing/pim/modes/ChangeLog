@@ -1,5 +1,38 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DRPriorityOption renamed to DrPriorityOption
+	    GenerationIDOption renamed to GenerationIdOption
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4MulticastGroupInfo renamed to Ipv4MulticastGroupInfo
+	    IPv4MulticastRoute renamed to Ipv4MulticastRoute
+	    IPv4Route renamed to Ipv4Route
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    PIMAssert renamed to PimAssert
+	    PIMBase renamed to PimBase
+	    PIMDM renamed to PimDm
+	    PIMDMOutInterface renamed to PimDmOutInterface
+	    PIMGraft renamed to PimGraft
+	    PIMHello renamed to PimHello
+	    PIMInterface renamed to PimInterface
+	    PIMInterfaceTable renamed to PimInterfaceTable
+	    PIMJoinPrune renamed to PimJoinPrune
+	    PIMMode renamed to PimMode
+	    PIMNeighbor renamed to PimNeighbor
+	    PIMNeighborTable renamed to PimNeighborTable
+	    PIMPacket renamed to PimPacket
+	    PIMRegister renamed to PimRegister
+	    PIMRegisterStop renamed to PimRegisterStop
+	    PIMSM renamed to PimSm
+	    PIMSMOutInterface renamed to PimSmOutInterface
+	    PIMStateRefresh renamed to PimStateRefresh
+	    PIMTimerKind renamed to PimTimerKind
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue() calls.

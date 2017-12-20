@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR renamed to ISnir
+	    IdealAnalogModel renamed to UnitDiskAnalogModel
+	    IdealNoise renamed to UnitDiskNoise
+	    IdealRadioMedium renamed to UnitDiskRadioMedium
+	    IdealReceiver renamed to UnitDiskReceiver
+	    IdealReception renamed to UnitDiskReception
+	    IdealTransmission renamed to UnitDiskTransmission
+	    Ieee80211OFDMMode renamed to Ieee80211OfdmMode
+
 2017-12-05  Zoltan Bojthe
 
 	Removed "typedef const Foo ConstFoo" statements, replaced with proper const support.

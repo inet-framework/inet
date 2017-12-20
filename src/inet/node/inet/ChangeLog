@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    BGPRouting renamed to BgpRouting
+	    DHCPServer renamed to DhcpServer
+	    IBGPRouting renamed to IBgpRouting
+	    IIPRouting renamed to IIpRouting
+	    IPIMRouting renamed to IPimRouting
+	    IPv4 renamed to Ipv4
+	    Ieee80211MgmtAP renamed to Ieee80211MgmtAp
+	    Ieee80211MgmtSTA renamed to Ieee80211MgmtSta
+	    OSPFRouting renamed to OspfRouting
+	    PIMRouting renamed to PimRouting
+	    PPPInterface renamed to PppInterface
+	    RIPRouting renamed to RipRouting
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-07-27  Levente Mészáros

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ARPPacket renamed to ArpPacket
+	    GenericARP renamed to GenericArp
+	    IARP renamed to IArp
+	    MACAddress renamed to MacAddress
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2015-05-26  Levente Mészáros

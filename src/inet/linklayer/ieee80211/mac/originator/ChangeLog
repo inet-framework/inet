@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection renamed to IQosRateSelection
+	    Ieee80211HTMode renamed to Ieee80211HtMode
+	    Ieee80211OFDMMode renamed to Ieee80211OfdmMode
+	    MACAddress renamed to MacAddress
+	    NonQoSRecoveryProcedure renamed to NonQosRecoveryProcedure
+	    OriginatorQoSAckPolicy renamed to OriginatorQosAckPolicy
+	    OriginatorQoSMacDataService renamed to OriginatorQosMacDataService
+	    QoSAckHandler renamed to QosAckHandler
+	    QoSRecoveryProcedure renamed to QosRecoveryProcedure
+	    QoSRtsPolicy renamed to QosRtsPolicy
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-11-10  Levente Mészáros

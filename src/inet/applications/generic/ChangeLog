@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPvXTrafficGenerator renamed to IIpvxTrafficGenerator
+	    IPv4 renamed to Ipv4
+	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IPv6 renamed to Ipv6
+	    IPv6ControlInfo renamed to Ipv6ControlInfo
+	    IPvXTrafGen renamed to IpvxTrafGen
+	    IPvXTrafSink renamed to IpvxTrafSink
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::doubleValue(), cPar::longValue() calls.

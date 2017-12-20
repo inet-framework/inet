@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKCode renamed to ApskCode
+	    APSKDecoder renamed to ApskDecoder
+	    APSKDemodulator renamed to ApskDemodulator
+	    APSKEncoder renamed to ApskEncoder
+	    APSKLayeredDimensionalRadioMedium renamed to ApskLayeredDimensionalRadioMedium
+	    APSKLayeredErrorModel renamed to ApskLayeredErrorModel
+	    APSKLayeredReceiver renamed to ApskLayeredReceiver
+	    APSKLayeredScalarRadioMedium renamed to ApskLayeredScalarRadioMedium
+	    APSKLayeredTransmitter renamed to ApskLayeredTransmitter
+	    APSKModulationBase renamed to ApskModulationBase
+	    APSKModulator renamed to ApskModulator
+	    APSKPhyHeader renamed to ApskPhyHeader
+	    APSKPhyHeaderSerializer renamed to ApskPhyHeaderSerializer
+	    APSKSymbol renamed to ApskSymbol
+	    BPSKModulation renamed to BpskModulation
+	    IFECCoder renamed to IFecCoder
+	    ISNIR renamed to ISnir
+	    QAM16Modulation renamed to Qam16Modulation
+	    QAM64Modulation renamed to Qam64Modulation
+	    QPSKModulation renamed to QpskModulation
+	    SNIRReceiverBase renamed to SnirReceiverBase
+	    UDP renamed to Udp
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue() calls.

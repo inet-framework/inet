@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPAddressVector renamed to Ipv4AddressVector
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressType renamed to Ipv4AddressType
+	    IPv4AddressVector renamed to Ipv4AddressVector
+
 2017-12-07  Zoltan Bojthe
 
 	Camelized property names in MSG files.

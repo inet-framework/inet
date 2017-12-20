@@ -1,5 +1,33 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPv4RoutingTable renamed to IIpv4RoutingTable
+	    IPProtocolId renamed to IpProtocolId
+	    IPv4 renamed to Ipv4
+	    IPv4Address renamed to Ipv4Address
+	    IPv4AddressType renamed to Ipv4AddressType
+	    IPv4InterfaceData renamed to Ipv4InterfaceData
+	    IPv4MulticastGroupInfo renamed to Ipv4MulticastGroupInfo
+	    IPv4MulticastGroupSourceInfo renamed to Ipv4MulticastGroupSourceInfo
+	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
+	    IPv4NetworkLayer renamed to Ipv4NetworkLayer
+	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    IPv6 renamed to Ipv6
+	    IPv6Address renamed to Ipv6Address
+	    IPv6AddressType renamed to Ipv6AddressType
+	    IPv6Header renamed to Ipv6Header
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    IPv6MulticastGroupInfo renamed to Ipv6MulticastGroupInfo
+	    IPv6RoutingTable renamed to Ipv6RoutingTable
+	    ISISInterfaceData renamed to IsisInterfaceData
+	    MACAddress renamed to MacAddress
+	    MACAddressType renamed to MacAddressType
+	    MPLS renamed to Mpls
+	    PPPInterface renamed to PppInterface
+	    TRILLInterfaceData renamed to TrillInterfaceData
+
 2017-12-15  Zoltan Bojthe
 
 	Renamed deprecated info() to str().

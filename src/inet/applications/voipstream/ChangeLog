@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    RTP renamed to Rtp
+	    UDPControlInfo renamed to UdpControlInfo
+	    UDPSocket renamed to UdpSocket
+	    VoIPStreamPacket renamed to VoipStreamPacket
+	    VoIPStreamPacketType renamed to VoipStreamPacketType
+	    VoIPStreamReceiver renamed to VoipStreamReceiver
+	    VoIPStreamSender renamed to VoipStreamSender
+
 2017-12-15  Zoltan Bojthe
 
 	Remove unnecessary cPar::stringValue() calls.

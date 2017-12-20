@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKDimensionalRadioMedium renamed to ApskDimensionalRadioMedium
+	    ISNIR renamed to ISnir
+	    Ieee802154UWBIRMode renamed to Ieee802154UwbIrMode
+	    Ieee802154UWBIRRadio renamed to Ieee802154UwbIrRadio
+	    Ieee802154UWBIRRadioMedium renamed to Ieee802154UwbIrRadioMedium
+	    Ieee802154UWBIRReceiver renamed to Ieee802154UwbIrReceiver
+	    Ieee802154UWBIRTransmitter renamed to Ieee802154UwbIrTransmitter
+	    UWBPRF renamed to UwbPrf
+	    UWBPreambleSymbolRepetitions renamed to UwbPreambleSymbolRepetitions
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-01-26  Levente Mészáros

@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MoBANCoordinator renamed to MoBanCoordinator
+	    MoBANLocal renamed to MoBanLocal
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::xmlValue(), cPar::boolValue(), cPar::longValue() calls.

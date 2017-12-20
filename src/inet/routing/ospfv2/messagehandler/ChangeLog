@@ -1,5 +1,42 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AreaID renamed to AreaId
+	    DDPacketID renamed to DdPacketId
+	    DesignatedRouterID renamed to DesignatedRouterId
+	    IPv4Address renamed to Ipv4Address
+	    LSAKeyType renamed to LsaKeyType
+	    LSAProcessingMarker renamed to LsaProcessingMarker
+	    LSARequest renamed to LsaRequest
+	    LSATrackingInfo renamed to LsaTrackingInfo
+	    LSAType renamed to LsaType
+	    OSPFASExternalLSA renamed to OspfAsExternalLsa
+	    OSPFASExternalLSAContents renamed to OspfAsExternalLsaContents
+	    OSPFArea renamed to OspfArea
+	    OSPFDDOptions renamed to OspfDdOptions
+	    OSPFDatabaseDescriptionPacket renamed to OspfDatabaseDescriptionPacket
+	    OSPFHelloPacket renamed to OspfHelloPacket
+	    OSPFInterface renamed to OspfInterface
+	    OSPFInterfaceType renamed to OspfInterfaceType
+	    OSPFLSA renamed to OspfLsa
+	    OSPFLSAHeader renamed to OspfLsaHeader
+	    OSPFLinkStateAcknowledgementPacket renamed to OspfLinkStateAcknowledgementPacket
+	    OSPFLinkStateRequestPacket renamed to OspfLinkStateRequestPacket
+	    OSPFLinkStateUpdatePacket renamed to OspfLinkStateUpdatePacket
+	    OSPFNeighbor renamed to OspfNeighbor
+	    OSPFNetworkLSA renamed to OspfNetworkLsa
+	    OSPFPacket renamed to OspfPacket
+	    OSPFPacketType renamed to OspfPacketType
+	    OSPFRouter renamed to OspfRouter
+	    OSPFRouterLSA renamed to OspfRouterLsa
+	    OSPFSummaryLSA renamed to OspfSummaryLsa
+	    OSPFTimer renamed to OspfTimer
+	    OSPFcommon renamed to OspfCommon
+	    RouterID renamed to RouterId
+	    RouterLSA renamed to RouterLsa
+
 2017-12-14  Levente Mészáros
 
 	Replaced pushHeader with insertAtEnd because these chunks are not headers.

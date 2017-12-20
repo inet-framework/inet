@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
+	    MACAddress renamed to MacAddress
+	    RSTP renamed to Rstp
+	    STP renamed to Stp
+
 2017-12-15  Zoltan Bojthe
 
 	Renamed deprecated info() to str().

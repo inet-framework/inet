@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKModulationBase renamed to ApskModulationBase
+	    APSKSymbol renamed to ApskSymbol
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-19  Levente Mészáros

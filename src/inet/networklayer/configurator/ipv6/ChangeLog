@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    FlatNetworkConfigurator renamed to Ipv4FlatNetworkConfigurator
+	    FlatNetworkConfigurator6 renamed to Ipv6FlatNetworkConfigurator
+	    IPv6 renamed to Ipv6
+	    IPv6Address renamed to Ipv6Address
+	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    IPv6RoutingTable renamed to Ipv6RoutingTable
+
 2017-12-15  Zoltan Bojthe
 
 	Removed unnecessary cPar::boolValue() calls.

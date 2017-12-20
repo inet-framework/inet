@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPProtocolId renamed to IpProtocolId
+	    MACAddress renamed to MacAddress
+
 2017-12-15  Andras Varga
 
 	Fixed int/double type mismatch between NED parameter and C++ usage.
