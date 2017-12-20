@@ -1,0 +1,2 @@
+BerkeleyNic -> BNic
+LightweightNic -> LNic
