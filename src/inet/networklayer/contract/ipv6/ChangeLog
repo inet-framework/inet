@@ -1,4 +1,24 @@
 ====== inet-4.x ======
 
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-06-28  Zoltan Bojthe
+
+	Switched to using pointer in IPv6ExtHeaderTagBase MSG file.
+
+2017-10-19  Zoltan Bojthe
+
+	Added IPv6Address.msg file.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 

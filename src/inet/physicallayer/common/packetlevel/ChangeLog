@@ -1,5 +1,42 @@
 ====== inet-4.x ======
 
+2017-12-19  Levente Mészáros
+
+	Replaced handleLowerPacket with handleSignal in Radio.
+
+2017-12-18  Levente Mészáros
+
+	Moved gates from Radio to PhysicalLayerBase.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls.
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements from MSG files, replaced
+	with proper const support.
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Changed return type for positions and orientations to reference.
+
+2017-11-22  Levente Mészáros
+
+	Renamed *Descr.msg to *.msg, now the msgc supports all required features.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-07  Zoltan Bojthe
+
+	Eliminated temporary manual descriptor hacks.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-27  Levente Mészáros

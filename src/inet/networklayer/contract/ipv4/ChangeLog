@@ -1,4 +1,12 @@
 ====== inet-4.x ======
 
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-10-19  Zoltan Bojthe
+
+	Added IPv4Address.msg file.
+
 2017-11-16  ------ inet-3.99.1 released ------
 

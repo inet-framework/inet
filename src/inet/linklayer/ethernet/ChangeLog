@@ -1,5 +1,40 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Eliminated unused variable compiler warnings.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-23  Levente Mészáros
+
+	Fixed typos in result filter names in @statistics.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+	Replaced passedUpPk signal with packetSentToUpper signal.
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-14  Zoltan Bojthe
+
+	replace "int foo @enum(FooEnum)" to FooEnum foo;
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-15  Zoltan Bojthe
+
+	Moved EthernetFcsMode to common.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-11  Zoltan Bojthe

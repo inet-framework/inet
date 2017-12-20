@@ -1,5 +1,51 @@
 ====== inet-4.x ======
 
+2017-12-19  Levente Mészáros
+
+	Extracted handlerUpperMessage and handleLowerMessage from LayeredProtocolBase
+	to allow overriding in subclasses.
+
+2017-12-18  Zoltan Bojthe
+
+	Changed to required omnetpp version is 5.2 or newer.
+
+2017-12-07  Levente Mészáros
+
+	Changed messageAge result filter to use the new region tag with CreationTimeTag.
+	Added TimeTag for tagging data with creation timestamps.
+
+2017-11-24  Zoltan Bojthe
+
+	Fixed namespace in Units.msg.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+	Added packetSentToPeer and packetReceivedFromPeer signals to Simsignals.
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Changed *CoordFilter to take pointers instead of cObject. The reason is that
+	Coord is no longer a cObject.
+
+2017-11-17  Zoltan Bojthe
+
+	Added more precise desription for units in MSG file.
+
+2017-11-10  Zoltan Bojthe
+
+	Added Units.msg MSG file.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-17  TÖRÖK Attila
+
+	Remove ignored qualifier that caused half of the compiler warnings.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-10  Gyorgy Szaszko

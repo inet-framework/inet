@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::xmlValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-23  Levente Mészáros
+
+	Removed cObject base class from Coord and EulerAngles.
+
+	The reason why cObject was a base class was that we used to emit signals
+	with coordinates, but that's not the case anymore. There are no virtual
+	functions in those classes and cObject would introduce an unnecessary
+	vptr.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 ====== inet-3.x ======

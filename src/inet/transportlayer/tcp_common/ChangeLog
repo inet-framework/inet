@@ -1,5 +1,52 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from subclasses. The protocolId was not
+	protocol agnostic, and there's a separate protocol field anyway.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-13  Zoltan Bojthe
+
+	Converted TCPOptionNumbers enum, default CRC case was missed.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-06-28  Zoltan Bojthe
+
+	Switched to using pointer array in MSG files for TCPOption.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-07-05  Levente Mészáros

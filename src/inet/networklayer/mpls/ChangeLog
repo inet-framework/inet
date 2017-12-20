@@ -1,3 +1,22 @@
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+	Removed unnecessary cPar::xmlValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed some unnecessary @customize from MSG files.
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 ====== inet-4.x ======
 
 2017-11-16  ------ inet-3.99.1 released ------

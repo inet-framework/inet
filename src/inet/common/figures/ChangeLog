@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-12-18  Zoltan Bojthe
+
+	Removed cPanelFigure copy (from omnetpp 5.2), switched to using omnetpp::cPanelFigure.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-07-12  Levente Mészáros

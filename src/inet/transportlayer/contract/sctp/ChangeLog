@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2017-11-22  Levente Mészáros
+
+	Replaced packet declarations with message in SCTPCommand.
+
+2017-11-21  Levente Mészáros
+
+	Changed MSG files to use the canonical syntax.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-06-14  Levente Mészáros

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 ====== inet-3.x ======

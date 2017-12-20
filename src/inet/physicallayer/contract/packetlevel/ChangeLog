@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-11-23  Levente Mészáros
+
+	Changed return type for positions and orientations to reference.
+
+2017-06-28  Zoltan Bojthe
+
+	Changed ConfigureRadioCommand to use pointer member in MSG.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-10  Levente Mészáros

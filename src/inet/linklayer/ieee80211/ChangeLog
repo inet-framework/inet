@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2017-11-28  Levente Mészáros
+
+	Renamed TODO files to start with an underscore.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 ====== inet-3.x ======

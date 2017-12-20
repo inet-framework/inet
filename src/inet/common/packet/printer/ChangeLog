@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-12-07  Levente Mészáros
+
+	Fixed includes for disabled features.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-04-05  Zoltan Bojthe

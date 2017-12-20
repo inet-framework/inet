@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2017-12-11  Levente Mészáros
+
+	Added doInsert* and doRemove* to Chunk in order to reuse tag maintaining code.
+
+2017-12-08  Levente Mészáros
+
+	Added checkMutable() calls to chunk tag API.
+
+2017-12-07  Levente Mészáros
+
+	Added RegionTagSet based tags to Chunk.
+	Added tags to Chunk descriptor.
+
+2017-11-28  Levente Mészáros
+
+	Removed obsolete @getval property.
+
+2017-11-17  Zoltan Bojthe
+
+	Added @beforeChange(handleChange()) to Chunk.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-09  Levente Mészáros

@@ -1,4 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader with insertAtEnd because these chunks are not headers.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
 2017-11-16  ------ inet-3.99.1 released ------
 

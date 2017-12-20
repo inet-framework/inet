@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed @customize from UdpHeader.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+	Replaced passedUpPk signal with packetSentToUpper signal.
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from subclasses. The protocolId was not
+	protocol agnostic, and there's a separate protocol field anyway.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-11-13  Levente Mészáros

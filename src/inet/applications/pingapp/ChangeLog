@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::boolValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-18  Zoltan Bojthe

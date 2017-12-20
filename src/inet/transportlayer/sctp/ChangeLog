@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-21  Levente Mészáros
+
+	Changed MSG files to use the canonical syntax.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2016-07-20  Zoltan Bojthe

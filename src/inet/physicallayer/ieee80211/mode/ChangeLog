@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-05  Zoltan Bojthe
+
+	Replaced "typedef const Foo ConstFoo" statements in MSG files with proper const support.
+
+2017-11-22  Levente Mészáros
+
+	Split 802.11 MSG files to fix linking errors.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-10-30  Levente Mészáros

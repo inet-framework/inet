@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue() calls.
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
 2017-11-16  ------ inet-3.99.1 released ------
 
 2017-09-13  Levente Mészáros

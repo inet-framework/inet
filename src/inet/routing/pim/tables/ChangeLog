@@ -1,3 +1,11 @@
 ====== inet-4.x ======
 
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::xmlValue() calls.
+
 2017-11-16  ------ inet-3.99.1 released ------
