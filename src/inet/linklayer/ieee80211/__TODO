@@ -4,3 +4,4 @@
  - remove frame arguments where appropriate
  - add more logging and display strings
  - generic cleanup, order of functions, formatting, whitespace, etc.
+ - mixed mode: access point receives proberq in dsss, responds in erpofdm. station cannot receive response.
