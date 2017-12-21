@@ -1,5 +1,5 @@
 /*
- *  LMACLayer.cc
+ *  LMac.h
  *  LMAC for MF 2.02, omnetpp 3.4
  *
  *  Created by Anna Förster on 10/10/08.
@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __INET_LMACLAYER_H
-#define __INET_LMACLAYER_H
+#ifndef __INET_LMAC_H
+#define __INET_LMAC_H
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -223,5 +223,5 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_LMACLAYER_H
+#endif // ifndef __INET_LMAC_H
 

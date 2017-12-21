@@ -1,6 +1,6 @@
 //
-//  LMACLayer.cc
-//  BMAC for MF 2.02, omnetpp 4
+//  LMac.ned
+//  LMAC for MF 2.02, omnetpp 4
 //
 //  Created by Anna Foerster on 10/10/08.
 //  Copyright 2008 Universita della Svizzera Italiana. All rights reserved.

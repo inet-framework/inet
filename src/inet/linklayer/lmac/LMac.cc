@@ -1,5 +1,5 @@
 /*
- *  LMACLayer.cc
+ *  LMac.cc
  *
  *
  *  Created by Anna Foerster on 10/10/08.
