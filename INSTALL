@@ -31,8 +31,8 @@ If you are building from command line:
 
 4. Type "make makefiles". This should generate the makefiles for you automatically.
 
-5. Type "make" to build the inet executable (debug version). Use "make MODE=release"
-   to build release version.
+5. Type "make" to build the inet executable (release version). Use "make MODE=debug"
+   to build debug version.
 
 6. You can run specific examples by changing into the example's directory and executing "./run"
 
