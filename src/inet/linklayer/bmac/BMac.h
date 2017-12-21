@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BMACLAYER_H
-#define __INET_BMACLAYER_H
+#ifndef __INET_BMAC_H
+#define __INET_BMAC_H
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -244,5 +244,5 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_BMACLAYER_H
+#endif // ifndef __INET_BMAC_H
 
