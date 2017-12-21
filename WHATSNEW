@@ -1,6 +1,185 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.99.2 (December, 2017) - Development
+------------------------------------------
+
+This release is the next development snapshot of the upcoming INET-4.0 version.
+
+The code is still work in progress, which means some details may change until the
+final 4.0 version is released. This version requires OMNeT++ 5.3.
+
+The highlights of this release are:
+
+1. New MSG file format
+
+   The new OMNeT++ 5.3 release contains a new version of the MSG compiler. The
+   new MSG compiler comes with an updated MSG file syntax which provides several
+   very useful improvements. The most notable one is the introduction of import
+   statements. The new MSG compiler is not enabled by default in OMNeT++ 5.3 for
+   backward compatibility.
+
+   INET heavily relies on using MSG files, so we decided to switch to the new
+   syntax. All MSG files have been updated resulting in much simpler content.
+
+   The most notable MSG file changes are:
+
+    - added import statements
+    - switched to proper pointer support
+    - deleted early declarations
+    - moved several properties from fields to types
+    - removed many cplusplus blocks
+    - removed many unnecessary typedefs 
+
+2. Renamed camel case for abbreviations
+
+   Many INET protocol implementations use several capitalized abbreviations to
+   shorten long technical terms. Often these abbreviations are concatenated
+   resulting in hardly understandable sequence of capital letters. Some notable
+   examples are: AODVRERR, OSPFLSA, PIMDM, etc. Many protocol implementations
+   also use identifiers which concatenate camel case words with capitalized
+   abbreviations making understanding even more difficult. Some notable examples
+   are: TCPSACKRexmitQueue, RTCPSDESPacket, OSPFDDOptions, etc.
+   
+   We decided to use a generic camel case naming scheme for the identifiers in
+   INET. The most important change is that capitalized abbreviations are simply
+   treated as words. Using a generic naming scheme makes INET look more consistent. 
+   All C++ class names, NED module names, packet class names, etc. have been
+   updated according to the new naming scheme.
+
+3. Fixed misnomers
+
+   Some misnomers have been fixed to avoid confusion and to better communicate
+   the intended goal and behavior of the affected components.
+
+   The most notable renamed C++ classes, modules, and related packet headers are:
+
+    - Csma -> Ieee802154Mac
+      This rename was brought up at the 4th OMNeT++ Community Summit. The main
+      reason is that the name has to express that this module is intended to
+      implement a specific standard (IEEE 802.15.4) as opposed to some generic
+      hypothetical protocol. Otherwise maintainers are free to change the code
+      however they see fit.
+   
+    - BMacLayer -> BMac
+    - LMacLayer -> LMac
+      These renames simply remove an unnecessary word that hardly adds anything
+      to the meaning. The word layer is not used anywhere else in INET modules,
+      this was a leftover after migrating the protocols from MiXiM.
+
+    - IdealMac -> AckingMac
+      This rename is admitting that this MAC protocol is not ideal in any way.
+      In fact, this trivial MAC protocol isn't a real medium access protocol at
+      all. This is primarily useful for sitations where the MAC protocol is not
+      to be simulated in detail. It doesn't provide carrier sense mechanism,
+      collision avoidance, or collision detection. The only MAC feature it provides
+      is optional out of bound acknowledgement, hence the name. 
+
+    - IdealRadio -> UnitDiskRadio
+      This rename is simply admitting the fact that this radio implements the
+      well known unit disk radio model.
+      
+   There are several other related C++ classes and NED modules which have also
+   been renamed to follow the above renames. For example, IdealRadioMedium ->
+   UnitDiskRadioMedium, etc.
+
+4. New models
+
+   Some existing MAC protocols didn't have a predefined wireless interface module
+   which may prevented users to find out how to use them.
+
+   - BNic
+     This is a wireless interface which uses BMac and ApskScalarRadio by default.
+
+   - LNic
+     This is a wireless interface which uses LMac and ApskScalarRadio by default.
+
+   - ShortcutMac
+     This module implements a simple shortcut to peer MAC protocol that completely
+     bypasses the physical layer. 
+
+   - ShortcutRadio
+     This module implements a simple shortcut to peer radio protocol that completely
+     bypasses the physical medium. 
+
+5. Region Tags
+
+   The INET packet API has been extended with region tags. The new region tags
+   API is provided by chunks, therefore it's available in packets, queues, and
+   buffers. This is an entirely new API that is completely independent of the
+   already provided packet tags API.
+
+   Packet tags allow attaching meta information to a packet as a whole. They are
+   used inside network nodes to pass information between protocols residing in
+   different layers (cross-layer communication). Packet tags don't change when
+   new headers are inserted into packets, or when existing headers are removed. 
+   
+   As opposed to packet tags, region tags allow attaching meta information to a
+   region of data designated by an offset and a length. The attached information
+   sticks to that data part independently of how the data is stored. Region tags
+   are also maintained if the data is queued, buffered, fragmented, or aggregated.
+   
+   For example, region tags can be very simply used to measure end to end delay
+   in a TCP application. The source application has to attach a creation time
+   region tag with the current simulation time to the data before sending it down
+   using the TCP socket. The destination application has to query the creation time
+   region tag for the data it just received from the TCP socket. The application
+   gets a list of creation time region tags in response. Each tag specifies the
+   timestamp and the part for which it is attached to. The important thing to note
+   here is that all the underlying protocols (including but not limited to TCP,
+   IPv4, IEEE 802.11, etc.) may queue, buffer, fragment, aggregate data as they
+   see fit. Nevertheless, the region tag API maintains the attached tags as if
+   they were individually attached to every single bit. Even if the individual
+   subparts are routed using alternative routes in the network.
+
+6. Chunk immutability
+
+   The Packet, ChunkQueue, and ChunkBuffer C++ classes have been changed to
+   automatically mark inserted chunks as immutable. Prior to this change it was
+   the caller's responsibility to do so, which turned out to be unnecessary. 
+   With this change the pushHeader and pushTrailer functions have been removed
+   from the API, and they have been replaced with insertHeader and insertTrailer
+   respectively.
+
+7. Packet drop signals
+
+   All packet drop related OMNeT++ signals have been replaced with the generic
+   packetDrop signal. The generic signal always carries a details object with it,
+   which describes the packet drop reason and some other data such as a retry
+   limit. The main reason for this change is to allow the packet drop visualizer
+   to display all packet drops independently of the source and reason. 
+
+8. Data link visualization
+
+   The data link activity visualization has been extended with a new feature that
+   determines what level of activity is displayed. The supported activity levels
+   are the following:
+
+    - service
+      The service level data link activity means that arrows are displayed for
+      packets going in at the top of the link layer in the source node and going
+      out at the top of the link layer in the destination node. (all SDUs)
+
+    - peer
+      The peer level data link activity means that arrows are displayed for
+      packets processed inside the link layer in the source node and processed
+      inside the link layer in the destination node.
+
+    - protocol
+      The protocol level data link activity means that arrows are displayed for
+      packets going out at the bottom of link layer in the source node and going
+      in at the bottom of the link layer in the destination node. (all PDUs)
+
+9. IEEE 802.11 model
+
+   The model has been changed with respect to packet names for A-MSDU aggregated
+   and fragmentated packets. Aggregate packets have a name that is a concatenation
+   of the names of all the aggregated packets. Fragment packets have a name that
+   contains the name of the original packet plus the fragment index. In both cases,
+   the restored packets (deaggregated or defragmented) at the other end have their
+   names restored. 
+
+
 INET-3.99.1 (November, 2017) - Development
 ------------------------------------------
 
