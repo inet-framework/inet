@@ -1,4 +1,5 @@
 
+MSGC:=$(MSGC) --msg6
 
 #
 # check if omnetpp is correctly patched
