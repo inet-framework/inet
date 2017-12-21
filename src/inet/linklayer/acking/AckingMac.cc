@@ -199,7 +199,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
 
 void AckingMac::handleLowerPacket(Packet *packet)
 {
-    auto idealMacHeader = packet->peekHeader<AckingMacHeader>();
+    auto macHeader = packet->peekHeader<AckingMacHeader>();
     if (packet->hasBitError()) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
@@ -210,7 +210,7 @@ void AckingMac::handleLowerPacket(Packet *packet)
     }
 
     if (!dropFrameNotForUs(packet)) {
-        int senderModuleId = idealMacHeader->getSrcModuleId();
+        int senderModuleId = macHeader->getSrcModuleId();
         AckingMac *senderMac = dynamic_cast<AckingMac *>(getSimulation()->getModule(senderModuleId));
         // TODO: this whole out of bounds ack mechanism is fishy
         if (senderMac && senderMac->useAck)
@@ -226,8 +226,8 @@ void AckingMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
         EV_DETAIL << "AckingMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
-        auto idealMacHeader = lastSentPk->popHeader<AckingMacHeader>();
-        lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
+        auto macHeader = lastSentPk->popHeader<AckingMacHeader>();
+        lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
         // packet lost
         emit(linkBreakSignal, lastSentPk);
         delete lastSentPk;
@@ -261,23 +261,23 @@ void AckingMac::acked(Packet *frame)
 
 void AckingMac::encapsulate(Packet *packet)
 {
-    auto idealMacHeader = makeShared<AckingMacHeader>();
-    idealMacHeader->setChunkLength(B(headerLength));
+    auto macHeader = makeShared<AckingMacHeader>();
+    macHeader->setChunkLength(B(headerLength));
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
-    idealMacHeader->setSrc(macAddressReq->getSrcAddress());
-    idealMacHeader->setDest(macAddressReq->getDestAddress());
+    macHeader->setSrc(macAddressReq->getSrcAddress());
+    macHeader->setDest(macAddressReq->getDestAddress());
     MacAddress dest = macAddressReq->getDestAddress();
     if (dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified())
-        idealMacHeader->setSrcModuleId(-1);
+        macHeader->setSrcModuleId(-1);
     else
-        idealMacHeader->setSrcModuleId(getId());
-    idealMacHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    packet->insertHeader(idealMacHeader);
+        macHeader->setSrcModuleId(getId());
+    macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    packet->insertHeader(macHeader);
 }
 
 bool AckingMac::dropFrameNotForUs(Packet *packet)
 {
-    auto idealMacHeader = packet->peekHeader<AckingMacHeader>();
+    auto macHeader = packet->peekHeader<AckingMacHeader>();
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
     // broadcasts) and pass it up to the higher layer where they will be dropped
@@ -285,13 +285,13 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     // All frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (idealMacHeader->getDest().equals(address))
+    if (macHeader->getDest().equals(address))
         return false;
 
-    if (idealMacHeader->getDest().isBroadcast())
+    if (macHeader->getDest().isBroadcast())
         return false;
 
-    if (promiscuous || idealMacHeader->getDest().isMulticast())
+    if (promiscuous || macHeader->getDest().isMulticast())
         return false;
 
     EV << "Frame '" << packet->getName() << "' not destined to us, discarding\n";
@@ -304,13 +304,13 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
 
 void AckingMac::decapsulate(Packet *packet)
 {
-    const auto& idealMacHeader = packet->popHeader<AckingMacHeader>();
+    const auto& macHeader = packet->popHeader<AckingMacHeader>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
-    macAddressInd->setSrcAddress(idealMacHeader->getSrc());
-    macAddressInd->setDestAddress(idealMacHeader->getDest());
+    macAddressInd->setSrcAddress(macHeader->getSrc());
+    macAddressInd->setDestAddress(macHeader->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
 }
 
 } // namespace inet

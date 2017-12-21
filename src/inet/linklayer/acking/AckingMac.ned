@@ -43,7 +43,7 @@ simple AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
                                             // a generated MAC address in init stage 0.
         double bitrate @unit("bps");
         int mtu @unit("B") = default(4470B);
-        int headerLength @unit("B") = default(1B);       // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
+        int headerLength @unit("B") = default(1B);       // AckingMacHeader length
         bool promiscuous = default(false);
         bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
         bool useAck = default(true);

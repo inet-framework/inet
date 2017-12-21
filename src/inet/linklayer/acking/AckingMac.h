@@ -17,8 +17,8 @@
 // author: Zoltan Bojthe
 //
 
-#ifndef __INET_IDEALMAC_H
-#define __INET_IDEALMAC_H
+#ifndef __INET_ACKINGMAC_H
+#define __INET_ACKINGMAC_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
@@ -40,7 +40,7 @@ class INET_API AckingMac : public MacProtocolBase
 {
   protected:
     // parameters
-    int headerLength = 0;    // IdealMacFrame header length in bytes
+    int headerLength = 0;    // AckingMacFrame header length in bytes
     double bitrate = 0;    // [bits per sec]
     bool promiscuous = false;    // promiscuous mode
     MacAddress address;    // MAC address
@@ -95,5 +95,5 @@ class INET_API AckingMac : public MacProtocolBase
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALMAC_H
+#endif // ifndef __INET_ACKINGMAC_H
 

@@ -53,7 +53,7 @@ module AckingWirelessNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IdealSignal);
+        input radioIn @labels(Signal);
     submodules:
         queue: <queueType> like IOutputQueue {
             parameters:
