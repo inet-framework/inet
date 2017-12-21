@@ -422,13 +422,13 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                             sack->setCumTsnAck(sack->getCumTsnAck() + localDiffTsn);
                             if (sack->getNumGaps() > 0) {
                                 for (int i = 0; i < sack->getNumGaps(); i++) {
-                                    sack->setGapStart(i, sack->getGapStart(i) + localDiffTsn);
-                                    sack->setGapStop(i, sack->getGapStop(i) + localDiffTsn);
+                                    sack->setGapStart(i, sack->getGapStart(i) + sack->getCumTsnAck());
+                                    sack->setGapStop(i, sack->getGapStop(i) + sack->getCumTsnAck());
                                 }
                             }
                             if (sack->getNumDupTsns() > 0) {
                                 for (int i = 0; i < sack->getNumDupTsns(); i++) {
-                                    sack->setDupTsns(i, sack->getDupTsns(i) + localDiffTsn);
+                                    sack->setDupTsns(i, sack->getDupTsns(i) + sack->getCumTsnAck());
                                 }
                             }
                             sctp->replaceChunk(sack, cc);

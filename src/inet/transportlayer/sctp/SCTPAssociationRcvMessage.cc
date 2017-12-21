@@ -1406,9 +1406,11 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     updateFastRecoveryStatus(state->lastTsnAck);
 
     // ====== Update RTT measurement for newly acked data chunks =============
-    EV_DETAIL << simTime() << ": SACK: rtt=" << rttEstimation
-              << ", path=" << path->remoteAddress << endl;
-    pmRttMeasurement(path, rttEstimation);
+    if (rttEstimation < SIMTIME_MAX) {
+        EV_DETAIL << simTime() << ": SACK: rtt=" << rttEstimation
+                  << ", path=" << path->remoteAddress << endl;
+        pmRttMeasurement(path, rttEstimation);
+    }
 
     // ====== Record statistics ==============================================
     for (auto & elem : sctpPathMap) {
@@ -1724,7 +1726,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk *sackChun
 
         // ===== Check whether a Fast Retransmission is necessary =============
         // Non-CMT behaviour: check for highest TSN
-        uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
+        uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn || (myChunk->getLastDestinationPath()->fastRecoveryActive && state->highestTsnAcked >= myChunk->tsn)) ? 1 : 0;
 
         // Split Fast Retransmission (SFR) algorithm for CMT
         if ((state->allowCMT == true) && (state->cmtUseSFR == true)) {
@@ -3831,6 +3833,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
                 nextPath->numberOfTimerBasedRetransmissions++;
                 chunk->hasBeenTimerBasedRtxed = true;
                 chunk->sendForwardIfAbandoned = true;
+                chunk->numberOfTransmissions++;
 
                 if (!chunk->hasBeenAbandoned) {
                     auto iter = sctpMain->assocStatMap.find(assocId);
