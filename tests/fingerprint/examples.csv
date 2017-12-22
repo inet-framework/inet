@@ -140,7 +140,7 @@
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             dbcf-43c2/tplx
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,          458d-5335/tplx
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,          8aec-4a8d/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,          cb9e-6c4a/tplx
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f042-928b/tplx
 
