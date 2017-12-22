@@ -1,20 +1,7 @@
-
+#
+# Use the new message compiler introduced in OMNeT++ 5.3
+#
 MSGC:=$(MSGC) --msg6
-
-#
-# check if omnetpp is correctly patched
-#
-ifneq ($(OMNETPP_MSGC_PATCH_VER),1)
-$(info This version of INET works only with a patched version of OMNeT++.)
-$(info See the misc/patch directory and apply the patch file found there to your OMNeT++ installation)
-$(info Copy the patch file to the root of your OMNeT++ installation and then execute)
-$(info ---)
-$(info patch -p1 <inet-4.0-omnetpp-5.1_or_5.2.patch)
-$(info ---)
-$(info Then reconfigure and rebuild OMNeT++.)
-
-$(error Unpatched OMNeT++ message compiler detected)
-endif
 
 #
 # on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
