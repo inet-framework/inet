@@ -1,8 +1,8 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.99.2 (December, 2017) - Development
-------------------------------------------
+INET-3.99.2 (December 2017) - Development
+-----------------------------------------
 
 This release is the next development snapshot of the upcoming INET-4.0 version.
 
@@ -40,10 +40,10 @@ The highlights of this release are:
    also use identifiers which concatenate camel case words with capitalized
    abbreviations making understanding even more difficult. Some notable examples
    are: TCPSACKRexmitQueue, RTCPSDESPacket, OSPFDDOptions, etc.
-   
+
    We decided to use a generic camel case naming scheme for the identifiers in
    INET. The most important change is that capitalized abbreviations are simply
-   treated as words. Using a generic naming scheme makes INET look more consistent. 
+   treated as words. Using a generic naming scheme makes INET look more consistent.
    All C++ class names, NED module names, packet class names, etc. have been
    updated according to the new naming scheme.
 
@@ -60,7 +60,7 @@ The highlights of this release are:
       implement a specific standard (IEEE 802.15.4) as opposed to some generic
       hypothetical protocol. Otherwise maintainers are free to change the code
       however they see fit.
-   
+
     - BMacLayer -> BMac
     - LMacLayer -> LMac
       These renames simply remove an unnecessary word that hardly adds anything
@@ -78,7 +78,7 @@ The highlights of this release are:
     - IdealRadio -> UnitDiskRadio
       This rename is simply admitting the fact that this radio implements the
       well known unit disk radio model.
-      
+
    There are several other related C++ classes and NED modules which have also
    been renamed to follow the above renames. For example, IdealRadioMedium ->
    UnitDiskRadioMedium, etc.
@@ -100,7 +100,7 @@ The highlights of this release are:
 
    - ShortcutRadio
      This module implements a simple shortcut to peer radio protocol that completely
-     bypasses the physical medium. 
+     bypasses the physical medium.
 
 5. Region Tags
 
@@ -113,12 +113,12 @@ The highlights of this release are:
    used inside network nodes to pass information between protocols residing in
    different layers (cross-layer communication). Packet tags don't change when
    new headers are inserted into packets, or when existing headers are removed. 
-   
+
    As opposed to packet tags, region tags allow attaching meta information to a
    region of data designated by an offset and a length. The attached information
    sticks to that data part independently of how the data is stored. Region tags
    are also maintained if the data is queued, buffered, fragmented, or aggregated.
-   
+
    For example, region tags can be very simply used to measure end to end delay
    in a TCP application. The source application has to attach a creation time
    region tag with the current simulation time to the data before sending it down
@@ -136,7 +136,7 @@ The highlights of this release are:
 
    The Packet, ChunkQueue, and ChunkBuffer C++ classes have been changed to
    automatically mark inserted chunks as immutable. Prior to this change it was
-   the caller's responsibility to do so, which turned out to be unnecessary. 
+   the caller's responsibility to do so, which turned out to be unnecessary.
    With this change the pushHeader and pushTrailer functions have been removed
    from the API, and they have been replaced with insertHeader and insertTrailer
    respectively.
@@ -147,7 +147,7 @@ The highlights of this release are:
    packetDrop signal. The generic signal always carries a details object with it,
    which describes the packet drop reason and some other data such as a retry
    limit. The main reason for this change is to allow the packet drop visualizer
-   to display all packet drops independently of the source and reason. 
+   to display all packet drops independently of the source and reason.
 
 8. Data link visualization
 
@@ -180,8 +180,8 @@ The highlights of this release are:
    names restored. 
 
 
-INET-3.99.1 (November, 2017) - Development
-------------------------------------------
+INET-3.99.1 (November 2017) - Development
+-----------------------------------------
 
 This release is the second development snapshot of the upcoming INET-4.0 version.
 
@@ -314,8 +314,8 @@ The highlights of this release are:
    several visualizers to display various aspects of the simulation differently.
 
 
-INET-3.99.0 (August, 2017) - Development
-----------------------------------------
+INET-3.99.0 (August 2017) - Development
+---------------------------------------
 
 This release is the first development snapshot of the upcoming INET-4.0 version.
 It contains a number of non-trivial backward incompatible changes compared to the
@@ -434,7 +434,7 @@ The highlights of this release are:
    after each change to ensure that all protocol behaviors have been preserved.
 
 
-INET 3.6.2 (October 2017) - stable
+INET 3.6.2 (October 2017) - Stable
 ----------------------------------
 
 This release contains minor bug fixes and compatibility fixes for the final
@@ -448,7 +448,7 @@ OMNeT++ 5.2 release. It requires OMNeT++ 5.1 or later.
  - Various fixes to eliminate warnings on clang 4 and gcc 7.x.
 
 
-INET 3.6.1 (July 2017) - stable
+INET 3.6.1 (July 2017) - Stable
 -------------------------------
 
 This release contains minor compatibility fixes. It requires OMNeT++ 5.1 or later.
@@ -457,8 +457,8 @@ This release contains minor compatibility fixes. It requires OMNeT++ 5.1 or late
  - Turned on the parallel build option in the IDE project file.
 
 
-INET-3.6.0 (June, 2017) - stable
---------------------------------
+INET-3.6.0 (June 2017) - Stable
+-------------------------------
 
 This release contains some important new features, several bug fixes, and a few
 minor enhancements. It requires OMNeT++ 5.1 or later.
@@ -529,7 +529,7 @@ Highlights in this release:
  - Added new features for various tutorials and showcases.
 
 
-INET-3.5.0 (February 2017) - stable
+INET-3.5.0 (February 2017) - Stable
 -----------------------------------
 
 This release contains mostly bug fixes and compatibility changes. It requires
@@ -599,7 +599,7 @@ Fixes:
   - AODV: no longer causes assertion failure when RREP-ACK arrived after a timeout
 
 
-INET-3.4.0 (June 2016) - stable
+INET-3.4.0 (June 2016) - Stable
 -------------------------------
 
 This INET release requires OMNeT++ 5.0. This is due to the new visualization
@@ -718,7 +718,7 @@ Build:
   - Added project feature tests (tests/features)
 
 
-INET-3.3.0 (June 2016) - stable
+INET-3.3.0 (June 2016) - Stable
 -------------------------------
 
 This release requires OMNeT++ 4.6 or 5.0.
@@ -805,7 +805,7 @@ Ethernet:
     instead of size of payload)
 
 
-INET-3.2.4 (April 2016) - stable
+INET-3.2.4 (April 2016) - Stable
 --------------------------------
 
 This is a minor maintenance release that requires either OMNeT++ 4.6,
