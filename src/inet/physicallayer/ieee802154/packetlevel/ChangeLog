@@ -1,5 +1,14 @@
 ====== inet-3.x ======
 
+2016-06-30  Florian Kauer
+
+	Fixing Ieee802154NarrowbandScalarRadio
+
+	Several minor fixes to the ned file:
+	- The bandwidth was not correct, leading to incorrect channel allocation
+	- The PHY header was calculated wrong
+	- The base type was wrong
+
 2017-10-02  ------ inet-3.6.2 released ------
 
 2017-07-06  ------ inet-3.6.1 released ------

@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2017-09-26  Zoltan Bojthe
+
+	Fix TCP/IP Checksum calculation with odd length
+
 2017-10-02  ------ inet-3.6.2 released ------
 
 2017-07-06  ------ inet-3.6.1 released ------

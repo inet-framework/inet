@@ -1,6 +1,38 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.3 (December 2017) - stable
+-----------------------------------
+
+This release contains minor bug fixes and compatibility fixes for the final
+OMNeT++ 5.3 Preview 1 release. It requires OMNeT++ 5.1 or later.
+
+TCP:
+
+  - Fixed TCP/IP Checksum calculation with odd lengths.
+
+SCTP:
+
+  - Fixed a retransmission bug where the transmission counter was not
+    advanced when the data was retransmitted due to timeout.
+	- Fixed a bug when fast recovery was active and the cumulative TSN
+    advanced, the miss indications were not increased.
+
+Packetdrill:
+
+	- The counting of Gap Reports was fixed.
+	- Added a new test to test fast Retransmissions.
+
+Ieee802154NarrowbandScalarRadio:
+
+	- The bandwidth was not correctly claculated, leading to incorrect channel allocation
+	- The PHY header was calculated wrong
+
+APSKScalarReceiver:
+
+	- Fixed sensitivity bug in APSKScalarReceiver found by Tobias Thiel
+
+
 INET 3.6.2 (October 2017) - stable
 ----------------------------------
 

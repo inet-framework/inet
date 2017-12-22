@@ -1,4 +1,16 @@
+
 ====== inet-3.x ======
+
+2017-12-21  Irene Ruengeler
+
+	Fix retransmission bugs
+
+	- The transmission counter was not advanced when the data was timer based
+	retransmitted.
+	- When fast recovery was active and the cumulative TSN advanced, the miss
+	indications were not increased.
+	- In PacketDrill the counting of Gap Reports was fixed.
+	- A PacketDrill test to test fast Retransmissions was added.
 
 2017-10-02  ------ inet-3.6.2 released ------
 
