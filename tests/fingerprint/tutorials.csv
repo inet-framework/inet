@@ -2,23 +2,23 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0,                              500s,           4aa7-43a4/tplx
 /tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0,                              500s,           4aa7-43a4/tplx
 /tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0,                              500s,           4aa7-43a4/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           2f88-968a/tplx   # Step4 extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           52be-bd0a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           f972-f99a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           94b6-6426/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           94b6-6426/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           1540-ba2a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           1540-ba2a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           1540-ba2a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           08a7-bc9a/tplx   # Step8A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           1d01-1fe9/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           1661-526a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           a6ab-f80f/tplx   # Step10A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           a6ab-f80f/tplx   # Step10B extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           2496-a907/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           4997-73f7/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           f0e7-c9a5/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           b4cc-8fc3/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           2542-e0a0/tplx   # Step4 extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           a431-a2c6/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           bcd2-6f2a/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           7e00-c823/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           7e00-c823/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           2585-ff33/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           2585-ff33/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           2585-ff33/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           8c51-b6ef/tplx   # Step8A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           99f7-159c/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           33d0-0224/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           1d2e-09f1/tplx   # Step10A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           1d2e-09f1/tplx   # Step10B extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           7bdc-5950/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           4aa7-43a4/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           1cd5-de27/tplx
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           0e6d-99a2/tplx
 # /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial01 -r 0,         500s,           0000-0000/tplx   # old omnetpp.ini
 # /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial02 -r 0,         500s,           0000-0000/tplx
 # /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial03 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial03 extended
