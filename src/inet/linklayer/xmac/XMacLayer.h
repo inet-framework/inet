@@ -27,9 +27,9 @@
 #include "inet/linklayer/xmac/XMacFrame_m.h"
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMACProtocol.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 
@@ -54,7 +54,7 @@ class MacPkt;
  * @author Joaquim Oller and Jan Peter Drees
  *
  */
-class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
+class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
 {
   private:
 	/** @brief Copy constructor is not allowed.
@@ -66,7 +66,7 @@ class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
 
   public:
 	XMacLayer()
-		: MACProtocolBase()
+		: MacProtocolBase()
 		, macQueue()
 		, nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
 		, nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
@@ -93,10 +93,10 @@ class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
     virtual void finish() override;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket *) override;
+    virtual void handleLowerPacket(Packet *) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket *) override;
+    virtual void handleUpperPacket(Packet *) override;
 
     /** @brief Handle self messages such as timers */
     virtual void handleSelfMessage(cMessage *) override;
@@ -208,11 +208,11 @@ class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
 
 	/** @name Help variables for the acknowledgment process. */
 	/*@{*/
-	MACAddress lastDataPktSrcAddr;
-	MACAddress lastDataPktDestAddr;
-	MACAddress lastPreamblePktSrcAddr;
+	MacAddress lastDataPktSrcAddr;
+	MacAddress lastDataPktDestAddr;
+	MacAddress lastPreamblePktSrcAddr;
 	int headerLength = 0;    // XMacFrame header length in bytes
-	MACAddress address;    // MAC address
+	MacAddress address;    // MAC address
 
 	/** @brief The radio. */
     IRadio *radio;
@@ -270,7 +270,7 @@ class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
 	void sendMacAck();
 
 	/** @brief Internal function to send one preamble */
-	void sendPreamble(MACAddress destination);
+	void sendPreamble(MacAddress destination);
 
 	/** @brief Internal function to attach a signal to the packet */
 	void attachSignal(XMacFrame *mac, simtime_t_cref startTime);
@@ -279,7 +279,7 @@ class INET_API XMacLayer : public MACProtocolBase, public IMACProtocol
 	bool addToQueue(cMessage * msg);
 
 	cPacket *decapsMsg(XMacFrame *macPkt);
-	cObject *setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr);
+	cObject *setUpControlInfo(cMessage *const pMsg, const MacAddress& pSrcAddr);
 };
 
 } // namespace inet

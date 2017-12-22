@@ -15,14 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
 
 //
 // Frame for ~XMac. Frame size is configurable
@@ -30,8 +27,8 @@ class noncobject MACAddress;
 //
 packet XMacFrame
 {
-    MACAddress src;     // source address
-    MACAddress dest;    // destination address
+    MacAddress src;     // source address
+    MacAddress dest;    // destination address
     long sequenceId; // Sequence Number to detect duplicate messages
 }
 

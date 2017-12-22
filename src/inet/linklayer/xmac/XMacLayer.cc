@@ -25,8 +25,6 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/linklayer/xmac/XMacFrame_m.h"
 
 
@@ -41,7 +39,7 @@ simsignal_t XMacLayer::packetFromUpperDroppedSignal = registerSignal("packetFrom
  */
 void XMacLayer::initialize(int stage)
 {
-	MACProtocolBase::initialize(stage);
+	MacProtocolBase::initialize(stage);
 
 	if (stage == INITSTAGE_LOCAL) {
 
@@ -68,8 +66,8 @@ void XMacLayer::initialize(int stage)
 		nbTxAcks=0;
 
 		txAttempts = 0;
-		lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
-		lastDataPktSrcAddr  = MACAddress::BROADCAST_ADDRESS;
+		lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
+		lastDataPktSrcAddr  = MacAddress::BROADCAST_ADDRESS;
 
 		cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
@@ -191,7 +189,7 @@ void XMacLayer::initializeMACAddress()
 
     if (!strcmp(addrstr, "auto")) {
         // assign automatic address
-        address = MACAddress::generateAutoAddress();
+        address = MacAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
@@ -203,7 +201,7 @@ void XMacLayer::initializeMACAddress()
 
 InterfaceEntry *XMacLayer::createInterfaceEntry()
 {
-    InterfaceEntry *e = new InterfaceEntry(this);
+    InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
     e->setDatarate(bitrate);
@@ -225,7 +223,7 @@ InterfaceEntry *XMacLayer::createInterfaceEntry()
  * packet. Then initiate sending of the packet, if the node is sleeping. Do
  * nothing, if node is working.
  */
-void XMacLayer::handleUpperPacket(cPacket *msg)
+void XMacLayer::handleUpperPacket(Packet *msg)
 {
 	bool pktAdded = addToQueue(msg);
 	if (!pktAdded)
@@ -242,7 +240,7 @@ void XMacLayer::handleUpperPacket(cPacket *msg)
 /**
  * Send one short preamble packet immediately.
  */
-void XMacLayer::sendPreamble(MACAddress preamble_address)
+void XMacLayer::sendPreamble(MacAddress preamble_address)
 {
     //~ diff with BMAC, @ in preamble!
     XMacFrame* preamble = new XMacFrame("Preamble");
@@ -513,7 +511,7 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 		if (msg->getKind() == XMAC_DATA)
 		{
 			XMacFrame* mac  = static_cast<XMacFrame *>(msg);
-			const MACAddress& dest = mac->getDest();
+			const MacAddress& dest = mac->getDest();
 
 			if ((dest == address) || dest.isBroadcast() || dest.isMulticast()) {
 				sendUp(decapsMsg(mac));
@@ -585,7 +583,7 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 /**
  * Handle XMAC preambles and received data packets.
  */
-void XMacLayer::handleLowerPacket(cPacket *msg)
+void XMacLayer::handleLowerPacket(Packet *msg)
 {
     if (msg->hasBitError()) {
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
@@ -663,7 +661,7 @@ bool XMacLayer::addToQueue(cMessage *msg)
     macPkt->setBitLength(headerLength);
     IMACProtocolControlInfo *const cInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
     EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() << ", CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
-    MACAddress dest = cInfo->getDestinationAddress();
+    MacAddress dest = cInfo->getDestinationAddress();
     macPkt->setDest(dest);
     delete cInfo;
     macPkt->setSrc(address);
@@ -725,7 +723,7 @@ cPacket *XMacLayer::decapsMsg(XMacFrame *macPkt)
 /**
  * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
  */
-cObject *XMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr)
+cObject *XMacLayer::setUpControlInfo(cMessage *const pMsg, const MacAddress& pSrcAddr)
 {
     SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
