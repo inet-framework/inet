@@ -18,6 +18,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -708,10 +709,9 @@ void XMac::decapsulate(Packet *packet)
     const auto& xmacHeader = packet->popHeader<XMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(xmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    // TODO:
-//    auto protocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
-//    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-//    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    auto protocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -724,7 +724,7 @@ void XMac::encapsulate(Packet *packet)
     // message by the network layer
     auto dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
-    // TODO: pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info
