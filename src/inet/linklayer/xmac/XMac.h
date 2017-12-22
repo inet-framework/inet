@@ -16,20 +16,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_XMACLAYER_H_
-#define __INET_XMACLAYER_H_
+#ifndef __INET_XMAC_H_
+#define __INET_XMAC_H_
 
 #include <string>
 #include <sstream>
 #include <vector>
 #include <list>
 
-#include "inet/linklayer/xmac/XMacFrame_m.h"
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/linklayer/contract/IMacProtocol.h"
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/xmac/XMacHeader_m.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
@@ -49,23 +49,23 @@ class MacPkt;
  * A paper analyzing this MiXiM implementation can be found at:
  * http://ieeexplore.ieee.org/document/7024195/
  *
- * @class XMacLayer
+ * @class XMac
  * @ingroup macLayer
  * @author Joaquim Oller and Jan Peter Drees
  *
  */
-class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
+class INET_API XMac : public MacProtocolBase, public IMacProtocol
 {
   private:
 	/** @brief Copy constructor is not allowed.
 	 */
-	XMacLayer(const XMacLayer&);
+	XMac(const XMac&);
 	/** @brief Assignment operator is not allowed.
 	 */
-	XMacLayer& operator=(const XMacLayer&);
+	XMac& operator=(const XMac&);
 
   public:
-	XMacLayer()
+	XMac()
 		: MacProtocolBase()
 		, macQueue()
 		, nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
@@ -84,7 +84,7 @@ class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
 		, maxTxAttempts(0)
 		, stats(false)
 	{}
-	virtual ~XMacLayer();
+	virtual ~XMac();
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int) override;
@@ -284,4 +284,4 @@ class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
 
 } // namespace inet
 
-#endif /* XMACLAYER_H_ */
+#endif /* XMAC_H_ */

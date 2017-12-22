@@ -16,8 +16,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.packet.chunk.Chunk;
-import inet.linklayer.common.MacAddress;
+import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;
 
@@ -25,10 +24,8 @@ namespace inet;
 // Frame for ~XMac. Frame size is configurable
 // in the MAC layer. 
 //
-class XMacFrame extends FieldsChunk
+class XMacHeader extends MacHeaderBase
 {
-    MacAddress src;     // source address
-    MacAddress dest;    // destination address
     long sequenceId; // Sequence Number to detect duplicate messages
 }
 
