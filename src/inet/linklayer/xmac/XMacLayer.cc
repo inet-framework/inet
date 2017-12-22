@@ -16,17 +16,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "XMacLayer.h"
-
 #include <cassert>
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/FindModule.h"
+#include "XMacLayer.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/xmac/XMacFrame_m.h"
-
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -242,14 +241,15 @@ void XMacLayer::handleUpperPacket(Packet *msg)
  */
 void XMacLayer::sendPreamble(MacAddress preamble_address)
 {
-    //~ diff with BMAC, @ in preamble!
-    XMacFrame* preamble = new XMacFrame("Preamble");
+    //~ diff with XMAC, @ in preamble!
+    auto preamble = makeShared<XMacFrame>();
 	preamble->setSrc(address);
 	preamble->setDest(preamble_address);
-	preamble->setKind(XMAC_PREAMBLE);
-	preamble->setBitLength(headerLength);
-	attachSignal(preamble, simTime());
-	sendDown(preamble);
+	preamble->setChunkLength(b(headerLength));
+	auto packet = new Packet("Preamble", preamble);
+	packet->setKind(XMAC_PREAMBLE);
+	attachSignal(packet, simTime());
+	sendDown(packet);
 	nbTxPreambles++;
 }
 
@@ -258,14 +258,15 @@ void XMacLayer::sendPreamble(MacAddress preamble_address)
  */
 void XMacLayer::sendMacAck()
 {
-    XMacFrame* ack = new XMacFrame("Acknowledgment");
+    auto ack = makeShared<XMacFrame>();
 	ack->setSrc(address);
-	//~ diff with BMAC, ack_preamble_based
+	//~ diff with XMAC, ack_preamble_based
 	ack->setDest(lastPreamblePktSrcAddr);
-	ack->setKind(XMAC_ACK);
-	ack->setBitLength(headerLength);
-    attachSignal(ack, simTime());
-	sendDown(ack);
+	ack->setChunkLength(b(headerLength));
+    auto packet = new Packet("Acknowledgment", ack);
+	packet->setKind(XMAC_ACK);
+    attachSignal(packet, simTime());
+	sendDown(packet);
 	nbTxAcks++;
 }
 
@@ -338,7 +339,7 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 		// schedule the timeout.
 		if (msg->getKind() == XMAC_PREAMBLE)
 		{
-		    XMacFrame* incoming_preamble = static_cast<XMacFrame *>(msg);
+            auto incoming_preamble = check_and_cast<Packet *>(msg)->peekHeader<XMacFrame>();
 
 		    // preamble is for me
 		    if (incoming_preamble->getDest() == address || incoming_preamble->getDest().isBroadcast() || incoming_preamble->getDest().isMulticast()) {
@@ -377,7 +378,7 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 		// even if we increased nbMissedAcks in state SLEEP
         if (msg->getKind() == XMAC_DATA)
         {
-            XMacFrame* incoming_data = static_cast<XMacFrame *>(msg);
+            auto incoming_data = check_and_cast<Packet *>(msg)->peekHeader<XMacFrame>();
 
             // packet is for me
             if (incoming_data->getDest() == address) {
@@ -415,7 +416,7 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 		// radio switch from above
 		if(msg->getKind() == XMAC_SWITCHING_FINISHED) {
 		    if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
-                XMacFrame *pkt_preamble = macQueue.front();
+                auto pkt_preamble = macQueue.front()->peekHeader<XMacFrame>();
                 sendPreamble(pkt_preamble->getDest());
             }
 		    return;
@@ -510,12 +511,13 @@ void XMacLayer::handleSelfMessage(cMessage *msg)
 		}
 		if (msg->getKind() == XMAC_DATA)
 		{
-			XMacFrame* mac  = static_cast<XMacFrame *>(msg);
+		    auto packet = check_and_cast<Packet *>(msg);
+            auto mac = packet->peekHeader<XMacFrame>();
 			const MacAddress& dest = mac->getDest();
 
 			if ((dest == address) || dest.isBroadcast() || dest.isMulticast()) {
-				sendUp(decapsMsg(mac));
-				delete mac;
+			    decapsulate(packet);
+				sendUp(packet);
 				nbRxDataPackets++;
 	            cancelEvent(data_timeout);
 
@@ -599,10 +601,11 @@ void XMacLayer::sendDataPacket()
 {
 	nbTxDataPackets++;
 	XMacFrame* pkt = check_and_cast<XMacFrame *>(macQueue.front()->dup());
-	attachSignal(pkt, simTime());
 	lastDataPktDestAddr = pkt->getDest();
-	pkt->setKind(XMAC_DATA);
-	sendDown(pkt);
+	auto packet = new Packet(nullptr, pkt);
+	packet->setKind(XMAC_DATA);
+	attachSignal(packet, simTime());
+	sendDown(packet);
 }
 
 /**
@@ -657,29 +660,21 @@ bool XMacLayer::addToQueue(cMessage *msg)
 		return false;
 	}
 
-	XMacFrame *macPkt = new XMacFrame(msg->getName());
-    macPkt->setBitLength(headerLength);
-    IMACProtocolControlInfo *const cInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
-    EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() << ", CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
-    MacAddress dest = cInfo->getDestinationAddress();
-    macPkt->setDest(dest);
-    delete cInfo;
-    macPkt->setSrc(address);
-
-	assert(static_cast<cPacket*>(msg));
-	macPkt->encapsulate(static_cast<cPacket*>(msg));
-    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getBitLength() << "\n";
-	macQueue.push_back(macPkt);
+	auto packet = check_and_cast<Packet *>(msg);
+	encapsulate(packet);
+    EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekHeader<XMacFrame>()->getDest() << endl;
+    EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";
+	macQueue.push_back(packet);
 	EV_DEBUG << "Max queue length: " << queueLength << ", packet put in queue"
 			  "\n  queue size: " << macQueue.size() << " macState: "
 			  << macState << endl;
 	return true;
 }
 
-void XMacLayer::attachSignal(XMacFrame *mac, simtime_t_cref startTime)
+void XMacLayer::attachSignal(Packet *packet, simtime_t_cref startTime)
 {
-    simtime_t duration = mac->getBitLength() / bitrate;
-    mac->setDuration(duration);
+    simtime_t duration = packet->getBitLength() / bitrate;
+    packet->setDuration(duration);
 }
 
 /**
@@ -708,27 +703,40 @@ void XMacLayer::changeDisplayColor(XMAC_COLORS color)
 				//dispStr.parse("b=40,40,rect,yellow,yellow,2");
 }
 
-/**
- * Decapsulate a X-MAC frame.
- */
-cPacket *XMacLayer::decapsMsg(XMacFrame *macPkt)
-{
-    cPacket *msg = macPkt->decapsulate();
-    setUpControlInfo(msg, macPkt->getSrc());
 
-    return msg;
+void XMacLayer::decapsulate(Packet *packet)
+{
+    const auto& xmacHeader = packet->popHeader<XMacFrame>();
+    packet->ensureTag<MacAddressInd>()->setSrcAddress(xmacHeader->getSrc());
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    // TODO:
+//    auto protocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
+//    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+//    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    EV_DETAIL << " message decapsulated " << endl;
 }
 
-
-/**
- * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
- */
-cObject *XMacLayer::setUpControlInfo(cMessage *const pMsg, const MacAddress& pSrcAddr)
+void XMacLayer::encapsulate(Packet *packet)
 {
-    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
-    cCtrlInfo->setSrc(pSrcAddr);
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
+    auto pkt = makeShared<XMacFrame>();
+    pkt->setChunkLength(b(headerLength));
+
+    // copy dest address from the Control Info attached to the network
+    // message by the network layer
+    auto dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
+    // TODO: pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setDest(dest);
+
+    //delete the control info
+    delete packet->removeControlInfo();
+
+    //set the src address to own mac address (nic module getId())
+    pkt->setSrc(address);
+
+    //encapsulate the network packet
+    packet->insertHeader(pkt);
+    EV_DETAIL << "pkt encapsulated\n";
 }
 
 } // namespace inet

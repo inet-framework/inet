@@ -25,7 +25,7 @@ namespace inet;
 // Frame for ~XMac. Frame size is configurable
 // in the MAC layer. 
 //
-packet XMacFrame
+class XMacFrame extends FieldsChunk
 {
     MacAddress src;     // source address
     MacAddress dest;    // destination address

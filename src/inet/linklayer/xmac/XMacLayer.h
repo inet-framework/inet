@@ -104,7 +104,7 @@ class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
     void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   protected:
-    typedef std::list<XMacFrame *> MacQueue;
+    typedef std::list<Packet *> MacQueue;
 
     /** implements MacBase functions */
     //@{
@@ -273,13 +273,13 @@ class INET_API XMacLayer : public MacProtocolBase, public IMacProtocol
 	void sendPreamble(MacAddress destination);
 
 	/** @brief Internal function to attach a signal to the packet */
-	void attachSignal(XMacFrame *mac, simtime_t_cref startTime);
+	void attachSignal(Packet *packet, simtime_t_cref startTime);
 
 	/** @brief Internal function to add a new packet from upper to the queue */
 	bool addToQueue(cMessage * msg);
 
-	cPacket *decapsMsg(XMacFrame *macPkt);
-	cObject *setUpControlInfo(cMessage *const pMsg, const MacAddress& pSrcAddr);
+    void decapsulate(Packet *packet);
+    void encapsulate(Packet *packet);
 };
 
 } // namespace inet
