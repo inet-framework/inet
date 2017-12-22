@@ -9,28 +9,13 @@ import string
 import subprocess
 
 # configuration
-since = '2017-05-15'
+since = ''  # empty means "since last entry in the ChangeLog file"
+fromtag = '22b15' # alternative for 'since': from the given tag or branch
+
 entriesToIgnore = [
-"""2017-02-20  Rudolf Hornig
+"""2017-03-03  Rudolf Hornig
 
-	doc: tagged changelogs
-
-""",
-"""2017-02-20  Rudolf Hornig
-
-	doc: updated changelogs
-
-""",
-"""2016-12-23  Rudolf Hornig
-
-	build: ChangeLogs tagged
-
-""",
-"""2014-03-14  Rudolf Hornig
-
-    Revert "updated changelogs for v2.3"
-
-    This reverts commit 1bf7ee83a4677760c23c55cb7ce2b004a2bde193.
+        doc: changelogs updated and tagged
 
 """,
 ]
@@ -59,14 +44,17 @@ def updateChangeLogIn(dir):
     f.close()
 
     # if "since" is not set, find most recent entry in the log
-    if since=="":
+    if since=="" and fromtag=="":
         since = '2000-01-01'
         m = re.search('^\d\d\d\d-\d\d-\d\d', oldLog)
         if m:
             since = m.group(0)
 
     # get appropriately formatted git log since that date
-    gitLogCommand = ['git', 'log', '--date=short', '--pretty=format:%ad  %an%n%n%w(81,8,8)%s%n%n%b', '--since='+since, dir]
+    gitLogCommand = ['git', 'log', '--date=short', '--pretty=format:%ad  %an%n%n%w(81,8,8)%s%n%n%b']
+    if since!="": gitLogCommand +=  ['--since='+since]
+    if fromtag!="": gitLogCommand += [fromtag+"..HEAD"]
+    gitLogCommand += [dir]
     newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS))
     newLog = formatChangeLog(newLog)
 
