@@ -1,0 +1,57 @@
+/*
+ * Send 5 packets. Get SACK for first 3 packets.
+ */
+
+--tolerance_usecs=50000
+
+// Set initial congestion window high enough to avoid testing it.
+0.0 `sysctl -w net.inet.sctp.initial_cwnd=10`
+
+// Create a non-blocking 1-to-1 style socket
++0.0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0.0 fcntl(3, F_GETFL) = 0x02 (flags O_RDWR)
++0.0 fcntl(3, F_SETFL, O_RDWR | O_NONBLOCK) = 0
+
+// Trigger the active associtation setup
++0.1 connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
++0.0 > sctp: INIT[flgs=0, tag=1, a_rwnd=..., os=..., is=..., tsn=10, ...]
++0.1 < sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=30000, os=1, is=1, tsn=3, STATE_COOKIE[len=4, val=...]]
++0.0 > sctp: COOKIE_ECHO[flgs=0, len=4, val=...]
++0.0 < sctp: COOKIE_ACK[flgs=0]
+// Check if the setup was sucessful
++0.0 getsockopt(3, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+
+// Turn off the sending of HEARTBEATs.
++0.0 setsockopt(3, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS, {spp_address=..., spp_hbinterval=0, spp_pathmaxrxt=0, spp_pathmtu=0, spp_flags=SPP_HB_DISABLE|SPP_PMTUD_DISABLE, spp_ipv6_flowlabel=0, spp_dscp=0}, 152) = 0
+
+// send 5 full packets (20 Byte IP header + 12 Byte SCTP common header + 16 Byte data chunk header + 1452 Byte data = 1500 Byte)
++0.1 write(3, ..., 1452) = 1452
++0.0 write(3, ..., 1452) = 1452
++0.0 write(3, ..., 1452) = 1452
++0.0 write(3, ..., 1452) = 1452
++0.0 write(3, ..., 1452) = 1452
+
+// 5 data chunks go out, because congestion window and (peers) receiver window are big enough
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=10, sid=0, ssn=0, ppid=0] // lost
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=11, sid=0, ssn=1, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=9, a_rwnd=30000, gaps=[2:2], dups=[]]
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=12, sid=0, ssn=2, ppid=0] // lost
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=13, sid=0, ssn=3, ppid=0]
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=14, sid=0, ssn=4, ppid=0]
+
+// receive sack for the second and the last two data chunks
++0.0 < sctp: SACK[flgs=0, cum_tsn=9, a_rwnd=30000, gaps=[2:2,4:4], dups=[]]
++0.0 < sctp: SACK[flgs=0, cum_tsn=9, a_rwnd=30000, gaps=[2:2,4:5], dups=[]]
+
+// fast retransmission for first data chunk.
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=10, sid=0, ssn=0, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=11, a_rwnd=30000, gaps=[2:3], dups=[]]
+// fast retransmission for third data chunk.
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=12, sid=0, ssn=2, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=14, a_rwnd=30000, gaps=[], dups=[]]
+
+// Tear down the association
++0.0 close(3) = 0
++0.0 > sctp: SHUTDOWN[flgs=0, cum_tsn=...]
++0.0 < sctp: SHUTDOWN_ACK[flgs=0]
++0.0 > sctp: SHUTDOWN_COMPLETE[flgs=0]
