@@ -35,7 +35,6 @@ void FlatRadioBase::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
-        NarrowbandRadioBase::handleUpperCommand(message);
         W newPower = configureCommand->getPower();
         if (!std::isnan(newPower.get()))
             setPower(newPower);
@@ -43,8 +42,7 @@ void FlatRadioBase::handleUpperCommand(cMessage *message)
         if (!std::isnan(newBitrate.get()))
             setBitrate(newBitrate);
     }
-    else
-        NarrowbandRadioBase::handleUpperCommand(message);
+    NarrowbandRadioBase::handleUpperCommand(message);
 }
 
 void FlatRadioBase::setPower(W newPower)

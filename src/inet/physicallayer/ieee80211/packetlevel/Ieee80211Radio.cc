@@ -51,7 +51,6 @@ void Ieee80211Radio::initialize(int stage)
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        FlatRadioBase::handleUpperCommand(message);
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
             const char *opMode = configureCommand->getOpMode();
@@ -74,8 +73,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
                 setChannelNumber(newChannelNumber);
         }
     }
-    else
-        FlatRadioBase::handleUpperCommand(message);
+    FlatRadioBase::handleUpperCommand(message);
 }
 
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)

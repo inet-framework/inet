@@ -247,6 +247,7 @@ void Radio::handleUpperCommand(cMessage *message)
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand->getRadioMode() != -1)
             setRadioMode((RadioMode)configureCommand->getRadioMode());
+        delete message;
     }
     else
         throw cRuntimeError("Unsupported command");
