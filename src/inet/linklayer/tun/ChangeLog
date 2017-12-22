@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MACBase renamed to MacBase
-	    PPP renamed to Ppp
+	    MACBase -> MacBase
+	    PPP -> Ppp
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,18 +3,18 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DSCP renamed to Dscp
-	    DSCPMarker renamed to DscpMarker
-	    FIFOQueue renamed to FifoQueue
-	    IPProtocolId renamed to IpProtocolId
-	    IPv4 renamed to Ipv4
-	    IPv6 renamed to Ipv6
-	    IPv6Header renamed to Ipv6Header
-	    REDDropper renamed to RedDropper
-	    TCP renamed to Tcp
-	    TCPSegment renamed to TcpHeader
-	    UDP renamed to Udp
-	    WRRScheduler renamed to WrrScheduler
+	    DSCP -> Dscp
+	    DSCPMarker -> DscpMarker
+	    FIFOQueue -> FifoQueue
+	    IPProtocolId -> IpProtocolId
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    IPv6Header -> Ipv6Header
+	    REDDropper -> RedDropper
+	    TCP -> Tcp
+	    TCPSegment -> TcpHeader
+	    UDP -> Udp
+	    WRRScheduler -> WrrScheduler
 
 2017-12-15  Zoltan Bojthe
 

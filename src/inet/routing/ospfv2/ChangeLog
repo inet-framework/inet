@@ -3,43 +3,43 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ASExternalLSA renamed to AsExternalLsa
-	    AreaID renamed to AreaId
-	    BGPRouting renamed to BgpRouting
-	    ExternalTOSInfo renamed to ExternalTosInfo
-	    IIPRouting renamed to IIpRouting
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4AddressRange renamed to Ipv4AddressRange
-	    IPv4ControlInfo renamed to Ipv4ControlInfo
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    LSARequest renamed to LsaRequest
-	    LSAType renamed to LsaType
-	    OSPFASExternalLSA renamed to OspfAsExternalLsa
-	    OSPFASExternalLSAContents renamed to OspfAsExternalLsaContents
-	    OSPFArea renamed to OspfArea
-	    OSPFConfigReader renamed to OspfConfigReader
-	    OSPFDDOptions renamed to OspfDdOptions
-	    OSPFDatabaseDescriptionPacket renamed to OspfDatabaseDescriptionPacket
-	    OSPFHelloPacket renamed to OspfHelloPacket
-	    OSPFInterface renamed to OspfInterface
-	    OSPFLSA renamed to OspfLsa
-	    OSPFLSAHeader renamed to OspfLsaHeader
-	    OSPFLinkStateAcknowledgementPacket renamed to OspfLinkStateAcknowledgementPacket
-	    OSPFLinkStateRequestPacket renamed to OspfLinkStateRequestPacket
-	    OSPFLinkStateUpdatePacket renamed to OspfLinkStateUpdatePacket
-	    OSPFNetworkLSA renamed to OspfNetworkLsa
-	    OSPFOptions renamed to OspfOptions
-	    OSPFPacket renamed to OspfPacket
-	    OSPFPacketType renamed to OspfPacketType
-	    OSPFRouter renamed to OspfRouter
-	    OSPFRouterLSA renamed to OspfRouterLsa
-	    OSPFRouting renamed to OspfRouting
-	    OSPFSummaryLSA renamed to OspfSummaryLsa
-	    OSPFTimerType renamed to OspfTimerType
-	    OSPFcommon renamed to OspfCommon
-	    TOSData renamed to TosData
+	    ASExternalLSA -> AsExternalLsa
+	    AreaID -> AreaId
+	    BGPRouting -> BgpRouting
+	    ExternalTOSInfo -> ExternalTosInfo
+	    IIPRouting -> IIpRouting
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    LSARequest -> LsaRequest
+	    LSAType -> LsaType
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFASExternalLSAContents -> OspfAsExternalLsaContents
+	    OSPFArea -> OspfArea
+	    OSPFConfigReader -> OspfConfigReader
+	    OSPFDDOptions -> OspfDdOptions
+	    OSPFDatabaseDescriptionPacket -> OspfDatabaseDescriptionPacket
+	    OSPFHelloPacket -> OspfHelloPacket
+	    OSPFInterface -> OspfInterface
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFLinkStateAcknowledgementPacket -> OspfLinkStateAcknowledgementPacket
+	    OSPFLinkStateRequestPacket -> OspfLinkStateRequestPacket
+	    OSPFLinkStateUpdatePacket -> OspfLinkStateUpdatePacket
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFPacket -> OspfPacket
+	    OSPFPacketType -> OspfPacketType
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFRouting -> OspfRouting
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFTimerType -> OspfTimerType
+	    OSPFcommon -> OspfCommon
+	    TOSData -> TosData
 
 2017-12-15  Zoltan Bojthe
 

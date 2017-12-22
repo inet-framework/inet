@@ -3,23 +3,23 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4Address renamed to Ipv4Address
-	    IPv6Address renamed to Ipv6Address
-	    TCPCommand renamed to TcpCommand
-	    TCPConnection renamed to TcpConnection
-	    TCPOption renamed to TcpOption
-	    TCPOptionEnd renamed to TcpOptionEnd
-	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
-	    TCPOptionNop renamed to TcpOptionNop
-	    TCPOptionSack renamed to TcpOptionSack
-	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
-	    TCPOptionTimestamp renamed to TcpOptionTimestamp
-	    TCPOptionUnknown renamed to TcpOptionUnknown
-	    TCPOptionWindowScale renamed to TcpOptionWindowScale
-	    TCPSegment renamed to TcpHeader
-	    TCPSessionApp renamed to TcpSessionApp
-	    TCPSocket renamed to TcpSocket
-	    UDPSocket renamed to UdpSocket
+	    IPv4Address -> Ipv4Address
+	    IPv6Address -> Ipv6Address
+	    TCPCommand -> TcpCommand
+	    TCPConnection -> TcpConnection
+	    TCPOption -> TcpOption
+	    TCPOptionEnd -> TcpOptionEnd
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPOptionNop -> TcpOptionNop
+	    TCPOptionSack -> TcpOptionSack
+	    TCPOptionSackPermitted -> TcpOptionSackPermitted
+	    TCPOptionTimestamp -> TcpOptionTimestamp
+	    TCPOptionUnknown -> TcpOptionUnknown
+	    TCPOptionWindowScale -> TcpOptionWindowScale
+	    TCPSegment -> TcpHeader
+	    TCPSessionApp -> TcpSessionApp
+	    TCPSocket -> TcpSocket
+	    UDPSocket -> UdpSocket
 
 2017-12-14  Levente Mészáros
 

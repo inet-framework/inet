@@ -3,7 +3,7 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKErrorModel renamed to ApskErrorModel
+	    APSKErrorModel -> ApskErrorModel
 
 2017-11-16  ------ inet-3.99.1 released ------
 

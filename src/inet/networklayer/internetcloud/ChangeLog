@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IDPair renamed to IdPair
-	    IDPairToDescriptorMap renamed to IdPairToDescriptorMap
-	    IPv4 renamed to Ipv4
-	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
+	    IDPair -> IdPair
+	    IDPairToDescriptorMap -> IdPairToDescriptorMap
+	    IPv4 -> Ipv4
+	    IPv4NetworkConfigurator -> Ipv4NetworkConfigurator
 
 2017-12-15  Zoltan Bojthe
 

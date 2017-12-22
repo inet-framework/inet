@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPProtocolId renamed to IpProtocolId
-	    MACAddress renamed to MacAddress
+	    IPProtocolId -> IpProtocolId
+	    MACAddress -> MacAddress
 
 2017-12-15  Andras Varga
 

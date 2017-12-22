@@ -3,15 +3,15 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IMACProtocol renamed to IMacProtocol
-	    IdealMac renamed to AckingMac
-	    IdealMacHeader renamed to AckingMacHeader
-	    IdealRadio renamed to UnitDiskRadio
-	    IdealRadioMedium renamed to UnitDiskRadioMedium
-	    IdealWirelessNic renamed to AckingWirelessNic
-	    MACAddress renamed to MacAddress
-	    MACBase renamed to MacBase
-	    MACProtocolBase renamed to MacProtocolBase
+	    IMACProtocol -> IMacProtocol
+	    IdealMac -> AckingMac
+	    IdealMacHeader -> AckingMacHeader
+	    IdealRadio -> UnitDiskRadio
+	    IdealRadioMedium -> UnitDiskRadioMedium
+	    IdealWirelessNic -> AckingWirelessNic
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACProtocolBase -> MacProtocolBase
 
 2017-12-18  Levente Mészáros
 

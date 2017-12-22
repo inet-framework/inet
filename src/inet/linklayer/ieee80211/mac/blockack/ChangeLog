@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IRecipientQoSAckPolicy renamed to IRecipientQosAckPolicy
-	    MACAddress renamed to MacAddress
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    MACAddress -> MacAddress
 
 2017-12-15  Zoltan Bojthe
 

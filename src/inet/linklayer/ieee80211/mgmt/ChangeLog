@@ -3,22 +3,22 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APInfo renamed to ApInfo
-	    AssociatedAPInfo renamed to AssociatedApInfo
-	    IMACRelayUnit renamed to IMacRelayUnit
-	    Ieee80211AgentSTA renamed to Ieee80211AgentSta
-	    Ieee80211BSSType renamed to Ieee80211BssType
-	    Ieee80211HWMPCode renamed to Ieee80211HwmpCode
-	    Ieee80211MgmtAP renamed to Ieee80211MgmtAp
-	    Ieee80211MgmtAPBase renamed to Ieee80211MgmtApBase
-	    Ieee80211MgmtAPSimplified renamed to Ieee80211MgmtApSimplified
-	    Ieee80211MgmtSTA renamed to Ieee80211MgmtSta
-	    Ieee80211MgmtSTASimplified renamed to Ieee80211MgmtStaSimplified
-	    Ieee80211Prim_BSSDescription renamed to Ieee80211Prim_BssDescription
-	    MACAddress renamed to MacAddress
-	    MAC_compare renamed to MacCompare
-	    STAInfo renamed to StaInfo
-	    STAList renamed to StaList
+	    APInfo -> ApInfo
+	    AssociatedAPInfo -> AssociatedApInfo
+	    IMACRelayUnit -> IMacRelayUnit
+	    Ieee80211AgentSTA -> Ieee80211AgentSta
+	    Ieee80211BSSType -> Ieee80211BssType
+	    Ieee80211HWMPCode -> Ieee80211HwmpCode
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtAPBase -> Ieee80211MgmtApBase
+	    Ieee80211MgmtAPSimplified -> Ieee80211MgmtApSimplified
+	    Ieee80211MgmtSTA -> Ieee80211MgmtSta
+	    Ieee80211MgmtSTASimplified -> Ieee80211MgmtStaSimplified
+	    Ieee80211Prim_BSSDescription -> Ieee80211Prim_BssDescription
+	    MACAddress -> MacAddress
+	    MAC_compare -> MacCompare
+	    STAInfo -> StaInfo
+	    STAList -> StaList
 
 2017-12-15  Zoltan Bojthe
 

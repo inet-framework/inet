@@ -3,13 +3,13 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKModulationBase renamed to ApskModulationBase
-	    BPSKModulation renamed to BpskModulation
-	    ISNIR renamed to ISnir
-	    Ieee80211OFDMMode renamed to Ieee80211OfdmMode
-	    QAM16Modulation renamed to Qam16Modulation
-	    QAM64Modulation renamed to Qam64Modulation
-	    QPSKModulation renamed to QpskModulation
+	    APSKModulationBase -> ApskModulationBase
+	    BPSKModulation -> BpskModulation
+	    ISNIR -> ISnir
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
 
 2017-11-16  ------ inet-3.99.1 released ------
 

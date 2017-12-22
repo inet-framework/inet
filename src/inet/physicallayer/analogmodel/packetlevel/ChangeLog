@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DimensionalSNIR renamed to DimensionalSnir
-	    SNIRBase renamed to SnirBase
-	    ScalarSNIR renamed to ScalarSnir
+	    DimensionalSNIR -> DimensionalSnir
+	    SNIRBase -> SnirBase
+	    ScalarSNIR -> ScalarSnir
 
 2017-11-21  Levente Mészáros
 

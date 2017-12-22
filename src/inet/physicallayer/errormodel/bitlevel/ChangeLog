@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKModulationBase renamed to ApskModulationBase
-	    APSKSymbol renamed to ApskSymbol
-	    ISNIR renamed to ISnir
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    ISNIR -> ISnir
 
 2017-11-16  ------ inet-3.99.1 released ------
 

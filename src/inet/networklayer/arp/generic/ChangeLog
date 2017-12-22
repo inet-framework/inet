@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARPPacket renamed to ArpPacket
-	    GenericARP renamed to GenericArp
-	    IARP renamed to IArp
-	    MACAddress renamed to MacAddress
+	    ARPPacket -> ArpPacket
+	    GenericARP -> GenericArp
+	    IARP -> IArp
+	    MACAddress -> MacAddress
 
 2017-11-16  ------ inet-3.99.1 released ------
 

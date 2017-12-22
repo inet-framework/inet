@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARPPacket renamed to ArpPacket
-	    IPv4 renamed to Ipv4
-	    IPv6 renamed to Ipv6
-	    IPv6Header renamed to Ipv6Header
-	    TCPOption renamed to TcpOption
-	    TCPSegment renamed to TcpHeader
+	    ARPPacket -> ArpPacket
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    IPv6Header -> Ipv6Header
+	    TCPOption -> TcpOption
+	    TCPSegment -> TcpHeader
 
 2017-11-16  ------ inet-3.99.1 released ------
 

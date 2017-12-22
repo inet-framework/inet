@@ -3,18 +3,18 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4NetworkLayer renamed to Ipv4NetworkLayer
-	    IPv6NetworkLayer renamed to Ipv6NetworkLayer
-	    ISCTP renamed to ISctp
-	    ITCP renamed to ITcp
-	    IUDP renamed to IUdp
-	    PPPFrame renamed to PppFrame
-	    PPPInterface renamed to PppInterface
-	    TCP renamed to Tcp
-	    TCPSpoof renamed to TcpSpoof
-	    TCP_NSC renamed to TcpNsc
-	    TCP_lwIP renamed to TcpLwip
-	    UDP renamed to Udp
+	    IPv4NetworkLayer -> Ipv4NetworkLayer
+	    IPv6NetworkLayer -> Ipv6NetworkLayer
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    PPPFrame -> PppFrame
+	    PPPInterface -> PppInterface
+	    TCP -> Tcp
+	    TCPSpoof -> TcpSpoof
+	    TCP_NSC -> TcpNsc
+	    TCP_lwIP -> TcpLwip
+	    UDP -> Udp
 
 2017-11-16  ------ inet-3.99.1 released ------
 

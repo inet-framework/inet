@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    MACRelayUnit renamed to MacRelayUnit
-	    OSGUtils renamed to OsgUtils
-	    TCP renamed to Tcp
-	    TCPConnection renamed to TcpConnection
-	    UDP renamed to Udp
+	    IPv4 -> Ipv4
+	    MACRelayUnit -> MacRelayUnit
+	    OSGUtils -> OsgUtils
+	    TCP -> Tcp
+	    TCPConnection -> TcpConnection
+	    UDP -> Udp
 
 2017-11-16  ------ inet-3.99.1 released ------
 

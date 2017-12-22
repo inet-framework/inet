@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ISCTP renamed to ISctp
-	    ITCP renamed to ITcp
-	    IUDP renamed to IUdp
-	    TCPCommand renamed to TcpCommand
-	    TCPSocket renamed to TcpSocket
-	    UDPSocket renamed to UdpSocket
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    TCPCommand -> TcpCommand
+	    TCPSocket -> TcpSocket
+	    UDPSocket -> UdpSocket
 
 2017-12-14  Levente Mészáros
 

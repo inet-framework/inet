@@ -3,24 +3,24 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKDimensionalRadio renamed to ApskDimensionalRadio
-	    APSKDimensionalRadioMedium renamed to ApskDimensionalRadioMedium
-	    APSKDimensionalReceiver renamed to ApskDimensionalReceiver
-	    APSKDimensionalTransmission renamed to ApskDimensionalTransmission
-	    APSKDimensionalTransmitter renamed to ApskDimensionalTransmitter
-	    APSKEncoder renamed to ApskEncoder
-	    APSKErrorModel renamed to ApskErrorModel
-	    APSKLayeredTransmitter renamed to ApskLayeredTransmitter
-	    APSKModulationBase renamed to ApskModulationBase
-	    APSKPhyHeader renamed to ApskPhyHeader
-	    APSKRadio renamed to ApskRadio
-	    APSKScalarRadio renamed to ApskScalarRadio
-	    APSKScalarRadioMedium renamed to ApskScalarRadioMedium
-	    APSKScalarReceiver renamed to ApskScalarReceiver
-	    APSKScalarTransmission renamed to ApskScalarTransmission
-	    APSKScalarTransmitter renamed to ApskScalarTransmitter
-	    DimensionalSNIR renamed to DimensionalSnir
-	    ScalarSNIR renamed to ScalarSnir
+	    APSKDimensionalRadio -> ApskDimensionalRadio
+	    APSKDimensionalRadioMedium -> ApskDimensionalRadioMedium
+	    APSKDimensionalReceiver -> ApskDimensionalReceiver
+	    APSKDimensionalTransmission -> ApskDimensionalTransmission
+	    APSKDimensionalTransmitter -> ApskDimensionalTransmitter
+	    APSKEncoder -> ApskEncoder
+	    APSKErrorModel -> ApskErrorModel
+	    APSKLayeredTransmitter -> ApskLayeredTransmitter
+	    APSKModulationBase -> ApskModulationBase
+	    APSKPhyHeader -> ApskPhyHeader
+	    APSKRadio -> ApskRadio
+	    APSKScalarRadio -> ApskScalarRadio
+	    APSKScalarRadioMedium -> ApskScalarRadioMedium
+	    APSKScalarReceiver -> ApskScalarReceiver
+	    APSKScalarTransmission -> ApskScalarTransmission
+	    APSKScalarTransmitter -> ApskScalarTransmitter
+	    DimensionalSNIR -> DimensionalSnir
+	    ScalarSNIR -> ScalarSnir
 
 2017-11-14  Zoltan Bojthe
 

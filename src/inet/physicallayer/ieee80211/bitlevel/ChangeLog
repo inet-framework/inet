@@ -3,44 +3,44 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKModulationBase renamed to ApskModulationBase
-	    APSKSymbol renamed to ApskSymbol
-	    BPSKModulation renamed to BpskModulation
-	    IAPSKModulation renamed to IApskModulation
-	    IFECCoder renamed to IFecCoder
-	    ISNIR renamed to ISnir
-	    Ieee80211HTInterleaving renamed to Ieee80211HtInterleaving
-	    Ieee80211LayeredOFDMReceiver renamed to Ieee80211LayeredOfdmReceiver
-	    Ieee80211LayeredOFDMTransmitter renamed to Ieee80211LayeredOfdmTransmitter
-	    Ieee80211OFDMCode renamed to Ieee80211OfdmCode
-	    Ieee80211OFDMCompliantCodes renamed to Ieee80211OfdmCompliantCodes
-	    Ieee80211OFDMCompliantModes renamed to Ieee80211OfdmCompliantModes
-	    Ieee80211OFDMDataMode renamed to Ieee80211OfdmDataMode
-	    Ieee80211OFDMDecoder renamed to Ieee80211OfdmDecoder
-	    Ieee80211OFDMDecoderModule renamed to Ieee80211OfdmDecoderModule
-	    Ieee80211OFDMDefs renamed to Ieee80211OfdmDefs
-	    Ieee80211OFDMDemodulator renamed to Ieee80211OfdmDemodulator
-	    Ieee80211OFDMDemodulatorModule renamed to Ieee80211OfdmDemodulatorModule
-	    Ieee80211OFDMEncoder renamed to Ieee80211OfdmEncoder
-	    Ieee80211OFDMEncoderModule renamed to Ieee80211OfdmEncoderModule
-	    Ieee80211OFDMInterleaver renamed to Ieee80211OfdmInterleaver
-	    Ieee80211OFDMInterleaverModule renamed to Ieee80211OfdmInterleaverModule
-	    Ieee80211OFDMInterleaving renamed to Ieee80211OfdmInterleaving
-	    Ieee80211OFDMMode renamed to Ieee80211OfdmMode
-	    Ieee80211OFDMModulation renamed to Ieee80211OfdmModulation
-	    Ieee80211OFDMModulator renamed to Ieee80211OfdmModulator
-	    Ieee80211OFDMModulatorModule renamed to Ieee80211OfdmModulatorModule
-	    Ieee80211OFDMPreambleMode renamed to Ieee80211OfdmPreambleMode
-	    Ieee80211OFDMRadio renamed to Ieee80211OfdmRadio
-	    Ieee80211OFDMReceptionSymbolModel renamed to Ieee80211OfdmReceptionSymbolModel
-	    Ieee80211OFDMSignalMode renamed to Ieee80211OfdmSignalMode
-	    Ieee80211OFDMSymbol renamed to Ieee80211OfdmSymbol
-	    Ieee80211OFDMSymbolModel renamed to Ieee80211OfdmSymbolModel
-	    Ieee80211OFDMTransmissionSymbolModel renamed to Ieee80211OfdmTransmissionSymbolModel
-	    QAM16Modulation renamed to Qam16Modulation
-	    QAM64Modulation renamed to Qam64Modulation
-	    QPSKModulation renamed to QpskModulation
-	    SNIRReceiverBase renamed to SnirReceiverBase
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    IAPSKModulation -> IApskModulation
+	    IFECCoder -> IFecCoder
+	    ISNIR -> ISnir
+	    Ieee80211HTInterleaving -> Ieee80211HtInterleaving
+	    Ieee80211LayeredOFDMReceiver -> Ieee80211LayeredOfdmReceiver
+	    Ieee80211LayeredOFDMTransmitter -> Ieee80211LayeredOfdmTransmitter
+	    Ieee80211OFDMCode -> Ieee80211OfdmCode
+	    Ieee80211OFDMCompliantCodes -> Ieee80211OfdmCompliantCodes
+	    Ieee80211OFDMCompliantModes -> Ieee80211OfdmCompliantModes
+	    Ieee80211OFDMDataMode -> Ieee80211OfdmDataMode
+	    Ieee80211OFDMDecoder -> Ieee80211OfdmDecoder
+	    Ieee80211OFDMDecoderModule -> Ieee80211OfdmDecoderModule
+	    Ieee80211OFDMDefs -> Ieee80211OfdmDefs
+	    Ieee80211OFDMDemodulator -> Ieee80211OfdmDemodulator
+	    Ieee80211OFDMDemodulatorModule -> Ieee80211OfdmDemodulatorModule
+	    Ieee80211OFDMEncoder -> Ieee80211OfdmEncoder
+	    Ieee80211OFDMEncoderModule -> Ieee80211OfdmEncoderModule
+	    Ieee80211OFDMInterleaver -> Ieee80211OfdmInterleaver
+	    Ieee80211OFDMInterleaverModule -> Ieee80211OfdmInterleaverModule
+	    Ieee80211OFDMInterleaving -> Ieee80211OfdmInterleaving
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    Ieee80211OFDMModulation -> Ieee80211OfdmModulation
+	    Ieee80211OFDMModulator -> Ieee80211OfdmModulator
+	    Ieee80211OFDMModulatorModule -> Ieee80211OfdmModulatorModule
+	    Ieee80211OFDMPreambleMode -> Ieee80211OfdmPreambleMode
+	    Ieee80211OFDMRadio -> Ieee80211OfdmRadio
+	    Ieee80211OFDMReceptionSymbolModel -> Ieee80211OfdmReceptionSymbolModel
+	    Ieee80211OFDMSignalMode -> Ieee80211OfdmSignalMode
+	    Ieee80211OFDMSymbol -> Ieee80211OfdmSymbol
+	    Ieee80211OFDMSymbolModel -> Ieee80211OfdmSymbolModel
+	    Ieee80211OFDMTransmissionSymbolModel -> Ieee80211OfdmTransmissionSymbolModel
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+	    SNIRReceiverBase -> SnirReceiverBase
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,19 +3,19 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IQoSRateSelection renamed to IQosRateSelection
-	    IRecipientQoSAckPolicy renamed to IRecipientQosAckPolicy
-	    IRecipientQoSMacDataService renamed to IRecipientQosMacDataService
-	    NonQoSRecoveryProcedure renamed to NonQosRecoveryProcedure
-	    OriginatorQoSAckPolicy renamed to OriginatorQosAckPolicy
-	    OriginatorQoSMacDataService renamed to OriginatorQosMacDataService
-	    QoSAckHandler renamed to QosAckHandler
-	    QoSCtsPolicy renamed to QosCtsPolicy
-	    QoSRateSelection renamed to QosRateSelection
-	    QoSRecoveryProcedure renamed to QosRecoveryProcedure
-	    QoSRtsPolicy renamed to QosRtsPolicy
-	    RecipientQoSAckPolicy renamed to RecipientQosAckPolicy
-	    RecipientQoSMacDataService renamed to RecipientQosMacDataService
+	    IQoSRateSelection -> IQosRateSelection
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService -> IRecipientQosMacDataService
+	    NonQoSRecoveryProcedure -> NonQosRecoveryProcedure
+	    OriginatorQoSAckPolicy -> OriginatorQosAckPolicy
+	    OriginatorQoSMacDataService -> OriginatorQosMacDataService
+	    QoSAckHandler -> QosAckHandler
+	    QoSCtsPolicy -> QosCtsPolicy
+	    QoSRateSelection -> QosRateSelection
+	    QoSRecoveryProcedure -> QosRecoveryProcedure
+	    QoSRtsPolicy -> QosRtsPolicy
+	    RecipientQoSAckPolicy -> RecipientQosAckPolicy
+	    RecipientQoSMacDataService -> RecipientQosMacDataService
 
 2017-11-16  Levente Mészáros
 

@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ISNIR renamed to ISnir
-	    WITH_IDEALWIRELESS renamed to WITH_ACKINGWIRELESS
+	    ISNIR -> ISnir
+	    WITH_IDEALWIRELESS -> WITH_ACKINGWIRELESS
 
 2017-12-18  Levente Mészáros
 

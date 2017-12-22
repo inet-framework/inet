@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MACAddress renamed to MacAddress
-	    OriginatorQoSAckPolicy renamed to OriginatorQosAckPolicy
-	    QoSRtsPolicy renamed to QosRtsPolicy
+	    MACAddress -> MacAddress
+	    OriginatorQoSAckPolicy -> OriginatorQosAckPolicy
+	    QoSRtsPolicy -> QosRtsPolicy
 
 2017-12-14  Levente Mészáros
 

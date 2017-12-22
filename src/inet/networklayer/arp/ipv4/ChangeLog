@@ -3,19 +3,19 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARP renamed to Arp
-	    ARPCache renamed to ArpCache
-	    ARPCacheEntry renamed to ArpCacheEntry
-	    ARPOpcode renamed to ArpOpcode
-	    ARPPacket renamed to ArpPacket
-	    GlobalARP renamed to GlobalArp
-	    IARP renamed to IArp
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4RoutingTable renamed to Ipv4RoutingTable
-	    MACAddress renamed to MacAddress
+	    ARP -> Arp
+	    ARPCache -> ArpCache
+	    ARPCacheEntry -> ArpCacheEntry
+	    ARPOpcode -> ArpOpcode
+	    ARPPacket -> ArpPacket
+	    GlobalARP -> GlobalArp
+	    IARP -> IArp
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    MACAddress -> MacAddress
 
 2017-12-14  Levente Mészáros
 

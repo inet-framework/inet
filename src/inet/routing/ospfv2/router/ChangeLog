@@ -3,40 +3,40 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ASExternalLSA renamed to AsExternalLsa
-	    AreaID renamed to AreaId
-	    DesignatedRouterID renamed to DesignatedRouterId
-	    ExternalTOSInfo renamed to ExternalTosInfo
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4AddressRange renamed to Ipv4AddressRange
-	    IPv4Route renamed to Ipv4Route
-	    LSA renamed to Lsa
-	    LSAKeyType renamed to LsaKeyType
-	    LSAKeyType_Less renamed to LsaKeyType_Less
-	    LSATrackingInfo renamed to LsaTrackingInfo
-	    LSAType renamed to LsaType
-	    LinkStateID renamed to LinkStateId
-	    NetworkLSA renamed to NetworkLsa
-	    OSPFASExternalLSA renamed to OspfAsExternalLsa
-	    OSPFASExternalLSAContents renamed to OspfAsExternalLsaContents
-	    OSPFArea renamed to OspfArea
-	    OSPFInterface renamed to OspfInterface
-	    OSPFInterfaceType renamed to OspfInterfaceType
-	    OSPFLSA renamed to OspfLsa
-	    OSPFLSAHeader renamed to OspfLsaHeader
-	    OSPFNetworkLSA renamed to OspfNetworkLsa
-	    OSPFOptions renamed to OspfOptions
-	    OSPFRouter renamed to OspfRouter
-	    OSPFRouterLSA renamed to OspfRouterLsa
-	    OSPFRoutingTableEntry renamed to OspfRoutingTableEntry
-	    OSPFSummaryLSA renamed to OspfSummaryLsa
-	    OSPFcommon renamed to OspfCommon
-	    RouterID renamed to RouterId
-	    RouterLSA renamed to RouterLsa
-	    SummaryLSA renamed to SummaryLsa
-	    TOSData renamed to TosData
+	    ASExternalLSA -> AsExternalLsa
+	    AreaID -> AreaId
+	    DesignatedRouterID -> DesignatedRouterId
+	    ExternalTOSInfo -> ExternalTosInfo
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4Route -> Ipv4Route
+	    LSA -> Lsa
+	    LSAKeyType -> LsaKeyType
+	    LSAKeyType_Less -> LsaKeyType_Less
+	    LSATrackingInfo -> LsaTrackingInfo
+	    LSAType -> LsaType
+	    LinkStateID -> LinkStateId
+	    NetworkLSA -> NetworkLsa
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFASExternalLSAContents -> OspfAsExternalLsaContents
+	    OSPFArea -> OspfArea
+	    OSPFInterface -> OspfInterface
+	    OSPFInterfaceType -> OspfInterfaceType
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFRoutingTableEntry -> OspfRoutingTableEntry
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFcommon -> OspfCommon
+	    RouterID -> RouterId
+	    RouterLSA -> RouterLsa
+	    SummaryLSA -> SummaryLsa
+	    TOSData -> TosData
 
 2017-12-15  Zoltan Bojthe
 

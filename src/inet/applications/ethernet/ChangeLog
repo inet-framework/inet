@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EtherAppCli renamed to EtherAppClient
-	    EtherAppSrv renamed to EtherAppServer
-	    EtherLLC renamed to EtherLlc
-	    MACAddress renamed to MacAddress
+	    EtherAppCli -> EtherAppClient
+	    EtherAppSrv -> EtherAppServer
+	    EtherLLC -> EtherLlc
+	    MACAddress -> MacAddress
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,13 +3,13 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EtherMACBase renamed to EtherMacBase
-	    IMACAddressTable renamed to IMacAddressTable
-	    IMACRelayUnit renamed to IMacRelayUnit
-	    MACAddress renamed to MacAddress
-	    MACAddressTable renamed to MacAddressTable
-	    MACRelayUnit renamed to MacRelayUnit
-	    MAC_compare renamed to MacCompare
+	    EtherMACBase -> EtherMacBase
+	    IMACAddressTable -> IMacAddressTable
+	    IMACRelayUnit -> IMacRelayUnit
+	    MACAddress -> MacAddress
+	    MACAddressTable -> MacAddressTable
+	    MACRelayUnit -> MacRelayUnit
+	    MAC_compare -> MacCompare
 
 2017-11-16  Levente Mészáros
 

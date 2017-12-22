@@ -3,16 +3,16 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    FlatNetworkConfigurator renamed to Ipv4FlatNetworkConfigurator
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4MulticastRoute renamed to Ipv4MulticastRoute
-	    IPv4NetworkConfigurator renamed to Ipv4NetworkConfigurator
-	    IPv4NodeConfigurator renamed to Ipv4NodeConfigurator
-	    IPv4Route renamed to Ipv4Route
-	    IPv4RoutingTable renamed to Ipv4RoutingTable
+	    FlatNetworkConfigurator -> Ipv4FlatNetworkConfigurator
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4MulticastRoute -> Ipv4MulticastRoute
+	    IPv4NetworkConfigurator -> Ipv4NetworkConfigurator
+	    IPv4NodeConfigurator -> Ipv4NodeConfigurator
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
 
 2017-12-15  Zoltan Bojthe
 

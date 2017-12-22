@@ -3,31 +3,31 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DRPriorityOption renamed to DrPriorityOption
-	    GenerationIDOption renamed to GenerationIdOption
-	    IPIMRouting renamed to IPimRouting
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    LANPruneDelayOption renamed to LanPruneDelayOption
-	    PIMAssert renamed to PimAssert
-	    PIMContstants renamed to PimContstants
-	    PIMDM renamed to PimDm
-	    PIMGraft renamed to PimGraft
-	    PIMHello renamed to PimHello
-	    PIMHelloOptionType renamed to PimHelloOptionType
-	    PIMHello_Base renamed to PimHello_Base
-	    PIMInterface renamed to PimInterface
-	    PIMInterfaceTable renamed to PimInterfaceTable
-	    PIMJoinPrune renamed to PimJoinPrune
-	    PIMNeighborTable renamed to PimNeighborTable
-	    PIMPacket renamed to PimPacket
-	    PIMPacketType renamed to PimPacketType
-	    PIMRegister renamed to PimRegister
-	    PIMRegisterStop renamed to PimRegisterStop
-	    PIMRouting renamed to PimRouting
-	    PIMSM renamed to PimSm
-	    PIMSplitter renamed to PimSplitter
-	    PIMStateRefresh renamed to PimStateRefresh
+	    DRPriorityOption -> DrPriorityOption
+	    GenerationIDOption -> GenerationIdOption
+	    IPIMRouting -> IPimRouting
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    LANPruneDelayOption -> LanPruneDelayOption
+	    PIMAssert -> PimAssert
+	    PIMContstants -> PimContstants
+	    PIMDM -> PimDm
+	    PIMGraft -> PimGraft
+	    PIMHello -> PimHello
+	    PIMHelloOptionType -> PimHelloOptionType
+	    PIMHello_Base -> PimHello_Base
+	    PIMInterface -> PimInterface
+	    PIMInterfaceTable -> PimInterfaceTable
+	    PIMJoinPrune -> PimJoinPrune
+	    PIMNeighborTable -> PimNeighborTable
+	    PIMPacket -> PimPacket
+	    PIMPacketType -> PimPacketType
+	    PIMRegister -> PimRegister
+	    PIMRegisterStop -> PimRegisterStop
+	    PIMRouting -> PimRouting
+	    PIMSM -> PimSm
+	    PIMSplitter -> PimSplitter
+	    PIMStateRefresh -> PimStateRefresh
 
 2017-12-15  Zoltan Bojthe
 

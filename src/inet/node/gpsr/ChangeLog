@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    GPSR renamed to Gpsr
-	    GPSRRouter renamed to GpsrRouter
+	    GPSR -> Gpsr
+	    GPSRRouter -> GpsrRouter
 
 2017-11-16  ------ inet-3.99.1 released ------
 

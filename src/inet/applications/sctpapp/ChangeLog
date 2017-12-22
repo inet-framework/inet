@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4Address renamed to Ipv4Address
-	    TCPEchoApp renamed to TcpEchoApp
+	    IPv4Address -> Ipv4Address
+	    TCPEchoApp -> TcpEchoApp
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,23 +3,23 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPProtocolId renamed to IpProtocolId
-	    ITCP renamed to ITcp
-	    LDP renamed to Ldp
-	    TCPAcceptCommand renamed to TcpAcceptCommand
-	    TCPAlgorithm renamed to TcpAlgorithm
-	    TCPAvailableInfo renamed to TcpAvailableInfo
-	    TCPCommand renamed to TcpCommand
-	    TCPConnectInfo renamed to TcpConnectInfo
-	    TCPConnection renamed to TcpConnection
-	    TCPErrorCode renamed to TcpErrorCode
-	    TCPErrorInfo renamed to TcpErrorInfo
-	    TCPOpenCommand renamed to TcpOpenCommand
-	    TCPSocket renamed to TcpSocket
-	    TCPSocketMap renamed to TcpSocketMap
-	    TCPSrvHostApp renamed to TcpServerHostApp
-	    TCPStateVariables renamed to TcpStateVariables
-	    TCPStatusInfo renamed to TcpStatusInfo
+	    IPProtocolId -> IpProtocolId
+	    ITCP -> ITcp
+	    LDP -> Ldp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAlgorithm -> TcpAlgorithm
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPConnection -> TcpConnection
+	    TCPErrorCode -> TcpErrorCode
+	    TCPErrorInfo -> TcpErrorInfo
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPSrvHostApp -> TcpServerHostApp
+	    TCPStateVariables -> TcpStateVariables
+	    TCPStatusInfo -> TcpStatusInfo
 
 2017-11-14  Zoltan Bojthe
 

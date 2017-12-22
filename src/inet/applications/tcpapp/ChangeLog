@@ -3,24 +3,24 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv6 renamed to Ipv6
-	    TCP renamed to Tcp
-	    TCPAppBase renamed to TcpAppBase
-	    TCPBasicClientApp renamed to TcpBasicClientApp
-	    TCPCommand renamed to TcpCommand
-	    TCPEchoApp renamed to TcpEchoApp
-	    TCPEchoAppThread renamed to TcpEchoAppThread
-	    TCPGenericSrvApp renamed to TcpGenericServerApp
-	    TCPGenericSrvThread renamed to TcpGenericServerThread
-	    TCPServerThreadBase renamed to TcpServerThreadBase
-	    TCPSessionApp renamed to TcpSessionApp
-	    TCPSinkApp renamed to TcpSinkApp
-	    TCPSocket renamed to TcpSocket
-	    TCPSocketMap renamed to TcpSocketMap
-	    TCPSrvHostApp renamed to TcpServerHostApp
-	    TCPStatusInfo renamed to TcpStatusInfo
-	    TCP_NSC renamed to TcpNsc
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    TCP -> Tcp
+	    TCPAppBase -> TcpAppBase
+	    TCPBasicClientApp -> TcpBasicClientApp
+	    TCPCommand -> TcpCommand
+	    TCPEchoApp -> TcpEchoApp
+	    TCPEchoAppThread -> TcpEchoAppThread
+	    TCPGenericSrvApp -> TcpGenericServerApp
+	    TCPGenericSrvThread -> TcpGenericServerThread
+	    TCPServerThreadBase -> TcpServerThreadBase
+	    TCPSessionApp -> TcpSessionApp
+	    TCPSinkApp -> TcpSinkApp
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPSrvHostApp -> TcpServerHostApp
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCP_NSC -> TcpNsc
 
 2017-12-15  Zoltan Bojthe
 

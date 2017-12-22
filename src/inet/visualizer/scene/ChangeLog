@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    OSGScene renamed to OsgScene
-	    OSGUtils renamed to OsgUtils
+	    OSGScene -> OsgScene
+	    OSGUtils -> OsgUtils
 
 2017-11-16  ------ inet-3.99.1 released ------
 

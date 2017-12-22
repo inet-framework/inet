@@ -3,16 +3,16 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ITCP renamed to ITcp
-	    TCPAcceptCommand renamed to TcpAcceptCommand
-	    TCPAvailableInfo renamed to TcpAvailableInfo
-	    TCPCommand renamed to TcpCommand
-	    TCPConnectInfo renamed to TcpConnectInfo
-	    TCPIPchecksum renamed to TcpIpChecksum
-	    TCPOpenCommand renamed to TcpOpenCommand
-	    TCPSegment renamed to TcpHeader
-	    TCPStatusInfo renamed to TcpStatusInfo
-	    TCP_lwIP renamed to TcpLwip
+	    ITCP -> ITcp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSegment -> TcpHeader
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCP_lwIP -> TcpLwip
 
 2017-12-18  Levente Mészáros
 

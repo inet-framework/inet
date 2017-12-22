@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4Address renamed to Ipv4Address
-	    MACBase renamed to MacBase
+	    IPv4Address -> Ipv4Address
+	    MACBase -> MacBase
 
 2017-12-15  Zoltan Bojthe
 

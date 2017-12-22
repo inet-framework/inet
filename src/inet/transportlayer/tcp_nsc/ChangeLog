@@ -3,26 +3,26 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv6 renamed to Ipv6
-	    ITCP renamed to ITcp
-	    TCPAcceptCommand renamed to TcpAcceptCommand
-	    TCPAvailableInfo renamed to TcpAvailableInfo
-	    TCPCommand renamed to TcpCommand
-	    TCPConnectInfo renamed to TcpConnectInfo
-	    TCPConnection renamed to TcpConnection
-	    TCPIPchecksum renamed to TcpIpChecksum
-	    TCPOpenCommand renamed to TcpOpenCommand
-	    TCPOption renamed to TcpOption
-	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
-	    TCPSegment renamed to TcpHeader
-	    TCPStatusInfo renamed to TcpStatusInfo
-	    TCP_NSC renamed to TcpNsc
-	    TCP_NSC_Connection renamed to TcpNscConnection
-	    TCP_NSC_Queues renamed to TcpNscQueues
-	    TCP_NSC_ReceiveQueue renamed to TcpNscReceiveQueue
-	    TCP_NSC_SendQueue renamed to TcpNscSendQueue
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv6 -> Ipv6
+	    ITCP -> ITcp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPConnection -> TcpConnection
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPOption -> TcpOption
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPSegment -> TcpHeader
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCP_NSC -> TcpNsc
+	    TCP_NSC_Connection -> TcpNscConnection
+	    TCP_NSC_Queues -> TcpNscQueues
+	    TCP_NSC_ReceiveQueue -> TcpNscReceiveQueue
+	    TCP_NSC_SendQueue -> TcpNscSendQueue
 
 2017-12-18  Levente Mészáros
 

@@ -3,22 +3,22 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DYMO renamed to Dymo
-	    DYMOMetricType renamed to DymoMetricType
-	    DYMOPacket renamed to DymoPacket
-	    DYMORouteData renamed to DymoRouteData
-	    DYMORouteState renamed to DymoRouteState
-	    DYMOSequenceNumber renamed to DymoSequenceNumber
-	    DYMOdefs renamed to DymoDefs
-	    IPv4 renamed to Ipv4
-	    IPv6 renamed to Ipv6
-	    RREP_ACK renamed to RrepAck
-	    RREQBackoffTimer renamed to RreqBackoffTimer
-	    RREQHolddownTimer renamed to RreqHolddownTimer
-	    RREQTimer renamed to RreqTimer
-	    RREQWaitRREPTimer renamed to RreqWaitRrepTimer
-	    UDP renamed to Udp
-	    UDPControlInfo renamed to UdpControlInfo
+	    DYMO -> Dymo
+	    DYMOMetricType -> DymoMetricType
+	    DYMOPacket -> DymoPacket
+	    DYMORouteData -> DymoRouteData
+	    DYMORouteState -> DymoRouteState
+	    DYMOSequenceNumber -> DymoSequenceNumber
+	    DYMOdefs -> DymoDefs
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    RREP_ACK -> RrepAck
+	    RREQBackoffTimer -> RreqBackoffTimer
+	    RREQHolddownTimer -> RreqHolddownTimer
+	    RREQTimer -> RreqTimer
+	    RREQWaitRREPTimer -> RreqWaitRrepTimer
+	    UDP -> Udp
+	    UDPControlInfo -> UdpControlInfo
 
 2017-12-14  Levente Mészáros
 

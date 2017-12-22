@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKScalarRadio renamed to ApskScalarRadio
-	    BMacLayer renamed to BMac
-	    BerkeleyNic renamed to BNic
-	    IMACProtocol renamed to IMacProtocol
-	    MACAddress renamed to MacAddress
-	    MACProtocolBase renamed to MacProtocolBase
+	    APSKScalarRadio -> ApskScalarRadio
+	    BMacLayer -> BMac
+	    BerkeleyNic -> BNic
+	    IMACProtocol -> IMacProtocol
+	    MACAddress -> MacAddress
+	    MACProtocolBase -> MacProtocolBase
 
 2017-12-18  Zoltan Bojthe
 

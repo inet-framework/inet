@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DISTR_TYPE renamed to DistrType
-	    LOG_FORMAT renamed to LogFormat
+	    DISTR_TYPE -> DistrType
+	    LOG_FORMAT -> LogFormat
 
 2017-11-23  Levente Mészáros
 

@@ -3,25 +3,25 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv4ControlInfo renamed to Ipv4ControlInfo
-	    IPv6 renamed to Ipv6
-	    IPv6ControlInfo renamed to Ipv6ControlInfo
-	    ITCP renamed to ITcp
-	    TCPCommand renamed to TcpCommand
-	    TCPIPchecksum renamed to TcpIpChecksum
-	    TCPOption renamed to TcpOption
-	    TCPOptionEnd renamed to TcpOptionEnd
-	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
-	    TCPOptionNop renamed to TcpOptionNop
-	    TCPOptionNumbers renamed to TcpOptionNumbers
-	    TCPOptionSack renamed to TcpOptionSack
-	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
-	    TCPOptionTimestamp renamed to TcpOptionTimestamp
-	    TCPOptionUnknown renamed to TcpOptionUnknown
-	    TCPOptionWindowScale renamed to TcpOptionWindowScale
-	    TCPSegment renamed to TcpHeader
-	    TCPSpoof renamed to TcpSpoof
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    ITCP -> ITcp
+	    TCPCommand -> TcpCommand
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCPOption -> TcpOption
+	    TCPOptionEnd -> TcpOptionEnd
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPOptionNop -> TcpOptionNop
+	    TCPOptionNumbers -> TcpOptionNumbers
+	    TCPOptionSack -> TcpOptionSack
+	    TCPOptionSackPermitted -> TcpOptionSackPermitted
+	    TCPOptionTimestamp -> TcpOptionTimestamp
+	    TCPOptionUnknown -> TcpOptionUnknown
+	    TCPOptionWindowScale -> TcpOptionWindowScale
+	    TCPSegment -> TcpHeader
+	    TCPSpoof -> TcpSpoof
 
 2017-12-15  Zoltan Bojthe
 

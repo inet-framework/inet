@@ -3,7 +3,7 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MACAddress renamed to MacAddress
+	    MACAddress -> MacAddress
 
 2017-12-14  Levente Mészáros
 

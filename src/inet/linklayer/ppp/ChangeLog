@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MACBase renamed to MacBase
-	    PPP renamed to Ppp
-	    PPPFrame renamed to PppFrame
-	    PPPInterface renamed to PppInterface
+	    MACBase -> MacBase
+	    PPP -> Ppp
+	    PPPFrame -> PppFrame
+	    PPPInterface -> PppInterface
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,32 +3,32 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    FEC_TLV renamed to FecTlv
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4Route renamed to Ipv4Route
-	    LDP renamed to Ldp
-	    LDPAddress renamed to LdpAddress
-	    LDPHello renamed to LdpHello
-	    LDPIni renamed to LdpIni
-	    LDPLabelMapping renamed to LdpLabelMapping
-	    LDPLabelRequest renamed to LdpLabelRequest
-	    LDPNotify renamed to LdpNotify
-	    LDPPacket renamed to LdpPacket
-	    LDP_MESSAGE_TYPES renamed to LdpMessageTypes
-	    LDP_STATUS_TYPES renamed to LdpStatusTypes
-	    LIBTable renamed to LibTable
-	    TCPCommand renamed to TcpCommand
-	    TCPSegment renamed to TcpHeader
-	    TCPSocket renamed to TcpSocket
-	    TCPSocketMap renamed to TcpSocketMap
-	    TCPStatusInfo renamed to TcpStatusInfo
-	    TED renamed to Ted
-	    TEDChangeInfo renamed to TedChangeInfo
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
+	    FEC_TLV -> FecTlv
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    LDP -> Ldp
+	    LDPAddress -> LdpAddress
+	    LDPHello -> LdpHello
+	    LDPIni -> LdpIni
+	    LDPLabelMapping -> LdpLabelMapping
+	    LDPLabelRequest -> LdpLabelRequest
+	    LDPNotify -> LdpNotify
+	    LDPPacket -> LdpPacket
+	    LDP_MESSAGE_TYPES -> LdpMessageTypes
+	    LDP_STATUS_TYPES -> LdpStatusTypes
+	    LIBTable -> LibTable
+	    TCPCommand -> TcpCommand
+	    TCPSegment -> TcpHeader
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPStatusInfo -> TcpStatusInfo
+	    TED -> Ted
+	    TEDChangeInfo -> TedChangeInfo
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
 
 2017-12-15  Zoltan Bojthe
 

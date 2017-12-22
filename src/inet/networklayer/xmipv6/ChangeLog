@@ -3,22 +3,22 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    BAStatus renamed to BaStatus
-	    BCExpiryIfEntry renamed to BcExpiryIfEntry
-	    BEStatus renamed to BeStatus
-	    BRTransmitIfEntry renamed to BrTransmitIfEntry
-	    BULExpiryIfEntry renamed to BulExpiryIfEntry
-	    BUTransmitIfEntry renamed to BuTransmitIfEntry
-	    CNList renamed to CnList
-	    IPv6 renamed to Ipv6
-	    IPv6Address renamed to Ipv6Address
-	    IPv6ControlInfo renamed to Ipv6ControlInfo
-	    IPv6ExtensionHeaders renamed to Ipv6ExtensionHeaders
-	    IPv6Header renamed to Ipv6Header
-	    IPv6InterfaceData renamed to Ipv6InterfaceData
-	    IPv6NeighbourDiscovery renamed to Ipv6NeighbourDiscovery
-	    IPv6RoutingTable renamed to Ipv6RoutingTable
-	    IPv6Tunneling renamed to Ipv6Tunneling
+	    BAStatus -> BaStatus
+	    BCExpiryIfEntry -> BcExpiryIfEntry
+	    BEStatus -> BeStatus
+	    BRTransmitIfEntry -> BrTransmitIfEntry
+	    BULExpiryIfEntry -> BulExpiryIfEntry
+	    BUTransmitIfEntry -> BuTransmitIfEntry
+	    CNList -> CnList
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    IPv6ExtensionHeaders -> Ipv6ExtensionHeaders
+	    IPv6Header -> Ipv6Header
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    IPv6NeighbourDiscovery -> Ipv6NeighbourDiscovery
+	    IPv6RoutingTable -> Ipv6RoutingTable
+	    IPv6Tunneling -> Ipv6Tunneling
 
 2017-12-15  Zoltan Bojthe
 

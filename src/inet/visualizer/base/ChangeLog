@@ -3,22 +3,22 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APInfo renamed to ApInfo
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4Route renamed to Ipv4Route
-	    IPv4RoutingTable renamed to Ipv4RoutingTable
-	    IPv6 renamed to Ipv6
-	    IPv6InterfaceData renamed to Ipv6InterfaceData
-	    Ieee80211MgmtAP renamed to Ieee80211MgmtAp
-	    Ieee80211MgmtSTA renamed to Ieee80211MgmtSta
-	    MACAddress renamed to MacAddress
-	    OSGScene renamed to OsgScene
-	    OSGUtils renamed to OsgUtils
-	    TCP renamed to Tcp
-	    TCPConnection renamed to TcpConnection
+	    APInfo -> ApInfo
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    IPv6 -> Ipv6
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtSTA -> Ieee80211MgmtSta
+	    MACAddress -> MacAddress
+	    OSGScene -> OsgScene
+	    OSGUtils -> OsgUtils
+	    TCP -> Tcp
+	    TCPConnection -> TcpConnection
 
 2017-12-15  Zoltan Bojthe
 

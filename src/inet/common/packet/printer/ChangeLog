@@ -3,15 +3,15 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARPPacket renamed to ArpPacket
-	    ICMPEchoReply renamed to IcmpEchoReply
-	    ICMPEchoRequest renamed to IcmpEchoRequest
-	    IPv4 renamed to Ipv4
-	    RIPEntry renamed to RipEntry
-	    RIPPacket renamed to RipPacket
-	    TCP renamed to Tcp
-	    TCPSegment renamed to TcpHeader
-	    UDP renamed to Udp
+	    ARPPacket -> ArpPacket
+	    ICMPEchoReply -> IcmpEchoReply
+	    ICMPEchoRequest -> IcmpEchoRequest
+	    IPv4 -> Ipv4
+	    RIPEntry -> RipEntry
+	    RIPPacket -> RipPacket
+	    TCP -> Tcp
+	    TCPSegment -> TcpHeader
+	    UDP -> Udp
 
 2017-12-07  Levente Mészáros
 

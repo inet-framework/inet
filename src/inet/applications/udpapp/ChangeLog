@@ -3,18 +3,18 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv6 renamed to Ipv6
-	    UDP renamed to Udp
-	    UDPBasicApp renamed to UdpBasicApp
-	    UDPBasicBurst renamed to UdpBasicBurst
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPEchoApp renamed to UdpEchoApp
-	    UDPSink renamed to UdpSink
-	    UDPSocket renamed to UdpSocket
-	    UDPVideoStreamCli renamed to UdpVideoStreamClient
-	    UDPVideoStreamSvr renamed to UdpVideoStreamServer
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv6 -> Ipv6
+	    UDP -> Udp
+	    UDPBasicApp -> UdpBasicApp
+	    UDPBasicBurst -> UdpBasicBurst
+	    UDPControlInfo -> UdpControlInfo
+	    UDPEchoApp -> UdpEchoApp
+	    UDPSink -> UdpSink
+	    UDPSocket -> UdpSocket
+	    UDPVideoStreamCli -> UdpVideoStreamClient
+	    UDPVideoStreamSvr -> UdpVideoStreamServer
 
 2017-12-15  Zoltan Bojthe
 

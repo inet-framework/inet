@@ -3,14 +3,14 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EtherLLC renamed to EtherLlc
-	    EtherMAC renamed to EtherMac
-	    EtherMACFullDuplex renamed to EtherMacFullDuplex
-	    IEtherMAC renamed to IEtherMac
-	    IMACAddressTable renamed to IMacAddressTable
-	    IMACProtocol renamed to IMacProtocol
-	    IMACRelayUnit renamed to IMacRelayUnit
-	    MACRelayUnit renamed to MacRelayUnit
+	    EtherLLC -> EtherLlc
+	    EtherMAC -> EtherMac
+	    EtherMACFullDuplex -> EtherMacFullDuplex
+	    IEtherMAC -> IEtherMac
+	    IMACAddressTable -> IMacAddressTable
+	    IMACProtocol -> IMacProtocol
+	    IMACRelayUnit -> IMacRelayUnit
+	    MACRelayUnit -> MacRelayUnit
 
 2017-11-16  ------ inet-3.99.1 released ------
 

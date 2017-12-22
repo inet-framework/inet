@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    SimpleVoIPPacket renamed to SimpleVoipPacket
-	    SimpleVoIPReceiver renamed to SimpleVoipReceiver
-	    SimpleVoIPSender renamed to SimpleVoipSender
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
-	    VoIPPacketInfo renamed to VoipPacketInfo
+	    SimpleVoIPPacket -> SimpleVoipPacket
+	    SimpleVoIPReceiver -> SimpleVoipReceiver
+	    SimpleVoIPSender -> SimpleVoipSender
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+	    VoIPPacketInfo -> VoipPacketInfo
 
 2017-12-15  Zoltan Bojthe
 

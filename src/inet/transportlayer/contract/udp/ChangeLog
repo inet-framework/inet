@@ -3,36 +3,36 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DSCP renamed to Dscp
-	    ICMP renamed to Icmp
-	    IPProtocolId renamed to IpProtocolId
-	    IPv4 renamed to Ipv4
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv6 renamed to Ipv6
-	    UDP renamed to Udp
-	    UDPBindCommand renamed to UdpBindCommand
-	    UDPBlockMulticastSourcesCommand renamed to UdpBlockMulticastSourcesCommand
-	    UDPCloseCommand renamed to UdpCloseCommand
-	    UDPCommandCode renamed to UdpCommandCode
-	    UDPConnectCommand renamed to UdpConnectCommand
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPErrorIndication renamed to UdpErrorIndication
-	    UDPJoinMulticastGroupsCommand renamed to UdpJoinMulticastGroupsCommand
-	    UDPJoinMulticastSourcesCommand renamed to UdpJoinMulticastSourcesCommand
-	    UDPLeaveMulticastGroupsCommand renamed to UdpLeaveMulticastGroupsCommand
-	    UDPLeaveMulticastSourcesCommand renamed to UdpLeaveMulticastSourcesCommand
-	    UDPSetBroadcastCommand renamed to UdpSetBroadcastCommand
-	    UDPSetMulticastInterfaceCommand renamed to UdpSetMulticastInterfaceCommand
-	    UDPSetMulticastLoopCommand renamed to UdpSetMulticastLoopCommand
-	    UDPSetMulticastSourceFilterCommand renamed to UdpSetMulticastSourceFilterCommand
-	    UDPSetOptionCommand renamed to UdpSetOptionCommand
-	    UDPSetReuseAddressCommand renamed to UdpSetReuseAddressCommand
-	    UDPSetTimeToLiveCommand renamed to UdpSetTimeToLiveCommand
-	    UDPSetTypeOfServiceCommand renamed to UdpSetTypeOfServiceCommand
-	    UDPSocket renamed to UdpSocket
-	    UDPSourceFilterMode renamed to UdpSourceFilterMode
-	    UDPStatusInd renamed to UdpStatusInd
-	    UDPUnblockMulticastSourcesCommand renamed to UdpUnblockMulticastSourcesCommand
+	    DSCP -> Dscp
+	    ICMP -> Icmp
+	    IPProtocolId -> IpProtocolId
+	    IPv4 -> Ipv4
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv6 -> Ipv6
+	    UDP -> Udp
+	    UDPBindCommand -> UdpBindCommand
+	    UDPBlockMulticastSourcesCommand -> UdpBlockMulticastSourcesCommand
+	    UDPCloseCommand -> UdpCloseCommand
+	    UDPCommandCode -> UdpCommandCode
+	    UDPConnectCommand -> UdpConnectCommand
+	    UDPControlInfo -> UdpControlInfo
+	    UDPErrorIndication -> UdpErrorIndication
+	    UDPJoinMulticastGroupsCommand -> UdpJoinMulticastGroupsCommand
+	    UDPJoinMulticastSourcesCommand -> UdpJoinMulticastSourcesCommand
+	    UDPLeaveMulticastGroupsCommand -> UdpLeaveMulticastGroupsCommand
+	    UDPLeaveMulticastSourcesCommand -> UdpLeaveMulticastSourcesCommand
+	    UDPSetBroadcastCommand -> UdpSetBroadcastCommand
+	    UDPSetMulticastInterfaceCommand -> UdpSetMulticastInterfaceCommand
+	    UDPSetMulticastLoopCommand -> UdpSetMulticastLoopCommand
+	    UDPSetMulticastSourceFilterCommand -> UdpSetMulticastSourceFilterCommand
+	    UDPSetOptionCommand -> UdpSetOptionCommand
+	    UDPSetReuseAddressCommand -> UdpSetReuseAddressCommand
+	    UDPSetTimeToLiveCommand -> UdpSetTimeToLiveCommand
+	    UDPSetTypeOfServiceCommand -> UdpSetTypeOfServiceCommand
+	    UDPSocket -> UdpSocket
+	    UDPSourceFilterMode -> UdpSourceFilterMode
+	    UDPStatusInd -> UdpStatusInd
+	    UDPUnblockMulticastSourcesCommand -> UdpUnblockMulticastSourcesCommand
 
 2017-11-14  Zoltan Bojthe
 

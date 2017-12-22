@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MoBANCoordinator renamed to MoBanCoordinator
-	    MoBANLocal renamed to MoBanLocal
+	    MoBANCoordinator -> MoBanCoordinator
+	    MoBANLocal -> MoBanLocal
 
 2017-12-15  Zoltan Bojthe
 

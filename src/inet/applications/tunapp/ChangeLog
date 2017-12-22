@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
 
 2017-11-16  Levente Mészáros
 

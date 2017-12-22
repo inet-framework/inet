@@ -3,18 +3,18 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARPPacket renamed to ArpPacket
-	    IARP renamed to IArp
-	    ICMPv6 renamed to Icmpv6
-	    IIPv6Tunneling renamed to IIpv6Tunneling
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4MulticastRoute renamed to Ipv4MulticastRoute
-	    IPv4Route renamed to Ipv4Route
-	    IPv6 renamed to Ipv6
-	    IPv6NeighbourDiscovery renamed to Ipv6NeighbourDiscovery
-	    IPv6Route renamed to Ipv6Route
-	    MACAddress renamed to MacAddress
+	    ARPPacket -> ArpPacket
+	    IARP -> IArp
+	    ICMPv6 -> Icmpv6
+	    IIPv6Tunneling -> IIpv6Tunneling
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4MulticastRoute -> Ipv4MulticastRoute
+	    IPv4Route -> Ipv4Route
+	    IPv6 -> Ipv6
+	    IPv6NeighbourDiscovery -> Ipv6NeighbourDiscovery
+	    IPv6Route -> Ipv6Route
+	    MACAddress -> MacAddress
 
 2017-12-11  Zoltan Bojthe
 

@@ -3,23 +3,23 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv4ControlInfo renamed to Ipv4ControlInfo
-	    IPv6 renamed to Ipv6
-	    IPv6ControlInfo renamed to Ipv6ControlInfo
-	    ISCTP renamed to ISctp
-	    ITCP renamed to ITcp
-	    IUDP renamed to IUdp
-	    TCP renamed to Tcp
-	    TCPCommand renamed to TcpCommand
-	    TCPOpenCommand renamed to TcpOpenCommand
-	    TCPSegment renamed to TcpHeader
-	    TCPSocket renamed to TcpSocket
-	    TCP_NSC renamed to TcpNsc
-	    TCP_lwIP renamed to TcpLwip
-	    UDP renamed to Udp
-	    UDPCommandCode renamed to UdpCommandCode
-	    UDPControlInfo renamed to UdpControlInfo
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    TCP -> Tcp
+	    TCPCommand -> TcpCommand
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSegment -> TcpHeader
+	    TCPSocket -> TcpSocket
+	    TCP_NSC -> TcpNsc
+	    TCP_lwIP -> TcpLwip
+	    UDP -> Udp
+	    UDPCommandCode -> UdpCommandCode
+	    UDPControlInfo -> UdpControlInfo
 
 2017-11-17  Zoltan Bojthe
 

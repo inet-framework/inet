@@ -3,17 +3,17 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ICMP renamed to Icmp
-	    ICMPEchoReply renamed to IcmpEchoReply
-	    ICMPEchoRequest renamed to IcmpEchoRequest
-	    ICMPv6 renamed to Icmpv6
-	    ICMPv6Header renamed to Icmpv6Header
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv6 renamed to Ipv6
-	    IPv6Address renamed to Ipv6Address
-	    IPv6InterfaceData renamed to Ipv6InterfaceData
+	    ICMP -> Icmp
+	    ICMPEchoReply -> IcmpEchoReply
+	    ICMPEchoRequest -> IcmpEchoRequest
+	    ICMPv6 -> Icmpv6
+	    ICMPv6Header -> Icmpv6Header
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6InterfaceData -> Ipv6InterfaceData
 
 2017-12-15  Andras Varga
 

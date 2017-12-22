@@ -3,66 +3,66 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IRTPPayloadSender renamed to IRtpPayloadSender
-	    RTCP renamed to Rtcp
-	    RTCPByePacket renamed to RtcpByePacket
-	    RTCPByePacket_Base renamed to RtcpByePacket_Base
-	    RTCPCompoundPacket renamed to RtcpCompoundPacket
-	    RTCPPacket renamed to RtcpPacket
-	    RTCPPacketType renamed to RtcpPacketType
-	    RTCPPacket_Base renamed to RtcpPacket_Base
-	    RTCPReceiverReportPacket renamed to RtcpReceiverReportPacket
-	    RTCPReceiverReportPacket_Base renamed to RtcpReceiverReportPacket_Base
-	    RTCPSDESPacket renamed to RtcpSdesPacket
-	    RTCPSDESPacket_Base renamed to RtcpSdesPacket_Base
-	    RTCPSenderReportPacket renamed to RtcpSenderReportPacket
-	    RTCPSenderReportPacket_Base renamed to RtcpSenderReportPacket_Base
-	    RTP renamed to Rtp
-	    RTPAVProfile renamed to RtpAvProfile
-	    RTPAVProfilePayload32Receiver renamed to RtpAvProfilePayload32Receiver
-	    RTPAVProfilePayload32Sender renamed to RtpAvProfilePayload32Sender
-	    RTPApplication renamed to RtpApplication
-	    RTPCICreateSenderModule renamed to RtpCiCreateSenderModule
-	    RTPCIDeleteSenderModule renamed to RtpCiDeleteSenderModule
-	    RTPCIEnterSession renamed to RtpCiEnterSession
-	    RTPCILeaveSession renamed to RtpCiLeaveSession
-	    RTPCISenderControl renamed to RtpCiSenderControl
-	    RTPCISenderModuleCreated renamed to RtpCiSenderModuleCreated
-	    RTPCISenderModuleDeleted renamed to RtpCiSenderModuleDeleted
-	    RTPCISenderStatus renamed to RtpCiSenderStatus
-	    RTPCISessionEntered renamed to RtpCiSessionEntered
-	    RTPCISessionLeft renamed to RtpCiSessionLeft
-	    RTPControlInfo renamed to RtpControlInfo
-	    RTPControlMsg renamed to RtpControlMsg
-	    RTPInnerPacket renamed to RtpInnerPacket
-	    RTPInnerPacket_Base renamed to RtpInnerPacket_Base
-	    RTPInterfacePacket renamed to RtpInterfacePacket
-	    RTPModule renamed to RtpModule
-	    RTPPacket renamed to RtpPacket
-	    RTPParticipantInfo renamed to RtpParticipantInfo
-	    RTPParticipantInfo_Base renamed to RtpParticipantInfo_Base
-	    RTPPayloadReceiver renamed to RtpPayloadReceiver
-	    RTPPayloadSender renamed to RtpPayloadSender
-	    RTPProfile renamed to RtpProfile
-	    RTPReceiverInfo renamed to RtpReceiverInfo
-	    RTPSenderControlMessage renamed to RtpSenderControlMessage
-	    RTPSenderControlMessageCommands renamed to RtpSenderControlMessageCommands
-	    RTPSenderInfo renamed to RtpSenderInfo
-	    RTPSenderStatus renamed to RtpSenderStatus
-	    RTPSenderStatusMessage renamed to RtpSenderStatusMessage
-	    RTPSessionControlInfo renamed to RtpSessionControlInfo
-	    RTP_IFP_TYPE renamed to RtpIfpType
-	    RTP_INP_TYPE renamed to RtpInpType
-	    SDESChunk renamed to SdesChunk
-	    SDESItem renamed to SdesItem
-	    SDES_ITEM_TYPE renamed to SdesItemType
-	    SSRCGate renamed to SsrcGate
-	    SSRCGateMap renamed to SsrcGateMap
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IRTPPayloadSender -> IRtpPayloadSender
+	    RTCP -> Rtcp
+	    RTCPByePacket -> RtcpByePacket
+	    RTCPByePacket_Base -> RtcpByePacket_Base
+	    RTCPCompoundPacket -> RtcpCompoundPacket
+	    RTCPPacket -> RtcpPacket
+	    RTCPPacketType -> RtcpPacketType
+	    RTCPPacket_Base -> RtcpPacket_Base
+	    RTCPReceiverReportPacket -> RtcpReceiverReportPacket
+	    RTCPReceiverReportPacket_Base -> RtcpReceiverReportPacket_Base
+	    RTCPSDESPacket -> RtcpSdesPacket
+	    RTCPSDESPacket_Base -> RtcpSdesPacket_Base
+	    RTCPSenderReportPacket -> RtcpSenderReportPacket
+	    RTCPSenderReportPacket_Base -> RtcpSenderReportPacket_Base
+	    RTP -> Rtp
+	    RTPAVProfile -> RtpAvProfile
+	    RTPAVProfilePayload32Receiver -> RtpAvProfilePayload32Receiver
+	    RTPAVProfilePayload32Sender -> RtpAvProfilePayload32Sender
+	    RTPApplication -> RtpApplication
+	    RTPCICreateSenderModule -> RtpCiCreateSenderModule
+	    RTPCIDeleteSenderModule -> RtpCiDeleteSenderModule
+	    RTPCIEnterSession -> RtpCiEnterSession
+	    RTPCILeaveSession -> RtpCiLeaveSession
+	    RTPCISenderControl -> RtpCiSenderControl
+	    RTPCISenderModuleCreated -> RtpCiSenderModuleCreated
+	    RTPCISenderModuleDeleted -> RtpCiSenderModuleDeleted
+	    RTPCISenderStatus -> RtpCiSenderStatus
+	    RTPCISessionEntered -> RtpCiSessionEntered
+	    RTPCISessionLeft -> RtpCiSessionLeft
+	    RTPControlInfo -> RtpControlInfo
+	    RTPControlMsg -> RtpControlMsg
+	    RTPInnerPacket -> RtpInnerPacket
+	    RTPInnerPacket_Base -> RtpInnerPacket_Base
+	    RTPInterfacePacket -> RtpInterfacePacket
+	    RTPModule -> RtpModule
+	    RTPPacket -> RtpPacket
+	    RTPParticipantInfo -> RtpParticipantInfo
+	    RTPParticipantInfo_Base -> RtpParticipantInfo_Base
+	    RTPPayloadReceiver -> RtpPayloadReceiver
+	    RTPPayloadSender -> RtpPayloadSender
+	    RTPProfile -> RtpProfile
+	    RTPReceiverInfo -> RtpReceiverInfo
+	    RTPSenderControlMessage -> RtpSenderControlMessage
+	    RTPSenderControlMessageCommands -> RtpSenderControlMessageCommands
+	    RTPSenderInfo -> RtpSenderInfo
+	    RTPSenderStatus -> RtpSenderStatus
+	    RTPSenderStatusMessage -> RtpSenderStatusMessage
+	    RTPSessionControlInfo -> RtpSessionControlInfo
+	    RTP_IFP_TYPE -> RtpIfpType
+	    RTP_INP_TYPE -> RtpInpType
+	    SDESChunk -> SdesChunk
+	    SDESItem -> SdesItem
+	    SDES_ITEM_TYPE -> SdesItemType
+	    SSRCGate -> SsrcGate
+	    SSRCGateMap -> SsrcGateMap
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
 
 2017-12-15  Zoltan Bojthe
 

@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKScalarRadio renamed to ApskScalarRadio
-	    IMACProtocol renamed to IMacProtocol
-	    LMacLayer renamed to LMac
-	    LightweightNic renamed to LNic
-	    MACAddress renamed to MacAddress
-	    MACProtocolBase renamed to MacProtocolBase
+	    APSKScalarRadio -> ApskScalarRadio
+	    IMACProtocol -> IMacProtocol
+	    LMacLayer -> LMac
+	    LightweightNic -> LNic
+	    MACAddress -> MacAddress
+	    MACProtocolBase -> MacProtocolBase
 
 2017-12-18  Zoltan Bojthe
 

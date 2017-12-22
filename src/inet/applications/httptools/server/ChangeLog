@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    TCPSocket renamed to TcpSocket
-	    TCPSocketMap renamed to TcpSocketMap
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
 
 2017-12-15  Zoltan Bojthe
 

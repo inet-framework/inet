@@ -3,44 +3,44 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    DDPacketID renamed to DdPacketId
-	    DesignatedRouterID renamed to DesignatedRouterId
-	    IPv4Address renamed to Ipv4Address
-	    LSA renamed to Lsa
-	    LSAKeyType renamed to LsaKeyType
-	    LSARequest renamed to LsaRequest
-	    LSAType renamed to LsaType
-	    NetworkLSA renamed to NetworkLsa
-	    OSPFASExternalLSA renamed to OspfAsExternalLsa
-	    OSPFArea renamed to OspfArea
-	    OSPFDDOptions renamed to OspfDdOptions
-	    OSPFDatabaseDescriptionPacket renamed to OspfDatabaseDescriptionPacket
-	    OSPFInterface renamed to OspfInterface
-	    OSPFInterfaceType renamed to OspfInterfaceType
-	    OSPFLSA renamed to OspfLsa
-	    OSPFLSAHeader renamed to OspfLsaHeader
-	    OSPFLinkStateRequestPacket renamed to OspfLinkStateRequestPacket
-	    OSPFLinkStateUpdatePacket renamed to OspfLinkStateUpdatePacket
-	    OSPFNeighbor renamed to OspfNeighbor
-	    OSPFNeighborState renamed to OspfNeighborState
-	    OSPFNeighborStateAttempt renamed to OspfNeighborStateAttempt
-	    OSPFNeighborStateDown renamed to OspfNeighborStateDown
-	    OSPFNeighborStateExchange renamed to OspfNeighborStateExchange
-	    OSPFNeighborStateExchangeStart renamed to OspfNeighborStateExchangeStart
-	    OSPFNeighborStateFull renamed to OspfNeighborStateFull
-	    OSPFNeighborStateInit renamed to OspfNeighborStateInit
-	    OSPFNeighborStateLoading renamed to OspfNeighborStateLoading
-	    OSPFNeighborStateTwoWay renamed to OspfNeighborStateTwoWay
-	    OSPFNetworkLSA renamed to OspfNetworkLsa
-	    OSPFOptions renamed to OspfOptions
-	    OSPFRouter renamed to OspfRouter
-	    OSPFRouterLSA renamed to OspfRouterLsa
-	    OSPFSummaryLSA renamed to OspfSummaryLsa
-	    OSPFTimer renamed to OspfTimer
-	    OSPFcommon renamed to OspfCommon
-	    RouterID renamed to RouterId
-	    RouterLSA renamed to RouterLsa
-	    TransmittedLSA renamed to TransmittedLsa
+	    DDPacketID -> DdPacketId
+	    DesignatedRouterID -> DesignatedRouterId
+	    IPv4Address -> Ipv4Address
+	    LSA -> Lsa
+	    LSAKeyType -> LsaKeyType
+	    LSARequest -> LsaRequest
+	    LSAType -> LsaType
+	    NetworkLSA -> NetworkLsa
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFArea -> OspfArea
+	    OSPFDDOptions -> OspfDdOptions
+	    OSPFDatabaseDescriptionPacket -> OspfDatabaseDescriptionPacket
+	    OSPFInterface -> OspfInterface
+	    OSPFInterfaceType -> OspfInterfaceType
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFLinkStateRequestPacket -> OspfLinkStateRequestPacket
+	    OSPFLinkStateUpdatePacket -> OspfLinkStateUpdatePacket
+	    OSPFNeighbor -> OspfNeighbor
+	    OSPFNeighborState -> OspfNeighborState
+	    OSPFNeighborStateAttempt -> OspfNeighborStateAttempt
+	    OSPFNeighborStateDown -> OspfNeighborStateDown
+	    OSPFNeighborStateExchange -> OspfNeighborStateExchange
+	    OSPFNeighborStateExchangeStart -> OspfNeighborStateExchangeStart
+	    OSPFNeighborStateFull -> OspfNeighborStateFull
+	    OSPFNeighborStateInit -> OspfNeighborStateInit
+	    OSPFNeighborStateLoading -> OspfNeighborStateLoading
+	    OSPFNeighborStateTwoWay -> OspfNeighborStateTwoWay
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFTimer -> OspfTimer
+	    OSPFcommon -> OspfCommon
+	    RouterID -> RouterId
+	    RouterLSA -> RouterLsa
+	    TransmittedLSA -> TransmittedLsa
 
 2017-12-14  Levente Mészáros
 

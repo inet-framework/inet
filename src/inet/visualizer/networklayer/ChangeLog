@@ -3,11 +3,11 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IPv4 renamed to Ipv4
-	    IPv4Route renamed to Ipv4Route
-	    MACRelayUnit renamed to MacRelayUnit
-	    OSGScene renamed to OsgScene
-	    OSGUtils renamed to OsgUtils
+	    IPv4 -> Ipv4
+	    IPv4Route -> Ipv4Route
+	    MACRelayUnit -> MacRelayUnit
+	    OSGScene -> OsgScene
+	    OSGUtils -> OsgUtils
 
 2017-11-16  ------ inet-3.99.1 released ------
 

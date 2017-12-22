@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    PPP renamed to Ppp
-	    PPPHeaderSerializer renamed to PppHeaderSerializer
+	    PPP -> Ppp
+	    PPPHeaderSerializer -> PppHeaderSerializer
 
 2017-11-16  ------ inet-3.99.1 released ------
 

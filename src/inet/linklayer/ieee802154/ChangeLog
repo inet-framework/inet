@@ -3,14 +3,14 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    CSMA renamed to Ieee802154Mac
-	    CSMAHeader renamed to Ieee802154MacHeader
-	    IMACProtocol renamed to IMacProtocol
-	    IdealMac renamed to AckingMac
-	    Ieee802154UWBIRNic renamed to Ieee802154UwbIrNic
-	    Ieee802154UWBIRRadio renamed to Ieee802154UwbIrRadio
-	    MACAddress renamed to MacAddress
-	    MACProtocolBase renamed to MacProtocolBase
+	    CSMA -> Ieee802154Mac
+	    CSMAHeader -> Ieee802154MacHeader
+	    IMACProtocol -> IMacProtocol
+	    IdealMac -> AckingMac
+	    Ieee802154UWBIRNic -> Ieee802154UwbIrNic
+	    Ieee802154UWBIRRadio -> Ieee802154UwbIrRadio
+	    MACAddress -> MacAddress
+	    MACProtocolBase -> MacProtocolBase
 
 2017-11-16  ------ inet-3.99.1 released ------
 

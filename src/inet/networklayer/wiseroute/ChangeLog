@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    GenericARP renamed to GenericArp
-	    IARP renamed to IArp
-	    IPProtocolId renamed to IpProtocolId
-	    MACAddress renamed to MacAddress
+	    GenericARP -> GenericArp
+	    IARP -> IArp
+	    IPProtocolId -> IpProtocolId
+	    MACAddress -> MacAddress
 
 2017-12-15  Zoltan Bojthe
 

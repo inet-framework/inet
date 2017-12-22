@@ -3,25 +3,25 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARP renamed to Arp
-	    DHCPClient renamed to DhcpClient
-	    DHCPLease renamed to DhcpLease
-	    DHCPLeased renamed to DhcpLeased
-	    DHCPMessage renamed to DhcpMessage
-	    DHCPMessageType renamed to DhcpMessageType
-	    DHCPOpcode renamed to DhcpOpcode
-	    DHCPOptionCode renamed to DhcpOptionCode
-	    DHCPOptions renamed to DhcpOptions
-	    DHCPServer renamed to DhcpServer
-	    ICMP renamed to Icmp
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4Address renamed to Ipv4Address
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4Route renamed to Ipv4Route
-	    IPv4RoutingTable renamed to Ipv4RoutingTable
-	    MACAddress renamed to MacAddress
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
+	    ARP -> Arp
+	    DHCPClient -> DhcpClient
+	    DHCPLease -> DhcpLease
+	    DHCPLeased -> DhcpLeased
+	    DHCPMessage -> DhcpMessage
+	    DHCPMessageType -> DhcpMessageType
+	    DHCPOpcode -> DhcpOpcode
+	    DHCPOptionCode -> DhcpOptionCode
+	    DHCPOptions -> DhcpOptions
+	    DHCPServer -> DhcpServer
+	    ICMP -> Icmp
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    MACAddress -> MacAddress
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
 
 2017-12-15  Zoltan Bojthe
 

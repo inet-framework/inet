@@ -3,24 +3,24 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EtherAppCli renamed to EtherAppClient
-	    EtherAppSrv renamed to EtherAppServer
-	    EtherFilledIFG renamed to EtherFilledIfg
-	    EtherFrameWithLLC renamed to EtherFrameWithLlc
-	    EtherLLC renamed to EtherLlc
-	    EtherMAC renamed to EtherMac
-	    EtherMACBase renamed to EtherMacBase
-	    EtherMACFullDuplex renamed to EtherMacFullDuplex
-	    EtherQoSQueue renamed to EtherQosQueue
-	    IEtherMAC renamed to IEtherMac
-	    IMACRelayUnit renamed to IMacRelayUnit
-	    IPv4 renamed to Ipv4
-	    MACAddress renamed to MacAddress
-	    MACBase renamed to MacBase
-	    MACReceiveState renamed to MacReceiveState
-	    MACRelayUnit renamed to MacRelayUnit
-	    MACTransmitState renamed to MacTransmitState
-	    SAPCode renamed to SapCode
+	    EtherAppCli -> EtherAppClient
+	    EtherAppSrv -> EtherAppServer
+	    EtherFilledIFG -> EtherFilledIfg
+	    EtherFrameWithLLC -> EtherFrameWithLlc
+	    EtherLLC -> EtherLlc
+	    EtherMAC -> EtherMac
+	    EtherMACBase -> EtherMacBase
+	    EtherMACFullDuplex -> EtherMacFullDuplex
+	    EtherQoSQueue -> EtherQosQueue
+	    IEtherMAC -> IEtherMac
+	    IMACRelayUnit -> IMacRelayUnit
+	    IPv4 -> Ipv4
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACReceiveState -> MacReceiveState
+	    MACRelayUnit -> MacRelayUnit
+	    MACTransmitState -> MacTransmitState
+	    SAPCode -> SapCode
 
 2017-12-15  Zoltan Bojthe
 

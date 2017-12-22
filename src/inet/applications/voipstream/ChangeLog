@@ -3,13 +3,13 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    RTP renamed to Rtp
-	    UDPControlInfo renamed to UdpControlInfo
-	    UDPSocket renamed to UdpSocket
-	    VoIPStreamPacket renamed to VoipStreamPacket
-	    VoIPStreamPacketType renamed to VoipStreamPacketType
-	    VoIPStreamReceiver renamed to VoipStreamReceiver
-	    VoIPStreamSender renamed to VoipStreamSender
+	    RTP -> Rtp
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+	    VoIPStreamPacket -> VoipStreamPacket
+	    VoIPStreamPacketType -> VoipStreamPacketType
+	    VoIPStreamReceiver -> VoipStreamReceiver
+	    VoIPStreamSender -> VoipStreamSender
 
 2017-12-15  Zoltan Bojthe
 

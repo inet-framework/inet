@@ -3,20 +3,20 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ICMPv6DEST_UN renamed to Icmpv6DestUnav
-	    ICMPv6Header renamed to Icmpv6Header
-	    ICMPv6HeaderSerializer renamed to Icmpv6HeaderSerializer
-	    ICMPv6Type renamed to Icmpv6Type
-	    ICMPv6_TIME_EX renamed to Icmpv6TimeEx
-	    IPProtocolId renamed to IpProtocolId
-	    IPv6 renamed to Ipv6
-	    IPv6Address renamed to Ipv6Address
-	    IPv6ExtensionHeaders renamed to Ipv6ExtensionHeaders
-	    IPv6Header renamed to Ipv6Header
-	    IPv6HeaderSerializer renamed to Ipv6HeaderSerializer
-	    IPv6NeighbourAdvertisement renamed to Ipv6NeighbourAdvertisement
-	    IPv6RouterAdvertisement renamed to Ipv6RouterAdvertisement
-	    IPv6RouterSolicitation renamed to Ipv6RouterSolicitation
+	    ICMPv6DEST_UN -> Icmpv6DestUnav
+	    ICMPv6Header -> Icmpv6Header
+	    ICMPv6HeaderSerializer -> Icmpv6HeaderSerializer
+	    ICMPv6Type -> Icmpv6Type
+	    ICMPv6_TIME_EX -> Icmpv6TimeEx
+	    IPProtocolId -> IpProtocolId
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6ExtensionHeaders -> Ipv6ExtensionHeaders
+	    IPv6Header -> Ipv6Header
+	    IPv6HeaderSerializer -> Ipv6HeaderSerializer
+	    IPv6NeighbourAdvertisement -> Ipv6NeighbourAdvertisement
+	    IPv6RouterAdvertisement -> Ipv6RouterAdvertisement
+	    IPv6RouterSolicitation -> Ipv6RouterSolicitation
 
 2017-11-15  Zoltan Bojthe
 

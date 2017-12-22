@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IAPSKModulation renamed to IApskModulation
-	    ISNIR renamed to ISnir
+	    IAPSKModulation -> IApskModulation
+	    ISNIR -> ISnir
 
 2017-11-23  Levente Mészáros
 

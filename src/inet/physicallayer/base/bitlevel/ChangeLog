@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKModulationBase renamed to ApskModulationBase
-	    APSKSymbol renamed to ApskSymbol
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
 
 2017-11-16  ------ inet-3.99.1 released ------
 

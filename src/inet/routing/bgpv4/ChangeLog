@@ -3,34 +3,34 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ASID renamed to AsId
-	    BGPCommon renamed to BgpCommon
-	    BGPFSM renamed to BgpFsm
-	    BGPHeader renamed to BgpHeader
-	    BGPKeepAliveMessage renamed to BgpKeepAliveMessage
-	    BGPOpenMessage renamed to BgpOpenMessage
-	    BGPPathSegmentType renamed to BgpPathSegmentType
-	    BGPRouting renamed to BgpRouting
-	    BGPRoutingTableEntry renamed to BgpRoutingTableEntry
-	    BGPSession renamed to BgpSession
-	    BGPSessionType renamed to BgpSessionType
-	    BGPUpdate renamed to BgpUpdate
-	    BGPUpdateMessage renamed to BgpUpdateMessage
-	    BGPUpdateNLRI renamed to BgpUpdateNlri
-	    BGPUpdatePathAttributeList renamed to BgpUpdatePathAttributeList
-	    IBGPRouting renamed to IBgpRouting
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4AddressRange renamed to Ipv4AddressRange
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IPv4Route renamed to Ipv4Route
-	    IPv4RoutingTable renamed to Ipv4RoutingTable
-	    OSPFRouting renamed to OspfRouting
-	    SessionID renamed to SessionId
-	    TCPConnection renamed to TcpConnection
-	    TCPSocket renamed to TcpSocket
-	    TCPSocketMap renamed to TcpSocketMap
+	    ASID -> AsId
+	    BGPCommon -> BgpCommon
+	    BGPFSM -> BgpFsm
+	    BGPHeader -> BgpHeader
+	    BGPKeepAliveMessage -> BgpKeepAliveMessage
+	    BGPOpenMessage -> BgpOpenMessage
+	    BGPPathSegmentType -> BgpPathSegmentType
+	    BGPRouting -> BgpRouting
+	    BGPRoutingTableEntry -> BgpRoutingTableEntry
+	    BGPSession -> BgpSession
+	    BGPSessionType -> BgpSessionType
+	    BGPUpdate -> BgpUpdate
+	    BGPUpdateMessage -> BgpUpdateMessage
+	    BGPUpdateNLRI -> BgpUpdateNlri
+	    BGPUpdatePathAttributeList -> BgpUpdatePathAttributeList
+	    IBGPRouting -> IBgpRouting
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    OSPFRouting -> OspfRouting
+	    SessionID -> SessionId
+	    TCPConnection -> TcpConnection
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
 
 2017-12-15  Zoltan Bojthe
 

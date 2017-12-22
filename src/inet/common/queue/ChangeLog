@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    FIFOQueue renamed to FifoQueue
-	    REDDropper renamed to RedDropper
-	    WRRScheduler renamed to WrrScheduler
+	    FIFOQueue -> FifoQueue
+	    REDDropper -> RedDropper
+	    WRRScheduler -> WrrScheduler
 
 2017-12-15  Zoltan Bojthe
 

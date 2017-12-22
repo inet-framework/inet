@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    BPDU renamed to Bpdu
-	    IMACAddressTable renamed to IMacAddressTable
-	    MACAddress renamed to MacAddress
-	    RSTP renamed to Rstp
-	    STP renamed to Stp
-	    STPBase renamed to StpBase
+	    BPDU -> Bpdu
+	    IMACAddressTable -> IMacAddressTable
+	    MACAddress -> MacAddress
+	    RSTP -> Rstp
+	    STP -> Stp
+	    STPBase -> StpBase
 
 2017-11-17  Zoltan Bojthe
 

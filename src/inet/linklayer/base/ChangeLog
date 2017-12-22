@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    MACAddress renamed to MacAddress
-	    MACBase renamed to MacBase
-	    MACProtocolBase renamed to MacProtocolBase
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACProtocolBase -> MacProtocolBase
 
 2017-11-17  Zoltan Bojthe
 

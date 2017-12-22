@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IBGPRouting renamed to IBgpRouting
-	    IIPRouting renamed to IIpRouting
-	    IPIMRouting renamed to IPimRouting
-	    IPv4ControlInfo renamed to Ipv4ControlInfo
+	    IBGPRouting -> IBgpRouting
+	    IIPRouting -> IIpRouting
+	    IPIMRouting -> IPimRouting
+	    IPv4ControlInfo -> Ipv4ControlInfo
 
 2017-11-16  ------ inet-3.99.1 released ------
 

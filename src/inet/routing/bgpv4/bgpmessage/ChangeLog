@@ -3,34 +3,34 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    BGPASPathSegment renamed to BgpAsPathSegment
-	    BGPCommon renamed to BgpCommon
-	    BGPHeader renamed to BgpHeader
-	    BGPKeepAliveMessage renamed to BgpKeepAliveMessage
-	    BGPOpenMessage renamed to BgpOpenMessage
-	    BGPOptionalParameters renamed to BgpOptionalParameters
-	    BGPParameterValues renamed to BgpParameterValues
-	    BGPPathSegmentType renamed to BgpPathSegmentType
-	    BGPSessionType renamed to BgpSessionType
-	    BGPType renamed to BgpType
-	    BGPUpdate renamed to BgpUpdate
-	    BGPUpdateAtomicAggregateValues renamed to BgpUpdateAtomicAggregateValues
-	    BGPUpdateAttributeFlags renamed to BgpUpdateAttributeFlags
-	    BGPUpdateAttributeType renamed to BgpUpdateAttributeType
-	    BGPUpdateAttributeTypeCode renamed to BgpUpdateAttributeTypeCode
-	    BGPUpdateMessage renamed to BgpUpdateMessage
-	    BGPUpdateMessage_Base renamed to BgpUpdateMessage_Base
-	    BGPUpdateNLRI renamed to BgpUpdateNlri
-	    BGPUpdatePathAttributeList renamed to BgpUpdatePathAttributeList
-	    BGPUpdatePathAttributes renamed to BgpUpdatePathAttributes
-	    BGPUpdatePathAttributesASPath renamed to BgpUpdatePathAttributesAsPath
-	    BGPUpdatePathAttributesAtomicAggregate renamed to BgpUpdatePathAttributesAtomicAggregate
-	    BGPUpdatePathAttributesLocalPref renamed to BgpUpdatePathAttributesLocalPref
-	    BGPUpdatePathAttributesNextHop renamed to BgpUpdatePathAttributesNextHop
-	    BGPUpdatePathAttributesOrigin renamed to BgpUpdatePathAttributesOrigin
-	    BGPUpdateWithdrawnRoutes renamed to BgpUpdateWithdrawnRoutes
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
+	    BGPASPathSegment -> BgpAsPathSegment
+	    BGPCommon -> BgpCommon
+	    BGPHeader -> BgpHeader
+	    BGPKeepAliveMessage -> BgpKeepAliveMessage
+	    BGPOpenMessage -> BgpOpenMessage
+	    BGPOptionalParameters -> BgpOptionalParameters
+	    BGPParameterValues -> BgpParameterValues
+	    BGPPathSegmentType -> BgpPathSegmentType
+	    BGPSessionType -> BgpSessionType
+	    BGPType -> BgpType
+	    BGPUpdate -> BgpUpdate
+	    BGPUpdateAtomicAggregateValues -> BgpUpdateAtomicAggregateValues
+	    BGPUpdateAttributeFlags -> BgpUpdateAttributeFlags
+	    BGPUpdateAttributeType -> BgpUpdateAttributeType
+	    BGPUpdateAttributeTypeCode -> BgpUpdateAttributeTypeCode
+	    BGPUpdateMessage -> BgpUpdateMessage
+	    BGPUpdateMessage_Base -> BgpUpdateMessage_Base
+	    BGPUpdateNLRI -> BgpUpdateNlri
+	    BGPUpdatePathAttributeList -> BgpUpdatePathAttributeList
+	    BGPUpdatePathAttributes -> BgpUpdatePathAttributes
+	    BGPUpdatePathAttributesASPath -> BgpUpdatePathAttributesAsPath
+	    BGPUpdatePathAttributesAtomicAggregate -> BgpUpdatePathAttributesAtomicAggregate
+	    BGPUpdatePathAttributesLocalPref -> BgpUpdatePathAttributesLocalPref
+	    BGPUpdatePathAttributesNextHop -> BgpUpdatePathAttributesNextHop
+	    BGPUpdatePathAttributesOrigin -> BgpUpdatePathAttributesOrigin
+	    BGPUpdateWithdrawnRoutes -> BgpUpdateWithdrawnRoutes
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
 
 2017-11-16  ------ inet-3.99.1 released ------
 

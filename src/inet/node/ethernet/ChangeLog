@@ -3,17 +3,17 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EtherAppCli renamed to EtherAppClient
-	    EtherAppSrv renamed to EtherAppServer
-	    EtherLLC renamed to EtherLlc
-	    EtherMAC renamed to EtherMac
-	    EtherMACFullDuplex renamed to EtherMacFullDuplex
-	    EtherQoSQueue renamed to EtherQosQueue
-	    IEtherMAC renamed to IEtherMac
-	    IMACAddressTable renamed to IMacAddressTable
-	    IMACRelayUnit renamed to IMacRelayUnit
-	    MACAddressTable renamed to MacAddressTable
-	    MACRelayUnit renamed to MacRelayUnit
+	    EtherAppCli -> EtherAppClient
+	    EtherAppSrv -> EtherAppServer
+	    EtherLLC -> EtherLlc
+	    EtherMAC -> EtherMac
+	    EtherMACFullDuplex -> EtherMacFullDuplex
+	    EtherQoSQueue -> EtherQosQueue
+	    IEtherMAC -> IEtherMac
+	    IMACAddressTable -> IMacAddressTable
+	    IMACRelayUnit -> IMacRelayUnit
+	    MACAddressTable -> MacAddressTable
+	    MACRelayUnit -> MacRelayUnit
 
 2017-11-16  ------ inet-3.99.1 released ------
 

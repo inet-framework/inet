@@ -3,10 +3,10 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    IQoSRateSelection renamed to IQosRateSelection
-	    IRecipientQoSAckPolicy renamed to IRecipientQosAckPolicy
-	    IRecipientQoSMacDataService renamed to IRecipientQosMacDataService
-	    MACAddress renamed to MacAddress
+	    IQoSRateSelection -> IQosRateSelection
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService -> IRecipientQosMacDataService
+	    MACAddress -> MacAddress
 
 2017-11-16  ------ inet-3.99.1 released ------
 

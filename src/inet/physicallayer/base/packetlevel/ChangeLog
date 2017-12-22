@@ -3,26 +3,26 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    APSKModulationBase renamed to ApskModulationBase
-	    APSKSymbol renamed to ApskSymbol
-	    BPSKModulation renamed to BpskModulation
-	    DPSKModulationBase renamed to DpskModulationBase
-	    DSSSOQPSK16Modulation renamed to DsssOqpsk16Modulation
-	    DimensionalSNIR renamed to DimensionalSnir
-	    GFSKModulationBase renamed to GfskModulationBase
-	    IAPSKModulation renamed to IApskModulation
-	    ISNIR renamed to ISnir
-	    MPSKModulation renamed to MpskModulation
-	    MQAMModulation renamed to MqamModulation
-	    MQAMModulationBase renamed to MqamModulationBase
-	    PPMModulationBase renamed to PpmModulationBase
-	    QAM16Modulation renamed to Qam16Modulation
-	    QAM256Modulation renamed to Qam256Modulation
-	    QAM64Modulation renamed to Qam64Modulation
-	    QPSKModulation renamed to QpskModulation
-	    SNIRBase renamed to SnirBase
-	    SNIRReceiverBase renamed to SnirReceiverBase
-	    ScalarSNIR renamed to ScalarSnir
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    DPSKModulationBase -> DpskModulationBase
+	    DSSSOQPSK16Modulation -> DsssOqpsk16Modulation
+	    DimensionalSNIR -> DimensionalSnir
+	    GFSKModulationBase -> GfskModulationBase
+	    IAPSKModulation -> IApskModulation
+	    ISNIR -> ISnir
+	    MPSKModulation -> MpskModulation
+	    MQAMModulation -> MqamModulation
+	    MQAMModulationBase -> MqamModulationBase
+	    PPMModulationBase -> PpmModulationBase
+	    QAM16Modulation -> Qam16Modulation
+	    QAM256Modulation -> Qam256Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+	    SNIRBase -> SnirBase
+	    SNIRReceiverBase -> SnirReceiverBase
+	    ScalarSNIR -> ScalarSnir
 
 2017-12-19  Levente Mészáros
 

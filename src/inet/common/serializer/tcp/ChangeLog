@@ -3,18 +3,18 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    TCP renamed to Tcp
-	    TCPOption renamed to TcpOption
-	    TCPOptionEnd renamed to TcpOptionEnd
-	    TCPOptionMaxSegmentSize renamed to TcpOptionMaxSegmentSize
-	    TCPOptionNop renamed to TcpOptionNop
-	    TCPOptionNumbers renamed to TcpOptionNumbers
-	    TCPOptionSack renamed to TcpOptionSack
-	    TCPOptionSackPermitted renamed to TcpOptionSackPermitted
-	    TCPOptionTimestamp renamed to TcpOptionTimestamp
-	    TCPOptionUnknown renamed to TcpOptionUnknown
-	    TCPOptionWindowScale renamed to TcpOptionWindowScale
-	    TCPSegment renamed to TcpHeader
+	    TCP -> Tcp
+	    TCPOption -> TcpOption
+	    TCPOptionEnd -> TcpOptionEnd
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPOptionNop -> TcpOptionNop
+	    TCPOptionNumbers -> TcpOptionNumbers
+	    TCPOptionSack -> TcpOptionSack
+	    TCPOptionSackPermitted -> TcpOptionSackPermitted
+	    TCPOptionTimestamp -> TcpOptionTimestamp
+	    TCPOptionUnknown -> TcpOptionUnknown
+	    TCPOptionWindowScale -> TcpOptionWindowScale
+	    TCPSegment -> TcpHeader
 
 2017-12-11  Zoltan Bojthe
 

@@ -3,9 +3,9 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ISCTP renamed to ISctp
-	    ITCP renamed to ITcp
-	    IUDP renamed to IUdp
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
 
 2017-11-16  ------ inet-3.99.1 released ------
 

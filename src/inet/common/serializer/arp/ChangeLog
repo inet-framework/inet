@@ -3,12 +3,12 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    ARP renamed to Arp
-	    ARPOpcode renamed to ArpOpcode
-	    ARPPacket renamed to ArpPacket
-	    ARPPacketSerializer renamed to ArpPacketSerializer
-	    IPv4Address renamed to Ipv4Address
-	    MACAddress renamed to MacAddress
+	    ARP -> Arp
+	    ARPOpcode -> ArpOpcode
+	    ARPPacket -> ArpPacket
+	    ARPPacketSerializer -> ArpPacketSerializer
+	    IPv4Address -> Ipv4Address
+	    MACAddress -> MacAddress
 
 2017-11-16  ------ inet-3.99.1 released ------
 

@@ -3,50 +3,50 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    EroObj_t renamed to EroObj
-	    FECEntry renamed to FecEntry
-	    FilterSpecObj_t renamed to FilterSpecObj
-	    FlowSpecObj_t renamed to FlowSpecObj
-	    HelloState_t renamed to HelloState
-	    IIPv4RoutingTable renamed to IIpv4RoutingTable
-	    IPAddressVector renamed to Ipv4AddressVector
-	    IPv4 renamed to Ipv4
-	    IPv4Address renamed to Ipv4Address
-	    IPv4AddressVector renamed to Ipv4AddressVector
-	    IPv4ControlInfo renamed to Ipv4ControlInfo
-	    IPv4InterfaceData renamed to Ipv4InterfaceData
-	    IRSVPClassifier renamed to IRsvpClassifier
-	    LIBTable renamed to LibTable
-	    LabelRequestObj_t renamed to LabelRequestObj
-	    MPLS renamed to Mpls
-	    PSBVector renamed to PsbVector
-	    PathStateBlock_t renamed to PathStateBlock
-	    RSBVector renamed to RsbVector
-	    RSVP renamed to Rsvp
-	    RSVPHelloMsg renamed to RsvpHelloMsg
-	    RSVPHelloMsg_Base renamed to RsvpHelloMsg_Base
-	    RSVPMessage renamed to RsvpMessage
-	    RSVPPacket renamed to RsvpPacket
-	    RSVPPacket_Base renamed to RsvpPacket_Base
-	    RSVPPathError renamed to RsvpPathError
-	    RSVPPathError_Base renamed to RsvpPathError_Base
-	    RSVPPathMsg renamed to RsvpPathMsg
-	    RSVPPathMsg_Base renamed to RsvpPathMsg_Base
-	    RSVPPathTear renamed to RsvpPathTear
-	    RSVPPathTear_Base renamed to RsvpPathTear_Base
-	    RSVPResvError renamed to RsvpResvError
-	    RSVPResvError_Base renamed to RsvpResvError_Base
-	    RSVPResvMsg renamed to RsvpResvMsg
-	    RSVPResvMsg_Base renamed to RsvpResvMsg_Base
-	    RSVPResvTear renamed to RsvpResvTear
-	    RSVPResvTear_Base renamed to RsvpResvTear_Base
-	    ResvStateBlock_t renamed to ResvStateBlock
-	    RsvpHopObj_t renamed to RsvpHopObj
-	    SenderTemplateObj_t renamed to SenderTemplateObj
-	    SenderTspecObj_t renamed to SenderTspecObj
-	    SessionObj_t renamed to SessionObj
-	    TED renamed to Ted
-	    TEDChangeInfo renamed to TedChangeInfo
+	    EroObj_t -> EroObj
+	    FECEntry -> FecEntry
+	    FilterSpecObj_t -> FilterSpecObj
+	    FlowSpecObj_t -> FlowSpecObj
+	    HelloState_t -> HelloState
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPAddressVector -> Ipv4AddressVector
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressVector -> Ipv4AddressVector
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IRSVPClassifier -> IRsvpClassifier
+	    LIBTable -> LibTable
+	    LabelRequestObj_t -> LabelRequestObj
+	    MPLS -> Mpls
+	    PSBVector -> PsbVector
+	    PathStateBlock_t -> PathStateBlock
+	    RSBVector -> RsbVector
+	    RSVP -> Rsvp
+	    RSVPHelloMsg -> RsvpHelloMsg
+	    RSVPHelloMsg_Base -> RsvpHelloMsg_Base
+	    RSVPMessage -> RsvpMessage
+	    RSVPPacket -> RsvpPacket
+	    RSVPPacket_Base -> RsvpPacket_Base
+	    RSVPPathError -> RsvpPathError
+	    RSVPPathError_Base -> RsvpPathError_Base
+	    RSVPPathMsg -> RsvpPathMsg
+	    RSVPPathMsg_Base -> RsvpPathMsg_Base
+	    RSVPPathTear -> RsvpPathTear
+	    RSVPPathTear_Base -> RsvpPathTear_Base
+	    RSVPResvError -> RsvpResvError
+	    RSVPResvError_Base -> RsvpResvError_Base
+	    RSVPResvMsg -> RsvpResvMsg
+	    RSVPResvMsg_Base -> RsvpResvMsg_Base
+	    RSVPResvTear -> RsvpResvTear
+	    RSVPResvTear_Base -> RsvpResvTear_Base
+	    ResvStateBlock_t -> ResvStateBlock
+	    RsvpHopObj_t -> RsvpHopObj
+	    SenderTemplateObj_t -> SenderTemplateObj
+	    SenderTspecObj_t -> SenderTspecObj
+	    SessionObj_t -> SessionObj
+	    TED -> Ted
+	    TEDChangeInfo -> TedChangeInfo
 
 2017-12-15  Zoltan Bojthe
 

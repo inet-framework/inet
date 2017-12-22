@@ -3,8 +3,8 @@
 2017-12-20  Zoltan Bojthe
 
 	Renaming:
-	    SUIPathLoss renamed to SuiPathLoss
-	    UWBIRStochasticPathLoss renamed to UwbIrStochasticPathLoss
+	    SUIPathLoss -> SuiPathLoss
+	    UWBIRStochasticPathLoss -> UwbIrStochasticPathLoss
 
 2017-12-15  Zoltan Bojthe
 
