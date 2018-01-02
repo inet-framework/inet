@@ -46,7 +46,8 @@ Packet::Packet(const Packet& other) :
     contents(other.contents),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator),
-    totalLength(other.totalLength)
+    totalLength(other.totalLength),
+    tags(other.tags)
 {
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
