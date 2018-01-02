@@ -33,7 +33,4 @@ class Packet extends cPacket
     b dataLength;
     b trailerPoppedLength;
     Chunk* contents @packetData @getter(getContents);
-//    Chunk* header @packetData @getter(getHeaderPart);
-//    Chunk* data @packetData @getter(getDataPart);
-//    Chunk* trailer @packetData @getter(getTrailerPart);
 }
