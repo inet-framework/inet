@@ -816,7 +816,7 @@ std::vector<Udp::SockDesc *> Udp::findSocketsForMcastBcastPacket(const L3Address
     return result;
 }
 
-void Udp::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort)
+void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 

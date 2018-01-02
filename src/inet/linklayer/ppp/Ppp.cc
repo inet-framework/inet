@@ -202,7 +202,7 @@ void Ppp::refreshOutGateConnection(bool connected)
         queueModule->requestPacket();
 }
 
-void Ppp::startTransmitting(cPacket *msg)
+void Ppp::startTransmitting(Packet *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     Packet *pppFrame = encapsulate(msg);
@@ -363,7 +363,7 @@ void Ppp::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-Packet *Ppp::encapsulate(cPacket *msg)
+Packet *Ppp::encapsulate(Packet *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();

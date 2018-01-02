@@ -108,9 +108,9 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterface(cPacket *packet);
-    virtual const InterfaceEntry *getDestInterface(cPacket *packet);
-    virtual Ipv4Address getNextHop(cPacket *packet);
+    virtual const InterfaceEntry *getSourceInterface(Packet *packet);
+    virtual const InterfaceEntry *getDestInterface(Packet *packet);
+    virtual Ipv4Address getNextHop(Packet *packet);
 
     // utility: look up route to the source of the datagram and return its interface
     virtual const InterfaceEntry *getShortestPathInterfaceToSource(const Ptr<const Ipv4Header>& ipv4Header) const;

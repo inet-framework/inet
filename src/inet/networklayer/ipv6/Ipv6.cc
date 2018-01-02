@@ -252,7 +252,7 @@ void Ipv6::endService(cPacket *msg)
     }
 }
 
-InterfaceEntry *Ipv6::getSourceInterfaceFrom(cPacket *packet)
+InterfaceEntry *Ipv6::getSourceInterfaceFrom(Packet *packet)
 {
     auto interfaceInd = packet->_findTag<InterfaceInd>();
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
@@ -272,7 +272,7 @@ void Ipv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         routeMulticastPacket(packet, destIE, fromIE, false);
 }
 
-void Ipv6::handleMessageFromHL(cPacket *msg)
+void Ipv6::handleMessageFromHL(Packet *msg)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {

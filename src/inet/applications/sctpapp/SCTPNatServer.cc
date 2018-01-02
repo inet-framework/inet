@@ -86,7 +86,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     EV << "Info for peer1: peer1-1=" << msg->getPeer1Addresses(0) << " peer2-1=" << msg->getPeer2Addresses(0) << "\n";
     if (info->multi)
         EV << " peer1-2=" << msg->getPeer1Addresses(1) << " peer2-2=" << msg->getPeer2Addresses(1) << endl;
-    cPacket *cmsg = new cPacket(msg->getName());
+    Packet *cmsg = new Packet(msg->getName());
     SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
     smsg->setEncaps(true);
     smsg->encapsulate(msg);
@@ -126,7 +126,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     EV << "Info for peer2: peer1-1=" << msg->getPeer1Addresses(0) << " peer2-1=" << msg->getPeer2Addresses(0) << "\n";
     if (info->multi)
         EV << " peer1-2=" << msg->getPeer1Addresses(1) << " peer2-2=" << msg->getPeer2Addresses(1) << endl;
-    cmsg = new cPacket(msg->getName());
+    cmsg = new Packet(msg->getName());
     smsg = new SCTPSimpleMessage("nat_data");
     smsg->setEncaps(true);
     smsg->encapsulate(msg);
@@ -144,7 +144,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     cmsg->setControlInfo(cmd);
     EV << "info sent to peer2\n";
     send(cmsg, "socketOut");
-    abortMsg = new cPacket("abortPeer2", SCTP_C_SHUTDOWN);
+    abortMsg = new Packet("abortPeer2", SCTP_C_SHUTDOWN);
     abortMsg->setControlInfo(cmd->dup());
     send(abortMsg, "socketOut");
     EV << "abortMsg sent to peer2\n";
@@ -152,7 +152,7 @@ void SCTPNatServer::sendInfo(NatInfo *info)
 
 void SCTPNatServer::generateAndSend()
 {
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = (int)par("requestLength");
     msg->setDataArraySize(numBytes);

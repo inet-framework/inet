@@ -198,7 +198,7 @@ void EtherTrafGen::sendBurstPackets()
     }
 }
 
-void EtherTrafGen::receivePacket(cPacket *msg)
+void EtherTrafGen::receivePacket(Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "' length= " << msg->getByteLength() << "B\n";
 

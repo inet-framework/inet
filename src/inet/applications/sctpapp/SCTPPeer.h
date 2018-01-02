@@ -98,8 +98,8 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
 
     void connect();
     void socketEstablished(int connId, void *yourPtr);
-    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
-    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg) override;
+    void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
+    void socketDataNotificationArrived(int connId, void *yourPtr, Packet *msg) override;
     void socketPeerClosed(int connId, void *yourPtr) override;
     void socketClosed(int connId, void *yourPtr) override;
     void socketFailure(int connId, void *yourPtr, int code) override;

@@ -211,7 +211,7 @@ void UdpBasicApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void UdpBasicApp::processPacket(cPacket *pk)
+void UdpBasicApp::processPacket(Packet *pk)
 {
     emit(rcvdPkSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;

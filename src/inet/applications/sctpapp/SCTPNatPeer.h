@@ -106,9 +106,9 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
      * Beware: this funcion deletes the incoming message, which might not be what you want.
      */
-    void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    void socketDataArrived(int32 connId, void *yourPtr, Packet *msg, bool urgent) override;
 
-    void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg) override;
+    void socketDataNotificationArrived(int32 connId, void *yourPtr, Packet *msg) override;
     /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
     void socketPeerClosed(int32 connId, void *yourPtr) override;
 

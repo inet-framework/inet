@@ -121,7 +121,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
+    virtual InterfaceEntry *getSourceInterfaceFrom(Packet *msg);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -139,7 +139,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Handle messages (typically packets to be send in Ipv6) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
-    virtual void handleMessageFromHL(cPacket *msg);
+    virtual void handleMessageFromHL(Packet *msg);
     virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress);
 
     /**

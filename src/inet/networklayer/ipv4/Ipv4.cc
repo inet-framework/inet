@@ -223,19 +223,19 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
     }
 }
 
-const InterfaceEntry *Ipv4::getSourceInterface(cPacket *packet)
+const InterfaceEntry *Ipv4::getSourceInterface(Packet *packet)
 {
     auto tag = packet->_findTag<InterfaceInd>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
-const InterfaceEntry *Ipv4::getDestInterface(cPacket *packet)
+const InterfaceEntry *Ipv4::getDestInterface(Packet *packet)
 {
     auto tag = packet->_findTag<InterfaceReq>();
     return tag != nullptr ? ift->getInterfaceById(tag->getInterfaceId()) : nullptr;
 }
 
-Ipv4Address Ipv4::getNextHop(cPacket *packet)
+Ipv4Address Ipv4::getNextHop(Packet *packet)
 {
     auto tag = packet->_findTag<NextHopAddressReq>();
     return tag != nullptr ? tag->getNextHopAddress().toIPv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
@@ -725,7 +725,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
-        cPacket *packetCopy = packet->dup();
+        auto *packetCopy = packet->dup();
         packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         emit(packetSentToUpperSignal, packetCopy);
         send(packetCopy, "transportOut");

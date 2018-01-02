@@ -150,7 +150,7 @@ void GenericNetworkProtocol::endService(cPacket *pk)
     }
 }
 
-const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(cPacket *packet)
+const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(Packet *packet)
 {
     auto interfaceInd = packet->_findTag<InterfaceInd>();
     return interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
@@ -514,7 +514,7 @@ void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
-        cPacket *packetCopy = packet->dup();
+        auto *packetCopy = packet->dup();
         packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }

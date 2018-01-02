@@ -63,7 +63,7 @@ void TcpSinkApp::handleMessage(cMessage *msg)
         send(msg, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
-        cPacket *pk = PK(msg);
+        Packet *pk = PK(msg);
         long packetLength = pk->getByteLength();
         bytesRcvd += packetLength;
         emit(rcvdPkSignal, pk);

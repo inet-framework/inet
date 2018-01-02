@@ -93,7 +93,7 @@ void EtherAppClient::handleMessage(cMessage *msg)
         scheduleNextPacket(false);
     }
     else
-        receivePacket(check_and_cast<cPacket *>(msg));
+        receivePacket(check_and_cast<Packet *>(msg));
 }
 
 bool EtherAppClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -211,7 +211,7 @@ void EtherAppClient::sendPacket()
     packetsSent++;
 }
 
-void EtherAppClient::receivePacket(cPacket *msg)
+void EtherAppClient::receivePacket(Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 

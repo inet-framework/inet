@@ -108,7 +108,7 @@ void SCTPServer::sendOrSchedule(cMessage *msg)
 
 void SCTPServer::generateAndSend()
 {
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -376,7 +376,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     auto n = endToEndDelay.find(id);
                     n->second->record(simTime() - smsg->getCreationTime());
-                    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+                    Packet *cmsg = new Packet("SCTP_C_SEND");
                     bytesSent += smsg->getBitLength() / 8;
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream + 1) % outboundStreams;

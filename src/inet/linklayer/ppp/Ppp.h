@@ -61,8 +61,8 @@ class INET_API Ppp : public MacBase
     static simsignal_t rxPkOkSignal;
 
   protected:
-    virtual void startTransmitting(cPacket *msg);
-    virtual Packet *encapsulate(cPacket *msg);
+    virtual void startTransmitting(Packet *msg);
+    virtual Packet *encapsulate(Packet *msg);
     virtual cPacket *decapsulate(Packet *packet);
     virtual void refreshDisplay() const override;
     virtual void refreshOutGateConnection(bool connected);

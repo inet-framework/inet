@@ -62,7 +62,7 @@ class INET_API UdpBasicApp : public ApplicationBase
     // chooses random destination address
     virtual L3Address chooseDestAddr();
     virtual void sendPacket();
-    virtual void processPacket(cPacket *msg);
+    virtual void processPacket(Packet *msg);
     virtual void setSocketOptions();
 
     virtual void processStart();

@@ -313,7 +313,7 @@ void SCTPClient::sendRequestArrived()
     }
 }
 
-void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
+void SCTPClient::socketDataArrived(int, void *, Packet *msg, bool)
 {
     packetsRcvd++;
 
@@ -324,7 +324,7 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
 
     if (echo) {
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
@@ -370,7 +370,7 @@ void SCTPClient::sendRequest(bool last)
     if (sendBytes < 1)
         sendBytes = 1;
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
@@ -477,7 +477,7 @@ void SCTPClient::handleTimer(cMessage *msg)
     }
 }
 
-void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
+void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, Packet *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");

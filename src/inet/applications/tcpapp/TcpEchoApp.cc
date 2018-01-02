@@ -54,7 +54,7 @@ void TcpEchoApp::initialize(int stage)
 void TcpEchoApp::sendDown(cMessage *msg)
 {
     if (msg->isPacket()) {
-        cPacket *pk = static_cast<cPacket *>(msg);
+        Packet *pk = static_cast<Packet *>(msg);
         bytesSent += pk->getByteLength();
         emit(sentPkSignal, pk);
     }
@@ -122,7 +122,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
    */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
-    cPacket *pkt = PK(timer);
+    Packet *pkt = PK(timer);
     pkt->setContextPointer(nullptr);
     echoAppModule->sendDown(pkt);
 }

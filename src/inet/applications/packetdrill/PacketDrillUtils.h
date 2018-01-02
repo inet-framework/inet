@@ -469,14 +469,14 @@ class INET_API PacketDrillPacket
         ~PacketDrillPacket();
 
     private:
-        cPacket* inetPacket;
+        Packet* inetPacket;
         enum direction_t direction; /* direction packet is traveling */
 
     public:
         enum direction_t getDirection() const { return direction; };
         void setDirection(enum direction_t dir) { direction = dir; };
-        cPacket* getInetPacket() { return inetPacket; };
-        void setInetPacket(cPacket *pkt) { inetPacket = pkt->dup(); delete pkt;};
+        Packet* getInetPacket() { return inetPacket; };
+        void setInetPacket(Packet *pkt) { inetPacket = pkt->dup(); delete pkt;};
 };
 
 class INET_API PacketDrillEvent : public cObject

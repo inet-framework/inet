@@ -49,13 +49,13 @@ void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate
 
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
-    if (cPacket *packet = dynamic_cast<cPacket *>(message)) {
+    if (Packet *packet = dynamic_cast<Packet *>(message)) {
         int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
-            cPacket *packetCopy = packet->dup();
+            Packet *packetCopy = packet->dup();
             packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");

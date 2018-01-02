@@ -197,7 +197,7 @@ void IpvxTrafGen::sendPacket()
     numSent++;
 }
 
-void IpvxTrafGen::printPacket(cPacket *msg)
+void IpvxTrafGen::printPacket(Packet *msg)
 {
     L3Address src, dest;
     int protocol = -1;
@@ -220,7 +220,7 @@ void IpvxTrafGen::printPacket(cPacket *msg)
         EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
-void IpvxTrafGen::processPacket(cPacket *msg)
+void IpvxTrafGen::processPacket(Packet *msg)
 {
     emit(rcvdPkSignal, msg);
     EV_INFO << "Received packet: ";

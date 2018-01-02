@@ -305,7 +305,7 @@ bool UdpSocket::belongsToAnyUDPSocket(cMessage *msg)
     return dynamic_cast<UdpControlInfo *>(msg->getControlInfo());
 }
 
-std::string UdpSocket::getReceivedPacketInfo(cPacket *pk)
+std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
 {
     auto l3Addresses = pk->_getTag<L3AddressInd>();
     auto ports = pk->_getTag<L4PortInd>();

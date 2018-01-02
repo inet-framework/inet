@@ -40,7 +40,7 @@ void HttpNodeBase::initialize(int stage)
     }
 }
 
-void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, simtime_t constdelay, rdObject *rdDelay)
+void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, Packet *pckt, simtime_t constdelay, rdObject *rdDelay)
 {
     if (pckt == nullptr)
         return;
@@ -51,7 +51,7 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
     sendDirect(pckt, delay, 0, receiver, "httpIn");
 }
 
-double HttpNodeBase::transmissionDelay(cPacket *pckt)
+double HttpNodeBase::transmissionDelay(Packet *pckt)
 {
     if (linkSpeed == 0)
         return 0.0; // No delay if link speed unspecified

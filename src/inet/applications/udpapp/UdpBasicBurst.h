@@ -86,7 +86,7 @@ class INET_API UdpBasicBurst : public ApplicationBase
     // chooses random destination address
     virtual L3Address chooseDestAddr();
     virtual Packet *createPacket();
-    virtual void processPacket(cPacket *msg);
+    virtual void processPacket(Packet *msg);
     virtual void generateBurst();
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

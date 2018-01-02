@@ -155,7 +155,7 @@ class INET_API TcpNscReceiveQueue : public cObject
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo();
+    virtual Packet *extractBytesUpTo();
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

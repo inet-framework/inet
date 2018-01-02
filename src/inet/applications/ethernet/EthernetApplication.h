@@ -14,6 +14,7 @@
 #define __INET_ETHERNETAPPLICATION_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
@@ -58,7 +59,7 @@ class INET_API EthernetApplication : public cSimpleModule
     /*
      * sendPacket function for the client side
      */
-    void sendPacket(cMessage *datapacket, const MacAddress& destAddr);
+    void sendPacket(Packet *datapacket, const MacAddress& destAddr);
 
     /*
      * generates response packet. Server side.

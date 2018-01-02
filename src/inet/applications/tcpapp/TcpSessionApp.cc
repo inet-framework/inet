@@ -144,7 +144,7 @@ void TcpSessionApp::sendData()
     }
 }
 
-cPacket *TcpSessionApp::createDataPacket(long sendBytes)
+Packet *TcpSessionApp::createDataPacket(long sendBytes)
 {
     Packet *packet = new Packet("data1");
     const char *dataTransferMode = par("dataTransferMode");

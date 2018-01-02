@@ -211,7 +211,7 @@ void UdpBasicBurst::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void UdpBasicBurst::processPacket(cPacket *pk)
+void UdpBasicBurst::processPacket(Packet *pk)
 {
     if (pk->getKind() == UDP_I_ERROR) {
         EV_WARN << "UDP error received\n";

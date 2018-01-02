@@ -53,7 +53,7 @@ void IpvxTrafSink::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-    processPacket(check_and_cast<cPacket *>(msg));
+    processPacket(check_and_cast<Packet *>(msg));
 }
 
 void IpvxTrafSink::refreshDisplay() const
@@ -77,7 +77,7 @@ bool IpvxTrafSink::handleOperationStage(LifecycleOperation *operation, int stage
     return true;
 }
 
-void IpvxTrafSink::printPacket(cPacket *msg)
+void IpvxTrafSink::printPacket(Packet *msg)
 {
     L3Address src, dest;
     int protocol = -1;
@@ -100,7 +100,7 @@ void IpvxTrafSink::printPacket(cPacket *msg)
         EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << endl;
 }
 
-void IpvxTrafSink::processPacket(cPacket *msg)
+void IpvxTrafSink::processPacket(Packet *msg)
 {
     emit(rcvdPkSignal, msg);
     EV_INFO << "Received packet: ";

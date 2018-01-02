@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/applications/generic/IpvxTrafSink.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -71,8 +71,8 @@ class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
     virtual void refreshDisplay() const override;
     virtual void startApp();
 
-    virtual void printPacket(cPacket *msg);
-    virtual void processPacket(cPacket *msg);
+    virtual void printPacket(Packet *msg);
+    virtual void processPacket(Packet *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:

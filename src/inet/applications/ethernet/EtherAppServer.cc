@@ -112,7 +112,7 @@ void EtherAppServer::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void EtherAppServer::sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap)
+void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap)
 {
     datapacket->_addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
     auto ieee802SapReq = datapacket->_addTagIfAbsent<Ieee802SapReq>();

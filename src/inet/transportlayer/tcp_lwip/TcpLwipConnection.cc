@@ -381,7 +381,7 @@ void TcpLwipConnection::do_SEND()
 void TcpLwipConnection::sendUpData()
 {
     if (sendUpEnabled) {
-        while (cPacket *dataMsg = receiveQueueM->extractBytesUpTo()) {
+        while (Packet *dataMsg = receiveQueueM->extractBytesUpTo()) {
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
             dataMsg->_addTagIfAbsent<SocketInd>()->setSocketId(connIdM);

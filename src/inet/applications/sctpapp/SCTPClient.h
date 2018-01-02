@@ -94,8 +94,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
 
     /* SCTPSocket::CallbackInterface callback methods */
     void socketEstablished(int connId, void *yourPtr, unsigned long int buffer) override;    // TODO: needs a better name
-    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;    // TODO: needs a better name
-    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg) override;
+    void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;    // TODO: needs a better name
+    void socketDataNotificationArrived(int connId, void *yourPtr, Packet *msg) override;
     void socketPeerClosed(int connId, void *yourPtr) override;
     void socketClosed(int connId, void *yourPtr) override;
     void socketFailure(int connId, void *yourPtr, int code) override;

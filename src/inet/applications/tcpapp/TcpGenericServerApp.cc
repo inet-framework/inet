@@ -71,7 +71,7 @@ void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TcpGenericServerApp::sendBack(cMessage *msg)
 {
-    cPacket *packet = dynamic_cast<cPacket *>(msg);
+    Packet *packet = dynamic_cast<Packet *>(msg);
 
     if (packet) {
         msgsSent++;

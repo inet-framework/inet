@@ -569,7 +569,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
 
 void TcpNsc::sendDataToApp(TcpNscConnection& c)
 {
-    cPacket *dataMsg;
+    Packet *dataMsg;
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
         dataMsg->setKind(TCP_I_DATA);

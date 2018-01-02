@@ -171,7 +171,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
     if (isToBeAccepted())
         throw cRuntimeError("READ without ACCEPT");
     delete msg;
-    cPacket *dataMsg;
+    Packet *dataMsg;
     while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
     {
         dataMsg->setKind(TCP_I_DATA);

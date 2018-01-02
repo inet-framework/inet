@@ -142,7 +142,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     delete msg;
 }
 
-void EthernetApplication::sendPacket(cMessage *datapacket, const MacAddress& destAddr)
+void EthernetApplication::sendPacket(Packet *datapacket, const MacAddress& destAddr)
 {
     datapacket->_addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
     emit(sentPkSignal, datapacket);

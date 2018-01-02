@@ -101,7 +101,7 @@ class INET_API TcpReceiveQueue : public cObject
      * It should return nullptr if there's no more data to be passed up --
      * this method is called several times until it returns nullptr.
      */
-    virtual cPacket *extractBytesUpTo(uint32 seq);
+    virtual Packet *extractBytesUpTo(uint32 seq);
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.

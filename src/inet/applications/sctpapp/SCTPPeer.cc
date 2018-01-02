@@ -156,7 +156,7 @@ void SCTPPeer::sendOrSchedule(cMessage *msg)
 
 void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
 {
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -396,7 +396,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     j->second->record(simTime() - smsg->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
                     k->second->collect(simTime() - smsg->getCreationTime());
-                    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+                    Packet *cmsg = new Packet("SCTP_C_SEND");
                     bytesSent += smsg->getByteLength();
                     cmd->setPrValue(0);
                     emit(sentPkSignal, smsg);
@@ -501,7 +501,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
+void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, Packet *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("CMSG");
@@ -575,7 +575,7 @@ void SCTPPeer::sendRequest(bool last)
 
     EV_INFO << "SCTPClient: sending " << numBytes << " data bytes\n";
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(numBytes);
@@ -681,7 +681,7 @@ void SCTPPeer::sendRequestArrived()
     }
 }
 
-void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
+void SCTPPeer::socketDataArrived(int, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -695,7 +695,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 
     if (echo) {
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);

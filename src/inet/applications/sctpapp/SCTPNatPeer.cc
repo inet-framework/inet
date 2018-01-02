@@ -123,7 +123,7 @@ void SCTPNatPeer::generateAndSend()
     uint32 numBytes;
     EV << "SCTPNatPeer:generateAndSend \n";
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     numBytes = (int64)(long)par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -417,7 +417,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                             j->second->record(simTime() - smsg->getCreationTime());
                             auto k = histEndToEndDelay.find(id);
                             k->second->collect(simTime() - smsg->getCreationTime());
-                            cPacket *cmsg = new cPacket("SCTP_C_SEND");
+                            Packet *cmsg = new Packet("SCTP_C_SEND");
                             bytesSent += smsg->getBitLength() / 8;
                             cmd->setSendUnordered(cmd->getSendUnordered());
                             lastStream = (lastStream + 1) % outboundStreams;
@@ -540,7 +540,7 @@ void SCTPNatPeer::handleTimer(cMessage *msg)
     delete connectInfo;
 }
 
-void SCTPNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *msg)
+void SCTPNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Packet *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
@@ -663,7 +663,7 @@ void SCTPNatPeer::sendRequest(bool last)
 
     EV << "SCTPNatPeer: sending " << numBytes << " data bytes\n";
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(numBytes);
@@ -705,7 +705,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         msg->setPeer2AddressesArraySize(1);
         msg->setPeer2Addresses(0, L3Address());
         msg->setPortPeer2(0);
-        cPacket *cmsg = new cPacket(msg->getName());
+        Packet *cmsg = new Packet(msg->getName());
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
         smsg->setEncaps(true);
         smsg->encapsulate(msg);
@@ -802,7 +802,7 @@ void SCTPNatPeer::sendRequestArrived()
     }
 }
 
-void SCTPNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
+void SCTPNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -813,7 +813,7 @@ void SCTPNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     if (echo) {
         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getBitLength() / 8;
         cmsg->encapsulate(smsg);
         if (ind->getSendUnordered())
@@ -873,7 +873,7 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
         msg->setPeer2Addresses(0, L3Address());
         msg->setPeer2Addresses(1, L3Address());
         msg->setPortPeer2(0);
-        cPacket* cmsg = new cPacket(msg->getName());
+        Packet* cmsg = new Packet(msg->getName());
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
         smsg->setEncaps(true);
         smsg->encapsulate(msg);
