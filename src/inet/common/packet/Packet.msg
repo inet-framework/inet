@@ -23,7 +23,6 @@ cplusplus {{
 
 namespace inet;
 
-
 class Packet extends cPacket
 {
     @existingClass;
@@ -33,4 +32,5 @@ class Packet extends cPacket
     b dataLength;
     b trailerPoppedLength;
     Chunk* contents @packetData @getter(getContents);
+    cObject *tags[] @getter(_getTag) @sizeGetter(_getNumTags);
 }
