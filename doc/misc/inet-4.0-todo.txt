@@ -23,6 +23,7 @@ should be included in INET 4.0.
 SHOULD:
  - port *all* protocols to the new packet API, PacketDrill and SCTP are not finished yet
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
+ - replace omnet tags API with INET tags API, add separate Command class to support tags for non packet messages
 
  - revise and rename signals to have a consistent naming scheme (e.g. NF_*)
  - revise and rename statistics to have a consistent naming scheme
