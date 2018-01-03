@@ -121,7 +121,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
         if (found != std::string::npos)
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
-        pk->transferTagsFrom(buf->packet);
+        pk->copyTags(*buf->packet);
         auto hdr = Ptr<Ipv6Header>(buf->packet->peekHeader<Ipv6Header>()->dup());
         const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);

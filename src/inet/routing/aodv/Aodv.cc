@@ -152,7 +152,7 @@ void Aodv::handleMessage(cMessage *msg)
             // KLUDGE: I added this -1 after TTL decrement has been moved in Ipv4
             unsigned int arrivalPacketTTL = udpPacket->_getTag<HopLimitInd>()->getHopLimit() - 1;
             const auto& ctrlPacket = udpPacket->popHeader<AodvControlPacket>();
-//            ctrlPacket->transferTagsFrom(msg);
+//            ctrlPacket->copyTags(*msg);
 
             switch (ctrlPacket->getPacketType()) {
                 case RREQ:
@@ -734,7 +734,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address&
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
     udpPacket->insertHeader(udpHeader);
-    // TODO: was udpPacket->transferTagsFrom(packet);
+    // TODO: was udpPacket->copyTags(*packet);
     udpPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());

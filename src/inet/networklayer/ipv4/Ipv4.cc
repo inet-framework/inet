@@ -878,7 +878,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         //copy Tags from packet to fragment     //FIXME optimizing needed
         {
             Packet *tmp = packet->dup();
-            fragment->transferTagsFrom(tmp);
+            fragment->copyTags(*tmp);
             delete tmp;
         }
 
