@@ -36,25 +36,49 @@ void MessageDispatcher::initialize()
     WATCH_MAP(protocolIdToLowerLayerGateIndex);
 }
 
-int MessageDispatcher::computeSocketReqSocketId(cMessage *message)
+int MessageDispatcher::computeSocketReqSocketId(Packet *packet)
+{
+    auto *socketReq = packet->_findTag<SocketReq>();
+    return socketReq != nullptr ? socketReq->getSocketId() : -1;
+}
+
+int MessageDispatcher::computeSocketIndSocketId(Packet *packet)
+{
+    auto *socketInd = packet->_findTag<SocketInd>();
+    return socketInd != nullptr ? socketInd->getSocketId() : -1;
+}
+
+int MessageDispatcher::computeInterfaceId(Packet *packet)
+{
+    auto interfaceReq = packet->_findTag<InterfaceReq>();
+    return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
+}
+
+const Protocol *MessageDispatcher::computeProtocol(Packet *packet)
+{
+    auto protocolReq = packet->_findTag<DispatchProtocolReq>();;
+    return protocolReq != nullptr ? protocolReq->getProtocol() : nullptr;
+}
+
+int MessageDispatcher::computeSocketReqSocketId(Message *message)
 {
     auto *socketReq = message->_findTag<SocketReq>();
     return socketReq != nullptr ? socketReq->getSocketId() : -1;
 }
 
-int MessageDispatcher::computeSocketIndSocketId(cMessage *message)
+int MessageDispatcher::computeSocketIndSocketId(Message *message)
 {
     auto *socketInd = message->_findTag<SocketInd>();
     return socketInd != nullptr ? socketInd->getSocketId() : -1;
 }
 
-int MessageDispatcher::computeInterfaceId(cMessage *message)
+int MessageDispatcher::computeInterfaceId(Message *message)
 {
     auto interfaceReq = message->_findTag<InterfaceReq>();
     return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
 }
 
-const Protocol *MessageDispatcher::computeProtocol(cMessage *message)
+const Protocol *MessageDispatcher::computeProtocol(Message *message)
 {
     auto protocolReq = message->_findTag<DispatchProtocolReq>();;
     return protocolReq != nullptr ? protocolReq->getProtocol() : nullptr;
@@ -65,25 +89,25 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t) {
     cGate *outGate = nullptr;
     if (!strcmp("upperLayerIn", inGate->getName())) {
         if (message->isPacket())
-            outGate = handleUpperLayerPacket(message, inGate);
+            outGate = handleUpperLayerPacket(check_and_cast<Packet *>(message), inGate);
         else
-            outGate = handleUpperLayerCommand(message, inGate);
+            outGate = handleUpperLayerMessage(check_and_cast<Request *>(message), inGate);
     }
     else if (!strcmp("lowerLayerIn", inGate->getName())) {
         if (message->isPacket())
-            outGate = handleLowerLayerPacket(message, inGate);
+            outGate = handleLowerLayerPacket(check_and_cast<Packet *>(message), inGate);
         else
-            outGate = handleLowerLayerCommand(message, inGate);
+            outGate = handleLowerLayerMessage(check_and_cast<Indication *>(message), inGate);
     }
     else
         throw cRuntimeError("Message %s(%s) arrived on unknown '%s' gate", message->getName(), message->getClassName(), inGate->getFullName());
     outGate->deliver(message, t);
 }
 
-cGate *MessageDispatcher::handleUpperLayerPacket(cMessage *message, cGate *inGate)
+cGate *MessageDispatcher::handleUpperLayerPacket(Packet *packet, cGate *inGate)
 {
-    int interfaceId = computeInterfaceId(message);
-    auto protocol = computeProtocol(message);
+    int interfaceId = computeInterfaceId(packet);
+    auto protocol = computeProtocol(packet);
     if (protocol != nullptr) {
         auto it = protocolIdToLowerLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToLowerLayerGateIndex.end())
@@ -99,13 +123,13 @@ cGate *MessageDispatcher::handleUpperLayerPacket(cMessage *message, cGate *inGat
             throw cRuntimeError("handleUpperLayerPacket(): Unknown interface: id = %d", interfaceId);
     }
     else
-        throw cRuntimeError("handleUpperLayerPacket(): Unknown packet: %s(%s)", message->getName(), message->getClassName());
+        throw cRuntimeError("handleUpperLayerPacket(): Unknown packet: %s(%s)", packet->getName(), packet->getClassName());
 }
 
-cGate *MessageDispatcher::handleLowerLayerPacket(cMessage *message, cGate *inGate)
+cGate *MessageDispatcher::handleLowerLayerPacket(Packet *packet, cGate *inGate)
 {
-    int socketId = computeSocketIndSocketId(message);
-    auto protocol = computeProtocol(message);
+    int socketId = computeSocketIndSocketId(packet);
+    auto protocol = computeProtocol(packet);
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
         if (it != socketIdToUpperLayerGateIndex.end())
@@ -121,59 +145,59 @@ cGate *MessageDispatcher::handleLowerLayerPacket(cMessage *message, cGate *inGat
             throw cRuntimeError("handleLowerLayerPacket(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
     }
     else
-        throw cRuntimeError("handleLowerLayerPacket(): Unknown packet: %s(%s)", message->getName(), message->getClassName());
+        throw cRuntimeError("handleLowerLayerPacket(): Unknown packet: %s(%s)", packet->getName(), packet->getClassName());
 }
 
-cGate *MessageDispatcher::handleUpperLayerCommand(cMessage *message, cGate *inGate)
+cGate *MessageDispatcher::handleUpperLayerMessage(Request *request, cGate *inGate)
 {
-    int socketId = computeSocketReqSocketId(message);
-    int interfaceId = computeInterfaceId(message);
-    auto protocol = computeProtocol(message);
+    int socketId = computeSocketReqSocketId(request);
+    int interfaceId = computeInterfaceId(request);
+    auto protocol = computeProtocol(request);
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
         if (it == socketIdToUpperLayerGateIndex.end())
             socketIdToUpperLayerGateIndex[socketId] = inGate->getIndex();
         else if (it->first != socketId)
-            throw cRuntimeError("handleUpperLayerCommand(): Socket is already registered: id = %d, gate = %d, new gate = %d", socketId, it->second, inGate->getIndex());
+            throw cRuntimeError("handleUpperLayerMessage(): Socket is already registered: id = %d, gate = %d, new gate = %d", socketId, it->second, inGate->getIndex());
     }
     if (protocol != nullptr) {
         auto it = protocolIdToLowerLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToLowerLayerGateIndex.end())
             return gate("lowerLayerOut", it->second);
         else
-            throw cRuntimeError("handleUpperLayerCommand(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
+            throw cRuntimeError("handleUpperLayerMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
     }
     else if (interfaceId != -1) {
         auto it = interfaceIdToLowerLayerGateIndex.find(interfaceId);
         if (it != interfaceIdToLowerLayerGateIndex.end())
             return gate("lowerLayerOut", it->second);
         else
-            throw cRuntimeError("handleUpperLayerCommand(): Unknown interface: id = %d", interfaceId);
+            throw cRuntimeError("handleUpperLayerMessage(): Unknown interface: id = %d", interfaceId);
     }
     else
-        throw cRuntimeError("handleUpperLayerCommand(): Unknown message: %s(%s)", message->getName(), message->getClassName());
+        throw cRuntimeError("handleUpperLayerMessage(): Unknown message: %s(%s)", request->getName(), request->getClassName());
 }
 
-cGate *MessageDispatcher::handleLowerLayerCommand(cMessage *message, cGate *inGate)
+cGate *MessageDispatcher::handleLowerLayerMessage(Indication *indication, cGate *inGate)
 {
-    int socketId = computeSocketIndSocketId(message);
-    auto protocol = computeProtocol(message);
+    int socketId = computeSocketIndSocketId(indication);
+    auto protocol = computeProtocol(indication);
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
         if (it != socketIdToUpperLayerGateIndex.end())
             return gate("upperLayerOut", it->second);
         else
-            throw cRuntimeError("handleLowerLayerCommand(): Unknown socket, id = %d", socketId);
+            throw cRuntimeError("handleLowerLayerMessage(): Unknown socket, id = %d", socketId);
     }
     else if (protocol != nullptr) {
         auto it = protocolIdToUpperLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToUpperLayerGateIndex.end())
             return gate("uppwerLayerOut", it->second);
         else
-            throw cRuntimeError("handleLowerLayerCommand(): Unknown protocol: id = %d", protocol->getId());
+            throw cRuntimeError("handleLowerLayerMessage(): Unknown protocol: id = %d", protocol->getId());
     }
     else
-        throw cRuntimeError("handleLowerLayerCommand(): Unknown message: %s(%s)", message->getName(), message->getClassName());
+        throw cRuntimeError("handleLowerLayerMessage(): Unknown message: %s(%s)", indication->getName(), indication->getClassName());
 }
 
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
