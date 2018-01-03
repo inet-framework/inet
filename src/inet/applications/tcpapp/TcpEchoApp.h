@@ -40,7 +40,7 @@ class INET_API TcpEchoApp : public TcpServerHostApp
     long bytesSent = 0;
 
   protected:
-    virtual void sendDown(cMessage *msg);
+    virtual void sendDown(Packet *packet);
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

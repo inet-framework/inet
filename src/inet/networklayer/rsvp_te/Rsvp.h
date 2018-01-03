@@ -243,7 +243,7 @@ class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycl
     virtual bool doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, Ipv4Address OI);
     virtual void announceLinkChange(int tedlinkindex);
 
-    virtual void sendToIP(cMessage *msg, Ipv4Address destAddr);
+    virtual void sendToIP(Packet *msg, Ipv4Address destAddr);
 
     virtual bool evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ipv4Address& OI);
 

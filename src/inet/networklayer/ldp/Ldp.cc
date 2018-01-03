@@ -222,7 +222,7 @@ bool Ldp::isNodeUp()
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void Ldp::sendToPeer(Ipv4Address dest, cMessage *msg)
+void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
 {
     getPeerSocket(dest)->send(msg);
 }

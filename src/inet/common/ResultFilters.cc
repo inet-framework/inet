@@ -112,7 +112,7 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (cMessage *msg = dynamic_cast<cMessage *>(object)) {
+    if (auto *msg = dynamic_cast<Packet *>(object)) {
         L3AddressTagBase *addresses = msg->_findTag<L3AddressReq>();
         if (!addresses)
             addresses = msg->_findTag<L3AddressInd>();

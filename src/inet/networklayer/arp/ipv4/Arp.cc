@@ -203,7 +203,7 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
     emit(arpResolutionInitiatedSignal, &signal);
 }
 
-void Arp::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
+void Arp::sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
 {
     // add control info with MAC address
     msg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddress);

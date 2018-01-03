@@ -1881,7 +1881,7 @@ void Rsvp::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, Se
     sendToIP(pk, nextHop);
 }
 
-void Rsvp::sendToIP(cMessage *msg, Ipv4Address destAddr)
+void Rsvp::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = RSVP_TRAFFIC;
     msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);

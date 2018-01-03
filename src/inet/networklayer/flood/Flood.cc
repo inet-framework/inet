@@ -320,7 +320,7 @@ void Flood::encapsulate(Packet *appPkt)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void Flood::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
+void Flood::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);

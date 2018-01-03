@@ -391,7 +391,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void WiseRoute::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
+void WiseRoute::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);

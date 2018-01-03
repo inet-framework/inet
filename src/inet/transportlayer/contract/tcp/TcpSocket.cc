@@ -180,7 +180,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     sockstate = CONNECTING;
 }
 
-void TcpSocket::send(cMessage *msg)
+void TcpSocket::send(Packet *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
         throw cRuntimeError("TcpSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));

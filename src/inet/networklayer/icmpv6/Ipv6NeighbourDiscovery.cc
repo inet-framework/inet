@@ -747,7 +747,7 @@ void Ipv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
     neighbourCache.remove(nceKey->address, nceKey->interfaceID);
 }
 
-void Ipv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const Ipv6Address& destAddr,
+void Ipv6NeighbourDiscovery::sendPacketToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
         const Ipv6Address& srcAddr, int interfaceId)
 {
     delete msg->_removeTagIfPresent<DispatchProtocolReq>();

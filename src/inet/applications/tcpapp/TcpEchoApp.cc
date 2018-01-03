@@ -51,7 +51,7 @@ void TcpEchoApp::initialize(int stage)
     }
 }
 
-void TcpEchoApp::sendDown(cMessage *msg)
+void TcpEchoApp::sendDown(Packet *msg)
 {
     if (msg->isPacket()) {
         Packet *pk = static_cast<Packet *>(msg);

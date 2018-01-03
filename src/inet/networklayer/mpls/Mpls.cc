@@ -283,14 +283,14 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
     }
 }
 
-void Mpls::sendToL2(cMessage *msg)
+void Mpls::sendToL2(Packet *msg)
 {
     ASSERT(msg->_findTag<InterfaceReq>());
     ASSERT(msg->_findTag<PacketProtocolTag>());
     send(msg, "ifOut");
 }
 
-void Mpls::sendToL3(cMessage *msg)
+void Mpls::sendToL3(Packet *msg)
 {
     ASSERT(msg->_findTag<InterfaceInd>());
     ASSERT(msg->_findTag<DispatchProtocolReq>());

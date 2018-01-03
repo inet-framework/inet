@@ -286,7 +286,7 @@ class INET_API TcpSocket
     /**
      * Sends data packet.
      */
-    void send(cMessage *msg);
+    void send(Packet *msg);
 
     /**
      * Sends command.

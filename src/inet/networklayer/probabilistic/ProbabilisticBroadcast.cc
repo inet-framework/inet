@@ -344,7 +344,7 @@ void ProbabilisticBroadcast::decapsulate(Packet *packet)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
+void ProbabilisticBroadcast::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
