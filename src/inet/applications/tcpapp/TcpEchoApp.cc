@@ -122,7 +122,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
    */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
-    Packet *pkt = PK(timer);
+    Packet *pkt = check_and_cast<Packet *>(timer);
     pkt->setContextPointer(nullptr);
     echoAppModule->sendDown(pkt);
 }

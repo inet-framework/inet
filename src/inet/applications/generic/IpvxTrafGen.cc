@@ -108,7 +108,7 @@ void IpvxTrafGen::handleMessage(cMessage *msg)
         }
     }
     else
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet *>(msg));
 }
 
 void IpvxTrafGen::refreshDisplay() const

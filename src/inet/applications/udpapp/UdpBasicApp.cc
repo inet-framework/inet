@@ -193,7 +193,7 @@ void UdpBasicApp::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet *>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
