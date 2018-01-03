@@ -49,7 +49,8 @@ void ExampleQosClassifier::initialize()
 
 void ExampleQosClassifier::handleMessage(cMessage *msg)
 {
-    msg->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
+    auto packet = check_and_cast<Packet *>(msg);
+    packet->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
     send(msg, "out");
 }
 

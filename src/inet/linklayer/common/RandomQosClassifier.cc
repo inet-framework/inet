@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/RandomQosClassifier.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 
@@ -24,7 +25,8 @@ Define_Module(RandomQosClassifier);
 
 void RandomQosClassifier::handleMessage(cMessage *msg)
 {
-    msg->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
+    auto packet = check_and_cast<Packet *>(msg);
+    packet->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
     send(msg, "out");
 }
 

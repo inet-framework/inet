@@ -133,7 +133,8 @@ void Aodv::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown self message");
     }
     else {
-        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
+        auto packet = check_and_cast<Packet *>(msg);
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
 
         if (protocol == &Protocol::icmpv4) {
             IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);

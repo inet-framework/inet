@@ -171,6 +171,8 @@ void Ipv6::refreshDisplay() const
 
 void Ipv6::endService(cPacket *msg)
 {
+    Packet *packet = dynamic_cast<Packet *>(msg);
+
 #ifdef WITH_xMIPv6
     // 28.09.07 - CB
     // support for rescheduling datagrams which are supposed to be sent over
@@ -195,17 +197,17 @@ void Ipv6::endService(cPacket *msg)
 #endif /* WITH_xMIPv6 */
 
     if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->getArrivalGate()->isName("ndIn") && msg->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+        || (msg->getArrivalGate()->isName("ndIn") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
         || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->getArrivalGate()->isName("xMIPv6In") && msg->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+        || (msg->getArrivalGate()->isName("xMIPv6In") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
         )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
-        handleMessageFromHL(msg);
+        handleMessageFromHL(packet);
     }
-    else if (msg->getArrivalGate()->isName("ndIn") && msg->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    else if (msg->getArrivalGate()->isName("ndIn") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
         Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();
