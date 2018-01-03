@@ -1,0 +1,148 @@
+====== inet-3.x ======
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-13  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-14  Zoltan Bojthe
+
+	backport: MANET protocols backport (uses ipv4::netfilter)
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-11  Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+2012-01-19  Andras Varga
+
+	Follow IPv4Route change: "host" in IPv4Route was renamed to
+	"destination"
+
+2012-01-19  Zoltan Bojthe
+
+	Follow RoutingTable change: returned IPv4Route pointers are no longer
+	const
+
+2012-01-20  Andras Varga
+
+	DSDV_2: timeToLiveRoutingEntry NED parameter renamed to routeLifetime
+
+2012-01-09  Zoltan Bojthe
+
+	Moved DSDV-related fields/functions from RoutingTable to DSDV_2.
+
+	DSDV route expiry is now implemented with a new isValid() method on
+	IPv4Route; RoutingTable will ignore invalid routes (isValid()==false).
+
+	Details:
+	- remove DSDV related fields/functions from the IPv4Route, IRoutingTable,
+	  and RoutingTable classes
+	- added new DSDVIPv4Route class that extends IPv4Route with DSDV-related
+	  fields: expiryTime, sequencenumber (changed installtime to expirytime)
+	- add IPv4Route::isValid() that compares simTime() to expiryTime
+	- rename dsdvTestAndDelete() in RoutingTable to purge() -- it throws out
+	  invalid routes using isValid()
+	- remove set/getTimeToLiveRoutingEntry() functions from IRoutingTable
+	- DSDV changed to add entries to the routing table with 255.255.255.255 netmask
+	- DSDV to use DSDVIPv4Route entries
+
+2012-01-09  Zoltan Bojthe
+
+	DSDV_2: bugfix for #497: dynamic routing protocols (manetrouting)
+	modify routing entries. Solution: remove routing entry and add a new one,
+	instead of modifying the existing route.
+
+	[Note: this fix is no longer needed, as a later RoutingTable/IPv4Route
+	change makes it possible to change routes on the fly.]
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-18  Andras Varga
+
+	comments, whitespace, etc.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.
