@@ -180,7 +180,7 @@ void xMIPv6::handleMessage(cMessage *msg)
     // if its a MIPv6 related mobility message
     else {
         auto packet = check_and_cast<Packet *>(msg);
-        if (msg->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
+        if (packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
             EV_INFO << " Received MIPv6 related message" << endl;
             processMobilityMessage(packet);
         }

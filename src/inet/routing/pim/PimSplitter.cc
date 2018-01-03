@@ -57,7 +57,7 @@ void PimSplitter::handleMessage(cMessage *msg)
 
     if (arrivalGate == ipIn) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4) {
             EV_WARN << "Received ICMP error " << msg->getName() <<  ", ignored\n";
             delete msg;

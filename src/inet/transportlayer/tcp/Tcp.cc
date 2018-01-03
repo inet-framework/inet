@@ -190,7 +190,7 @@ void Tcp::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
             EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
             delete msg;

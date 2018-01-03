@@ -456,7 +456,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
     else if (msgP->arrivedOn("ipIn")) {
         // must be a Packet
         Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = msgP->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = pk->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
             handleIpInputMessage(pk);

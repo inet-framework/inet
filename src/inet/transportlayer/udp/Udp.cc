@@ -183,7 +183,7 @@ void Udp::handleMessage(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::udp) {
             processUDPPacket(packet);
         }
