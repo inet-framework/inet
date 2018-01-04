@@ -24,13 +24,17 @@ namespace inet {
 namespace physicallayer {
 
 Signal::Signal(const ITransmission *transmission) :
-    transmission(transmission)
+    transmissionId(transmission->getId()),
+    transmission(transmission),
+    radioMedium(transmission->getTransmitter()->getMedium())
 {
 }
 
 Signal::Signal(const Signal& other) :
     cPacket(other),
-    transmission(other.transmission)
+    transmissionId(other.transmissionId),
+    transmission(nullptr),
+    radioMedium(other.radioMedium)
 {
 }
 
@@ -39,36 +43,64 @@ std::ostream& Signal::printToStream(std::ostream& stream, int level) const
     return stream << (cPacket *)this;
 }
 
+const IRadio *Signal::getTransmitter() const
+{
+    auto transmission = getTransmission();
+    return transmission != nullptr ? transmission->getTransmitter() : nullptr;
+}
+
+const IRadio *Signal::getReceiver() const
+{
+    if (receiver == nullptr)
+        receiver = check_and_cast<const IRadio *>(getArrivalModule());
+    return receiver;
+}
+
 const ITransmission *Signal::getTransmission() const
 {
-    return transmission;
+    if (!isDup())
+        return transmission;
+    else
+        return radioMedium->getTransmission(transmissionId);
 }
 
 const IArrival *Signal::getArrival() const
 {
-    if (arrival == nullptr) {
-        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        arrival = transmission->getMedium()->getArrival(receiver, transmission);
+    if (!isDup()) {
+        if (arrival == nullptr)
+            arrival = radioMedium->getArrival(getReceiver(), transmission);
+        return arrival;
     }
-    return arrival;
+    else {
+        auto transmission = getTransmission();
+        return transmission != nullptr ? radioMedium->getArrival(getReceiver(), transmission) : nullptr;
+    }
 }
 
 const IListening *Signal::getListening() const
 {
-    if (listening == nullptr) {
-        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        listening = transmission->getMedium()->getListening(receiver, transmission);
+    if (!isDup()) {
+        if (listening == nullptr)
+            listening = radioMedium->getListening(getReceiver(), transmission);
+        return listening;
     }
-    return listening;
+    else {
+        auto transmission = getTransmission();
+        return transmission != nullptr ? radioMedium->getListening(getReceiver(), transmission) : nullptr;
+    }
 }
 
 const IReception *Signal::getReception() const
 {
-    if (reception == nullptr) {
-        auto receiver = check_and_cast<const IRadio *>(getArrivalModule());
-        reception = transmission->getMedium()->getReception(receiver, transmission);
+    if (!isDup()) {
+        if (reception == nullptr)
+            reception = radioMedium->getReception(getReceiver(), transmission);
+        return reception;
     }
-    return reception;
+    else {
+        auto transmission = getTransmission();
+        return transmission != nullptr ? radioMedium->getReception(getReceiver(), transmission) : nullptr;
+    }
 }
 
 } // namespace physicallayer

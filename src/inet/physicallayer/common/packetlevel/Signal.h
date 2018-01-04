@@ -27,10 +27,16 @@ namespace physicallayer {
 class INET_API Signal : public cPacket, public ISignal
 {
   protected:
-    const ITransmission *transmission = nullptr;
+    const int transmissionId;
+    const ITransmission *transmission;
+    const IRadioMedium *radioMedium;
+    mutable const IRadio *receiver = nullptr;
     mutable const IArrival *arrival = nullptr;
     mutable const IListening *listening = nullptr;
     mutable const IReception *reception = nullptr;
+
+  protected:
+    bool isDup() const { return transmission == nullptr; }
 
   public:
     Signal(const ITransmission *transmission);
@@ -40,6 +46,8 @@ class INET_API Signal : public cPacket, public ISignal
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
+    virtual const IRadio *getTransmitter() const;
+    virtual const IRadio *getReceiver() const;
     virtual const ITransmission *getTransmission() const override;
     virtual const IArrival *getArrival() const override;
     virtual const IListening *getListening() const override;
