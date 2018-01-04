@@ -159,10 +159,10 @@ class INET_API IRadioMedium : public IPrintableObject
     virtual void removeRadio(const IRadio *radio) = 0;
 
     /**
-     * Get radio instance from medium by id.
+     * Returns radio instance from medium by id.
      * May return a nullptr if no matching radio is registered.
      */
-    virtual const IRadio* getRadio(int id) const = 0;
+    virtual const IRadio *getRadio(int id) const = 0;
 
     /**
      * Returns a new signal containing the signal transmission that
@@ -175,6 +175,12 @@ class INET_API IRadioMedium : public IPrintableObject
      * Returns the packet that was transmitted in the provided signal.
      */
     virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) = 0;
+
+    /**
+     * Returns transmission instance from medium by id.
+     * May return a nullptr if no matching transmission is registered.
+     */
+    virtual const ITransmission *getTransmission(int id) const = 0;
 
     /**
      * Returns the listening decision that describes what the receiver detects

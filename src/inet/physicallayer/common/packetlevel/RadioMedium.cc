@@ -606,6 +606,14 @@ Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *signal)
     return packet;
 }
 
+const ITransmission *RadioMedium::getTransmission(int id) const
+{
+    for (auto transmission : transmissions)
+        if (transmission->getId() == id)
+            return transmission;
+    return nullptr;
+}
+
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
     const IListeningDecision *decision = computeListeningDecision(radio, listening, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
