@@ -28,25 +28,28 @@ namespace inet::physicallayer;
 class IIeee80211Band
 {
     @existingClass;
-    string name @editable(false);
-    Hz centerFrequency[] @sizeGetter(getNumChannels) @editable(false);
+    @descriptor(readonly);
+    string name;
+    Hz centerFrequency[] @sizeGetter(getNumChannels);
 }
 
 class Ieee80211EnumeratedBand extends IIeee80211Band
 {
     @existingClass;
+    @descriptor(readonly);
 }
 
 class Ieee80211ArithmeticalBand extends IIeee80211Band
 {
     @existingClass;
+    @descriptor(readonly);
 }
 
 class Ieee80211Channel
 {
     @existingClass;
     @descriptor(readonly);
-    IIeee80211Band *band @editable(false);
+    IIeee80211Band *band;
     int channelNumber;
 }
 

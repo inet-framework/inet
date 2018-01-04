@@ -28,59 +28,64 @@ namespace inet::physicallayer;
 class IIeee80211PreambleMode
 {
     @existingClass;
-    simtime_t duration @editable(false);
+    @descriptor(readonly);
+    simtime_t duration;
 };
 
 class IIeee80211HeaderMode
 {
     @existingClass;
-    bps netBitrate @editable(false);
-    bps grossBitrate @editable(false);
-    b Length @editable(false);
-    simtime_t duration @editable(false);
-//    IModulation *modulation @editable(false);
+    @descriptor(readonly);
+    bps netBitrate;
+    bps grossBitrate;
+    b Length;
+    simtime_t duration;
+//    IModulation *modulation;
 };
 
 class IIeee80211DataMode
 {
     @existingClass;
-    bps netBitrate @editable(false);
-    bps grossBitrate @editable(false);
-//    IModulation *modulation @editable(false);
-    int numberOfSpatialStreams @editable(false);
+    @descriptor(readonly);
+    bps netBitrate;
+    bps grossBitrate;
+//    IModulation *modulation;
+    int numberOfSpatialStreams;
 };
 
 class IIeee80211Mode extends cObject
 {
     @existingClass;
-    int legacyCwMin @editable(false);
-    int legacyCwMax @editable(false);
-    string name @editable(false);
-    IIeee80211PreambleMode *preambleMode @getter(_getPreambleMode) @editable(false);
-    IIeee80211HeaderMode *headerMode @getter(_getHeaderMode) @editable(false);
-    IIeee80211DataMode *dataMode @getter(_getDataMode) @editable(false);
-    simtime_t slotTime @editable(false);
-    simtime_t sifsTime @editable(false);
-    simtime_t rifsTime @editable(false);
-    simtime_t ccaTime @editable(false);
-    simtime_t phyRxStartDelay @editable(false);
-    simtime_t rxTxTurnaroundTime @editable(false);
-    simtime_t preambleLength @editable(false);
-    simtime_t plcpHeaderLength @editable(false);
-    int mpduMaxLength @editable(false);
+    @descriptor(readonly);
+    int legacyCwMin;
+    int legacyCwMax;
+    string name;
+    IIeee80211PreambleMode *preambleMode @getter(_getPreambleMode);
+    IIeee80211HeaderMode *headerMode @getter(_getHeaderMode);
+    IIeee80211DataMode *dataMode @getter(_getDataMode);
+    simtime_t slotTime;
+    simtime_t sifsTime;
+    simtime_t rifsTime;
+    simtime_t ccaTime;
+    simtime_t phyRxStartDelay;
+    simtime_t rxTxTurnaroundTime;
+    simtime_t preambleLength;
+    simtime_t plcpHeaderLength;
+    int mpduMaxLength;
 }
 
 class Ieee80211ModeSet extends cObject
 {
     @existingClass;
-    IIeee80211Mode *slowestMode @getter(_getSlowestMode) @editable(false);
-    IIeee80211Mode *fastestMode @getter(_getFastestMode) @editable(false);
-    IIeee80211Mode *slowestMandatoryMode @getter(_getSlowestMandatoryMode) @editable(false);
-    IIeee80211Mode *fastestMandatoryMode @getter(_getFastestMandatoryMode) @editable(false);
-    simtime_t sifsTime @editable(false);
-    simtime_t slotTime @editable(false);
-    simtime_t phyRxStartDelay @editable(false);
-    int cwMin @editable(false);
-    int cwMax @editable(false);
+    @descriptor(readonly);
+    IIeee80211Mode *slowestMode @getter(_getSlowestMode);
+    IIeee80211Mode *fastestMode @getter(_getFastestMode);
+    IIeee80211Mode *slowestMandatoryMode @getter(_getSlowestMandatoryMode);
+    IIeee80211Mode *fastestMandatoryMode @getter(_getFastestMandatoryMode);
+    simtime_t sifsTime;
+    simtime_t slotTime;
+    simtime_t phyRxStartDelay;
+    int cwMin;
+    int cwMax;
 }
 
