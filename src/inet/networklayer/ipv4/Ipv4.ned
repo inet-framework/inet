@@ -54,13 +54,13 @@ package inet.networklayer.ipv4;
 //
 // <b>Working with Arp</b>
 //
-// Ipv4 module subscribe to completedARPResolution and failedARPResolution signals on Arp module.
+// Ipv4 module subscribe to completedArpResolution and failedArpResolution signals on Arp module.
 // The Arp module accessed via arpOut gate, should not insert any module between Ipv4 and Arp.
 // Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
 // method call. If MacAddress unspecified, then start address resolution via Arp method call and
 // insert packet to a queue specified by next hop addr.
-// When received a completedARPResolution, then send packets from queue of next hop addr.
-// When received a failedARPResolution, then drop packets from queue of next hop addr.
+// When received a completedArpResolution, then send packets from queue of next hop addr.
+// When received a failedArpResolution, then drop packets from queue of next hop addr.
 // When Ipv4 module received an Arp packet from Lower Layer on some queueIn gate,
 // then send out this packet on arpOut gate. When received a packet on arpIn gate,
 // then send out this packet on the specified queueOut gate.
@@ -101,10 +101,10 @@ simple Ipv4
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetDrop](type=cPacket);
-        @signal[NF_IPv4_NEW_MULTICAST](type=Ipv4Header);
-        @signal[NF_IPv4_DATA_ON_NONRPF](type=Ipv4Header);
-        @signal[NF_IPv4_DATA_ON_RPF](type=Ipv4Header);
-        @signal[NF_IPv4_MDATA_REGISTER](type=Packet);
+        @signal[ipv4NewMulticast](type=Ipv4Header);
+        @signal[ipv4DataOnNonrpf](type=Ipv4Header);
+        @signal[ipv4DataOnRpf](type=Ipv4Header);
+        @signal[ipv4MdataRegister](type=Packet);
         @statistic[packetDropAddressResolutionFailed](title="packet drop: address resolution failed"; source=packetDropReasonIsAddressResolutionFailed(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropHopLimitReached](title="packet drop: hop limit reached"; source=packetDropReasonIsHopLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropForwardingDisabled](title="packet drop: forwarding disabled"; source=packetDropReasonIsForwardingDisabled(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

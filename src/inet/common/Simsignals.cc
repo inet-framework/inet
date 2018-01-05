@@ -20,67 +20,67 @@
 
 namespace inet {
 
-simsignal_t NF_PP_TX_BEGIN = cComponent::registerSignal("NF_PP_TX_BEGIN");
-simsignal_t NF_PP_TX_END = cComponent::registerSignal("NF_PP_TX_END");
-simsignal_t NF_PP_RX_END = cComponent::registerSignal("NF_PP_RX_END");
-simsignal_t NF_TX_ACKED = cComponent::registerSignal("NF_TX_ACKED");
-simsignal_t NF_L2_Q_DROP = cComponent::registerSignal("NF_L2_Q_DROP");
-simsignal_t NF_MAC_BECAME_IDLE = cComponent::registerSignal("NF_MAC_BECAME_IDLE");
-simsignal_t NF_L2_BEACON_LOST = cComponent::registerSignal("NF_L2_BEACON_LOST");
-simsignal_t NF_L2_ASSOCIATED = cComponent::registerSignal("NF_L2_ASSOCIATED");
-simsignal_t NF_L2_ASSOCIATED_NEWAP = cComponent::registerSignal("NF_L2_ASSOCIATED_NEWAP");
-simsignal_t NF_L2_ASSOCIATED_OLDAP = cComponent::registerSignal("NF_L2_ASSOCIATED_OLDAP");
-simsignal_t NF_L2_DISASSOCIATED = cComponent::registerSignal("NF_L2_DISASSOCIATED");
-simsignal_t NF_L2_AP_ASSOCIATED = cComponent::registerSignal("NF_L2_AP_ASSOCIATED");
-simsignal_t NF_L2_AP_DISASSOCIATED = cComponent::registerSignal("NF_L2_AP_DISASSOCIATED");
+simsignal_t ppTxBeginSignal = cComponent::registerSignal("ppTxBegin");
+simsignal_t ppTxEndSignal = cComponent::registerSignal("ppTxEnd");
+simsignal_t ppRxEndSignal = cComponent::registerSignal("ppRxEnd");
+simsignal_t txAckedSignal = cComponent::registerSignal("txAcked");
+simsignal_t l2QDropSignal = cComponent::registerSignal("l2QDrop");
+simsignal_t macBecameIdleSignal = cComponent::registerSignal("macBecameIdle");
+simsignal_t l2BeaconLostSignal = cComponent::registerSignal("l2BeaconLost");
+simsignal_t l2AssociatedSignal = cComponent::registerSignal("l2Associated");
+simsignal_t l2AssociatedNewapSignal = cComponent::registerSignal("l2AssociatedNewap");
+simsignal_t l2AssociatedOldapSignal = cComponent::registerSignal("l2AssociatedOldap");
+simsignal_t l2DisassociatedSignal = cComponent::registerSignal("l2Disassociated");
+simsignal_t l2ApAssociatedSignal = cComponent::registerSignal("l2ApAssociated");
+simsignal_t l2ApDisassociatedSignal = cComponent::registerSignal("l2ApDisassociated");
 
 simsignal_t linkBreakSignal = cComponent::registerSignal("linkBreak");
-simsignal_t NF_LINK_PROMISCUOUS = cComponent::registerSignal("NF_LINK_PROMISCUOUS");
-simsignal_t NF_LINK_FULL_PROMISCUOUS = cComponent::registerSignal("NF_LINK_FULL_PROMISCUOUS");
+simsignal_t linkPromiscuousSignal = cComponent::registerSignal("linkPromiscuous");
+simsignal_t linkFullPromiscuousSignal = cComponent::registerSignal("linkFullPromiscuous");
 
-simsignal_t NF_MODESET_CHANGED = cComponent::registerSignal("NF_MODESET_CHANGED");
+simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
 
 // - layer 3 (network)
-simsignal_t NF_INTERFACE_CREATED = cComponent::registerSignal("NF_INTERFACE_CREATED");
-simsignal_t NF_INTERFACE_DELETED = cComponent::registerSignal("NF_INTERFACE_DELETED");
-simsignal_t NF_INTERFACE_STATE_CHANGED = cComponent::registerSignal("NF_INTERFACE_STATE_CHANGED");
-simsignal_t NF_INTERFACE_CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_CONFIG_CHANGED");
-simsignal_t NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED");
-simsignal_t NF_INTERFACE_IPv4CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_IPv4CONFIG_CHANGED");
-simsignal_t NF_INTERFACE_IPv6CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_IPv6CONFIG_CHANGED");
-simsignal_t NF_TED_CHANGED = cComponent::registerSignal("NF_TED_CHANGED");
+simsignal_t interfaceCreatedSignal = cComponent::registerSignal("interfaceCreated");
+simsignal_t interfaceDeletedSignal = cComponent::registerSignal("interfaceDeleted");
+simsignal_t interfaceStateChangedSignal = cComponent::registerSignal("interfaceStateChanged");
+simsignal_t interfaceConfigChangedSignal = cComponent::registerSignal("interfaceConfigChanged");
+simsignal_t interfaceGenericnetworkprotocolconfigChangedSignal = cComponent::registerSignal("interfaceGenericnetworkprotocolconfigChanged");
+simsignal_t interfaceIpv4ConfigChangedSignal = cComponent::registerSignal("interfaceIpv4ConfigChanged");
+simsignal_t interfaceIpv6ConfigChangedSignal = cComponent::registerSignal("interfaceIpv6ConfigChanged");
+simsignal_t tedChangedSignal = cComponent::registerSignal("tedChanged");
 
 // layer 3 - Routing Table
-simsignal_t NF_ROUTE_ADDED = cComponent::registerSignal("NF_ROUTE_ADDED");
-simsignal_t NF_ROUTE_DELETED = cComponent::registerSignal("NF_ROUTE_DELETED");
-simsignal_t NF_ROUTE_CHANGED = cComponent::registerSignal("NF_ROUTE_CHANGED");
-simsignal_t NF_MROUTE_ADDED = cComponent::registerSignal("NF_MROUTE_ADDED");
-simsignal_t NF_MROUTE_DELETED = cComponent::registerSignal("NF_MROUTE_DELETED");
-simsignal_t NF_MROUTE_CHANGED = cComponent::registerSignal("NF_MROUTE_CHANGED");
+simsignal_t routeAddedSignal = cComponent::registerSignal("routeAdded");
+simsignal_t routeDeletedSignal = cComponent::registerSignal("routeDeleted");
+simsignal_t routeChangedSignal = cComponent::registerSignal("routeChanged");
+simsignal_t mrouteAddedSignal = cComponent::registerSignal("mrouteAdded");
+simsignal_t mrouteDeletedSignal = cComponent::registerSignal("mrouteDeleted");
+simsignal_t mrouteChangedSignal = cComponent::registerSignal("mrouteChanged");
 
 // layer 3 - Ipv4
-simsignal_t NF_IPv4_MCAST_JOIN = cComponent::registerSignal("NF_IPv4_MCAST_JOIN");
-simsignal_t NF_IPv4_MCAST_LEAVE = cComponent::registerSignal("NF_IPv4_MCAST_LEAVE");
-simsignal_t NF_IPv4_MCAST_CHANGE = cComponent::registerSignal("NF_IPv4_MCAST_CHANGE");
-simsignal_t NF_IPv4_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_REGISTERED");
-simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_UNREGISTERED");
+simsignal_t ipv4McastJoinSignal = cComponent::registerSignal("ipv4McastJoin");
+simsignal_t ipv4McastLeaveSignal = cComponent::registerSignal("ipv4McastLeave");
+simsignal_t ipv4McastChangeSignal = cComponent::registerSignal("ipv4McastChange");
+simsignal_t ipv4McastRegisteredSignal = cComponent::registerSignal("ipv4McastRegistered");
+simsignal_t ipv4McastUnregisteredSignal = cComponent::registerSignal("ipv4McastUnregistered");
 
 // for PIM
-simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
-simsignal_t NF_IPv4_DATA_ON_NONRPF = cComponent::registerSignal("NF_IPv4_DATA_ON_NONRPF");
-simsignal_t NF_IPv4_DATA_ON_RPF = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF");
-simsignal_t NF_IPv4_MDATA_REGISTER = cComponent::registerSignal("NF_IPv4_MDATA_REGISTER");
-simsignal_t NF_PIM_NEIGHBOR_ADDED = cComponent::registerSignal("NF_PIM_NEIGHBOR_ADDED");
-simsignal_t NF_PIM_NEIGHBOR_DELETED = cComponent::registerSignal("NF_PIM_NEIGHBOR_DELETED");
-simsignal_t NF_PIM_NEIGHBOR_CHANGED = cComponent::registerSignal("NF_PIM_NEIGHBOR_CHANGED");
+simsignal_t ipv4NewMulticastSignal = cComponent::registerSignal("ipv4NewMulticast");
+simsignal_t ipv4DataOnNonrpfSignal = cComponent::registerSignal("ipv4DataOnNonrpf");
+simsignal_t ipv4DataOnRpfSignal = cComponent::registerSignal("ipv4DataOnRpf");
+simsignal_t ipv4MdataRegisterSignal = cComponent::registerSignal("ipv4MdataRegister");
+simsignal_t pimNeighborAddedSignal = cComponent::registerSignal("pimNeighborAdded");
+simsignal_t pimNeighborDeletedSignal = cComponent::registerSignal("pimNeighborDeleted");
+simsignal_t pimNeighborChangedSignal = cComponent::registerSignal("pimNeighborChanged");
 
 // layer 3 - Ipv6
-simsignal_t NF_IPv6_HANDOVER_OCCURRED = cComponent::registerSignal("NF_IPv6_HANDOVER_OCCURRED");
-simsignal_t NF_MIPv6_RO_COMPLETED = cComponent::registerSignal("NF_MIPv6_RO_COMPLETED");
-simsignal_t NF_IPv6_MCAST_JOIN = cComponent::registerSignal("NF_IPv6_MCAST_JOIN");
-simsignal_t NF_IPv6_MCAST_LEAVE = cComponent::registerSignal("NF_IPv6_MCAST_LEAVE");
-simsignal_t NF_IPv6_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_REGISTERED");
-simsignal_t NF_IPv6_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_UNREGISTERED");
+simsignal_t ipv6HandoverOccurredSignal = cComponent::registerSignal("ipv6HandoverOccurred");
+simsignal_t mipv6RoCompletedSignal = cComponent::registerSignal("mipv6RoCompleted");
+simsignal_t ipv6McastJoinSignal = cComponent::registerSignal("ipv6McastJoin");
+simsignal_t ipv6McastLeaveSignal = cComponent::registerSignal("ipv6McastLeave");
+simsignal_t ipv6McastRegisteredSignal = cComponent::registerSignal("ipv6McastRegistered");
+simsignal_t ipv6McastUnregisteredSignal = cComponent::registerSignal("ipv6McastUnregistered");
 
 // - layer 4 (transport)
 //...

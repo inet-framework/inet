@@ -58,7 +58,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual ~Ipv6NeighbourDiscovery();
 
   private:
-    static simsignal_t startDADSignal;
+    static simsignal_t startDadSignal;
 
   public:
     /**

@@ -38,19 +38,19 @@ simple InterfaceTable
     parameters:
         bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
-        @signal[NF_INTERFACE_CREATED](type=InterfaceEntry);
-        @signal[NF_INTERFACE_DELETED](type=InterfaceEntry);
-        @signal[NF_INTERFACE_STATE_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_IPv4CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_IPv6CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_IPv4_MCAST_JOIN](type=Ipv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_LEAVE](type=Ipv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_CHANGE](type=Ipv4MulticastGroupSourceInfo);
-        @signal[NF_IPv4_MCAST_REGISTERED](type=Ipv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_UNREGISTERED](type=Ipv4MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_JOIN](type=Ipv6MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_LEAVE](type=Ipv6MulticastGroupInfo);
+        @signal[interfaceCreated](type=InterfaceEntry);
+        @signal[interfaceDeleted](type=InterfaceEntry);
+        @signal[interfaceStateChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceConfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceIpv4ConfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceIpv6ConfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceGenericnetworkprotocolconfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[ipv4McastJoin](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4McastLeave](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4McastChange](type=Ipv4MulticastGroupSourceInfo);
+        @signal[ipv4McastRegistered](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4McastUnregistered](type=Ipv4MulticastGroupInfo);
+        @signal[ipv6McastJoin](type=Ipv6MulticastGroupInfo);
+        @signal[ipv6McastLeave](type=Ipv6MulticastGroupInfo);
 }
 

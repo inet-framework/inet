@@ -69,8 +69,8 @@ void PimInterfaceTable::initialize(int stage)
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PimInterfaceTable: containing node not found.");
-        host->subscribe(NF_INTERFACE_CREATED, this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
     }
 }
 
@@ -127,12 +127,12 @@ void PimInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
 
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             addInterface(ie);
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
             removeInterface(ie);

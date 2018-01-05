@@ -50,18 +50,18 @@ simple SimpleVoipReceiver like IApp
         int bufferSpace = default(20);      // buffer size in packets
         double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)
 
-        @signal[VoIPPacketDelay](type="simtime_t");      // when receive a frame
-        @signal[VoIPPacketLossRate](type="double");      // at end of talkspurt
-        @signal[VoIPPlayoutDelay](type="simtime_t");    // at end of talkspurt
-        @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspurt
-        @signal[VoIPMosSignal](type="double");          // at end of talkspurt
-        @signal[VoIPTaildropLossRate](type="double");   // at end of talkspurt
-        @statistic[endToEndDelay](title="VoIP Packet End-to-End Delay"; unit="s"; source="VoIPPacketDelay"; record=stats,vector); 
-        @statistic[packetLossRate](title="VoIP Packet Loss"; unit="ratio"; source="VoIPPacketLossRate"; record=stats,vector);
-        @statistic[playoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
-        @statistic[playoutLossRate](title="VoIP Playout Loss Rate"; unit="ratio"; source="VoIPPlayoutLossRate"; record=stats,vector);
-        @statistic[MOS](title="VoIP MOS"; unit="MOS"; source="VoIPMosSignal"; record=stats,vector);
-        @statistic[taildropLossRate](title="VoIP Tail Drop Loss Rate"; unit="ratio"; source="VoIPTaildropLossRate"; record=stats,vector);
+        @signal[voIpPacketDelay](type="simtime_t");      // when receive a frame
+        @signal[voIpPacketLossRate](type="double");      // at end of talkspurt
+        @signal[voIpPlayoutDelay](type="simtime_t");    // at end of talkspurt
+        @signal[voIpPlayoutLossRate](type="double");    // at end of talkspurt
+        @signal[voIpMosSignal](type="double");          // at end of talkspurt
+        @signal[voIpTaildropLossRate](type="double");   // at end of talkspurt
+        @statistic[endToEndDelay](title="VoIP Packet End-to-End Delay"; unit="s"; source="voIpPacketDelay"; record=stats,vector); 
+        @statistic[packetLossRate](title="VoIP Packet Loss"; unit="ratio"; source="voIpPacketLossRate"; record=stats,vector);
+        @statistic[playoutDelay](title="VoIP Playout Delay"; unit="s"; source="voIpPlayoutDelay"; record=stats,vector);
+        @statistic[playoutLossRate](title="VoIP Playout Loss Rate"; unit="ratio"; source="voIpPlayoutLossRate"; record=stats,vector);
+        @statistic[MOS](title="VoIP MOS"; unit="MOS"; source="voIpMosSignal"; record=stats,vector);
+        @statistic[taildropLossRate](title="VoIP Tail Drop Loss Rate"; unit="ratio"; source="voIpTaildropLossRate"; record=stats,vector);
 
         @display("i=block/source");
     gates:

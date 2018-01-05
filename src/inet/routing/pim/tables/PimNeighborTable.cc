@@ -64,7 +64,7 @@ std::string PimNeighbor::str() const
 void PimNeighbor::changed()
 {
     if (nt)
-        nt->emit(NF_PIM_NEIGHBOR_CHANGED, this);
+        nt->emit(pimNeighborChangedSignal, this);
 }
 
 PimNeighborTable::~PimNeighborTable()
@@ -126,7 +126,7 @@ bool PimNeighborTable::addNeighbor(PimNeighbor *entry, double holdTime)
     take(entry->getLivenessTimer());
     restartLivenessTimer(entry, holdTime);
 
-    emit(NF_PIM_NEIGHBOR_ADDED, entry);
+    emit(pimNeighborAddedSignal, entry);
 
     return true;
 }
@@ -142,7 +142,7 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
         if (it2 != neighborsOnInterface.end()) {
             neighborsOnInterface.erase(it2);
 
-            emit(NF_PIM_NEIGHBOR_DELETED, neighbor);
+            emit(pimNeighborDeletedSignal, neighbor);
 
             neighbor->nt = nullptr;
             cancelEvent(neighbor->getLivenessTimer());

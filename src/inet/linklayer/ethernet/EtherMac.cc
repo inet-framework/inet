@@ -254,7 +254,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
 
     if (!isControlFrame) {
         numFramesFromHL++;
-        emit(rxPkFromHLSignal, packet);
+        emit(rxPkFromHlSignal, packet);
     }
 
     if (txQueue.extQueue) {

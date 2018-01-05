@@ -58,7 +58,7 @@ namespace physicallayer {
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
   public:
-    static simsignal_t minSNIRSignal;
+    static simsignal_t minSnirSignal;
     static simsignal_t packetErrorRateSignal;
     static simsignal_t bitErrorRateSignal;
     static simsignal_t symbolErrorRateSignal;

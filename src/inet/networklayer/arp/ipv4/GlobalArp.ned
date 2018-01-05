@@ -30,9 +30,9 @@ simple GlobalArp like IArp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         @display("i=block/layer");
-        @signal[initiatedARPResolution](type=IArp::Notification);
-        @signal[completedARPResolution](type=IArp::Notification);
-        @signal[failedARPResolution](type=IArp::Notification);
+        @signal[initiatedArpResolution](type=IArp::Notification);
+        @signal[completedArpResolution](type=IArp::Notification);
+        @signal[failedArpResolution](type=IArp::Notification);
     gates:
         input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ArpPacket+Ieee802Ctrl);  // outgoing ARP requests/replies

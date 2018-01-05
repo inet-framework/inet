@@ -78,10 +78,10 @@ void Ieee80211VisualizerBase::handleParameterChange(const char *name)
 void Ieee80211VisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(NF_L2_ASSOCIATED, this);
-    subscriptionModule->subscribe(NF_L2_DISASSOCIATED, this);
-    subscriptionModule->subscribe(NF_L2_AP_ASSOCIATED, this);
-    subscriptionModule->subscribe(NF_L2_AP_DISASSOCIATED, this);
+    subscriptionModule->subscribe(l2AssociatedSignal, this);
+    subscriptionModule->subscribe(l2DisassociatedSignal, this);
+    subscriptionModule->subscribe(l2ApAssociatedSignal, this);
+    subscriptionModule->subscribe(l2ApDisassociatedSignal, this);
 }
 
 void Ieee80211VisualizerBase::unsubscribe()
@@ -89,10 +89,10 @@ void Ieee80211VisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(NF_L2_ASSOCIATED, this);
-        subscriptionModule->unsubscribe(NF_L2_DISASSOCIATED, this);
-        subscriptionModule->unsubscribe(NF_L2_AP_ASSOCIATED, this);
-        subscriptionModule->unsubscribe(NF_L2_AP_DISASSOCIATED, this);
+        subscriptionModule->unsubscribe(l2AssociatedSignal, this);
+        subscriptionModule->unsubscribe(l2DisassociatedSignal, this);
+        subscriptionModule->unsubscribe(l2ApAssociatedSignal, this);
+        subscriptionModule->unsubscribe(l2ApDisassociatedSignal, this);
     }
 }
 
@@ -130,7 +130,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
 {
 #ifdef WITH_IEEE80211
     Enter_Method_Silent();
-    if (signal == NF_L2_ASSOCIATED) {
+    if (signal == l2AssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
@@ -139,7 +139,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             addIeee80211Visualization(ieee80211Visualization);
         }
     }
-    else if (signal == NF_L2_DISASSOCIATED) {
+    else if (signal == l2DisassociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
@@ -147,7 +147,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             removeIeee80211Visualization(ieee80211Visualization);
         }
     }
-    else if (signal == NF_L2_AP_ASSOCIATED) {
+    else if (signal == l2ApAssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface and the ssid
@@ -161,7 +161,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             }
         }
     }
-    else if (signal == NF_L2_AP_DISASSOCIATED) {
+    else if (signal == l2ApDisassociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             // TODO: KLUDGE: this is the wrong way to lookup the interface

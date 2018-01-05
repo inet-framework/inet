@@ -106,8 +106,8 @@ void Ipv4::initialize(int stage)
 
         pendingPackets.clear();
         cModule *arpModule = check_and_cast<cModule *>(arp);
-        arpModule->subscribe(IArp::completedARPResolutionSignal, this);
-        arpModule->subscribe(IArp::failedARPResolutionSignal, this);
+        arpModule->subscribe(IArp::completedArpResolutionSignal, this);
+        arpModule->subscribe(IArp::failedArpResolutionSignal, this);
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -618,7 +618,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
     if (!route) {
         EV_WARN << "Multicast route does not exist, try to add.\n";
         // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_NEW_MULTICAST, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
+        emit(ipv4NewMulticastSignal, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
 
         // read new record
         route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
@@ -637,7 +637,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface()) {
         EV_ERROR << "Did not arrive on input interface, packet dropped.\n";
         // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_DATA_ON_NONRPF, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
+        emit(ipv4DataOnNonrpfSignal, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
         numDropped++;
         PacketDropDetails details;
         emit(packetDropSignal, packet, &details);
@@ -653,7 +653,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
     }
     else {
         // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_DATA_ON_RPF, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
+        emit(ipv4DataOnRpfSignal, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -677,7 +677,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         }
 
         // TODO: no need to emit fromIE when tags will be use, d in place of control infos
-        emit(NF_IPv4_MDATA_REGISTER, packet, const_cast<InterfaceEntry *>(fromIE));    // postRouting hook
+        emit(ipv4MdataRegisterSignal, packet, const_cast<InterfaceEntry *>(fromIE));    // postRouting hook
 
         // only copies sent, delete original packet
         delete packet;
@@ -1333,10 +1333,10 @@ void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 {
     Enter_Method_Silent();
 
-    if (signalID == IArp::completedARPResolutionSignal) {
+    if (signalID == IArp::completedArpResolutionSignal) {
         arpResolutionCompleted(check_and_cast<IArp::Notification *>(obj));
     }
-    if (signalID == IArp::failedARPResolutionSignal) {
+    if (signalID == IArp::failedArpResolutionSignal) {
         arpResolutionTimedOut(check_and_cast<IArp::Notification *>(obj));
     }
 }

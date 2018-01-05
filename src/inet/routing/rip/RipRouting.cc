@@ -319,7 +319,7 @@ void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
 
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         // configure interface for RIP
         ie = check_and_cast<const InterfaceEntry *>(obj);
         if (ie->isMulticast() && !ie->isLoopback()) {
@@ -329,12 +329,12 @@ void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
                 addInterface(ie, config[i]);
         }
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         // delete interfaces and routes referencing the deleted interface
         ie = check_and_cast<const InterfaceEntry *>(obj);
         deleteInterface(ie);
     }
-    else if (signalID == NF_INTERFACE_STATE_CHANGED) {
+    else if (signalID == interfaceStateChangedSignal) {
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
             ie = change->getInterfaceEntry();
@@ -348,7 +348,7 @@ void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
             }
         }
     }
-    else if (signalID == NF_ROUTE_DELETED) {
+    else if (signalID == routeDeletedSignal) {
         // remove references to the deleted route and invalidate the RIP route
         const IRoute *route = check_and_cast<const IRoute *>(obj);
         if (route->getSource() != this) {
@@ -359,7 +359,7 @@ void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
                 }
         }
     }
-    else if (signalID == NF_ROUTE_ADDED) {
+    else if (signalID == routeAddedSignal) {
         // add or update the RIP route
         IRoute *route = const_cast<IRoute *>(check_and_cast<const IRoute *>(obj));
         if (route->getSource() != this) {
@@ -385,7 +385,7 @@ void RipRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject
             }
         }
     }
-    else if (signalID == NF_ROUTE_CHANGED) {
+    else if (signalID == routeChangedSignal) {
         const IRoute *route = check_and_cast<const IRoute *>(obj);
         if (route->getSource() != this) {
             RipRoute *ripRoute = findRoute(route);
@@ -462,12 +462,12 @@ void RipRouting::startRIPRouting()
     configureInitialRoutes();
 
     // subscribe to notifications
-    host->subscribe(NF_INTERFACE_CREATED, this);
-    host->subscribe(NF_INTERFACE_DELETED, this);
-    host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-    host->subscribe(NF_ROUTE_DELETED, this);
-    host->subscribe(NF_ROUTE_ADDED, this);
-    host->subscribe(NF_ROUTE_CHANGED, this);
+    host->subscribe(interfaceCreatedSignal, this);
+    host->subscribe(interfaceDeletedSignal, this);
+    host->subscribe(interfaceStateChangedSignal, this);
+    host->subscribe(routeDeletedSignal, this);
+    host->subscribe(routeAddedSignal, this);
+    host->subscribe(routeChangedSignal, this);
 
     // configure socket
     socket.setMulticastLoop(false);
@@ -495,12 +495,12 @@ void RipRouting::stopRIPRouting()
         socket.close();
 
         // unsubscribe to notifications
-        host->unsubscribe(NF_INTERFACE_CREATED, this);
-        host->unsubscribe(NF_INTERFACE_DELETED, this);
-        host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
-        host->unsubscribe(NF_ROUTE_DELETED, this);
-        host->unsubscribe(NF_ROUTE_ADDED, this);
-        host->unsubscribe(NF_ROUTE_CHANGED, this);
+        host->unsubscribe(interfaceCreatedSignal, this);
+        host->unsubscribe(interfaceDeletedSignal, this);
+        host->unsubscribe(interfaceStateChangedSignal, this);
+        host->unsubscribe(routeDeletedSignal, this);
+        host->unsubscribe(routeAddedSignal, this);
+        host->unsubscribe(routeChangedSignal, this);
     }
 
     // cancel timers

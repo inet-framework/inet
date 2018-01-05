@@ -1237,7 +1237,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     /*statVectorBAfromCN.record(1);*/
 
                     // fire event to MIH subscribers
-                    emit(NF_MIPv6_RO_COMPLETED, (cObject *)nullptr);
+                    emit(mipv6RoCompletedSignal, (cObject *)nullptr);
                 }
 
                 // set BAck flag in BUL

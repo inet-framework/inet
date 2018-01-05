@@ -60,9 +60,9 @@ simple Ppp
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[NF_PP_TX_BEGIN](type=TxNotifDetails);
-        @signal[NF_PP_TX_END](type=TxNotifDetails);
-        @signal[NF_PP_RX_END](type=TxNotifDetails);
+        @signal[ppTxBegin](type=TxNotifDetails);
+        @signal[ppTxEnd](type=TxNotifDetails);
+        @signal[ppRxEnd](type=TxNotifDetails);
         @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

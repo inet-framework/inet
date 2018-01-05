@@ -109,7 +109,7 @@ simple Rsvp
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");
-        @signal[NF_TED_CHANGED](type=TedChangeInfo);
+        @signal[tedChanged](type=TedChangeInfo);
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);

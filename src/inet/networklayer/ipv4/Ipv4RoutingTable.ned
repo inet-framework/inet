@@ -59,10 +59,10 @@ simple Ipv4RoutingTable like IRoutingTable
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
         string routingFile = default("");  // routing table file name
         @display("i=block/table");
-        @signal[NF_ROUTE_ADDED](type=Ipv4Route);
-        @signal[NF_ROUTE_DELETED](type=Ipv4Route);
-        @signal[NF_ROUTE_CHANGED](type=Ipv4Route);
-        @signal[NF_MROUTE_ADDED](type=Ipv4MulticastRoute);
-        @signal[NF_MROUTE_DELETED](type=Ipv4MulticastRoute);
-        @signal[NF_MROUTE_CHANGED](type=Ipv4MulticastRoute);
+        @signal[routeAdded](type=Ipv4Route);
+        @signal[routeDeleted](type=Ipv4Route);
+        @signal[routeChanged](type=Ipv4Route);
+        @signal[mrouteAdded](type=Ipv4MulticastRoute);
+        @signal[mrouteDeleted](type=Ipv4MulticastRoute);
+        @signal[mrouteChanged](type=Ipv4MulticastRoute);
 }

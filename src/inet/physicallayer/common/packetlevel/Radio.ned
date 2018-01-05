@@ -87,7 +87,7 @@ module Radio extends PhysicalLayerBase like IRadio
         @signal[transmissionEnded];
         @signal[receptionStarted];
         @signal[receptionEnded];
-        @signal[minSNIR];
+        @signal[minSnir];
         @signal[packetErrorRate];
         @signal[bitErrorRate];
         @signal[symbolErrorRate];
@@ -96,7 +96,7 @@ module Radio extends PhysicalLayerBase like IRadio
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmissionState](title="Radio transmission state"; source=transmissionStateChanged; record=count,vector; interpolationmode=sample-hold);
 
-        @statistic[minSNIR](title="Min SNIR"; source=minSNIR; record=histogram);
+        @statistic[minSnir](title="Min SNIR"; source=minSnir; record=histogram);
         @statistic[packetErrorRate](title="Packet error rate"; source=packetErrorRate; record=histogram);
         @statistic[bitErrorRate](title="Bit error rate"; source=bitErrorRate; record=histogram);
         @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate; record=histogram);

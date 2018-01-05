@@ -33,7 +33,7 @@ Define_Module(RateSelection);
 void RateSelection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(NF_MODESET_CHANGED, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl*>(getModuleByPath(par("rateControlModule")));
@@ -157,7 +157,7 @@ const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<const
 void RateSelection::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
     }

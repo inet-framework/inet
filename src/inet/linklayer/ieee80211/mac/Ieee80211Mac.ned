@@ -90,7 +90,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @signal[NF_MODESET_CHANGED](type=inet::physicallayer::Ieee80211ModeSet);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
     gates:
         input mgmtIn;
         output mgmtOut;

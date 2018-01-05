@@ -749,7 +749,7 @@ void Rsvp::announceLinkChange(int tedlinkindex)
     TedChangeInfo d;
     d.setTedLinkIndicesArraySize(1);
     d.setTedLinkIndices(0, tedlinkindex);
-    emit(NF_TED_CHANGED, &d);
+    emit(tedChangedSignal, &d);
 }
 
 void Rsvp::commitResv(ResvStateBlock *rsb)

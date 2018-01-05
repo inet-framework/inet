@@ -445,7 +445,7 @@ void RadioMedium::addRadio(const IRadio *radio)
     if (listeningFilter)
         radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
-        getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+        getContainingNode(radioModule)->subscribe(interfaceConfigChangedSignal, this);
     emit(radioAddedSignal, radioModule);
 }
 
@@ -468,7 +468,7 @@ void RadioMedium::removeRadio(const IRadio *radio)
     if (listeningFilter)
         radioModule->unsubscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
-        getContainingNode(radioModule)->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+        getContainingNode(radioModule)->unsubscribe(interfaceConfigChangedSignal, this);
     emit(radioRemovedSignal, radioModule);
 }
 
@@ -685,7 +685,7 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const ISignal *signal)
 
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
-    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
+    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == interfaceConfigChangedSignal) {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
         for (const auto transmission : transmissions) {
             if (signal == IRadio::listeningChangedSignal) {

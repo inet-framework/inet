@@ -37,7 +37,7 @@ simple xMIPv6
         bool isHomeAgent;
         bool isMobileNode;
         @display("i=block/classifier2");
-        @signal[NF_MIPv6_RO_COMPLETED](type=cMessage?);
+        @signal[mipv6RoCompleted](type=cMessage?);
     gates:
         input fromIPv6;
         output toIPv6;

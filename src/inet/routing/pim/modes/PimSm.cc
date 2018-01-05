@@ -130,15 +130,15 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PimDm: containing node not found.");
-        host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-        host->subscribe(NF_IPv4_MDATA_REGISTER, this);
-        host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-        host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-        host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-        host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-        host->subscribe(NF_PIM_NEIGHBOR_ADDED, this);
-        host->subscribe(NF_PIM_NEIGHBOR_DELETED, this);
-        host->subscribe(NF_PIM_NEIGHBOR_CHANGED, this);
+        host->subscribe(ipv4NewMulticastSignal, this);
+        host->subscribe(ipv4MdataRegisterSignal, this);
+        host->subscribe(ipv4DataOnRpfSignal, this);
+        host->subscribe(ipv4DataOnNonrpfSignal, this);
+        host->subscribe(ipv4McastRegisteredSignal, this);
+        host->subscribe(ipv4McastUnregisteredSignal, this);
+        host->subscribe(pimNeighborAddedSignal, this);
+        host->subscribe(pimNeighborDeletedSignal, this);
+        host->subscribe(pimNeighborChangedSignal, this);
     }
 
     return done;
@@ -163,15 +163,15 @@ void PimSm::stopPIMRouting()
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PimSm: containing node not found.");
-        host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
-        host->unsubscribe(NF_IPv4_MDATA_REGISTER, this);
-        host->unsubscribe(NF_IPv4_DATA_ON_RPF, this);
-        host->unsubscribe(NF_IPv4_DATA_ON_NONRPF, this);
-        host->unsubscribe(NF_IPv4_MCAST_REGISTERED, this);
-        host->unsubscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-        host->unsubscribe(NF_PIM_NEIGHBOR_ADDED, this);
-        host->unsubscribe(NF_PIM_NEIGHBOR_DELETED, this);
-        host->unsubscribe(NF_PIM_NEIGHBOR_CHANGED, this);
+        host->unsubscribe(ipv4NewMulticastSignal, this);
+        host->unsubscribe(ipv4MdataRegisterSignal, this);
+        host->unsubscribe(ipv4DataOnRpfSignal, this);
+        host->unsubscribe(ipv4DataOnNonrpfSignal, this);
+        host->unsubscribe(ipv4McastRegisteredSignal, this);
+        host->unsubscribe(ipv4McastUnregisteredSignal, this);
+        host->unsubscribe(pimNeighborAddedSignal, this);
+        host->unsubscribe(pimNeighborDeletedSignal, this);
+        host->unsubscribe(pimNeighborChangedSignal, this);
     }
 
     clearRoutes();
@@ -282,28 +282,28 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     const Ipv4Header *ipv4Header;
     PimInterface *pimInterface;
 
-    if (signalID == NF_IPv4_MCAST_REGISTERED) {
+    if (signalID == ipv4McastRegisteredSignal) {
         EV << "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverAdded(info->ie, info->groupAddress);
     }
-    else if (signalID == NF_IPv4_MCAST_UNREGISTERED) {
+    else if (signalID == ipv4McastUnregisteredSignal) {
         EV << "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverRemoved(info->ie, info->groupAddress);
     }
-    else if (signalID == NF_IPv4_NEW_MULTICAST) {
+    else if (signalID == ipv4NewMulticastSignal) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         Ipv4Address srcAddr = ipv4Header->getSrcAddress();
         Ipv4Address destAddr = ipv4Header->getDestAddress();
         unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
-    else if (signalID == NF_IPv4_DATA_ON_RPF) {
+    else if (signalID == ipv4DataOnRpfSignal) {
         EV << "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
@@ -316,7 +316,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                 multicastPacketArrivedOnRpfInterface(route);
         }
     }
-    else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
+    else if (signalID == ipv4DataOnNonrpfSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         PimInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode) {
@@ -328,7 +328,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                 multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
         }
     }
-    else if (signalID == NF_IPv4_MDATA_REGISTER) {
+    else if (signalID == ipv4MdataRegisterSignal) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
         Packet *pk = check_and_cast<Packet *>(obj);
         const auto& ipv4Header = pk->peekHeader<Ipv4Header>();
@@ -337,7 +337,7 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         if (incomingInterface && incomingInterface->getMode() == PimInterface::SparseMode)
             multicastPacketForwarded(pk);
     }
-    else if (signalID == NF_PIM_NEIGHBOR_ADDED || signalID == NF_PIM_NEIGHBOR_DELETED || signalID == NF_PIM_NEIGHBOR_CHANGED) {
+    else if (signalID == pimNeighborAddedSignal || signalID == pimNeighborDeletedSignal || signalID == pimNeighborChangedSignal) {
         PimNeighbor *neighbor = check_and_cast<PimNeighbor *>(obj);
         updateDesignatedRouterAddress(neighbor->getInterfacePtr());
     }

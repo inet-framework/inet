@@ -26,12 +26,12 @@ namespace inet {
 
 Define_Module(SimpleVoipReceiver);
 
-simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
-simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-simsignal_t SimpleVoipReceiver::mosSignal = registerSignal("VoIPMosSignal");
-simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("voIpPacketLossRate");
+simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("voIpPacketDelay");
+simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("voIpPlayoutDelay");
+simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("voIpPlayoutLossRate");
+simsignal_t SimpleVoipReceiver::mosSignal = registerSignal("voIpMosSignal");
+simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("voIpTaildropLossRate");
 
 void SimpleVoipReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoipPacket *pk)
 {

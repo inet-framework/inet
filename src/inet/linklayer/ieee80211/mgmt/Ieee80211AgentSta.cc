@@ -51,7 +51,7 @@ void Ieee80211AgentSta::initialize(int stage)
             channelsToScan.push_back(atoi(token));
 
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_L2_BEACON_LOST, this);
+        host->subscribe(l2BeaconLostSignal, this);
 
         // JcM add: get the default ssid, if there is one.
         default_ssid = par("default_ssid").stdstringValue();
@@ -119,13 +119,13 @@ void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, 
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
 
-    if (signalID == NF_L2_BEACON_LOST) {
+    if (signalID == l2BeaconLostSignal) {
         //XXX should check details if it's about this NIC
         EV << "beacon lost, starting scanning again\n";
         getContainingNode(this)->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
-        emit(NF_L2_DISASSOCIATED, myIface);
+        emit(l2DisassociatedSignal, myIface);
     }
 }
 
@@ -305,11 +305,11 @@ void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         // we are happy!
         getContainingNode(this)->bubble("Associated with AP");
         if (prevAP.isUnspecified() || prevAP != resp->getAddress()) {
-            emit(NF_L2_ASSOCIATED_NEWAP, myIface);    //XXX detail: InterfaceEntry?
+            emit(l2AssociatedNewapSignal, myIface);    //XXX detail: InterfaceEntry?
             prevAP = resp->getAddress();
         }
         else
-            emit(NF_L2_ASSOCIATED_OLDAP, myIface);
+            emit(l2AssociatedOldapSignal, myIface);
     }
 }
 
@@ -324,7 +324,7 @@ void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     }
     else {
         EV << "Reassociation successful\n";
-        emit(NF_L2_ASSOCIATED_OLDAP, myIface);    //XXX detail: InterfaceEntry?
+        emit(l2AssociatedOldapSignal, myIface);    //XXX detail: InterfaceEntry?
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

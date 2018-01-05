@@ -26,7 +26,7 @@ namespace inet {
 class InterfaceEntry;
 
 /**
- * Details class for the NF_PP_TX_BEGIN, NF_PP_TX_END and NF_PP_RX_END
+ * Details class for the ppTxBeginSignal, ppTxEndSignal and ppRxEndSignal
  * notifications (normally triggered from PPP).
  */
 //XXX also used by Ieee80211 to signal that a msg has been acked (must use an ID to identify msg!!!), and that channel was switched (msg==nullptr then)

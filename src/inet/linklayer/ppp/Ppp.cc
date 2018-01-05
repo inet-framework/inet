@@ -209,7 +209,7 @@ void Ppp::startTransmitting(cPacket *msg)
 
     // fire notification
     notifDetails.setPacket(pppFrame);
-    emit(NF_PP_TX_BEGIN, &notifDetails);
+    emit(ppTxBeginSignal, &notifDetails);
 
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
@@ -246,7 +246,7 @@ void Ppp::handleMessage(cMessage *msg)
 
         // fire notification
         notifDetails.setPacket(nullptr);
-        emit(NF_PP_TX_END, &notifDetails);
+        emit(ppTxEndSignal, &notifDetails);
 
         if (!txQueue.isEmpty()) {
             cPacket *pk = (cPacket *)txQueue.pop();
@@ -263,7 +263,7 @@ void Ppp::handleMessage(cMessage *msg)
 
         // fire notification
         notifDetails.setPacket(PK(msg));
-        emit(NF_PP_RX_END, &notifDetails);
+        emit(ppRxEndSignal, &notifDetails);
 
         msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
