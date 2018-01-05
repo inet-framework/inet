@@ -43,7 +43,7 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
     enum { F_ADDRESS, F_METRIC };
 
   protected:
-    void changed1(int fieldId) { changed(interfaceGenericnetworkprotocolconfigChangedSignal, fieldId); }
+    void changed1(int fieldId) { changed(interfaceGnpConfigChangedSignal, fieldId); }
 
   private:
     // copying not supported: following are private and also left undefined

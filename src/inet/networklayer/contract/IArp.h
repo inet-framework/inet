@@ -52,9 +52,9 @@ class INET_API IArp
     };
 
     /** @brief Signals used to publish ARP state changes. */
-    static const simsignal_t initiatedArpResolutionSignal;
-    static const simsignal_t completedArpResolutionSignal;
-    static const simsignal_t failedArpResolutionSignal;
+    static const simsignal_t arpResolutionInitiatedSignal;
+    static const simsignal_t arpResolutionCompletedSignal;
+    static const simsignal_t arpResolutionFailedSignal;
 
   public:
     virtual ~IArp() {}

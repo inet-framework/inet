@@ -305,11 +305,11 @@ void Ieee80211AgentSta::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         // we are happy!
         getContainingNode(this)->bubble("Associated with AP");
         if (prevAP.isUnspecified() || prevAP != resp->getAddress()) {
-            emit(l2AssociatedNewapSignal, myIface);    //XXX detail: InterfaceEntry?
+            emit(l2AssociatedNewApSignal, myIface);    //XXX detail: InterfaceEntry?
             prevAP = resp->getAddress();
         }
         else
-            emit(l2AssociatedOldapSignal, myIface);
+            emit(l2AssociatedOldApSignal, myIface);
     }
 }
 
@@ -324,7 +324,7 @@ void Ieee80211AgentSta::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     }
     else {
         EV << "Reassociation successful\n";
-        emit(l2AssociatedOldapSignal, myIface);    //XXX detail: InterfaceEntry?
+        emit(l2AssociatedOldApSignal, myIface);    //XXX detail: InterfaceEntry?
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

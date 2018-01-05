@@ -106,8 +106,8 @@ void Ipv4::initialize(int stage)
 
         pendingPackets.clear();
         cModule *arpModule = check_and_cast<cModule *>(arp);
-        arpModule->subscribe(IArp::completedArpResolutionSignal, this);
-        arpModule->subscribe(IArp::failedArpResolutionSignal, this);
+        arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
+        arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -1333,10 +1333,10 @@ void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 {
     Enter_Method_Silent();
 
-    if (signalID == IArp::completedArpResolutionSignal) {
+    if (signalID == IArp::arpResolutionCompletedSignal) {
         arpResolutionCompleted(check_and_cast<IArp::Notification *>(obj));
     }
-    if (signalID == IArp::failedArpResolutionSignal) {
+    if (signalID == IArp::arpResolutionFailedSignal) {
         arpResolutionTimedOut(check_and_cast<IArp::Notification *>(obj));
     }
 }

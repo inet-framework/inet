@@ -44,7 +44,7 @@ simple InterfaceTable
         @signal[interfaceConfigChanged](type=InterfaceEntryChangeDetails);
         @signal[interfaceIpv4ConfigChanged](type=InterfaceEntryChangeDetails);
         @signal[interfaceIpv6ConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceGenericnetworkprotocolconfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceGnpConfigChanged](type=InterfaceEntryChangeDetails);
         @signal[ipv4McastJoin](type=Ipv4MulticastGroupInfo);
         @signal[ipv4McastLeave](type=Ipv4MulticastGroupInfo);
         @signal[ipv4McastChange](type=Ipv4MulticastGroupSourceInfo);

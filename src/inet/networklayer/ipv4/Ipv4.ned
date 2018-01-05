@@ -54,13 +54,13 @@ package inet.networklayer.ipv4;
 //
 // <b>Working with Arp</b>
 //
-// Ipv4 module subscribe to completedArpResolution and failedArpResolution signals on Arp module.
+// Ipv4 module subscribe to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
 // The Arp module accessed via arpOut gate, should not insert any module between Ipv4 and Arp.
 // Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
 // method call. If MacAddress unspecified, then start address resolution via Arp method call and
 // insert packet to a queue specified by next hop addr.
-// When received a completedArpResolution, then send packets from queue of next hop addr.
-// When received a failedArpResolution, then drop packets from queue of next hop addr.
+// When received a arpResolutionCompleted, then send packets from queue of next hop addr.
+// When received a arpResolutionFailed, then drop packets from queue of next hop addr.
 // When Ipv4 module received an Arp packet from Lower Layer on some queueIn gate,
 // then send out this packet on arpOut gate. When received a packet on arpIn gate,
 // then send out this packet on the specified queueOut gate.

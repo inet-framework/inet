@@ -39,8 +39,8 @@ extern INET_API simsignal_t    // admin
     macBecameIdleSignal,
     l2BeaconLostSignal,    // missed several consecutive beacons (currently Ieee80211)
     l2AssociatedSignal,    // successfully associated with an AP (currently Ieee80211)
-    l2AssociatedNewapSignal,    // successfully associated with an AP (currently Ieee80211)
-    l2AssociatedOldapSignal,
+    l2AssociatedNewApSignal,    // successfully associated with an AP (currently Ieee80211)
+    l2AssociatedOldApSignal,
     l2DisassociatedSignal,    // same as BEACON_LOST but used in higher layers
     l2ApAssociatedSignal,    // emitted by the AP, successfully associated with this AP (currently Ieee80211)
     l2ApDisassociatedSignal,    // emitted by the AP, successfully disassociated from this AP (currently Ieee80211)
@@ -56,7 +56,7 @@ extern INET_API simsignal_t    // admin
     interfaceDeletedSignal,
     interfaceStateChangedSignal,
     interfaceConfigChangedSignal,
-    interfaceGenericnetworkprotocolconfigChangedSignal,
+    interfaceGnpConfigChangedSignal,
     interfaceIpv4ConfigChangedSignal,
     interfaceIpv6ConfigChangedSignal,
     tedChangedSignal,

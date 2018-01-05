@@ -31,8 +31,8 @@ import inet.networklayer.contract.IArp;
 // IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
 // of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
 // uses the Arp::startAddressResolution() method.
-// ARP emit a completedArpResolution signal, when added/modified an entry in ARP table.
-// ARP emit a failedArpResolution signal when an ARP request failed (ARP request sent
+// ARP emit a arpResolutionCompleted signal, when added/modified an entry in ARP table.
+// ARP emit a arpResolutionFailed signal when an ARP request failed (ARP request sent
 // retryCount times and retryTimeout elapsed).
 //
 // ARP resolution is used over <i>broadcast</i> interfaces only,
@@ -55,14 +55,14 @@ simple Arp like IArp
         @display("i=block/layer");
         @signal[sentReq](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedArpResolution](type=IArp::Notification);
-        @signal[completedArpResolution](type=IArp::Notification);
-        @signal[failedArpResolution](type=IArp::Notification);
+        @signal[arpResolutionInitiated](type=IArp::Notification);
+        @signal[arpResolutionCompleted](type=IArp::Notification);
+        @signal[arpResolutionFailed](type=IArp::Notification);
         @statistic[sentReq](title="ARP request sent"; record=count,vector);
         @statistic[sentReply](title="ARP replies sent"; record=count,vector);
-        @statistic[initiatedArpResolution](title="ARP initiated resolutions"; record=count);
-        @statistic[completedArpResolution](title="ARP completed resolutions"; record=count);
-        @statistic[failedArpResolution](title="ARP failed resolutions"; record=count);
+        @statistic[arpResolutionInitiated](title="ARP initiated resolutions"; record=count);
+        @statistic[arpResolutionCompleted](title="ARP completed resolutions"; record=count);
+        @statistic[arpResolutionFailed](title="ARP failed resolutions"; record=count);
     gates:
         input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ArpPacket+Ieee802Ctrl,Ipv4Header+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop

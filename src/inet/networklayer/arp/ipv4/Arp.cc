@@ -200,7 +200,7 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
 
     numResolutions++;
     Notification signal(nextHopAddr, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
-    emit(initiatedArpResolutionSignal, &signal);
+    emit(arpResolutionInitiatedSignal, &signal);
 }
 
 void Arp::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
@@ -259,7 +259,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
     // throw out entry from cache
     EV << "ARP timeout, max retry count " << retryCount << " for " << entry->myIter->first << " reached.\n";
     Notification signal(entry->myIter->first, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
-    emit(failedArpResolutionSignal, &signal);
+    emit(arpResolutionFailedSignal, &signal);
     arpCache.erase(entry->myIter);
     delete entry;
     numFailedResolutions++;
@@ -432,7 +432,7 @@ void Arp::updateARPCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     entry->macAddress = macAddress;
     entry->lastUpdate = simTime();
     Notification signal(entry->myIter->first, macAddress, entry->ie);
-    emit(completedArpResolutionSignal, &signal);
+    emit(arpResolutionCompletedSignal, &signal);
 }
 
 MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
