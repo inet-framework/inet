@@ -1,0 +1,338 @@
+### rename signals:
+
+"NF_INTERFACE_CONFIG_CHANGED" -> "interfaceConfigChanged"
+"NF_INTERFACE_CREATED" -> "interfaceCreated"
+"NF_INTERFACE_DELETED" -> "interfaceDeleted"
+"NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED" -> "interfaceGenericnetworkprotocolconfigChanged"
+"NF_INTERFACE_IPv4CONFIG_CHANGED" -> "interfaceIpv4ConfigChanged"
+"NF_INTERFACE_IPv6CONFIG_CHANGED" -> "interfaceIpv6ConfigChanged"
+"NF_INTERFACE_STATE_CHANGED" -> "interfaceStateChanged"
+"NF_IPv4_DATA_ON_NONRPF" -> "ipv4DataOnNonrpf"
+"NF_IPv4_DATA_ON_RPF" -> "ipv4DataOnRpf"
+"NF_IPv4_MCAST_CHANGE" -> "ipv4McastChange"
+"NF_IPv4_MCAST_JOIN" -> "ipv4McastJoin"
+"NF_IPv4_MCAST_LEAVE" -> "ipv4McastLeave"
+"NF_IPv4_MCAST_REGISTERED" -> "ipv4McastRegistered"
+"NF_IPv4_MCAST_UNREGISTERED" -> "ipv4McastUnregistered"
+"NF_IPv4_MDATA_REGISTER" -> "ipv4MdataRegister"
+"NF_IPv4_NEW_MULTICAST" -> "ipv4NewMulticast"
+"NF_IPv6_HANDOVER_OCCURRED" -> "ipv6HandoverOccurred"
+"NF_IPv6_MCAST_JOIN" -> "ipv6McastJoin"
+"NF_IPv6_MCAST_LEAVE" -> "ipv6McastLeave"
+"NF_IPv6_MCAST_REGISTERED" -> "ipv6McastRegistered"
+"NF_IPv6_MCAST_UNREGISTERED" -> "ipv6McastUnregistered"
+"NF_L2_AP_ASSOCIATED" -> "l2ApAssociated"
+"NF_L2_AP_DISASSOCIATED" -> "l2ApDisassociated"
+"NF_L2_ASSOCIATED" -> "l2Associated"
+"NF_L2_ASSOCIATED_NEWAP" -> "l2AssociatedNewap"
+"NF_L2_ASSOCIATED_OLDAP" -> "l2AssociatedOldap"
+"NF_L2_BEACON_LOST" -> "l2BeaconLost"
+"NF_L2_DISASSOCIATED" -> "l2Disassociated"
+"NF_L2_Q_DROP" -> "l2QDrop"
+"NF_LINK_FULL_PROMISCUOUS" -> "linkFullPromiscuous"
+"NF_LINK_PROMISCUOUS" -> "linkPromiscuous"
+"NF_MAC_BECAME_IDLE" -> "macBecameIdle"
+"NF_MIPv6_RO_COMPLETED" -> "mipv6RoCompleted"
+"NF_MODESET_CHANGED" -> "modesetChanged"
+"NF_MROUTE_ADDED" -> "mrouteAdded"
+"NF_MROUTE_CHANGED" -> "mrouteChanged"
+"NF_MROUTE_DELETED" -> "mrouteDeleted"
+"NF_PIM_NEIGHBOR_ADDED" -> "pimNeighborAdded"
+"NF_PIM_NEIGHBOR_CHANGED" -> "pimNeighborChanged"
+"NF_PIM_NEIGHBOR_DELETED" -> "pimNeighborDeleted"
+"NF_PP_RX_END" -> "ppRxEnd"
+"NF_PP_TX_BEGIN" -> "ppTxBegin"
+"NF_PP_TX_END" -> "ppTxEnd"
+"NF_ROUTE_ADDED" -> "routeAdded"
+"NF_ROUTE_CHANGED" -> "routeChanged"
+"NF_ROUTE_DELETED" -> "routeDeleted"
+"NF_TED_CHANGED" -> "tedChanged"
+"NF_TX_ACKED" -> "txAcked"
+"VoIPMosSignal" -> "voIpMosSignal"
+"VoIPPacketDelay" -> "voIpPacketDelay"
+"VoIPPacketLossRate" -> "voIpPacketLossRate"
+"VoIPPlayoutDelay" -> "voIpPlayoutDelay"
+"VoIPPlayoutLossRate" -> "voIpPlayoutLossRate"
+"VoIPTaildropLossRate" -> "voIpTaildropLossRate"
+### "acceptConfirm" -> "acceptConfirm"
+### "backoff" -> "backoff"
+### "badResponse" -> "badResponse"
+### "bitErrorRate" -> "bitErrorRate"
+### "collision" -> "collision"
+"completedARPResolution" -> "completedArpResolution"
+### "connState" -> "connState"
+### "connect" -> "connect"
+### "currentConsumptionChanged" -> "currentConsumptionChanged"
+### "currentGenerationChanged" -> "currentGenerationChanged"
+### "datarate" -> "datarate"
+### "decapPk" -> "decapPk"
+### "delay" -> "delay"
+### "dequeuePk" -> "dequeuePk"
+### "dropConfirm" -> "dropConfirm"
+### "dsap" -> "dsap"
+### "duplPk" -> "duplPk"
+### "echoedPk" -> "echoedPk"
+### "encapPk" -> "encapPk"
+### "enqueuePk" -> "enqueuePk"
+"failedARPResolution" -> "failedArpResolution"
+"initiatedARPResolution" -> "initiatedArpResolution"
+### "linkBreak" -> "linkBreak"
+### "listeningChanged" -> "listeningChanged"
+### "lostPackets" -> "lostPackets"
+### "lostSamples" -> "lostSamples"
+### "markPk" -> "markPk"
+### "messageSent" -> "messageSent"
+"minSNIR" -> "minSnir"
+### "mobilityStateChanged" -> "mobilityStateChanged"
+### "nodeStatusChanged" -> "nodeStatusChanged"
+### "numLost" -> "numLost"
+### "numOutOfOrderArrivals" -> "numOutOfOrderArrivals"
+### "numRoutes" -> "numRoutes"
+### "obstaclePenetrated" -> "obstaclePenetrated"
+### "outOfOrderPk" -> "outOfOrderPk"
+### "packetDrop" -> "packetDrop"
+### "packetErrorRate" -> "packetErrorRate"
+### "packetFromUpperDroppedSignal" -> "packetFromUpperDroppedSignal"
+### "packetHasVoice" -> "packetHasVoice"
+### "packetReceivedFromLower" -> "packetReceivedFromLower"
+### "packetReceivedFromPeer" -> "packetReceivedFromPeer"
+### "packetReceivedFromUpper" -> "packetReceivedFromUpper"
+### "packetSentToLower" -> "packetSentToLower"
+### "packetSentToPeer" -> "packetSentToPeer"
+### "packetSentToUpper" -> "packetSentToUpper"
+### "pauseSent" -> "pauseSent"
+### "pingRxSeq" -> "pingRxSeq"
+### "pingTxSeq" -> "pingTxSeq"
+### "pk" -> "pk"
+### "pkClass" -> "pkClass"
+### "powerConsumptionChanged" -> "powerConsumptionChanged"
+### "powerGenerationChanged" -> "powerGenerationChanged"
+### "queueLength" -> "queueLength"
+### "queueingTime" -> "queueingTime"
+### "radioAdded" -> "radioAdded"
+### "radioChannelChanged" -> "radioChannelChanged"
+### "radioModeChanged" -> "radioModeChanged"
+### "radioRemoved" -> "radioRemoved"
+### "rcvdAssertPk" -> "rcvdAssertPk"
+### "rcvdGraftAckPk" -> "rcvdGraftAckPk"
+### "rcvdGraftPk" -> "rcvdGraftPk"
+### "rcvdHelloPk" -> "rcvdHelloPk"
+### "rcvdJoinPrunePk" -> "rcvdJoinPrunePk"
+### "rcvdPk" -> "rcvdPk"
+### "rcvdPkRtpTimestamp" -> "rcvdPkRtpTimestamp"
+### "rcvdRegisterPk" -> "rcvdRegisterPk"
+### "rcvdRegisterStopPk" -> "rcvdRegisterStopPk"
+### "rcvdResponse" -> "rcvdResponse"
+### "rcvdStateRefreshPk" -> "rcvdStateRefreshPk"
+### "receiveState" -> "receiveState"
+### "receivedSignalPartChanged" -> "receivedSignalPartChanged"
+### "receptionEnded" -> "receptionEnded"
+### "receptionStarted" -> "receptionStarted"
+### "receptionStateChanged" -> "receptionStateChanged"
+### "reqStreamBytes" -> "reqStreamBytes"
+### "residualChargeCapacityChanged" -> "residualChargeCapacityChanged"
+### "residualEnergyCapacityChanged" -> "residualEnergyCapacityChanged"
+### "rtt" -> "rtt"
+### "rxPausePkUnits" -> "rxPausePkUnits"
+"rxPkFromHL" -> "rxPkFromHl"
+### "rxPkOk" -> "rxPkOk"
+### "sentAssertPk" -> "sentAssertPk"
+### "sentGraftAckPk" -> "sentGraftAckPk"
+### "sentGraftPk" -> "sentGraftPk"
+### "sentHelloPk" -> "sentHelloPk"
+### "sentJoinPrunePk" -> "sentJoinPrunePk"
+### "sentPk" -> "sentPk"
+### "sentRegisterPk" -> "sentRegisterPk"
+### "sentRegisterStopPk" -> "sentRegisterStopPk"
+### "sentReply" -> "sentReply"
+### "sentReq" -> "sentReq"
+### "sentRequest" -> "sentRequest"
+### "sentStateRefreshPk" -> "sentStateRefreshPk"
+### "sentUpdate" -> "sentUpdate"
+### "signalAdded" -> "signalAdded"
+### "signalArrivalEnded" -> "signalArrivalEnded"
+### "signalArrivalStarted" -> "signalArrivalStarted"
+### "signalDepartureEnded" -> "signalDepartureEnded"
+### "signalDepartureStarted" -> "signalDepartureStarted"
+### "signalRemoved" -> "signalRemoved"
+"startDAD" -> "startDad"
+### "stateChanged" -> "stateChanged"
+### "symbolErrorRate" -> "symbolErrorRate"
+### "tcpConnectionAdded" -> "tcpConnectionAdded"
+### "tcpConnectionRemoved" -> "tcpConnectionRemoved"
+### "transmissionEnded" -> "transmissionEnded"
+### "transmissionStarted" -> "transmissionStarted"
+### "transmissionStateChanged" -> "transmissionStateChanged"
+### "transmitState" -> "transmitState"
+### "transmittedSignalPartChanged" -> "transmittedSignalPartChanged"
+### "txPausePkUnits" -> "txPausePkUnits"
+### "txPk" -> "txPk"
+### "txState" -> "txState"
+NF_INTERFACE_CONFIG_CHANGED -> interfaceConfigChangedSignal
+NF_INTERFACE_CREATED -> interfaceCreatedSignal
+NF_INTERFACE_DELETED -> interfaceDeletedSignal
+NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED -> interfaceGenericnetworkprotocolconfigChangedSignal
+NF_INTERFACE_IPv4CONFIG_CHANGED -> interfaceIpv4ConfigChangedSignal
+NF_INTERFACE_IPv6CONFIG_CHANGED -> interfaceIpv6ConfigChangedSignal
+NF_INTERFACE_STATE_CHANGED -> interfaceStateChangedSignal
+NF_IPv4_DATA_ON_NONRPF -> ipv4DataOnNonrpfSignal
+NF_IPv4_DATA_ON_RPF -> ipv4DataOnRpfSignal
+NF_IPv4_MCAST_CHANGE -> ipv4McastChangeSignal
+NF_IPv4_MCAST_JOIN -> ipv4McastJoinSignal
+NF_IPv4_MCAST_LEAVE -> ipv4McastLeaveSignal
+NF_IPv4_MCAST_REGISTERED -> ipv4McastRegisteredSignal
+NF_IPv4_MCAST_UNREGISTERED -> ipv4McastUnregisteredSignal
+NF_IPv4_MDATA_REGISTER -> ipv4MdataRegisterSignal
+NF_IPv4_NEW_MULTICAST -> ipv4NewMulticastSignal
+NF_IPv6_HANDOVER_OCCURRED -> ipv6HandoverOccurredSignal
+NF_IPv6_MCAST_JOIN -> ipv6McastJoinSignal
+NF_IPv6_MCAST_LEAVE -> ipv6McastLeaveSignal
+NF_IPv6_MCAST_REGISTERED -> ipv6McastRegisteredSignal
+NF_IPv6_MCAST_UNREGISTERED -> ipv6McastUnregisteredSignal
+NF_L2_AP_ASSOCIATED -> l2ApAssociatedSignal
+NF_L2_AP_DISASSOCIATED -> l2ApDisassociatedSignal
+NF_L2_ASSOCIATED -> l2AssociatedSignal
+NF_L2_ASSOCIATED_NEWAP -> l2AssociatedNewapSignal
+NF_L2_ASSOCIATED_OLDAP -> l2AssociatedOldapSignal
+NF_L2_BEACON_LOST -> l2BeaconLostSignal
+NF_L2_DISASSOCIATED -> l2DisassociatedSignal
+NF_L2_Q_DROP -> l2QDropSignal
+NF_LINK_FULL_PROMISCUOUS -> linkFullPromiscuousSignal
+NF_LINK_PROMISCUOUS -> linkPromiscuousSignal
+NF_MAC_BECAME_IDLE -> macBecameIdleSignal
+NF_MIPv6_RO_COMPLETED -> mipv6RoCompletedSignal
+NF_MODESET_CHANGED -> modesetChangedSignal
+NF_MROUTE_ADDED -> mrouteAddedSignal
+NF_MROUTE_CHANGED -> mrouteChangedSignal
+NF_MROUTE_DELETED -> mrouteDeletedSignal
+NF_PIM_NEIGHBOR_ADDED -> pimNeighborAddedSignal
+NF_PIM_NEIGHBOR_CHANGED -> pimNeighborChangedSignal
+NF_PIM_NEIGHBOR_DELETED -> pimNeighborDeletedSignal
+NF_PP_RX_END -> ppRxEndSignal
+NF_PP_TX_BEGIN -> ppTxBeginSignal
+NF_PP_TX_END -> ppTxEndSignal
+NF_ROUTE_ADDED -> routeAddedSignal
+NF_ROUTE_CHANGED -> routeChangedSignal
+NF_ROUTE_DELETED -> routeDeletedSignal
+NF_TED_CHANGED -> tedChangedSignal
+NF_TX_ACKED -> txAckedSignal
+### _rcvdPkRtpTimestampSignal -> _rcvdPkRtpTimestampSignal
+### acceptConfirmSignal -> acceptConfirmSignal
+### backoffSignal -> backoffSignal
+### badResponseSignal -> badResponseSignal
+### bitErrorRateSignal -> bitErrorRateSignal
+### collisionSignal -> collisionSignal
+completedARPResolutionSignal -> completedArpResolutionSignal
+### connStateSignal -> connStateSignal
+### connectSignal -> connectSignal
+### currentConsumptionChangedSignal -> currentConsumptionChangedSignal
+### currentGenerationChangedSignal -> currentGenerationChangedSignal
+### datarateSignal -> datarateSignal
+### decapPkSignal -> decapPkSignal
+### delaySignal -> delaySignal
+### dequeuePkSignal -> dequeuePkSignal
+### dropConfirmSignal -> dropConfirmSignal
+### dsapSignal -> dsapSignal
+### duplPkSignal -> duplPkSignal
+### echoedPkSignal -> echoedPkSignal
+### encapPkSignal -> encapPkSignal
+### enqueuePkSignal -> enqueuePkSignal
+failedARPResolutionSignal -> failedArpResolutionSignal
+initiatedARPResolutionSignal -> initiatedArpResolutionSignal
+### linkBreakSignal -> linkBreakSignal
+### listeningChangedSignal -> listeningChangedSignal
+### lostPacketsSignal -> lostPacketsSignal
+### lostSamplesSignal -> lostSamplesSignal
+### markPkSignal -> markPkSignal
+### messageSentSignal -> messageSentSignal
+minSNIRSignal -> minSnirSignal
+### mobilityStateChangedSignal -> mobilityStateChangedSignal
+### mosSignal -> mosSignal
+### nodeStatusChangedSignal -> nodeStatusChangedSignal
+### numLostSignal -> numLostSignal
+### numOutOfOrderArrivalsSignal -> numOutOfOrderArrivalsSignal
+### numRoutesSignal -> numRoutesSignal
+### obstaclePenetratedSignal -> obstaclePenetratedSignal
+### outOfOrderPkSignal -> outOfOrderPkSignal
+### packetDelaySignal -> packetDelaySignal
+### packetDropSignal -> packetDropSignal
+### packetErrorRateSignal -> packetErrorRateSignal
+### packetFromUpperDroppedSignal -> packetFromUpperDroppedSignal
+### packetHasVoiceSignal -> packetHasVoiceSignal
+### packetLossRateSignal -> packetLossRateSignal
+### packetReceivedFromLowerSignal -> packetReceivedFromLowerSignal
+### packetReceivedFromPeerSignal -> packetReceivedFromPeerSignal
+### packetReceivedFromUpperSignal -> packetReceivedFromUpperSignal
+### packetSentToLowerSignal -> packetSentToLowerSignal
+### packetSentToPeerSignal -> packetSentToPeerSignal
+### packetSentToUpperSignal -> packetSentToUpperSignal
+### pauseSentSignal -> pauseSentSignal
+### pingRxSeqSignal -> pingRxSeqSignal
+### pingTxSeqSignal -> pingTxSeqSignal
+### pkClassSignal -> pkClassSignal
+### pkSignal -> pkSignal
+### playoutDelaySignal -> playoutDelaySignal
+### playoutLossRateSignal -> playoutLossRateSignal
+### powerConsumptionChangedSignal -> powerConsumptionChangedSignal
+### powerGenerationChangedSignal -> powerGenerationChangedSignal
+### queueLengthSignal -> queueLengthSignal
+### queueingTimeSignal -> queueingTimeSignal
+### radioAddedSignal -> radioAddedSignal
+### radioChannelChangedSignal -> radioChannelChangedSignal
+### radioModeChangedSignal -> radioModeChangedSignal
+### radioRemovedSignal -> radioRemovedSignal
+### rcvdAssertPkSignal -> rcvdAssertPkSignal
+### rcvdGraftAckPkSignal -> rcvdGraftAckPkSignal
+### rcvdGraftPkSignal -> rcvdGraftPkSignal
+### rcvdHelloPkSignal -> rcvdHelloPkSignal
+### rcvdJoinPrunePkSignal -> rcvdJoinPrunePkSignal
+### rcvdPkSignal -> rcvdPkSignal
+### rcvdRegisterPkSignal -> rcvdRegisterPkSignal
+### rcvdRegisterStopPkSignal -> rcvdRegisterStopPkSignal
+### rcvdResponseSignal -> rcvdResponseSignal
+### rcvdStateRefreshPkSignal -> rcvdStateRefreshPkSignal
+### receiveStateSignal -> receiveStateSignal
+### receivedSignalPartChangedSignal -> receivedSignalPartChangedSignal
+### receptionEndedSignal -> receptionEndedSignal
+### receptionStartedSignal -> receptionStartedSignal
+### receptionStateChangedSignal -> receptionStateChangedSignal
+### reqStreamBytesSignal -> reqStreamBytesSignal
+### residualChargeCapacityChangedSignal -> residualChargeCapacityChangedSignal
+### residualEnergyCapacityChangedSignal -> residualEnergyCapacityChangedSignal
+### rttSignal -> rttSignal
+### rxPausePkUnitsSignal -> rxPausePkUnitsSignal
+rxPkFromHLSignal -> rxPkFromHlSignal
+### rxPkOkSignal -> rxPkOkSignal
+### sentAssertPkSignal -> sentAssertPkSignal
+### sentGraftAckPkSignal -> sentGraftAckPkSignal
+### sentGraftPkSignal -> sentGraftPkSignal
+### sentHelloPkSignal -> sentHelloPkSignal
+### sentJoinPrunePkSignal -> sentJoinPrunePkSignal
+### sentPkSignal -> sentPkSignal
+### sentRegisterPkSignal -> sentRegisterPkSignal
+### sentRegisterStopPkSignal -> sentRegisterStopPkSignal
+### sentReplySignal -> sentReplySignal
+### sentReqSignal -> sentReqSignal
+### sentRequestSignal -> sentRequestSignal
+### sentStateRefreshPkSignal -> sentStateRefreshPkSignal
+### sentUpdateSignal -> sentUpdateSignal
+### signalAddedSignal -> signalAddedSignal
+### signalArrivalEndedSignal -> signalArrivalEndedSignal
+### signalArrivalStartedSignal -> signalArrivalStartedSignal
+### signalDepartureEndedSignal -> signalDepartureEndedSignal
+### signalDepartureStartedSignal -> signalDepartureStartedSignal
+### signalRemovedSignal -> signalRemovedSignal
+startDADSignal -> startDadSignal
+### stateChangedSignal -> stateChangedSignal
+### symbolErrorRateSignal -> symbolErrorRateSignal
+### taildropLossRateSignal -> taildropLossRateSignal
+### tcpConnectionAddedSignal -> tcpConnectionAddedSignal
+### tcpConnectionRemovedSignal -> tcpConnectionRemovedSignal
+### transmissionEndedSignal -> transmissionEndedSignal
+### transmissionStartedSignal -> transmissionStartedSignal
+### transmissionStateChangedSignal -> transmissionStateChangedSignal
+### transmitStateSignal -> transmitStateSignal
+### transmittedSignalPartChangedSignal -> transmittedSignalPartChangedSignal
+### txPausePkUnitsSignal -> txPausePkUnitsSignal
+### txPkSignal -> txPkSignal
+### txStateSignal -> txStateSignal
