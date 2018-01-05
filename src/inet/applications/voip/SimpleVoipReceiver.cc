@@ -30,7 +30,7 @@ simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("voipPacke
 simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("voipPacketDelay");
 simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("voipPlayoutDelay");
 simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("voipPlayoutLossRate");
-simsignal_t SimpleVoipReceiver::mosSignal = registerSignal("voipMosSignal");
+simsignal_t SimpleVoipReceiver::mosRateSignal = registerSignal("voipMosRate");
 simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("voipTaildropLossRate");
 
 void SimpleVoipReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoipPacket *pk)
@@ -261,7 +261,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
     emit(playoutDelaySignal, playoutDelay);
     double lossRate = ((double)playoutLoss / (double)talkspurtNumPackets);
     emit(playoutLossRateSignal, lossRate);
-    emit(mosSignal, mos);
+    emit(mosRateSignal, mos);
 
     // add calculated MOS value to fingerprint
     FINGERPRINT_ADD_EXTRA_DATA(mos);
