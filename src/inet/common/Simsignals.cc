@@ -69,8 +69,6 @@ simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCA
 simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
 simsignal_t NF_IPv4_DATA_ON_NONRPF = cComponent::registerSignal("NF_IPv4_DATA_ON_NONRPF");
 simsignal_t NF_IPv4_DATA_ON_RPF = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF");
-simsignal_t NF_IPv4_RPF_CHANGE = cComponent::registerSignal("NF_IPv4_RPF_CHANGE");
-simsignal_t NF_IPv4_DATA_ON_RPF_PIMSM = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF_PIMSM");
 simsignal_t NF_IPv4_MDATA_REGISTER = cComponent::registerSignal("NF_IPv4_MDATA_REGISTER");
 simsignal_t NF_PIM_NEIGHBOR_ADDED = cComponent::registerSignal("NF_PIM_NEIGHBOR_ADDED");
 simsignal_t NF_PIM_NEIGHBOR_DELETED = cComponent::registerSignal("NF_PIM_NEIGHBOR_DELETED");
@@ -84,20 +82,8 @@ simsignal_t NF_IPv6_MCAST_LEAVE = cComponent::registerSignal("NF_IPv6_MCAST_LEAV
 simsignal_t NF_IPv6_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_REGISTERED");
 simsignal_t NF_IPv6_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_UNREGISTERED");
 
-// layer 3 - CLNS
-simsignal_t NF_CLNS_ROUTE_ADDED = cComponent::registerSignal("NF_CLNS_ROUTE_ADDED");
-simsignal_t NF_CLNS_ROUTE_DELETED = cComponent::registerSignal("NF_CLNS_ROUTE_DELETED");
-simsignal_t NF_CLNS_ROUTE_CHANGED = cComponent::registerSignal("NF_CLNS_ROUTE_CHANGED");
-
-simsignal_t NF_ISIS_ADJ_CHANGED = cComponent::registerSignal("NF_ISIS_ADJ_CHANGED");
-
 // - layer 4 (transport)
 //...
-
-// - layer 7 - OverSim
-simsignal_t NF_OVERLAY_TRANSPORTADDRESS_CHANGED = cComponent::registerSignal("NF_OVERLAY_TRANSPORTADDRESS_CHANGED");
-simsignal_t NF_OVERLAY_NODE_GRACEFUL_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_GRACEFUL_LEAVE");
-simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_LEAVE");
 
 // - layer 7 (application)
 //...

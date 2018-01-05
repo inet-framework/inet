@@ -80,8 +80,6 @@ extern INET_API simsignal_t    // admin
     NF_IPv4_NEW_MULTICAST,
     NF_IPv4_DATA_ON_NONRPF,
     NF_IPv4_DATA_ON_RPF,
-    NF_IPv4_RPF_CHANGE,
-    NF_IPv4_DATA_ON_RPF_PIMSM,
     NF_IPv4_MDATA_REGISTER,
     NF_PIM_NEIGHBOR_ADDED,
     NF_PIM_NEIGHBOR_DELETED,
@@ -95,20 +93,8 @@ extern INET_API simsignal_t    // admin
     NF_IPv6_MCAST_REGISTERED,
     NF_IPv6_MCAST_UNREGISTERED,
 
-// layer 3 - CLNS
-    NF_CLNS_ROUTE_ADDED,
-    NF_CLNS_ROUTE_DELETED,
-    NF_CLNS_ROUTE_CHANGED,
-
-    NF_ISIS_ADJ_CHANGED,
-
 // - layer 4 (transport)
 //...
-
-// - layer 7 - OverSim
-    NF_OVERLAY_TRANSPORTADDRESS_CHANGED,    // OverSim
-    NF_OVERLAY_NODE_GRACEFUL_LEAVE,    // OverSim
-    NF_OVERLAY_NODE_LEAVE,    // OverSim
 
 // - layer 7 (application)
 //...
