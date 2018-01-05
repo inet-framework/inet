@@ -33,7 +33,7 @@
 
 namespace inet {
 
-simsignal_t Arp::sentReqSignal = registerSignal("sentReq");
+simsignal_t Arp::sentRequestSignal = registerSignal("sentRequest");
 simsignal_t Arp::sentReplySignal = registerSignal("sentReply");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
@@ -237,7 +237,7 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 
     sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
     numRequestsSent++;
-    emit(sentReqSignal, 1L);
+    emit(sentRequestSignal, 1L);
 }
 
 void Arp::requestTimedOut(cMessage *selfmsg)

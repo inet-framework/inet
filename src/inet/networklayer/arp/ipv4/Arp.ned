@@ -53,12 +53,12 @@ simple Arp like IArp
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
         @display("i=block/layer");
-        @signal[sentReq](type=long);
+        @signal[sentRequest](type=long);
         @signal[sentReply](type=long);
         @signal[arpResolutionInitiated](type=IArp::Notification);
         @signal[arpResolutionCompleted](type=IArp::Notification);
         @signal[arpResolutionFailed](type=IArp::Notification);
-        @statistic[sentReq](title="ARP request sent"; record=count,vector);
+        @statistic[sentRequest](title="ARP request sent"; record=count,vector);
         @statistic[sentReply](title="ARP replies sent"; record=count,vector);
         @statistic[arpResolutionInitiated](title="ARP initiated resolutions"; record=count);
         @statistic[arpResolutionCompleted](title="ARP completed resolutions"; record=count);
