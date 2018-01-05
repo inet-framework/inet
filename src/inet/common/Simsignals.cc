@@ -67,16 +67,11 @@ simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCA
 
 // for PIM
 simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
-simsignal_t NF_IPv4_NEW_IGMP_ADDED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED");
-simsignal_t NF_IPv4_NEW_IGMP_REMOVED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED");
 simsignal_t NF_IPv4_DATA_ON_NONRPF = cComponent::registerSignal("NF_IPv4_DATA_ON_NONRPF");
 simsignal_t NF_IPv4_DATA_ON_RPF = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF");
 simsignal_t NF_IPv4_RPF_CHANGE = cComponent::registerSignal("NF_IPv4_RPF_CHANGE");
 simsignal_t NF_IPv4_DATA_ON_RPF_PIMSM = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF_PIMSM");
 simsignal_t NF_IPv4_MDATA_REGISTER = cComponent::registerSignal("NF_IPv4_MDATA_REGISTER");
-simsignal_t NF_IPv4_NEW_IGMP_ADDED_PISM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED_PISM");
-simsignal_t NF_IPv4_NEW_IGMP_REMOVED_PIMSM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED_PIMSM");
-
 simsignal_t NF_PIM_NEIGHBOR_ADDED = cComponent::registerSignal("NF_PIM_NEIGHBOR_ADDED");
 simsignal_t NF_PIM_NEIGHBOR_DELETED = cComponent::registerSignal("NF_PIM_NEIGHBOR_DELETED");
 simsignal_t NF_PIM_NEIGHBOR_CHANGED = cComponent::registerSignal("NF_PIM_NEIGHBOR_CHANGED");
