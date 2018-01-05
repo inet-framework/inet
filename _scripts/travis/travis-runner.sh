@@ -12,7 +12,9 @@
 
 set -e # make the script exit with error if any executed command exits with error
 
+echo -e "\nccache summary:\n"
 ccache -s
+echo -e "\n----\n"
 
 export PATH="/root/omnetpp-5.3p2-$TARGET_PLATFORM/bin:$PATH"
 
@@ -23,29 +25,27 @@ cp -r /root/nsc-0.5.3 3rdparty
 
 # only enabling some features only with native compilation, because we don't [want to?] have cross-compiled ffmpeg and NSC
 if [ "$TARGET_PLATFORM" = "linux" ]; then
-    opp_featuretool enable VoIPStream
-    opp_featuretool enable VoIPStream_examples
-
-    opp_featuretool enable TCP_NSC
-    opp_featuretool enable TCP_lwIP
+    opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
 fi
 
 make makefiles
-
 
 if [ "$RUN_FINGERPRINT_TESTS" = "yes" ]; then
     export PATH=/usr/lib/ccache:$PATH
     make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc)
 
-    POSTFIX=""
-    if [ "$MODE" = "debug" ]; then
-        POSTFIX="_dbg"
-    fi
+    echo -e "\n---- build finished, starting fingerprint tests ----\n"
 
     cd tests/fingerprint
-    ./fingerprinttest -e opp_run$POSTFIX
+    if [ "$MODE" = "debug" ]; then
+        ./fingerprinttest -d
+    else
+        ./fingerprinttest
+    fi
 else
     make MODE=$MODE -j $(nproc)
 fi
 
+echo -e "\nccache summary:\n"
 ccache -s
+echo -e "\n----\n"
