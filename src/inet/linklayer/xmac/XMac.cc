@@ -31,7 +31,7 @@ namespace inet {
 
 Define_Module(XMac);
 
-simsignal_t XMac::packetFromUpperDroppedSignal = registerSignal("packetFromUpperDroppedSignal");
+simsignal_t XMac::packetFromUpperDroppedSignal = registerSignal("packetFromUpperDropped");
 
 /**
  * Initialize method of XMac. Init all parameters, schedule timers.
