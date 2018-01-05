@@ -37,8 +37,10 @@ simsignal_t NF_L2_AP_DISASSOCIATED = cComponent::registerSignal("NF_L2_AP_DISASS
 simsignal_t linkBreakSignal = cComponent::registerSignal("linkBreak");
 simsignal_t NF_LINK_PROMISCUOUS = cComponent::registerSignal("NF_LINK_PROMISCUOUS");
 simsignal_t NF_LINK_FULL_PROMISCUOUS = cComponent::registerSignal("NF_LINK_FULL_PROMISCUOUS");
+
 simsignal_t NF_MODESET_CHANGED = cComponent::registerSignal("NF_MODESET_CHANGED");
 
+// - layer 3 (network)
 simsignal_t NF_INTERFACE_CREATED = cComponent::registerSignal("NF_INTERFACE_CREATED");
 simsignal_t NF_INTERFACE_DELETED = cComponent::registerSignal("NF_INTERFACE_DELETED");
 simsignal_t NF_INTERFACE_STATE_CHANGED = cComponent::registerSignal("NF_INTERFACE_STATE_CHANGED");
@@ -48,6 +50,7 @@ simsignal_t NF_INTERFACE_IPv4CONFIG_CHANGED = cComponent::registerSignal("NF_INT
 simsignal_t NF_INTERFACE_IPv6CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_IPv6CONFIG_CHANGED");
 simsignal_t NF_TED_CHANGED = cComponent::registerSignal("NF_TED_CHANGED");
 
+// layer 3 - Routing Table
 simsignal_t NF_ROUTE_ADDED = cComponent::registerSignal("NF_ROUTE_ADDED");
 simsignal_t NF_ROUTE_DELETED = cComponent::registerSignal("NF_ROUTE_DELETED");
 simsignal_t NF_ROUTE_CHANGED = cComponent::registerSignal("NF_ROUTE_CHANGED");
@@ -55,12 +58,14 @@ simsignal_t NF_MROUTE_ADDED = cComponent::registerSignal("NF_MROUTE_ADDED");
 simsignal_t NF_MROUTE_DELETED = cComponent::registerSignal("NF_MROUTE_DELETED");
 simsignal_t NF_MROUTE_CHANGED = cComponent::registerSignal("NF_MROUTE_CHANGED");
 
+// layer 3 - Ipv4
 simsignal_t NF_IPv4_MCAST_JOIN = cComponent::registerSignal("NF_IPv4_MCAST_JOIN");
 simsignal_t NF_IPv4_MCAST_LEAVE = cComponent::registerSignal("NF_IPv4_MCAST_LEAVE");
 simsignal_t NF_IPv4_MCAST_CHANGE = cComponent::registerSignal("NF_IPv4_MCAST_CHANGE");
 simsignal_t NF_IPv4_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_REGISTERED");
 simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_UNREGISTERED");
 
+// for PIM
 simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
 simsignal_t NF_IPv4_NEW_IGMP_ADDED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED");
 simsignal_t NF_IPv4_NEW_IGMP_REMOVED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED");
@@ -76,6 +81,7 @@ simsignal_t NF_PIM_NEIGHBOR_ADDED = cComponent::registerSignal("NF_PIM_NEIGHBOR_
 simsignal_t NF_PIM_NEIGHBOR_DELETED = cComponent::registerSignal("NF_PIM_NEIGHBOR_DELETED");
 simsignal_t NF_PIM_NEIGHBOR_CHANGED = cComponent::registerSignal("NF_PIM_NEIGHBOR_CHANGED");
 
+// layer 3 - Ipv6
 simsignal_t NF_IPv6_HANDOVER_OCCURRED = cComponent::registerSignal("NF_IPv6_HANDOVER_OCCURRED");
 simsignal_t NF_MIPv6_RO_COMPLETED = cComponent::registerSignal("NF_MIPv6_RO_COMPLETED");
 simsignal_t NF_IPv6_MCAST_JOIN = cComponent::registerSignal("NF_IPv6_MCAST_JOIN");
@@ -83,16 +89,25 @@ simsignal_t NF_IPv6_MCAST_LEAVE = cComponent::registerSignal("NF_IPv6_MCAST_LEAV
 simsignal_t NF_IPv6_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_REGISTERED");
 simsignal_t NF_IPv6_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_UNREGISTERED");
 
+// layer 3 - CLNS
 simsignal_t NF_CLNS_ROUTE_ADDED = cComponent::registerSignal("NF_CLNS_ROUTE_ADDED");
 simsignal_t NF_CLNS_ROUTE_DELETED = cComponent::registerSignal("NF_CLNS_ROUTE_DELETED");
 simsignal_t NF_CLNS_ROUTE_CHANGED = cComponent::registerSignal("NF_CLNS_ROUTE_CHANGED");
 
 simsignal_t NF_ISIS_ADJ_CHANGED = cComponent::registerSignal("NF_ISIS_ADJ_CHANGED");
 
+// - layer 4 (transport)
+//...
+
+// - layer 7 - OverSim
 simsignal_t NF_OVERLAY_TRANSPORTADDRESS_CHANGED = cComponent::registerSignal("NF_OVERLAY_TRANSPORTADDRESS_CHANGED");
 simsignal_t NF_OVERLAY_NODE_GRACEFUL_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_GRACEFUL_LEAVE");
 simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_LEAVE");
 
+// - layer 7 (application)
+//...
+
+// general
 simsignal_t packetDropSignal = cComponent::registerSignal("packetDrop");
 
 simsignal_t packetSentToUpperSignal = cComponent::registerSignal("packetSentToUpper");
