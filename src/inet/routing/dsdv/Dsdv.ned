@@ -18,6 +18,8 @@
 
 package inet.routing.dsdv;
 
+import inet.routing.contract.IManetRouting;
+
 //
 // Implements Destination-Sequenced Distance Vector.
 //
@@ -32,7 +34,7 @@ package inet.routing.dsdv;
 //
 // WRANING: This is a partial / unfinished implementation. DO NOT USE it !
 //
-simple Dsdv
+simple Dsdv like IManetRouting
 {
     parameters:
         @display("i=block/routing");

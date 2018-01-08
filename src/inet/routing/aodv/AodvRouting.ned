@@ -18,6 +18,8 @@
 
 package inet.routing.aodv;
 
+import inet.routing.contract.IManetRouting;
+
 //
 // Ad hoc On-Demand Distance Vector Routing Protocol module.
 //
@@ -34,7 +36,7 @@ package inet.routing.aodv;
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
-simple AodvRouting
+simple AodvRouting like IManetRouting
 {
     parameters:
         @display("i=block/network2");

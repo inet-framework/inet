@@ -19,6 +19,8 @@
 
 package inet.routing.gpsr;
 
+import inet.routing.contract.IManetRouting;
+
 //
 // This module provides Greedy Perimeter Stateless Routing for Wireless Networks.
 // The implementation supports both GG and RNG planarization algorithms.
@@ -26,7 +28,7 @@ package inet.routing.gpsr;
 // For more information on the routing algorithm, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
-simple Gpsr
+simple Gpsr like IManetRouting
 {
     parameters:
         // properties
