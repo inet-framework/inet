@@ -136,6 +136,82 @@ void Dsdv::stop()
     }
 }
 
+void Dsdv::handleSelfMessage(cMessage *msg)
+{
+    // When DSDV module receives selfmessage (scheduled event)
+    // it means that it's time for Hello message broadcast event
+    // i.e. Brodcast Hello messages to other nodes when selfmessage=event
+    // But if selmessage!=event it means that it is time to forward useful Hello message to othert nodes
+    if (msg == event)
+    {
+        auto hello = makeShared<DsdvHello>();
+
+        rt->purge();
+
+        // count non-loopback interfaces
+        // int numIntf = 0;
+        // InterfaceEntry *ie = nullptr;
+        //for (int k=0; k<ift->getNumInterfaces(); k++)
+        //  if (!ift->getInterface(k)->isLoopback())
+        //  {ie = ift->getInterface(k); numIntf++;}
+
+        // Filling the DsdvHello fields
+        // Ipv4Address source = (ie->ipv4()->getIPAddress());
+        Ipv4Address source = (interface80211ptr->ipv4Data()->getIPAddress());
+        hello->setChunkLength(b(128)); ///size of Hello message in bits
+        hello->setSrcAddress(source);
+        sequencenumber += 2;
+        hello->setSequencenumber(sequencenumber);
+        hello->setNextAddress(source);
+        hello->setHopdistance(1);
+
+        /*http://www.cs.ucsb.edu/~ebelding/txt/bc.txt
+        The IPv4 address for "limited broadcast" is 255.255.255.255, and is not supposed to be forwarded.
+        Since the nodes in an ad hoc network are asked to forward the flooded packets, the limited broadcast
+        address is a poor choice.  The other available choice, the "directed broadcast" address, would presume a
+        choice of routing prefix for the ad hoc network and thus is not a reasonable choice.
+        (...)
+        Limited Broadcast - Sent to all NICs on the some network segment as the source NIC. It is represented with
+        the 255.255.255.255 TCP/IP address. This broadcast is not forwarded by routers so will only appear on one
+        network segment.
+        Direct broadcast - Sent to all hosts on a network. Routers may be configured to forward directed broadcasts
+        on large networks. For network 192.168.0.0, the broadcast is 192.168.255.255.
+        */
+        //new control info for DsdvHello
+        auto packet = new Packet("Hello", hello);
+        packet->ensureTag<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
+        packet->ensureTag<L3AddressReq>()->setSrcAddress(source); //let's try the limited broadcast
+        packet->ensureTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+
+        //broadcast to other nodes the hello message
+        send(packet, "ipOut");
+        packet = nullptr;
+        hello = nullptr;
+
+        //schedule new brodcast hello message event
+        scheduleAt(simTime()+helloInterval+broadcastDelay->doubleValue(), event);
+        bubble("Sending new hello message");
+    }
+    else
+    {
+        for (auto it = forwardList->begin(); it != forwardList->end(); it++)
+        {
+            if ( (*it)->event == msg )
+            {
+                EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
+                send((*it)->hello, "ipOut");
+                (*it)->hello = nullptr;
+                delete (*it);
+                forwardList->erase(it);
+                break;
+            }
+        }
+        delete msg;
+    }
+}
+
 void Dsdv::handleMessage(cMessage *msg)
 {
     if (!isNodeUp()) {
@@ -146,80 +222,9 @@ void Dsdv::handleMessage(cMessage *msg)
         return;
     }
 
-    // When DSDV module receives selfmessage (scheduled event)
-    // it means that it's time for Hello message broadcast event
-    // i.e. Brodcast Hello messages to other nodes when selfmessage=event
-    // But if selmessage!=event it means that it is time to forward useful Hello message to othert nodes
     if (msg->isSelfMessage())
     {
-        if (msg == event)
-        {
-            auto hello = makeShared<DsdvHello>();
-
-            rt->purge();
-
-            // count non-loopback interfaces
-            // int numIntf = 0;
-            // InterfaceEntry *ie = nullptr;
-            //for (int k=0; k<ift->getNumInterfaces(); k++)
-            //  if (!ift->getInterface(k)->isLoopback())
-            //  {ie = ift->getInterface(k); numIntf++;}
-
-            // Filling the DsdvHello fields
-            // Ipv4Address source = (ie->ipv4()->getIPAddress());
-            Ipv4Address source = (interface80211ptr->ipv4Data()->getIPAddress());
-            hello->setChunkLength(b(128)); ///size of Hello message in bits
-            hello->setSrcAddress(source);
-            sequencenumber += 2;
-            hello->setSequencenumber(sequencenumber);
-            hello->setNextAddress(source);
-            hello->setHopdistance(1);
-
-            /*http://www.cs.ucsb.edu/~ebelding/txt/bc.txt
-            The IPv4 address for "limited broadcast" is 255.255.255.255, and is not supposed to be forwarded.
-            Since the nodes in an ad hoc network are asked to forward the flooded packets, the limited broadcast
-            address is a poor choice.  The other available choice, the "directed broadcast" address, would presume a
-            choice of routing prefix for the ad hoc network and thus is not a reasonable choice.
-            (...)
-            Limited Broadcast - Sent to all NICs on the some network segment as the source NIC. It is represented with
-            the 255.255.255.255 TCP/IP address. This broadcast is not forwarded by routers so will only appear on one
-            network segment.
-            Direct broadcast - Sent to all hosts on a network. Routers may be configured to forward directed broadcasts
-            on large networks. For network 192.168.0.0, the broadcast is 192.168.255.255.
-            */
-            //new control info for DsdvHello
-            auto packet = new Packet("Hello", hello);
-            packet->ensureTag<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-            packet->ensureTag<L3AddressReq>()->setSrcAddress(source); //let's try the limited broadcast
-            packet->ensureTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
-            packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-            packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-
-            //broadcast to other nodes the hello message
-            send(packet, "ipOut");
-            hello = nullptr;
-
-            //schedule new brodcast hello message event
-            scheduleAt(simTime()+helloInterval+broadcastDelay->doubleValue(), event);
-            bubble("Sending new hello message");
-        }
-        else
-        {
-            for (auto it = forwardList->begin(); it != forwardList->end(); it++)
-            {
-                if ( (*it)->event == msg )
-                {
-                    EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
-                    send((*it)->hello, "ipOut");
-                    (*it)->hello = nullptr;
-                    delete (*it)->event;
-                    (*it)->event = nullptr;
-                    delete (*it);
-                    forwardList->erase(it);
-                    break;
-                }
-            }
-        }
+        handleSelfMessage(msg);
     }
     else if (msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::manet)
     {

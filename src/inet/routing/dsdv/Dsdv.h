@@ -75,6 +75,8 @@ class INET_API Dsdv : public cSimpleModule, public ILifecycle
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
+    void handleSelfMessage(cMessage *msg);
+
     // configuration
     bool isNodeUp() const;
 
