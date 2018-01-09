@@ -79,32 +79,33 @@ void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cOb
     IMobility *module = dynamic_cast<IMobility *>(object);
     if (module) {
         Coord coord = module->getCurrentPosition();
-        fire(this, t, reinterpret_cast<uintptr_t>(&coord), details);
+        VoidPtrWrapper wrapper(&coord);
+        fire(this, t, &wrapper, details);
     }
 }
 
 Register_ResultFilter("xCoord", XCoordFilter);
 
-void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details)
+void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (reinterpret_cast<Coord *>(object))
+    if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
         fire(this, t, ((Coord *)object)->x, details);
 }
 
 Register_ResultFilter("yCoord", YCoordFilter);
 
-void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details)
+void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (reinterpret_cast<Coord *>(object))
+    if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
         fire(this, t, ((Coord *)object)->y, details);
 }
 
 Register_ResultFilter("zCoord", ZCoordFilter);
 
-void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details)
+void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (reinterpret_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->z, details);
+    if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
+        fire(this, t, ((Coord *)wrapper->getObject())->z, details);
 }
 
 Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
