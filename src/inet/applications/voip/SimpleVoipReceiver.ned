@@ -60,7 +60,7 @@ simple SimpleVoipReceiver like IApp
         @statistic[packetLossRate](title="VoIP Packet Loss"; unit="ratio"; source="voipPacketLossRate"; record=stats,vector);
         @statistic[playoutDelay](title="VoIP Playout Delay"; unit="s"; source="voipPlayoutDelay"; record=stats,vector);
         @statistic[playoutLossRate](title="VoIP Playout Loss Rate"; unit="ratio"; source="voipPlayoutLossRate"; record=stats,vector);
-        @statistic[MOS](title="VoIP MOS"; unit="MOS"; source="voipMosRate"; record=stats,vector);
+        @statistic[mos](title="VoIP MOS"; unit="MOS"; source="voipMosRate"; record=stats,vector);
         @statistic[taildropLossRate](title="VoIP Tail Drop Loss Rate"; unit="ratio"; source="voipTaildropLossRate"; record=stats,vector);
 
         @display("i=block/source");
