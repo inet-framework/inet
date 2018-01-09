@@ -319,7 +319,7 @@ void Dsdv::handleMessage(cMessage *msg)
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
                     //waitTime= SIMTIME_DBL (simTime())+waitTime;
-                    EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";
+                    EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";     //FIXME unchanged waitTime showed twice!!!
                     packet->insertAtEnd(recHello);
                     sendDelayed(packet, waitTime, "ipOut");
                     packet = nullptr;
@@ -348,7 +348,7 @@ void Dsdv::handleMessage(cMessage *msg)
             delete msg;
         }
         else
-            delete msg;
+            throw cRuntimeError("Message arrived on unknown gate %s", msg->getArrivalGate()->getName());
     }
     else
         throw cRuntimeError("Message not supported %s", msg->getName());
