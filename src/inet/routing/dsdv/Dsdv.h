@@ -22,6 +22,8 @@
 #include <string.h>
 #include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -36,7 +38,7 @@ namespace inet {
 /**
  * DSDV protocol implementation.
  */
-class INET_API Dsdv : public cSimpleModule
+class INET_API Dsdv : public cSimpleModule, public ILifecycle
 {
   private:
     struct ForwardEntry
@@ -56,6 +58,8 @@ class INET_API Dsdv : public cSimpleModule
     int interfaceId = -1;
     unsigned int sequencenumber = 0;
     simtime_t routeLifetime;
+    cModule *host = nullptr;
+    NodeStatus *nodeStatus = nullptr;
 
   protected:
     simtime_t helloInterval;
@@ -71,6 +75,13 @@ class INET_API Dsdv : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
+    // configuration
+    bool isNodeUp() const;
+
+    // lifecycle
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    void start();
+    void stop();
 };
 
 /**

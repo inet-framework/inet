@@ -16,6 +16,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3Socket.h"
@@ -37,20 +38,9 @@ Dsdv::Dsdv()
 
 Dsdv::~Dsdv()
 {
+    stop();
     // Dispose of dynamically allocated the objects
-    cancelAndDelete(event);
-    while (!forwardList->empty())
-    {
-        ForwardEntry *fh = forwardList->front();
-        if (fh->event)
-            cancelAndDelete(fh->event);
-        if (fh->hello)
-            cancelAndDelete(fh->hello);
-        fh->event = nullptr;
-        fh->hello = nullptr;
-        forwardList->pop_front();
-        delete fh;
-    }
+    delete event;
     delete forwardList;
     //delete Hello;
 }
@@ -63,78 +53,106 @@ void Dsdv::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         sequencenumber = 0;
-        if (!ift)
-            ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        if (!rt)
-            rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        host = getContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+
+        routeLifetime = par("routeLifetime").doubleValue();
+        helloInterval = (simtime_t) par("hellomsgperiod_DSDV");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         registerProtocol(Protocol::manet, gate("ipOut"));
         L3Socket socket(Protocol::manet.getId(), gate("ipOut"));
-
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        /* Search the 80211 interface */
-        int  num_80211 = 0;
-        InterfaceEntry *ie;
-        InterfaceEntry *i_face;
-        const char *name;
-        broadcastDelay = &par("broadcastDelay");
-        for (int i = 0; i < ift->getNumInterfaces(); i++)
-        {
-            ie = ift->getInterface(i);
-            name = ie->getInterfaceName();
-            if (strstr(name, "wlan")!=nullptr)
-            {
-                i_face = ie;
-                num_80211++;
-                interfaceId = i;
-            }
-        }
-
-        // One enabled network interface (in total)
-        if (num_80211==1)
-            interface80211ptr = i_face;
-        else
-            throw cRuntimeError("DSDV has found %i 80211 interfaces", num_80211);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        if (par("manetPurgeRoutingTables").boolValue())
-        {
-            Ipv4Route *entry;
-            // clean the route table wlan interface entry
-            for (int i=rt->getNumRoutes()-1; i>=0; i--)
-            {
-                entry = rt->getRoute(i);
-                const InterfaceEntry *ie = entry->getInterface();
-                if (strstr(ie->getInterfaceName(), "wlan")!=nullptr)
-                    rt->deleteRoute(entry);
-            }
-        }
-        interface80211ptr->ipv4Data()->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
-
-        // schedules a random periodic event: the hello message broadcast from DSDV module
-
-        routeLifetime = par("routeLifetime").doubleValue();
-
-        //reads from omnetpp.ini
-        helloInterval = (simtime_t) par("hellomsgperiod_DSDV");
-        //HelloForward = new DsdvHello("HelloForward");
-        // schedules a random periodic event: the hello message broadcast from DSDV module
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
-        scheduleAt( uniform(0, par("MaxVariance_DSDV").doubleValue()), event);
+        if (isNodeUp())
+            start();
+    }
+}
+
+void Dsdv::start()
+{
+    /* Search the 80211 interface */
+    int  num_80211 = 0;
+    InterfaceEntry *ie;
+    InterfaceEntry *i_face;
+    const char *name;
+    broadcastDelay = &par("broadcastDelay");
+    for (int i = 0; i < ift->getNumInterfaces(); i++)
+    {
+        ie = ift->getInterface(i);
+        name = ie->getInterfaceName();
+        if (strstr(name, "wlan") != nullptr)
+        {
+            i_face = ie;
+            num_80211++;
+            interfaceId = i;
+        }
+    }
+
+    // One enabled network interface (in total)
+    if (num_80211 == 1)
+        interface80211ptr = i_face;
+    else
+        throw cRuntimeError("DSDV has found %i 80211 interfaces", num_80211);
+    if (par("manetPurgeRoutingTables").boolValue())
+    {
+        Ipv4Route *entry;
+        // clean the route table wlan interface entry
+        for (int i = rt->getNumRoutes() - 1; i >= 0; i--)
+        {
+            entry = rt->getRoute(i);
+            const InterfaceEntry *ie = entry->getInterface();
+            if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
+                rt->deleteRoute(entry);
+        }
+    }
+    CHK(interface80211ptr->ipv4Data())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+
+    // schedules a random periodic event: the hello message broadcast from DSDV module
+
+    //reads from omnetpp.ini
+    //HelloForward = new DsdvHello("HelloForward");
+    // schedules a random periodic event: the hello message broadcast from DSDV module
+    scheduleAt(simTime() + uniform(0, (double)par("MaxVariance_DSDV")), event);
+}
+
+void Dsdv::stop()
+{
+    cancelEvent(event);
+    while (!forwardList->empty())
+    {
+        ForwardEntry *fh = forwardList->front();
+        if (fh->event)
+            cancelAndDelete(fh->event);
+        if (fh->hello)
+            cancelAndDelete(fh->hello);
+        fh->event = nullptr;
+        fh->hello = nullptr;
+        forwardList->pop_front();
+        delete fh;
     }
 }
 
 void Dsdv::handleMessage(cMessage *msg)
 {
+    if (!isNodeUp()) {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self message arrived in node down status");
+        EV_ERROR << "Message " << msg->getName() << "(" << msg->getClassName() << ") arrived in node down status, ignored\n";
+        delete msg;
+        return;
+    }
+
     // When DSDV module receives selfmessage (scheduled event)
     // it means that it's time for Hello message broadcast event
     // i.e. Brodcast Hello messages to other nodes when selfmessage=event
     // But if selmessage!=event it means that it is time to forward useful Hello message to othert nodes
     if (msg->isSelfMessage())
     {
-        if (msg==event)
+        if (msg == event)
         {
             auto hello = makeShared<DsdvHello>();
 
@@ -235,7 +253,6 @@ void Dsdv::handleMessage(cMessage *msg)
         if (msg->arrivedOn("ipIn") && ((!isForwardHello && recHello) || (isForwardHello && fhp->hello)))
         {
             bubble("Received hello message");
-
             Ipv4Address source = interface80211ptr->ipv4Data()->getIPAddress();
 
             //pointer to interface and routing table
@@ -361,6 +378,42 @@ void Dsdv::handleMessage(cMessage *msg)
     else
         throw cRuntimeError("Message not supported %s", msg->getName());
 }
+
+//
+// configuration
+//
+
+bool Dsdv::isNodeUp() const
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+//
+// lifecycle
+//
+bool Dsdv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            // TODO: send a beacon to remove ourself from peers neighbor position table
+            stop();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+            stop();
+        }
+    }
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
 
 } // namespace inet
 
