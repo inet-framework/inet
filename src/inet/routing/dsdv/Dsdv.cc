@@ -234,16 +234,6 @@ void Dsdv::handleMessage(cMessage *msg)
         // it adds/replaces the information in routing table for the one contained in the message
         // but only if it's useful/up-to-date. If not the DSDV module ignores the message.
         packet->ensureTag<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-
-        // int numIntf = 0;
-        if (ift!=nullptr)
-            ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        //InterfaceEntry *ie = nullptr;
-        //for (int k=0; k<ift->getNumInterfaces(); k++)
-        //  if (!ift->getInterface(k)->isLoopback())
-        //  {ie = ift->getInterface(k); numIntf++;}
-
-        //controlInfo->setSrcAddr(ie->ipv4()->getIPAddress());
         packet->ensureTag<L3AddressReq>()->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
         packet->ensureTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
         packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
@@ -255,15 +245,10 @@ void Dsdv::handleMessage(cMessage *msg)
             fhp->hello = check_and_cast<Packet *>(msg->dup());
         }
 
-        if (msg->arrivedOn("ipIn") && ((!isForwardHello && recHello) || (isForwardHello && fhp->hello)))
-        {
+        if (msg->arrivedOn("ipIn")) {
+            ASSERT((!isForwardHello && recHello) || (isForwardHello && fhp->hello));
             bubble("Received hello message");
             Ipv4Address source = interface80211ptr->ipv4Data()->getIPAddress();
-
-            //pointer to interface and routing table
-            //rt = RoutingTableAccess_DSDV().get(); // IPv4RoutingTable *rt = nodeInfo[i].rt;
-            //ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);//InterfaceTable *ift = nodeInfo[i].ift;
-
 
             //reads DSDV hello message fields
             Ipv4Address src;
@@ -276,8 +261,7 @@ void Dsdv::handleMessage(cMessage *msg)
                 next = recHello->getNextAddress();
                 numHops = recHello->getHopdistance();
 
-                if (src==source)
-                {
+                if (src == source) {
                     EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
                     delete packet;
                     return;
@@ -290,24 +274,12 @@ void Dsdv::handleMessage(cMessage *msg)
                 next = fhpHello->getNextAddress();
                 numHops = fhpHello->getHopdistance();
 
-                if (src==source)
-                {
+                if (src == source) {
                     EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
                     delete fhp;
                     return;
                 }
             }
-            // count non-loopback interfaces
-            //int numIntf = 0;
-            //InterfaceEntry *ie = nullptr;
-            //for (int k=0; k<ift->getNumInterfaces(); k++)
-            //  if (!ift->getInterface(k)->isLoopback())
-            //  {ie = ift->getInterface(k); numIntf++;}
-            //
-            //Tests if the DSDV hello message that arrived is originally from another node
-            //Ipv4Address source = (ie->ipv4()->getIPAddress());
-
-
 
             Ipv4Route *_entrada_routing = rt->findBestMatchingRoute(src);
             DsdvIpv4Route *entrada_routing = dynamic_cast<DsdvIpv4Route *>(_entrada_routing);
@@ -340,8 +312,6 @@ void Dsdv::handleMessage(cMessage *msg)
                     recHello->setNextAddress(source);
                     numHops++;
                     recHello->setHopdistance(numHops);
-                    //send(HelloForward, "ipOut");//
-                    //HelloForward=nullptr;//
                     double waitTime = intuniform(1, 50);
                     waitTime = waitTime/100;
                     EV_DETAIL << "waitime for forward before was " << waitTime <<" And host is " << source << "\n";
@@ -405,7 +375,6 @@ bool Dsdv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            // TODO: send a beacon to remove ourself from peers neighbor position table
             stop();
         }
     }
