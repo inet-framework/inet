@@ -38,10 +38,10 @@ std::ostream& ScalarNoise::printToStream(std::ostream& stream, int level) const
 W ScalarNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
     W noisePower = W(0);
-    W minNoisePower = W(0);
+    W minNoisePower = W(NaN);
     for (const auto & elem : *powerChanges) {
         noisePower += elem.second;
-        if (noisePower < minNoisePower && startTime <= elem.first && elem.first <= endTime)
+        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && startTime <= elem.first && elem.first < endTime)
             minNoisePower = noisePower;
     }
     return minNoisePower;
@@ -53,7 +53,7 @@ W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
     W maxNoisePower = W(0);
     for (const auto & elem : *powerChanges) {
         noisePower += elem.second;
-        if (noisePower > maxNoisePower && startTime <= elem.first && elem.first <= endTime)
+        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && startTime <= elem.first && elem.first < endTime)
             maxNoisePower = noisePower;
     }
     return maxNoisePower;
