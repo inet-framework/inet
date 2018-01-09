@@ -733,7 +733,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
-    storeAPInfo(header->getTransmitterAddress(), beaconBody);
+    storeAPInfo(packet, header, beaconBody);
 
     // if it is out associate AP, restart beacon timeout
     if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
@@ -758,12 +758,13 @@ void Ieee80211MgmtSta::handleProbeResponseFrame(Packet *packet, const Ptr<const 
 {
     EV << "Received Probe Response frame\n";
     const auto& probeResponseBody = packet->peekData<Ieee80211ProbeResponseFrame>();
-    storeAPInfo(header->getTransmitterAddress(), probeResponseBody);
+    storeAPInfo(packet, header, probeResponseBody);
     delete packet;
 }
 
-void Ieee80211MgmtSta::storeAPInfo(const MacAddress& address, const Ptr<const Ieee80211BeaconFrame>& body)
+void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
 {
+    auto address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
     if (ap) {
         EV << "AP address=" << address << ", SSID=" << body->getSSID() << " already in our AP list, refreshing the info\n";
@@ -779,9 +780,9 @@ void Ieee80211MgmtSta::storeAPInfo(const MacAddress& address, const Ptr<const Ie
     ap->ssid = body->getSSID();
     ap->supportedRates = body->getSupportedRates();
     ap->beaconInterval = body->getBeaconInterval();
-
-    //XXX where to get this from?
-    //ap->rxPower = ...
+    auto signalPowerInd = packet->getTag<SignalPowerInd>();
+    if (signalPowerInd != nullptr)
+        ap->rxPower = signalPowerInd->getPower().get();
 }
 
 } // namespace ieee80211
