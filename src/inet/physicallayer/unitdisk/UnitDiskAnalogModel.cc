@@ -70,6 +70,12 @@ const INoise *UnitDiskAnalogModel::computeNoise(const IListening *listening, con
     return new UnitDiskNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
 }
 
+const INoise *UnitDiskAnalogModel::computeNoise(const IReception *reception, const INoise *noise) const
+{
+    bool isInterfering = check_and_cast<const UnitDiskReception *>(reception)->getPower() >= UnitDiskReception::POWER_INTERFERING;
+    return new UnitDiskNoise(reception->getStartTime(), reception->getEndTime(), isInterfering);
+}
+
 const ISnir *UnitDiskAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     return new UnitDiskSnir(reception, noise);

@@ -144,6 +144,21 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 
+const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
+{
+    auto dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+    std::vector<ConstMapping *> receptionPowers;
+    receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalReception->getPower()));
+    receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalNoise->getPower()));
+    DimensionSet dimensions = dimensionalReception->getPower()->getDimensionSet();
+    if (!dimensions.hasDimension(Dimension::time))
+        dimensions.addDimension(Dimension::time);
+    ConstMapping *receptionMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
+    ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(receptionMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
+    return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCarrierFrequency(), dimensionalReception->getBandwidth(), noisePower);
+}
+
 const ISnir *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
