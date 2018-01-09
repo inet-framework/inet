@@ -79,16 +79,30 @@ namespace tcp {
 #endif /* LWIP_ERROR */
 
 #ifdef LWIP_DEBUG
+
+// These constexpr funcion log predicates were put in place instead
+// of the simple macros to silence approximately 450 instances of
+// "warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]"
+// as seen here: https://travis-ci.org/inet-framework/inet/jobs/327767598
+constexpr bool lwip_log_predicate(unsigned int debug, unsigned int debug_types_on, int debug_min_level)
+{
+  return ((debug) & LWIP_DBG_ON)
+            && ((debug) & debug_types_on)
+            && ((s16_t)((debug) & LWIP_DBG_MASK_LEVEL) >= debug_min_level);
+}
+
+constexpr bool lwip_halt_predicate(unsigned int debug)
+{
+  return (debug) & LWIP_DBG_HALT;
+}
+
 /** print debug message only if debug message type is enabled...
  *  AND is of correct type AND is at least LWIP_DBG_LEVEL
  */
 #define LWIP_DEBUGF(debug, message) do { \
-                               if ( \
-                                   ((debug) & LWIP_DBG_ON) && \
-                                   ((debug) & LWIP_DBG_TYPES_ON) && \
-                                   ((s16_t)((debug) & LWIP_DBG_MASK_LEVEL) >= LWIP_DBG_MIN_LEVEL)) { \
+                               if (lwip_log_predicate(debug, LWIP_DBG_TYPES_ON, LWIP_DBG_MIN_LEVEL)) { \
                                  LWIP_PLATFORM_DIAG(message); \
-                                 if ((debug) & LWIP_DBG_HALT) { \
+                                 if (lwip_halt_predicate(debug)) { \
                                    while(1); \
                                  } \
                                } \
