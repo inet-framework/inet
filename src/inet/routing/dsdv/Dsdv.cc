@@ -264,6 +264,7 @@ void Dsdv::handleMessage(cMessage *msg)
                 if (src == source) {
                     EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
                     delete packet;
+                    delete msg;
                     return;
                 }
             }
@@ -276,7 +277,9 @@ void Dsdv::handleMessage(cMessage *msg)
 
                 if (src == source) {
                     EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
+                    delete packet;
                     delete fhp;
+                    delete msg;
                     return;
                 }
             }
@@ -319,6 +322,7 @@ void Dsdv::handleMessage(cMessage *msg)
                     EV_DETAIL << "waitime for forward is " << waitTime <<" And host is " << source << "\n";
                     packet->insertAtEnd(recHello);
                     sendDelayed(packet, waitTime, "ipOut");
+                    packet = nullptr;
                 }
                 else {
                     auto forwardHello = staticPtrCast<DsdvHello>(fhp->hello->peekData<DsdvHello>()->dupShared());
@@ -336,16 +340,12 @@ void Dsdv::handleMessage(cMessage *msg)
                     fhp->event = new cMessage("event2");
                     scheduleAt(waitTime, fhp->event);
                     forwardList->push_back(fhp);
+                    fhp = nullptr;
                 }
             }
-            else
-            {
-                if (!isForwardHello)
-                    delete msg;
-                else
-                    delete fhp;
-            }
-            //delete msg; ?
+            delete packet;
+            delete fhp;
+            delete msg;
         }
         else
             delete msg;
