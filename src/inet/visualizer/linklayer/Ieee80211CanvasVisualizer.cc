@@ -41,10 +41,19 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
     }
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
 {
-    std::hash<std::string> hasher;
-    std::string icon(this->icon);
+    int index;
+    auto powerDbm = inet::math::mW2dBm(mW(power).get());
+    if (std::isnan(powerDbm))
+        index = icons.size() - 1;
+    else if (powerDbm < minPowerDbm)
+        index = 0;
+    else if (powerDbm > maxPowerDbm)
+        index = icons.size() - 1;
+    else
+        index = round(icons.size() * (powerDbm - minPowerDbm) / (maxPowerDbm - minPowerDbm));
+    std::string icon(icons[index].c_str());
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
     labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(interfaceEntry);
@@ -52,6 +61,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
+    std::hash<std::string> hasher;
     iconFigure->setTintColor(iconColorSet.getColor(hasher(ssid)));
     iconFigure->setTintAmount(1);
     auto labelFigure = labeledIconFigure->getLabelFigure();

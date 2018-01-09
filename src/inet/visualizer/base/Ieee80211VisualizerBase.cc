@@ -48,7 +48,12 @@ void Ieee80211VisualizerBase::initialize(int stage)
         displayAssociations = par("displayAssociations");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        icon = par("icon");
+        minPowerDbm = par("minPower");
+        maxPowerDbm = par("maxPower");
+        const char *iconsAsString = par("icons");
+        cStringTokenizer tokenizer(iconsAsString);
+        while (tokenizer.hasMoreTokens())
+            icons.push_back(tokenizer.nextToken());
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
@@ -130,7 +135,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         if (nodeFilter.matches(networkNode)) {
             auto interfaceEntry = check_and_cast<InterfaceEntry *>(object);
             auto apInfo = check_and_cast<inet::ieee80211::Ieee80211MgmtSta::ApInfo *>(details);
-            auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, apInfo->ssid);
+            auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, apInfo->ssid, W(apInfo->rxPower));
             addIeee80211Visualization(ieee80211Visualization);
         }
     }
@@ -151,7 +156,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
             auto interfaceEntry = addressResolver.findInterfaceTableOf(networkNode)->getInterfaceByInterfaceModule(mgmt->getParentModule());
             auto ieee80211Visualization = getIeee80211Visualization(networkNode, interfaceEntry);
             if (ieee80211Visualization == nullptr) {
-                auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, mgmt->par("ssid"));
+                auto ieee80211Visualization = createIeee80211Visualization(networkNode, interfaceEntry, mgmt->par("ssid"), W(NaN));
                 addIeee80211Visualization(ieee80211Visualization);
             }
         }
