@@ -43,17 +43,7 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
 
 Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
 {
-    int index;
-    auto powerDbm = inet::math::mW2dBm(mW(power).get());
-    if (std::isnan(powerDbm))
-        index = icons.size() - 1;
-    else if (powerDbm < minPowerDbm)
-        index = 0;
-    else if (powerDbm > maxPowerDbm)
-        index = icons.size() - 1;
-    else
-        index = round(icons.size() * (powerDbm - minPowerDbm) / (maxPowerDbm - minPowerDbm));
-    std::string icon(icons[index].c_str());
+    std::string icon = getIcon(power);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
     labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(interfaceEntry);

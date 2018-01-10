@@ -177,6 +177,21 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
 #endif // WITH_IEEE80211
 }
 
+std::string Ieee80211VisualizerBase::getIcon(W power) const
+{
+    int index;
+    auto powerDbm = inet::math::mW2dBm(mW(power).get());
+    if (std::isnan(powerDbm))
+        index = icons.size() - 1;
+    else if (powerDbm < minPowerDbm)
+        index = 0;
+    else if (powerDbm > maxPowerDbm)
+        index = icons.size() - 1;
+    else
+        index = round(icons.size() * (powerDbm - minPowerDbm) / (maxPowerDbm - minPowerDbm));
+    return icons[index];
+}
+
 } // namespace visualizer
 
 } // namespace inet

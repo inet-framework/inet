@@ -73,6 +73,8 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     virtual void removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization);
     virtual void removeAllIeee80211Visualizations();
 
+    virtual std::string getIcon(W power) const;
+
   public:
     virtual ~Ieee80211VisualizerBase();
 
