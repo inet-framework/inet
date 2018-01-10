@@ -233,8 +233,8 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            2e8e-2067/tplx, PASS,
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            663a-031b/tplx, PASS,
 
-/examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             e660-6932 f76c-df22/tplx, PASS,
-/examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             e660-6932 f5a5-2d27/tplx, PASS,
+/examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             f76c-df22/tplx, PASS,
+/examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             f5a5-2d27/tplx, PASS,
 
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           9649-c759/tplx, PASS,
 
