@@ -113,6 +113,8 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
   public:
     Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
 
+    virtual const ApInfo *getAssociatedAp() { return &assocAP; }
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
