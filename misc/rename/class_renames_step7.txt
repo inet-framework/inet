@@ -1,2 +1,0 @@
-BerkeleyMacLayer -> BerkeleyMac
-LightweightMacLayer -> LightweightMac
