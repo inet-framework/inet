@@ -104,7 +104,7 @@ void Gpsr::initialize(int stage)
         networkProtocol->registerHook(0, this);
         if (isNodeUp()) {
             configureInterfaces();
-            scheduleBeaconTimer();
+            processBeaconTimer();
             schedulePurgeNeighborsTimer();
         }
         WATCH(neighborPositionTable);
