@@ -188,7 +188,7 @@ std::string Ieee80211VisualizerBase::getIcon(W power) const
     else if (powerDbm > maxPowerDbm)
         index = icons.size() - 1;
     else
-        index = round(icons.size() * (powerDbm - minPowerDbm) / (maxPowerDbm - minPowerDbm));
+        index = round((icons.size() - 1) * (powerDbm - minPowerDbm) / (maxPowerDbm - minPowerDbm));
     return icons[index];
 }
 

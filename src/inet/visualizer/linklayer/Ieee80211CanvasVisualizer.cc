@@ -16,6 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/linklayer/Ieee80211CanvasVisualizer.h"
 
 namespace inet {
@@ -23,6 +25,11 @@ namespace inet {
 namespace visualizer {
 
 Define_Module(Ieee80211CanvasVisualizer);
+
+Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::~Ieee80211CanvasVisualization()
+{
+    delete figure;
+}
 
 Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::Ieee80211CanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, LabeledIconFigure *figure, int networkNodeId, int interfaceId) :
     Ieee80211Visualization(networkNodeId, interfaceId),
@@ -38,6 +45,29 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+    }
+}
+
+void Ieee80211CanvasVisualizer::refreshDisplay() const
+{
+    auto simulation = getSimulation();
+    for (auto& entry : ieee80211Visualizations) {
+        auto networkNode = simulation->getModule(entry.second->networkNodeId);
+        if (networkNode != nullptr) {
+            L3AddressResolver addressResolver;
+            auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+            if (interfaceTable != nullptr) {
+                auto networkInterface = interfaceTable->getInterfaceById(entry.second->interfaceId);
+                auto mgmt = dynamic_cast<inet::ieee80211::Ieee80211MgmtSta *>(networkInterface->getSubmodule("mgmt"));
+                if (mgmt != nullptr) {
+                    auto apInfo = mgmt->getAssociatedAp();
+                    std::string icon = getIcon(W(apInfo->rxPower));
+                    auto canvasVisualization = check_and_cast<const Ieee80211CanvasVisualization *>(entry.second);
+                    auto iconFigure = check_and_cast<LabeledIconFigure *>(canvasVisualization->figure)->getIconFigure();
+                    iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
+                }
+            }
+        }
     }
 }
 
