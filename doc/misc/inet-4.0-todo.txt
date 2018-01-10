@@ -38,7 +38,6 @@ SHOULD:
 NEED NOT:
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
  - eliminate all KLUDGES introduced by the 3 main infrastructure changes
- - implement all necessary omnetpp message compiler changes to avoid clutter in msg files
  - revise physical layer error models wrt. how errors are represented
  - factor out physical layer analog domain representation into a separate parameter of transmissions
  - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
@@ -47,7 +46,6 @@ NEED NOT:
  - add separate reusable application packet generators
  - rewrite serializers that use structure bit fields, this is undefined C++ behavior
  - revise all network node module base class hierarchy (e.g. mpls nodes)
- - use InterfaceEntry class instead of cCompoundModule for the corresponding network interface (merge the two)
  - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
    providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
    but we should avoid having these classes for a random collections of utility functions!
@@ -63,6 +61,8 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + implement all necessary omnetpp message compiler changes to avoid clutter in msg files
+ + use InterfaceEntry class instead of cCompoundModule for the corresponding network interface (merge the two)
  + renamed IdealRadio to UnitDiskRadio, IdealMac to MaMac, BMacLayer to BerkeleyMac, LMacLayer to LightweightMac, CSMA to Ieee802154Mac, etc.
  + renamed all cc/h files to reflect the name of the class they are defining
  + renamed all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
