@@ -781,8 +781,11 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->supportedRates = body->getSupportedRates();
     ap->beaconInterval = body->getBeaconInterval();
     auto signalPowerInd = packet->getTag<SignalPowerInd>();
-    if (signalPowerInd != nullptr)
+    if (signalPowerInd != nullptr) {
         ap->rxPower = signalPowerInd->getPower().get();
+        if (ap->address == assocAP.address)
+            assocAP.rxPower = ap->rxPower;
+    }
 }
 
 } // namespace ieee80211
