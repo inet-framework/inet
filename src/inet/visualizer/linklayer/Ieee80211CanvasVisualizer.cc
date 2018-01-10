@@ -101,7 +101,14 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
     labelFigure->setText(ssid.c_str());
-    labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+    if(showLabelNextToIcon)
+    {
+        labelFigure->setPosition(cFigure::Point(iconFigure->getBounds().getSize().x * 2, iconFigure->getBounds().getSize().y / 2));
+    }
+    else
+    {
+        labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+    }
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
         throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", interfaceEntry->getInterfaceName(), networkNode->getFullPath().c_str());

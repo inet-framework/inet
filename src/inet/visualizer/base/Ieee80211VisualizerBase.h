@@ -54,6 +54,7 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
+    bool showLabelNextToIcon = false;
     Placement placementHint;
     double placementPriority;
     //@}
