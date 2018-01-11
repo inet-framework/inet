@@ -13,11 +13,10 @@ package inet.node.mpls;
 
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IWiredNic;
-import inet.linklayer.loopback.LoopbackInterface;
+import inet.linklayer.contract.ILoopbackInterface;
+import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
-import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
 import inet.networklayer.rsvp_te.Rsvp;
@@ -91,10 +90,10 @@ module RsvpRouter
             parameters:
                 @display("p=409,271;b=580,5,,,,1");
         }
-        lo[numLoInterfaces]: LoopbackInterface {
+        lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             @display("p=139,394");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=271,394,row,90;q=l2queue");
         }

@@ -21,15 +21,15 @@ package inet.linklayer.ppp;
 
 import inet.common.IHook;
 import inet.common.queue.IOutputQueue;
+import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.linklayer.contract.IWiredNic;
 
 
 //
 // PPP interface. Complements the ~PPP module with an output queue
 // for QoS and RED support.
 //
-module PppInterface like IWiredNic
+module PppInterface like IPppInterface
 {
     parameters:
         @class(InterfaceEntry);

@@ -19,7 +19,7 @@ package inet.examples.bgpv4.BgpOpen;
 
 import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
-import inet.linklayer.contract.IWiredNic;
+import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
@@ -82,7 +82,7 @@ module BGPRouterSimple
             parameters:
                 @display("b=580,5,,,,1;p=461,368");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=401,429,row,110;q=l2queue;i=block/ifcard");
         }

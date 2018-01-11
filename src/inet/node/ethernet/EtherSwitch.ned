@@ -21,10 +21,10 @@ package inet.node.ethernet;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -79,7 +79,7 @@ module EtherSwitch
             parameters:
                 @display("p=427,167;b=395,5");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
                 @display("p=264,247,row;q=txQueue");

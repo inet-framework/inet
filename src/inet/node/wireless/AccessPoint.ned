@@ -17,9 +17,9 @@ package inet.node.wireless;
 
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
-import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
@@ -88,7 +88,7 @@ module AccessPoint
             parameters:
                 @display("p=216,400,row;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
                 @display("p=400,400,row;q=txQueue");

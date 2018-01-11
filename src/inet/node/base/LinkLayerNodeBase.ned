@@ -18,12 +18,14 @@
 package inet.node.base;
 
 import inet.common.packet.recorder.PcapRecorder;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.ILoopbackInterface;
+import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunNic;
-import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
-import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
+
 
 module LinkLayerNodeBase extends NodeBase
 {
@@ -52,7 +54,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=100,700;is=s");
         }
-        lo[numLoInterfaces]: LoopbackInterface {
+        lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             parameters:
                 @display("p=300,700,row,50;");
         }
@@ -61,11 +63,11 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=600,700,row,50;q=queue");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=400,700,row,50;q=txQueue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=500,700,row,50;q=txQueue");
         }
