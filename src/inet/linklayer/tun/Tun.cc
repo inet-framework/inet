@@ -22,7 +22,7 @@
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
-#include "inet/linklayer/tun/TunInterface.h"
+#include "inet/linklayer/tun/Tun.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
