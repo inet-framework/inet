@@ -18,25 +18,21 @@
 
 package inet.linklayer.tun;
 
-import inet.linklayer.contract.ITunNic;
-
-module TunInterface like ITunNic
+simple Tun
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(TunInterface);
         string interfaceTableModule;    // The path to the InterfaceTable module
         int mtu @unit("B") = default(1500B);
-        @display("i=block/tunnel;bgb=150,121");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        @display("i=block/tunnel");
+
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+
     gates:
         input upperLayerIn;    // from upper layers
         output upperLayerOut;  // to upper layers
-    submodules:
-        tun: Tun {
-            @display("p=72,56");
-        }
-    connections:
-        upperLayerIn --> { @display("m=n"); } --> tun.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- tun.upperLayerOut;
 }
 
