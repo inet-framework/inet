@@ -21,7 +21,6 @@ package inet.linklayer.tun;
 simple Tun
 {
     parameters:
-        @class(TunInterface);
         string interfaceTableModule;    // The path to the InterfaceTable module
         int mtu @unit("B") = default(1500B);
         @display("i=block/tunnel");

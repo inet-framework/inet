@@ -27,23 +27,23 @@
 
 namespace inet {
 
-Define_Module(TunInterface);
+Define_Module(Tun);
 
-void TunInterface::initialize(int stage)
+void Tun::initialize(int stage)
 {
     MacBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         registerInterface();
 }
 
-InterfaceEntry *TunInterface::createInterfaceEntry()
+InterfaceEntry *Tun::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     e->setMtu(par("mtu"));
     return e;
 }
 
-void TunInterface::handleMessage(cMessage *message)
+void Tun::handleMessage(cMessage *message)
 {
     if (message->arrivedOn("upperLayerIn")) {
         if (message->isPacket()) {
@@ -102,12 +102,12 @@ void TunInterface::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message: %s", message->getName());
 }
 
-void TunInterface::flushQueue()
+void Tun::flushQueue()
 {
     // does not have a queue, do nothing
 }
 
-void TunInterface::clearQueue()
+void Tun::clearQueue()
 {
     // does not have a queue, do nothing
 }

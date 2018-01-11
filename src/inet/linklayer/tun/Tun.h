@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class INET_API TunInterface : public MacBase
+class INET_API Tun : public MacBase
 {
     protected:
         std::vector<int> socketIds;
