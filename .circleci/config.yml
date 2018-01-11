@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: omnetpp/travis-inet:5.3p2
+    steps:
+      - checkout
+      - run:
+          name: Cloning git submodules
+          command: git submodule update --init
+      - run:
+          name: Setting up PATH environment variable
+          command: echo 'export PATH=/root/omnetpp-5.3p2-linux/bin:$PATH' >> $BASH_ENV
+      - run:
+          name: Copying NSC into INET
+          command: cp -r /root/nsc-0.5.3 3rdparty
+      - run:
+          name: Feature tests
+          command: ./tests/features/featuretest
+      - store_artifacts:
+          path: /root/project/tests/features/_log
