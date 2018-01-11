@@ -19,7 +19,7 @@
 package inet.examples.wireless.throughput;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -41,7 +41,7 @@ module ThroughputClient
                 registerSAP = false;
                 @display("b=40,24;p=180,60,col");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
                 mgmtType = default("Ieee80211MgmtStaSimplified");

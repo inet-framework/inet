@@ -18,9 +18,9 @@
 
 package inet.linklayer.tun;
 
-import inet.linklayer.contract.ITunNic;
+import inet.linklayer.contract.ITunnelInterface;
 
-module TunInterface like ITunNic
+module TunInterface like ITunnelInterface
 {
     parameters:
         @class(InterfaceEntry);

@@ -1,0 +1,21 @@
+INic -> INetworkInterface
+IWirelessNic -> IWirelessInterface
+IWiredNic -> IWiredInterface
+IExternalNic -> IExternalInterface
+ITunNic -> ITunnelInterface
+
+AckingWirelessNic -> AckingWirelessInterface
+BNic -> BMacInterface
+LNic -> LMacInterface
+XNic -> XMacInterface
+Ieee80211Nic -> Ieee80211Interface
+Ieee802154NarrowbandNic -> Ieee802154NarrowbandInterface
+Ieee802154UwbIrNic -> Ieee802154UwbIrInterface
+ShortcutNic -> ShortcutInterface
+WirelessNic -> WirelessInterface
+
+# EthernetInterface -> EthernetInterface
+# LoopbackInterface -> LoopbackInterface
+# PppInterface -> PppInterface
+# TunInterface -> TunInterface
+# ExtInterface -> ExtInterface

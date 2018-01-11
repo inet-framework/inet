@@ -56,7 +56,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.radioMedium.backgroundNoise.power = -110dBm
 
 # nic
-*.host*.wlan[*].typename = "AckingWirelessNic"
+*.host*.wlan[*].typename = "AckingWirelessInterface"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false

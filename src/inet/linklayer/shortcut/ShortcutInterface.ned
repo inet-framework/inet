@@ -15,15 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.bmac;
+package inet.linklayer.shortcut;
 
-import inet.linklayer.common.WirelessNic;
+import inet.linklayer.common.WirelessInterface;
 
-
-module BNic extends WirelessNic
+module ShortcutInterface extends WirelessInterface
 {
     parameters:
-        radioType = default("ApskScalarRadio");
-        macType = "BMac";
+        radioType = "";
+        macType = "ShortcutMac";
 }
-

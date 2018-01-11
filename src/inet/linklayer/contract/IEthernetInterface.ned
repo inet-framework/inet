@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // Prototype module for Ethernet interfaces.
 //
-moduleinterface IEthernetInterface extends IWiredNic
+moduleinterface IEthernetInterface extends IWiredInterface
 {
     parameters:
         @display("i=block/ifcard");

@@ -47,7 +47,7 @@ package inet.networklayer.ipv4;
 //
 // A routed datagram will be sent to the queueOut gate, with an
 // ~Ipv4ControlInfo  object attached. queueOut is expected to be
-// connected to ~INic modules.
+// connected to ~INetworkInterface modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
 // and manipulate the route table by calling ~Ipv4RoutingTable's methods in C++.

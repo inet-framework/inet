@@ -27,7 +27,7 @@ package inet.node.inet;
 // - By default contains a single wireless card, however it can be configured
 //   by the numWlanInterfaces parameter. Wirless card type is configured by the
 //   **.wlan[*].typename parameter. see:  inet.linklayer.ieee80211 or other
-//   modules implementing ~IWirelessNic
+//   modules implementing ~IWirelessInterface
 // - Node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
 //

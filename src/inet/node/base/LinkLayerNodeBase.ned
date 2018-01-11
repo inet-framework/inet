@@ -19,11 +19,11 @@ package inet.node.base;
 
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.IExternalInterface;
 import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
-import inet.linklayer.contract.ITunNic;
-import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.contract.ITunnelInterface;
+import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -59,7 +59,7 @@ module LinkLayerNodeBase extends NodeBase
                 @display("p=300,700,row,50;");
         }
         // TODO: move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
-        wlan[numWlanInterfaces]: <default("Ieee80211Nic")> like IWirelessNic {
+        wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
                 @display("p=600,700,row,50;q=queue");
         }
@@ -71,11 +71,11 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=500,700,row,50;q=txQueue");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
             parameters:
                 @display("p=700,700,row,50;q=txQueue");
         }
-        tun[numTunInterfaces]: <default("TunInterface")> like ITunNic {
+        tun[numTunInterfaces]: <default("TunInterface")> like ITunnelInterface {
             parameters:
                 @display("p=800,700,row,50;q=txQueue");
         }

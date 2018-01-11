@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.lmac;
+package inet.linklayer.bmac;
 
-import inet.linklayer.common.WirelessNic;
+import inet.linklayer.common.WirelessInterface;
 
 
-module LNic extends WirelessNic
+module BMacInterface extends WirelessInterface
 {
     parameters:
         radioType = default("ApskScalarRadio");
-        macType = "LMac";
+        macType = "BMac";
 }
 

@@ -25,7 +25,7 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// This module implements a trivial MAC protocol for use in ~AckingWirelessNic.
+// This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
 //
 // The implementation provides packet encapsulation and decapsulation, but it
 // doesn't have a real medium access protocol. It doesn't provide carrier sense
@@ -33,7 +33,7 @@ import inet.linklayer.contract.IMacProtocol;
 // out of bound acknowledgement. Higher layer packets should have MacAddressReq
 // tag.
 //
-// See ~AckingWirelessNic for rationale and details.
+// See ~AckingWirelessInterface for rationale and details.
 //
 simple AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {

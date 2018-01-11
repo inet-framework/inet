@@ -15,7 +15,7 @@
 
 package inet.linklayer.contract;
 
-moduleinterface IWirelessNic extends INic
+moduleinterface IWirelessInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");

@@ -83,7 +83,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 ned-path = .;../../../../src;../../lib
 
 # channel physical parameters
-**.wlan[*].typename = "AckingWirelessNic"
+**.wlan[*].typename = "AckingWirelessInterface"
 **.wlan[*].bitrate = 2Mbps
 **.wlan[*].mac.address = "auto"
 **.wlan[*].mac.headerLength = 20B

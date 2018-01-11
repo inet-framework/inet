@@ -32,7 +32,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 // per-packet bitrate setting gets implemented.)
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in ~Ieee80211Nic).
+// typically in the 802.11 management module, see in ~Ieee80211Interface).
 // The base class for 802.11 frame messages is ~Ieee80211MacHeader, but this
 // module expects ~Ieee80211DataOrMgmtHeader (a subclass) from upper layers
 // (the management module). This module will assign the transmitter address

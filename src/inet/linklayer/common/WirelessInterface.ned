@@ -18,10 +18,10 @@
 package inet.linklayer.common;
 
 import inet.linklayer.contract.IMacProtocol;
-import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.contract.IWirelessInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-module WirelessNic like IWirelessNic
+module WirelessInterface like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);

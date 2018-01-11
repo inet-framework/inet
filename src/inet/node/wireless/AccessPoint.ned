@@ -20,7 +20,7 @@ import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
-import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.contract.IWirelessInterface;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 
@@ -84,7 +84,7 @@ module AccessPoint
             parameters:
                 @display("p=356,299;b=300,5,,,,1");
         }
-        wlan[numWlanInterfaces]: <default("Ieee80211Nic")> like IWirelessNic {
+        wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
                 @display("p=216,400,row;q=queue");
         }

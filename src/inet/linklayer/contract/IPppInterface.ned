@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // Prototype module for PPP interfaces.
 //
-moduleinterface IPppInterface extends IWiredNic
+moduleinterface IPppInterface extends IWiredInterface
 {
     parameters:
         @display("i=block/ifcard");

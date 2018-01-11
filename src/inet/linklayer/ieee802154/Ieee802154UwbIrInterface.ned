@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,58 +14,40 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
-
-package inet.linklayer.acking;
+package inet.linklayer.ieee802154;
 
 import inet.common.queue.IOutputQueue;
-import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.acking.AckingMac;
+import inet.linklayer.contract.IWirelessInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-//
-// Highly abstracted wireless NIC that consists of a unit disk radio and a trivial
-// MAC protocol. It offers simplicity for scenarios where Layer 1 and 2 effects
-// can be completely ignored, for example testing the basic functionality
-// of a wireless ad-hoc routing protocol.
-//
-// The most important parameter this model accepts is the transmission range.
-// When a radio transmits a frame, all other radios within transmission range
-// will receive the frame correctly, and radios out of range will not be
-// affected at all.
-//
-// This module requires an ~UnitDiskRadioMedium instance in the network.
-//
-module AckingWirelessNic like IWirelessNic
+
+module Ieee802154UwbIrInterface like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);
-        @display("i=block/ifcard;bgb=214,335;bgl=53");
         string interfaceTableModule;
-        string energySourceModule = default("");
-        double bitrate @unit("bps");
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
-        string radioType = default("UnitDiskRadio");
+        string radioType = default("Ieee802154UwbIrRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
-        **.bitrate = bitrate;
+        @display("i=block/ifcard");
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(Signal);
+        input radioIn @labels(ISignal);
     submodules:
         queue: <queueType> like IOutputQueue {
             parameters:
-                @display("p=23,125;q=l2queue");
+                @display("p=100,50;q=l2queue");
         }
         mac: AckingMac {
             parameters:
-                @display("p=98,207");
+                @display("p=100,150");
         }
         radio: <radioType> like IRadio {
             parameters:
-                @display("p=98,278");
+                @display("p=100,250");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;

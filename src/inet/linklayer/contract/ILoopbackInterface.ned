@@ -20,7 +20,7 @@ package inet.linklayer.contract;
 //
 // Prototype module for loopback interfaces.
 //
-moduleinterface ILoopbackInterface extends INic
+moduleinterface ILoopbackInterface extends INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");

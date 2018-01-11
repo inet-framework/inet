@@ -18,7 +18,7 @@
 package inet.linklayer.ieee80211;
 
 import inet.linklayer.common.IIeee8021dQosClassifier;
-import inet.linklayer.contract.IWirelessNic;
+import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
@@ -36,7 +36,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 //
 // A classifier is needed if you want to use QoS.
 //
-module Ieee80211Nic like IWirelessNic
+module Ieee80211Interface like IWirelessInterface
 {
     parameters:
         @class(::inet::InterfaceEntry);

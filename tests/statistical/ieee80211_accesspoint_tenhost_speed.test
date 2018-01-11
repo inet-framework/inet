@@ -9,14 +9,14 @@ Testing TCP communication speed
 
 import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
-module Ieee80211NicSTASimplified extends Ieee80211Nic
+module Ieee80211NicSTASimplified extends Ieee80211Interface
 {
     parameters:
         mgmtType = "Ieee80211MgmtStaSimplified";

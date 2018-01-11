@@ -35,10 +35,10 @@ import inet.routing.contract.IPimRouting;
 // - By default contains no wireless cards, however it can be configured
 //   by the numWlanInterfaces parameter. Wirless card type is configured by the
 //   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
-//   modules implementing ~IWirelessNic
+//   modules implementing ~IWirelessInterface
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
-//   **.ext.typename in the INI file. see: ~ExtInterface and ~IExternalNic
+//   **.ext.typename in the INI file. see: ~ExtInterface and ~IExternalInterface
 // - PPP queueing type can be set using **.ppp.queueType see: ~PppInterface
 // - If wireless card is present, node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) 2017 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.contract;
+package inet.linklayer.xmac;
 
-//
-// Prototype module for link layer protocols.
-//
-moduleinterface IWiredNic extends INic
+import inet.linklayer.common.WirelessInterface;
+
+module XMacInterface extends WirelessInterface
 {
     parameters:
-        @display("i=block/ifcard");
-    gates:
-        inout phys;
+        radioType = default("ApskScalarRadio");
+        macType = "XMac";
 }
 

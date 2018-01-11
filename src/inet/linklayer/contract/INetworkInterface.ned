@@ -17,7 +17,7 @@
 
 package inet.linklayer.contract;
 
-moduleinterface INic
+moduleinterface INetworkInterface
 {
     parameters:
         @display("i=block/ifcard");
