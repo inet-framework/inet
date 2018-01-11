@@ -89,7 +89,7 @@ Register_ResultFilter("xCoord", XCoordFilter);
 void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
-        fire(this, t, ((Coord *)object)->x, details);
+        fire(this, t, ((Coord *)wrapper->getObject())->x, details);
 }
 
 Register_ResultFilter("yCoord", YCoordFilter);
@@ -97,7 +97,7 @@ Register_ResultFilter("yCoord", YCoordFilter);
 void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
-        fire(this, t, ((Coord *)object)->y, details);
+        fire(this, t, ((Coord *)wrapper->getObject())->y, details);
 }
 
 Register_ResultFilter("zCoord", ZCoordFilter);
