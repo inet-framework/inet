@@ -6,25 +6,37 @@ services:
   - docker
 
 before_install:
-  - docker pull omnetpp/inet-travis-runner
-
-# can't really do it with a matrix because of the constraint that fingerprint tests can only be ran on linux
-env:
-  - MODE=release TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=yes
-  - MODE=release TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=no
-  - MODE=release TARGET_PLATFORM=windows RUN_FINGERPRINT_TESTS=no
-  - MODE=release TARGET_PLATFORM=macosx  RUN_FINGERPRINT_TESTS=no
-
-  - MODE=debug   TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=yes
-  - MODE=debug   TARGET_PLATFORM=linux   RUN_FINGERPRINT_TESTS=no
-  - MODE=debug   TARGET_PLATFORM=windows RUN_FINGERPRINT_TESTS=no
-  - MODE=debug   TARGET_PLATFORM=macosx  RUN_FINGERPRINT_TESTS=no
+  - docker pull omnetpp/travis-inet:5.3p2-180111
 
 cache:
   directories:
     - $HOME/docker_ccache
 
-script:
-  - docker run -ti --env TRAVIS_REPO_SLUG --env TARGET_PLATFORM --env RUN_FINGERPRINT_TESTS --env MODE
-      -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
-      omnetpp/inet-travis-runner /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-runner.sh
+# The "build" stage inherits this, so we won't have to repeat it 6 times.
+# The "fingerprints" stage overwrites it for both of its jobs (only the .sh file is different).
+script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
+          -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
+          omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-build.sh
+
+# Note that the "env:" values must match EXACTLY (the whole string, even the spaces between the assignments)
+# between the jobs in the "build" stage (which prepare the cache) and the corresponding jobs in the
+# "fingerprints" stage (which use the cache). See: https://github.com/travis-ci/travis-ci/issues/9043
+jobs:
+  include:
+    - stage: build
+      env: TARGET_PLATFORM=linux MODE=release
+    - env: TARGET_PLATFORM=linux MODE=debug
+    - env: TARGET_PLATFORM=windows MODE=release
+    - env: TARGET_PLATFORM=windows MODE=debug
+    - env: TARGET_PLATFORM=macosx MODE=release
+    - env: TARGET_PLATFORM=macosx MODE=debug
+
+    - stage: fingerprints
+      script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
+                -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
+                omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-fingerprints.sh
+      env: TARGET_PLATFORM=linux MODE=release
+    - script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
+                -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
+                omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-fingerprints.sh
+      env: TARGET_PLATFORM=linux MODE=debug
