@@ -45,7 +45,7 @@ void XMac::initialize(int stage)
         animation     = hasPar("animation")     ? par("animation")     : true;
         slotDuration  = hasPar("slotDuration")  ? par("slotDuration")  : 1.;
         bitrate       = hasPar("bitrate")       ? par("bitrate")       : 15360.;
-        headerLength = par("headerLength").longValue();
+        headerLength = par("headerLength");
         checkInterval = hasPar("checkInterval") ? par("checkInterval") : 0.1;
         txPower       = hasPar("txPower")       ? par("txPower")       : 50.;
         useMacAcks    = hasPar("useMACAcks")    ? par("useMACAcks")    : false;
@@ -207,7 +207,7 @@ InterfaceEntry *XMac::createInterfaceEntry()
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
-    e->setMtu(par("mtu").longValue());
+    e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
 
