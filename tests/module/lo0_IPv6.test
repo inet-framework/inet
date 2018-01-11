@@ -57,7 +57,7 @@ scalar LocalUDP.host.lo[0].lo passedUpPk:count 3200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.lo[0].lo rcvdPkFromHL:count 3200
+scalar LocalUDP.host.lo[0].lo rcvdPkFromHl:count 3200
 attr
 
 %contains: results/General-0.sca
