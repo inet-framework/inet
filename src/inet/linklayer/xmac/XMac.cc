@@ -31,8 +31,6 @@ namespace inet {
 
 Define_Module(XMac);
 
-simsignal_t XMac::packetFromUpperDroppedSignal = registerSignal("packetFromUpperDropped");
-
 /**
  * Initialize method of XMac. Init all parameters, schedule timers.
  */
@@ -632,20 +630,20 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
  * Encapsulates the received network-layer packet into a MacPkt and set all
  * needed header fields.
  */
-bool XMac::addToQueue(cMessage *msg)
+bool XMac::addToQueue(Packet *packet)
 {
     if (macQueue.size() >= queueLength) {
         // queue is full, message has to be deleted
         EV_DEBUG << "New packet arrived, but queue is FULL, so new packet is"
                   " deleted\n";
-        emit(packetFromUpperDroppedSignal, msg);
-        delete msg;
+        PacketDropDetails details;
+        details.setReason(QUEUE_OVERFLOW);
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         nbDroppedDataPackets++;
-
         return false;
     }
 
-    auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekHeader<XMacHeader>()->getDestAddr() << endl;
     EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";

@@ -221,10 +221,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     int              txAttempts;
     /*@}*/
 
-
-    /** @brief Inspect reasons for dropped packets */
-    static simsignal_t packetFromUpperDroppedSignal;
-
     /** @brief The maximum length of the queue */
     unsigned int queueLength;
     /** @brief Animate (colorize) the nodes.
@@ -276,7 +272,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     void attachSignal(Packet *packet, simtime_t_cref startTime);
 
     /** @brief Internal function to add a new packet from upper to the queue */
-    bool addToQueue(cMessage * msg);
+    bool addToQueue(Packet *packet);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);
