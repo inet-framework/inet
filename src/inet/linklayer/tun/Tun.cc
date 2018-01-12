@@ -17,6 +17,8 @@
 
 #include <algorithm>
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/stlutils.h"
@@ -79,7 +81,7 @@ void Tun::handleMessage(cMessage *message)
         }
         else {
             cObject *controlInfo = message->getControlInfo();
-            int socketId = message->_getTag<SocketReq>()->getSocketId();
+            int socketId = check_and_cast<Request *>(message)->_getTag<SocketReq>()->getSocketId();
             if (dynamic_cast<TunOpenCommand *>(controlInfo) != nullptr) {
                 auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
                 if (it != socketIds.end())
