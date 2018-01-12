@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -54,13 +55,12 @@ void TcpSinkApp::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we close too
-        int socketId = msg->_getTag<SocketInd>()->getSocketId();
-        msg->setName("close");
-        msg->setKind(TCP_C_CLOSE);
-        msg->_clearTags();
-        msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-        msg->_addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-        send(msg, "socketOut");
+        auto indication = check_and_cast<Indication *>(msg);
+        int socketId = indication->_getTag<SocketInd>()->getSocketId();
+        auto request = new Request("close", TCP_C_CLOSE);
+        request->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+        request->_addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+        send(request, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);

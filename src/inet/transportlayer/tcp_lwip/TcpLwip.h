@@ -25,6 +25,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CRC_m.h"

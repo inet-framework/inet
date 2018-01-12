@@ -97,7 +97,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
-        int connId = msg->_getTag<SocketInd>()->getSocketId();
+        int connId = check_and_cast<Indication *>(msg)->_getTag<SocketInd>()->getSocketId();
         delete msg;
         auto outMsg = new Request("close");
         outMsg->setName("close");

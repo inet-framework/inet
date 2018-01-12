@@ -214,21 +214,23 @@ void Udp::refreshDisplay() const
 
 void Udp::processCommandFromApp(cMessage *msg)
 {
-    int socketId = msg->_getTag<SocketReq>()->getSocketId();
     switch (msg->getKind()) {
         case UDP_C_BIND: {
+            int socketId = check_and_cast<Request *>(msg)->_getTag<SocketReq>()->getSocketId();
             UdpBindCommand *ctrl = check_and_cast<UdpBindCommand *>(msg->getControlInfo());
             bind(socketId, msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
             break;
         }
 
         case UDP_C_CONNECT: {
+            int socketId = check_and_cast<Request *>(msg)->_getTag<SocketReq>()->getSocketId();
             UdpConnectCommand *ctrl = check_and_cast<UdpConnectCommand *>(msg->getControlInfo());
             connect(socketId, msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
             break;
         }
 
         case UDP_C_CLOSE: {
+            int socketId = check_and_cast<Request *>(msg)->_getTag<SocketReq>()->getSocketId();
             close(socketId);
             break;
         }
@@ -238,6 +240,7 @@ void Udp::processCommandFromApp(cMessage *msg)
             return;     // prevent delete of msg
 
         case UDP_C_SETOPTION: {
+            int socketId = check_and_cast<Request *>(msg)->_getTag<SocketReq>()->getSocketId();
             UdpSetOptionCommand *ctrl = check_and_cast<UdpSetOptionCommand *>(msg->getControlInfo());
             SockDesc *sd = getOrCreateSocket(socketId);
 

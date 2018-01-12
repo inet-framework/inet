@@ -15,6 +15,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/httptools/browser/HttpBrowser.h"
 
@@ -66,7 +67,8 @@ void HttpBrowser::handleMessage(cMessage *msg)
             EV_DEBUG << "No control info for the message" << endl;
         }
         else {
-            int connId = msg->_getTag<SocketInd>()->getSocketId();
+            auto indication = check_and_cast<Indication *>(msg);
+            int connId = indication->_getTag<SocketInd>()->getSocketId();
             EV_DEBUG << "Connection ID: " << connId << endl;
         }
 
