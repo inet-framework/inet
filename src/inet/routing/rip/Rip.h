@@ -83,7 +83,7 @@ struct RipRoute : public cObject
 };
 
 /**
- * Enumerated parameter to control how the RipRouting module
+ * Enumerated parameter to control how the Rip module
  * advertises the routes to its neighbors.
  */
 enum RipMode {
@@ -98,7 +98,7 @@ enum RipMode {
  * We could store this data in the InterfaceEntry* itself,
  * but it contains only 5 holes for protocol data, and they
  * are used by network layer protocols only. Therefore
- * RipRouting manages its own table of these entries.
+ * Rip manages its own table of these entries.
  */
 struct RipInterfaceEntry
 {
@@ -133,7 +133,7 @@ struct RipInterfaceEntry
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API RipRouting : public cSimpleModule, protected cListener, public ILifecycle
+class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycle
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RipInterfaceEntry> InterfaceVector;
@@ -168,8 +168,8 @@ class INET_API RipRouting : public cSimpleModule, protected cListener, public IL
     static simsignal_t numRoutesSignal;
 
   public:
-    RipRouting();
-    ~RipRouting();
+    Rip();
+    ~Rip();
 
   private:
     RipInterfaceEntry *findInterfaceById(int interfaceId);

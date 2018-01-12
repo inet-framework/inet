@@ -15,7 +15,7 @@ package inet.routing.contract;
 //
 // Interface for routing protocol modules connected to IP Layer.
 //
-moduleinterface IIpRouting
+moduleinterface IOspf
 {
     parameters:
         @display("i=block/network");

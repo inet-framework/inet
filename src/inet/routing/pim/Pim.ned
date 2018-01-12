@@ -19,13 +19,13 @@
 
 package inet.routing.pim;
 
-import inet.routing.contract.IPimRouting;
+import inet.routing.contract.IPim;
 import inet.routing.pim.modes.PimDm;
 import inet.routing.pim.modes.PimSm;
 import inet.routing.pim.tables.PimInterfaceTable;
 import inet.routing.pim.tables.PimNeighborTable;
 
-module PimRouting like IPimRouting
+module Pim like IPim
 {
     parameters:
         @display("i=block/network2;bgl=4;bgb=350,207");

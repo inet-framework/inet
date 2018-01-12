@@ -18,7 +18,7 @@
 
 package inet.routing.contract;
 
-moduleinterface IPimRouting
+moduleinterface IPim
 {
     parameters:
         @display("i=block/network");

@@ -19,9 +19,9 @@ package inet.node.inet;
 
 import inet.applications.contract.IApp;
 import inet.node.base.ApplicationLayerNodeBase;
-import inet.routing.contract.IBgpRouting;
-import inet.routing.contract.IIpRouting;
-import inet.routing.contract.IPimRouting;
+import inet.routing.contract.IBgp;
+import inet.routing.contract.IOspf;
+import inet.routing.contract.IPim;
 
 //
 // Ipv4 router that supports wireless, Ethernet, PPP and external interfaces.
@@ -62,20 +62,20 @@ module Router extends ApplicationLayerNodeBase
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
-        ospf: <"OspfRouting"> like IIpRouting if hasOSPF {
+        ospf: <"Ospf"> like IOspf if hasOSPF {
             parameters:
                 @display("p=800,300,row");
         }
-        bgp: <"BgpRouting"> like IBgpRouting if hasBGP {
+        bgp: <"Bgp"> like IBgp if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=600,100");
         }
-        rip: <"RipRouting"> like IApp if hasRIP {
+        rip: <"Rip"> like IApp if hasRIP {
             parameters:
                 @display("p=700,100");
         }
-        pim: <"PimRouting"> like IPimRouting if hasPIM {
+        pim: <"Pim"> like IPim if hasPIM {
             parameters:
                 @display("p=700,300");
         }

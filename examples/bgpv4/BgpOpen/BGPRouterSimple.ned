@@ -23,7 +23,7 @@ import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
-import inet.routing.bgpv4.BgpRouting;
+import inet.routing.bgpv4.Bgp;
 import inet.transportlayer.contract.ITcp;
 
 
@@ -52,7 +52,7 @@ module BGPRouterSimple
                 routerId = "auto";
                 @display("p=52,172;i=block/table2_s");
         }
-        bgp: BgpRouting {
+        bgp: Bgp {
             parameters:
                 ospfRoutingModule = "";
                 @display("p=160,50;i=block/network");

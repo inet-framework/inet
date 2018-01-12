@@ -36,12 +36,12 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API BgpRouting : public cSimpleModule, public ILifecycle, public TcpSocket::CallbackInterface
+class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::CallbackInterface
 {
   public:
-    BgpRouting() {}
+    Bgp() {}
 
-    virtual ~BgpRouting();
+    virtual ~Bgp();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

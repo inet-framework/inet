@@ -22,7 +22,7 @@ import inet.applications.contract.IApp;
 //
 // Interface for BGP routing module.
 //
-moduleinterface IBgpRouting extends IApp
+moduleinterface IBgp extends IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

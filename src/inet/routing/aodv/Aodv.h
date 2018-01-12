@@ -39,7 +39,7 @@ namespace inet {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API AodvRouting : public cSimpleModule, public ILifecycle, public NetfilterBase::HookBase, public cListener
+class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterBase::HookBase, public cListener
 {
   protected:
     /*
@@ -204,8 +204,8 @@ class INET_API AodvRouting : public cSimpleModule, public ILifecycle, public Net
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
-    AodvRouting();
-    virtual ~AodvRouting();
+    Aodv();
+    virtual ~Aodv();
 };
 
 } // namespace inet

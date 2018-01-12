@@ -22,7 +22,7 @@
 #include <memory.h>
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/routing/ospfv2/OspfRouting.h"
+#include "inet/routing/ospfv2/Ospf.h"
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/OspfConfigReader.h"
@@ -34,18 +34,18 @@ namespace inet {
 
 namespace ospf {
 
-Define_Module(OspfRouting);
+Define_Module(Ospf);
 
-OspfRouting::OspfRouting()
+Ospf::Ospf()
 {
 }
 
-OspfRouting::~OspfRouting()
+Ospf::~Ospf()
 {
     delete ospfRouter;
 }
 
-void OspfRouting::initialize(int stage)
+void Ospf::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -59,7 +59,7 @@ void OspfRouting::initialize(int stage)
     }
 }
 
-void OspfRouting::createOspfRouter()
+void Ospf::createOspfRouter()
 {
     ospfRouter = new Router(rt->getRouterId(), this, ift, rt);
 
@@ -72,7 +72,7 @@ void OspfRouting::createOspfRouter()
     ospfRouter->addWatches();
 }
 
-void OspfRouting::handleMessage(cMessage *msg)
+void Ospf::handleMessage(cMessage *msg)
 {
     if (!isUp)
         handleMessageWhenDown(msg);
@@ -80,7 +80,7 @@ void OspfRouting::handleMessage(cMessage *msg)
         ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
-void OspfRouting::handleMessageWhenDown(cMessage *msg)
+void Ospf::handleMessageWhenDown(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
@@ -88,7 +88,7 @@ void OspfRouting::handleMessageWhenDown(cMessage *msg)
     delete msg;
 }
 
-bool OspfRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
@@ -121,13 +121,13 @@ bool OspfRouting::handleOperationStage(LifecycleOperation *operation, int stage,
     return true;
 }
 
-bool OspfRouting::isNodeUp()
+bool Ospf::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void OspfRouting::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
+void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 {
     Enter_Method_Silent();
     OspfAsExternalLsaContents newExternalContents;
@@ -138,7 +138,7 @@ void OspfRouting::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAd
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool OspfRouting::checkExternalRoute(const Ipv4Address& route)
+bool Ospf::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
     for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {

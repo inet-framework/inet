@@ -23,8 +23,8 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
-import inet.routing.bgpv4.BgpRouting;
-import inet.routing.ospfv2.OspfRouting;
+import inet.routing.bgpv4.Bgp;
+import inet.routing.ospfv2.Ospf;
 import inet.transportlayer.contract.ITcp;
 
 
@@ -52,11 +52,11 @@ module BGPRouterEx
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        ospf: OspfRouting {
+        ospf: Ospf {
             parameters:
                 @display("p=235,284,row;i=block/network2");
         }
-        bgp: BgpRouting {
+        bgp: Bgp {
             parameters:
                 ospfRoutingModule = "^.ospf";
                 @display("p=160,50;i=block/network");

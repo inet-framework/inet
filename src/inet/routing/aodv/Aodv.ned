@@ -31,12 +31,12 @@ import inet.routing.contract.IManetRouting;
 //
 // This routing protocol communicates over UDP and used in ~AodvRouter
 // nodes as a routing submodule. ~AodvRouter is just a ~WirelessHost
-// extended with ~AodvRouting submodule.
+// extended with ~Aodv submodule.
 //
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
-simple AodvRouting like IManetRouting
+simple Aodv like IManetRouting
 {
     parameters:
         @display("i=block/network2");

@@ -70,7 +70,7 @@
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
 //    daemon ported into the INET Framework, currently in a different project)
 //    used inside QuaggaRouter; alternatively one can run ~OspfRouter which relies
-//    on the ~OspfRouting module;
+//    on the ~Ospf module;
 //
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>
