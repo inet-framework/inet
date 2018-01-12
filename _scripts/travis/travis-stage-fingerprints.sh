@@ -37,7 +37,7 @@ echo -e "\n---- build finished, starting fingerprint tests ----\n"
 
 cd tests/fingerprint
 if [ "$MODE" = "debug" ]; then
-    ./fingerprinttest -d
+    ./fingerprints -e opp_run_dbg
 else
-    ./fingerprinttest
+    ./fingerprints -e opp_run_release
 fi
