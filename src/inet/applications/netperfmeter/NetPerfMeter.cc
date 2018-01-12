@@ -1220,15 +1220,15 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    TcpCommand* queueInfo = new TcpCommand();
    queueInfo->setUserId(queueSize);
 
-   Request* cmsg = new Request("QueueRequest");
-   cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
-   cmsg->setControlInfo(queueInfo);
-   cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
+   auto request = new Request("QueueRequest");
+   request->setKind(TCP_C_QUEUE_BYTES_LIMIT);
+   request->setControlInfo(queueInfo);
+   request->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
-      IncomingSocketTCP->sendCommand(cmsg);
+      IncomingSocketTCP->sendCommand(request);
    }
    else {
-      SocketTCP->sendCommand(cmsg);
+      SocketTCP->sendCommand(request);
    }
 }
 

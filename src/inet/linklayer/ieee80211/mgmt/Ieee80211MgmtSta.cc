@@ -223,9 +223,9 @@ void Ieee80211MgmtSta::changeChannel(int channelNum)
 
     Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
     configureCommand->setChannelNumber(channelNum);
-    auto msg = new Request("changeChannel", RADIO_C_CONFIGURE);
-    msg->setControlInfo(configureCommand);
-    send(msg, "macOut");
+    auto request = new Request("changeChannel", RADIO_C_CONFIGURE);
+    request->setControlInfo(configureCommand);
+    send(request, "macOut");
 }
 
 void Ieee80211MgmtSta::beaconLost()

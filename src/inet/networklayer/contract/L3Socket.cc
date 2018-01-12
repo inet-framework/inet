@@ -53,9 +53,9 @@ void L3Socket::bind(int protocolId)
     ASSERT(controlInfoProtocolId != -1);
     L3SocketBindCommand *command = new L3SocketBindCommand();
     command->setProtocolId(protocolId);
-    auto bind = new Request("bind");
-    bind->setControlInfo(command);
-    sendToOutput(bind);
+    auto request = new Request("bind");
+    request->setControlInfo(command);
+    sendToOutput(request);
     bound = true;
 }
 
@@ -69,9 +69,9 @@ void L3Socket::close()
     ASSERT(bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    auto close = new Request("close");
-    close->setControlInfo(command);
-    sendToOutput(close);
+    auto request = new Request("close");
+    request->setControlInfo(command);
+    sendToOutput(request);
 }
 
 } // namespace inet

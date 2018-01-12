@@ -325,9 +325,9 @@ void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
     if (radio->getRadioMode() != radioMode) {
         ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
         configureCommand->setRadioMode(radioMode);
-        auto message = new Request("configureRadioMode", RADIO_C_CONFIGURE);
-        message->setControlInfo(configureCommand);
-        sendDown(message);
+        auto request = new Request("configureRadioMode", RADIO_C_CONFIGURE);
+        request->setControlInfo(configureCommand);
+        sendDown(request);
     }
 }
 

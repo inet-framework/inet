@@ -100,11 +100,11 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         // pending to be sent back in this connection
         int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
-        auto outMsg = new Request("close");
-        outMsg->setName("close");
-        outMsg->setKind(TCP_C_CLOSE);
-        outMsg->addTagIfAbsent<SocketReq>()->setSocketId(connId);
-        sendOrSchedule(outMsg, delay + maxMsgDelay);
+        auto request = new Request("close");
+        request->setName("close");
+        request->setKind(TCP_C_CLOSE);
+        request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+        sendOrSchedule(request, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
@@ -142,12 +142,12 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         delete msg;
 
         if (doClose) {
-            auto outMsg = new Request("close");
-            outMsg->setKind(TCP_C_CLOSE);
+            auto request = new Request("close");
+            request->setKind(TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            outMsg->addTagIfAbsent<SocketReq>()->setSocketId(connId);
-            outMsg->setControlInfo(cmd);
-            sendOrSchedule(outMsg, delay + maxMsgDelay);
+            request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+            request->setControlInfo(cmd);
+            sendOrSchedule(request, delay + maxMsgDelay);
         }
     }
     else if (msg->getKind() == TCP_I_AVAILABLE)
