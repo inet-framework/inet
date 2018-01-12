@@ -535,6 +535,11 @@ class INET_API Packet : public cPacket
     /** @name Tag related functions */
     //@{
     /**
+     * Returns all tags.
+     */
+    TagSet& getTags() { return tags; }
+
+    /**
      * Returns the number of packet tags.
      */
     int _getNumTags() const {
@@ -610,6 +615,8 @@ class INET_API Packet : public cPacket
      */
     virtual std::string str() const override { return contents->str(); }
 };
+
+INET_API TagSet& getTags(cMessage *msg);
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
 
