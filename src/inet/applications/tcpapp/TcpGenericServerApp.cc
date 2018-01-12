@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -98,7 +99,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         // pending to be sent back in this connection
         int connId = msg->_getTag<SocketInd>()->getSocketId();
         delete msg;
-        cMessage *outMsg = new cMessage("close");
+        auto outMsg = new Request("close");
         outMsg->setName("close");
         outMsg->setKind(TCP_C_CLOSE);
         outMsg->_addTagIfAbsent<SocketReq>()->setSocketId(connId);
@@ -140,7 +141,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         delete msg;
 
         if (doClose) {
-            cMessage *outMsg = new cMessage("close");
+            auto outMsg = new Request("close");
             outMsg->setKind(TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
             outMsg->_addTagIfAbsent<SocketReq>()->setSocketId(connId);

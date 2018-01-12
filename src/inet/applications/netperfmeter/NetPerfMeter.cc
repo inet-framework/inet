@@ -28,6 +28,7 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -1219,7 +1220,7 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    TcpCommand* queueInfo = new TcpCommand();
    queueInfo->setUserId(queueSize);
 
-   Packet* cmsg = new Packet("QueueRequest");
+   Request* cmsg = new Request("QueueRequest");
    cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
    cmsg->setControlInfo(queueInfo);
    cmsg->_addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);

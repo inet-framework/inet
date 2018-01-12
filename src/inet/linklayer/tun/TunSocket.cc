@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
@@ -39,7 +40,7 @@ void TunSocket::sendToTun(cMessage *msg)
 void TunSocket::open(int interfaceId)
 {
     this->interfaceId = interfaceId;
-    cMessage *message = new cMessage("OPEN");
+    auto message = new Request("OPEN");
     TunOpenCommand *command = new TunOpenCommand();
     message->setControlInfo(command);
     sendToTun(message);
@@ -56,7 +57,7 @@ void TunSocket::send(Packet *packet)
 
 void TunSocket::close()
 {
-    cMessage *message = new cMessage("CLOSE");
+    auto message = new Request("CLOSE");
     TunCloseCommand *command = new TunCloseCommand();
     message->setControlInfo(command);
     sendToTun(message);

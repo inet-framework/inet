@@ -20,6 +20,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 //#include "inet/common/serializer/headers/defs.h"    // for endian macros
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
@@ -128,7 +129,7 @@ TcpLwipConnection::~TcpLwipConnection()
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
+    auto msg = new Indication(indicationName(TCP_I_AVAILABLE));
     msg->setKind(TCP_I_AVAILABLE);
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
@@ -149,7 +150,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 
 void TcpLwipConnection::sendEstablishedMsg()
 {
-    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
+    auto msg = new Indication("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
 
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
@@ -199,7 +200,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
 {
     const char *nameOfIndication = indicationName(code);
     EV_DETAIL << "Notifying app: " << nameOfIndication << "\n";
-    cMessage *msg = new cMessage(nameOfIndication);
+    auto msg = new Indication(nameOfIndication);
     msg->setKind(code);
     TcpCommand *ind = new TcpCommand();
     msg->setControlInfo(ind);

@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -291,7 +292,7 @@ class INET_API TcpSocket
     /**
      * Sends command.
      */
-    void sendCommand(cMessage *msg);
+    void sendCommand(Request *msg);
 
     /**
      * Closes the local end of the connection. With TCP, a CLOSE operation

@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -324,7 +325,7 @@ void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
     if (radio->getRadioMode() != radioMode) {
         ConfigureRadioCommand *configureCommand = new ConfigureRadioCommand();
         configureCommand->setRadioMode(radioMode);
-        cMessage *message = new cMessage("configureRadioMode", RADIO_C_CONFIGURE);
+        auto message = new Request("configureRadioMode", RADIO_C_CONFIGURE);
         message->setControlInfo(configureCommand);
         sendDown(message);
     }

@@ -25,6 +25,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CRC_m.h"

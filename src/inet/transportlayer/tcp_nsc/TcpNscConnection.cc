@@ -181,7 +181,7 @@ void TcpNscConnection::do_SEND()
         if (onCloseM && sendQueueM->getBytesAvailable() == 0 && !disconnectCalledM) {
             disconnectCalledM = true;
             pNscSocketM->disconnect();
-            cMessage *msg = new cMessage("CLOSED");
+            auto msg = new Indication("CLOSED");
             msg->setKind(TCP_I_CLOSED);
             TcpCommand *ind = new TcpCommand();
             msg->setControlInfo(ind);

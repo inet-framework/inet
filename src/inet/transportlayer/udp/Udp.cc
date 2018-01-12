@@ -835,7 +835,7 @@ void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 
 void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
 {
-    cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
+    auto notifyMsg = new Indication("ERROR", UDP_I_ERROR);
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     notifyMsg->setControlInfo(udpCtrl);
     //FIXME notifyMsg->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);

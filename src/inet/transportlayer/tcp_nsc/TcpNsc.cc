@@ -289,7 +289,7 @@ TcpNsc::~TcpNsc()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
 {
-    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
+    auto msg = new Indication("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
     tcpConnectInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
@@ -305,7 +305,7 @@ void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
 
 void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
 {
-    cMessage *msg = new cMessage("TCP_I_AVAILABLE");
+    auto *msg = new Indication("TCP_I_AVAILABLE");
     msg->setKind(TCP_I_AVAILABLE);
 
     TcpAvailableInfo *tcpConnectInfo = new TcpAvailableInfo();
@@ -614,7 +614,7 @@ void TcpNsc::sendErrorNotificationToApp(TcpNscConnection& c, int err)
             break;
     }
     if (code != -1) {
-        cMessage *msg = new cMessage(name);
+        auto msg = new Indication(name);
         msg->setKind(code);
         TcpCommand *ind = new TcpCommand();
         msg->setControlInfo(ind);

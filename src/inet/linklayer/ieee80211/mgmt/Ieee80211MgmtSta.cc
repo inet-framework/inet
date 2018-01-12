@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -222,7 +223,7 @@ void Ieee80211MgmtSta::changeChannel(int channelNum)
 
     Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
     configureCommand->setChannelNumber(channelNum);
-    cMessage *msg = new cMessage("changeChannel", RADIO_C_CONFIGURE);
+    auto msg = new Request("changeChannel", RADIO_C_CONFIGURE);
     msg->setControlInfo(configureCommand);
     send(msg, "macOut");
 }

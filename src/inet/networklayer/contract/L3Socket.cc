@@ -17,6 +17,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/L3Socket.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -50,7 +51,7 @@ void L3Socket::bind(int protocolId)
     ASSERT(controlInfoProtocolId != -1);
     L3SocketBindCommand *command = new L3SocketBindCommand();
     command->setProtocolId(protocolId);
-    cMessage *bind = new cMessage("bind");
+    auto bind = new Request("bind");
     bind->setControlInfo(command);
     sendToOutput(bind);
     bound = true;
@@ -66,7 +67,7 @@ void L3Socket::close()
     ASSERT(bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    cMessage *close = new cMessage("close");
+    auto close = new Request("close");
     close->setControlInfo(command);
     sendToOutput(close);
 }

@@ -35,6 +35,7 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
@@ -294,7 +295,7 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    cMessage *msg = new cMessage(indicationName(code));
+    auto msg = new Indication(indicationName(code));
     msg->setKind(code);
     TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
@@ -306,7 +307,7 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
+    auto msg = new Indication(indicationName(TCP_I_AVAILABLE));
     msg->setKind(TCP_I_AVAILABLE);
 
     TcpAvailableInfo *ind = new TcpAvailableInfo();
@@ -324,7 +325,7 @@ void TcpConnection::sendAvailableIndicationToApp()
 void TcpConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
-    cMessage *msg = new cMessage(indicationName(TCP_I_ESTABLISHED));
+    auto msg = new Indication(indicationName(TCP_I_ESTABLISHED));
     msg->setKind(TCP_I_ESTABLISHED);
 
     TcpConnectInfo *ind = new TcpConnectInfo();
@@ -345,10 +346,10 @@ void TcpConnection::sendToApp(cMessage *msg)
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
-        cMessage *msg = nullptr;
+        Message *msg = nullptr;
 
         if (tcpMain->useDataNotification) {
-            msg = new cMessage("Data Notification");
+            msg = new Indication("Data Notification");
             msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
             TcpCommand *cmd = new TcpCommand();
             msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
