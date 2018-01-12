@@ -109,8 +109,8 @@ void Arp::handleMessage(cMessage *msg)
         requestTimedOut(msg);
     }
     else {
-        Packet *arp = check_and_cast<Packet *>(msg);
-        processARPPacket(arp);
+        Packet *packet = check_and_cast<Packet *>(msg);
+        processARPPacket(packet);
     }
 }
 

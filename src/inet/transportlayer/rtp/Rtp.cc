@@ -298,10 +298,10 @@ void Rtp::senderModuleStatus(RtpInnerPacket *rinp)
 
 void Rtp::dataOut(RtpInnerPacket *rinp)
 {
-    Packet *msg = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
+    Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
     // RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
 
-    _udpSocket.sendTo(msg, _destinationAddress, _port);
+    _udpSocket.sendTo(packet, _destinationAddress, _port);
 
     // Rtcp module must be informed about sent rtp data packet
     send(rinp, "rtcpOut");
