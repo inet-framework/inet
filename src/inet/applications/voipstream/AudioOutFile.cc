@@ -24,10 +24,6 @@
 
 #include "inet/common/INETEndians.h"
 
-extern "C" {
-#include <libavutil/audioconvert.h>
-}
-
 namespace inet {
 
 void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
