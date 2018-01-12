@@ -20,6 +20,12 @@ import inet.common.INETDefs;
 
 namespace inet;
 
+enum TunCommandCode
+{
+    TUN_C_OPEN  = 1;
+    TUN_C_CLOSE = 2;
+}
+
 class TunControlInfo extends cObject
 {
 }

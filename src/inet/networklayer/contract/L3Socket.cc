@@ -53,7 +53,7 @@ void L3Socket::bind(int protocolId)
     ASSERT(controlInfoProtocolId != -1);
     L3SocketBindCommand *command = new L3SocketBindCommand();
     command->setProtocolId(protocolId);
-    auto request = new Request("bind");
+    auto request = new Request("bind", L3_C_BIND);
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
@@ -69,7 +69,7 @@ void L3Socket::close()
     ASSERT(bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    auto request = new Request("close");
+    auto request = new Request("close", L3_C_CLOSE);
     request->setControlInfo(command);
     sendToOutput(request);
 }

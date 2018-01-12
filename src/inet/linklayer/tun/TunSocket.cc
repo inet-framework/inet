@@ -41,7 +41,7 @@ void TunSocket::sendToTun(cMessage *msg)
 void TunSocket::open(int interfaceId)
 {
     this->interfaceId = interfaceId;
-    auto request = new Request("OPEN");
+    auto request = new Request("OPEN", TUN_C_OPEN);
     TunOpenCommand *command = new TunOpenCommand();
     request->setControlInfo(command);
     sendToTun(request);
@@ -58,7 +58,7 @@ void TunSocket::send(Packet *packet)
 
 void TunSocket::close()
 {
-    auto request = new Request("CLOSE");
+    auto request = new Request("CLOSE", TUN_C_CLOSE);
     TunCloseCommand *command = new TunCloseCommand();
     request->setControlInfo(command);
     sendToTun(request);
