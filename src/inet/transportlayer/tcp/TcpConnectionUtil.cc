@@ -601,7 +601,7 @@ void TcpConnection::sendAck()
 
     // write header options
     writeHeaderOptions(tcpseg);
-    Packet *fp = new Packet("ACK");
+    Packet *fp = new Packet("TcpAck");
 
     // send it
     sendToIP(fp, tcpseg);
