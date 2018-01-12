@@ -109,7 +109,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
     while (sockdata->queue.has<HttpRequestMessage>()) {
         auto packet = new Packet(msg->getName(), sockdata->queue.pop<HttpRequestMessage>());
         packet->setSentFrom(msg->getSenderModule(), msg->getSenderGate()->getId(), msg->getSendingTime());
-        cMessage *reply = handleReceivedMessage(packet);
+        auto reply = handleReceivedMessage(packet);
         if (reply != nullptr)
             socket->send(reply);    // Send to socket if the reply is non-zero.
         delete packet;

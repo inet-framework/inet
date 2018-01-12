@@ -226,7 +226,7 @@ void Dsdv::handleMessage(cMessage *msg)
     {
         handleSelfMessage(msg);
     }
-    else if (msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::manet)
+    else if (check_and_cast<Packet *>(msg)->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::manet)
     {
         auto packet = new Packet("Hello");
 

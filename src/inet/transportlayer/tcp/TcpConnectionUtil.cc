@@ -356,7 +356,7 @@ void TcpConnection::sendAvailableDataToApp()
             msg->setControlInfo(cmd);
             sendToApp(msg);
         } else {
-            while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
+            while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);

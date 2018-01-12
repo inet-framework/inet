@@ -249,8 +249,8 @@ void Ppp::handleMessage(cMessage *msg)
         emit(ppTxEndSignal, &notifDetails);
 
         if (!txQueue.isEmpty()) {
-            cPacket *pk = (cPacket *)txQueue.pop();
-            startTransmitting(pk);
+            auto packet = check_and_cast<Packet *>(txQueue.pop());
+            startTransmitting(packet);
         }
         else if (queueModule && 0 == queueModule->getNumPendingRequests()) {
             queueModule->requestPacket();
@@ -265,11 +265,12 @@ void Ppp::handleMessage(cMessage *msg)
         notifDetails.setPacket(PK(msg));
         emit(ppRxEndSignal, &notifDetails);
 
-        msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+        auto packet = check_and_cast<Packet *>(msg);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
 
         // check for bit errors
-        if (PK(msg)->hasBitError()) {
+        if (packet->hasBitError()) {
             EV_WARN << "Bit error in " << msg << endl;
             PacketDropDetails details;
             details.setReason(INCORRECTLY_RECEIVED);
@@ -279,7 +280,6 @@ void Ppp::handleMessage(cMessage *msg)
         }
         else {
             // pass up payload
-            auto packet = check_and_cast<Packet *>(msg);
             const auto& pppHeader = packet->peekHeader<PppHeader>();
             const auto& pppTrailer = packet->peekTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
             if (pppHeader == nullptr || pppTrailer == nullptr)
@@ -322,7 +322,7 @@ void Ppp::handleMessage(cMessage *msg)
             }
             else {
                 // We are idle, so we can start transmitting right away.
-                startTransmitting(PK(msg));
+                startTransmitting(check_and_cast<Packet *>(msg));
             }
         }
     }
