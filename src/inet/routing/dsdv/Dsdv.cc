@@ -59,7 +59,7 @@ void Dsdv::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         routeLifetime = par("routeLifetime").doubleValue();
-        helloInterval = (simtime_t) par("hellomsgperiod_DSDV");
+        helloInterval = (simtime_t) par("helloInterval");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -116,7 +116,7 @@ void Dsdv::start()
     //reads from omnetpp.ini
     //HelloForward = new DsdvHello("HelloForward");
     // schedules a random periodic event: the hello message broadcast from DSDV module
-    scheduleAt(simTime() + uniform(0, (double)par("MaxVariance_DSDV")), event);
+    scheduleAt(simTime() + uniform(0, (double)par("maxVariance")), event);
 }
 
 void Dsdv::stop()
