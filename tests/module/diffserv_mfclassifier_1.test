@@ -1,4 +1,5 @@
-%description: Tests for MultiFieldClassifier.
+%description:
+Tests for MultiFieldClassifier.
 
 
 %file: TestApp.ned

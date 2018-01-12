@@ -1,4 +1,5 @@
-%description: https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example L.1)
+%description:
+https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example L.1)
 
 %file: test.ned
 

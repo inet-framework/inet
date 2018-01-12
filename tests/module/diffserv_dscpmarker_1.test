@@ -1,4 +1,5 @@
-%description: Tests for DSCPMarker
+%description:
+Tests for DSCPMarker
 
 
 %file: TestApp.ned

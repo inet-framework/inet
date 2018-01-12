@@ -1,4 +1,5 @@
-%description: Simple test for TokenBucketMeter.
+%description:
+Simple test for TokenBucketMeter.
 
 This file implements the test case described in
   Sanjay Ramroop: Performance evaluation of DiffServ networks using the ns-3 simulator

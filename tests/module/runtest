@@ -28,7 +28,7 @@ echo
 (cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . --no-deep-includes -I../../../src; $MAKE) || exit 1
 
 echo
-PATH=$PATH:../../src opp_test run -p work$DBG_SUFFIX -a "--check-signals=false -lINET " $OPT -v $TESTFILES || exit 1
+PATH=$PATH:../../src opp_test run -p work$DBG_SUFFIX $OPT -v $TESTFILES -a "--check-signals=false -lINET " || exit 1
 
 echo
 echo Results can be found in ./work

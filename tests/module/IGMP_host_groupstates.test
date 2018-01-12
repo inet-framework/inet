@@ -1,4 +1,5 @@
-%description: Tests group specific state transitions of Non-Querier IGMP hosts
+%description:
+Tests group specific state transitions of Non-Querier IGMP hosts
 
 RFC 2236 6.:
 
