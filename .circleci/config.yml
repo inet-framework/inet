@@ -1,8 +1,9 @@
 version: 2
 jobs:
-  build:
+  build: # the name is misleading, but has to be "build", so it is used outside of workflows
     docker:
-      - image: omnetpp/travis-inet:5.3p2
+      - image: omnetpp/travis-inet:5.3p2-180111
+    parallelism: 4 # make use of all our free containers
     steps:
       - checkout
       - run:
@@ -15,7 +16,26 @@ jobs:
           name: Copying NSC into INET
           command: cp -r /root/nsc-0.5.3 3rdparty
       - run:
+          name: Setting up parallel environment
+          command: echo 'export SPLIT_INDEX=$CIRCLE_NODE_INDEX SPLIT_TOTAL=$CIRCLE_NODE_TOTAL' >> $BASH_ENV
+      - run:
           name: Feature tests
           command: ./tests/features/featuretest
       - store_artifacts:
           path: /root/project/tests/features/_log
+          destination: log # replace the absolute path above with a shorter one
+
+# the rest is just to schedule a cron job for automated weekly tests
+workflows:
+  version: 2
+  weekly: # this name is arbitrary, but fitting
+    jobs:
+      - build # the name of the job above
+    triggers:
+      - schedule:
+          cron: "0 16 * * 6" # run on every saturday, at 16:00 UTC
+          filters:
+            branches:
+              only:
+                - master
+                - integration
