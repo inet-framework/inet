@@ -181,13 +181,13 @@ void TcpNscConnection::do_SEND()
         if (onCloseM && sendQueueM->getBytesAvailable() == 0 && !disconnectCalledM) {
             disconnectCalledM = true;
             pNscSocketM->disconnect();
-            auto msg = new Indication("CLOSED");
-            msg->setKind(TCP_I_CLOSED);
+            auto indication = new Indication("CLOSED");
+            indication->setKind(TCP_I_CLOSED);
             TcpCommand *ind = new TcpCommand();
-            msg->setControlInfo(ind);
-            msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-            msg->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
-            tcpNscM->send(msg, "appOut");
+            indication->setControlInfo(ind);
+            indication->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
+            tcpNscM->send(indication, "appOut");
             //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
         }
     }

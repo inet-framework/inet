@@ -289,24 +289,24 @@ TcpNsc::~TcpNsc()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
 {
-    auto msg = new Indication("TCP_I_ESTABLISHED");
-    msg->setKind(TCP_I_ESTABLISHED);
+    auto indication = new Indication("TCP_I_ESTABLISHED");
+    indication->setKind(TCP_I_ESTABLISHED);
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
     tcpConnectInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
     tcpConnectInfo->setRemoteAddr(connP.inetSockPairM.remoteM.ipAddrM);
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
-    msg->setControlInfo(tcpConnectInfo);
-    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
-    send(msg, "appOut");
+    indication->setControlInfo(tcpConnectInfo);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
+    send(indication, "appOut");
     connP.sentEstablishedM = true;
 }
 
 void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
 {
-    auto *msg = new Indication("TCP_I_AVAILABLE");
-    msg->setKind(TCP_I_AVAILABLE);
+    auto *indication = new Indication("TCP_I_AVAILABLE");
+    indication->setKind(TCP_I_AVAILABLE);
 
     TcpAvailableInfo *tcpConnectInfo = new TcpAvailableInfo();
 
@@ -317,10 +317,10 @@ void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
     tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
-    msg->setControlInfo(tcpConnectInfo);
-    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
-    send(msg, "appOut");
+    indication->setControlInfo(tcpConnectInfo);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
+    send(indication, "appOut");
     c.sentEstablishedM = true;
 }
 
@@ -614,13 +614,13 @@ void TcpNsc::sendErrorNotificationToApp(TcpNscConnection& c, int err)
             break;
     }
     if (code != -1) {
-        auto msg = new Indication(name);
-        msg->setKind(code);
+        auto indication = new Indication(name);
+        indication->setKind(code);
         TcpCommand *ind = new TcpCommand();
-        msg->setControlInfo(ind);
-        msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-        msg->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
-        send(msg, "appOut");
+        indication->setControlInfo(ind);
+        indication->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        send(indication, "appOut");
     }
 }
 

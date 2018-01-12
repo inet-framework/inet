@@ -838,17 +838,17 @@ void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 
 void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort)
 {
-    auto notifyMsg = new Indication("ERROR", UDP_I_ERROR);
+    auto indication = new Indication("ERROR", UDP_I_ERROR);
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
-    notifyMsg->setControlInfo(udpCtrl);
+    indication->setControlInfo(udpCtrl);
     //FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    notifyMsg->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
-    notifyMsg->addTagIfAbsent<L3AddressInd>()->setSrcAddress(localAddr);
-    notifyMsg->addTagIfAbsent<L3AddressInd>()->setDestAddress(remoteAddr);
-    notifyMsg->addTagIfAbsent<L4PortInd>()->setSrcPort(sd->localPort);
-    notifyMsg->addTagIfAbsent<L4PortInd>()->setDestPort(remotePort);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
+    indication->addTagIfAbsent<L3AddressInd>()->setSrcAddress(localAddr);
+    indication->addTagIfAbsent<L3AddressInd>()->setDestAddress(remoteAddr);
+    indication->addTagIfAbsent<L4PortInd>()->setSrcPort(sd->localPort);
+    indication->addTagIfAbsent<L4PortInd>()->setDestPort(remotePort);
 
-    send(notifyMsg, "appOut");
+    send(indication, "appOut");
 }
 
 UdpHeader *Udp::createUDPPacket()

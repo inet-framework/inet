@@ -129,8 +129,8 @@ TcpLwipConnection::~TcpLwipConnection()
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto msg = new Indication(indicationName(TCP_I_AVAILABLE));
-    msg->setKind(TCP_I_AVAILABLE);
+    auto indication = new Indication(indicationName(TCP_I_AVAILABLE));
+    indication->setKind(TCP_I_AVAILABLE);
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
@@ -141,17 +141,17 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setLocalPort(pcbM->local_port);
     ind->setRemotePort(pcbM->remote_port);
 
-    msg->setControlInfo(ind);
-    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(listenConnId);
-    tcpLwipM.send(msg, "appOut");
+    indication->setControlInfo(ind);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(listenConnId);
+    tcpLwipM.send(indication, "appOut");
     //TODO shouldn't read from lwip until accept arrived
 }
 
 void TcpLwipConnection::sendEstablishedMsg()
 {
-    auto msg = new Indication("TCP_I_ESTABLISHED");
-    msg->setKind(TCP_I_ESTABLISHED);
+    auto indication = new Indication("TCP_I_ESTABLISHED");
+    indication->setKind(TCP_I_ESTABLISHED);
 
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
 
@@ -162,11 +162,11 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setLocalPort(pcbM->local_port);
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
 
-    msg->setControlInfo(tcpConnectInfo);
-    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
+    indication->setControlInfo(tcpConnectInfo);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
 
-    tcpLwipM.send(msg, "appOut");
+    tcpLwipM.send(indication, "appOut");
     sendUpEnabled = true;
     do_SEND();
     //TODO now can read from lwip
@@ -200,13 +200,13 @@ void TcpLwipConnection::sendIndicationToApp(int code)
 {
     const char *nameOfIndication = indicationName(code);
     EV_DETAIL << "Notifying app: " << nameOfIndication << "\n";
-    auto msg = new Indication(nameOfIndication);
-    msg->setKind(code);
+    auto indication = new Indication(nameOfIndication);
+    indication->setKind(code);
     TcpCommand *ind = new TcpCommand();
-    msg->setControlInfo(ind);
-    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
-    tcpLwipM.send(msg, "appOut");
+    indication->setControlInfo(ind);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
+    tcpLwipM.send(indication, "appOut");
 }
 
 void TcpLwipConnection::fillStatusInfo(TcpStatusInfo& statusInfo)
