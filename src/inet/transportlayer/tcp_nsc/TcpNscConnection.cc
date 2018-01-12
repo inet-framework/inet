@@ -181,8 +181,7 @@ void TcpNscConnection::do_SEND()
         if (onCloseM && sendQueueM->getBytesAvailable() == 0 && !disconnectCalledM) {
             disconnectCalledM = true;
             pNscSocketM->disconnect();
-            auto indication = new Indication("CLOSED");
-            indication->setKind(TCP_I_CLOSED);
+            auto indication = new Indication("CLOSED", TCP_I_CLOSED);
             TcpCommand *ind = new TcpCommand();
             indication->setControlInfo(ind);
             indication->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);

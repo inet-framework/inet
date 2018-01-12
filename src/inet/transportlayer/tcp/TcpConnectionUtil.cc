@@ -295,8 +295,7 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    auto indication = new Indication(indicationName(code));
-    indication->setKind(code);
+    auto indication = new Indication(indicationName(code), code);
     TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
     indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
@@ -307,9 +306,7 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_AVAILABLE));
-    indication->setKind(TCP_I_AVAILABLE);
-
+    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -325,9 +322,7 @@ void TcpConnection::sendAvailableIndicationToApp()
 void TcpConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_ESTABLISHED));
-    indication->setKind(TCP_I_ESTABLISHED);
-
+    auto indication = new Indication(indicationName(TCP_I_ESTABLISHED), TCP_I_ESTABLISHED);
     TcpConnectInfo *ind = new TcpConnectInfo();
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
@@ -347,8 +342,7 @@ void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
         if (tcpMain->useDataNotification) {
-            auto indication = new Indication("Data Notification");
-            indication->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
+            auto indication = new Indication("Data Notification", TCP_I_DATA_NOTIFICATION); // TBD currently we never send TCP_I_URGENT_DATA
             TcpCommand *cmd = new TcpCommand();
             indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
             indication->setControlInfo(cmd);

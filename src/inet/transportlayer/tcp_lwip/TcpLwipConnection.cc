@@ -129,9 +129,7 @@ TcpLwipConnection::~TcpLwipConnection()
 void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    auto indication = new Indication(indicationName(TCP_I_AVAILABLE));
-    indication->setKind(TCP_I_AVAILABLE);
-
+    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
     TcpAvailableInfo *ind = new TcpAvailableInfo();
@@ -150,9 +148,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
 
 void TcpLwipConnection::sendEstablishedMsg()
 {
-    auto indication = new Indication("TCP_I_ESTABLISHED");
-    indication->setKind(TCP_I_ESTABLISHED);
-
+    auto indication = new Indication("TCP_I_ESTABLISHED", TCP_I_ESTABLISHED);
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
@@ -200,8 +196,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
 {
     const char *nameOfIndication = indicationName(code);
     EV_DETAIL << "Notifying app: " << nameOfIndication << "\n";
-    auto indication = new Indication(nameOfIndication);
-    indication->setKind(code);
+    auto indication = new Indication(nameOfIndication, code);
     TcpCommand *ind = new TcpCommand();
     indication->setControlInfo(ind);
     indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
