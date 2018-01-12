@@ -636,7 +636,8 @@ TcpNscReceiveQueue *TcpNsc::createReceiveQueue()
 
 void TcpNsc::handleAppMessage(cMessage *msgP)
 {
-    int connId = msgP->_getTag<SocketReq>()->getSocketId();
+    auto& tags = getTags(msgP);
+    int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpNscConnection *conn = findAppConn(connId);
 

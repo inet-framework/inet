@@ -32,8 +32,9 @@ void TunSocket::sendToTun(cMessage *msg)
 {
     if (!outputGate)
         throw cRuntimeError("TunSocket: setOutputGate() must be invoked before socket can be used");
-    msg->_addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);
 }
 

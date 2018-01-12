@@ -413,7 +413,8 @@ struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
 
 void TcpLwip::handleAppMessage(cMessage *msgP)
 {
-    int connId = msgP->_getTag<SocketReq>()->getSocketId();
+    auto& tags = getTags(msgP);
+    int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
 

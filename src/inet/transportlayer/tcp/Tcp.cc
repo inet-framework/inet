@@ -24,6 +24,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -227,7 +228,8 @@ void Tcp::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
     }
     else {    // must be from app
-        int socketId = msg->_getTag<SocketReq>()->getSocketId();
+        auto& tags = getTags(msg);
+        int socketId = tags.getTag<SocketReq>()->getSocketId();
 
         TcpConnection *conn = findConnForApp(socketId);
 

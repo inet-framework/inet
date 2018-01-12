@@ -21,6 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -82,8 +83,9 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        delete message->_removeTagIfPresent<DispatchProtocolReq>();
-        message->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+        auto& tags = getTags(message);
+        delete tags.removeTagIfPresent<DispatchProtocolReq>();
+        tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
     else {
@@ -91,8 +93,9 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                delete duplicate->_removeTagIfPresent<DispatchProtocolReq>();
-                duplicate->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                auto& tags = getTags(duplicate);
+                delete tags.removeTagIfPresent<DispatchProtocolReq>();
+                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }
         }
