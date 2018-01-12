@@ -201,7 +201,7 @@ cNEDValue nedf_nanToZero(cComponent *context, cNEDValue argv[], int argc)
 {
     double x = argv[0].doubleValue();
     const char *unit = argv[0].getUnit();
-    return std::isnan(x) ? cNEDValue(0, unit) : argv[0];
+    return std::isnan(x) ? cNEDValue(0.0, unit) : argv[0];
 }
 
 Define_NED_Function2(nedf_nanToZero,

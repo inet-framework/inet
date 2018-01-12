@@ -72,11 +72,11 @@ simple NetPerfMeter like INetPerfMeterApp
         string          dataTransferMode         = default("object");  // Data transfer mode for TCP socket (TCP only)
 
         volatile double frameRate      @unit(Hz) = default(1 Hz);      // Outgoing frame rate
-        volatile double frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size
+        volatile int    frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size
         string          frameRateString          = default("");        // Outgoing frame rate per stream, separated by ";"
         string          frameSizeString          = default("");        // Outgoing frame size per stream, separated by ";"
         string          traceFile                = default("");        // Use trace file instead of frame rate/frame size
-        double          maxMsgSize     @unit(B)  = default(1000 B);    // Maximum message size
+        int             maxMsgSize     @unit(B)  = default(1000 B);    // Maximum message size
         double          unordered                = default(0.0);       // Fraction of unordered messages (SCTP only)
         double          unreliable               = default(0.0);       // Fraction of unreliable messages (SCTP only)
         bool            decoupleSaturatedStreams = default(true);      // Apply buffer splitting when using multiple streams

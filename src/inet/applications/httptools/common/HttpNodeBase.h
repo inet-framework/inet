@@ -56,7 +56,7 @@ enum LOG_FORMAT { lf_short, lf_long };
 class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
 {
   protected:
-    unsigned long linkSpeed = 0;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
+    double linkSpeed = 0;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
     int httpProtocol = 0;    // the http protocol. http/1.0: 10 ; http/1.1: 11
     std::string logFileName;    // the log file name for message generation events
     bool enableLogging = true;    // enable/disable of logging message generation events to file

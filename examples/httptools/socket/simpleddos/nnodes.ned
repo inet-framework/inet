@@ -46,7 +46,7 @@ import inet.node.inet.StandardHost;
 network HttpNnodes
 {
     parameters:
-        double numclients @prompt("Number of clients") = default(10);
+        int numclients @prompt("Number of clients") = default(10);
         @display("bgb=474,374");
     types:
         channel ethernetline extends ned.DatarateChannel

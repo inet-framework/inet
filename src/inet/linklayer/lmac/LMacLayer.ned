@@ -33,7 +33,7 @@ simple LMacLayer extends MACProtocolBase like IMACProtocol
         int headerLength @unit(B) = default(10B);
         int mtu @unit("B") = default(0B);
         // length of MAC header
-        double queueLength = default(10);
+        int queueLength = default(10);
         // default channel
         double defaultChannel = default(0);
         // bit rate

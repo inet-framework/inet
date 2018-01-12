@@ -44,7 +44,7 @@ import inet.node.httptools.DirectHost;
 network HttpDirectFlash
 {
     parameters:
-        double num_browsers @prompt("Number of browsers") = default(2);
+        int num_browsers @prompt("Number of browsers") = default(2);
         @display("bgb=754,559");
     submodules:
         controller: HttpController {

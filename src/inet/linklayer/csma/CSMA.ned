@@ -70,7 +70,7 @@ simple CSMA extends MACProtocolBase like IMACProtocol
         // Complete MAC ack message length (in bits)
         // (! headerLength is not added to this),
         // only used when usage of MAC acks is enabled.
-        double ackLength @unit(bit) = default(40 bit);
+        int ackLength @unit(bit) = default(40 bit);
         // Simple interframe space (12 symbols). Time to wait between receiving a frame and acknowledging it.
         // Should be bigger than the maximum time for switching between Tx and Rx at the receiver.
         // Only used when usage of MAC acks is enabled.

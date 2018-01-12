@@ -136,9 +136,9 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     double groupMembershipInterval;    // RFC 2236: Section 8.4
     double otherQuerierPresentInterval;    // RFC 2236: Section 8.5
     double startupQueryInterval;    // RFC 2236: Section 8.6
-    double startupQueryCount;    // RFC 2236: Section 8.7
+    int startupQueryCount;    // RFC 2236: Section 8.7
     double lastMemberQueryInterval;    // RFC 2236: Section 8.8
-    double lastMemberQueryCount;    // RFC 2236: Section 8.9
+    int lastMemberQueryCount;    // RFC 2236: Section 8.9
     double unsolicitedReportInterval;    // RFC 2236: Section 8.10
     //double version1RouterPresentInterval;  // RFC 2236: Section 8.11
 

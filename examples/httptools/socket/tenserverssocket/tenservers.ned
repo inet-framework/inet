@@ -53,7 +53,7 @@ channel ethernetline extends ned.DatarateChannel
 network Http10Servers
 {
     parameters:
-        double numclients @prompt("Number of clients") = default(10);
+        int numclients @prompt("Number of clients") = default(10);
         @display("bgb=939,624");
     submodules:
         configurator: IPv4NetworkConfigurator {

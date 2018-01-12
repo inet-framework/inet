@@ -263,7 +263,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
 
     /** @brief initial contention window size
      * Only used for linear and constant backoff method.*/
-    double initialCW;
+    int initialCW;
 
     /** @brief The power (in mW) to transmit with.*/
     double txPower;

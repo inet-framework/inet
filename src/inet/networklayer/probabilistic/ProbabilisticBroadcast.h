@@ -191,7 +191,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      * @brief Maximal back-off before first broadcast attempt [seconds].
      * Read from omnetpp.ini
      **/
-    int maxFirstBcastBackoff;
+    simtime_t maxFirstBcastBackoff;
 
     /**
      * @brief How long the message should be kept in queue after its died.

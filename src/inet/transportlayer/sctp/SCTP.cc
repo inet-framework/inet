@@ -305,20 +305,20 @@ void SCTP::handleMessage(cMessage *msg)
 SocketOptions* SCTP::collectSocketOptions()
 {
     SocketOptions* sockOptions = new SocketOptions();
-    sockOptions->maxInitRetrans = (int) par("maxInitRetrans");
+    sockOptions->maxInitRetrans = par("maxInitRetrans");
     sockOptions->maxInitRetransTimeout = SCTP_TIMEOUT_INIT_REXMIT_MAX;
-    sockOptions->rtoInitial = (int) par("rtoInitial");
-    sockOptions->rtoMin = (int) par("rtoMin");
-    sockOptions->rtoMax = (int) par("rtoMax");
-    sockOptions->sackFrequency = (int) par("sackFrequency");
-    sockOptions->sackPeriod = (double) par("sackPeriod");
-    sockOptions->maxBurst = (int) par("maxBurst");
-    sockOptions->fragPoint = (int) par("fragPoint");
+    sockOptions->rtoInitial = par("rtoInitial");
+    sockOptions->rtoMin = par("rtoMin");
+    sockOptions->rtoMax = par("rtoMax");
+    sockOptions->sackFrequency = par("sackFrequency");
+    sockOptions->sackPeriod = par("sackPeriod");
+    sockOptions->maxBurst = par("maxBurst");
+    sockOptions->fragPoint = par("fragPoint");
     sockOptions->nagle = ((bool) par("nagleEnabled")) ? 1 : 0;
     sockOptions->enableHeartbeats = (bool) par("enableHeartbeats");
-    sockOptions->pathMaxRetrans = (int) par("pathMaxRetrans");
-    sockOptions->hbInterval = (double) par("hbInterval");
-    sockOptions->assocMaxRtx = (int) par("assocMaxRetrans");
+    sockOptions->pathMaxRetrans = par("pathMaxRetrans");
+    sockOptions->hbInterval = par("hbInterval");
+    sockOptions->assocMaxRtx = par("assocMaxRetrans");
     return sockOptions;
 }
 
@@ -990,7 +990,7 @@ void SCTP::finish()
             recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
         }
 
-        recordScalar("RTXMethod", (double)par("RTXMethod"));
+        recordScalar("RTXMethod", (long)par("RTXMethod"));
     }
 }
 

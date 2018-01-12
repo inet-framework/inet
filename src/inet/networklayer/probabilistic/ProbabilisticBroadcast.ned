@@ -42,7 +42,7 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
         // probability of broadcast for each attempt
         double beta = default(0.8);
         // maximal number of broadcast attempts for each packet.
-        double maxNbBcast = default(1);
+        int maxNbBcast = default(1);
         // maximal back-off before first broadcast attempt [seconds].
         // if don't want to use this parameter, simply set it
         // to a value that is greater than bcperiod.

@@ -37,7 +37,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     const char *fileName = nullptr;    // the name of the file to be transmitted
     const char *commonName = nullptr;    // the CNAME of this participant.
     const char *profileName = nullptr;    // the name of the used profile
-    int bandwidth = 0;    // the reserved bandwidth for rtp/rtcp in bytes/second
+    double bandwidth = 0;    // the reserved bandwidth for rtp/rtcp in bytes/second
     int port = -1;    // one of the udp port used
     int payloadType = -1;    // the payload type of the data in the file
     simtime_t sessionEnterDelay;    // the delay after the application enters the session

@@ -72,6 +72,6 @@ network MixedNetwork
             rRouter[i].ethg++ <--> C <--> rRouter[(i+1)%numRipRouters].ethg++ if numRipRouters>1;
             rRouter[i].ethg++ <--> C <--> rRouter[(i+2)%numRipRouters].ethg++ if numRipRouters>2;
         }
-        rHost.ethg++ <--> C <--> rRouter[numRipRouters/2].ethg++;
+        rHost.ethg++ <--> C <--> rRouter[int(numRipRouters/2)].ethg++;
 }
 

@@ -38,8 +38,8 @@ import inet.applications.contract.ITCPApp;
 // FTP:
 // <pre>
 //    numRequestsPerSession = exponential(3)
-//    requestLength = truncnormal(20,5)
-//    replyLength = exponential(1000000)
+//    requestLength = 1B*int(truncnormal(20,5))
+//    replyLength = 1B*int(exponential(1000000))
 // </pre>
 //
 // Note that this module doesn't open separate TCP connections for commands
@@ -49,8 +49,8 @@ import inet.applications.contract.ITCPApp;
 // <pre>
 //    numRequestsPerSession = 1 <i>(HTTP 1.0)</i>
 //    numRequestsPerSession = exponential(5) <i>(HTTP 1.1, with keepalive)</i>
-//    requestLength = truncnormal(350,20)
-//    replyLength = exponential(2000)
+//    requestLength = 1B*int(truncnormal(350,20))
+//    replyLength = 1B*int(exponential(2000))
 // </pre>
 //
 // Note that since most web pages contain images and may contain frames,

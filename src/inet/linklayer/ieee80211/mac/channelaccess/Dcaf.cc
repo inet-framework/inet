@@ -44,7 +44,7 @@ void Dcaf::calculateTimingParameters()
 {
     slotTime = modeSet->getSlotTime();
     sifs = modeSet->getSifsTime();
-    int difs = par("difsTime");
+    double difs = par("difsTime");
     // The PIFS and DIFS are derived by the Equation (9-2) and Equation (9-3), as illustrated in Figure 9-14.
     // PIFS = aSIFSTime + aSlotTime (9-2)
     // DIFS = aSIFSTime + 2 × aSlotTime (9-3)

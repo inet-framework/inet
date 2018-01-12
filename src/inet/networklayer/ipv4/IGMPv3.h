@@ -180,9 +180,9 @@ class INET_API IGMPv3 : public cSimpleModule, protected cListener
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
     double startupQueryInterval;
-    double startupQueryCount;
+    int startupQueryCount;
     double lastMemberQueryInterval;
-    double lastMemberQueryCount;
+    int lastMemberQueryCount;
     double lastMemberQueryTime;
     double unsolicitedReportInterval;
 

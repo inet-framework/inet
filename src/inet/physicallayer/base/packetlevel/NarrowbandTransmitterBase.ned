@@ -26,7 +26,7 @@ module NarrowbandTransmitterBase like ITransmitter
 {
     parameters:
         double preambleDuration @unit(s);  // preamble duration
-        double headerBitLength @unit(b);   // number of header bits added to the length of the MAC frame
+        int headerBitLength @unit(b);   // number of header bits added to the length of the MAC frame
         double bitrate @unit(bps);         // the bitrate of the transmitter is used to compute the duration of the transmission
         double power @unit(W);             // transmission power
         double carrierFrequency @unit(Hz); // center frequency of the band where the transmitter transmits on the medium

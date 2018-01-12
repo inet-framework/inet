@@ -42,7 +42,7 @@ simple HttpServerEvilA like ITCPApp
         string logFile;         // Name of server log file. Events are appended, allowing sharing of file for multiple servers.
         string siteDefinition;  // The site script file. Blank to disable.
         xml config;             // The XML configuration file for random sites
-        int activationTime;     // The initial activation delay. Zero to disable.
+        double activationTime;     // The initial activation delay. Zero to disable.
         int minBadRequests;     // The lower bound of bad requests.
         int maxBadRequests;     // The upper bound of bad requests
     gates:
