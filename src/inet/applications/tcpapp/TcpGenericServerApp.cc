@@ -100,9 +100,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         // pending to be sent back in this connection
         int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
-        auto request = new Request("close");
-        request->setName("close");
-        request->setKind(TCP_C_CLOSE);
+        auto request = new Request("close", TCP_C_CLOSE);
         request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
         sendOrSchedule(request, delay + maxMsgDelay);
     }
@@ -142,8 +140,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         delete msg;
 
         if (doClose) {
-            auto request = new Request("close");
-            request->setKind(TCP_C_CLOSE);
+            auto request = new Request("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
             request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
             request->setControlInfo(cmd);
