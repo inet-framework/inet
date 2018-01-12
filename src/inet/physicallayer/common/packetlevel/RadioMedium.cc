@@ -514,9 +514,8 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
 {
     Enter_Method_Silent();
     take(packet);
-    // TODO: we should do this but it breaks 802.11
-    // TODO: packet->clearTags();
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
+    packet->clearTags();
     auto signal = new Signal(transmission);
     signal->setName(packet->getName());
     signal->setDuration(transmission->getDuration());
