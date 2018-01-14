@@ -1,9 +1,10 @@
+| CI Status | master | integration |
+|-----------|:------:|:-----------:|
+| Build and fingerprint tests | [![Travis CI][travis-master]][1] | [![Travis CI][travis-integration]][2] |
+| Feature enablement tests    | [![CircleCI][circle-master]][3]  | [![CircleCI][circle-integration]][4]  |
+
 INET Framework for OMNEST/OMNeT++
 =================================
-
-[![Build Status of master](
-    https://travis-ci.org/inet-framework/inet.svg?branch=master)](
-    https://travis-ci.org/inet-framework/inet)
 
 The [INET framework](https://inet.omnetpp.org) is an open-source communication networks
 simulation package, written for the OMNEST/OMNeT++ simulation system. The INET
@@ -53,3 +54,13 @@ or winpcap (on windows from www.winpcap.org) and enable the "Emulation" feature
 either in the IDE or using the inet_featuretool then regenerate the INET makefile
 using 'make makefiles'.
 
+
+[travis-master]: https://travis-ci.org/inet-framework/inet.svg?branch=master
+[travis-integration]: https://travis-ci.org/inet-framework/inet.svg?branch=integration
+[circle-master]: https://circleci.com/gh/inet-framework/inet/tree/master.svg?style=svg
+[circle-integration]: https://circleci.com/gh/inet-framework/inet/tree/integration.svg?style=svg
+
+[1]: https://travis-ci.org/inet-framework/inet/branches
+[2]: https://travis-ci.org/inet-framework/inet/branches
+[3]: https://circleci.com/gh/inet-framework/workflows/inet/tree/master
+[4]: https://circleci.com/gh/inet-framework/workflows/inet/tree/integration
