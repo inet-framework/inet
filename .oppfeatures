@@ -1152,6 +1152,18 @@
         linkerFlags = ""
         />
     <feature
+        id="generalshowcases"
+        name="General showcases"
+        description = "Simple showcases demonstrating general features."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "showcase general"
+        nedPackages = "inet.showcases.general"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="visualizershowcases"
         name="Visualization showcases"
         description = "Simple showcases demonstrating features and concepts related to visualizing state and behavior of communication networks."
