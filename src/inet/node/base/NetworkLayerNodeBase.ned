@@ -19,9 +19,6 @@ package inet.node.base;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.generic.GenericNetworkLayer;
-import inet.networklayer.ipv4.Ipv4NetworkLayer;
-import inet.networklayer.ipv6.Ipv6NetworkLayer;
 
 module NetworkLayerNodeBase extends LinkLayerNodeBase
 {
@@ -30,6 +27,8 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         bool hasIpv6 = default(false);
         bool hasGn = default(false);    //FIXME redundant/unused? !!! see also networkLayerType, 
         string networkLayerType = default("");
+        string ipv4NetworkLayerType = default("Ipv4NetworkLayer");
+        string ipv6NetworkLayerType = default("Ipv6NetworkLayer");
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
@@ -38,11 +37,11 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         @figure[networkLayer.title](type=text; pos=910,420; anchor=ne; text="network layer");
 
     submodules:
-        ipv4: Ipv4NetworkLayer if hasIpv4 {
+        ipv4: <ipv4NetworkLayerType> like INetworkLayer if hasIpv4 {
             parameters:
                 @display("p=400,500;q=queue");
         }
-        ipv6: Ipv6NetworkLayer if hasIpv6 {
+        ipv6: <ipv6NetworkLayerType> like INetworkLayer if hasIpv6 {
             parameters:
                 @display("p=500,500;q=queue");
         }
