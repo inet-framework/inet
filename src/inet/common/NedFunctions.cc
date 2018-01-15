@@ -203,6 +203,55 @@ Define_NED_Function2(nedf_nanToZero,
         "Returns the argument if it is not NaN, otherwise returns 0."
         );
 
+#if OMNETPP_VERSION <= 0x0503 && OMNETPP_BUILDNUM < 1014
+static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[], int argc)
+{
+    switch (argv[0].getType()) {
+        case cNedValue::BOOL:
+            return (intpar_t)( (bool)argv[0] ? 1 : 0 );
+        case cNedValue::DOUBLE:
+            argv[0].setPreservingUnit(floor(argv[0].doubleValue()));
+            return argv[0];
+        case cNedValue::STRING:
+            throw cRuntimeError("intWithUnit(): Cannot convert string to int");
+        case cNedValue::XML:
+            throw cRuntimeError("intWithUnit(): Cannot convert xml to int");
+        default:
+            throw cRuntimeError("Internal error: Invalid cNedValue type");
+    }
+}
+
+Define_NED_Function2(nedf_intWithUnit,
+    "quantity intWithUnit(any x)",
+    "conversion",
+    "Converts x to an integer (C++ long), and returns the result. A boolean argument becomes 0 or 1; a double is converted using floor(); a string or an XML argument causes an error.");
+
+#else
+static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[], int argc)
+{
+    switch (argv[0].getType()) {
+        case cNedValue::BOOL:
+            return (intpar_t)( (bool)argv[0] ? 1 : 0 );
+        case cNedValue::INT:
+            return argv[0];
+        case cNedValue::DOUBLE:
+            return cNedValue(checked_int_cast<intpar_t>(floor(argv[0].doubleValue())), argv[0].getUnit());
+        case cNedValue::STRING:
+            throw cRuntimeError("intWithUnit(): Cannot convert string to int");
+        case cNedValue::XML:
+            throw cRuntimeError("intWithUnit(): Cannot convert xml to int");
+        default:
+            throw cRuntimeError("Internal error: Invalid cNedValue type");
+    }
+}
+
+Define_NED_Function2(nedf_intWithUnit,
+    "intquantity intWithUnit(any x)",
+    "conversion",
+    "Converts x to an integer (C++ long), and returns the result. A boolean argument becomes 0 or 1; a double is converted using floor(); a string or an XML argument causes an error.");
+
+#endif
+
 } // namespace utils
 
 } // namespace inet

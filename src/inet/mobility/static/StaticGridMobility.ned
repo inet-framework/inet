@@ -31,11 +31,11 @@ import inet.mobility.base.MobilityBase;
 simple StaticGridMobility extends MobilityBase
 {
     parameters:
-        int marginX @unit(m) = default(0m);
-        int marginY @unit(m) = default(0m);
+        double marginX @unit(m) = default(0m);
+        double marginY @unit(m) = default(0m);
         int numHosts;
-        int columns = default(ceil(sqrt(numHosts * (this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / (this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY))));
-        int rows = default((numHosts + columns - 1) / columns);
+        int columns = default(int(ceil(sqrt(numHosts * (this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / (this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY)))));
+        int rows = default(int((numHosts + columns - 1) / columns));
         double initialZ @unit(m) = default(0m);
         double separationX @unit(m) = default((this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / columns);
         double separationY @unit(m) = default((this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY) / rows);

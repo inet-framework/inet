@@ -286,6 +286,25 @@
 
 ====== inet-3.x ======
 
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-09-26  Zoltan Bojthe
+
+	Fix TCP/IP Checksum calculation with odd length
+
+2017-10-12  TÖRÖK Attila
+
+	Include INETDefs.h in stlutils.h.
+
+	The ASSERT macro is defined in the former and used in the latter. So far
+	it compiled only because the precompiled header was included by a
+	command-line argument. This fixes compilation without precompiled
+	headers.
+
+2017-10-02  Levente Mészáros
+
+	Added result filter for minimum reception signal power.
+
 2017-10-02  ------ inet-3.6.2 released ------
 
 2017-07-12  Rudolf Hornig

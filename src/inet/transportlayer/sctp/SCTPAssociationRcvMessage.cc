@@ -845,7 +845,7 @@ bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, 
 {
     bool trans = false;
     SCTPCookie *cookie = check_and_cast<SCTPCookie *>(cookieEcho->getStateCookie());
-    if (cookie->getCreationTime() + (int32)sctpMain->par("validCookieLifetime") < simTime()) {
+    if (cookie->getCreationTime() + sctpMain->par("validCookieLifetime") < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";
         sendAbort();
         delete cookie;

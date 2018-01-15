@@ -37,7 +37,7 @@ module DirectHost
 {
     parameters:
         @networkNode;
-        double numApps = default(0);     // The number of apps in the array
+        int numApps = default(0);     // The number of apps in the array
     submodules:
         app[numApps]: <> like IHttpDirectApp {
             parameters:
