@@ -546,6 +546,21 @@
         linkerFlags = ""
         />
     <feature
+        id="DSDV"
+        name="DSDV"
+        description = "Destination-Sequenced Distance Vector routing"
+        initiallyEnabled = "true"
+        requires = "IPv4 Ieee80211"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.dsdv
+                       inet.node.dsdv
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_DSDV"
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
