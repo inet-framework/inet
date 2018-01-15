@@ -784,6 +784,21 @@
         linkerFlags = ""
         />
     <feature
+        id="shortcut"
+        name="Shortcut"
+        description = "Implements simple shortcut to peer protocols that completely bypass the lower layers."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.shortcut
+                       inet.physicallayer.shortcut
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_SHORTCUT"
+        linkerFlags = ""
+        />
+    <feature
         id="wireless_examples"
         name="Wireless examples"
         description = "Provides various wireless examples"
