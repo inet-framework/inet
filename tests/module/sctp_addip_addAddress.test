@@ -73,5 +73,5 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
-scalar multihomed.sctp_server.sctp 	"Number of Heartbeat ACKs Sent 3:10.2.1.1" 	[1-9][0-9]*
+scalar multihomed.sctp_server.sctp "Number of Heartbeat ACKs Sent 3:10.2.1.1" [1-9][0-9]*
 %#--------------------------------------------------------------------------------------------------------------

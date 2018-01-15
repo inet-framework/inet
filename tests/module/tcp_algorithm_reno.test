@@ -66,25 +66,25 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 %#################################################################################################################
 
 %contains: results/General-0.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-1.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-2.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-3.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-4.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-5.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %contains: results/General-6.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

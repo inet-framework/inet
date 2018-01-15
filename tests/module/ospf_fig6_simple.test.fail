@@ -273,29 +273,29 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[0] 	echoedPk:count 	100
+scalar Fig6.N12.host[0].udpApp[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] 	sentPk:count 	100
+scalar Fig6.N12.host[0].udpApp[1] sentPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] 	rcvdPk:count 	100
+scalar Fig6.N12.host[0].udpApp[1] rcvdPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[0] 	echoedPk:count 	100
+scalar Fig6.N15.host[0].udpApp[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] 	sentPk:count 	100
+scalar Fig6.N15.host[0].udpApp[1] sentPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] 	rcvdPk:count 	100
+scalar Fig6.N15.host[0].udpApp[1] rcvdPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[0] 	echoedPk:count 	100
+scalar Fig6.Area3_N10.host[0].udpApp[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] 	sentPk:count 	100
+scalar Fig6.Area3_N10.host[0].udpApp[1] sentPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] 	rcvdPk:count 	100
+scalar Fig6.Area3_N10.host[0].udpApp[1] rcvdPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[0] 	echoedPk:count 	100
+scalar Fig6.Area3_H1.udpApp[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] 	sentPk:count 	100
+scalar Fig6.Area3_H1.udpApp[1] sentPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] 	rcvdPk:count 	100
+scalar Fig6.Area3_H1.udpApp[1] rcvdPk:count 100
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

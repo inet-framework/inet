@@ -73,10 +73,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #**.vector-recording = false
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
-scalar SCTPFeatureTest.sctp_client.sctp[ \t]*"Number of StreamReset requests sent"[ \t]*2
-scalar SCTPFeatureTest.sctp_client.sctp[ \t]*"Number of StreamReset requests performed"[ \t]*1
-%contains-regex: results/General-0.sca
-scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of StreamReset requests sent"[ \t]*0
-scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of StreamReset requests performed"[ \t]*1
+%contains: results/General-0.sca
+scalar SCTPFeatureTest.sctp_client.sctp "Number of StreamReset requests sent" 2
+scalar SCTPFeatureTest.sctp_client.sctp "Number of StreamReset requests performed 1
+%contains: results/General-0.sca
+scalar SCTPFeatureTest.sctp_server.sctp "Number of StreamReset requests sent" 0
+scalar SCTPFeatureTest.sctp_server.sctp "Number of StreamReset requests performed" 1
 %#--------------------------------------------------------------------------------------------------------------
