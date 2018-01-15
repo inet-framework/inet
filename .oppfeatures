@@ -1060,7 +1060,7 @@
         />
     <feature
         id="BMAC"
-        name="BMAC"
+        name="B-MAC"
         description = "B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
         initiallyEnabled = "true"
         requires = ""
@@ -1074,7 +1074,7 @@
         />
     <feature
         id="LMAC"
-        name="LMAC"
+        name="L-MAC"
         description = "L-MAC, a lightweight MAC protocol for wireless sensor networks"
         initiallyEnabled = "true"
         requires = ""
@@ -1088,7 +1088,7 @@
         />
     <feature
         id="XMAC"
-        name="XMAC"
+        name="X-MAC"
         description = "X-MAC, a MAC protocol for wireless sensor networks"
         initiallyEnabled = "true"
         requires = ""
