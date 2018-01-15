@@ -1087,6 +1087,20 @@
         linkerFlags = ""
         />
     <feature
+        id="XMAC"
+        name="XMAC"
+        description = "X-MAC, a MAC protocol for wireless sensor networks"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.xmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_XMAC"
+        linkerFlags = ""
+        />
+    <feature
         id="CsmaCaMac"
         name="CSMA/CA"
         description = "A CSMA/CA (Carrier Sense Multiple Access / Collision Avoidance) MAC protocol, similar to 802.11b"
