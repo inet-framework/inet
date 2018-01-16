@@ -38,9 +38,11 @@ template <class T> class IntrusivePtr
     T *p;
 
   public:
-    INET_ALWAYS_INLINE constexpr IntrusivePtr() noexcept : p(0) { }
+    INET_ALWAYS_INLINE constexpr IntrusivePtr() noexcept : p(nullptr) { }
 
-    INET_ALWAYS_INLINE IntrusivePtr(T *p) : p(p) {
+    INET_ALWAYS_INLINE constexpr IntrusivePtr(std::nullptr_t ) : p(nullptr) { }
+
+    INET_ALWAYS_INLINE explicit IntrusivePtr(T *p) : p(p) {
         if (p != 0) intrusivePtrCounterIncrement(p);
     }
 
@@ -211,19 +213,19 @@ INET_ALWAYS_INLINE T *get_pointer(IntrusivePtr<T> const & p) noexcept
 template <class T, class U>
 INET_ALWAYS_INLINE IntrusivePtr<T> static_pointer_cast(IntrusivePtr<U> const & p)
 {
-    return static_cast<T *>(p.get());
+    return IntrusivePtr<T>(static_cast<T *>(p.get()));
 }
 
 template <class T, class U>
 INET_ALWAYS_INLINE IntrusivePtr<T> const_pointer_cast(IntrusivePtr<U> const & p)
 {
-    return const_cast<T *>(p.get());
+    return IntrusivePtr<T>(const_cast<T *>(p.get()));
 }
 
 template <class T, class U>
 INET_ALWAYS_INLINE IntrusivePtr<T> dynamic_pointer_cast(IntrusivePtr<U> const & p)
 {
-    return dynamic_cast<T *>(p.get());
+    return IntrusivePtr<T>(dynamic_cast<T *>(p.get()));
 }
 
 template <class Y>
