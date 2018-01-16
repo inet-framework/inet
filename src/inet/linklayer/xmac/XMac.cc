@@ -584,9 +584,8 @@ void XMac::handleLowerPacket(Packet *msg)
 void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    XMacHeader* pkt = check_and_cast<XMacHeader *>(macQueue.front()->dup());
-    lastDataPktDestAddr = pkt->getDestAddr();
-    auto packet = new Packet(nullptr, pkt);
+    auto packet = macQueue.front()->dup();
+    lastDataPktDestAddr = packet->peekHeader<XMacHeader>()->getDestAddr();
     packet->setKind(XMAC_DATA);
     attachSignal(packet, simTime());
     sendDown(packet);
