@@ -508,6 +508,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,                   100s,     fd03-9fde/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,     9909-1881/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,     9909-1881/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithIdealRadio -r 0,                   100s,     4263-8316/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithAPSKScalarRadio -r 0,              100s,     f29f-93ca/tplx, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithAPSKDimensionalRadio -r 0,         100s,     f29f-93ca/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,     0756-51cb/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0, 100s,     5c04-71d4/tplx, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     2647-10a4/tplx, PASS, wireless
