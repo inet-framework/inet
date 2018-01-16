@@ -16,9 +16,12 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/linklayer/Ieee80211CanvasVisualizer.h"
+
+#ifdef WITH_IEEE80211
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#endif
 
 namespace inet {
 
@@ -50,6 +53,7 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
 
 void Ieee80211CanvasVisualizer::refreshDisplay() const
 {
+#ifdef WITH_IEEE80211
     auto simulation = getSimulation();
     for (auto& entry : ieee80211Visualizations) {
         auto networkNode = simulation->getModule(entry.second->networkNodeId);
@@ -69,6 +73,7 @@ void Ieee80211CanvasVisualizer::refreshDisplay() const
             }
         }
     }
+#endif
 }
 
 Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
