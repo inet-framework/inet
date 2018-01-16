@@ -422,7 +422,6 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
                 const L3Address& witnessAddress = neighborAddresse;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
-                ;
                 double neighborWitnessDistance = (witnessPosition - neighborPosition).length();
                 if (*it == neighborAddresse)
                     continue;
@@ -437,7 +436,6 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
                 const L3Address& witnessAddress = neighborAddresse;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
-                ;
                 if (*it == neighborAddresse)
                     continue;
                 else if (witnessDistance < neighborDistance)
