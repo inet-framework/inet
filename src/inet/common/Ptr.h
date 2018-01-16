@@ -25,10 +25,13 @@
 #ifndef INET_PTR_IMPLEMENTATION
 #define INET_PTR_IMPLEMENTATION INET_INTRUSIVE_PTR
 #endif
+
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
 #include <memory>
 #elif INET_PTR_IMPLEMENTATION == INET_INTRUSIVE_PTR
 #include "inet/common/IntrusivePtr.h"
+#else
+#error "Unknown shared pointer implementation selected."
 #endif
 
 namespace inet {
