@@ -128,16 +128,16 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAna
     if (!isCompliant) {
         unsigned int headerCodeWordSize = mode->getSignalMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize();
         ASSERT(headerBitLength % headerCodeWordSize == 0);
-        unsigned int numberOfSignalAPSKSymbols = headerBitLength / headerCodeWordSize;
-        unsigned int numberOfSignalOFDMSymbols = numberOfSignalAPSKSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+        unsigned int numberOfSignalApskSymbols = headerBitLength / headerCodeWordSize;
+        unsigned int numberOfSignalOFDMSymbols = numberOfSignalApskSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
         headerDuration = numberOfSignalOFDMSymbols * mode->getSymbolInterval();
     }
     else
         headerDuration = mode->getSignalMode()->getDuration();
     unsigned int dataCodeWordSize = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize();
     ASSERT(dataBitLength % dataCodeWordSize == 0);
-    unsigned int numberOfDataAPSKSymbols = dataBitLength / dataCodeWordSize;
-    unsigned int numberOfDataOFDMSymbols = numberOfDataAPSKSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+    unsigned int numberOfDataApskSymbols = dataBitLength / dataCodeWordSize;
+    unsigned int numberOfDataOFDMSymbols = numberOfDataApskSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
     simtime_t duration = preambleDuration + headerDuration + dataDuration;
     return new ScalarTransmissionSignalAnalogModel(duration, carrierFrequency, mode->getDataMode()->getBandwidth(), power);

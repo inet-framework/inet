@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-void Ieee80211OfdmSymbol::pushAPSKSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex)
+void Ieee80211OfdmSymbol::pushApskSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex)
 {
     if (subcarrierIndex >= 53)
         throw cRuntimeError("Out of range with subcarrierIndex = %d", subcarrierIndex);

@@ -77,10 +77,10 @@ int Ieee80211OfdmModulator::getSubcarrierIndex(int ofdmSymbolIndex) const
 
 void Ieee80211OfdmModulator::insertPilotSubcarriers(Ieee80211OfdmSymbol *ofdmSymbol, int symbolID) const
 {
-    ofdmSymbol->pushAPSKSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 5);
-    ofdmSymbol->pushAPSKSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 19);
-    ofdmSymbol->pushAPSKSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 33);
-    ofdmSymbol->pushAPSKSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &negativePilotSubcarrier : &positivePilotSubcarrier, 47);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 5);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 19);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &positivePilotSubcarrier : &negativePilotSubcarrier, 33);
+    ofdmSymbol->pushApskSymbol(pilotSubcarrierPolarityVector[symbolID % 127] == 1 ? &negativePilotSubcarrier : &positivePilotSubcarrier, 47);
 }
 
 const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmissionBitModel *bitModel) const
@@ -110,7 +110,7 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
         // The 0 subcarrier, associated with center frequency, is omitted and filled with the value 0.
         for (unsigned int j = 0; j < NUMBER_OF_OFDM_DATA_SUBCARRIERS; j++) {
             int subcarrierIndex = getSubcarrierIndex(j);
-            ofdmSymbol->pushAPSKSymbol(apskSymbols.at(j + i), subcarrierIndex);
+            ofdmSymbol->pushApskSymbol(apskSymbols.at(j + i), subcarrierIndex);
         }
         insertPilotSubcarriers(ofdmSymbol, i / NUMBER_OF_OFDM_DATA_SUBCARRIERS + pilotSubcarrierPolarityVectorOffset);
         EV_DEBUG << "Modulated OFDM symbol: " << *ofdmSymbol << endl;

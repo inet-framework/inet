@@ -38,7 +38,7 @@ ApskLayeredErrorModel::ApskLayeredErrorModel()
 
 std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "LayeredAPSKErrorModel";
+    return stream << "LayeredApskErrorModel";
 }
 
 const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
