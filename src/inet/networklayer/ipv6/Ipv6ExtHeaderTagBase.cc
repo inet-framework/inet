@@ -17,18 +17,14 @@
 
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTagBase.h"
 
-#ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#endif // ifdef WITH_IPv6
 
 namespace inet {
 
 void Ipv6ExtHeaderTagBase::copy(const Ipv6ExtHeaderTagBase& other)
 {
-#ifdef WITH_IPv6
     for (const auto & elem : other.extensionHeaders)
         extensionHeaders.push_back((elem)->dup());
-#endif // ifdef WITH_IPv6
 }
 
 Ipv6ExtHeaderTagBase& Ipv6ExtHeaderTagBase::operator=(const Ipv6ExtHeaderTagBase& other)
@@ -43,13 +39,11 @@ Ipv6ExtHeaderTagBase& Ipv6ExtHeaderTagBase::operator=(const Ipv6ExtHeaderTagBase
 
 void Ipv6ExtHeaderTagBase::clean()
 {
-#ifdef WITH_IPv6
     while (!extensionHeaders.empty()) {
         Ipv6ExtensionHeader *eh = extensionHeaders.back();
         extensionHeaders.pop_back();
         delete eh;
     }
-#endif // ifdef WITH_IPv6
 }
 
 Ipv6ExtHeaderTagBase::~Ipv6ExtHeaderTagBase()
@@ -87,7 +81,6 @@ void Ipv6ExtHeaderTagBase::setExtensionHeader(size_t k, Ipv6ExtensionHeader *ext
 
 void Ipv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
 {
-#ifdef WITH_IPv6
     ASSERT(eh);
     if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size()) {
         extensionHeaders.push_back(eh);
@@ -96,9 +89,6 @@ void Ipv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos
 
     // insert at position atPos, shift up the rest of the array
     extensionHeaders.insert(extensionHeaders.begin() + atPos, eh);
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without Ipv6 support");
-#endif // ifdef WITH_IPv6
 }
 
 Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
@@ -106,14 +96,10 @@ Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
     if (extensionHeaders.empty())
         return nullptr;
 
-#ifdef WITH_IPv6
     auto first = extensionHeaders.begin();
     Ipv6ExtensionHeader *ret = *first;
     extensionHeaders.erase(first);
     return ret;
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without Ipv6 support");
-#endif // ifdef WITH_IPv6
 }
 
 } // namespace inet

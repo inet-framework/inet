@@ -24,11 +24,6 @@ namespace inet;
 
 cplusplus {{
 std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh);
-
-#ifndef WITH_IPv6
-class Ipv6ExtensionHeader {}
-inline std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader* eh) {return os;}
-#endif
 }}
 
 class Ipv6ExtHeaderTagBase extends cObject
