@@ -789,8 +789,8 @@ void Ipv6::encapsulate(Packet *transportPacket)
         Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         ipv6Header->addExtensionHeader(extHeader);
         // EV << "Move extension header to datagram." << endl;
-        delete extHeadersTag;
     }
+    delete extHeadersTag;
 
     ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
     transportPacket->removePoppedHeaders();
