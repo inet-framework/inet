@@ -87,7 +87,7 @@ measurements less repeatable.
 
 10. Configure OMNeT++ Features
 
-Disable Qtenv, Tkenv, Osg, OsgEarth, and other unnecessary optional OMNeT++
+Disable Qtenv, Tkenv, Osg, OsgEarth, Parsim and other unnecessary optional OMNeT++
 features. Some of these features link with several additional libraries that
 may affect performance. For example, linking with pthread library might decrease
 the performance of std::shared_ptr by using locking to provide atomic operations
