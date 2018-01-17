@@ -965,7 +965,6 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 return false;
             }
             else {
-                delete rh;
                 EV_INFO << "Ignoring unknown routing header" << endl;
             }
         }

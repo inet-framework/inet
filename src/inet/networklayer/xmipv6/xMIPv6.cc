@@ -30,6 +30,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -186,17 +187,13 @@ void xMIPv6::handleMessage(cMessage *msg)
         // CB on 29.08.07
         // normal datagram with an extension header
         else if (auto packet = dynamic_cast<Packet *>(msg)) {
-            packet->removePoppedHeaders();
-            auto ipv6Header = packet->removeHeader<Ipv6Header>();
             Ipv6ExtensionHeader *eh = (Ipv6ExtensionHeader *)packet->getContextPointer();
-
             if (auto rh = dynamic_cast<Ipv6RoutingHeader *>(eh))
-                processType2RH(packet, (Ipv6Header *)ipv6Header.get(), rh);
+                processType2RH(packet, rh);
             else if (auto hao = dynamic_cast<HomeAddressOption *>(eh))
-                processHoAOpt(packet, (Ipv6Header *)ipv6Header.get(), hao);
+                processHoAOpt(packet, hao);
             else
                 throw cRuntimeError("Unknown Extension Header.");
-            packet->insertHeader(ipv6Header);
         }
         else
             throw cRuntimeError("Unknown message type received.");
@@ -2025,13 +2022,14 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
     //createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingHeader *rh)
+void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 {
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
     //EV << "Processing RH2..." << endl;
 
-    if (!validateType2RH(*ipv6Header, *rh)) {
-        delete rh;
-        delete ipv6Header;
+    if (!validateType2RH(*ipv6Header.get(), *rh)) {
+        //TODO dropPacketSignal
+        delete packet;
         return;
     }
 
@@ -2052,7 +2050,8 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
     /*The segments left field in the routing header is 1 on the wire.*/
     if (rh->getSegmentsLeft() != 1) {
         EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
-        delete ipv6Header;
+        //TODO dropPacketSignal
+        delete packet;
         return;
     }
 
@@ -2067,7 +2066,11 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
            destination field with the Home Address field in the routing header,
            decrements segments left by one from the value it had on the wire,
            and resubmits the packet to IP for processing the next header.*/
-        ipv6Header->setDestAddress(HoA);
+        ipv6Header = nullptr;
+        packet->removePoppedHeaders();
+        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        newIpv6Header->setDestAddress(HoA);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validRH2 = true;
     }
     else {
@@ -2077,17 +2080,19 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
         EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
     }
 
-    delete rh;
+    packet->setContextPointer(nullptr);
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
         send(packet, "toIPv6");
     }
-    else
+    else {
+        //TODO dropPacketSignal
         delete packet;
+    }
 }
 
-bool xMIPv6::validateType2RH(Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
+bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
 {
     // cf. RFC 3775 - 6.4
 
@@ -2116,8 +2121,10 @@ bool xMIPv6::validateType2RH(Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh
     return true;
 }
 
-void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOption *hoaOpt)
+void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 {
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
+
     // datagram from MN to CN
     bool validHoAOpt = false;
     const Ipv6Address& HoA = hoaOpt->getHomeAddress();
@@ -2133,7 +2140,11 @@ void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOp
     ASSERT(bc != nullptr);
 
     if (bc->isInBindingCache(HoA, CoA)) {
-        ipv6Header->setSrcAddress(HoA);
+        ipv6Header = nullptr;
+        packet->removePoppedHeaders();
+        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        newIpv6Header->setSrcAddress(HoA);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validHoAOpt = true;
     }
     else {
@@ -2149,6 +2160,7 @@ void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOp
         createAndSendBEMessage(CoA, status);
     }
 
+    packet->setContextPointer(nullptr);
     delete hoaOpt;
 
     if (validHoAOpt) {
