@@ -115,14 +115,14 @@ void GenericNetworkProtocol::handleCommand(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;
@@ -154,7 +154,7 @@ void GenericNetworkProtocol::endService(cPacket *pk)
 
 const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(Packet *packet)
 {
-    auto interfaceInd = packet->_findTag<InterfaceInd>();
+    auto interfaceInd = packet->findTag<InterfaceInd>();
     return interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
@@ -165,10 +165,10 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     }
 
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
 
-    const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
+    const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
 
     EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getInterfaceName() << "\n";
@@ -176,10 +176,10 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     if (datagramPreRoutingHook(packet) != IHook::ACCEPT)
         return;
 
-    inIE = interfaceTable->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
-    auto destIeTag = packet->_findTag<InterfaceReq>();
+    inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    auto destIeTag = packet->findTag<InterfaceReq>();
     destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
-    auto nextHopTag = packet->_findTag<NextHopAddressReq>();
+    auto nextHopTag = packet->findTag<NextHopAddressReq>();
     L3Address nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
     datagramPreRouting(packet, inIE, destIE, nextHop);
 }
@@ -201,9 +201,9 @@ void GenericNetworkProtocol::handlePacketFromHL(Packet *packet)
     if (datagramLocalOutHook(packet) != IHook::ACCEPT)
         return;
 
-    auto destIeTag = packet->_findTag<InterfaceReq>();
+    auto destIeTag = packet->findTag<InterfaceReq>();
     destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
-    auto nextHopTag = packet->_findTag<NextHopAddressReq>();
+    auto nextHopTag = packet->findTag<NextHopAddressReq>();
     nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
 
     datagramLocalOut(packet, destIE, nextHop);
@@ -440,33 +440,33 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
 
     // create and fill in control info
     if (fromIE) {
-        auto ifTag = packet->_addTagIfAbsent<InterfaceInd>();
+        auto ifTag = packet->addTagIfAbsent<InterfaceInd>();
         ifTag->setInterfaceId(fromIE->getInterfaceId());
     }
 
     // attach control info
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(header->getProtocol());
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(header->getProtocol());
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
-    auto l3AddressInd = packet->_addTagIfAbsent<L3AddressInd>();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(header->getProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(header->getProtocol());
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
+    auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
     l3AddressInd->setSrcAddress(header->getSourceAddress());
     l3AddressInd->setDestAddress(header->getDestinationAddress());
-    packet->_addTagIfAbsent<HopLimitInd>()->setHopLimit(header->getHopLimit());
+    packet->addTagIfAbsent<HopLimitInd>()->setHopLimit(header->getHopLimit());
 }
 
 void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
 {
     auto header = makeShared<GenericDatagramHeader>();
     header->setChunkLength(B(par("headerLength")));
-    auto l3AddressReq = transportPacket->_removeTag<L3AddressReq>();
+    auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     L3Address src = l3AddressReq->getSrcAddress();
     L3Address dest = l3AddressReq->getDestAddress();
     delete l3AddressReq;
 
-    header->setProtocol(transportPacket->_getTag<PacketProtocolTag>()->getProtocol());
+    header->setProtocol(transportPacket->getTag<PacketProtocolTag>()->getProtocol());
 
-    auto hopLimitReq = transportPacket->_removeTagIfPresent<HopLimitReq>();
+    auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
 
@@ -474,7 +474,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
     header->setDestinationAddress(dest);
 
     // Generic_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    auto ifTag = transportPacket->_findTag<InterfaceReq>();
+    auto ifTag = transportPacket->findTag<InterfaceReq>();
     destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 
 
@@ -517,7 +517,7 @@ void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         auto *packetCopy = packet->dup();
-        packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
+        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {
@@ -549,11 +549,11 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
 
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getInterfaceName() << " is not broadcast, skipping ARP\n";
-        //Peer to peer interface, no broadcast, no MACAddress. // packet->_addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
-        delete datagram->_removeTagIfPresent<DispatchProtocolReq>();
-        datagram->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
-        datagram->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+        //Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
+        delete datagram->removeTagIfPresent<DispatchProtocolReq>();
+        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
         send(datagram, "queueOut");
         return;
     }
@@ -571,11 +571,11 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
     }
     else {
         // add control info with MAC address
-        datagram->_addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMAC);
-        delete datagram->_removeTagIfPresent<DispatchProtocolReq>();
-        datagram->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
-        datagram->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+        datagram->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMAC);
+        delete datagram->removeTagIfPresent<DispatchProtocolReq>();
+        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
 
         // send out
         send(datagram, "queueOut");

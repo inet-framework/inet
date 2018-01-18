@@ -32,5 +32,5 @@ class Packet extends cPacket
     b dataLength;
     b trailerPoppedLength;
     Chunk* contents @packetData @getter(getContents);
-    cObject *tags[] @getter(_getTag) @sizeGetter(_getNumTags);
+    cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
 }

@@ -235,12 +235,12 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
     udpPacket->insertHeader(udpHeader);
-    auto addresses = udpPacket->_addTagIfAbsent<L3AddressReq>();
+    auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
-    udpPacket->_addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
-    udpPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
+    udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     sendUDPPacket(udpPacket, delay);
 }
 
@@ -588,7 +588,7 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram)
     const L3Address& destination = networkHeader->getDestinationAddress();
     EV_INFO << "Finding next hop: source = " << source << ", destination = " << destination << endl;
     auto nextHop = findNextHop(networkHeader, destination);
-    datagram->_addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHop);
+    datagram->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHop);
     if (nextHop.isUnspecified()) {
         EV_WARN << "No next hop found, dropping packet: source = " << source << ", destination = " << destination << endl;
         return DROP;
@@ -600,7 +600,7 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram)
         const_cast<GpsrOption *>(gpsrOption)->setSenderAddress(getSelfAddress());
         auto interfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
         ASSERT(interfaceEntry);
-        datagram->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
         return ACCEPT;
     }
 }

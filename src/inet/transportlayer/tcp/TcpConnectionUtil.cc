@@ -261,8 +261,8 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
     tcpseg->setCrc(0);
@@ -279,8 +279,8 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(B(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
-    pkt->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = pkt->_addTagIfAbsent<L3AddressReq>();
+    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
@@ -299,7 +299,7 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
     msg->setKind(code);
     TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
-    msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -317,7 +317,7 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
 
-    msg->_addTagIfAbsent<SocketInd>()->setSocketId(listeningSocketId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(listeningSocketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -333,7 +333,7 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
-    msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -352,13 +352,13 @@ void TcpConnection::sendAvailableDataToApp()
             msg = new Indication("Data Notification");
             msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
             TcpCommand *cmd = new TcpCommand();
-            msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
             msg->setControlInfo(cmd);
             sendToApp(msg);
         } else {
             while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                msg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+                msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);
             }
         }

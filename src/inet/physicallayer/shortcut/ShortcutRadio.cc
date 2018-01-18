@@ -58,7 +58,7 @@ void ShortcutRadio::handleMessageWhenUp(cMessage *message)
 
 void ShortcutRadio::handleUpperPacket(Packet *packet)
 {
-    auto destination = packet->_getTag<MacAddressReq>()->getDestAddress();
+    auto destination = packet->getTag<MacAddressReq>()->getDestAddress();
     if (destination.isBroadcast()) {
         for (auto it : shortcutRadios)
             if (it.second != this)

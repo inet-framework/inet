@@ -742,11 +742,11 @@ void BMac::refreshDisplay() const
 void BMac::decapsulate(Packet *packet)
 {
     const auto& bmacHeader = packet->popHeader<BMacHeader>();
-    packet->_addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
-    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -757,9 +757,9 @@ void BMac::encapsulate(Packet *packet)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = packet->_getTag<MacAddressReq>()->getDestAddress();
+    auto dest = packet->getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info

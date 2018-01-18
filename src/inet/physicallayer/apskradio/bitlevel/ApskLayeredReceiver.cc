@@ -161,8 +161,8 @@ const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     auto packet = const_cast<Packet *>(packetModel->getPacket());
-    packet->_addTagIfAbsent<ErrorRateInd>(); // TODO: setPacketErrorRate(per);
-    auto snirInd = packet->_addTagIfAbsent<SnirInd>();
+    packet->addTagIfAbsent<ErrorRateInd>(); // TODO: setPacketErrorRate(per);
+    auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);

@@ -38,49 +38,49 @@ void MessageDispatcher::initialize()
 
 int MessageDispatcher::computeSocketReqSocketId(Packet *packet)
 {
-    auto *socketReq = packet->_findTag<SocketReq>();
+    auto *socketReq = packet->findTag<SocketReq>();
     return socketReq != nullptr ? socketReq->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeSocketIndSocketId(Packet *packet)
 {
-    auto *socketInd = packet->_findTag<SocketInd>();
+    auto *socketInd = packet->findTag<SocketInd>();
     return socketInd != nullptr ? socketInd->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeInterfaceId(Packet *packet)
 {
-    auto interfaceReq = packet->_findTag<InterfaceReq>();
+    auto interfaceReq = packet->findTag<InterfaceReq>();
     return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
 }
 
 const Protocol *MessageDispatcher::computeProtocol(Packet *packet)
 {
-    auto protocolReq = packet->_findTag<DispatchProtocolReq>();;
+    auto protocolReq = packet->findTag<DispatchProtocolReq>();;
     return protocolReq != nullptr ? protocolReq->getProtocol() : nullptr;
 }
 
 int MessageDispatcher::computeSocketReqSocketId(Message *message)
 {
-    auto *socketReq = message->_findTag<SocketReq>();
+    auto *socketReq = message->findTag<SocketReq>();
     return socketReq != nullptr ? socketReq->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeSocketIndSocketId(Message *message)
 {
-    auto *socketInd = message->_findTag<SocketInd>();
+    auto *socketInd = message->findTag<SocketInd>();
     return socketInd != nullptr ? socketInd->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeInterfaceId(Message *message)
 {
-    auto interfaceReq = message->_findTag<InterfaceReq>();
+    auto interfaceReq = message->findTag<InterfaceReq>();
     return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
 }
 
 const Protocol *MessageDispatcher::computeProtocol(Message *message)
 {
-    auto protocolReq = message->_findTag<DispatchProtocolReq>();;
+    auto protocolReq = message->findTag<DispatchProtocolReq>();;
     return protocolReq != nullptr ? protocolReq->getProtocol() : nullptr;
 }
 

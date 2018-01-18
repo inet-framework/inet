@@ -93,7 +93,7 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
         else if (msg->arrivedOn("ifIn")) {
             numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
-            delete frame->_removeTagIfPresent<DispatchProtocolReq>();
+            delete frame->removeTagIfPresent<DispatchProtocolReq>();
             emit(packetReceivedFromLowerSignal, frame);
             handleAndDispatchFrame(frame);
         }
@@ -116,7 +116,7 @@ void Ieee8021dRelay::broadcast(Packet *packet)
 {
     EV_DETAIL << "Broadcast frame " << packet << endl;
 
-    int inputInterfacceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
+    int inputInterfacceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
     int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; i++) {
@@ -145,7 +145,7 @@ namespace {
 void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 {
     const auto& frame = packet->peekHeader<EthernetMacHeader>();
-    int arrivalInterfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
+    int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
     Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->ieee8021dData();
     if (isStpAware && arrivalPortData == nullptr)
@@ -201,8 +201,8 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
-    packet->_clearTags();
-    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->clearTags();
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->removePoppedChunks();
     emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
@@ -220,8 +220,8 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
     const auto& bpdu = packet->peekHeader<Bpdu>();
     (void)bpdu;       // unused variable
-    unsigned int portNum = packet->_getTag<InterfaceReq>()->getInterfaceId();
-    MacAddress address = packet->_getTag<MacAddressReq>()->getDestAddress();
+    unsigned int portNum = packet->getTag<InterfaceReq>()->getInterfaceId();
+    MacAddress address = packet->getTag<MacAddressReq>()->getDestAddress();
 
     if (ifTable->getInterfaceById(portNum) == nullptr)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
@@ -240,7 +240,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
@@ -255,7 +255,7 @@ void Ieee8021dRelay::deliverBPDU(Packet *packet)
 
     const auto& llc = packet->popHeader<Ieee8022LlcHeader>();
     ASSERT(llc->getSsap() == 0x42 && llc->getDsap() == 0x42 && llc->getControl() == 3);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::stp);
     const auto& bpdu = packet->peekHeader<Bpdu>();
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;

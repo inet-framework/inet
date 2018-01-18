@@ -165,9 +165,9 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     int interfaceId = -1;
 
     auto tcpsegP = packet->peekHeader<TcpHeader>();
-    srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
-    destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
-    interfaceId = (packet->_getTag<InterfaceInd>())->getInterfaceId();
+    srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+    destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+    interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
 
     switch(tcpsegP->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
@@ -457,7 +457,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
     else if (msgP->arrivedOn("ipIn")) {
         // must be a Packet
         Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = pk->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
             handleIpInputMessage(pk);
@@ -627,8 +627,8 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
 
     IL3AddressType *addressType = destP.getAddressType();
 
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(srcP);
     addresses->setDestAddress(destP);
     if (conn) {

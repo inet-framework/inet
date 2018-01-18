@@ -38,7 +38,7 @@ TcpSocket::TcpSocket()
 
 TcpSocket::TcpSocket(cMessage *msg)
 {
-    connId = check_and_cast<Indication *>(msg)->_getTag<SocketInd>()->getSocketId();
+    connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;

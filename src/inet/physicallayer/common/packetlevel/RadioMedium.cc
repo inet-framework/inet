@@ -515,7 +515,7 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     Enter_Method_Silent();
     take(packet);
     // TODO: we should do this but it breaks 802.11
-    // TODO: packet->_clearTags();
+    // TODO: packet->clearTags();
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
     auto signal = new Signal(transmission);
     signal->setName(packet->getName());
@@ -630,7 +630,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->_getTag<MacAddressReq>()->getDestAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getTag<MacAddressReq>()->getDestAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);

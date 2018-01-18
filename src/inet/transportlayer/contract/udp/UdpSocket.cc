@@ -98,10 +98,10 @@ void UdpSocket::connect(L3Address addr, int port)
 void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
-    auto addressReq = pk->_addTagIfAbsent<L3AddressReq>();
+    auto addressReq = pk->addTagIfAbsent<L3AddressReq>();
     addressReq->setDestAddress(destAddr);
     if (destPort != -1)
-        pk->_addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
+        pk->addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
     sendToUDP(pk);
 }
 
@@ -310,20 +310,20 @@ bool UdpSocket::belongsToAnyUDPSocket(cMessage *msg)
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
 {
-    auto l3Addresses = pk->_getTag<L3AddressInd>();
-    auto ports = pk->_getTag<L4PortInd>();
+    auto l3Addresses = pk->getTag<L3AddressInd>();
+    auto ports = pk->getTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
     L3Address destAddr = l3Addresses->getDestAddress();
     int srcPort = ports->getSrcPort();
     int destPort = ports->getDestPort();
-    int interfaceID = pk->_getTag<InterfaceInd>()->getInterfaceId();
-    int ttl = pk->_getTag<HopLimitInd>()->getHopLimit();
+    int interfaceID = pk->getTag<InterfaceInd>()->getInterfaceId();
+    int ttl = pk->getTag<HopLimitInd>()->getHopLimit();
 
     std::stringstream os;
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
     os << " TTL=" << ttl;
-    if (auto dscpTag = pk->_findTag<DscpInd>())
+    if (auto dscpTag = pk->findTag<DscpInd>())
         os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;
     return os.str();

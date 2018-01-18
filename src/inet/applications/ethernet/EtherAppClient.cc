@@ -201,8 +201,8 @@ void EtherAppClient::sendPacket()
     data->setResponseBytes(respLen);
     datapacket->insertAtEnd(data);
 
-    datapacket->_addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
-    auto ieee802SapReq = datapacket->_addTagIfAbsent<Ieee802SapReq>();
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+    auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
     ieee802SapReq->setSsap(localSAP);
     ieee802SapReq->setDsap(remoteSAP);
 

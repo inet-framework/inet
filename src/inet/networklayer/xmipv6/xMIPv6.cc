@@ -180,7 +180,7 @@ void xMIPv6::handleMessage(cMessage *msg)
     // if its a MIPv6 related mobility message
     else {
         auto packet = check_and_cast<Packet *>(msg);
-        if (packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
+        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6) {
             EV_INFO << " Received MIPv6 related message" << endl;
             processMobilityMessage(packet);
         }
@@ -639,12 +639,12 @@ void xMIPv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& des
         const Ipv6Address& srcAddr, int interfaceId, simtime_t sendTime)    // overloaded for use at CN - CB
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
-    delete msg->_removeTagIfPresent<DispatchProtocolReq>();
-    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
-    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
-    msg->_addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
-    msg->_addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
-    msg->_addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
+    delete msg->removeTagIfPresent<DispatchProtocolReq>();
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mobileipv6);
+    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
     EV_INFO << "ControlInfo appended successfully. Sending mobility message to Ipv6 module\n";
 
     EV_DETAIL << "controlInfo: DestAddr=" << destAddr
@@ -715,8 +715,8 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
     bool validBUMessage = validateBUMessage(inPacket, bu);
 
     if (validBUMessage) {
-        auto ifTag = inPacket->_getTag<InterfaceInd>();
-        auto addrTag = inPacket->_getTag<L3AddressInd>();
+        auto ifTag = inPacket->getTag<InterfaceInd>();
+        auto addrTag = inPacket->getTag<L3AddressInd>();
         const Ipv6Address& HoA = bu->getHomeAddressMN();
         Ipv6Address CoA = addrTag->getSrcAddress().toIPv6();
         Ipv6Address destAddress = addrTag->getDestAddress().toIPv6();
@@ -956,12 +956,12 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
 
 bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& bu)
 {
-    auto ifTag = packet->_getTag<InterfaceInd>();
+    auto ifTag = packet->getTag<InterfaceInd>();
     // Performs BU Validation according to RFC3775 Sec 9.5.1
 
     EV_INFO << "\n<<<<<<<<<ROUTINE WHERE BU GETS VALIDATED>>>>>>>>>>>>>>><<\n";
 
-    Ipv6Address src = packet->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address src = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
     Ipv6Address homeAddress = bu->getHomeAddressMN();    //confirm whether it is getHomeAddressMN() or simply homeAddress()
     uint seqNumber = bu->getSequence();    //The seq Number of the recieved BU
     uint bcSeqNumber = bc->readBCSequenceNumber(homeAddress);    //The seq Number of the last recieved BU in the Binding cache
@@ -997,7 +997,7 @@ bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& b
            address, then the receiving node MUST send back a Binding
            Acknowledgement with status code 135, and the last accepted sequence
            number in the Sequence Number field of the Binding Acknowledgement.*/
-        Ipv6Address destAddress = packet->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
+        Ipv6Address destAddress = packet->getTag<L3AddressInd>()->getDestAddress().toIPv6();
         createAndSendBAMessage(destAddress, homeAddress, ifTag->getInterfaceId(), REGISTRATION_TYPE_CHANGE_DISALLOWED,
                 bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
@@ -1140,8 +1140,8 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false;
-    Ipv6Address baSource = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    auto ifTag = inPacket->_getTag<InterfaceInd>();
+    Ipv6Address baSource = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    auto ifTag = inPacket->getTag<InterfaceInd>();
     InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());    //the interface on which the BAck was received
 
     if (rt6->isMobileNode()) {
@@ -1337,8 +1337,8 @@ bool xMIPv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
          protection is used.  If the Binding Update was sent to the
          correspondent node, the Binding Authorization Data mobility option
          MUST be present and have a valid value.*/
-    Ipv6Address cnAddress = packet->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    auto ifTag = packet->_getTag<InterfaceInd>();
+    Ipv6Address cnAddress = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    auto ifTag = packet->getTag<InterfaceInd>();
     InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());
 
     if (cnAddress != ie->ipv6Data()->getHomeAgentAddress()) {    // BAck comes from a CN and not from the HA
@@ -1719,8 +1719,8 @@ void xMIPv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, InterfaceEntry 
 void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& homeTestInit)
 {
     // 9.4.1 & 9.4.3
-    Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address HoA = inPacket->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
 
     auto outPacket = new Packet("HoT");
     const auto& homeTest = makeShared<HomeTest>();
@@ -1743,8 +1743,8 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
 void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& coti)
 {
     // 9.4.2 & 9.4.4
-    Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address coa = inPacket->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address coa = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
 
     auto outPacket = new Packet("CoT");
     const auto& cot = makeShared<CareOfTest>();
@@ -1774,9 +1774,9 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
     }
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
-        Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
         //Ipv6Address& destAddr = ctrlInfo->destAddr();
-        int interfaceID = inPacket->_getTag<InterfaceInd>()->getInterfaceId();
+        int interfaceID = inPacket->getTag<InterfaceInd>()->getInterfaceId();
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
 
         BindingUpdateList::BindingUpdateListEntry *bulEntry = bul->lookup(srcAddr);
@@ -1807,8 +1807,8 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
 bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 {
     // RFC - 11.6.2
-    Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address destAddr = inPacket->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
     //int interfaceID = ctrlInfo->interfaceId();
 
     /* The Source Address of the packet belongs to a correspondent node
@@ -1862,9 +1862,9 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
 
-        Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
         //Ipv6Address& destAddr = ctrlInfo->destAddr();
-        auto ifTag = inPacket->_getTag<InterfaceInd>();
+        auto ifTag = inPacket->getTag<InterfaceInd>();
         int interfaceID = ifTag->getInterfaceId();
 
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
@@ -1904,9 +1904,9 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
 bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 {
     // RFC - 11.6.2
-    Ipv6Address srcAddr = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address destAddr = inPacket->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
-    auto ifTag = inPacket->_getTag<InterfaceInd>();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    auto ifTag = inPacket->getTag<InterfaceInd>();
     int interfaceID = ifTag->getInterfaceId();
 
     /* The Source Address of the packet belongs to a correspondent node
@@ -2499,8 +2499,8 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
        the source of the Binding Refresh Request, and the mobile node wants
        to retain its binding cache entry at the correspondent node, then the
        mobile node should start a return routability procedure.*/
-    Ipv6Address cnAddress = inPacket->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address HoA = inPacket->_getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address cnAddress = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
 
     if (!bul->isInBindingUpdateList(cnAddress, HoA)) {
         EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;
@@ -2509,7 +2509,7 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
         emit(packetDropSignal, inPacket, &details);
     }
     else {
-        auto ifTag = inPacket->_getTag<InterfaceInd>();
+        auto ifTag = inPacket->getTag<InterfaceInd>();
         InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());
         initReturnRoutability(cnAddress, ie);
     }

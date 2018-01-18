@@ -51,13 +51,13 @@ void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
-        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol());
+        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
             Packet *packetCopy = packet->dup();
-            packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");
         }
@@ -117,14 +117,14 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;

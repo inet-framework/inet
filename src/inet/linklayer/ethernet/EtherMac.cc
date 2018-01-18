@@ -542,7 +542,7 @@ void EtherMac::startFrameTransmission()
     encapsulate(frame);
 
     int64_t sentFrameByteLength = frame->getByteLength();
-    frame->_clearTags();
+    frame->clearTags();
     auto signal = new EthernetSignal(frame->getName());
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
@@ -864,9 +864,9 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     if (interfaceEntry)
-        packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);

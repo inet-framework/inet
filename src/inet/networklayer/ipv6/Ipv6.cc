@@ -127,14 +127,14 @@ void Ipv6::handleMessage(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = request->_getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;
@@ -199,17 +199,17 @@ void Ipv6::endService(cPacket *msg)
 #endif /* WITH_xMIPv6 */
 
     if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->getArrivalGate()->isName("ndIn") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+        || (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
         || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->getArrivalGate()->isName("xMIPv6In") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+        || (msg->getArrivalGate()->isName("xMIPv6In") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
         )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
         handleMessageFromHL(packet);
     }
-    else if (msg->getArrivalGate()->isName("ndIn") && packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    else if (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
         Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();
@@ -222,8 +222,8 @@ void Ipv6::endService(cPacket *msg)
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
         auto ipv6Header = packet->peekHeader<Ipv6Header>();
-        packet->_addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
-        packet->_addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
+        packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
+        packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
@@ -258,7 +258,7 @@ void Ipv6::endService(cPacket *msg)
 
 InterfaceEntry *Ipv6::getSourceInterfaceFrom(Packet *packet)
 {
-    auto interfaceInd = packet->_findTag<InterfaceInd>();
+    auto interfaceInd = packet->findTag<InterfaceInd>();
     return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
@@ -285,13 +285,13 @@ void Ipv6::handleMessageFromHL(Packet *msg)
         return;
     }
 
-    auto ifTag = msg->_findTag<InterfaceReq>();
+    auto ifTag = msg->findTag<InterfaceReq>();
     const InterfaceEntry *destIE = ifTag ? ift->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
     auto packet = check_and_cast<Packet *>(msg);
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
-    Ipv6Address src = packet->_getTag<L3AddressReq>()->getSrcAddress().toIPv6();
+    Ipv6Address src = packet->getTag<L3AddressReq>()->getSrcAddress().toIPv6();
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src) == nullptr) {
@@ -669,7 +669,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         Packet *packetCopy = packet->dup();
-        packetCopy->_addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
+        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
 
@@ -739,29 +739,29 @@ void Ipv6::decapsulate(Packet *packet)
     }
 
     // create and fill in control info
-    packet->_addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
-    packet->_addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
-    packet->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ipv6Header->getProtocol());
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->_addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
-    auto l3AddressInd = packet->_addTagIfAbsent<L3AddressInd>();
+    packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
+    packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
+    packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ipv6Header->getProtocol());
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
+    auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
     l3AddressInd->setSrcAddress(ipv6Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv6Header->getDestAddress());
-    packet->_addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
+    packet->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 }
 
 void Ipv6::encapsulate(Packet *transportPacket)
 {
     auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
-    L3AddressReq *addresses = transportPacket->_removeTag<L3AddressReq>();
+    L3AddressReq *addresses = transportPacket->removeTag<L3AddressReq>();
     Ipv6Address src = addresses->getSrcAddress().toIPv6();
     Ipv6Address dest = addresses->getDestAddress().toIPv6();
     delete addresses;
 
-    auto hopLimitReq = transportPacket->_removeTagIfPresent<HopLimitReq>();
+    auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
 
@@ -772,21 +772,21 @@ void Ipv6::encapsulate(Packet *transportPacket)
     ipv6Header->setSrcAddress(src);
 
     // set other fields
-    if (DscpReq *dscpReq = transportPacket->_removeTagIfPresent<DscpReq>()) {
+    if (DscpReq *dscpReq = transportPacket->removeTagIfPresent<DscpReq>()) {
         ipv6Header->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
         delete dscpReq;
     }
-    if (EcnReq *ecnReq = transportPacket->_removeTagIfPresent<EcnReq>()) {
+    if (EcnReq *ecnReq = transportPacket->removeTagIfPresent<EcnReq>()) {
         ipv6Header->setExplicitCongestionNotification(ecnReq->getExplicitCongestionNotification());
         delete ecnReq;
     }
 
     ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
-    ipv6Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->_getTag<PacketProtocolTag>()->getProtocol()));
+    ipv6Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
-    auto extHeadersTag = transportPacket->_removeTagIfPresent<Ipv6ExtHeaderReq>();
+    auto extHeadersTag = transportPacket->removeTagIfPresent<Ipv6ExtHeaderReq>();
     while (extHeadersTag && 0 < extHeadersTag->getExtensionHeaderArraySize()) {
         Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         ipv6Header->addExtensionHeader(extHeader);
@@ -898,11 +898,11 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
 
 void Ipv6::sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MacAddress& macAddr)
 {
-    packet->_addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddr);
-    delete packet->_removeTagIfPresent<DispatchProtocolReq>();
-    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    packet->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddr);
+    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+    packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     send(packet, "queueOut");
 }
 

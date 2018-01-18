@@ -68,7 +68,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
         else {
             auto indication = check_and_cast<Indication *>(msg);
-            int connId = indication->_getTag<SocketInd>()->getSocketId();
+            int connId = indication->getTag<SocketInd>()->getSocketId();
             EV_DEBUG << "Connection ID: " << connId << endl;
         }
 

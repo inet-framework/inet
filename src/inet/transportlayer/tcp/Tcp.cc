@@ -134,11 +134,11 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
-            auto networkProtocol = packet->_getTag<NetworkProtocolInd>()->getProtocol();
+            auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
             const std::vector<uint8_t> tcpBytes = packet->peekDataBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
-            L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
-            L3Address destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
+            L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
             pseudoHeader->setSrcAddress(srcAddr);
             pseudoHeader->setDestAddress(destAddr);
             ASSERT(networkProtocol);
@@ -191,7 +191,7 @@ void Tcp::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
             EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
             delete msg;
@@ -203,8 +203,8 @@ void Tcp::handleMessage(cMessage *msg)
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
+            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
 
             if (!checkCrc(tcpHeader, packet)) {

@@ -297,8 +297,8 @@ void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     msg->setControlInfo(tcpConnectInfo);
-    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->_addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
+    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
     send(msg, "appOut");
     connP.sentEstablishedM = true;
 }
@@ -318,8 +318,8 @@ void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
     msg->setControlInfo(tcpConnectInfo);
-    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->_addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
+    msg->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
     send(msg, "appOut");
     c.sentEstablishedM = true;
 }
@@ -351,11 +351,11 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
     // get src/dest addresses
     TcpNscConnection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    inetSockPair.remoteM.ipAddrM = packet->_getTag<L3AddressInd>()->getSrcAddress();
-    inetSockPair.localM.ipAddrM = packet->_getTag<L3AddressInd>()->getDestAddress();
+    inetSockPair.remoteM.ipAddrM = packet->getTag<L3AddressInd>()->getSrcAddress();
+    inetSockPair.localM.ipAddrM = packet->getTag<L3AddressInd>()->getDestAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (packet->_getTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
+    if (packet->getTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
         const auto& tcpHdr = packet->peekHeader<TcpHeader>();
         // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
         //       with IP header size difference
@@ -573,7 +573,7 @@ void TcpNsc::sendDataToApp(TcpNscConnection& c)
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->_addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        dataMsg->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
     }
@@ -618,8 +618,8 @@ void TcpNsc::sendErrorNotificationToApp(TcpNscConnection& c, int err)
         msg->setKind(code);
         TcpCommand *ind = new TcpCommand();
         msg->setControlInfo(ind);
-        msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-        msg->_addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+        msg->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
         send(msg, "appOut");
     }
 }
@@ -687,7 +687,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
     }
     else if (msgP->arrivedOn("ipIn")) {
         Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = pk->_getTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
             handleIpInputMessage(pk);
@@ -911,8 +911,8 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    fp->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = fp->_addTagIfAbsent<L3AddressReq>();
+    fp->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = fp->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 

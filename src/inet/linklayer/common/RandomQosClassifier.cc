@@ -26,7 +26,7 @@ Define_Module(RandomQosClassifier);
 void RandomQosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    packet->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
+    packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
     send(msg, "out");
 }
 

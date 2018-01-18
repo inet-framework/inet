@@ -215,7 +215,7 @@ void Ppp::startTransmitting(Packet *msg)
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
-    pppFrame->_clearTags();
+    pppFrame->clearTags();
     if (sendRawBytes) {
         auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllBytes());
         send(rawFrame, physOutGate);
@@ -266,7 +266,7 @@ void Ppp::handleMessage(cMessage *msg)
         emit(ppRxEndSignal, &notifDetails);
 
         auto packet = check_and_cast<Packet *>(msg);
-        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
 
         // check for bit errors
@@ -367,11 +367,11 @@ Packet *Ppp::encapsulate(Packet *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();
-    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->_getTag<PacketProtocolTag>()->getProtocol()));
+    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertHeader(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
     packet->insertTrailer(pppTrailer);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
     return packet;
 }
 
@@ -382,11 +382,11 @@ cPacket *Ppp::decapsulate(Packet *packet)
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC
-    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     auto protocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
-    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     return packet;
 }
 

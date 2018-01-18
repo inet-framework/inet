@@ -86,7 +86,7 @@ void Stp::handleMessage(cMessage *msg)
 
 void Stp::handleBPDU(Packet *packet, const Ptr<const Bpdu>& bpdu)
 {
-    int arrivalGate = packet->_getTag<InterfaceInd>()->getInterfaceId();
+    int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
     if (bpdu->getTcaFlag()) {
@@ -133,8 +133,8 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
 
-    int arrivalGate = packet->_getTag<InterfaceInd>()->getInterfaceId();
-    MacAddressInd *addressInd = packet->_getTag<MacAddressInd>();
+    int arrivalGate = packet->getTag<InterfaceInd>()->getInterfaceId();
+    MacAddressInd *addressInd = packet->getTag<MacAddressInd>();
     MacAddress srcAddress = addressInd->getSrcAddress();
     MacAddress destAddress = addressInd->getDestAddress();
 
@@ -145,9 +145,9 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     if (!isRoot) {
         Packet *outPacket = new Packet(packet->getName());
         outPacket->insertAtEnd(tcn);
-        outPacket->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        outPacket->_addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
-        outPacket->_addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
+        outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+        outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
+        outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
         send(outPacket, "relayOut");
     }
     delete packet;
@@ -157,8 +157,8 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 {
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<Bpdu>();
-    packet->_addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
 
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
@@ -206,8 +206,8 @@ void Stp::generateTCN()
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            packet->_addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-            packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
             packet->insertAtEnd(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;

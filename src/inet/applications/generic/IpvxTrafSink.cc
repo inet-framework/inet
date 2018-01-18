@@ -83,11 +83,11 @@ void IpvxTrafSink::printPacket(Packet *msg)
     int protocol = -1;
     auto ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->_getTag<PacketProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
-    L3AddressTagBase *addresses = msg->_findTag<L3AddressReq>();
+    L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)
-        addresses = msg->_findTag<L3AddressInd>();
+        addresses = msg->findTag<L3AddressInd>();
     if (addresses != nullptr) {
         src = addresses->getSrcAddress();
         dest = addresses->getDestAddress();

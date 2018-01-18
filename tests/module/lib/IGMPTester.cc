@@ -392,12 +392,12 @@ void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 
-    msg->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(ie->getInterfaceId());
-    msg->_addTagIfAbsent<L3AddressInd>()->setDestAddress(dest);
-    msg->_addTagIfAbsent<HopLimitInd>()->setHopLimit(1);
-    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
-    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::igmp);
-    msg->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<L3AddressInd>()->setDestAddress(dest);
+    msg->addTagIfAbsent<HopLimitInd>()->setHopLimit(1);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
 
     EV << "IGMPTester: Sending: " << msg << ".\n";
     send(msg, "igmpOut");

@@ -237,8 +237,8 @@ void Ieee80211MgmtSta::beaconLost()
 void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address)
 {
     auto packet = new Packet(name);
-    packet->_addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->_addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
+    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtEnd(body);
     sendDown(packet);
 }
@@ -325,7 +325,7 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, c
         const Ptr<const Ieee80211MgmtHeader>& beacon = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
         ApInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
-            ap->rxPower = packet->_getTag<SignalPowerInd>()->getPower().get();
+            ap->rxPower = packet->getTag<SignalPowerInd>()->getPower().get();
     }
 }
 
@@ -781,7 +781,7 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->ssid = body->getSSID();
     ap->supportedRates = body->getSupportedRates();
     ap->beaconInterval = body->getBeaconInterval();
-    auto signalPowerInd = packet->_getTag<SignalPowerInd>();
+    auto signalPowerInd = packet->getTag<SignalPowerInd>();
     if (signalPowerInd != nullptr) {
         ap->rxPower = signalPowerInd->getPower().get();
         if (ap->address == assocAP.address)

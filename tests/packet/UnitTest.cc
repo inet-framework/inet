@@ -1739,14 +1739,14 @@ static void testChunkTags()
     auto tag1 = chunk1->addTag<CreationTimeTag>(B(0), B(20));
     tag1->setCreationTime(42);
     chunk1->markImmutable();
-    const auto& tag2 = chunk1->_findTag<CreationTimeTag>();
+    const auto& tag2 = chunk1->findTag<CreationTimeTag>();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2->getCreationTime() == 42);
 
     // SliceChunk
     const auto& sliceChunk1 = chunk1->peek(B(10), B(10));
     ASSERT(sliceChunk1->getNumTags() == 1);
-    const auto& tag3 = sliceChunk1->_findTag<CreationTimeTag>();
+    const auto& tag3 = sliceChunk1->findTag<CreationTimeTag>();
     ASSERT(tag3 != nullptr);
     ASSERT(tag3->getCreationTime() == 42);
 
@@ -1754,7 +1754,7 @@ static void testChunkTags()
     auto sequenceChunk = makeShared<SequenceChunk>();
     sequenceChunk->insertAtEnd(chunk1);
     ASSERT(sequenceChunk->getNumTags() == 1);
-    const auto& tag4 = sequenceChunk->_findTag<CreationTimeTag>();
+    const auto& tag4 = sequenceChunk->findTag<CreationTimeTag>();
     ASSERT(tag4 != nullptr);
     ASSERT(tag4->getCreationTime() == 42);
 }
@@ -1763,17 +1763,17 @@ static void testPacketTags()
 {
     // 1. application creates packet
     Packet packet1;
-    ASSERT_ERROR(packet1._getTag<CreationTimeTag>(), "is absent");
+    ASSERT_ERROR(packet1.getTag<CreationTimeTag>(), "is absent");
     packet1.insertAtEnd(makeImmutableByteCountChunk(B(1000)));
-    const auto& tag1 = packet1._addTag<CreationTimeTag>();
+    const auto& tag1 = packet1.addTag<CreationTimeTag>();
     ASSERT(tag1 != nullptr);
     // 2. source TCP encapsulates packet
     packet1.insertHeader(makeImmutableTcpHeader());
-    const auto& tag2 = packet1._getTag<CreationTimeTag>();
+    const auto& tag2 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag2 == tag1);
     // 3. destination TCP decapsulates packet
     packet1.popHeader<TcpHeader>();
-    const auto& tag3 = packet1._getTag<CreationTimeTag>();
+    const auto& tag3 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag3 == tag2);
 }
 

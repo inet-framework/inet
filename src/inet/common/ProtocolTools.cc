@@ -21,7 +21,7 @@ namespace inet {
 
 const Protocol *findPacketProtocol(Packet *packet)
 {
-    const auto& packetProtocolTag = packet->_getTag<PacketProtocolTag>();
+    const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
     return packetProtocolTag == nullptr ? nullptr : packetProtocolTag->getProtocol();
 }
 
@@ -36,7 +36,7 @@ const Protocol& getPacketProtocol(Packet *packet)
 
 void insertProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<Chunk>& header)
 {
-    auto packetProtocolTag = packet->_addTagIfAbsent<PacketProtocolTag>();
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setProtocol(&protocol);
     packet->insertHeader(header);
 }

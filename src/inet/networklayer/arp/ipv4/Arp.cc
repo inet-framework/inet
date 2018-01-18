@@ -206,10 +206,10 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
 void Arp::sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
 {
     // add control info with MAC address
-    msg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddress);
-    delete msg->_removeTagIfPresent<DispatchProtocolReq>();
-    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    msg->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddress);
+    delete msg->removeTagIfPresent<DispatchProtocolReq>();
+    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     // send out
     EV_INFO << "Sending " << msg << " to network protocol.\n";
@@ -300,7 +300,7 @@ void Arp::processARPPacket(Packet *packet)
     dumpARPPacket(arp.get());
 
     // extract input port
-    InterfaceEntry *ie = ift->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
     //
     // Recipe a'la RFC 826:

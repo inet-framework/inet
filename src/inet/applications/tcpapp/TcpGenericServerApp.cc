@@ -98,17 +98,17 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
-        int connId = check_and_cast<Indication *>(msg)->_getTag<SocketInd>()->getSocketId();
+        int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
         auto outMsg = new Request("close");
         outMsg->setName("close");
         outMsg->setKind(TCP_C_CLOSE);
-        outMsg->_addTagIfAbsent<SocketReq>()->setSocketId(connId);
+        outMsg->addTagIfAbsent<SocketReq>()->setSocketId(connId);
         sendOrSchedule(outMsg, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        int connId = packet->_getTag<SocketInd>()->getSocketId();
+        int connId = packet->getTag<SocketInd>()->getSocketId();
         ChunkQueue &queue = socketQueue[connId];
         auto chunk = packet->peekDataAt(B(0));
         queue.push(chunk);
@@ -125,7 +125,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 
             if (requestedBytes > 0) {
                 Packet *outPacket = new Packet(msg->getName());
-                outPacket->_addTagIfAbsent<SocketReq>()->setSocketId(connId);
+                outPacket->addTagIfAbsent<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
                 payload->setChunkLength(B(requestedBytes));
@@ -145,7 +145,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
             auto outMsg = new Request("close");
             outMsg->setKind(TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            outMsg->_addTagIfAbsent<SocketReq>()->setSocketId(connId);
+            outMsg->addTagIfAbsent<SocketReq>()->setSocketId(connId);
             outMsg->setControlInfo(cmd);
             sendOrSchedule(outMsg, delay + maxMsgDelay);
         }

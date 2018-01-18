@@ -81,7 +81,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         insertNetworkProtocolHeader(packet, networkProtocol, networkHeader);
 
         delete message->removeControlInfo();
-        packet->_clearTags();
+        packet->clearTags();
         tunSocket.send(packet);
         packetsSent++;
     }

@@ -542,21 +542,21 @@ class INET_API Packet : public cPacket
     /**
      * Returns the number of packet tags.
      */
-    int _getNumTags() const {
+    int getNumTags() const {
         return tags.getNumTags();
     }
 
     /**
      * Returns the packet tag at the given index.
      */
-    cObject *_getTag(int index) const {
+    cObject *getTag(int index) const {
         return tags.getTag(index);
     }
 
     /**
      * Clears the set of packet tags.
      */
-    void _clearTags() {
+    void clearTags() {
         tags.clearTags();
     }
 
@@ -570,42 +570,42 @@ class INET_API Packet : public cPacket
     /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
-    template<typename T> T *_findTag() const {
+    template<typename T> T *findTag() const {
         return tags.findTag<T>();
     }
 
     /**
      * Returns the packet tag for the provided type or throws an exception if no such packet tag is found.
      */
-    template<typename T> T *_getTag() const {
+    template<typename T> T *getTag() const {
         return tags.getTag<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type, or throws an exception if such a packet tag is already present.
      */
-    template<typename T> T *_addTag() {
+    template<typename T> T *addTag() {
         return tags.addTag<T>();
     }
 
     /**
      * Returns a newly added packet tag for the provided type if absent, or returns the packet tag that is already present.
      */
-    template<typename T> T *_addTagIfAbsent() {
+    template<typename T> T *addTagIfAbsent() {
         return tags.addTagIfAbsent<T>();
     }
 
     /**
      * Removes the packet tag for the provided type, or throws an exception if no such packet tag is found.
      */
-    template<typename T> T *_removeTag() {
+    template<typename T> T *removeTag() {
         return tags.removeTag<T>();
     }
 
     /**
      * Removes the packet tag for the provided type if present, or returns nullptr if no such packet tag is found.
      */
-    template<typename T> T *_removeTagIfPresent() {
+    template<typename T> T *removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
     //@}
