@@ -64,6 +64,7 @@ void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pa
 
 void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
 {
+    //FIXME bug: the length always incremented
     setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + Ipv4Address (4))
     BgpUpdateMessage_Base::NLRI = NLRI_var;
 }
