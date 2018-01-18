@@ -37,7 +37,7 @@ enum RtcpPacketType
 class RtcpPacket extends FieldsChunk
 {
     chunkLength = B(4);
-    @customize;  // see the generated C++ header for more info
+    @customize;  // implements rtcpLength getter/setter
     int8 version = 2;
     bool padding = 0;
     short count = 0;
@@ -45,7 +45,7 @@ class RtcpPacket extends FieldsChunk
     abstract int rtcpLength;
 }
 
-cplusplus{{
+cplusplus {{
 
 class INET_API RtcpPacket : public RtcpPacket_Base
 {
@@ -69,91 +69,40 @@ class INET_API RtcpPacket : public RtcpPacket_Base
 class RtcpReceiverReportPacket extends RtcpPacket
 {
     packetType = RTCP_PT_RR;
-    @customize;  // see the generated C++ header for more info
+    chunkLength = getChunkLength() + B(4);
     uint32 ssrc = 0;
     cArray receptionReports;
 }
 
-cplusplus {{
-
-class INET_API RtcpReceiverReportPacket : public RtcpReceiverReportPacket_Base
-{
+cplusplus(RtcpReceiverReportPacket) {{
   public:
-    RtcpReceiverReportPacket();
-    RtcpReceiverReportPacket(const RtcpReceiverReportPacket& other) : RtcpReceiverReportPacket_Base(other) {}
-    RtcpReceiverReportPacket& operator=(const RtcpReceiverReportPacket& other) { RtcpReceiverReportPacket_Base::operator=(other); return *this; }
-    virtual RtcpReceiverReportPacket *dup() const override { return new RtcpReceiverReportPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpReceiverReportPacket_Base
-    /**
-     * Adds a receiver report to this receiver report packet.
-     */
+    /** Adds a receiver report to this receiver report packet. */
     virtual void addReceptionReport(ReceptionReport *report);
-};
-
 }}
 
 class RtcpSdesPacket extends RtcpPacket
 {
     packetType = RTCP_PT_SDES;
-    @customize;  // see the generated C++ header for more info
     cArray sdesChunks;
 }
 
-cplusplus {{
-
-class INET_API RtcpSdesPacket : public RtcpSdesPacket_Base
-{
+cplusplus(RtcpSdesPacket) {{
   public:
-    RtcpSdesPacket();
-    RtcpSdesPacket(const RtcpSdesPacket& other) : RtcpSdesPacket_Base(other) {}
-    RtcpSdesPacket& operator=(const RtcpSdesPacket& other) { RtcpSdesPacket_Base::operator=(other); return *this; }
-    virtual RtcpSdesPacket *dup() const override { return new RtcpSdesPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpSdesPacket_Base
     void addSDESChunk(SdesChunk *sdesChunk);
-};
-
 }}
 
 class RtcpByePacket extends RtcpPacket
 {
     packetType = RTCP_PT_BYE;
+    chunkLength = getChunkLength() + B(4);
     count = 1;
-    @customize;  // see the generated C++ header for more info
     uint32 ssrc = 0;
 }
-
-cplusplus {{
-
-class INET_API RtcpByePacket : public RtcpByePacket_Base
-{
-  public:
-    RtcpByePacket();
-    RtcpByePacket(const RtcpByePacket& other) : RtcpByePacket_Base(other) {}
-    RtcpByePacket& operator=(const RtcpByePacket& other) { RtcpByePacket_Base::operator=(other); return *this; }
-    virtual RtcpByePacket *dup() const override { return new RtcpByePacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpByePacket_Base
-};
-
-}}
 
 class RtcpSenderReportPacket extends RtcpReceiverReportPacket
 {
     packetType = RTCP_PT_SR;
-    @customize;  // see the generated C++ header for more info
+    chunkLength = getChunkLength() + B(20);
     SenderReport senderReport;
 }
-
-cplusplus {{
-
-class INET_API RtcpSenderReportPacket : public RtcpSenderReportPacket_Base
-{
-  public:
-    RtcpSenderReportPacket();
-    RtcpSenderReportPacket(const RtcpSenderReportPacket& other) : RtcpSenderReportPacket_Base(other) {}
-    RtcpSenderReportPacket& operator=(const RtcpSenderReportPacket& other) { RtcpSenderReportPacket_Base::operator=(other); return *this; }
-    virtual RtcpSenderReportPacket *dup() const override { return new RtcpSenderReportPacket(*this); }
-    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpSenderReportPacket_Base
-};
-
-}}
 

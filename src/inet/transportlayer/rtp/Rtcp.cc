@@ -21,8 +21,8 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/rtp/RtcpPacket.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtcpPacket_m.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 #include "inet/transportlayer/rtp/RtpSenderInfo.h"
@@ -154,7 +154,7 @@ void Rtcp::handleSelfMessage(cMessage *msg)
 
 void Rtcp::handleInitializeRTCP(RtpInnerPacket *rinp)
 {
-    _mtu = rinp->getMTU();
+    _mtu = rinp->getMtu();
     _bandwidth = rinp->getBandwidth();
     _rtcpPercentage = rinp->getRtcpPercentage();
     _destinationAddress = rinp->getAddress();

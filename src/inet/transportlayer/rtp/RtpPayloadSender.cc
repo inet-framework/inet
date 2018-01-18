@@ -18,7 +18,7 @@
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 
 namespace inet {
 
@@ -111,7 +111,7 @@ void RtpPayloadSender::handleMessage(cMessage *msg)
 void RtpPayloadSender::initializeSenderModule(RtpInnerPacket *rinpIn)
 {
     EV_TRACE << "initializeSenderModule Enter" << endl;
-    _mtu = rinpIn->getMTU();
+    _mtu = rinpIn->getMtu();
     _ssrc = rinpIn->getSsrc();
     const char *fileName = rinpIn->getFileName();
     openSourceFile(fileName);

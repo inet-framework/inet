@@ -35,7 +35,7 @@ namespace inet::rtp;
 //
 class RtpParticipantInfo extends cNamedObject
 {
-    @customize;  // see the generated C++ header for more info
+    @customize;  //FIXME need revise, several custommized functions should be moved to a processing module
 
     abstract uint32 ssrc;
 

@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
