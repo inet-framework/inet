@@ -18,10 +18,6 @@ import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.rsvp_te.IntServ;
 import inet.networklayer.rsvp_te.RsvpPacket;
 
-cplusplus {{
-#include "inet/networklayer/rsvp_te/RsvpPacket.h"
-}}
-
 namespace inet;
 
 //
@@ -29,31 +25,47 @@ namespace inet;
 //
 class RsvpResvMsg extends RsvpPacket
 {
-    @customize;
     RsvpHopObj hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RESV_MESSAGE;
 }
+
+cplusplus(RsvpResvMsg) {{
+  public:
+    inline Ipv4Address getNHOP() const { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() const { return getHop().Logical_Interface_Handle; }
+}}
 
 //
 // FIXME missing documentation
 //
 class RsvpResvTear extends RsvpPacket
 {
-    @customize;
     RsvpHopObj hop;
     FlowDescriptorVector flowDescriptor;
     rsvpKind = RTEAR_MESSAGE;
 }
+
+cplusplus(RsvpResvTear) {{
+  public:
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+}}
 
 //
 // FIXME missing documentation
 //
 class RsvpResvError extends RsvpPacket
 {
-    @customize;
     RsvpHopObj hop;
     Ipv4Address errorNode;
     int errorCode;
     rsvpKind = RERROR_MESSAGE;
 }
+
+cplusplus(RsvpResvError) {{
+  public:
+    inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
+    inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
+}}
+

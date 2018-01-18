@@ -20,6 +20,10 @@ import inet.networklayer.rsvp_te.IntServ;
 
 namespace inet;
 
+cplusplus {{
+#define RSVP_TRAFFIC    2
+}}
+
 enum RsvpConstants {
     PATH_MESSAGE   = 1;
     RESV_MESSAGE   = 2;
@@ -43,27 +47,18 @@ class RsvpMessage extends FieldsChunk
 //
 class RsvpPacket extends RsvpMessage
 {
-    @customize;
     SessionObj session;
     bool checksumValid = true;
 }
 
-cplusplus {{
+cplusplus(RsvpPacket) {{
 
 /**
- * RSVP message common part.
+ * RsvpPacket common part.
  *
- * This class adds convenience get() and set() methods to the generated
- * base class, but no extra data.
+ * Adds convenience get() and set() methods to the generated class, but no extra data.
  */
-class INET_API RsvpPacket : public RsvpPacket_Base
-{
   public:
-    RsvpPacket() : RsvpPacket_Base() {}
-    RsvpPacket(const RsvpPacket& other) : RsvpPacket_Base(other) {}
-    RsvpPacket& operator=(const RsvpPacket& other) { RsvpPacket_Base::operator=(other); return *this; }
-    virtual RsvpPacket *dup() const override { return new RsvpPacket(*this); }
-
     inline Ipv4Address getDestAddress() { return getSession().DestAddress; }
     inline int getTunnelId() { return getSession().Tunnel_Id; }
     inline int getExTunnelId() { return getSession().Extended_Tunnel_Id; }
@@ -75,7 +70,6 @@ class INET_API RsvpPacket : public RsvpPacket_Base
                getSession().Tunnel_Id == s->Tunnel_Id &&
                getSession().Extended_Tunnel_Id == s->Extended_Tunnel_Id;
     }
-};
 
 }}
 
