@@ -64,7 +64,7 @@ void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
     MacAddress macSrcAddr;
     auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(packet->popHeader<ProbabilisticBroadcastHeader>()->dupShared());
     packet->removePoppedChunks();
-    auto macAddressInd = packet->getMandatoryTag<MacAddressInd>();
+    auto macAddressInd = packet->_getTag<MacAddressInd>();
     macHeader->setNbHops(macHeader->getNbHops() + 1);
     macSrcAddr = macAddressInd->getSrcAddress();
     delete packet->removeControlInfo();
@@ -287,7 +287,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
     pkt->setFinalDestAddr(broadcastAddress);
     pkt->setAppTtl(timeToLive);
     pkt->setId(getNextID());
-    pkt->setProtocol(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol());
+    pkt->setProtocol(packet->_getTag<PacketProtocolTag>()->getProtocol());
     // clean-up
     delete controlInfo;
 
@@ -336,9 +336,9 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
 void ProbabilisticBroadcast::decapsulate(Packet *packet)
 {
     auto macHeader = packet->popHeader<ProbabilisticBroadcastHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(macHeader->getProtocol());
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(macHeader->getProtocol());
-    packet->ensureTag<L3AddressInd>()->setSrcAddress(macHeader->getSrcAddr());
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(macHeader->getProtocol());
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(macHeader->getProtocol());
+    packet->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(macHeader->getSrcAddr());
 }
 
 /**
@@ -346,9 +346,9 @@ void ProbabilisticBroadcast::decapsulate(Packet *packet)
  */
 void ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
 {
-    pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
+    pMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+    pMsg->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
 }
 
 } // namespace inet

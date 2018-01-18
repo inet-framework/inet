@@ -80,7 +80,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 {
     EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
 
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
 
     //TODO processing link-layer headers when exists
 

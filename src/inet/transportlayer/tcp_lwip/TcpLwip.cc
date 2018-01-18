@@ -165,9 +165,9 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     int interfaceId = -1;
 
     auto tcpsegP = packet->peekHeader<TcpHeader>();
-    srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
-    interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
+    srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+    destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
+    interfaceId = (packet->_getTag<InterfaceInd>())->getInterfaceId();
 
     switch(tcpsegP->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
@@ -413,7 +413,7 @@ struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
 
 void TcpLwip::handleAppMessage(cMessage *msgP)
 {
-    int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
+    int connId = msgP->_getTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
 
@@ -456,7 +456,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
     else if (msgP->arrivedOn("ipIn")) {
         // must be a Packet
         Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = msgP->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = msgP->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
             handleIpInputMessage(pk);
@@ -626,8 +626,8 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
 
     IL3AddressType *addressType = destP.getAddressType();
 
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = packet->ensureTag<L3AddressReq>();
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(srcP);
     addresses->setDestAddress(destP);
     if (conn) {

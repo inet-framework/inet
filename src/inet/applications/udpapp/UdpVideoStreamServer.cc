@@ -89,8 +89,8 @@ void UdpVideoStreamServer::processStreamRequest(Packet *msg)
     cMessage *timer = new cMessage("VideoStreamTmr");
     VideoStreamData *d = &streams[timer->getId()];
     d->timer = timer;
-    d->clientAddr = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    d->clientPort = msg->getMandatoryTag<L4PortInd>()->getSrcPort();
+    d->clientAddr = msg->_getTag<L3AddressInd>()->getSrcAddress();
+    d->clientPort = msg->_getTag<L4PortInd>()->getSrcPort();
     d->videoSize = (*videoSize);
     d->bytesLeft = d->videoSize;
     d->numPkSent = 0;

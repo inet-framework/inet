@@ -67,8 +67,8 @@ void Ieee80211Portal::encapsulate(Packet *packet)
 #ifdef WITH_ETHERNET
     auto ethernetHeader = EtherEncap::decapsulateMacHeader(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
     packet->removePoppedChunks();
-    packet->ensureTag<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
-    packet->ensureTag<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
+    packet->_addTagIfAbsent<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
+    packet->_addTagIfAbsent<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
     if (isIeee8023Header(*ethernetHeader))
         // check that the packet already has an LLC header
         packet->peekHeader<Ieee8022LlcHeader>();
@@ -102,13 +102,13 @@ void Ieee80211Portal::decapsulate(Packet *packet)
         }
     }
     const auto& ethernetHeader = makeShared<EthernetMacHeader>();
-    ethernetHeader->setSrc(packet->getMandatoryTag<MacAddressInd>()->getSrcAddress());
-    ethernetHeader->setDest(packet->getMandatoryTag<MacAddressInd>()->getDestAddress());
+    ethernetHeader->setSrc(packet->_getTag<MacAddressInd>()->getSrcAddress());
+    ethernetHeader->setDest(packet->_getTag<MacAddressInd>()->getDestAddress());
     ethernetHeader->setTypeOrLength(typeOrLength);
     packet->insertHeader(ethernetHeader);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET

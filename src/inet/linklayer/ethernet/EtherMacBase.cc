@@ -395,7 +395,7 @@ void EtherMacBase::decapsulate(Packet *packet)
     auto phyHeader = packet->popHeader<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 }
 
 //FIXME should use it in EtherMac, EtherMacFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.

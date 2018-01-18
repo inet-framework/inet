@@ -120,7 +120,7 @@ void EtherMacFullDuplex::startFrameTransmission()
 
     // send
     EV_INFO << "Transmission of " << frame << " started.\n";
-    frame->clearTags();
+    frame->_clearTags();
     auto signal = new EthernetSignal(frame->getName());
     if (sendRawBytes) {
         signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
@@ -347,9 +347,9 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     if (interfaceEntry)
-        packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);

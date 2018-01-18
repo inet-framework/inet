@@ -49,7 +49,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setSrcAddress(Ipv4Address("192.168.1.1"));
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -58,7 +58,7 @@ void TestApp::initialize()
         const auto& ipv6Header = makeShared<Ipv6Header>();
         ipv6Header->setSrcAddress(Ipv6Address("fe80::1122:3344:5566"));
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -67,7 +67,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(Ipv4Address("192.168.1.1"));
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -76,7 +76,7 @@ void TestApp::initialize()
         const auto& ipv6Header = makeShared<Ipv6Header>();
         ipv6Header->setDestAddress(Ipv6Address("fe80::1122:3344:5566"));
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -88,7 +88,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -100,7 +100,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -112,7 +112,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -121,7 +121,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setTypeOfService(0x2e);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -130,7 +130,7 @@ void TestApp::initialize()
         const auto& ipv6Header = makeShared<Ipv6Header>();
         ipv6Header->setTrafficClass(0x2e);
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -139,7 +139,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setSrcAddress(Ipv4Address("192.168.2.1"));    
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -148,7 +148,7 @@ void TestApp::initialize()
         const auto& ipv6Header = makeShared<Ipv6Header>();
         ipv6Header->setSrcAddress(Ipv6Address("fe80::1"));
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -157,7 +157,7 @@ void TestApp::initialize()
         const auto& ipv4Header = makeShared<Ipv4Header>();
         ipv4Header->setDestAddress(Ipv4Address("192.168.2.1"));    
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -166,7 +166,7 @@ void TestApp::initialize()
         const auto& ipv6Header = makeShared<Ipv6Header>();
         ipv6Header->setDestAddress(Ipv6Address("fe80::1"));
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -178,7 +178,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -190,7 +190,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv6Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -202,7 +202,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv4Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 
@@ -214,7 +214,7 @@ void TestApp::initialize()
         packet->insertHeader(udpPacket);
         ipv6Header->setProtocolId(IP_PROT_UDP);
         packet->insertHeader(ipv6Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         send(packet, "out");
     }
 
@@ -222,7 +222,7 @@ void TestApp::initialize()
         Packet *packet = new Packet("ipv4-18");
         const auto& ipv4Header = makeShared<Ipv4Header>();
         packet->insertHeader(ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "out");
     }
 }

@@ -149,13 +149,13 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
-    auto mode = packet->getMandatoryTag<Ieee80211ModeInd>()->getMode();
+    auto mode = packet->_getTag<Ieee80211ModeInd>()->getMode();
     const auto& phyHeader = packet->popHeader<Ieee80211PhyHeader>();
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popTrailer(tailLength + paddingLength);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
 }
 
 } // namespace physicallayer

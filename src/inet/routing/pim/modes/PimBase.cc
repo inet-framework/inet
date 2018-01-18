@@ -178,12 +178,12 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     msg->setChunkLength(B(byteLength));
     pk->insertHeader(msg);
-    pk->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    pk->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
-    pk->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    pk->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    pk->ensureTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
-    pk->ensureTag<HopLimitReq>()->setHopLimit(1);
+    pk->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    pk->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
+    pk->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    pk->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    pk->_addTagIfAbsent<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
+    pk->_addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, pk);
 
@@ -192,9 +192,9 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
 void PimBase::processHelloPacket(Packet *packet)
 {
-    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int interfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
 
-    Ipv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address address = packet->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
     const auto& pimPacket = packet->peekHeader<PimHello>();
     int version = pimPacket->getVersion();
 

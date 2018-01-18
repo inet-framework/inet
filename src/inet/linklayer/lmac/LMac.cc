@@ -664,11 +664,11 @@ void LMac::findNewSlot()
 void LMac::decapsulate(Packet *packet)
 {
     const auto& lmacHeader = packet->popHeader<LMacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->_addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
+    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -684,10 +684,10 @@ void LMac::encapsulate(Packet *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = netwPkt->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    auto dest = netwPkt->_getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
     pkt->setDestAddr(dest);
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->_getTag<PacketProtocolTag>()->getProtocol()));
 
     //delete the control info
     delete netwPkt->removeControlInfo();

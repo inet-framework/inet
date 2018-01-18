@@ -52,9 +52,9 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
         emit(pkSignal, pk);
 
         // determine its source address/port
-        L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-        int srcPort = pk->getMandatoryTag<L4PortInd>()->getSrcPort();
-        pk->clearTags();
+        L3Address remoteAddress = pk->_getTag<L3AddressInd>()->getSrcAddress();
+        int srcPort = pk->_getTag<L4PortInd>()->getSrcPort();
+        pk->_clearTags();
         pk->removePoppedChunks();
 
         // send back

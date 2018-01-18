@@ -157,7 +157,7 @@ void AckingMac::startTransmitting(Packet *msg)
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
-    MacAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MacAddress dest = msg->_getTag<MacAddressReq>()->getDestAddress();
     encapsulate(check_and_cast<Packet *>(msg));
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
@@ -227,7 +227,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
     if (message == ackTimeoutMsg) {
         EV_DETAIL << "AckingMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
         auto macHeader = lastSentPk->popHeader<AckingMacHeader>();
-        lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+        lastSentPk->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
         // packet lost
         emit(linkBreakSignal, lastSentPk);
         delete lastSentPk;
@@ -263,7 +263,7 @@ void AckingMac::encapsulate(Packet *packet)
 {
     auto macHeader = makeShared<AckingMacHeader>();
     macHeader->setChunkLength(B(headerLength));
-    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
+    auto macAddressReq = packet->_getTag<MacAddressReq>();
     macHeader->setSrc(macAddressReq->getSrcAddress());
     macHeader->setDest(macAddressReq->getDestAddress());
     MacAddress dest = macAddressReq->getDestAddress();
@@ -271,7 +271,7 @@ void AckingMac::encapsulate(Packet *packet)
         macHeader->setSrcModuleId(-1);
     else
         macHeader->setSrcModuleId(getId());
-    macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertHeader(macHeader);
 }
 
@@ -305,12 +305,12 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
 void AckingMac::decapsulate(Packet *packet)
 {
     const auto& macHeader = packet->popHeader<AckingMacHeader>();
-    auto macAddressInd = packet->ensureTag<MacAddressInd>();
+    auto macAddressInd = packet->_addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
 }
 
 } // namespace inet

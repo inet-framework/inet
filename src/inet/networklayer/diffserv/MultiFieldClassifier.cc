@@ -160,7 +160,7 @@ void MultiFieldClassifier::refreshDisplay() const
 
 int MultiFieldClassifier::classifyPacket(Packet *packet)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {

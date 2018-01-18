@@ -54,12 +54,12 @@ void TcpSinkApp::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we close too
-        int socketId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+        int socketId = msg->_getTag<SocketInd>()->getSocketId();
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
-        msg->clearTags();
-        msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-        msg->ensureTag<SocketReq>()->setSocketId(socketId);
+        msg->_clearTags();
+        msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+        msg->_addTagIfAbsent<SocketReq>()->setSocketId(socketId);
         send(msg, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {

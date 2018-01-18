@@ -43,7 +43,7 @@ void Ieee8022Llc::handleMessage(cMessage *message)
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
-        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->getTag<Ieee802SapInd>() != nullptr)
+        if (packet->_getTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->_findTag<Ieee802SapInd>() != nullptr)
             send(packet, "upperLayerOut");
         else {
             EV_WARN << "Unknown protocol or SAP, dropping packet\n";
@@ -59,7 +59,7 @@ void Ieee8022Llc::handleMessage(cMessage *message)
 
 void Ieee8022Llc::encapsulate(Packet *frame)
 {
-    auto protocolTag = frame->getTag<PacketProtocolTag>();
+    auto protocolTag = frame->_findTag<PacketProtocolTag>();
     const Protocol *protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     int ethType = -1;
     int snapOui = -1;
@@ -89,14 +89,14 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             llcHeader->setControl(3);
         }
         else {
-            auto sapReq = frame->getMandatoryTag<Ieee802SapReq>();
+            auto sapReq = frame->_getTag<Ieee802SapReq>();
             llcHeader->setSsap(sapReq->getSsap());
             llcHeader->setDsap(sapReq->getDsap());
             llcHeader->setControl(3);       //TODO get from sapTag
         }
         frame->insertHeader(llcHeader);
     }
-    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+    frame->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)
@@ -104,7 +104,7 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     const Protocol *payloadProtocol = nullptr;
     const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
 
-    auto sapInd = frame->ensureTag<Ieee802SapInd>();
+    auto sapInd = frame->_addTagIfAbsent<Ieee802SapInd>();
     sapInd->setSsap(llcHeader->getSsap());
     sapInd->setDsap(llcHeader->getDsap());
     //TODO control?
@@ -121,12 +121,12 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     else {
         int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
         payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
-        auto sapInd = frame->ensureTag<Ieee802SapInd>();
+        auto sapInd = frame->_addTagIfAbsent<Ieee802SapInd>();
         sapInd->setSsap(llcHeader->getSsap());
         sapInd->setDsap(llcHeader->getDsap());
     }
-    frame->ensureTag<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    frame->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    frame->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    frame->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
 } // namespace inet

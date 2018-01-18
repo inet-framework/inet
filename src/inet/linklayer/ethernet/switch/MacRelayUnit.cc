@@ -66,7 +66,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 {
     //FIXME : should handle multicast mac addresses correctly
 
-    int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int inputInterfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
 
     numProcessedFrames++;
 
@@ -95,8 +95,8 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
-        packet->clearTags();
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        packet->_clearTags();
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         packet->removePoppedChunks();
         emit(packetSentToLowerSignal, packet);
         send(packet, "ifOut");
@@ -109,7 +109,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
 void MacRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
 {
-    packet->clearTags();
+    packet->_clearTags();
     packet->removePoppedChunks();
     int numPorts = ift->getNumInterfaces();
     for (int i = 0; i < numPorts; ++i) {
@@ -119,7 +119,7 @@ void MacRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
         int ifId = ie->getInterfaceId();
         if (inputInterfaceId != ifId) {
             Packet *dupFrame = packet->dup();
-            dupFrame->ensureTag<InterfaceReq>()->setInterfaceId(ifId);
+            dupFrame->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifId);
             emit(packetSentToLowerSignal, dupFrame);
             send(dupFrame, "ifOut");
         }

@@ -242,7 +242,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
 
     pkt->setChunkLength(B(headerLength));
 
-    auto addrTag = packet->getTag<L3AddressReq>();
+    auto addrTag = packet->_findTag<L3AddressReq>();
     if (addrTag == nullptr) {
         EV << "WiseRoute warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
@@ -258,7 +258,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol()));
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
@@ -347,10 +347,10 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 void WiseRoute::decapsulate(Packet *packet)
 {
     auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(wiseRouteHeader->getProtocol());
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(wiseRouteHeader->getProtocol());
-    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    packet->ensureTag<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(wiseRouteHeader->getProtocol());
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(wiseRouteHeader->getProtocol());
+    packet->_addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
     nbHops = nbHops + wiseRouteHeader->getNbHops();
 }
 
@@ -393,9 +393,9 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
  */
 void WiseRoute::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
 {
-    pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->_addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
+    pMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+    pMsg->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
 }
 
 } // namespace inet

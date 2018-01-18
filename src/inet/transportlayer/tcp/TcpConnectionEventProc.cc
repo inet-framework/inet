@@ -175,7 +175,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
     while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
     {
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->ensureTag<SocketInd>()->setSocketId(socketId);
+        dataMsg->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
         sendToApp(dataMsg);
     }
 }

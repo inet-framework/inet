@@ -46,7 +46,7 @@ void MessageHandler::messageReceived(cMessage *message)
     }
     else {
         Packet *pk = check_and_cast<Packet *>(message);
-        auto protocol = pk->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = pk->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4) {
             EV_ERROR << "ICMP error received -- discarding\n";
             delete message;
@@ -196,7 +196,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
-        int interfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+        int interfaceId = pk->_getTag<InterfaceInd>()->getInterfaceId();
         AreaId areaID = packet->getAreaID();
         Area *area = router->getAreaByID(areaID);
 
@@ -230,8 +230,8 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                 }
             }
             if (intf != nullptr) {
-                Ipv4Address sourceAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-                Ipv4Address destinationAddress = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+                Ipv4Address sourceAddress = pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                Ipv4Address destinationAddress = pk->_getTag<L3AddressInd>()->getDestAddress().toIPv4();
                 Ipv4Address allDRouters = Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 
@@ -311,10 +311,10 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
 void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, int outputIfIndex, short ttl)
 {
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
-    packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
-    packet->ensureTag<L3AddressReq>()->setDestAddress(destination);
-    packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
+    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outputIfIndex);
+    packet->_addTagIfAbsent<L3AddressReq>()->setDestAddress(destination);
+    packet->_addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
     const auto& ospfPacket = packet->peekHeader<OspfPacket>();
 
     switch (ospfPacket->getType()) {
@@ -362,7 +362,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, int out
             break;
     }
 
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     ospfModule->send(packet, "ipOut");
 }
 

@@ -414,7 +414,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
 
         // get rid of the encapsulation of the Ipv6 module
         packet->popHeader<Ipv6Header>();
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
             // construct Type 2 Routing Header (RFC 3775 - 6.4.1)
@@ -430,7 +430,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             t2RH->setAddress(0, rh2);
 
             // append T2RH to routing headers
-            packet->ensureTag<Ipv6ExtHeaderReq>()->addExtensionHeader(t2RH);
+            packet->_addTagIfAbsent<Ipv6ExtHeaderReq>()->addExtensionHeader(t2RH);
 
             EV_INFO << "Added Type 2 Routing Header." << endl;
         }
@@ -443,12 +443,12 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             haOpt->setHomeAddress(rh2);
 
             // append HA option to routing headers
-            packet->ensureTag<Ipv6ExtHeaderReq>()->addExtensionHeader(haOpt);
+            packet->_addTagIfAbsent<Ipv6ExtHeaderReq>()->addExtensionHeader(haOpt);
 
             EV_INFO << "Added Home Address Option header." << endl;
         }
 
-        auto addresses = packet->ensureTag<L3AddressReq>();
+        auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
         // new src is tunnel entry (either CoA or CN)
         addresses->setSrcAddress(src);
         // copy old dest addr
@@ -461,8 +461,8 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
       // normal tunnel - just modify controlInfo and send
       // datagram back to Ipv6 module for encapsulation
 
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    auto addresses = packet->ensureTag<L3AddressReq>();
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+    auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(tunnels[vIfIndex].entry);
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
@@ -477,7 +477,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // decapsulation is performed in Ipv6 module
-    Ipv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
 #ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel
@@ -510,7 +510,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 #ifdef WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
     if (rt->isMobileNode() && (srcAddr == ie->ipv6Data()->getHomeAgentAddress())
         && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
     {

@@ -67,7 +67,7 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
 {
     auto phyHeader = packet->peekHeader<UnitDiskPhyHeader>();
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
-    auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<Packet *>(packet)->_findTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
     auto dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();

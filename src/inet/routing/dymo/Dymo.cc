@@ -411,18 +411,18 @@ void Dymo::sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
     Packet *udpPacket = new Packet(packet->getClassName());
     auto udpHeader = makeShared<UdpHeader>();
-    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // In its default mode of operation, AODVv2 uses the Udp port 269 [RFC5498] to carry protocol packets.
     udpHeader->setSourcePort(DYMO_UDP_PORT);
     udpHeader->setDestinationPort(DYMO_UDP_PORT);
-    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
-        udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    auto addresses = udpPacket->ensureTag<L3AddressReq>();
+        udpPacket->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    auto addresses = udpPacket->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(nextHop);
     // The Ipv4 TTL (Ipv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
-    udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
+    udpPacket->_addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
     udpPacket->insertHeader(udpHeader);
     udpPacket->insertAtEnd(packet);
     sendUDPPacket(udpPacket, delay);
@@ -456,7 +456,7 @@ bool Dymo::permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     //    5.4. AODVv2 Packet Header Fields and Information Elements
     //    If a packet is received with a value other than 255, any AODVv2
     //    message contained in the packet MUST be disregarded by AODVv2.
-    if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255)
+    if (packet->_getTag<HopLimitInd>()->getHopLimit() != 255)
         return false;
     // 2. If the RteMsg.<msg-hop-limit> is equal to 0, then the message is disregarded.
     if (rteMsg->getHopLimit() == 0)
@@ -940,8 +940,8 @@ void Dymo::processRERR(Packet *packet, const Ptr<const RERR>& rerrIncoming)
     if (rerrIncoming->getHopLimit() == 0 || rerrIncoming->getUnreachableNodeArraySize() == 0)
         return;
     else {
-        L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-        auto incomingIfTag = packet->getMandatoryTag<InterfaceInd>();
+        L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+        auto incomingIfTag = packet->_getTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
         // route table for a route using longest prefix matching.  If no such
         // Route is found, processing is complete for that UnreachableNode.Address.
@@ -1135,10 +1135,10 @@ void Dymo::updateRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const Ad
     targetAddressToSequenceNumber[address] = sequenceNumber;
     // Route.NextHopAddress := IP.SourceAddress (i.e., an address of the node from which the RteMsg was received)
     // note that Dymo packets are not routed on the IP level, so we can use the source address here
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
     route->setNextHop(srcAddr);
     // Route.NextHopInterface is set to the interface on which RteMsg was received
-    InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((packet->getMandatoryTag<InterfaceInd>())->getInterfaceId());
+    InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((packet->_getTag<InterfaceInd>())->getInterfaceId());
     if (interfaceEntry)
         route->setInterface(interfaceEntry);
     // Route.Broken flag := FALSE

@@ -57,7 +57,7 @@ void PimSplitter::handleMessage(cMessage *msg)
 
     if (arrivalGate == ipIn) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4) {
             EV_WARN << "Received ICMP error " << msg->getName() <<  ", ignored\n";
             delete msg;
@@ -71,7 +71,7 @@ void PimSplitter::handleMessage(cMessage *msg)
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
-        msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         send(msg, ipOut);
     }
     else
@@ -82,7 +82,7 @@ void PimSplitter::processPIMPacket(Packet *pkt)
 {
     const auto& pimPkt = pkt->peekHeader<PimPacket>();
     (void)pimPkt;       // unused variable
-    InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(pkt->_getTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 
     EV_INFO << "Received packet on interface '" << ie->getInterfaceName() << "'" << endl;

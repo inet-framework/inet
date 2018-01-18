@@ -1739,14 +1739,14 @@ static void testChunkTags()
     auto tag1 = chunk1->addTag<CreationTimeTag>(B(0), B(20));
     tag1->setCreationTime(42);
     chunk1->markImmutable();
-    const auto& tag2 = chunk1->getTag<CreationTimeTag>();
+    const auto& tag2 = chunk1->_findTag<CreationTimeTag>();
     ASSERT(tag2 != nullptr);
     ASSERT(tag2->getCreationTime() == 42);
 
     // SliceChunk
     const auto& sliceChunk1 = chunk1->peek(B(10), B(10));
     ASSERT(sliceChunk1->getNumTags() == 1);
-    const auto& tag3 = sliceChunk1->getTag<CreationTimeTag>();
+    const auto& tag3 = sliceChunk1->_findTag<CreationTimeTag>();
     ASSERT(tag3 != nullptr);
     ASSERT(tag3->getCreationTime() == 42);
 
@@ -1754,7 +1754,7 @@ static void testChunkTags()
     auto sequenceChunk = makeShared<SequenceChunk>();
     sequenceChunk->insertAtEnd(chunk1);
     ASSERT(sequenceChunk->getNumTags() == 1);
-    const auto& tag4 = sequenceChunk->getTag<CreationTimeTag>();
+    const auto& tag4 = sequenceChunk->_findTag<CreationTimeTag>();
     ASSERT(tag4 != nullptr);
     ASSERT(tag4->getCreationTime() == 42);
 }

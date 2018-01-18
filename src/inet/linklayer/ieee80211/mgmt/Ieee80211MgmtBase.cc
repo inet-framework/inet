@@ -93,7 +93,7 @@ void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
 {
     ASSERT(isOperational);
-    msg->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
+    msg->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     send(msg, "upperLayerOut");
 }
 

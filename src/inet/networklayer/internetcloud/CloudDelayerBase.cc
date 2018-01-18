@@ -78,9 +78,9 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram
 {
     Enter_Method_Silent();
 
-    auto ifInd = datagram->getMandatoryTag<InterfaceInd>();
+    auto ifInd = datagram->_getTag<InterfaceInd>();
     int srcID = ifInd ? ifInd->getInterfaceId() : -1;
-    int destID = datagram->getMandatoryTag<InterfaceReq>()->getInterfaceId();
+    int destID = datagram->_getTag<InterfaceReq>()->getInterfaceId();
 
     simtime_t propDelay;
     bool isDrop;

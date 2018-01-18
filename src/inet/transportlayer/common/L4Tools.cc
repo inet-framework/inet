@@ -31,7 +31,7 @@ namespace inet {
 
 const Protocol *findTransportProtocol(Packet *packet)
 {
-    auto transportProtocolInd = packet->getTag<TransportProtocolInd>();
+    auto transportProtocolInd = packet->_findTag<TransportProtocolInd>();
     return transportProtocolInd == nullptr ? nullptr : transportProtocolInd->getProtocol();
 }
 
@@ -46,7 +46,7 @@ const Protocol& getProtocolId(Packet *packet)
 
 const Ptr<const TransportHeaderBase> findTransportProtocolHeader(Packet *packet)
 {
-    auto transportProtocolInd = packet->getTag<TransportProtocolInd>();
+    auto transportProtocolInd = packet->_findTag<TransportProtocolInd>();
     return transportProtocolInd == nullptr ? nullptr : dynamicPtrCast<const TransportHeaderBase>(transportProtocolInd->getTransportProtocolHeader());
 }
 
@@ -86,7 +86,7 @@ const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet,
 
 void insertTransportProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<TransportHeaderBase>& header)
 {
-    auto transportProtocolInd = packet->ensureTag<TransportProtocolInd>();
+    auto transportProtocolInd = packet->_addTagIfAbsent<TransportProtocolInd>();
     transportProtocolInd->setProtocol(&protocol);
     transportProtocolInd->setTransportProtocolHeader(header);
     insertProtocolHeader(packet, protocol, header);

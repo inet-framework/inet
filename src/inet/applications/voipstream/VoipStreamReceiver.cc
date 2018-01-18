@@ -147,8 +147,8 @@ void VoipStreamReceiver::createConnection(Packet *pk)
     ASSERT(curConn.offline);
 
     const auto& vp = pk->peekHeader<VoipStreamPacket>();
-    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
-    auto ports = pk->getMandatoryTag<L4PortInd>();
+    auto l3Addresses = pk->_getTag<L3AddressInd>();
+    auto ports = pk->_getTag<L4PortInd>();
 
     curConn.srcAddr = l3Addresses->getSrcAddress();
     curConn.srcPort = ports->getSrcPort();
@@ -188,8 +188,8 @@ void VoipStreamReceiver::checkSourceAndParameters(Packet *pk)
     ASSERT(!curConn.offline);
 
     const auto& vp = pk->peekHeader<VoipStreamPacket>();
-    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
-    auto ports = pk->getMandatoryTag<L4PortInd>();
+    auto l3Addresses = pk->_getTag<L3AddressInd>();
+    auto ports = pk->_getTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
     L3Address destAddr = l3Addresses->getDestAddress();
 

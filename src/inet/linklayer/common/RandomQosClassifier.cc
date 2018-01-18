@@ -24,7 +24,7 @@ Define_Module(RandomQosClassifier);
 
 void RandomQosClassifier::handleMessage(cMessage *msg)
 {
-    msg->ensureTag<UserPriorityReq>()->setUserPriority(intrand(8));
+    msg->_addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
     send(msg, "out");
 }
 

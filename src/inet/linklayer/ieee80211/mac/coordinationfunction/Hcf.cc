@@ -714,7 +714,7 @@ void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHead
 void Hcf::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode) const
  {
     ASSERT(mode != nullptr);
-    packet->ensureTag<Ieee80211ModeReq>()->setMode(mode);
+    packet->_addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
 }
 
 

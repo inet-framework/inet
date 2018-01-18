@@ -63,7 +63,7 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const L
     auto receivedPacket = transmittedPacket->dup();
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
-    receivedPacket->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
+    receivedPacket->_addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
     return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
 }
 

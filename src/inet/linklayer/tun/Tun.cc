@@ -47,16 +47,16 @@ void Tun::handleMessage(cMessage *message)
 {
     if (message->arrivedOn("upperLayerIn")) {
         if (message->isPacket()) {
-            auto socketReq = message->getTag<SocketReq>();
+            auto socketReq = message->_findTag<SocketReq>();
             // check if packet is from app by finding SocketReq with sockedId that is in socketIds
             auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
             if (socketReq != nullptr && contains(socketIds, sId)) {
                 ASSERT(message->getControlInfo() == nullptr);
                 // TODO: should we determine the network protocol by looking at the packet?!
-                message->clearTags();
-                message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                message->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-                message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+                message->_clearTags();
+                message->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                message->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+                message->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
                 emit(packetSentToUpperSignal, message);
                 send(message, "upperLayerOut");
             }
@@ -65,12 +65,12 @@ void Tun::handleMessage(cMessage *message)
                 ASSERT(message->getControlInfo() == nullptr);
                 for (int socketId : socketIds) {
                     cMessage *copy = message->dup();
-                    copy->clearTags();
-                    copy->ensureTag<SocketInd>()->setSocketId(socketId);
-                    copy->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                    copy->ensureTag<PacketProtocolTag>()->setProtocol(message->getMandatoryTag<PacketProtocolTag>()->getProtocol());
-                    auto npTag = message->getMandatoryTag<NetworkProtocolInd>();
-                    auto newnpTag = copy->ensureTag<NetworkProtocolInd>();
+                    copy->_clearTags();
+                    copy->_addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+                    copy->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                    copy->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(message->_getTag<PacketProtocolTag>()->getProtocol());
+                    auto npTag = message->_getTag<NetworkProtocolInd>();
+                    auto newnpTag = copy->_addTagIfAbsent<NetworkProtocolInd>();
                     *newnpTag = *npTag;
                     send(copy, "upperLayerOut");
                 }
@@ -79,7 +79,7 @@ void Tun::handleMessage(cMessage *message)
         }
         else {
             cObject *controlInfo = message->getControlInfo();
-            int socketId = message->getMandatoryTag<SocketReq>()->getSocketId();
+            int socketId = message->_getTag<SocketReq>()->getSocketId();
             if (dynamic_cast<TunOpenCommand *>(controlInfo) != nullptr) {
                 auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
                 if (it != socketIds.end())

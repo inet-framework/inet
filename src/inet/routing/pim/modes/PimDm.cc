@@ -219,7 +219,7 @@ void PimDm::processJoinPrunePacket(Packet *pk)
 
     emit(rcvdJoinPrunePkSignal, pk);
 
-    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
+    auto ifTag = pk->_getTag<InterfaceInd>();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(ifTag->getInterfaceId());
 
     if (!incomingInterface) {
@@ -390,8 +390,8 @@ void PimDm::processGraftPacket(Packet *pk)
 
     emit(rcvdGraftPkSignal, pk);
 
-    Ipv4Address sender = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    Ipv4Address sender = pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->_getTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
     if (pkt->getUpstreamNeighborAddress() != incomingInterface->ipv4Data()->getIPAddress()) {
@@ -544,7 +544,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
 
     emit(rcvdGraftAckPkSignal, pk);
 
-    Ipv4Address destAddress = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+    Ipv4Address destAddress = pk->_getTag<L3AddressInd>()->getDestAddress().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
@@ -600,8 +600,8 @@ void PimDm::processStateRefreshPacket(Packet *pk)
     }
 
     // check if State Refresh msg has came from RPF neighbor
-    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
-    Ipv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    auto ifTag = pk->_getTag<InterfaceInd>();
+    Ipv4Address srcAddr = pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
     UpstreamInterface *upstream = route->upstreamInterface;
     if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != srcAddr) {
         delete pk;
@@ -688,8 +688,8 @@ void PimDm::processStateRefreshPacket(Packet *pk)
 void PimDm::processAssertPacket(Packet *pk)
 {
     const auto& pkt = pk->peekHeader<PimAssert>();
-    int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    Ipv4Address srcAddrFromTag = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    int incomingInterfaceId = pk->_getTag<InterfaceInd>()->getInterfaceId();
+    Ipv4Address srcAddrFromTag = pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
     Ipv4Address source = pkt->getSourceAddress();
     Ipv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
@@ -1597,8 +1597,8 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
 {
     EV_INFO << "Sending GraftAck message.\n";
 
-    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
-    auto addressInd = pk->getMandatoryTag<L3AddressInd>();
+    auto ifTag = pk->_getTag<InterfaceInd>();
+    auto addressInd = pk->_getTag<L3AddressInd>();
     Ipv4Address destAddr = addressInd->getSrcAddress().toIPv4();
     Ipv4Address srcAddr = addressInd->getDestAddress().toIPv4();
     int outInterfaceId = ifTag->getInterfaceId();
@@ -1665,14 +1665,14 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
 
 void PimDm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, int outInterfaceId)
 {
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    auto addresses = packet->ensureTag<L3AddressReq>();
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    packet->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    auto addresses = packet->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(srcAddr);
     addresses->setDestAddress(destAddr);
-    packet->ensureTag<HopLimitReq>()->setHopLimit(1);
+    packet->_addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
     send(packet, "ipOut");
 }
 

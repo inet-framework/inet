@@ -29,7 +29,7 @@ namespace tcp {
 
 INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
-    auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto networkProtocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::tcp) {
         packet->removeFromBeginning(networkHeader->getChunkLength());

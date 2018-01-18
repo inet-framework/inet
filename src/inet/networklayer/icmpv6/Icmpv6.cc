@@ -98,7 +98,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             delete packet;
         }
         else {
-            packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+            packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
             send(packet, "transportOut");
         }
     }
@@ -170,14 +170,14 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
     insertCrc(replyHeader, replyPacket);
     replyPacket->insertHeader(replyHeader);
 
-    auto addressInd = requestPacket->getMandatoryTag<L3AddressInd>();
-    replyPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    auto addressReq = replyPacket->ensureTag<L3AddressReq>();
+    auto addressInd = requestPacket->_getTag<L3AddressInd>();
+    replyPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    auto addressReq = replyPacket->_addTagIfAbsent<L3AddressReq>();
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
     if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        Ipv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
+        Ipv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->_getTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
         addressReq->setSrcAddress(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used
@@ -242,8 +242,8 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     const auto& ipv6Header = origDatagram->peekHeader<Ipv6Header>();
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
-        errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->ensureTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMsg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+        errorMsg->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -256,15 +256,15 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 
 void Icmpv6::sendToIP(Packet *msg, const Ipv6Address& dest)
 {
-    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
+    msg->_addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     sendToIP(msg);
 }
 
 void Icmpv6::sendToIP(Packet *msg)
 {
     // assumes Ipv6ControlInfo is already attached
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     send(msg, "ipv6Out");
 }
 

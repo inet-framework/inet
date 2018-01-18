@@ -38,25 +38,25 @@ void MessageDispatcher::initialize()
 
 int MessageDispatcher::computeSocketReqSocketId(cMessage *message)
 {
-    auto *socketReq = message->getTag<SocketReq>();
+    auto *socketReq = message->_findTag<SocketReq>();
     return socketReq != nullptr ? socketReq->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeSocketIndSocketId(cMessage *message)
 {
-    auto *socketInd = message->getTag<SocketInd>();
+    auto *socketInd = message->_findTag<SocketInd>();
     return socketInd != nullptr ? socketInd->getSocketId() : -1;
 }
 
 int MessageDispatcher::computeInterfaceId(cMessage *message)
 {
-    auto interfaceReq = message->getTag<InterfaceReq>();
+    auto interfaceReq = message->_findTag<InterfaceReq>();
     return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
 }
 
 const Protocol *MessageDispatcher::computeProtocol(cMessage *message)
 {
-    auto protocolReq = message->getTag<DispatchProtocolReq>();;
+    auto protocolReq = message->_findTag<DispatchProtocolReq>();;
     return protocolReq != nullptr ? protocolReq->getProtocol() : nullptr;
 }
 

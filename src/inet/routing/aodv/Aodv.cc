@@ -133,7 +133,7 @@ void Aodv::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown self message");
     }
     else {
-        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
 
         if (protocol == &Protocol::icmpv4) {
             IcmpHeader *icmpPacket = check_and_cast<IcmpHeader *>(msg);
@@ -148,9 +148,9 @@ void Aodv::handleMessage(cMessage *msg)
         else if (true) {  //FIXME protocol == ???
             Packet *udpPacket = check_and_cast<Packet *>(msg);
             udpPacket->popHeader<UdpHeader>();
-            L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            L3Address sourceAddr = udpPacket->_getTag<L3AddressInd>()->getSrcAddress();
             // KLUDGE: I added this -1 after TTL decrement has been moved in Ipv4
-            unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit() - 1;
+            unsigned int arrivalPacketTTL = udpPacket->_getTag<HopLimitInd>()->getHopLimit() - 1;
             const auto& ctrlPacket = udpPacket->popHeader<AodvControlPacket>();
 //            ctrlPacket->transferTagsFrom(msg);
 
@@ -735,13 +735,13 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address&
     udpHeader->setDestinationPort(aodvUDPPort);
     udpPacket->insertHeader(udpHeader);
     // TODO: was udpPacket->transferTagsFrom(packet);
-    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
-    auto addresses = udpPacket->ensureTag<L3AddressReq>();
+    udpPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
+    auto addresses = udpPacket->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(getSelfIPAddress());
     addresses->setDestAddress(destAddr);
-    udpPacket->ensureTag<HopLimitReq>()->setHopLimit(timeToLive);
+    udpPacket->_addTagIfAbsent<HopLimitReq>()->setHopLimit(timeToLive);
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();

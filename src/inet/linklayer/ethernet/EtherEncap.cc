@@ -107,7 +107,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 
     int typeOrLength = -1;
     if (!useSNAP) {
-        auto protocolTag = packet->getTag<PacketProtocolTag>();
+        auto protocolTag = packet->_findTag<PacketProtocolTag>();
         if (protocolTag) {
             const Protocol *protocol = protocolTag->getProtocol();
             if (protocol) {
@@ -121,7 +121,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
         Ieee8022Llc::encapsulate(packet);
         typeOrLength = packet->getByteLength();
     }
-    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
+    auto macAddressReq = packet->_getTag<MacAddressReq>();
     const auto& ethHeader = makeShared<EthernetMacHeader>();
     ethHeader->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
     ethHeader->setDest(macAddressReq->getDestAddress());
@@ -130,7 +130,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 }
@@ -173,7 +173,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
     packet->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
 
     // add Ieee802Ctrl to packet
-    auto macAddressInd = packet->ensureTag<MacAddressInd>();
+    auto macAddressInd = packet->_addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(ethHeader->getSrc());
     macAddressInd->setDestAddress(ethHeader->getDest());
 
@@ -183,10 +183,10 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else if (isEth2Header(*ethHeader)) {
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength()));
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength()));
     }
     return ethHeader;
 }
@@ -202,7 +202,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
     }
     else if (isEth2Header(*ethHeader)) {
         payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(payloadProtocol);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     }
 
     return ethHeader;
@@ -213,9 +213,9 @@ void EtherEncap::processFrameFromMAC(Packet *packet)
     // decapsulate and attach control info
     decapsulateMacLlcSnap(packet);
 
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
     if (protocol)
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+        packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
 
     EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
               << packet->getName() << "' to higher layer\n";
@@ -253,7 +253,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

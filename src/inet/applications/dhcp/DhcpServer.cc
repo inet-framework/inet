@@ -159,7 +159,7 @@ void DhcpServer::processDHCPMessage(Packet *packet)
     const auto& dhcpMsg = packet->peekHeader<DhcpMessage>();
 
     // check that the packet arrived on the interface we are supposed to serve
-    int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int inputInterfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
     if (inputInterfaceId != ie->getInterfaceId()) {
         EV_WARN << "DHCP message arrived on a different interface, dropping\n";
         delete packet;
@@ -506,7 +506,7 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     socket.sendTo(msg, destAddr, destPort);
 }
 

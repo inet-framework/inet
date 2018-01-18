@@ -179,11 +179,11 @@ void Dsdv::handleSelfMessage(cMessage *msg)
         */
         //new control info for DsdvHello
         auto packet = new Packet("Hello", hello);
-        packet->ensureTag<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-        packet->ensureTag<L3AddressReq>()->setSrcAddress(source); //let's try the limited broadcast
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
+        packet->_addTagIfAbsent<L3AddressReq>()->setSrcAddress(source); //let's try the limited broadcast
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+        packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
 
         //broadcast to other nodes the hello message
         send(packet, "ipOut");
@@ -233,11 +233,11 @@ void Dsdv::handleMessage(cMessage *msg)
         // When DSDV module receives DsdvHello from other host
         // it adds/replaces the information in routing table for the one contained in the message
         // but only if it's useful/up-to-date. If not the DSDV module ignores the message.
-        packet->ensureTag<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-        packet->ensureTag<L3AddressReq>()->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
+        packet->_addTagIfAbsent<L3AddressReq>()->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+        packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         ForwardEntry *fhp = nullptr;
         auto recHello = !isForwardHello ? staticPtrCast<DsdvHello>(check_and_cast<Packet *>(msg)->peekData<DsdvHello>()->dupShared()) : nullptr;
         if (isForwardHello) {

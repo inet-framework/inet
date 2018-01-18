@@ -55,8 +55,8 @@ void UdpSocket::sendToUDP(cMessage *msg)
         EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
     EV_TRACE << endl;
 
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
-    msg->ensureTag<SocketReq>()->setSocketId(sockId);
+    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
+    msg->_addTagIfAbsent<SocketReq>()->setSocketId(sockId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
@@ -96,10 +96,10 @@ void UdpSocket::connect(L3Address addr, int port)
 void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
-    auto addressReq = pk->ensureTag<L3AddressReq>();
+    auto addressReq = pk->_addTagIfAbsent<L3AddressReq>();
     addressReq->setDestAddress(destAddr);
     if (destPort != -1)
-        pk->ensureTag<L4PortReq>()->setDestPort(destPort);
+        pk->_addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
     sendToUDP(pk);
 }
 
@@ -296,7 +296,7 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
 
 bool UdpSocket::belongsToSocket(cMessage *msg)
 {
-    int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+    int socketId = msg->_getTag<SocketReq>()->getSocketId();
     return dynamic_cast<UdpControlInfo *>(msg->getControlInfo()) && socketId == sockId;
 }
 
@@ -307,20 +307,20 @@ bool UdpSocket::belongsToAnyUDPSocket(cMessage *msg)
 
 std::string UdpSocket::getReceivedPacketInfo(cPacket *pk)
 {
-    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
-    auto ports = pk->getMandatoryTag<L4PortInd>();
+    auto l3Addresses = pk->_getTag<L3AddressInd>();
+    auto ports = pk->_getTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
     L3Address destAddr = l3Addresses->getDestAddress();
     int srcPort = ports->getSrcPort();
     int destPort = ports->getDestPort();
-    int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    int ttl = pk->getMandatoryTag<HopLimitInd>()->getHopLimit();
+    int interfaceID = pk->_getTag<InterfaceInd>()->getInterfaceId();
+    int ttl = pk->_getTag<HopLimitInd>()->getHopLimit();
 
     std::stringstream os;
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
     os << " TTL=" << ttl;
-    if (auto dscpTag = pk->getTag<DscpInd>())
+    if (auto dscpTag = pk->_findTag<DscpInd>())
         os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;
     return os.str();

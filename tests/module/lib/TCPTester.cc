@@ -176,13 +176,13 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     if (seg == nullptr)
         throw cRuntimeError("Unknown message");
     int segno = fromA ? ++fromASeq : ++fromBSeq;
-//    const Protocol *protInd = pk->getMandatoryTag<ProtocolInd>()->getProtocol();
-//    const Protocol *protReq = pk->getMandatoryTag<ProtocolReq>()->getProtocol();
-//    pk->ensureTag<ProtocolReq>()->setProtocol(protInd);
-//    pk->ensureTag<ProtocolInd>()->setProtocol(protReq);
-    pk->ensureTag<L3AddressInd>()->setSrcAddress(pk->getMandatoryTag<L3AddressReq>()->getSrcAddress());
-    pk->ensureTag<L3AddressInd>()->setDestAddress(pk->getMandatoryTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeMandatoryTag<L3AddressReq>();
+//    const Protocol *protInd = pk->_getTag<ProtocolInd>()->getProtocol();
+//    const Protocol *protReq = pk->_getTag<ProtocolReq>()->getProtocol();
+//    pk->_addTagIfAbsent<ProtocolReq>()->setProtocol(protInd);
+//    pk->_addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
+    pk->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->_getTag<L3AddressReq>()->getSrcAddress());
+    pk->_addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->_getTag<L3AddressReq>()->getDestAddress());
+    delete pk->_removeTag<L3AddressReq>();
 
     // find entry in script
     Command *cmd = NULL;
@@ -282,13 +282,13 @@ void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
         throw cRuntimeError("Unknown message");
     if (fromA) ++fromASeq; else ++fromBSeq;
 
-//    const Protocol *protInd = pk->getMandatoryTag<ProtocolInd>()->getProtocol();
-//    const Protocol *protReq = pk->getMandatoryTag<ProtocolReq>()->getProtocol();
-//    pk->ensureTag<ProtocolReq>()->setProtocol(protInd);
-//    pk->ensureTag<ProtocolInd>()->setProtocol(protReq);
-    pk->ensureTag<L3AddressInd>()->setSrcAddress(pk->getMandatoryTag<L3AddressReq>()->getSrcAddress());
-    pk->ensureTag<L3AddressInd>()->setDestAddress(pk->getMandatoryTag<L3AddressReq>()->getDestAddress());
-    delete pk->removeMandatoryTag<L3AddressReq>();
+//    const Protocol *protInd = pk->_getTag<ProtocolInd>()->getProtocol();
+//    const Protocol *protReq = pk->_getTag<ProtocolReq>()->getProtocol();
+//    pk->_addTagIfAbsent<ProtocolReq>()->setProtocol(protInd);
+//    pk->_addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
+    pk->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->_getTag<L3AddressReq>()->getSrcAddress());
+    pk->_addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->_getTag<L3AddressReq>()->getDestAddress());
+    delete pk->_removeTag<L3AddressReq>();
 
     // decide what to do
     double x = dblrand();

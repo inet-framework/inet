@@ -113,9 +113,9 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (cMessage *msg = dynamic_cast<cMessage *>(object)) {
-        L3AddressTagBase *addresses = msg->getTag<L3AddressReq>();
+        L3AddressTagBase *addresses = msg->_findTag<L3AddressReq>();
         if (!addresses)
-            addresses = msg->getTag<L3AddressInd>();
+            addresses = msg->_findTag<L3AddressInd>();
         if (addresses != nullptr) {
             fire(this, t, addresses->getSrcAddress().str().c_str(), details);
         }

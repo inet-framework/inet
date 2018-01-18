@@ -151,8 +151,8 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 void Ieee80211Mac::handleMgmtPacket(Packet *packet)
 {
     const auto& header = makeShared<Ieee80211MgmtHeader>();
-    header->setType((Ieee80211FrameType)packet->getTag<Ieee80211SubtypeReq>()->getSubtype());
-    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+    header->setType((Ieee80211FrameType)packet->_findTag<Ieee80211SubtypeReq>()->getSubtype());
+    header->setReceiverAddress(packet->_getTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
     packet->insertHeader(header);
@@ -234,7 +234,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 
 void Ieee80211Mac::encapsulate(Packet *packet)
 {
-    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
+    auto macAddressReq = packet->_getTag<MacAddressReq>();
     auto destAddress = macAddressReq->getDestAddress();
     const auto& header = makeShared<Ieee80211DataHeader>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
@@ -255,7 +255,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     }
     else
         throw cRuntimeError("Unknown mode");
-    if (auto userPriorityReq = packet->getTag<UserPriorityReq>()) {
+    if (auto userPriorityReq = packet->_findTag<UserPriorityReq>()) {
         // make it a QoS frame, and set TID
         header->setType(ST_DATA_WITH_QOS);
         header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));
@@ -268,7 +268,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
     const auto& header = packet->popHeader<Ieee80211DataOrMgmtHeader>();
-    auto macAddressInd = packet->ensureTag<MacAddressInd>();
+    auto macAddressInd = packet->_addTagIfAbsent<MacAddressInd>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT) {
         macAddressInd->setSrcAddress(header->getTransmitterAddress());
         macAddressInd->setDestAddress(header->getReceiverAddress());
@@ -291,9 +291,9 @@ void Ieee80211Mac::decapsulate(Packet *packet)
         auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         int tid = dataHeader->getTid();
         if (tid < 8)
-            packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
+            packet->_addTagIfAbsent<UserPriorityInd>()->setUserPriority(tid);
     }
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->popTrailer<Ieee80211MacTrailer>(B(4));
 }
 
@@ -353,7 +353,7 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
+    frame->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
     sendDown(frame);
 }
 

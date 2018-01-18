@@ -518,7 +518,7 @@ void Ldp::processLDPHello(Packet *msg)
     const auto& ldpHello = msg->peekHeader<LdpHello>();
     //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
-    int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int interfaceId = msg->_getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
     EV_INFO << "Received LDP Hello from " << peerAddr << ", ";
@@ -1095,7 +1095,7 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
     pk->removePoppedHeaders();
     auto reply = pk->removeHeader<LdpLabelMapping>();
     pk->removeAll();
-    pk->clearTags();
+    pk->_clearTags();
     reply->setType(LABEL_RELEASE);
     pk->insertHeader(reply);
 

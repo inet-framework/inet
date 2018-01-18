@@ -174,14 +174,14 @@ void SCTP::handleMessage(cMessage *msg)
 
         if (par("udpEncapsEnabled")) {
             EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
-            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = msg->_getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = msg->_getTag<L3AddressInd>()->getDestAddress();
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
             EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
         } else {
             auto controlInfo = msg->removeControlInfo();
-            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = msg->_getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = msg->_getTag<L3AddressInd>()->getDestAddress();
             delete controlInfo;
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
         }
@@ -352,8 +352,8 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
         udpSocket.sendTo(msg, toAddr, SCTP_UDP_PORT);
     }
     else {
-        msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-        auto addresses = msg->ensureTag<L3AddressReq>();
+        msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
+        auto addresses = msg->_addTagIfAbsent<L3AddressReq>();
         addresses->setSrcAddress(fromAddr);
         addresses->setDestAddress(toAddr);
 
@@ -380,8 +380,8 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH * 8);
     msg->addChunk(scChunk);
 
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-    auto addresses = msg->ensureTag<L3AddressReq>();
+    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
+    auto addresses = msg->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     send_to_ip(msg);

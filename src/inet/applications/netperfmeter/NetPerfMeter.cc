@@ -581,7 +581,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          IncomingSocketTCP->setOutputGate(gate("tcpOut"));
       }
 
-      ConnectionID = msg->getMandatoryTag<SocketInd>()->getSocketId();
+      ConnectionID = msg->_getTag<SocketInd>()->getSocketId();
       sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
    else if(TransportProtocol == SCTP) {
@@ -1222,7 +1222,7 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    cPacket* cmsg = new cPacket("QueueRequest");
    cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
    cmsg->setControlInfo(queueInfo);
-   cmsg->ensureTag<SocketReq>()->setSocketId(ConnectionID);
+   cmsg->_addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
       IncomingSocketTCP->sendCommand(cmsg);
    }

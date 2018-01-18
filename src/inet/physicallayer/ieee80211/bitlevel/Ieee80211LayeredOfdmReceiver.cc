@@ -391,13 +391,13 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     delete dataFieldPacketModel;
 
     auto packet = const_cast<Packet *>(packetModel->getPacket());
-    auto snirInd = packet->ensureTag<SnirInd>();
+    auto snirInd = packet->_addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-    packet->ensureTag<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
-    auto modeInd = packet->ensureTag<Ieee80211ModeInd>();
+    packet->_addTagIfAbsent<ErrorRateInd>(); // TODO: should be done  setPacketErrorRate(packetModel->getPER());
+    auto modeInd = packet->_addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
-    auto channelInd = packet->ensureTag<Ieee80211ChannelInd>();
+    auto channelInd = packet->_addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }

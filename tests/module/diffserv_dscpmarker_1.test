@@ -52,7 +52,7 @@ void TestApp::initialize()
       const auto& header = makeShared<Ipv4Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
-      packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+      packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
       send(packet, "out", i);
     }
 
@@ -64,7 +64,7 @@ void TestApp::initialize()
       const auto& header = makeShared<Ipv6Header>();
       header->setDiffServCodePoint(i);
       packet->insertHeader(header);
-      packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+      packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
       send(packet, "out", i);
     }
 }

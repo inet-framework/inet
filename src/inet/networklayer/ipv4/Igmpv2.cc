@@ -619,19 +619,19 @@ void Igmpv2::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
 {
     ASSERT(ie->isMulticast());
 
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
-    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
+    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->_addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
+    msg->_addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
     send(msg, "ipOut");
 }
 
 void Igmpv2::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
     switch (igmp->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             processQuery(ie, packet);
@@ -713,7 +713,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 {
     ASSERT(ie->isMulticast());
 
-    Ipv4Address sender = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = packet->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     const auto& igmpQry = packet->peekHeader<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
 

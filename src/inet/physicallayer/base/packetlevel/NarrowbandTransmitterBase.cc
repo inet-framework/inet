@@ -52,13 +52,13 @@ std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int
 
 Hz NarrowbandTransmitterBase::computeCarrierFrequency(const Packet *packet) const
 {
-    auto signalBandReq = const_cast<Packet *>(packet)->getTag<SignalBandReq>();
+    auto signalBandReq = const_cast<Packet *>(packet)->_findTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getCarrierFrequency() : carrierFrequency;
 }
 
 Hz NarrowbandTransmitterBase::computeBandwidth(const Packet *packet) const
 {
-    auto signalBandReq = const_cast<Packet *>(packet)->getTag<SignalBandReq>();
+    auto signalBandReq = const_cast<Packet *>(packet)->_findTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getBandwidth() : bandwidth;
 }
 

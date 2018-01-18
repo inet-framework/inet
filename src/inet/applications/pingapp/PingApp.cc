@@ -226,7 +226,7 @@ void PingApp::handleMessage(cMessage *msg)
     else {
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
-        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
+        if (packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
             const auto& icmpHeader = packet->popHeader<IcmpHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
                 const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
@@ -240,7 +240,7 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_IPv6
-        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
+        if (packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
             const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
                 const auto& echoReply = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpHeader));
@@ -254,7 +254,7 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_GENERIC
-        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
+        if (packet->_getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
             const auto& icmpHeader = packet->popHeader<EchoPacket>();
             if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
                 processPingResponse(icmpHeader->getIdentifier(), icmpHeader->getSeqNumber(), packet);
@@ -369,7 +369,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtEnd(payload);
             Icmp::insertCrc(crcMode, request, outPacket);
             outPacket->insertHeader(request);
-            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            outPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without Ipv4");
@@ -383,7 +383,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtEnd(payload);
             Icmpv6::insertCrc(crcMode, request, outPacket);
             outPacket->insertHeader(request);
-            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+            outPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
             throw cRuntimeError("INET compiled without Ipv6");
@@ -400,7 +400,7 @@ void PingApp::sendPingRequest()
             outPacket->insertAtEnd(payload);
             // insertCrc(crcMode, request, outPacket);
             outPacket->insertHeader(request);
-            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
+            outPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else
             throw cRuntimeError("INET compiled without Generic Network");
@@ -410,11 +410,11 @@ void PingApp::sendPingRequest()
             throw cRuntimeError("Unaccepted destination address type: %d (address: %s)", (int)destAddr.getType(), destAddr.str().c_str());
     }
 
-    auto addressReq = outPacket->ensureTag<L3AddressReq>();
+    auto addressReq = outPacket->_addTagIfAbsent<L3AddressReq>();
     addressReq->setSrcAddress(srcAddr);
     addressReq->setDestAddress(destAddr);
     if (hopLimit != -1)
-        outPacket->ensureTag<HopLimitReq>()->setHopLimit(hopLimit);
+        outPacket->_addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
     l3Socket->send(outPacket);
 
@@ -436,9 +436,9 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
     }
 
     // get src, hopCount etc from packet, and print them
-    L3Address src = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
-    auto msgHopCountTag = packet->getTag<HopLimitInd>();
+    L3Address src = packet->_getTag<L3AddressInd>()->getSrcAddress();
+    //L3Address dest = msg->_getTag<L3AddressInd>()->getDestination();
+    auto msgHopCountTag = packet->_findTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;
 
     // calculate the RTT time by looking up the the send time of the packet

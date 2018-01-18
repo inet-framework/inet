@@ -65,8 +65,8 @@ std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int 
 const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Packet *packet) const
 {
     const IIeee80211Mode *transmissionMode;
-    auto modeReq = const_cast<Packet *>(packet)->getTag<Ieee80211ModeReq>();
-    auto bitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
+    auto modeReq = const_cast<Packet *>(packet)->_findTag<Ieee80211ModeReq>();
+    auto bitrateReq = const_cast<Packet *>(packet)->_findTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
         if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
@@ -84,7 +84,7 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Pa
 const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const Packet *packet) const
 {
     const Ieee80211Channel *transmissionChannel;
-    auto channelReq = const_cast<Packet *>(packet)->getTag<Ieee80211ChannelReq>();
+    auto channelReq = const_cast<Packet *>(packet)->_findTag<Ieee80211ChannelReq>();
     transmissionChannel = channelReq != nullptr ? channelReq->getChannel() : channel;
     if (transmissionChannel == nullptr)
         throw cRuntimeError("Transmission channel is undefined");

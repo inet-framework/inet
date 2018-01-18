@@ -37,7 +37,7 @@ TcpSocket::TcpSocket()
 
 TcpSocket::TcpSocket(cMessage *msg)
 {
-    connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+    connId = msg->_getTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
@@ -97,8 +97,8 @@ void TcpSocket::sendToTCP(cMessage *msg, int connId)
     if (!gateToTcp)
         throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
 
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
+    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->_addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
@@ -235,7 +235,7 @@ void TcpSocket::renewSocket()
 
 bool TcpSocket::belongsToSocket(cMessage *msg)
 {
-    return msg->getMandatoryTag<SocketInd>()->getSocketId() == connId;
+    return msg->_getTag<SocketInd>()->getSocketId() == connId;
 }
 
 bool TcpSocket::belongsToAnyTCPSocket(cMessage *msg)

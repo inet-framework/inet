@@ -500,8 +500,8 @@ void Radio::captureReception(cMessage *timer)
 
 void Radio::sendUp(Packet *macFrame)
 {
-    emit(minSnirSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
-    auto errorRateInd = macFrame->getMandatoryTag<ErrorRateInd>();
+    emit(minSnirSignal, macFrame->_getTag<SnirInd>()->getMinimumSnir());
+    auto errorRateInd = macFrame->_getTag<ErrorRateInd>();
     if (!std::isnan(errorRateInd->getPacketErrorRate()))
         emit(packetErrorRateSignal, errorRateInd->getPacketErrorRate());
     if (!std::isnan(errorRateInd->getBitErrorRate()))

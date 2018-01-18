@@ -103,14 +103,14 @@ void ExtInterface::handleMessage(cMessage *msg)
            << " and length of"
            << packet->getByteLength()
            << " bytes to networklayer.\n";
-        packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         send(packet, "upperLayerOut");
         numRcvd++;
     }
     else {
-        auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol != &Protocol::ipv4)
             throw cRuntimeError("ExtInterface accepts ipv4 packets only");
 

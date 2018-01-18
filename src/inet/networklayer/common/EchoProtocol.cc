@@ -69,16 +69,16 @@ void EchoProtocol::processEchoRequest(Packet *request)
     echoReply->setSeqNumber(echoReq->getSeqNumber());
     reply->insertAtEnd(echoReply);
     reply->insertAtEnd(request->peekData());
-    auto addressInd = request->getMandatoryTag<L3AddressInd>();
+    auto addressInd = request->_getTag<L3AddressInd>();
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    auto addressReq = reply->ensureTag<L3AddressReq>();
+    auto addressReq = reply->_addTagIfAbsent<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress());
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
-    reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
-    reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
+    reply->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
+    reply->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
     send(reply, "ipOut");
     delete request;
 }

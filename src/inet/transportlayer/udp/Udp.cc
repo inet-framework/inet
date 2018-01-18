@@ -183,7 +183,7 @@ void Udp::handleMessage(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::udp) {
             processUDPPacket(packet);
         }
@@ -214,7 +214,7 @@ void Udp::refreshDisplay() const
 
 void Udp::processCommandFromApp(cMessage *msg)
 {
-    int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+    int socketId = msg->_getTag<SocketReq>()->getSocketId();
     switch (msg->getKind()) {
         case UDP_C_BIND: {
             UdpBindCommand *ctrl = check_and_cast<UdpBindCommand *>(msg->getControlInfo());
@@ -322,10 +322,10 @@ void Udp::processPacketFromApp(Packet *packet)
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    int socketId = packet->getMandatoryTag<SocketReq>()->getSocketId();
+    int socketId = packet->_getTag<SocketReq>()->getSocketId();
     SockDesc *sd = getOrCreateSocket(socketId);
 
-    auto addressReq = packet->ensureTag<L3AddressReq>();
+    auto addressReq = packet->_addTagIfAbsent<L3AddressReq>();
     srcAddr = addressReq->getSrcAddress();
     destAddr = addressReq->getDestAddress();
 
@@ -333,7 +333,7 @@ void Udp::processPacketFromApp(Packet *packet)
         addressReq->setSrcAddress(srcAddr = sd->localAddr);
     if (destAddr.isUnspecified())
         addressReq->setDestAddress(destAddr = sd->remoteAddr);
-    if (auto portsReq = packet->removeTag<L4PortReq>()) {
+    if (auto portsReq = packet->_removeTagIfPresent<L4PortReq>()) {
         srcPort = portsReq->getSrcPort();
         destPort = portsReq->getDestPort();
         delete portsReq;
@@ -343,14 +343,14 @@ void Udp::processPacketFromApp(Packet *packet)
     if (destPort == -1)
         destPort = sd->remotePort;
 
-    auto interfaceReq = packet->getTag<InterfaceReq>();
+    auto interfaceReq = packet->_findTag<InterfaceReq>();
     ASSERT(interfaceReq == nullptr || interfaceReq->getInterfaceId() != -1);
 
     if (interfaceReq == nullptr && destAddr.isMulticast()) {
         auto membership = sd->findFirstMulticastMembership(destAddr);
         int interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
         if (interfaceId != -1)
-            packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+            packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     }
 
     if (addressReq->getDestAddress().isUnspecified())
@@ -359,12 +359,12 @@ void Udp::processPacketFromApp(Packet *packet)
         throw cRuntimeError("send invalid remote port number %d", destPort);
 
 
-    if (packet->getTag<MulticastReq>() == nullptr)
-        packet->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
-    if (sd->ttl != -1 && packet->getTag<HopLimitReq>() == nullptr)
-        packet->ensureTag<HopLimitReq>()->setHopLimit(sd->ttl);
-    if (packet->getTag<DscpReq>() == nullptr)
-        packet->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+    if (packet->_findTag<MulticastReq>() == nullptr)
+        packet->_addTagIfAbsent<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
+    if (sd->ttl != -1 && packet->_findTag<HopLimitReq>() == nullptr)
+        packet->_addTagIfAbsent<HopLimitReq>()->setHopLimit(sd->ttl);
+    if (packet->_findTag<DscpReq>() == nullptr)
+        packet->_addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
     const Protocol *l3Protocol = nullptr;
     if (destAddr.getType() == L3Address::Ipv4) {
@@ -387,7 +387,7 @@ void Udp::processPacketFromApp(Packet *packet)
     udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + packet->getTotalLength()).get());
     insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
     emit(sentPkSignal, packet);
@@ -410,12 +410,12 @@ void Udp::processUDPPacket(Packet *udpPacket)
 
     auto srcPort = udpHeader->getSourcePort();
     auto destPort = udpHeader->getDestinationPort();
-    auto l3AddressInd = udpPacket->getMandatoryTag<L3AddressInd>();
+    auto l3AddressInd = udpPacket->_getTag<L3AddressInd>();
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = B(udpHeader->getTotalLengthField());
     auto hasIncorrectLength = totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
-    auto networkProtocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
+    auto networkProtocol = udpPacket->_getTag<NetworkProtocolInd>()->getProtocol();
 
     if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
         EV_WARN << "Packet has bit error, discarding\n";
@@ -583,7 +583,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     char buff[80];
     snprintf(buff, sizeof(buff), "Port %d unreachable", udpHeader->getDestinationPort());
     udpPacket->setName(buff);
-    const Protocol *protocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
+    const Protocol *protocol = udpPacket->_getTag<NetworkProtocolInd>()->getProtocol();
 
     if (protocol == nullptr) {
         throw cRuntimeError("(%s)%s arrived from lower layer without NetworkProtocolInd",
@@ -592,8 +592,8 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
 
     //push back network protocol header
     udpPacket->removePoppedChunks();
-    udpPacket->insertHeader(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
-    auto inIe = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    udpPacket->insertHeader(udpPacket->_getTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
+    auto inIe = udpPacket->_getTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
 #ifdef WITH_IPv4
@@ -822,11 +822,11 @@ void Udp::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort
 
     // send payload with UdpControlInfo up to the application
     payload->setKind(UDP_I_DATA);
-    delete payload->removeTag<DispatchProtocolReq>();
-    payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
-    payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    payload->ensureTag<L4PortInd>()->setSrcPort(srcPort);
-    payload->ensureTag<L4PortInd>()->setDestPort(destPort);
+    delete payload->_removeTagIfPresent<DispatchProtocolReq>();
+    payload->_addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
+    payload->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    payload->_addTagIfAbsent<L4PortInd>()->setSrcPort(srcPort);
+    payload->_addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
 
     emit(packetSentToUpperSignal, payload);
     send(payload, "appOut");
@@ -838,12 +838,12 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     notifyMsg->setControlInfo(udpCtrl);
-    //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
-    notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
-    notifyMsg->ensureTag<L3AddressInd>()->setSrcAddress(localAddr);
-    notifyMsg->ensureTag<L3AddressInd>()->setDestAddress(remoteAddr);
-    notifyMsg->ensureTag<L4PortInd>()->setSrcPort(sd->localPort);
-    notifyMsg->ensureTag<L4PortInd>()->setDestPort(remotePort);
+    //FIXME notifyMsg->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+    notifyMsg->_addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
+    notifyMsg->_addTagIfAbsent<L3AddressInd>()->setSrcAddress(localAddr);
+    notifyMsg->_addTagIfAbsent<L3AddressInd>()->setDestAddress(remoteAddr);
+    notifyMsg->_addTagIfAbsent<L4PortInd>()->setSrcPort(sd->localPort);
+    notifyMsg->_addTagIfAbsent<L4PortInd>()->setDestPort(remotePort);
 
     send(notifyMsg, "appOut");
 }
@@ -1247,7 +1247,7 @@ void Udp::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 
 INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
-    auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto networkProtocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::udp) {
         packet->removeFromBeginning(networkHeader->getChunkLength());
@@ -1315,7 +1315,7 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
                 return true;
             else {
                 // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
-                auto l3AddressInd = packet->getMandatoryTag<L3AddressInd>();
+                auto l3AddressInd = packet->_getTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
                 auto udpHeaderBytes = udpHeader->Chunk::peek<BytesChunk>(B(0), udpHeader->getChunkLength())->getBytes();

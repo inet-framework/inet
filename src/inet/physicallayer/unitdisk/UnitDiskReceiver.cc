@@ -99,7 +99,7 @@ const IReceptionResult *UnitDiskReceiver::computeReceptionResult(const IListenin
     auto noise = check_and_cast_nullable<const UnitDiskNoise *>(snir->getNoise());
     double errorRate = check_and_cast<const UnitDiskReception *>(reception)->getPower() == UnitDiskReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
     auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
-    auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<ErrorRateInd>();
+    auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->_addTagIfAbsent<ErrorRateInd>();
     errorRateInd->setSymbolErrorRate(errorRate);
     errorRateInd->setBitErrorRate(errorRate);
     errorRateInd->setPacketErrorRate(errorRate);

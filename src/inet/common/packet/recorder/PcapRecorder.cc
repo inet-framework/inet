@@ -132,7 +132,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     auto packet = dynamic_cast<Packet *>(msg);
 
     if (packet && (dumpBadFrames || !packet->hasBitError())) {
-        auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
                 pcapDumper.writeFrame(simTime(), packet);

@@ -350,7 +350,7 @@ void PimSm::processJoinPrunePacket(Packet *pk)
 
     emit(rcvdJoinPrunePkSignal, pk);
 
-    InterfaceEntry *inInterface = ift->getInterfaceById(pk->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *inInterface = ift->getInterfaceById(pk->_getTag<InterfaceInd>()->getInterfaceId());
 
     int holdTime = pkt->getHoldTime();
     Ipv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress();
@@ -596,8 +596,8 @@ void PimSm::processRegisterPacket(Packet *pk)
 
     emit(rcvdRegisterPkSignal, pk);
 
-    Ipv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    Ipv4Address destAddr = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+    Ipv4Address srcAddr = pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address destAddr = pk->_getTag<L3AddressInd>()->getDestAddress().toIPv4();
     const auto& encapData = pk->peekHeader<Ipv4Header>();
     Ipv4Address source = encapData->getSrcAddress();
     Ipv4Address group = encapData->getDestAddress();
@@ -683,10 +683,10 @@ void PimSm::processRegisterStopPacket(Packet *pk)
 void PimSm::processAssertPacket(Packet *pk)
 {
     const auto& pkt = pk->peekHeader<PimAssert>();
-    int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int incomingInterfaceId = pk->_getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address source = pkt->getSourceAddress();
     Ipv4Address group = pkt->getGroupAddress();
-    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4());
+    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->_getTag<L3AddressInd>()->getSrcAddress().toIPv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
             << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << "'.\n";
@@ -1557,13 +1557,13 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
 
 void PimSm::sendToIP(Packet *packet, Ipv4Address srcAddr, Ipv4Address destAddr, int outInterfaceId, short ttl)
 {
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    packet->ensureTag<L3AddressReq>()->setSrcAddress(srcAddr);
-    packet->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
-    packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    packet->_addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    packet->_addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddr);
+    packet->_addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    packet->_addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
     send(packet, "ipOut");
 }
 
@@ -1582,11 +1582,11 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     const auto& ipv4Header = data->popHeader<Ipv4Header>();
 
     // set control info
-    data->ensureTag<PacketProtocolTag>()->setProtocol(ipv4Header->getProtocol());
-    data->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    // XXX data->ensureTag<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
-    data->ensureTag<L3AddressReq>()->setDestAddress(ipv4Header->getDestAddress());
-    data->ensureTag<HopLimitReq>()->setHopLimit(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
+    data->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv4Header->getProtocol());
+    data->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    // XXX data->_addTagIfAbsent<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
+    data->_addTagIfAbsent<L3AddressReq>()->setDestAddress(ipv4Header->getDestAddress());
+    data->_addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
     data->removePoppedChunks();
     send(data, "ipOut");
 }

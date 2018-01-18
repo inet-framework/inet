@@ -133,11 +133,11 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     switch (tcpHeader->getCrcMode()) {
         case CRC_COMPUTED: {
             //check CRC:
-            auto networkProtocol = packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
+            auto networkProtocol = packet->_getTag<NetworkProtocolInd>()->getProtocol();
             const std::vector<uint8_t> tcpBytes = packet->peekDataBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
-            L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            L3Address destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+            L3Address destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
             pseudoHeader->setSrcAddress(srcAddr);
             pseudoHeader->setDestAddress(destAddr);
             ASSERT(networkProtocol);
@@ -190,7 +190,7 @@ void Tcp::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
             EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to Tcp???
             delete msg;
@@ -202,8 +202,8 @@ void Tcp::handleMessage(cMessage *msg)
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->_getTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
 
             if (!checkCrc(tcpHeader, packet)) {
@@ -227,7 +227,7 @@ void Tcp::handleMessage(cMessage *msg)
             throw cRuntimeError("Unknown protocol: '%s'", (protocol != nullptr ? protocol->getName() : "<nullptr>"));
     }
     else {    // must be from app
-        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        int socketId = msg->_getTag<SocketReq>()->getSocketId();
 
         TcpConnection *conn = findConnForApp(socketId);
 

@@ -72,9 +72,9 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 
     ASSERT(pk != nullptr);
     IL3AddressType *addressType = dest.getAddressType();
-    pk->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    pk->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = pk->ensureTag<L3AddressReq>();
+    pk->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    pk->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pk->_addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 

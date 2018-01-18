@@ -53,9 +53,9 @@ const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const ILi
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = UnitDiskReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);
-    auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ModeInd>();
+    auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->_addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
-    auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->ensureTag<Ieee80211ChannelInd>();
+    auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->_addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
     return receptionResult;
 }

@@ -609,9 +609,9 @@ void Rip::processRequest(Packet *packet)
         return;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    int srcPort = packet->getMandatoryTag<L4PortInd>()->getSrcPort();
-    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+    int srcPort = packet->_getTag<L4PortInd>()->getSrcPort();
+    int interfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
 
     EV_INFO << "received request from " << srcAddr << "\n";
 
@@ -767,9 +767,9 @@ void Rip::processResponse(Packet *packet)
         return;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    packet->clearTags();
+    L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
+    int interfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
+    packet->_clearTags();
 
     RipInterfaceEntry *incomingIe = findInterfaceById(interfaceId);
     if (!incomingIe) {
@@ -813,12 +813,12 @@ void Rip::processResponse(Packet *packet)
 bool Rip::isValidResponse(Packet *packet)
 {
     // check that received from ripUdpPort
-    if (packet->getMandatoryTag<L4PortInd>()->getSrcPort() != ripUdpPort) {
+    if (packet->_getTag<L4PortInd>()->getSrcPort() != ripUdpPort) {
         EV_WARN << "source port is not " << ripUdpPort << "\n";
         return false;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    L3Address srcAddr = packet->_getTag<L3AddressInd>()->getSrcAddress();
 
     // check that it is not our response (received own multicast message)
     if (rt->isLocalAddress(srcAddr)) {
@@ -831,7 +831,7 @@ bool Rip::isValidResponse(Packet *packet)
             EV_WARN << "source address is not link-local: " << srcAddr << "\n";
             return false;
         }
-        if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
+        if (packet->_getTag<HopLimitInd>()->getHopLimit() != 255) {
             EV_WARN << "ttl is not 255";
             return false;
         }
@@ -1055,10 +1055,10 @@ void Rip::purgeRoute(RipRoute *ripRoute)
 void Rip::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface)
 {
     if (destAddr.isMulticast()) {
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
         if (mode == RIPng) {
             socket.setTimeToLive(255);
-            packet->ensureTag<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
+            packet->_addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
     }
     socket.sendTo(packet, destAddr, destPort);

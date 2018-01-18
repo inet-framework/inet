@@ -131,13 +131,13 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     insertCrc(icmpHeader,errorPacket);
     errorPacket->insertHeader(icmpHeader);
 
-    errorPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    errorPacket->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the Ipv4 layer
-        errorPacket->ensureTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorPacket->_addTagIfAbsent<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPMessage(errorPacket);
@@ -208,8 +208,8 @@ void Icmp::processICMPMessage(Packet *packet)
                     delete packet;
                 }
                 else {
-                    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
-                    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+                    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+                    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
                     send(packet, "transportOut");
                 }
             }
@@ -250,7 +250,7 @@ void Icmp::processEchoRequest(Packet *request)
     const auto& icmpReply = makeShared<IcmpEchoReply>();
     icmpReply->setIdentifier(icmpReq->getIdentifier());
     icmpReply->setSeqNumber(icmpReq->getSeqNumber());
-    auto addressInd = request->getMandatoryTag<L3AddressInd>();
+    auto addressInd = request->_getTag<L3AddressInd>();
     Ipv4Address src = addressInd->getSrcAddress().toIPv4();
     Ipv4Address dest = addressInd->getDestAddress().toIPv4();
     reply->insertAtEnd(request->peekData());
@@ -260,7 +260,7 @@ void Icmp::processEchoRequest(Packet *request)
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the Ipv4 layer
-    auto addressReq = reply->ensureTag<L3AddressReq>();
+    auto addressReq = reply->_addTagIfAbsent<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress().toIPv4());
     addressReq->setDestAddress(addressInd->getSrcAddress().toIPv4());
 
@@ -270,7 +270,7 @@ void Icmp::processEchoRequest(Packet *request)
 
 void Icmp::sendToIP(Packet *msg, const Ipv4Address& dest)
 {
-    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
+    msg->_addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     sendToIP(msg);
 }
 
@@ -278,8 +278,8 @@ void Icmp::sendToIP(Packet *msg)
 {
     // assumes Ipv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    msg->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     send(msg, "ipOut");
 }
 

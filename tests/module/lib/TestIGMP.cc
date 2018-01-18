@@ -99,7 +99,7 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 
 void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->_getTag<InterfaceInd>()->getInterfaceId());
     Ipv4Address group = Ipv4Address::UNSPECIFIED_ADDRESS;
     switch (igmp->getType())
     {

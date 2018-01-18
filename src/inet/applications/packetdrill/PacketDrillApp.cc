@@ -209,16 +209,16 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     if (listenSet) {
                         if (acceptSet) {
                             tcpSocket.setState(TcpSocket::CONNECTED);
-                            tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                            tcpConnId = msg->_getTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                            tcpConnId = msg->_getTag<SocketInd>()->getSocketId();
                             establishedPending = true;
                         }
                     } else {
                         tcpSocket.setState(TcpSocket::CONNECTED);
-                        tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                        tcpConnId = msg->_getTag<SocketInd>()->getSocketId();
                     }
                     delete msg;
                     break;
@@ -231,7 +231,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                         cMessage *msg = new cMessage("data request");
                         msg->setKind(TCP_C_READ);
                         TcpCommand *cmd = new TcpCommand();
-                        msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+                        msg->_addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                         msg->setControlInfo(cmd);
                         send(msg, "tcpOut");
                         recvFromSet = false;
@@ -1338,7 +1338,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                     cMessage *msg = new cMessage("dataRequest");
                     msg->setKind(TCP_C_READ);
                     TcpCommand *tcpcmd = new TcpCommand();
-                    msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+                    msg->_addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                     msg->setControlInfo(tcpcmd);
                     send(msg, "tcpOut");
                     break;
@@ -1446,7 +1446,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
             cMessage *msg = new cMessage("close");
             msg->setKind(TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+            msg->_addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
             msg->setControlInfo(cmd);
             send(msg, "tcpOut");
             break;

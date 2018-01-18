@@ -73,7 +73,7 @@ void Mpls::processPacketFromL3(Packet *msg)
 {
     using namespace tcp;
 
-    const Protocol *protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    const Protocol *protocol = msg->_getTag<PacketProtocolTag>()->getProtocol();
     if (protocol != &Protocol::ipv4) {
         // only the Ipv4 protocol supported yet
         sendToL2(msg);
@@ -126,17 +126,17 @@ bool Mpls::tryLabelAndForwardIPv4Datagram(Packet *packet)
     if (!mplsHeader->hasLabel()) {
         // yes, this may happen - if we'are both ingress and egress
         packet->removePoppedChunks();
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-        delete packet->removeTag<DispatchProtocolReq>();
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        delete packet->_removeTagIfPresent<DispatchProtocolReq>();
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(packet);
     }
     else {
         packet->removePoppedChunks();
         packet->insertHeader(mplsHeader);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
-        delete packet->removeTag<DispatchProtocolReq>();
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+        delete packet->_removeTagIfPresent<DispatchProtocolReq>();
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(packet);
     }
 
@@ -191,7 +191,7 @@ void Mpls::doStackOps(MplsHeader *mplsHeader, const LabelOpVector& outLabel)
 
 void Mpls::processPacketFromL2(Packet *packet)
 {
-    const Protocol *protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    const Protocol *protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::mpls) {
         processMPLSPacketFromL2(packet);
     }
@@ -212,7 +212,7 @@ void Mpls::processPacketFromL2(Packet *packet)
 
 void Mpls::processMPLSPacketFromL2(Packet *packet)
 {
-    int incomingInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int incomingInterfaceId = packet->_getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getInterfaceName();
     const auto& mplsHeader = dynamicPtrCast<MplsHeader>(packet->popHeader<MplsHeader>()->dupShared());
@@ -260,9 +260,9 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-        delete packet->removeTag<DispatchProtocolReq>();
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+        delete packet->_removeTagIfPresent<DispatchProtocolReq>();
+        packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
+        packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
         sendToL2(packet);
     }
     else {
@@ -272,9 +272,9 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
 
         if (outgoingInterface) {
             packet->removePoppedChunks();
-            delete packet->removeTag<DispatchProtocolReq>();
-            packet->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-            packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
+            delete packet->_removeTagIfPresent<DispatchProtocolReq>();
+            packet->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
+            packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(packet);
         }
         else {
@@ -285,15 +285,15 @@ void Mpls::processMPLSPacketFromL2(Packet *packet)
 
 void Mpls::sendToL2(cMessage *msg)
 {
-    ASSERT(msg->getTag<InterfaceReq>());
-    ASSERT(msg->getTag<PacketProtocolTag>());
+    ASSERT(msg->_findTag<InterfaceReq>());
+    ASSERT(msg->_findTag<PacketProtocolTag>());
     send(msg, "ifOut");
 }
 
 void Mpls::sendToL3(cMessage *msg)
 {
-    ASSERT(msg->getTag<InterfaceInd>());
-    ASSERT(msg->getTag<DispatchProtocolReq>());
+    ASSERT(msg->_findTag<InterfaceInd>());
+    ASSERT(msg->_findTag<DispatchProtocolReq>());
     send(msg, "netwOut");
 }
 

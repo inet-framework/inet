@@ -98,7 +98,7 @@ int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 
 int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto protocol = packet->_getTag<PacketProtocolTag>()->getProtocol();
 
     //TODO processing link-layer headers when exists
 

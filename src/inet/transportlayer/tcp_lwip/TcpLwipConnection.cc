@@ -141,8 +141,8 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(ind);
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketInd>()->setSocketId(listenConnId);
+    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->_addTagIfAbsent<SocketInd>()->setSocketId(listenConnId);
     tcpLwipM.send(msg, "appOut");
     //TODO shouldn't read from lwip until accept arrived
 }
@@ -162,8 +162,8 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    msg->ensureTag<SocketInd>()->setSocketId(connIdM);
+    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    msg->_addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
 
     tcpLwipM.send(msg, "appOut");
     sendUpEnabled = true;
@@ -203,8 +203,8 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     msg->setKind(code);
     TcpCommand *ind = new TcpCommand();
     msg->setControlInfo(ind);
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketInd>()->setSocketId(connIdM);
+    msg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->_addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
     tcpLwipM.send(msg, "appOut");
 }
 
@@ -383,8 +383,8 @@ void TcpLwipConnection::sendUpData()
     if (sendUpEnabled) {
         while (cPacket *dataMsg = receiveQueueM->extractBytesUpTo()) {
             dataMsg->setKind(TCP_I_DATA);
-            dataMsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-            dataMsg->ensureTag<SocketInd>()->setSocketId(connIdM);
+            dataMsg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+            dataMsg->_addTagIfAbsent<SocketInd>()->setSocketId(connIdM);
 //            int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:
             tcpLwipM.send(dataMsg, "appOut");

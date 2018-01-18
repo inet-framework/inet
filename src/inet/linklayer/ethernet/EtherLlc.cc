@@ -131,7 +131,7 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
     EV << "Encapsulating higher layer packet `" << packet->getName() << "' for MAC\n";
     EV << "Sent from " << getSimulation()->getModule(packet->getSenderModuleId())->getFullPath() << " at " << packet->getSendingTime() << " and was created " << packet->getCreationTime() << "\n";
 
-    auto ieee802SapReq = packet->getMandatoryTag<Ieee802SapReq>();
+    auto ieee802SapReq = packet->_getTag<Ieee802SapReq>();
 
     const auto& llc = makeShared<Ieee8022LlcHeader>();
     const auto& eth = makeShared<EthernetMacHeader>();
@@ -140,12 +140,12 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
     llc->setSsap(ieee802SapReq->getSsap());
     llc->setDsap(ieee802SapReq->getDsap());
     packet->insertHeader(llc);
-    eth->setDest(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());    // src address will be filled by MAC
+    eth->setDest(packet->_getTag<MacAddressReq>()->getDestAddress());    // src address will be filled by MAC
     eth->setTypeOrLength(packet->getByteLength());
     packet->insertHeader(eth);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     send(packet, "lowerLayerOut");
 }
@@ -180,10 +180,10 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
         return;
     }
 
-    auto macaddressInd = packet->ensureTag<MacAddressInd>();
+    auto macaddressInd = packet->_addTagIfAbsent<MacAddressInd>();
     macaddressInd->setSrcAddress(ethHeader->getSrc());
     macaddressInd->setDestAddress(ethHeader->getDest());
-    auto ieee802SapInd = packet->ensureTag<Ieee802SapInd>();
+    auto ieee802SapInd = packet->_addTagIfAbsent<Ieee802SapInd>();
     ieee802SapInd->setSsap(llc->getSsap());
     ieee802SapInd->setDsap(llc->getDsap());
 
@@ -268,7 +268,7 @@ void EtherLlc::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

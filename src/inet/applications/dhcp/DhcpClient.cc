@@ -676,7 +676,7 @@ void DhcpClient::scheduleTimerT2()
 void DhcpClient::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->_addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     socket.sendTo(msg, destAddr, destPort);
 }
 

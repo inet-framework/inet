@@ -213,9 +213,9 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     auto macPkt = makeShared<Ieee802154MacHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
-    MacAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MacAddress dest = packet->_getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << dest << endl;
-    macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->_getTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
     delete packet->removeControlInfo();
     macPkt->setSrcAddr(address);
@@ -965,11 +965,11 @@ void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, long
 void Ieee802154Mac::decapsulate(Packet *packet)
 {
     const auto& csmaHeader = packet->popHeader<Ieee802154MacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->_addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
+    packet->_addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->_addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->_addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
 }
 
 } // namespace inet

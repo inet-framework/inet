@@ -386,8 +386,8 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
     }
     else {
         IL3AddressType *addressType = dest.getAddressType();
-        sctpmsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-        sctpmsg->ensureTag<L3AddressReq>()->setDestAddress(dest);
+        sctpmsg->_addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
+        sctpmsg->_addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
         sctpMain->send_to_ip(sctpmsg);
 
         if (chunkType == HEARTBEAT) {
