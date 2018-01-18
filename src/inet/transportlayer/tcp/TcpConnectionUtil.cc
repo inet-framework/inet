@@ -690,6 +690,8 @@ void TcpConnection::sendSegment(uint32 bytes)
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
         tcpseg->insertHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
+    tcpseg->setHeaderLength(TCP_HEADER_OCTETS + tcpseg->getHeaderOptionArrayLength());
+    tcpseg->setChunkLength(B(tcpseg->getHeaderLength()));
 
     ASSERT(tcpseg->getHeaderLength() == tcpseg_temp->getHeaderLength());
 
@@ -1257,11 +1259,14 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     if (tcpseg->getHeaderOptionArraySize() != 0) {
         uint options_len = tcpseg->getHeaderOptionArrayLength();
 
-        if (options_len <= TCP_OPTIONS_MAX_SIZE) // Options length allowed? - maximum: 40 Bytes
+        if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes
             tcpseg->setHeaderLength(TCP_HEADER_OCTETS + options_len); // TCP_HEADER_OCTETS = 20
+            tcpseg->setChunkLength(B(TCP_HEADER_OCTETS + options_len));
+        }
         else {
-            tcpseg->setHeaderLength(TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20
             tcpseg->dropHeaderOptions();    // drop all options
+            tcpseg->setHeaderLength(TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20
+            tcpseg->setChunkLength(B(TCP_HEADER_OCTETS));
             EV_ERROR << "ERROR: Options length exceeded! Segment will be sent without options" << "\n";
         }
     }
