@@ -24,8 +24,6 @@ cplusplus {{
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
-
-#include "inet/common/ByteArray.h"
 }};
 
 namespace inet;
