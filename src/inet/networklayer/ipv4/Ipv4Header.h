@@ -70,13 +70,13 @@ class INET_API Ipv4Header : public Ipv4Header_Base
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int getOptionArraySize() const { return options.size(); }
+    virtual unsigned int getOptionArraySize() const { return options.getTlvOptionArraySize(); }
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { return *check_and_cast<TlvOptionBase *>(&(options.getTlvOptionForUpdate(k))); }
-    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>(&(options.getTlvOption(k))); }
+    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { return *check_and_cast<TlvOptionBase *>((options.getTlvOptionForUpdate(k))); }
+    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>((options.getTlvOption(k))); }
 
     /**
      * Returns the TlvOptionBase of the specified type,
@@ -88,9 +88,9 @@ class INET_API Ipv4Header : public Ipv4Header_Base
 
     /**
      * Adds an TlvOptionBase to the datagram.
-     * default atPos means add to the end.
      */
-    virtual void addOption(TlvOptionBase *opt, int atPos = -1);
+    virtual void addOption(TlvOptionBase *opt);
+    virtual void addOption(TlvOptionBase *opt, int atPos);
 
     /**
      * Calculates the length of the Ipv6 header plus the extension

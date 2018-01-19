@@ -650,7 +650,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
             hdr->setByteLength(8);
             ipv6Header->addExtensionHeader(hdr);
         }
-        hdr->getTlvOptionsForUpdate().add(gpsrOption);
+        hdr->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
         int newHlen = ipv6Header->calculateHeaderByteLength();
         ipv6Header->setChunkLength(ipv6Header->getChunkLength() + B(newHlen - oldHlen));
@@ -663,7 +663,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         auto gnpHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         int oldHlen = gnpHeader->getTlvOptions().getLength();
-        gnpHeader->getTlvOptionsForUpdate().add(gpsrOption);
+        gnpHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->setChunkLength(gnpHeader->getChunkLength() + B(newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::gnp, gnpHeader);
@@ -690,7 +690,7 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)
-                gpsrOption = check_and_cast_nullable<const GpsrOption *>(&(hdr->getTlvOptions().at(i)));
+                gpsrOption = check_and_cast<const GpsrOption *>(hdr->getTlvOptions().getTlvOption(i));
         }
     }
     else
@@ -699,7 +699,7 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     if (auto gnpHeader = dynamicPtrCast<const GenericDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast_nullable<const GpsrOption *>(&(gnpHeader->getTlvOptions().at(i)));
+            gpsrOption = check_and_cast<const GpsrOption *>(gnpHeader->getTlvOptions().getTlvOption(i));
     }
     else
 #endif
@@ -724,7 +724,7 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)
-                gpsrOption = check_and_cast_nullable<GpsrOption *>(&(hdr->getTlvOptionsForUpdate().at(i)));
+                gpsrOption = check_and_cast<GpsrOption *>(hdr->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
         }
     }
     else
@@ -733,7 +733,7 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     if (auto gnpHeader = dynamicPtrCast<GenericDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast_nullable<GpsrOption *>(&(gnpHeader->getTlvOptionsForUpdate().at(i)));
+            gpsrOption = check_and_cast<GpsrOption *>(gnpHeader->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
     }
     else
 #endif

@@ -40,9 +40,14 @@ const TlvOptionBase *Ipv4Header::findOptionByType(short int optionType, int inde
     return i >= 0 ? &getOption(i) : nullptr;
 }
 
+void Ipv4Header::addOption(TlvOptionBase *opt)
+{
+    options.insertTlvOption(opt);
+}
+
 void Ipv4Header::addOption(TlvOptionBase *opt, int atPos)
 {
-    options.add(opt, atPos);
+    options.insertTlvOption(atPos, opt);
 }
 
 int Ipv4Header::calculateHeaderByteLength() const

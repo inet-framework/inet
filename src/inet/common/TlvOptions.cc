@@ -18,91 +18,52 @@
 //
 
 
-#include "TlvOptions.h"
+#include "TlvOptions_m.h"
 
 namespace inet {
-
-Register_Class(TlvOptions);
-
-void TlvOptions::copy(const TlvOptions& other)
-{
-    for (auto opt: other.optionVector)
-        optionVector.push_back(opt->dup());
-}
 
 int TlvOptions::getLength() const
 {
     int length = 0;
-    for (auto opt: optionVector)
-        length += opt->getLength();
+    for (size_t i = 0; i < tlvOption_arraysize; i++) {
+        if (tlvOption[i])
+            length += tlvOption[i]->getLength();
+    }
     return length;
 }
 
-void TlvOptions::add(TlvOptionBase *opt, int atPos)
+TlvOptionBase *TlvOptions::dropTlvOption(TlvOptionBase *option)
 {
-    ASSERT(opt->getLength() >= 1);
-    if (atPos == -1)
-        optionVector.push_back(opt);
-    else
-        optionVector.insert(optionVector.begin() + atPos, opt);
-}
-
-TlvOptionBase *TlvOptions::remove(TlvOptionBase *option)
-{
-    for (auto it = optionVector.begin(); it != optionVector.end(); ++it)
-        if ((*it) == option) {
-            optionVector.erase(it);
+    for (size_t i = 0; i < tlvOption_arraysize; i++) {
+        if (tlvOption[i] == option) {
+            dropTlvOption(i);
+            eraseTlvOption(i);
             return option;
         }
+    }
     return nullptr;
 }
 
 void TlvOptions::deleteOptionByType(int type, bool firstOnly)
 {
-    auto it = optionVector.begin();
-    while (it != optionVector.end()) {
-        if ((*it)->getType() == type) {
-            delete (*it);
-            it = optionVector.erase(it);
+    for (size_t i = 0; i < tlvOption_arraysize; ) {
+        if (tlvOption[i] && tlvOption[i]->getType() == type) {
+            dropTlvOption(i);
+            eraseTlvOption(i);
             if (firstOnly)
                 break;
         }
         else
-            ++it;
+            ++i;
     }
-}
-
-void TlvOptions::clear()
-{
-    for (auto opt: optionVector)
-        delete opt;
-    optionVector.clear();
 }
 
 int TlvOptions::findByType(short int type, int firstPos) const
 {
-    for (unsigned int pos=firstPos; pos < optionVector.size(); pos++)
-        if (optionVector[pos]->getType() == type)
-            return pos;
+    for (size_t i = firstPos; i < tlvOption_arraysize; )
+        if (tlvOption[i] && tlvOption[i]->getType() == type)
+            return i;
     return -1;
-}
-
-void TlvOptions::parsimPack(cCommBuffer *b) const
-{
-    TlvOptions_Base::parsimPack(b);
-    int s = (int)optionVector.size();
-    doParsimPacking(b, s);
-    for (auto opt: optionVector)
-        b->packObject(opt);
-}
-
-void TlvOptions::parsimUnpack(cCommBuffer *b)
-{
-    TlvOptions_Base::parsimUnpack(b);
-    int s;
-    doParsimUnpacking(b, s);
-    for (int i = 0; i < s; i++)
-        optionVector.push_back(check_and_cast<TlvOptionBase *>(b->unpackObject()));
 }
 
 } // namespace inet

@@ -25,10 +25,6 @@ import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
-cplusplus {{
-#include "inet/common/TlvOptions.h"
-}}
-
 namespace inet;
 
 cplusplus {{

@@ -24,7 +24,6 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/common/TlvOptions.h"
 #include "inet/routing/gpsr/GpsrDefs.h"
 }}
 

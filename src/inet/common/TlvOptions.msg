@@ -35,7 +35,32 @@ class TlvOptionRaw extends TlvOptionBase
 
 class TlvOptions extends cObject
 {
-    @customize;
-    abstract TlvOptionBase tlvOption[];
+    TlvOptionBase *tlvOption[] @owned @clone(->dup());
+    //KLUDGE/HACK @clone(->dup()): msgc bug: currently, owned cObject elements cloned with copy constructor of defined class
 }
+
+cplusplus(TlvOptions) {{
+  public:
+    /*
+     * Removes option from optionVector and returns option when removed, otherwise returns nullptr.
+     */
+    TlvOptionBase *dropTlvOption(TlvOptionBase *option);
+
+    /*
+     * Removes all options or first only option where type is the specified type.
+     */
+    void deleteOptionByType(int type, bool firstOnly = true);
+
+    /*
+     * Calculate and returns the total length of all stored options in bytes
+     */
+    virtual int getLength() const;
+
+    /*
+     * Find the first option with specified type. Search started with element at firstPos.
+     * Returns the position of found option, or return -1 if not found
+     */
+    int findByType(short int type, int firstPos=0) const;
+}}
+
 

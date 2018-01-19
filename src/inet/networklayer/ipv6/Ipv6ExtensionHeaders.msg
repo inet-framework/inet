@@ -24,7 +24,6 @@ import inet.networklayer.ipv6.Ipv6Header;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
-#include "inet/common/TlvOptions.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 }}
 
