@@ -84,7 +84,9 @@ cGate *MessageDispatcher::handleUpperLayerPacket(cMessage *message, cGate *inGat
 {
     int interfaceId = computeInterfaceId(message);
     auto protocol = computeProtocol(message);
+    EV_INFO << "handleUpperLayerPacket:" << endl;
     if (protocol != nullptr) {
+    EV_INFO << "protocol = " << protocol->getId() << endl;
         auto it = protocolIdToLowerLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToLowerLayerGateIndex.end())
             return gate("lowerLayerOut", it->second);
@@ -104,7 +106,9 @@ cGate *MessageDispatcher::handleUpperLayerPacket(cMessage *message, cGate *inGat
 
 cGate *MessageDispatcher::handleLowerLayerPacket(cMessage *message, cGate *inGate)
 {
+EV_INFO << "handleLowerLayerPacket\n";
     int socketId = computeSocketIndSocketId(message);
+    EV_INFO << "socketId computed to " << socketId << endl;
     auto protocol = computeProtocol(message);
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
@@ -114,6 +118,7 @@ cGate *MessageDispatcher::handleLowerLayerPacket(cMessage *message, cGate *inGat
             throw cRuntimeError("handleLowerLayerPacket(): Unknown socket, id = %d", socketId);
     }
     else if (protocol != nullptr) {
+    EV_INFO << "protocol computed to " << protocol->getId() << endl;
         auto it = protocolIdToUpperLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToUpperLayerGateIndex.end())
             return gate("upperLayerOut", it->second);
@@ -126,14 +131,19 @@ cGate *MessageDispatcher::handleLowerLayerPacket(cMessage *message, cGate *inGat
 
 cGate *MessageDispatcher::handleUpperLayerCommand(cMessage *message, cGate *inGate)
 {
+    EV_INFO << "handleUpperLayerCommand\n";
     int socketId = computeSocketReqSocketId(message);
+    EV_INFO << "socketId=" << socketId << endl;
     int interfaceId = computeInterfaceId(message);
+    EV_INFO << "interfaceId=" << interfaceId << endl;
     auto protocol = computeProtocol(message);
+    EV_INFO << "protocol=" << protocol->getId() << endl;
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
-        if (it == socketIdToUpperLayerGateIndex.end())
+        if (it == socketIdToUpperLayerGateIndex.end()) {
+        EV_INFO << "Combine socket " << socketId << " and gate " << inGate->getIndex() << endl;
             socketIdToUpperLayerGateIndex[socketId] = inGate->getIndex();
-        else if (it->first != socketId)
+        } else if (it->first != socketId)
             throw cRuntimeError("handleUpperLayerCommand(): Socket is already registered: id = %d, gate = %d, new gate = %d", socketId, it->second, inGate->getIndex());
     }
     if (protocol != nullptr) {
@@ -168,7 +178,7 @@ cGate *MessageDispatcher::handleLowerLayerCommand(cMessage *message, cGate *inGa
     else if (protocol != nullptr) {
         auto it = protocolIdToUpperLayerGateIndex.find(protocol->getId());
         if (it != protocolIdToUpperLayerGateIndex.end())
-            return gate("uppwerLayerOut", it->second);
+            return gate("upperLayerOut", it->second);
         else
             throw cRuntimeError("handleLowerLayerCommand(): Unknown protocol: id = %d", protocol->getId());
     }
@@ -178,21 +188,34 @@ cGate *MessageDispatcher::handleLowerLayerCommand(cMessage *message, cGate *inGa
 
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
 {
+    EV_INFO << "handleRegisterProtocol for protocol " << protocol.getId() << " and gate " << protocolGate->getIndex() << endl;
+  EV_INFO << "gatename: " << protocolGate->getName() << endl;
     if (!strcmp("upperLayerIn", protocolGate->getName())) {
+    EV_INFO << "upperLayerIn\n";
         if (protocolIdToUpperLayerGateIndex.find(protocol.getId()) != protocolIdToUpperLayerGateIndex.end())
             throw cRuntimeError("handleRegisterProtocol(): Upper layer protocol is already registered: %s", protocol.str().c_str());
+        EV_INFO << "Combine protocol " << protocol.getId() << " with gate " << protocolGate->getIndex() << endl;
         protocolIdToUpperLayerGateIndex[protocol.getId()] = protocolGate->getIndex();
         int size = gateSize("lowerLayerOut");
+        EV_INFO << "size lowerLayerOut " << size << endl;
         for (int i = 0; i < size; i++)
             registerProtocol(protocol, gate("lowerLayerOut", i));
     }
     else if (!strcmp("lowerLayerIn", protocolGate->getName())) {
+    EV_INFO << "lowerLayerIn\n";
         if (protocolIdToLowerLayerGateIndex.find(protocol.getId()) != protocolIdToLowerLayerGateIndex.end())
             throw cRuntimeError("handleRegisterProtocol(): Lower layer protocol is already registered: %s", protocol.str().c_str());
+        EV_INFO << "handleRegisterProtocol: Combine protocol " << protocol.getId() << " and gate " << protocolGate->getIndex() << endl;
         protocolIdToLowerLayerGateIndex[protocol.getId()] = protocolGate->getIndex();
         int size = gateSize("upperLayerOut");
+        EV_INFO << "gateSize upperLayerOut = " << size << endl;
         for (int i = 0; i < size; i++)
             registerProtocol(protocol, gate("upperLayerOut", i));
+        auto it = protocolIdToLowerLayerGateIndex.find(protocol.getId());
+        if (it != protocolIdToLowerLayerGateIndex.end())
+            EV_INFO << "Found protocol " << protocol.getId() << " for gate " << protocolGate->getIndex() << endl;
+        else
+            EV_INFO << "NOT Found protocol " << protocol.getId() << " for gate " << protocolGate->getIndex() << endl;
     }
     else
         throw cRuntimeError("handleRegisterProtocol(): Unknown gate: %s", protocolGate->getName());

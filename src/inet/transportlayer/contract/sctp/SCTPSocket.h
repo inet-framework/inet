@@ -24,7 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
 
@@ -53,7 +53,7 @@ typedef struct {
     bool streamReset;
 } AppSocketOptions;
 
-class INET_API SCTPSocket
+class INET_API SctpSocket
 {
   public:
     /**
@@ -74,7 +74,7 @@ class INET_API SCTPSocket
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) { delete status; }
+        virtual void socketStatusArrived(int assocId, void *yourPtr, SctpStatusInfo *status) { delete status; }
         virtual void socketDeleted(int assocId, void *yourPtr) {}
         virtual void sendRequestArrived() {}
         virtual void msgAbandonedArrived(int assocId) {}
@@ -111,7 +111,7 @@ class INET_API SCTPSocket
     void *yourPtr;
 
   protected:
-    void sendToSCTP(cMessage *msg);
+    void sendToSctp(cMessage *msg);
 
   public:
     cGate *gateToSctp;
@@ -119,24 +119,24 @@ class INET_API SCTPSocket
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
      */
-    SCTPSocket(bool type = true);
+    SctpSocket(bool type = true);
 
     /**
      * Constructor, to be used with forked sockets (see listen()).
      * The assocId will be picked up from the message: it should have arrived
-     * from SCTPMain and contain SCTPCommmand control info.
+     * from SctpMain and contain SctpCommmand control info.
      */
-    SCTPSocket(cMessage *msg);
+    SctpSocket(cMessage *msg);
 
     /**
      * Destructor
      */
-    ~SCTPSocket();
+    ~SctpSocket();
 
     /**
      * Returns the internal connection Id. SCTP uses the (gate index, assocId) pair
      * to identify the connection when it receives a command from the application
-     * (or SCTPSocket).
+     * (or SctpSocket).
      */
     int getConnectionId() const { return assocId; }
 
@@ -144,7 +144,8 @@ class INET_API SCTPSocket
      * Generates a new integer, to be used as assocId. (assocId is part of the key
      * which associates connections with their apps).
      */
-    static int32 getNewAssocId() { return ++nextAssocId; }
+   // static int32 getNewAssocId() { return ++nextAssocId; }
+     static int32 getNewAssocId() { return getEnvir()->getUniqueNumber(); }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
@@ -238,14 +239,16 @@ class INET_API SCTPSocket
 
     /**
      * Initiates passive OPEN. If fork=true, you'll have to create a new
-     * SCTPSocket object for each incoming connection, and this socket
+     * SctpSocket object for each incoming connection, and this socket
      * will keep listening on the port. If fork=false, the first incoming
      * connection will be accepted, and SCTP will refuse subsequent ones.
-     * See SCTPOpenCommand documentation (neddoc) for more info.
+     * See SctpOpenCommand documentation (neddoc) for more info.
      */
     void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
     void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false, int32 fd = -1);
+
+    void accept(int socketId);
 
     /**
      * Active OPEN to the given remote socket.
@@ -265,7 +268,7 @@ class INET_API SCTPSocket
     /**
      * Send data message.
      */
-    void send(SCTPSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);
+   /* void send(SctpSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);*/
 
     /**
      * Send data message (provided within control message).
@@ -296,7 +299,7 @@ class INET_API SCTPSocket
     void abort();
     void shutdown(int id = -1);
     /**
-     * Causes SCTP to reply with a fresh SCTPStatusInfo, attached to a dummy
+     * Causes SCTP to reply with a fresh SctpStatusInfo, attached to a dummy
      * message as controlInfo(). The reply message can be recognized by its
      * message kind SCTP_I_STATUS, or (if a callback object is used)
      * the socketStatusArrived() method of the callback object will be
@@ -309,17 +312,17 @@ class INET_API SCTPSocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a SCTPCommand as controlInfo(), and the assocId in it matches
+     * has a SctpCommand as controlInfo(), and the assocId in it matches
      * that of the socket.)
      */
     bool belongsToSocket(cMessage *msg);
 
     /**
-     * Returns true if the message belongs to any SCTPSocket instance.
-     * (This basically checks if the message has a SCTPCommand attached to
+     * Returns true if the message belongs to any SctpSocket instance.
+     * (This basically checks if the message has a SctpCommand attached to
      * it as controlInfo().)
      */
-    static bool belongsToAnySCTPSocket(cMessage *msg);
+    static bool belongsToAnySctpSocket(cMessage *msg);
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -327,16 +330,16 @@ class INET_API SCTPSocket
      * multiply inherits from CallbackInterface too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public SCTPSocket::CallbackInterface
+     * class MyAppModule : public cSimpleModule, public SctpSocket::CallbackInterface
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
      *
-     * SCTPSocket doesn't delete the callback object in the destructor
+     * SctpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      *
      * YourPtr is an optional pointer. It may contain any value you wish --
-     * SCTPSocket will not look at it or do anything with it except passing
+     * SctpSocket will not look at it or do anything with it except passing
      * it back to you in the CallbackInterface calls. You may find it
      * useful if you maintain additional per-connection information:
      * in that case you don't have to look it up by assocId in the callbacks,
@@ -345,7 +348,7 @@ class INET_API SCTPSocket
     void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
 
     /**
-     * Examines the message (which should have arrived from SCTPMain),
+     * Examines the message (which should have arrived from SctpMain),
      * updates socket state, and if there is a callback object installed
      * (see setCallbackObject(), class CallbackInterface), dispatches
      * to the appropriate method of it with the same yourPtr that

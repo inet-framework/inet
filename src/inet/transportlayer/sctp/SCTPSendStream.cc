@@ -16,15 +16,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SCTPSendStream.h"
+#include "inet/transportlayer/sctp/SctpSendStream.h"
 
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
 
 namespace sctp {
 
-SCTPSendStream::SCTPSendStream(SCTPAssociation *assoc_, const uint16 id)
+SctpSendStream::SctpSendStream(SctpAssociation *assoc_, const uint16 id)
 {
     assoc = assoc_;
     streamId = id;
@@ -40,26 +40,26 @@ SCTPSendStream::SCTPSendStream(SCTPAssociation *assoc_, const uint16 id)
     uStreamQ = new cPacketQueue(queueName);
 }
 
-SCTPSendStream::~SCTPSendStream()
+SctpSendStream::~SctpSendStream()
 {
     deleteQueue();
 }
 
-void SCTPSendStream::deleteQueue()
+void SctpSendStream::deleteQueue()
 {
-    SCTPDataMsg *datMsg;
-    SCTPSimpleMessage *smsg;
+    SctpDataMsg *datMsg;
+    SctpSimpleMessage *smsg;
     int32 count = streamQ->getLength();
     while (!streamQ->isEmpty()) {
-        datMsg = check_and_cast<SCTPDataMsg *>(streamQ->pop());
-        smsg = check_and_cast<SCTPSimpleMessage *>(datMsg->decapsulate());
+        datMsg = check_and_cast<SctpDataMsg *>(streamQ->pop());
+        smsg = check_and_cast<SctpSimpleMessage *>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
         count--;
     }
     while (!uStreamQ->isEmpty()) {
-        datMsg = check_and_cast<SCTPDataMsg *>(uStreamQ->pop());
-        smsg = check_and_cast<SCTPSimpleMessage *>(datMsg->decapsulate());
+        datMsg = check_and_cast<SctpDataMsg *>(uStreamQ->pop());
+        smsg = check_and_cast<SctpSimpleMessage *>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
     }
@@ -67,11 +67,11 @@ void SCTPSendStream::deleteQueue()
     delete uStreamQ;
 }
 
-uint32 SCTPSendStream::getNextStreamSeqNum() {
+uint32 SctpSendStream::getNextStreamSeqNum() {
     return nextStreamSeqNum;
 };
 
-void SCTPSendStream::setNextStreamSeqNum(const uint16 num) {
+void SctpSendStream::setNextStreamSeqNum(const uint16 num) {
     nextStreamSeqNum = num;
 };
 

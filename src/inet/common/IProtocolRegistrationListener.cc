@@ -22,6 +22,7 @@ namespace inet {
 void registerProtocol(const Protocol& protocol, cGate *gate)
 {
     cGate* pathEndGate = gate->getPathEndGate();
+    EV_INFO << "Gate name: " << gate->getName() << ", end gate " << pathEndGate->getName() << endl;
     IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(pathEndGate->getOwner());
     if (protocolRegistration != nullptr)
         protocolRegistration->handleRegisterProtocol(protocol, pathEndGate);

@@ -22,9 +22,9 @@
    To add new streamSchedulers
    - the appropriate functions have to be implemented, preferably
     in this file.
-   - in SCTPAssociation.h an entry has to be added to
-    enum SCTPStreamSchedulers.
-   - in SCTPAssociationBase.cc in the contructor for SCTPAssociation
+   - in SctpAssociation.h an entry has to be added to
+    enum SctpStreamSchedulers.
+   - in SctpAssociationBase.cc in the contructor for SctpAssociation
     the new functions have to be assigned. Compare the entries
     for ROUND_ROBIN.
 
@@ -34,41 +34,41 @@
 #include <list>
 #include <math.h>
 
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
 
 namespace sctp {
 
-void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
+void SctpAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
     uint32 i;
 
     EV_INFO << "initStreams instreams=" << inStreams << "  outstream=" << outStreams << "\n";
     if (receiveStreams.size() == 0 && sendStreams.size() == 0) {
         for (i = 0; i < inStreams; i++) {
-            SCTPReceiveStream *rcvStream = new SCTPReceiveStream(this);
+            SctpReceiveStream *rcvStream = new SctpReceiveStream(this);
 
             this->receiveStreams[i] = rcvStream;
             rcvStream->setStreamId(i);
             this->state->numMsgsReq[i] = 0;
         }
         for (i = 0; i < outStreams; i++) {
-            SCTPSendStream *sendStream = new SCTPSendStream(this, i);
+            SctpSendStream *sendStream = new SctpSendStream(this, i);
             sendStream->setStreamId(i);
             this->sendStreams[i] = sendStream;
         }
     }
 }
 
-void SCTPAssociation::addInStreams(uint32 inStreams)
+void SctpAssociation::addInStreams(uint32 inStreams)
 {
     uint32 i, j;
     char vectorName[128];
     EV_INFO << "Add " << inStreams << " inbound streams" << endl;
     for (i = receiveStreams.size(), j = 0; j < inStreams; i++, j++) {
-        SCTPReceiveStream *rcvStream = new SCTPReceiveStream(this);
+        SctpReceiveStream *rcvStream = new SctpReceiveStream(this);
         this->receiveStreams[i] = rcvStream;
         rcvStream->setStreamId(i);
         this->state->numMsgsReq[i] = 0;
@@ -77,18 +77,18 @@ void SCTPAssociation::addInStreams(uint32 inStreams)
     }
 }
 
-void SCTPAssociation::addOutStreams(uint32 outStreams)
+void SctpAssociation::addOutStreams(uint32 outStreams)
 {
     uint32 i, j;
     EV_INFO << "Add " << outStreams << " outbound streams" << endl;
     for (i = sendStreams.size(), j = 0; j < outStreams; i++, j++) {
-        SCTPSendStream *sendStream = new SCTPSendStream(this, i);
+        SctpSendStream *sendStream = new SctpSendStream(this, i);
         sendStream->setStreamId(i);
         this->sendStreams[i] = sendStream;
     }
 }
 
-void SCTPAssociation::deleteStreams()
+void SctpAssociation::deleteStreams()
 {
     for (auto & elem : sendStreams) {
         delete elem.second;
@@ -98,7 +98,7 @@ void SCTPAssociation::deleteStreams()
     }
 }
 
-int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamScheduler(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid, testsid;
 
@@ -140,7 +140,7 @@ int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //
     return sid;
 }
 
-int32 SCTPAssociation::numUsableStreams(void)
+int32 SctpAssociation::numUsableStreams(void)
 {
     int32 count = 0;
 
@@ -151,7 +151,7 @@ int32 SCTPAssociation::numUsableStreams(void)
     return count;
 }
 
-int32 SCTPAssociation::streamSchedulerRoundRobinPacket(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerRoundRobinPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid, testsid, lastsid = state->lastStreamScheduled;
 
@@ -193,18 +193,18 @@ int32 SCTPAssociation::streamSchedulerRoundRobinPacket(SCTPPathVariables *path, 
     return sid;
 }
 
-int32 SCTPAssociation::streamSchedulerRandom(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerRandom(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     EV_INFO << "Stream Scheduler: Random (peek: " << peek << ")" << endl;
     state->ssNextStream = true;
     return streamSchedulerRandomPacket(path, peek);
 }
 
-int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerRandomPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid = -1, rnd;
     uint32 lastsid = state->lastStreamScheduled;
-    std::vector<uint32> SCTPWaitingSendStreamsList;
+    std::vector<uint32> SctpWaitingSendStreamsList;
 
     EV_INFO << "Stream Scheduler: RandomPacket (peek: " << peek << ")" << endl;
 
@@ -213,14 +213,14 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
             if (elem.second->getUnorderedStreamQ()->getLength() > 0 ||
                 elem.second->getStreamQ()->getLength() > 0)
             {
-                SCTPWaitingSendStreamsList.push_back(elem.first);
+                SctpWaitingSendStreamsList.push_back(elem.first);
                 EV_DETAIL << "Stream Scheduler: add sid " << elem.first << " to list of waiting streams.\n";
             }
         }
-        if (SCTPWaitingSendStreamsList.size() > 0) {
-            rnd = (int)(ceil(RNGCONTEXT uniform(1, SCTPWaitingSendStreamsList.size()) - 0.5));
+        if (SctpWaitingSendStreamsList.size() > 0) {
+            rnd = (int)(ceil(RNGCONTEXT uniform(1, SctpWaitingSendStreamsList.size()) - 0.5));
             EV_DETAIL << "Stream Scheduler: go to " << rnd << ". element of waiting stream list.\n";
-            sid = SCTPWaitingSendStreamsList[rnd - 1];
+            sid = SctpWaitingSendStreamsList[rnd - 1];
             if (!peek)
                 state->lastStreamScheduled = sid;
             EV_DETAIL << "Stream Scheduler: chose sid " << sid << ".\n";
@@ -243,7 +243,7 @@ int32 SCTPAssociation::streamSchedulerRandomPacket(SCTPPathVariables *path, bool
     return sid;
 }
 
-int32 SCTPAssociation::streamSchedulerPriority(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerPriority(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid = 0, testsid;
     std::list<uint32> PriorityList;
@@ -291,14 +291,14 @@ int32 SCTPAssociation::streamSchedulerPriority(SCTPPathVariables *path, bool pee
     return sid;
 }
 
-int32 SCTPAssociation::streamSchedulerFairBandwidth(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerFairBandwidth(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     EV_INFO << "Stream Scheduler: FairBandwidth (peek: " << peek << ")" << endl;
     state->ssNextStream = true;
     return streamSchedulerFairBandwidthPacket(path, peek);
 }
 
-int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     uint32 bandwidth = 0, packetsize = 0, lastDataChunkSize;
     int32 sid = -1;
@@ -329,10 +329,10 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
         if (elem.second->getUnorderedStreamQ()->getLength() > 0 || elem.second->getStreamQ()->getLength() > 0) {
             /* Get size of the first packet in stream */
             if (elem.second->getUnorderedStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)elem.second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+                packetsize = check_and_cast<SctpSimpleMessage *>(((SctpDataMsg *)elem.second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
             else if (elem.second->getStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SCTPSimpleMessage *>(((SCTPDataMsg *)elem.second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+                packetsize = check_and_cast<SctpSimpleMessage *>(((SctpDataMsg *)elem.second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
 
             /* This stream is new to the map, so add it */
@@ -401,7 +401,7 @@ int32 SCTPAssociation::streamSchedulerFairBandwidthPacket(SCTPPathVariables *pat
     return sid;
 }
 
-int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
+int32 SctpAssociation::streamSchedulerFCFS(SctpPathVariables *path, bool peek)    //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid, testsid;
     simtime_t oldestEnqueuing, testTime;
@@ -421,7 +421,7 @@ int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)  
         testsid = (testsid + 1) % outboundStreams;
 
         if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0) {
-            testTime = ((SCTPDataMsg *)sendStreams.find(testsid)->second->getUnorderedStreamQ()->front())->getEnqueuingTime();
+            testTime = ((SctpDataMsg *)sendStreams.find(testsid)->second->getUnorderedStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
                 sid = testsid;
@@ -430,7 +430,7 @@ int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)  
         }
 
         if (sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0) {
-            testTime = ((SCTPDataMsg *)sendStreams.find(testsid)->second->getStreamQ()->front())->getEnqueuingTime();
+            testTime = ((SctpDataMsg *)sendStreams.find(testsid)->second->getStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
                 sid = testsid;
@@ -445,7 +445,7 @@ int32 SCTPAssociation::streamSchedulerFCFS(SCTPPathVariables *path, bool peek)  
     return sid;
 }
 
-int32 SCTPAssociation::pathStreamSchedulerManual(SCTPPathVariables *path, bool peek)
+int32 SctpAssociation::pathStreamSchedulerManual(SctpPathVariables *path, bool peek)
 {
     uint32 pathNo = 0;
     int32 testsid, sid = -1;
@@ -470,7 +470,7 @@ int32 SCTPAssociation::pathStreamSchedulerManual(SCTPPathVariables *path, bool p
             throw cRuntimeError("streamsToPaths not defined");
     }
 
-    for (SCTPPathMap::const_iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
+    for (SctpPathMap::const_iterator iterator = sctpPathMap.begin(); iterator != sctpPathMap.end(); ++iterator) {
         if (path == iterator->second)
             break;
         pathNo++;
@@ -495,12 +495,12 @@ int32 SCTPAssociation::pathStreamSchedulerManual(SCTPPathVariables *path, bool p
     return sid;
 }
 
-int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, bool peek)
+int32 SctpAssociation::pathStreamSchedulerMapToPath(SctpPathVariables *path, bool peek)
 {
     int32 thisPath = -1;
     int32 workingPaths = 0;
     for (auto & elem : sctpPathMap) {
-        SCTPPathVariables *myPath = elem.second;
+        SctpPathVariables *myPath = elem.second;
         if (myPath->activePath) {
             if (myPath == path) {
                 thisPath = workingPaths;
@@ -514,10 +514,10 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, boo
     }
 
     int32 sid = -1;
-    for (SCTPSendStreamMap::const_iterator iterator = sendStreams.begin();
+    for (SctpSendStreamMap::const_iterator iterator = sendStreams.begin();
          iterator != sendStreams.end(); iterator++)
     {
-        SCTPSendStream *stream = iterator->second;
+        SctpSendStream *stream = iterator->second;
         if ((stream->getStreamId() % workingPaths) == thisPath) {    // Maps to "path" ...
             if ((stream->getUnorderedStreamQ()->getLength() > 0) ||    // Stream has something to send ...
                 (stream->getStreamQ()->getLength() > 0))

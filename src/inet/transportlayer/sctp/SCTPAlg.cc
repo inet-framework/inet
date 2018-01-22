@@ -16,50 +16,50 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SCTPAlg.h"
-#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/SctpAlg.h"
+#include "inet/transportlayer/sctp/Sctp.h"
 
 namespace inet {
 
 namespace sctp {
 
-Register_Class(SCTPAlg);
+Register_Class(SctpAlg);
 
-SCTPAlg::SCTPAlg() : SCTPAlgorithm()
+SctpAlg::SctpAlg() : SctpAlgorithm()
 {
     state = nullptr;
 }
 
-SCTPAlg::~SCTPAlg()
+SctpAlg::~SctpAlg()
 {
-    EV_DEBUG << "Destructor SCTPAlg" << endl;
-    // Note: don't delete "state" here, it'll be deleted from SCTPAssociation
+    EV_DEBUG << "Destructor SctpAlg" << endl;
+    // Note: don't delete "state" here, it'll be deleted from SctpAssociation
 }
 
-SCTPStateVariables *SCTPAlg::createStateVariables()
+SctpStateVariables *SctpAlg::createStateVariables()
 {
     ASSERT(state == nullptr);
-    state = new SCTPAlgStateVariables();
+    state = new SctpAlgStateVariables();
     return state;
 }
 
-void SCTPAlg::established(bool active)
+void SctpAlg::established(bool active)
 {
     if (active) {
         EV_INFO << "Completing connection: sending DATA" << endl;
     }
 }
 
-void SCTPAlg::connectionClosed()
+void SctpAlg::connectionClosed()
 {
 }
 
-void SCTPAlg::processTimer(cMessage *timer, SCTPEventCode& event)
+void SctpAlg::processTimer(cMessage *timer, SctpEventCode& event)
 {
     EV_INFO << "no extra timers in this SCTP variant" << endl;
 }
 
-void SCTPAlg::sendCommandInvoked(SCTPPathVariables *path)
+void SctpAlg::sendCommandInvoked(SctpPathVariables *path)
 {
     if (state->allowCMT) {
         assoc->sendOnAllPaths(path);
@@ -69,25 +69,25 @@ void SCTPAlg::sendCommandInvoked(SCTPPathVariables *path)
     }
 }
 
-void SCTPAlg::receivedDataAck(uint32)
+void SctpAlg::receivedDataAck(uint32)
 {
 }
 
-void SCTPAlg::receivedDuplicateAck()
+void SctpAlg::receivedDuplicateAck()
 {
     EV_INFO << "Duplicate ACK #" << endl;
 }
 
-void SCTPAlg::receivedAckForDataNotYetSent(uint32 seq)
+void SctpAlg::receivedAckForDataNotYetSent(uint32 seq)
 {
     EV_INFO << "ACK acks something not yet sent, sending immediate ACK" << endl;
 }
 
-void SCTPAlg::sackSent()
+void SctpAlg::sackSent()
 {
 }
 
-void SCTPAlg::dataSent(uint32)
+void SctpAlg::dataSent(uint32)
 {
 }
 

@@ -17,10 +17,10 @@
 //
 
 #include <string.h>
-#include "inet/transportlayer/sctp/SCTP.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
 
 namespace inet {
 
@@ -30,13 +30,13 @@ namespace sctp {
 // Event processing code
 //
 
-void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
+void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg)
 {
     L3Address lAddr, rAddr;
 
-    SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
+    SctpOpenCommand *openCmd = check_and_cast<SctpOpenCommand *>(sctpCommand);
 
-    EV_INFO << "SCTPAssociationEventProc:process_ASSOCIATE\n";
+    EV_INFO << "SctpAssociationEventProc:process_ASSOCIATE\n";
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
@@ -80,14 +80,14 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
     }
 }
 
-void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
+void SctpAssociation::process_OPEN_PASSIVE(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg)
 {
     L3Address lAddr;
     int16 localPort;
 
-    SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
+    SctpOpenCommand *openCmd = check_and_cast<SctpOpenCommand *>(sctpCommand);
 
-    EV_DEBUG << "SCTPAssociationEventProc:process_OPEN_PASSIVE\n";
+    EV_DEBUG << "SctpAssociationEventProc:process_OPEN_PASSIVE\n";
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
@@ -123,9 +123,9 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
     }
 }
 
-void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
+void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg)
 {
-    SCTPSendInfo *sendCommand = check_and_cast<SCTPSendInfo *>(sctpCommand);
+    SctpSendInfo *sendCommand = check_and_cast<SctpSendInfo *>(sctpCommand);
 
     if (fsm->getState() != SCTP_S_ESTABLISHED) {
         // TD 12.03.2009: since SCTP_S_ESTABLISHED is the only case, the
@@ -143,15 +143,15 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
              << " appGateIndex=" << appGateIndex
              << " streamId=" << sendCommand->getSid() << endl;
 
-    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((PK(msg)->decapsulate()));
+    SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>((PK(msg)->decapsulate()));
     auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += smsg->getByteLength();
 
-    // ------ Prepare SCTPDataMsg -----------------------------------------
+    // ------ Prepare SctpDataMsg -----------------------------------------
     const uint32 streamId = sendCommand->getSid();
     const uint32 sendUnordered = sendCommand->getSendUnordered();
     const uint32 ppid = sendCommand->getPpid();
-    SCTPSendStream *stream = nullptr;
+    SctpSendStream *stream = nullptr;
     auto associter = sendStreams.find(streamId);
     if (associter != sendStreams.end()) {
         stream = associter->second;
@@ -160,12 +160,13 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         throw cRuntimeError("Stream with id %d not found", streamId);
     }
 
-    char name[64];
+   /* char name[64];
     snprintf(name, sizeof(name), "SDATA-%d-%d", streamId, state->msgNum);
-    smsg->setName(name);
+    smsg->setName(name);*/
 
-    SCTPDataMsg *datMsg = new SCTPDataMsg();
+    SctpDataMsg *datMsg = new SctpDataMsg();
     datMsg->encapsulate(smsg);
+   // datMsg->insertAtEnd(smsg);
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);
     datMsg->setEnqueuingTime(simTime());
@@ -209,7 +210,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
             // Find lowest priority
             for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
-                SCTPDataMsg *msg = (SCTPDataMsg *)(*iter);
+                SctpDataMsg *msg = (SctpDataMsg *)(*iter);
 
                 if (msg->getPriority() > lowestPriority)
                     lowestPriority = msg->getPriority();
@@ -268,7 +269,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
         sendQueue->record(stream->getStreamQ()->getLength());
     }
-
+EV_INFO << "Size of send queue " << stream->getStreamQ()->getLength() << endl;
     // ------ Send buffer full? -------------------------------------------
     if ((state->appSendAllowed) &&
         (state->sendQueueLimit > 0) &&
@@ -301,9 +302,9 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
     }
 }
 
-void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand *sctpCommand)
+void SctpAssociation::process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommand *sctpCommand)
 {
-    SCTPSendInfo *sendCommand = check_and_cast<SCTPSendInfo *>(sctpCommand);
+    SctpSendInfo *sendCommand = check_and_cast<SctpSendInfo *>(sctpCommand);
     if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
         EV_DEBUG << "Application tries to read from invalid stream id....\n";
     }
@@ -311,16 +312,16 @@ void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand 
     pushUlp();
 }
 
-void SCTPAssociation::process_PRIMARY(SCTPEventCode& event, SCTPCommand *sctpCommand)
+void SctpAssociation::process_PRIMARY(SctpEventCode& event, SctpCommand *sctpCommand)
 {
-    SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(sctpCommand);
+    SctpPathInfo *pinfo = check_and_cast<SctpPathInfo *>(sctpCommand);
     state->setPrimaryPath(getPath(pinfo->getRemoteAddress()));
 }
 
-void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
+void SctpAssociation::process_STREAM_RESET(SctpCommand *sctpCommand)
 {
     EV_DEBUG << "process_STREAM_RESET request arriving from App\n";
-    SCTPResetInfo *rinfo = check_and_cast<SCTPResetInfo *>(sctpCommand);
+    SctpResetInfo *rinfo = check_and_cast<SctpResetInfo *>(sctpCommand);
     if (!(getPath(remoteAddr)->ResetTimer->isScheduled())) {
         if (rinfo->getRequestType() == ADD_BOTH) {
             sendAddInAndOutStreamsRequest(rinfo);
@@ -378,22 +379,22 @@ void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
     }
 }
 
-void SCTPAssociation::process_QUEUE_MSGS_LIMIT(const SCTPCommand *sctpCommand)
+void SctpAssociation::process_QUEUE_MSGS_LIMIT(const SctpCommand *sctpCommand)
 {
-    const SCTPInfo *qinfo = check_and_cast<const SCTPInfo *>(sctpCommand);
+    const SctpInfo *qinfo = check_and_cast<const SctpInfo *>(sctpCommand);
     state->queueLimit = qinfo->getText();
     EV_DEBUG << "state->queueLimit set to " << state->queueLimit << "\n";
 }
 
-void SCTPAssociation::process_QUEUE_BYTES_LIMIT(const SCTPCommand *sctpCommand)
+void SctpAssociation::process_QUEUE_BYTES_LIMIT(const SctpCommand *sctpCommand)
 {
-    const SCTPInfo *qinfo = check_and_cast<const SCTPInfo *>(sctpCommand);
+    const SctpInfo *qinfo = check_and_cast<const SctpInfo *>(sctpCommand);
     state->sendQueueLimit = qinfo->getText();
 }
 
-void SCTPAssociation::process_CLOSE(SCTPEventCode& event)
+void SctpAssociation::process_CLOSE(SctpEventCode& event)
 {
-    EV_DEBUG << "SCTPAssociationEventProc:process_CLOSE; assoc=" << assocId << endl;
+    EV_DEBUG << "SctpAssociationEventProc:process_CLOSE; assoc=" << assocId << endl;
     switch (fsm->getState()) {
         case SCTP_S_ESTABLISHED:
             sendOnAllPaths(state->getPrimaryPath());
@@ -408,9 +409,9 @@ void SCTPAssociation::process_CLOSE(SCTPEventCode& event)
     }
 }
 
-void SCTPAssociation::process_ABORT(SCTPEventCode& event)
+void SctpAssociation::process_ABORT(SctpEventCode& event)
 {
-    EV_DEBUG << "SCTPAssociationEventProc:process_ABORT; assoc=" << assocId << endl;
+    EV_DEBUG << "SctpAssociationEventProc:process_ABORT; assoc=" << assocId << endl;
     switch (fsm->getState()) {
         case SCTP_S_ESTABLISHED:
             sendOnAllPaths(state->getPrimaryPath());
@@ -419,9 +420,9 @@ void SCTPAssociation::process_ABORT(SCTPEventCode& event)
     }
 }
 
-void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpCommand, cMessage *msg)
+void SctpAssociation::process_STATUS(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg)
 {
-    SCTPStatusInfo *statusInfo = new SCTPStatusInfo();
+    SctpStatusInfo *statusInfo = new SctpStatusInfo();
     statusInfo->setState(fsm->getState());
     statusInfo->setStateName(stateName(fsm->getState()));
     statusInfo->setPathId(remoteAddr);

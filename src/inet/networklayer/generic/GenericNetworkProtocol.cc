@@ -506,6 +506,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
+    EV_INFO << "GenericNetworkProtocol::sendDatagramToHL\n";
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
     int protocol = header->getProtocolId();
     decapsulate(packet);
@@ -516,9 +517,11 @@ void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
     for (auto it = lowerBound; it != upperBound; it++) {
         cPacket *packetCopy = packet->dup();
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
+        EV_INFO << "go and send packetCopy " << packetCopy << endl;
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+    EV_INFO << "go and send packet " << packet << endl;
         send(packet, "transportOut");
         numLocalDeliver++;
     }
@@ -592,6 +595,7 @@ void GenericNetworkProtocol::datagramPreRouting(Packet *datagram, const Interfac
 
 void GenericNetworkProtocol::datagramLocalIn(Packet *packet, const InterfaceEntry *inIE)
 {
+    EV_INFO << "GenericNetworkProtocol::datagramLocalIn " << packet << endl;
     sendDatagramToHL(packet);
 }
 
@@ -632,6 +636,7 @@ void GenericNetworkProtocol::dropQueuedDatagram(const Packet *datagram)
 void GenericNetworkProtocol::reinjectQueuedDatagram(const Packet *datagram)
 {
     Enter_Method("reinjectDatagram()");
+    EV_INFO << "GenericNetworkProtocol::reinjectQueuedDatagram " << datagram << "\n";
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             Packet *datagram = iter->datagram;

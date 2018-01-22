@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
-// Based on SCTPSocketMap.h, Copyright (C) 2004 Andras Varga
+// Based on SctpSocketMap.h, Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,51 +23,51 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
 
 /**
- * Small utility class for managing a large number of SCTPSocket objects.
+ * Small utility class for managing a large number of SctpSocket objects.
  */
-//TBD: need for lookup could be eliminated by adding a void *yourPtr into SCTPConnection and SCTPCommand
-class INET_API SCTPSocketMap
+//TBD: need for lookup could be eliminated by adding a void *yourPtr into SctpConnection and SctpCommand
+class INET_API SctpSocketMap
 {
   protected:
-    typedef std::map<int, SCTPSocket *> SocketMap;
+    typedef std::map<int, SctpSocket *> SocketMap;
     SocketMap socketMap;
 
   public:
     /**
      * Constructor.
      */
-    SCTPSocketMap() {}
+    SctpSocketMap() {}
 
     /**
-     * Destructor. Does NOT delete the SCTPSocket objects.
+     * Destructor. Does NOT delete the SctpSocket objects.
      */
-    ~SCTPSocketMap() {}
+    ~SctpSocketMap() {}
 
     /**
      * Finds the socket (by connId) for the given message. The message
-     * must have arrived from SCTP, and must contain a SCTPCommand
+     * must have arrived from SCTP, and must contain a SctpCommand
      * control info object. The method returns nullptr if the socket was
      * not found, and throws an error if the message doesn't contain
-     * a SCTPCommand.
+     * a SctpCommand.
      */
-    SCTPSocket *findSocketFor(cMessage *msg);
+    SctpSocket *findSocketFor(cMessage *msg);
 
     /**
      * Registers the given socket. Should not be called multiple times
      * for one socket object.
      */
-    void addSocket(SCTPSocket *socket);
+    void addSocket(SctpSocket *socket);
 
     /**
      * Removes the given socket from the data structure.
      */
-    SCTPSocket *removeSocket(SCTPSocket *socket);
+    SctpSocket *removeSocket(SctpSocket *socket);
 
     /**
      * Returns the number of sockets stored.

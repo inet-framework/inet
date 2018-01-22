@@ -28,11 +28,12 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/transportlayer/sctp/SCTPMessage.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpUdpHook.h"
 
 namespace inet {
 
@@ -40,8 +41,8 @@ namespace sctp {
 
 #define SCTP_UDP_PORT    9899
 
-class SCTPAssociation;
-class SCTPMessage;
+class SctpAssociation;
+class SctpHeader;
 
 /**
  * Implements the SCTP protocol. This section describes the internal
@@ -53,41 +54,41 @@ class SCTPMessage;
  * The SCTP protocol implementation is composed of several classes (discussion
  * follows below):
  *   - SCTP: the module class
- *   - SCTPAssociation: manages an association
- *   - SCTPSendQueue, SCTPReceiveQueue: abstract base classes for various types
+ *   - SctpAssociation: manages an association
+ *   - SctpSendQueue, SctpReceiveQueue: abstract base classes for various types
  *      of send and receive queues
- *   - SCTPAlgorithm: abstract base class for SCTP algorithms
+ *   - SctpAlgorithm: abstract base class for SCTP algorithms
  *
  * SCTP subclassed from cSimpleModule. It manages socketpair-to-association
  * mapping, and dispatches segments and user commands to the appropriate
- * SCTPAssociation object.
+ * SctpAssociation object.
  *
- * SCTPAssociation manages the association, with the help of other objects.
- * SCTPAssociation itself implements the basic SCTP "machinery": takes care
+ * SctpAssociation manages the association, with the help of other objects.
+ * SctpAssociation itself implements the basic SCTP "machinery": takes care
  * of the state machine, stores the state variables (TCB), sends/receives
  * etc.
  *
- * SCTPAssociation internally relies on 3 objects. The first two are subclassed
- * from SCTPSendQueue and SCTPReceiveQueue. They manage the actual data stream,
- * so SCTPAssociation itself only works with sequence number variables.
+ * SctpAssociation internally relies on 3 objects. The first two are subclassed
+ * from SctpSendQueue and SctpReceiveQueue. They manage the actual data stream,
+ * so SctpAssociation itself only works with sequence number variables.
  * This makes it possible to easily accomodate need for various types of
  * simulated data transfer: real byte stream, "virtual" bytes (byte counts
  * only), and sequence of cMessage objects (where every message object is
  * mapped to a SCTP sequence number range).
  *
  * Currently implemented send queue and receive queue classes are
- * SCTPVirtualDataSendQueue and SCTPVirtualDataRcvQueue which implement
+ * SctpVirtualDataSendQueue and SctpVirtualDataRcvQueue which implement
  * queues with "virtual" bytes (byte counts only).
  *
- * The third object is subclassed from SCTPAlgorithm. Control over
+ * The third object is subclassed from SctpAlgorithm. Control over
  * retransmissions, congestion control and ACK sending are "outsourced"
- * from SCTPAssociation into SCTPAlgorithm: delayed acks, slow start, fast rexmit,
- * etc. are all implemented in SCTPAlgorithm subclasses.
+ * from SctpAssociation into SctpAlgorithm: delayed acks, slow start, fast rexmit,
+ * etc. are all implemented in SctpAlgorithm subclasses.
  *
- * The concrete SCTPAlgorithm class to use can be chosen per association (in OPEN)
+ * The concrete SctpAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
-class INET_API SCTP : public cSimpleModule
+class INET_API Sctp : public cSimpleModule
 {
   public:
     struct AppAssocKey
@@ -148,7 +149,7 @@ class INET_API SCTP : public cSimpleModule
         uint32 numOverfullSACKs;
         uint64 sumRGapRanges;    // Total sum of RGap ranges (Last RGapStop - CumAck)
         uint64 sumNRGapRanges;    // Total sum of NRGap ranges (Last NRGapStop - CumAck)
-        uint32 numDropsBecauseNewTSNGreaterThanHighestTSN;
+        uint32 numDropsBecauseNewTsnGreaterThanHighestTsn;
         uint32 numDropsBecauseNoRoomInBuffer;
         uint32 numChunksReneged;
         uint32 numAuthChunksSent;
@@ -172,37 +173,39 @@ class INET_API SCTP : public cSimpleModule
     typedef std::map<int32, VTagPair> SctpVTagMap;
     SctpVTagMap sctpVTagMap;
 
-    typedef std::map<AppAssocKey, SCTPAssociation *> SctpAppAssocMap;
-    typedef std::map<SockPair, SCTPAssociation *> SctpAssocMap;
+    typedef std::map<AppAssocKey, SctpAssociation *> SctpAppAssocMap;
+    typedef std::map<SockPair, SctpAssociation *> SctpAssocMap;
 
     SctpAppAssocMap sctpAppAssocMap;
     SctpAssocMap sctpAssocMap;
-    std::list<SCTPAssociation *> assocList;
+    std::list<SctpAssociation *> assocList;
 
-    UDPSocket udpSocket;
+    UdpSocket udpSocket;
+    int udpSockId;
 
     SocketOptions* socketOptions;
 
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
+    SctpUdpHook udpHook;
 
     int32 sizeAssocMap;
 
     uint16 nextEphemeralPort;
 
-    SCTPAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
-    SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
+    SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+    SctpAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
     int32 findAssocForFd(int32 fd);
-    void sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
-    void sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
+    void sendAbortFromMain(SctpHeader*sctpmsg, L3Address fromAddr, L3Address toAddr);
+    void sendShutdownCompleteFromMain(SctpHeader*sctpmsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
 
   public:
     void printInfoAssocMap();
     void printVTagMap();
 
-    void removeAssociation(SCTPAssociation *assoc);
+    void removeAssociation(SctpAssociation *assoc);
     simtime_t testTimeout;
     uint32 numGapReports;
     uint32 numPacketsReceived;
@@ -214,12 +217,12 @@ class INET_API SCTP : public cSimpleModule
     uint64 numPktDropReports;
 
   public:
-    virtual ~SCTP();
+    virtual ~Sctp();
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void send_to_ip(SCTPMessage *msg);
+    virtual void send_to_ip(Packet *msg);
 
 
     inline AssocStat *getAssocStat(uint32 assocId)
@@ -232,29 +235,29 @@ class INET_API SCTP : public cSimpleModule
     }
 
     /**
-     * To be called from SCTPAssociation when socket pair    changes
+     * To be called from SctpAssociation when socket pair    changes
      */
-    void updateSockPair(SCTPAssociation *assoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
-    void addLocalAddress(SCTPAssociation *assoc, L3Address address);
-    void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses);
-    bool addRemoteAddress(SCTPAssociation *assoc, L3Address localAddress, L3Address remoteAddress);
-    void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses);
-    void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> locAddresses);
+    void updateSockPair(SctpAssociation *assoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
+    void addLocalAddress(SctpAssociation *assoc, L3Address address);
+    void addLocalAddressToAllRemoteAddresses(SctpAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses);
+    bool addRemoteAddress(SctpAssociation *assoc, L3Address localAddress, L3Address remoteAddress);
+    void removeLocalAddressFromAllRemoteAddresses(SctpAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses);
+    void removeRemoteAddressFromAllAssociations(SctpAssociation *assoc, L3Address address, std::vector<L3Address> locAddresses);
     /**
      * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
      * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
      */
-    void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
+    void addForkedAssociation(SctpAssociation *assoc, SctpAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort);
 
     /**
-     * To be called from SCTPAssociation: reserves an ephemeral port for the connection.
+     * To be called from SctpAssociation: reserves an ephemeral port for the connection.
      */
     uint16 getEphemeralPort();
 
-    SCTPAssociation *getAssoc(int32 assocId);
-    SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
+    SctpAssociation *getAssoc(int32 assocId);
+    SctpAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
 
-    SCTPAssociation *findAssocForInitAck(SCTPInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+    SctpAssociation *findAssocForInitAck(SctpInitAckChunk *initack, L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
 
     SctpVTagMap getVTagMap() { return sctpVTagMap; };
 

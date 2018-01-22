@@ -16,15 +16,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "inet/transportlayer/sctp/SCTPGapList.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpGapList.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
 namespace sctp {
 
 // ###### Constructor #######################################################
-SCTPSimpleGapList::SCTPSimpleGapList()
+SctpSimpleGapList::SctpSimpleGapList()
 {
     NumGaps = 0;
     for (unsigned int i = 0; i < MAX_GAP_COUNT; i++) {
@@ -34,25 +34,25 @@ SCTPSimpleGapList::SCTPSimpleGapList()
 }
 
 // ###### Destructor ########################################################
-SCTPSimpleGapList::~SCTPSimpleGapList()
+SctpSimpleGapList::~SctpSimpleGapList()
 {
 }
 
 // ###### Check gap list ####################################################
-void SCTPSimpleGapList::check(const uint32 cTsnAck) const
+void SctpSimpleGapList::check(const uint32 cTsnAck) const
 {
     for (uint32 i = 0; i < NumGaps; i++) {
         if (i == 0) {
-            assert(SCTPAssociation::tsnGt(GapStartList[i], cTsnAck + 1));
+            assert(SctpAssociation::tsnGt(GapStartList[i], cTsnAck + 1));
         }
         else {
-            assert(SCTPAssociation::tsnGt(GapStartList[i], GapStopList[i - 1] + 1));
+            assert(SctpAssociation::tsnGt(GapStartList[i], GapStopList[i - 1] + 1));
         }
-        assert(SCTPAssociation::tsnLe(GapStartList[i], GapStopList[i]));
+        assert(SctpAssociation::tsnLe(GapStartList[i], GapStopList[i]));
     }
 }
 
-void SCTPSimpleGapList::resetGaps()
+void SctpSimpleGapList::resetGaps()
 {
     NumGaps = 0;
     for (unsigned int i = 0; i < MAX_GAP_COUNT; i++) {
@@ -62,7 +62,7 @@ void SCTPSimpleGapList::resetGaps()
 }
 
 // ###### Print gap list ####################################################
-void SCTPSimpleGapList::print(std::ostream& os) const
+void SctpSimpleGapList::print(std::ostream& os) const
 {
     os << "{";
     for (uint32 i = 0; i < NumGaps; i++) {
@@ -75,10 +75,10 @@ void SCTPSimpleGapList::print(std::ostream& os) const
 }
 
 // ###### Is TSN in gap list? ###############################################
-bool SCTPSimpleGapList::tsnInGapList(const uint32 tsn) const
+bool SctpSimpleGapList::tsnInGapList(const uint32 tsn) const
 {
     for (uint32 i = 0; i < NumGaps; i++) {
-        if (SCTPAssociation::tsnBetween(GapStartList[i], tsn, GapStopList[i])) {
+        if (SctpAssociation::tsnBetween(GapStartList[i], tsn, GapStopList[i])) {
             return true;
         }
     }
@@ -86,15 +86,15 @@ bool SCTPSimpleGapList::tsnInGapList(const uint32 tsn) const
 }
 
 // ###### Forward CumAckTSN #################################################
-void SCTPSimpleGapList::forwardCumAckTSN(const uint32 cTsnAck)
+void SctpSimpleGapList::forwardCumAckTsn(const uint32 cTsnAck)
 {
     if (NumGaps > 0) {
-        // It is only possible to advance CumAckTSN when there are gaps.
+        // It is only possible to advance CumAckTsn when there are gaps.
         uint32 counter = 0;
         uint32 advance = 0;
         while (counter < NumGaps) {
-            // Check whether CumAckTSN can be advanced.
-            if (SCTPAssociation::tsnGe(cTsnAck, GapStartList[counter])) {    // Yes!
+            // Check whether CumAckTsn can be advanced.
+            if (SctpAssociation::tsnGe(cTsnAck, GapStartList[counter])) {    // Yes!
                 advance++;
             }
             else {    // No -> end of search.
@@ -114,15 +114,15 @@ void SCTPSimpleGapList::forwardCumAckTSN(const uint32 cTsnAck)
     }
 }
 
-// ###### Try to advance CumAckTSN ##########################################
-bool SCTPSimpleGapList::tryToAdvanceCumAckTSN(uint32& cTsnAck)
+// ###### Try to advance CumAckTsn ##########################################
+bool SctpSimpleGapList::tryToAdvanceCumAckTsn(uint32& cTsnAck)
 {
     bool progress = false;
     if (NumGaps > 0) {
-        // It is only possible to advance CumAckTSN when there are gaps.
+        // It is only possible to advance CumAckTsn when there are gaps.
         uint32 counter = 0;
         while (counter < NumGaps) {
-            // Check whether CumAckTSN can be advanced.
+            // Check whether CumAckTsn can be advanced.
             if (cTsnAck + 1 == GapStartList[0]) {    // Yes!
                 cTsnAck = GapStopList[0];
                 // We can take out all fragments of this block
@@ -138,20 +138,20 @@ bool SCTPSimpleGapList::tryToAdvanceCumAckTSN(uint32& cTsnAck)
     return progress;
 }
 
-// ###### Remove TSN from gap list ##########################################
-void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
+// ###### Remove Tsn from gap list ##########################################
+void SctpSimpleGapList::removeFromGapList(const uint32 removedTsn)
 {
     const int32 initialNumGaps = NumGaps;
 
     for (int32 i = initialNumGaps - 1; i >= 0; i--) {
-        if (SCTPAssociation::tsnBetween(GapStartList[i], removedTSN, GapStopList[i])) {
+        if (SctpAssociation::tsnBetween(GapStartList[i], removedTsn, GapStopList[i])) {
             // ====== Gap block contains more than one TSN =====================
             const int32 gapsize = (int32)(GapStopList[i] - GapStartList[i] + 1);
             if (gapsize > 1) {
-                if (GapStopList[i] == removedTSN) {    // Remove stop TSN
+                if (GapStopList[i] == removedTsn) {    // Remove stop TSN
                     GapStopList[i]--;
                 }
-                else if (GapStartList[i] == removedTSN) {    // Remove start TSN
+                else if (GapStartList[i] == removedTsn) {    // Remove start TSN
                     GapStartList[i]++;
                 }
                 else {    // Block has to be splitted up
@@ -160,9 +160,9 @@ void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
                         GapStopList[j] = GapStopList[j - 1];
                         GapStartList[j] = GapStartList[j - 1];
                     }
-                    GapStopList[i] = removedTSN - 1;
+                    GapStopList[i] = removedTsn - 1;
                     if ((uint32)i + 1 < NumGaps) {
-                        GapStartList[i + 1] = removedTSN + 1;
+                        GapStartList[i + 1] = removedTsn + 1;
                     }
                 }
             }
@@ -183,11 +183,11 @@ void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
 }
 
 // ###### Add TSN to gap list ###############################################
-bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
+bool SctpSimpleGapList::updateGapList(const uint32 receivedTsn,
         uint32& cTsnAck,
         bool& newChunkReceived)
 {
-    if (SCTPAssociation::tsnLe(receivedTSN, cTsnAck)) {
+    if (SctpAssociation::tsnLe(receivedTsn, cTsnAck)) {
         // Received TSN covered by CumAckTSN -> nothing to do.
         return false;
     }
@@ -196,26 +196,26 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
     for (uint32 i = 0; i < NumGaps; i++) {
         if (GapStartList[i] > 0) {
             const uint32 hi = GapStartList[i] - 1;
-            if (SCTPAssociation::tsnBetween(lo, receivedTSN, hi)) {
+            if (SctpAssociation::tsnBetween(lo, receivedTsn, hi)) {
                 const uint32 gapsize = hi - lo + 1;
                 if (gapsize > 1) {
                     /**
                      * TSN either sits at the end of one gap, and thus changes gap
                      * boundaries, or it is in between two gaps, and becomes a new gap
                      */
-                    if (receivedTSN == hi) {
-                        GapStartList[i] = receivedTSN;
+                    if (receivedTsn == hi) {
+                        GapStartList[i] = receivedTsn;
                         newChunkReceived = true;
                         return true;
                     }
-                    else if (receivedTSN == lo) {
-                        if (receivedTSN == (cTsnAck + 1)) {
+                    else if (receivedTsn == lo) {
+                        if (receivedTsn == (cTsnAck + 1)) {
                             cTsnAck++;
                             newChunkReceived = true;
                             return true;
                         }
                         /* some gap must increase its upper bound */
-                        GapStopList[i - 1] = receivedTSN;
+                        GapStopList[i - 1] = receivedTsn;
                         newChunkReceived = true;
                         return true;
                     }
@@ -226,8 +226,8 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                             GapStartList[j] = GapStartList[j - 1];
                             GapStopList[j] = GapStopList[j - 1];
                         }
-                        GapStartList[i] = receivedTSN;
-                        GapStopList[i] = receivedTSN;
+                        GapStartList[i] = receivedTsn;
+                        GapStopList[i] = receivedTsn;
                         newChunkReceived = true;
                         return true;
                     }
@@ -267,16 +267,16 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                     }
                 }
             }
-            else {    /* receivedTSN is not in the gap between these fragments... */
+            else {    /* receivedTsn is not in the gap between these fragments... */
                 lo = GapStopList[i] + 1;
             }
         }    /* end: for */
     }    /* end: for */
 
     // ====== We have reached the end of the list ============================
-    if (receivedTSN == lo) {    // just increase CumAckTSN, handle further update of CumAckTSN later
-        if (receivedTSN == cTsnAck + 1) {
-            cTsnAck = receivedTSN;
+    if (receivedTsn == lo) {    // just increase CumAckTsn, handle further update of CumAckTsn later
+        if (receivedTsn == cTsnAck + 1) {
+            cTsnAck = receivedTsn;
             newChunkReceived = true;
             return true;
         }
@@ -291,12 +291,12 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
         // TSN is larger than the last gap end + 1. Otherwise, the TSN has already
         // been acknowledged.
         if ((NumGaps == 0) ||
-            (SCTPAssociation::tsnGt(receivedTSN, GapStopList[NumGaps - 1] + 1)))
+            (SctpAssociation::tsnGt(receivedTsn, GapStopList[NumGaps - 1] + 1)))
         {
             // A new fragment altogether, past the end of the list
             if (NumGaps < MAX_GAP_COUNT) {    // T.D. 18.12.09: Enforce upper limit!
-                GapStartList[NumGaps] = receivedTSN;
-                GapStopList[NumGaps] = receivedTSN;
+                GapStartList[NumGaps] = receivedTsn;
+                GapStopList[NumGaps] = receivedTsn;
                 NumGaps++;
                 newChunkReceived = true;
             }
@@ -308,93 +308,93 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
 }
 
 // ###### Constructor #######################################################
-SCTPGapList::SCTPGapList()
+SctpGapList::SctpGapList()
 {
-    CumAckTSN = 0;
+    CumAckTsn = 0;
 }
 
-// ###### DestruSCTPGapListctor ########################################################
-SCTPGapList::~SCTPGapList()
+// ###### DestruSctpGapListctor ########################################################
+SctpGapList::~SctpGapList()
 {
 }
 
 // ###### Check gap list ####################################################
-void SCTPGapList::check() const
+void SctpGapList::check() const
 {
-    CombinedGapList.check(CumAckTSN);
-    RevokableGapList.check(CumAckTSN);
-    NonRevokableGapList.check(CumAckTSN);
+    CombinedGapList.check(CumAckTsn);
+    RevokableGapList.check(CumAckTsn);
+    NonRevokableGapList.check(CumAckTsn);
 }
 
 // ###### Print gap list ####################################################
-void SCTPGapList::print(std::ostream& os) const
+void SctpGapList::print(std::ostream& os) const
 {
-    os << "CumAck=" << CumAckTSN;
+    os << "CumAck=" << CumAckTsn;
     os << "   Combined-Gaps=" << CombinedGapList;
     os << "   R-Gaps=" << RevokableGapList;
     os << "   NR-Gaps=" << NonRevokableGapList;
 }
 
-// ###### Forward CumAckTSN #################################################
-void SCTPGapList::forwardCumAckTSN(const uint32 cumAckTSN)
+// ###### Forward CumAckTsn #################################################
+void SctpGapList::forwardCumAckTsn(const uint32 cumAckTsn)
 {
-    CumAckTSN = cumAckTSN;
-    CombinedGapList.forwardCumAckTSN(CumAckTSN);
-    RevokableGapList.forwardCumAckTSN(CumAckTSN);
-    NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
+    CumAckTsn = cumAckTsn;
+    CombinedGapList.forwardCumAckTsn(CumAckTsn);
+    RevokableGapList.forwardCumAckTsn(CumAckTsn);
+    NonRevokableGapList.forwardCumAckTsn(CumAckTsn);
 }
 
-// ###### Advance CumAckTSN #################################################
-bool SCTPGapList::tryToAdvanceCumAckTSN()
+// ###### Advance CumAckTsn #################################################
+bool SctpGapList::tryToAdvanceCumAckTsn()
 {
-    if (CombinedGapList.tryToAdvanceCumAckTSN(CumAckTSN)) {
-        RevokableGapList.forwardCumAckTSN(CumAckTSN);
-        NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
+    if (CombinedGapList.tryToAdvanceCumAckTsn(CumAckTsn)) {
+        RevokableGapList.forwardCumAckTsn(CumAckTsn);
+        NonRevokableGapList.forwardCumAckTsn(CumAckTsn);
         return true;
     }
     return false;
 }
 
 // ###### Remove TSN from gap list ##########################################
-void SCTPGapList::removeFromGapList(const uint32 removedTSN)
+void SctpGapList::removeFromGapList(const uint32 removedTsn)
 {
-    RevokableGapList.removeFromGapList(removedTSN);
-    NonRevokableGapList.removeFromGapList(removedTSN);
-    CombinedGapList.removeFromGapList(removedTSN);
+    RevokableGapList.removeFromGapList(removedTsn);
+    NonRevokableGapList.removeFromGapList(removedTsn);
+    CombinedGapList.removeFromGapList(removedTsn);
 }
 
 // ###### Add TSN to gap list ###############################################
-bool SCTPGapList::updateGapList(const uint32 receivedTSN,
+bool SctpGapList::updateGapList(const uint32 receivedTsn,
         bool& newChunkReceived,
         bool tsnIsRevokable)
 {
-    uint32 oldCumAckTSN = CumAckTSN;
+    uint32 oldCumAckTsn = CumAckTsn;
     if (tsnIsRevokable) {
         // Once a TSN become non-revokable, it cannot become revokable again!
         // However, if the list became too long, updateGapList() may be called
         // again when the chunk is received again.
-        RevokableGapList.updateGapList(receivedTSN, oldCumAckTSN, newChunkReceived);
+        RevokableGapList.updateGapList(receivedTsn, oldCumAckTsn, newChunkReceived);
     }
     else {
-        if (NonRevokableGapList.updateGapList(receivedTSN, oldCumAckTSN, newChunkReceived) == true) {
+        if (NonRevokableGapList.updateGapList(receivedTsn, oldCumAckTsn, newChunkReceived) == true) {
             // TSN has moved from revokable to non-revokable!
-            RevokableGapList.removeFromGapList(receivedTSN);
+            RevokableGapList.removeFromGapList(receivedTsn);
         }
     }
 
     // Finally, add TSN to combined list and set CumAckTSN.
-    oldCumAckTSN = CumAckTSN;
-    const bool newChunk = CombinedGapList.updateGapList(receivedTSN, CumAckTSN, newChunkReceived);
-    if (oldCumAckTSN != CumAckTSN) {
-        RevokableGapList.forwardCumAckTSN(CumAckTSN);
-        NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
+    oldCumAckTsn = CumAckTsn;
+    const bool newChunk = CombinedGapList.updateGapList(receivedTsn, CumAckTsn, newChunkReceived);
+    if (oldCumAckTsn != CumAckTsn) {
+        RevokableGapList.forwardCumAckTsn(CumAckTsn);
+        NonRevokableGapList.forwardCumAckTsn(CumAckTsn);
     }
     return newChunk;
 }
 
-void SCTPGapList::resetGaps(const uint32 newCumAck)
+void SctpGapList::resetGaps(const uint32 newCumAck)
 {
-    CumAckTSN = newCumAck;
+    CumAckTsn = newCumAck;
     RevokableGapList.resetGaps();
     NonRevokableGapList.resetGaps();
     CombinedGapList.resetGaps();

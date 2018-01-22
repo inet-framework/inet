@@ -168,17 +168,21 @@ void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
     constPtrCast<Chunk>(chunk)->markImmutable();
     if (contents == EmptyChunk::singleton) {
+    EV_INFO << "contents == EmptyChunk\n";
         contents = chunk;
         totalLength = contents->getChunkLength();
     }
     else {
+    EV_INFO << "contents != EmptyChunk chunk type = " << chunk->getChunkType() << "\n";
         if (contents->canInsertAtBeginning(chunk)) {
+         EV_INFO << "contents->canInsertAtBeginnin\n";
             const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
             newContents->insertAtBeginning(chunk);
             newContents->markImmutable();
             contents = newContents->simplify();
         }
         else {
+        EV_INFO << "contents->cannotInsertAtBeginning\n";
             auto sequenceChunk = makeShared<SequenceChunk>();
             sequenceChunk->insertAtBeginning(contents);
             sequenceChunk->insertAtBeginning(chunk);
@@ -187,6 +191,7 @@ void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
         }
         totalLength += chunk->getChunkLength();
     }
+    EV_INFO << "totalLength = " << totalLength << endl;
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
 }

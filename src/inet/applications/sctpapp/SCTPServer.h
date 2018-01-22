@@ -20,17 +20,17 @@
 #define __INET_SCTPSERVER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 
 /**
- * Implements the SCTPServer simple module. See the NED file for more info.
+ * Implements the SctpServer simple module. See the NED file for more info.
  */
-class INET_API SCTPServer : public cSimpleModule, public ILifecycle
+class INET_API SctpServer : public cSimpleModule, public ILifecycle
 {
   protected:
     struct ServerAssocStat
@@ -59,7 +59,7 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
     bool ordered;
 
     // state
-    SCTPSocket *socket;
+    SctpSocket *socket;
     cMessage *timeoutMsg;
     cMessage *delayTimer;
     cMessage *delayFirstReadTimer;
@@ -91,7 +91,7 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
     void handleTimer(cMessage *msg);
     void sendOrSchedule(cMessage *msg);
 
-    cMessage *makeAbortNotification(SCTPCommand *msg);
+    cMessage *makeAbortNotification(SctpCommand *msg);
     cMessage *makeReceiveRequest(cMessage *msg);
     cMessage *makeDefaultReceive();
     void generateAndSend();
@@ -100,8 +100,8 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    virtual ~SCTPServer();
-    SCTPServer();
+    virtual ~SctpServer();
+    SctpServer();
 };
 
 } // namespace inet

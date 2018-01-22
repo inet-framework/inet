@@ -21,39 +21,39 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
 
 namespace sctp {
 
-class INET_API SCTPReceiveStream : public cObject
+class INET_API SctpReceiveStream : public cObject
 {
   protected:
-    SCTPAssociation *assoc;
+    SctpAssociation *assoc;
     uint16 streamId;
     int32 expectedStreamSeqNum;
-    SCTPQueue *deliveryQ;
-    SCTPQueue *orderedQ;
-    SCTPQueue *unorderedQ;
-    uint32 reassemble(SCTPQueue *queue, uint32 tsn);
+    SctpQueue *deliveryQ;
+    SctpQueue *orderedQ;
+    SctpQueue *unorderedQ;
+    uint32 reassemble(SctpQueue *queue, uint32 tsn);
 
   public:
-    uint32 enqueueNewDataChunk(SCTPDataVariables *dchunk);
+    uint32 enqueueNewDataChunk(SctpDataVariables *dchunk);
     /**
      * Ctor.
      */
-    SCTPReceiveStream(SCTPAssociation *assoc);
+    SctpReceiveStream(SctpAssociation *assoc);
     int32 getExpectedStreamSeqNum();
     void setExpectedStreamSeqNum(const int32 num);
 
     /**
      * Virtual dtor.
      */
-    ~SCTPReceiveStream();
-    inline SCTPQueue *getDeliveryQ() const { return deliveryQ; };
-    inline SCTPQueue *getOrderedQ() const { return orderedQ; };
-    inline SCTPQueue *getUnorderedQ() const { return unorderedQ; };
+    ~SctpReceiveStream();
+    inline SctpQueue *getDeliveryQ() const { return deliveryQ; };
+    inline SctpQueue *getOrderedQ() const { return orderedQ; };
+    inline SctpQueue *getUnorderedQ() const { return unorderedQ; };
 
     inline int32 getStreamId() const { return streamId; };
     inline void setStreamId(const uint16 id) { streamId = id; };

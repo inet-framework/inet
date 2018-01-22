@@ -29,8 +29,8 @@
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
-#include "inet/transportlayer/sctp/SCTPMessage.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
@@ -61,7 +61,8 @@ PacketDump::~PacketDump()
 }
 
 #ifdef WITH_SCTP
-void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SCTPMessage>& sctpmsg,
+#if 0
+void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SctpHeader>& sctpmsg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     using namespace sctp;
@@ -75,7 +76,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
     out << "[sctp] " << srcAddr << " > " << destAddr;
     uint32 numberOfChunks;
-    SCTPChunk *chunk;
+    SctpChunk *chunk;
     uint8 type;
     // src/dest
     out << srcAddr << "." << sctpmsg->getSrcPort() << " > "
@@ -92,10 +93,10 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
         out << "Packet has bit error!!\n";
 
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        chunk = (SCTPChunk *)sctpmsg->getChunks(i);
+        chunk = (SctpChunk *)sctpmsg->getChunks(i);
         type = chunk->getChunkType();
 
-        // FIXME create a getChunkTypeName(SCTPChunkType x) function in SCTP code and use it!
+        // FIXME create a getChunkTypeName(SctpChunkType x) function in SCTP code and use it!
         switch (type) {
             case INIT:
                 out << "INIT ";
@@ -155,7 +156,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
         out << endl;
 
         for (uint32 i = 0; i < numberOfChunks; i++) {
-            chunk = (SCTPChunk *)sctpmsg->getChunks(i);
+            chunk = (SctpChunk *)sctpmsg->getChunks(i);
             type = chunk->getChunkType();
 
             sprintf(buf, "   %3u: ", i + 1);
@@ -163,8 +164,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
             switch (type) {
                 case INIT: {
-                    SCTPInitChunk *initChunk;
-                    initChunk = check_and_cast<SCTPInitChunk *>(chunk);
+                    SctpInitChunk *initChunk;
+                    initChunk = check_and_cast<SctpInitChunk *>(chunk);
                     out << "INIT[InitiateTag=";
                     out << initChunk->getInitTag();
                     out << "; a_rwnd=";
@@ -195,8 +196,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case INIT_ACK: {
-                    SCTPInitAckChunk *initackChunk;
-                    initackChunk = check_and_cast<SCTPInitAckChunk *>(chunk);
+                    SctpInitAckChunk *initackChunk;
+                    initackChunk = check_and_cast<SctpInitAckChunk *>(chunk);
                     out << "INIT_ACK[InitiateTag=";
                     out << initackChunk->getInitTag();
                     out << "; a_rwnd=";
@@ -236,8 +237,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     break;
 
                 case DATA: {
-                    SCTPDataChunk *dataChunk;
-                    dataChunk = check_and_cast<SCTPDataChunk *>(chunk);
+                    SctpDataChunk *dataChunk;
+                    dataChunk = check_and_cast<SctpDataChunk *>(chunk);
                     out << "DATA[TSN=";
                     out << dataChunk->getTsn();
                     out << "; SID=";
@@ -253,8 +254,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case SACK: {
-                    SCTPSackChunk *sackChunk;
-                    sackChunk = check_and_cast<SCTPSackChunk *>(chunk);
+                    SctpSackChunk *sackChunk;
+                    sackChunk = check_and_cast<SctpSackChunk *>(chunk);
                     out << "SACK[CumTSNAck=";
                     out << sackChunk->getCumTsnAck();
                     out << "; a_rwnd=";
@@ -287,8 +288,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case HEARTBEAT:
-                    SCTPHeartbeatChunk *heartbeatChunk;
-                    heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(chunk);
+                    SctpHeartbeatChunk *heartbeatChunk;
+                    heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(chunk);
                     out << "HEARTBEAT[InfoLength=";
                     out << chunk->getBitLength() / 8 - 4;
                     out << "; time=";
@@ -303,16 +304,16 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     break;
 
                 case ABORT:
-                    SCTPAbortChunk *abortChunk;
-                    abortChunk = check_and_cast<SCTPAbortChunk *>(chunk);
+                    SctpAbortChunk *abortChunk;
+                    abortChunk = check_and_cast<SctpAbortChunk *>(chunk);
                     out << "ABORT[T-Bit=";
                     out << abortChunk->getT_Bit();
                     out << "]";
                     break;
 
                 case SHUTDOWN:
-                    SCTPShutdownChunk *shutdown;
-                    shutdown = check_and_cast<SCTPShutdownChunk *>(chunk);
+                    SctpShutdownChunk *shutdown;
+                    shutdown = check_and_cast<SctpShutdownChunk *>(chunk);
                     out << "SHUTDOWN[CumTSNAck=";
                     out << shutdown->getCumTsnAck();
                     out << "]";
@@ -328,13 +329,13 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
                 case ERRORTYPE: {
                     out << "ERRORTYPE ";
-                    SCTPErrorChunk *errorChunk;
-                    errorChunk = check_and_cast<SCTPErrorChunk *>(chunk);
+                    SctpErrorChunk *errorChunk;
+                    errorChunk = check_and_cast<SctpErrorChunk *>(chunk);
                     uint32 numberOfParameters = errorChunk->getParametersArraySize();
                     uint32 parameterType;
 
                     for (uint32 i = 0; i < numberOfParameters; i++) {
-                        SCTPParameter *param = (SCTPParameter *)errorChunk->getParameters(i);
+                        SctpParameter *param = (SctpParameter *)errorChunk->getParameters(i);
                         parameterType = param->getParameterType();
                         out << parameterType << " ";
                     }
@@ -352,6 +353,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     out << endl;
 }
 #endif // ifndef WITH_SCTP
+#endif
 
 void PacketDump::dump(const char *label, const char *msg)
 {
@@ -398,10 +400,12 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         else
 #endif // ifdef WITH_IPv6
 #ifdef WITH_SCTP
-        if (const auto& sctpMessage = dynamicPtrCast<const sctp::SCTPMessage>(chunk)) {
+#if 0
+        if (const auto& sctpMessage = dynamicPtrCast<const sctp::SctpHeader>(chunk)) {
             sctpDump("", packet, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
         }
         else
+#endif
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
         if (const auto& tcpHdr = dynamicPtrCast<const tcp::TcpHeader>(chunk)) {
@@ -441,11 +445,13 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
     out << "UDP: Payload length=" << udpHeader->getTotalLengthField() - UDP_HEADER_BYTES << endl;
 
 #ifdef WITH_SCTP
+#if 0
     if (udpHeader->getSourcePort() == 9899 || udpHeader->getDestinationPort() == 9899) {
-        if (dynamic_cast<sctp::SCTPMessage *>(udpHeader->getEncapsulatedPacket()))
-            sctpDump("", (sctp::SCTPMessage *)(udpHeader->getEncapsulatedPacket()),
+        if (dynamic_cast<sctp::SctpHeader *>(udpHeader->getEncapsulatedPacket()))
+            sctpDump("", (sctp::SctpHeader *)(udpHeader->getEncapsulatedPacket()),
                     std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
+#endif
 #endif // ifdef WITH_SCTP
 
     // comment

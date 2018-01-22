@@ -20,8 +20,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
 
@@ -33,25 +33,25 @@ namespace sctp {
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above algorithms.
  */
-class INET_API SCTPAlgorithm : public cObject
+class INET_API SctpAlgorithm : public cObject
 {
   protected:
-    SCTPAssociation *assoc;    // we belong to this association
-    SCTPQueue *transmissionQ;
-    SCTPQueue *retransmissionQ;
+    SctpAssociation *assoc;    // we belong to this association
+    SctpQueue *transmissionQ;
+    SctpQueue *retransmissionQ;
 
   public:
     /**
      * Ctor.
      */
-    SCTPAlgorithm() { assoc = nullptr; transmissionQ = nullptr; retransmissionQ = nullptr; }
+    SctpAlgorithm() { assoc = nullptr; transmissionQ = nullptr; retransmissionQ = nullptr; }
 
     /**
      * Virtual dtor.
      */
-    virtual ~SCTPAlgorithm() {}
+    virtual ~SctpAlgorithm() {}
 
-    inline void setAssociation(SCTPAssociation *_assoc)
+    inline void setAssociation(SctpAssociation *_assoc)
     {
         assoc = _assoc;
         transmissionQ = assoc->getTransmissionQueue();
@@ -60,15 +60,15 @@ class INET_API SCTPAlgorithm : public cObject
 
     virtual void initialize() {}
 
-    virtual SCTPStateVariables *createStateVariables() = 0;
+    virtual SctpStateVariables *createStateVariables() = 0;
 
     virtual void established(bool active) = 0;
 
     virtual void connectionClosed() = 0;
 
-    virtual void processTimer(cMessage *timer, SCTPEventCode& event) = 0;
+    virtual void processTimer(cMessage *timer, SctpEventCode& event) = 0;
 
-    virtual void sendCommandInvoked(SCTPPathVariables *path) = 0;
+    virtual void sendCommandInvoked(SctpPathVariables *path) = 0;
 
     virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
 

@@ -582,7 +582,7 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->setTag(peerVTag);
     sctpmsg->setName("SCTPCleanUp");
     sctpmsg->setChecksumOk(true);
-    sctpmsg->addChunk(abortChunk);
+    sctpmsg->insertSctpChunks(abortChunk);
     IPv4Datagram *ipv4Header = new IPv4Datagram("IPCleanup");
     ipv4Header->setSrcAddress(remoteAddress.toIPv4());
     ipv4Header->setDestAddress(localAddress.toIPv4());

@@ -439,7 +439,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
         PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *)(*iter);
-        sctpmsg->addChunk(chunk->getChunk());
+        sctpmsg->insertSctpChunks(chunk->getChunk());
     }
 
     Ipv4Header *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_SCTP, direction, app->getLocalAddress(),

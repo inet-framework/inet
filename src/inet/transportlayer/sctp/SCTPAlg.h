@@ -21,49 +21,49 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
 
 namespace inet {
 
 namespace sctp {
 
 /**
- * State variables for SCTPAlg.
+ * State variables for SctpAlg.
  */
-class INET_API SCTPAlgStateVariables : public SCTPStateVariables
+class INET_API SctpAlgStateVariables : public SctpStateVariables
 {
   public:
     //...
 };
 
-class INET_API SCTPAlg : public SCTPAlgorithm
+class INET_API SctpAlg : public SctpAlgorithm
 {
   protected:
-    SCTPAlgStateVariables *state;
+    SctpAlgStateVariables *state;
 
   public:
     /**
      * Ctor.
      */
-    SCTPAlg();
+    SctpAlg();
 
     /**
      * Virtual dtor.
      */
-    virtual ~SCTPAlg();
+    virtual ~SctpAlg();
 
     /**
-     * Creates and returns a SCTPStateVariables object.
+     * Creates and returns a SctpStateVariables object.
      */
-    virtual SCTPStateVariables *createStateVariables() override;
+    virtual SctpStateVariables *createStateVariables() override;
 
     virtual void established(bool active) override;
 
     virtual void connectionClosed() override;
 
-    virtual void processTimer(cMessage *timer, SCTPEventCode& event) override;
+    virtual void processTimer(cMessage *timer, SctpEventCode& event) override;
 
-    virtual void sendCommandInvoked(SCTPPathVariables *path) override;
+    virtual void sendCommandInvoked(SctpPathVariables *path) override;
 
     virtual void receivedDataAck(uint32 firstSeqAcked) override;
 

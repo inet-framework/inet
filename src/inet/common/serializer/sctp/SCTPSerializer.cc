@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#if 0
 #include "inet/common/serializer/SerializerUtil.h"
 
 #include "inet/common/serializer/headers/defs.h"
@@ -2263,3 +2264,4 @@ void SCTPSerializer::calculateSharedKey()
 
 } // namespace inet
 
+#endif

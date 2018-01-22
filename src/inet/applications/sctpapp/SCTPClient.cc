@@ -16,13 +16,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/sctpapp/SCTPClient.h"
+#include "inet/applications/sctpapp/SctpClient.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
@@ -33,11 +36,11 @@ namespace inet {
 #define MSGKIND_RESET      4
 #define MSGKIND_STOP       5
 
-Define_Module(SCTPClient);
+Define_Module(SctpClient);
 
-simsignal_t SCTPClient::echoedPkSignal = registerSignal("echoedPk");
+simsignal_t SctpClient::echoedPkSignal = registerSignal("echoedPk");
 
-SCTPClient::SCTPClient()
+SctpClient::SctpClient()
 {
     timeMsg = nullptr;
     stopTimer = nullptr;
@@ -63,14 +66,14 @@ SCTPClient::SCTPClient()
     chunksAbandoned = 0;
 }
 
-SCTPClient::~SCTPClient()
+SctpClient::~SctpClient()
 {
     cancelAndDelete(timeMsg);
     cancelAndDelete(stopTimer);
     cancelAndDelete(primaryChangeTimer);
 }
 
-void SCTPClient::initialize(int stage)
+void SctpClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -108,14 +111,18 @@ void SCTPClient::initialize(int stage)
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
         socket.setOutputGate(gate("socketOut"));
-
-        if (addresses.size() == 0)
-            socket.bind(port);
-        else
-            socket.bindx(addresses, port);
-
         socket.setCallbackObject(this);
-        socket.setOutputGate(gate("socketOut"));
+
+        if (addresses.size() == 0) {
+        EV_INFO << "Call socket bind\n";
+            socket.bind(port);
+           EV_INFO << "Nach socket bind\n";
+        } else {
+            socket.bindx(addresses, port);
+        }
+
+
+       // socket.setOutputGate(gate("socketOut"));
 
         simtime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO) {
@@ -134,7 +141,7 @@ void SCTPClient::initialize(int stage)
     }
 }
 
-void SCTPClient::handleMessage(cMessage *msg)
+void SctpClient::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         handleTimer(msg);
@@ -144,7 +151,7 @@ void SCTPClient::handleMessage(cMessage *msg)
     }
 }
 
-void SCTPClient::connect()
+void SctpClient::connect()
 {
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
@@ -188,20 +195,20 @@ void SCTPClient::connect()
     numSessions++;
 }
 
-void SCTPClient::close()
+void SctpClient::close()
 {
     socket.close();
 }
 
-void SCTPClient::refreshDisplay() const
+void SctpClient::refreshDisplay() const
 {
-    getDisplayString().setTagArg("t", 0, SCTPSocket::stateName(socket.getState()));
+    getDisplayString().setTagArg("t", 0, SctpSocket::stateName(socket.getState()));
 }
 
-void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
+void SctpClient::socketEstablished(int, void *, unsigned long int buffer)
 {
     int count = 0;
-    EV_INFO << "SCTPClient: connected\n";
+    EV_INFO << "SctpClient: connected\n";
     bufferSize = buffer;
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession");
@@ -210,7 +217,7 @@ void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
     if (numRequestsToSend < 1)
         numRequestsToSend = 0;
 
-    EV_INFO << "SCTPClient:numRequestsToSend=" << numRequestsToSend << "\n";
+    EV_INFO << "SctpClient:numRequestsToSend=" << numRequestsToSend << "\n";
 
     // perform first request (next one will be sent when reply arrives)
     if ((numRequestsToSend > 0 && !timer) || timer) {
@@ -276,10 +283,10 @@ void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
     }
 }
 
-void SCTPClient::sendQueueRequest()
+void SctpClient::sendQueueRequest()
 {
     cMessage *cmsg = new cMessage("SCTP_C_QUEUE_MSGS_LIMIT");
-    SCTPInfo *qinfo = new SCTPInfo();
+    SctpInfo *qinfo = new SctpInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setSocketId(socket.getConnectionId());
@@ -288,7 +295,7 @@ void SCTPClient::sendQueueRequest()
     socket.sendRequest(cmsg);
 }
 
-void SCTPClient::sendRequestArrived()
+void SctpClient::sendRequestArrived()
 {
     int count = 0;
 
@@ -313,21 +320,25 @@ void SCTPClient::sendRequestArrived()
     }
 }
 
-void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
+void SctpClient::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     packetsRcvd++;
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
-    SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
+    SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
     emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+
+       // auto& smsg = msg->peekDataAt(B(0), B(msg->getByteLength()));
+
+        SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
-        emit(echoedPkSignal, smsg);
+        emit(echoedPkSignal, msg);
         cmsg->encapsulate(smsg);
+       // cmsg->insertAtEnd(smsg);
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
         socket.sendMsg(cmsg);
@@ -342,7 +353,7 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
     delete ind;
 }
 
-void SCTPClient::sendRequest(bool last)
+void SctpClient::sendRequest(bool last)
 {
     // find next stream
     unsigned int nextStream = 0;
@@ -370,8 +381,25 @@ void SCTPClient::sendRequest(bool last)
     if (sendBytes < 1)
         sendBytes = 1;
 
+  /*  Packet *cmsg = new Packet("SCTP_C_SEND");
+    const auto& msg = makeShared<BytesChunk>();
+    std::vector<uint8_t> vec;
+    vec.resize(sendBytes);
+    for (int i = 0; i < sendBytes; i++)
+        vec[i] = (bytesSent + i) & 0xFF;
+    msg->setBytes(vec);
+    Ptr<Chunk> payload = makeShared<ByteCountChunk>(B(sendBytes));
+    payload = msg;
+
+
+    auto creationTimeTag = payload->addTag<CreationTimeTag>();
+    creationTimeTag->setCreationTime(simTime());
+
+    cmsg->insertAtEnd(payload);
+    cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);*/
+
     cPacket *cmsg = new cPacket("SCTP_C_SEND");
-    SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
+    SctpSimpleMessage *msg = new SctpSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
 
@@ -385,26 +413,27 @@ void SCTPClient::sendRequest(bool last)
     cmsg->encapsulate(msg);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
 
-    // send SCTPMessage with SCTPSimpleMessage enclosed
+    // send SCTPHeader with SctpSimpleMessage enclosed
     EV_INFO << "Sending request ..." << endl;
     bufferSize -= sendBytes;
 
     if (bufferSize < 0)
         last = true;
 
-    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    SctpSendInfo* sendCommand = new SctpSendInfo;
     sendCommand->setLast(last);
     sendCommand->setPrMethod(par("prMethod"));
     sendCommand->setPrValue(par("prValue"));
     sendCommand->setSid(nextStream);
     cmsg->setControlInfo(sendCommand);
-
+EV_INFO << "vor emit\n";
     emit(sentPkSignal, msg);
+    EV_INFO << "nach emit\n";
     socket.sendMsg(cmsg);
     bytesSent += sendBytes;
 }
 
-void SCTPClient::handleTimer(cMessage *msg)
+void SctpClient::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
@@ -477,11 +506,11 @@ void SCTPClient::handleTimer(cMessage *msg)
     }
 }
 
-void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
+void SctpClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
-    SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
+    SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-    SCTPSendInfo *cmd = new SCTPSendInfo();
+    SctpSendInfo *cmd = new SctpSendInfo();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
@@ -491,11 +520,11 @@ void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *m
     socket.sendNotification(cmsg);
 }
 
-void SCTPClient::shutdownReceivedArrived(int connId)
+void SctpClient::shutdownReceivedArrived(int connId)
 {
     if (numRequestsToSend == 0) {
         cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
-        SCTPInfo *qinfo = new SCTPInfo();
+        SctpInfo *qinfo = new SctpInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setSocketId(connId);
         cmsg->setControlInfo(qinfo);
@@ -503,16 +532,16 @@ void SCTPClient::shutdownReceivedArrived(int connId)
     }
 }
 
-void SCTPClient::socketPeerClosed(int, void *)
+void SctpClient::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
-    if (socket.getState() == SCTPSocket::PEER_CLOSED) {
+    if (socket.getState() == SctpSocket::PEER_CLOSED) {
         EV_INFO << "remote SCTP closed, closing here as well\n";
         close();
     }
 }
 
-void SCTPClient::socketClosed(int, void *)
+void SctpClient::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
@@ -524,7 +553,7 @@ void SCTPClient::socketClosed(int, void *)
     }
 }
 
-void SCTPClient::socketFailure(int, void *, int code)
+void SctpClient::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
@@ -534,7 +563,7 @@ void SCTPClient::socketFailure(int, void *, int code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
+void SctpClient::socketStatusArrived(int assocId, void *yourPtr, SctpStatusInfo *status)
 {
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -552,10 +581,10 @@ void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo 
     delete status;
 }
 
-void SCTPClient::setPrimaryPath(const char *str)
+void SctpClient::setPrimaryPath(const char *str)
 {
     cMessage *cmsg = new cMessage("SCTP_C_PRIMARY");
-    SCTPPathInfo *pinfo = new SCTPPathInfo();
+    SctpPathInfo *pinfo = new SctpPathInfo();
 
     if (strcmp(str, "") != 0) {
         pinfo->setRemoteAddress(L3Address(str));
@@ -576,12 +605,12 @@ void SCTPClient::setPrimaryPath(const char *str)
     socket.sendNotification(cmsg);
 }
 
-void SCTPClient::sendStreamResetNotification()
+void SctpClient::sendStreamResetNotification()
 {
     unsigned int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
         cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
-        SCTPResetInfo *rinfo = new SCTPResetInfo();
+        SctpResetInfo *rinfo = new SctpResetInfo();
         rinfo->setSocketId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType((unsigned short int)type);
@@ -591,12 +620,12 @@ void SCTPClient::sendStreamResetNotification()
     }
 }
 
-void SCTPClient::msgAbandonedArrived(int assocId)
+void SctpClient::msgAbandonedArrived(int assocId)
 {
     chunksAbandoned++;
 }
 
-void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
+void SctpClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
 {
     bufferSize = buffer;
     sendAllowed = true;
@@ -626,7 +655,7 @@ void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
     }
 }
 
-void SCTPClient::finish()
+void SctpClient::finish()
 {
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";

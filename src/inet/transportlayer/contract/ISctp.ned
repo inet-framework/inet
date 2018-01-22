@@ -25,8 +25,8 @@ moduleinterface ISctp
 {
     @display("i=block/wheelbarrow");
     gates:
-        input appIn;
+        input appIn @labels(SctpCommand/down);
         input ipIn;
-        output appOut;
+        output appOut @labels(SctpCommand/up);
         output ipOut;
 }

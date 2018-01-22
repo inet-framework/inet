@@ -56,7 +56,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/node/packetdrill|inet/applications/packetdrill|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/visualizer/util|inet/visualizer/transportlayer|inet/visualizer/scene|inet/visualizer/power|inet/visualizer/physicallayer|inet/visualizer/networklayer|inet/visualizer/mobility|inet/visualizer/linklayer|inet/visualizer/integrated|inet/visualizer/environment|inet/visualizer/common|inet/visualizer/base|inet/applications/voipstream|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|inet/node/packetdrill|inet/applications/packetdrill|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -113,7 +113,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/node/packetdrill|inet/applications/packetdrill|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/visualizer/util|inet/visualizer/transportlayer|inet/visualizer/scene|inet/visualizer/power|inet/visualizer/physicallayer|inet/visualizer/networklayer|inet/visualizer/mobility|inet/visualizer/linklayer|inet/visualizer/integrated|inet/visualizer/environment|inet/visualizer/common|inet/visualizer/base|inet/applications/voipstream|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/transportlayer/tcp_lwip|inet/node/packetdrill|inet/applications/packetdrill|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

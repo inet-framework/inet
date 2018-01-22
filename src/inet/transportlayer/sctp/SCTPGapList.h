@@ -27,15 +27,15 @@ namespace inet {
 
 namespace sctp {
 
-//#include "SCTPSeqNumbers.h"
+//#include "SctpSeqNumbers.h"
 
 #define MAX_GAP_COUNT    500
 
-class INET_API SCTPSimpleGapList
+class INET_API SctpSimpleGapList
 {
   public:
-    SCTPSimpleGapList();
-    ~SCTPSimpleGapList();
+    SctpSimpleGapList();
+    ~SctpSimpleGapList();
 
     void check(const uint32 cTsnAck) const;
     void print(std::ostream& os) const;
@@ -58,10 +58,10 @@ class INET_API SCTPSimpleGapList
     }
 
     bool tsnInGapList(const uint32 tsn) const;
-    void forwardCumAckTSN(const uint32 cTsnAck);
-    bool tryToAdvanceCumAckTSN(uint32& cTsnAck);
-    void removeFromGapList(const uint32 removedTSN);
-    bool updateGapList(const uint32 receivedTSN,
+    void forwardCumAckTsn(const uint32 cTsnAck);
+    bool tryToAdvanceCumAckTsn(uint32& cTsnAck);
+    void removeFromGapList(const uint32 removedTsn);
+    bool updateGapList(const uint32 receivedTsn,
             uint32& cTsnAck,
             bool& newChunkReceived);
     void resetGaps();
@@ -74,32 +74,32 @@ class INET_API SCTPSimpleGapList
     uint32 GapStopList[MAX_GAP_COUNT];
 };
 
-inline std::ostream& operator<<(std::ostream& ostr, const SCTPSimpleGapList& gapList) { gapList.print(ostr); return ostr; }
+inline std::ostream& operator<<(std::ostream& ostr, const SctpSimpleGapList& gapList) { gapList.print(ostr); return ostr; }
 
-class INET_API SCTPGapList
+class INET_API SctpGapList
 {
   public:
-    SCTPGapList();
-    ~SCTPGapList();
+    SctpGapList();
+    ~SctpGapList();
 
-    inline void setInitialCumAckTSN(const uint32 cumAckTSN)
+    inline void setInitialCumAckTsn(const uint32 cumAckTsn)
     {
         assert(CombinedGapList.getNumGaps() == 0);
-        CumAckTSN = cumAckTSN;
+        CumAckTsn = cumAckTsn;
     }
 
-    inline uint32 getCumAckTSN() const
+    inline uint32 getCumAckTsn() const
     {
-        return CumAckTSN;
+        return CumAckTsn;
     }
 
-    inline uint32 getHighestTSNReceived() const
+    inline uint32 getHighestTsnReceived() const
     {
         if (CombinedGapList.getNumGaps() > 0) {
             return CombinedGapList.getGapStop(CombinedGapList.getNumGaps() - 1);
         }
         else {
-            return CumAckTSN;
+            return CumAckTsn;
         }
     }
 
@@ -166,10 +166,10 @@ class INET_API SCTPGapList
     void check() const;
     void print(std::ostream& os) const;
 
-    void forwardCumAckTSN(const uint32 cumAckTSN);
-    bool tryToAdvanceCumAckTSN();
-    void removeFromGapList(const uint32 removedTSN);
-    bool updateGapList(const uint32 receivedTSN,
+    void forwardCumAckTsn(const uint32 cumAckTsn);
+    bool tryToAdvanceCumAckTsn();
+    void removeFromGapList(const uint32 removedTsn);
+    bool updateGapList(const uint32 receivedTsn,
             bool& newChunkReceived,
             bool tsnIsRevokable = true);
     void resetGaps(const uint32 newCumAck);
@@ -177,13 +177,13 @@ class INET_API SCTPGapList
     // ====== Private data ===================================================
 
   private:
-    uint32 CumAckTSN;
-    SCTPSimpleGapList RevokableGapList;
-    SCTPSimpleGapList NonRevokableGapList;
-    SCTPSimpleGapList CombinedGapList;
+    uint32 CumAckTsn;
+    SctpSimpleGapList RevokableGapList;
+    SctpSimpleGapList NonRevokableGapList;
+    SctpSimpleGapList CombinedGapList;
 };
 
-inline std::ostream& operator<<(std::ostream& ostr, const SCTPGapList& gapList) { gapList.print(ostr); return ostr; }
+inline std::ostream& operator<<(std::ostream& ostr, const SctpGapList& gapList) { gapList.print(ostr); return ostr; }
 
 } // namespace sctp
 

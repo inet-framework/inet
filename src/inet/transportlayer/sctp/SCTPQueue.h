@@ -22,14 +22,14 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/sctp/SCTP.h"
+#include "inet/transportlayer/sctp/Sctp.h"
 
 namespace inet {
 
 namespace sctp {
 
-class SCTPDataVariables;
-class SCTPAssociation;
+class SctpDataVariables;
+class SctpAssociation;
 
 /**
  * Abstract base class for SCTP receive queues. This class represents
@@ -37,48 +37,48 @@ class SCTPAssociation;
  * The class also accomodates for selective retransmission, i.e.
  * also acts as a segment buffer.
  *
- * This class goes hand-in-hand with SCTPSendQueue.
+ * This class goes hand-in-hand with SctpSendQueue.
  *
  * This class is polymorphic because depending on where and how you
  * use the SCTP model you might have different ideas about "sending data"
  * on a simulated connection: you might want to transmit real bytes,
  * "dummy" (byte count only), cMessage objects, etc; see discussion
- * at SCTPSendQueue. Different subclasses can be written to accomodate
+ * at SctpSendQueue. Different subclasses can be written to accomodate
  * different needs.
  *
- * @see SCTPSendQueue
+ * @see SctpSendQueue
  */
-class INET_API SCTPQueue : public cObject
+class INET_API SctpQueue : public cObject
 {
   public:
     /**
      * Constructor.
      */
-    SCTPQueue();
-    SCTPQueue(SCTPAssociation *assoc);
+    SctpQueue();
+    SctpQueue(SctpAssociation *assoc);
 
     /**
      * Virtual destructor.
      */
-    ~SCTPQueue();
+    ~SctpQueue();
 
-    bool checkAndInsertChunk(const uint32 key, SCTPDataVariables *chunk);
+    bool checkAndInsertChunk(const uint32 key, SctpDataVariables *chunk);
     /* returns true if new data is inserted and false if data was present */
 
-    SCTPDataVariables *getAndExtractChunk(const uint32 tsn);
-    SCTPDataVariables *extractMessage();
+    SctpDataVariables *getAndExtractChunk(const uint32 tsn);
+    SctpDataVariables *extractMessage();
 
     void printQueue() const;
 
     uint32 getQueueSize() const;
 
-    SCTPDataVariables *getFirstChunk() const;
+    SctpDataVariables *getFirstChunk() const;
 
     cMessage *getMsg(const uint32 key) const;
 
-    SCTPDataVariables *getChunk(const uint32 key) const;
+    SctpDataVariables *getChunk(const uint32 key) const;
 
-    SCTPDataVariables *getChunkFast(const uint32 tsn, bool& firstTime);
+    SctpDataVariables *getChunkFast(const uint32 tsn, bool& firstTime);
 
     void removeMsg(const uint32 key);
 
@@ -86,22 +86,22 @@ class INET_API SCTPQueue : public cObject
 
     int32 getNumBytes() const;
 
-    SCTPDataVariables *dequeueChunkBySSN(const uint16 ssn);
+    SctpDataVariables *dequeueChunkBySSN(const uint16 ssn);
 
     uint32 getSizeOfFirstChunk(const L3Address& remoteAddress);
 
     uint16 getFirstSsnInQueue(const uint16 sid);
 
-    void findEarliestOutstandingTSNsForPath(const L3Address& remoteAddress,
-            uint32& earliestOutstandingTSN,
-            uint32& rtxEarliestOutstandingTSN) const;
+    void findEarliestOutstandingTsnsForPath(const L3Address& remoteAddress,
+            uint32& earliestOutstandingTsn,
+            uint32& rtxEarliestOutstandingTsn) const;
 
   public:
-    typedef std::map<uint32, SCTPDataVariables *> PayloadQueue;
+    typedef std::map<uint32, SctpDataVariables *> PayloadQueue;
     PayloadQueue payloadQueue;
 
   protected:
-    SCTPAssociation *assoc;    // SCTP connection object
+    SctpAssociation *assoc;    // SCTP connection object
 
   private:
     PayloadQueue::iterator GetChunkFastIterator;

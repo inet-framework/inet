@@ -25,15 +25,15 @@ namespace inet {
 // SCTP command codes, sent by the application to SCTP. These constants
 // should be set as message kind on a message sent to the SCTP entity.
 //
-// @see SCTPCommand, SCTPOpenCommand, SCTP
+// @see SctpCommand, SctpOpenCommand, Sctp
 //
 enum SctpCommandCode {
-    SCTP_C_ASSOCIATE = 1,    // active open (must carry SCTPOpenCommand)
-    SCTP_C_OPEN_PASSIVE = 2,    // passive open (must carry SCTPOpenCommand)
+    SCTP_C_ASSOCIATE = 1,    // active open (must carry SctpOpenCommand)
+    SCTP_C_OPEN_PASSIVE = 2,    // passive open (must carry SctpOpenCommand)
     SCTP_C_SEND = 3,    // send data (set on data packet)
     SCTP_C_CLOSE = 5,    // shutdown the association
     SCTP_C_ABORT = 6,    // abort connection
-    SCTP_C_STATUS = 7,    // request status info (SCTP_I_STATUS) from SCTP
+    SCTP_C_STATUS = 7,    // request status info (SCTP_I_STATUS) from Sctp
     SCTP_C_RECEIVE = 8,    // data receive request
     SCTP_C_SEND_ORDERED = 9,    // send data ordered
     SCTP_C_SEND_UNORDERED = 10,    // send data unordered
@@ -50,14 +50,15 @@ enum SctpCommandCode {
     SCTP_C_SET_STREAM_PRIO = 21,
     SCTP_C_GETSOCKETOPTIONS = 22,
     SCTP_C_ACCEPT = 23,
-    SCTP_C_SET_RTO_INFO = 24
+    SCTP_C_SET_RTO_INFO = 24,
+    SCTP_C_ACCEPT_SOCKET_ID = 25
 };
 
 //
 // SCTP indications, sent by SCTP to the application. SCTP will set these
 // constants as message kind on messages it sends to the application.
 //
-// @see SCTPCommand, SCTPStatusInfo, SCTP
+// @see SctpCommand, SctpStatusInfo, Sctp
 //
 enum SctpStatusInd {
     SCTP_I_DATA = 1,    // data packet (set on data packet)
@@ -68,7 +69,7 @@ enum SctpStatusInd {
     SCTP_I_CONNECTION_REFUSED = 6,    // connection refused
     SCTP_I_CONNECTION_RESET = 7,    // connection reset
     SCTP_I_TIMED_OUT = 8,    // conn-estab timer went off, or max retransm. count reached
-    SCTP_I_STATUS = 9,    // status info (will carry SCTPStatusInfo)
+    SCTP_I_STATUS = 9,    // status info (will carry SctpStatusInfo)
     SCTP_I_ABORT = 10,    // association was aborted by the peer
     SCTP_I_CONN_LOST = 11,    // association had too many retransmissions FIXME
     SCTP_I_SEND_MSG = 12,
@@ -80,10 +81,11 @@ enum SctpStatusInd {
     SCTP_I_RCV_STREAMS_RESETTED = 18,
     SCTP_I_RESET_REQUEST_FAILED = 19,
     SCTP_I_ADDRESS_ADDED = 20,    // used for AddIP and multihomed NAT
-    SCTP_I_SENDSOCKETOPTIONS = 21
+    SCTP_I_SENDSOCKETOPTIONS = 21,
+    SCTP_I_AVAILABLE = 22
 };
 
-enum SCTPFlags {
+enum SctpFlags {
     COMPLETE_MESG_UNORDERED = 1,
     COMPLETE_MESG_ORDERED = 0
 };

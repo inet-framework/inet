@@ -23,30 +23,30 @@
 #include <algorithm>
 #include <sstream>
 
-#include "inet/transportlayer/sctp/SCTPNatTable.h"
+#include "inet/transportlayer/sctp/SctpNatTable.h"
 #include "inet/common/Simsignals.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
 namespace sctp {
+#if 0
+uint32 SctpNatTable::nextEntryNumber = 0;
 
-uint32 SCTPNatTable::nextEntryNumber = 0;
+Define_Module(SctpNatTable);
 
-Define_Module(SCTPNatTable);
-
-SCTPNatTable::SCTPNatTable()
+SctpNatTable::SctpNatTable()
 {
 }
 
-SCTPNatTable::~SCTPNatTable()
+SctpNatTable::~SctpNatTable()
 {
     for (auto & elem : natEntries)
         delete(elem);
     natEntries.clear();
 }
 
-SCTPNatEntry *SCTPNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag)
+SctpNatEntry *SctpNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -59,7 +59,7 @@ SCTPNatEntry *SCTPNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Add
     return nullptr;
 }
 
-SCTPNatEntry *SCTPNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
+SctpNatEntry *SctpNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -74,7 +74,7 @@ SCTPNatEntry *SCTPNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3A
     return nullptr;
 }
 
-SCTPNatEntry *SCTPNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt)
+SctpNatEntry *SctpNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -90,7 +90,7 @@ SCTPNatEntry *SCTPNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalP
     return nullptr;
 }
 
-SCTPNatEntry *SCTPNatTable::getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt)
+SctpNatEntry *SctpNatTable::getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -103,7 +103,7 @@ SCTPNatEntry *SCTPNatTable::getLocalInitEntry(L3Address globalAddr, uint16 local
     return nullptr;
 }
 
-SCTPNatEntry *SCTPNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
+SctpNatEntry *SctpNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -116,7 +116,7 @@ SCTPNatEntry *SCTPNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt,
     return nullptr;
 }
 
-void SCTPNatTable::removeEntry(SCTPNatEntry *entry)
+void SctpNatTable::removeEntry(SctpNatEntry *entry)
 {
     Enter_Method_Silent();
     for (auto i = natEntries.begin(); i != natEntries.end(); ++i)
@@ -130,14 +130,14 @@ void SCTPNatTable::removeEntry(SCTPNatEntry *entry)
         }
 }
 
-void SCTPNatTable::printNatTable()
+void SctpNatTable::printNatTable()
 {
     for (auto & elem : natEntries) {
         EV << "localAddr:" << (elem)->getLocalAddress() << "  globalAddr:" << (elem)->getGlobalAddress() << "  localPort:" << (elem)->getLocalPort() << "  globalPort:" << (elem)->getGlobalPort() << "  nattedAddr:" << (elem)->getNattedAddress() << "  nattedPort:" << (elem)->getNattedPort() << "  localVtag:" << (elem)->getLocalVTag() << "  globalVtag:" << (elem)->getGlobalVTag() << "\n";
     }
 }
 
-SCTPNatEntry::SCTPNatEntry()
+SctpNatEntry::SctpNatEntry()
 {
     localAddress = L3Address();
     globalAddress = L3Address();
@@ -150,10 +150,10 @@ SCTPNatEntry::SCTPNatEntry()
     entryNumber = 0;
 }
 
-SCTPNatEntry::~SCTPNatEntry()
+SctpNatEntry::~SctpNatEntry()
 {
 }
-
+#endif
 } // namespace sctp
 
 } // namespace inet

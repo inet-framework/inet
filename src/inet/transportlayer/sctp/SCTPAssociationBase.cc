@@ -20,18 +20,18 @@
 #include <assert.h>
 #include <sstream>
 
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
-#include "inet/transportlayer/sctp/SCTP.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/transportlayer/sctp/SCTPQueue.h"
-#include "inet/transportlayer/sctp/SCTPAlgorithm.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
+#include "inet/transportlayer/sctp/SctpAlgorithm.h"
 
 namespace inet {
 
 namespace sctp {
 
-SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *assoc, const IRoutingTable *rt)
+SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *assoc, const IRoutingTable *rt)
 {
     // ====== Path Variable Initialization ===================================
     association = assoc;
@@ -89,7 +89,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     rtxPseudoCumAck = 0;
     newRTXPseudoCumAck = false;
     findRTXPseudoCumAck = true;    // Set findRTXPseudoCumAck to TRUE for new destination.
-    oldestChunkTSN = 0;
+    oldestChunkTsn = 0;
     oldestChunkSendTime = simTime();
     highestNewAckInSack = 0;
     lowestNewAckInSack = 0;
@@ -104,8 +104,8 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     newCumAck = false;
     outstandingBytesBeforeUpdate = 0;
     newlyAckedBytes = 0;
-    findLowestTSN = true;
-    lowestTSNRetransmitted = false;
+    findLowestTsn = true;
+    lowestTsnRetransmitted = false;
     sawNewAck = false;
     cmtGroupPaths = 0;
     utilizedCwnd = 0;
@@ -130,7 +130,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     numberOfBytesReceived = 0;
 
     // ====== Path Info ======================================================
-    SCTPPathInfo *pinfo = new SCTPPathInfo("pinfo");
+    SctpPathInfo *pinfo = new SctpPathInfo("pinfo");
     pinfo->setRemoteAddress(addr);
 
     // ====== Timers =========================================================
@@ -176,9 +176,9 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     statisticsPathBandwidth = new cOutVector(str);
 
     snprintf(str, sizeof(str), "TSN Sent %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathSentTSN = new cOutVector(str);
+    vectorPathSentTsn = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Received %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathReceivedTSN = new cOutVector(str);
+    vectorPathReceivedTsn = new cOutVector(str);
 
     snprintf(str, sizeof(str), "HB Sent %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathHb = new cOutVector(str);
@@ -212,23 +212,23 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
     vectorPathFastRecoveryState->record(0);
 
     snprintf(str, sizeof(str), "TSN Sent Fast RTX %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathTSNFastRTX = new cOutVector(str);
+    vectorPathTsnFastRTX = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Sent Timer-Based RTX %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathTSNTimerBased = new cOutVector(str);
+    vectorPathTsnTimerBased = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Acked CumAck %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathAckedTSNCumAck = new cOutVector(str);
+    vectorPathAckedTsnCumAck = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Acked GapAck %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathAckedTSNGapAck = new cOutVector(str);
+    vectorPathAckedTsnGapAck = new cOutVector(str);
 
     snprintf(str, sizeof(str), "TSN PseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathPseudoCumAck = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN RTXPseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathRTXPseudoCumAck = new cOutVector(str);
     snprintf(str, sizeof(str), "Blocking TSNs Moved %d:%s", assoc->assocId, addr.str().c_str());
-    vectorPathBlockingTSNsMoved = new cOutVector(str);
+    vectorPathBlockingTsnsMoved = new cOutVector(str);
 }
 
-SCTPPathVariables::~SCTPPathVariables()
+SctpPathVariables::~SctpPathVariables()
 {
     delete statisticsPathSSthresh;
     delete statisticsPathCwnd;
@@ -236,8 +236,8 @@ SCTPPathVariables::~SCTPPathVariables()
     delete statisticsPathRTO;
     delete statisticsPathRTT;
 
-    delete vectorPathSentTSN;
-    delete vectorPathReceivedTSN;
+    delete vectorPathSentTsn;
+    delete vectorPathReceivedTsn;
     delete vectorPathHb;
     delete vectorPathRcvdHb;
     delete vectorPathHbAck;
@@ -254,19 +254,19 @@ SCTPPathVariables::~SCTPPathVariables()
     delete vectorPathPbAcked;
     delete vectorPathFastRecoveryState;
 
-    delete vectorPathTSNFastRTX;
-    delete vectorPathTSNTimerBased;
-    delete vectorPathAckedTSNCumAck;
-    delete vectorPathAckedTSNGapAck;
+    delete vectorPathTsnFastRTX;
+    delete vectorPathTsnTimerBased;
+    delete vectorPathAckedTsnCumAck;
+    delete vectorPathAckedTsnGapAck;
 
     delete vectorPathPseudoCumAck;
     delete vectorPathRTXPseudoCumAck;
-    delete vectorPathBlockingTSNsMoved;
+    delete vectorPathBlockingTsnsMoved;
 }
 
-const L3Address SCTPDataVariables::zeroAddress = L3Address();
+const L3Address SctpDataVariables::zeroAddress = L3Address();
 
-SCTPDataVariables::SCTPDataVariables()
+SctpDataVariables::SctpDataVariables()
 {
     userData = nullptr;
     ordered = true;
@@ -310,11 +310,11 @@ SCTPDataVariables::SCTPDataVariables()
     priority = 0;
 }
 
-SCTPDataVariables::~SCTPDataVariables()
+SctpDataVariables::~SctpDataVariables()
 {
 }
 
-SCTPStateVariables::SCTPStateVariables()
+SctpStateVariables::SctpStateVariables()
 {
     active = false;
     fork = false;
@@ -378,7 +378,7 @@ SCTPStateVariables::SCTPStateVariables()
     localRwnd = SCTP_DEFAULT_ARWND;
     errorCount = 0;
     initRetransCounter = 0;
-    nextTSN = 0;
+    nextTsn = 0;
     chunksAdded = 0;
     dataChunksAdded = 0;
     packetBytes = 0;
@@ -445,15 +445,15 @@ SCTPStateVariables::SCTPStateVariables()
     sendResponse = 0;
     responseSn = 0;
     numResetRequests = 0;
-    maxBurstVariant = SCTPStateVariables::MBV_MaxBurst;
+    maxBurstVariant = SctpStateVariables::MBV_MaxBurst;
     initialWindow = 0;
     allowCMT = false;
     cmtSendAllComparisonFunction = nullptr;
     cmtRetransmissionVariant = nullptr;
-    cmtCUCVariant = SCTPStateVariables::CUCV_Normal;
-    cmtBufferSplitVariant = SCTPStateVariables::CBSV_None;
+    cmtCUCVariant = SctpStateVariables::CUCV_Normal;
+    cmtBufferSplitVariant = SctpStateVariables::CBSV_None;
     cmtBufferSplittingUsesOSB = false;
-    cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_None;
+    cmtChunkReschedulingVariant = SctpStateVariables::CCRV_None;
     cmtChunkReschedulingThreshold = 0.5;
     cmtSmartT3Reset = true;
     cmtSmartFastRTX = true;
@@ -471,7 +471,7 @@ SCTPStateVariables::SCTPStateVariables()
     }
 
     count = 0;
-    blockingTSNsMoved = 0;
+    blockingTsnsMoved = 0;
 
     cmtUseDAC = true;
     cmtUseFRC = true;
@@ -499,7 +499,7 @@ SCTPStateVariables::SCTPStateVariables()
     throughputInterval = 1.0;
 }
 
-SCTPStateVariables::~SCTPStateVariables()
+SctpStateVariables::~SctpStateVariables()
 {
     if (incomingRequestSet) {
         delete incomingRequest;
@@ -508,21 +508,21 @@ SCTPStateVariables::~SCTPStateVariables()
         delete initChunk;
 }
 
-bool SCTPStateVariables::findRequestNum(uint32 num)
+bool SctpStateVariables::findRequestNum(uint32 num)
 {
     if (requests.find(num) != requests.end())
         return true;
     return false;
 }
 
-bool SCTPStateVariables::findPeerRequestNum(uint32 num)
+bool SctpStateVariables::findPeerRequestNum(uint32 num)
 {
     if (peerRequests.find(num) != peerRequests.end())
         return true;
     return false;
 }
 
-bool SCTPStateVariables::findPeerStreamToReset(uint16 num)
+bool SctpStateVariables::findPeerStreamToReset(uint16 num)
 {
     std::list<uint16>::iterator it;
     for (it = peerStreamsToReset.begin(); it != peerStreamsToReset.end(); it++) {
@@ -532,7 +532,7 @@ bool SCTPStateVariables::findPeerStreamToReset(uint16 num)
     return false;
 }
 
-bool SCTPStateVariables::findMatch(uint16 num)
+bool SctpStateVariables::findMatch(uint16 num)
 {
     std::list<uint16>::iterator it;
     for (it = resetOutStreams.begin(); it != resetOutStreams.end(); it++) {
@@ -542,7 +542,7 @@ bool SCTPStateVariables::findMatch(uint16 num)
     return false;
 }
 
-SCTPStateVariables::RequestData* SCTPStateVariables::findTypeInRequests(uint16 type)
+SctpStateVariables::RequestData* SctpStateVariables::findTypeInRequests(uint16 type)
 {
     for (auto & elem : requests) {
         if (elem.second.type == type) {
@@ -552,7 +552,7 @@ SCTPStateVariables::RequestData* SCTPStateVariables::findTypeInRequests(uint16 t
     return nullptr;
 }
 
-uint16 SCTPStateVariables::getNumRequestsNotPerformed()
+uint16 SctpStateVariables::getNumRequestsNotPerformed()
 {
     uint16 count = 0;
     for (auto & elem : requests) {
@@ -567,7 +567,7 @@ uint16 SCTPStateVariables::getNumRequestsNotPerformed()
 // FSM framework, SCTP FSM
 //
 
-SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
+SctpAssociation::SctpAssociation(Sctp *_module, int32 _appGateIndex, int32 _assocId, IRoutingTable *_rt, IInterfaceTable *_ift)
 {
     // ====== Initialize variables ===========================================
     rt = _rt;
@@ -575,6 +575,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     sctpMain = _module;
     appGateIndex = _appGateIndex;
     assocId = _assocId;
+    listeningAssocId = -1;
     fd = -1;
     listening = false;
     localPort = 0;
@@ -622,7 +623,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     ssFunctions.ssGetNextSid = nullptr;
     ssFunctions.ssUsableStreams = nullptr;
 
-    EV_INFO << "SCTPAssociationBase::SCTPAssociation(): new assocId="
+    EV_INFO << "SctpAssociationBase::SctpAssociation(): new assocId="
             << assocId << endl;
 
     // ====== FSM ============================================================
@@ -633,7 +634,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
     fsm->setState(SCTP_S_CLOSED);
 
     // ====== Path Info ======================================================
-    SCTPPathInfo *pinfo = new SCTPPathInfo("pathInfo");
+    SctpPathInfo *pinfo = new SctpPathInfo("pathInfo");
     pinfo->setRemoteAddress(L3Address());
 
     // ====== Timers =========================================================
@@ -739,98 +740,98 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
 
     switch (ssModule) {
         case ROUND_ROBIN:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamScheduler;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamScheduler;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: ROUND_ROBIN" << endl;
             break;
 
         case ROUND_ROBIN_PACKET:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerRoundRobinPacket;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerRoundRobinPacket;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: ROUND_ROBIN_PACKET" << endl;
             break;
 
         case RANDOM_SCHEDULE:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerRandom;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerRandom;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: RANDOM_SCHEDULE" << endl;
             break;
 
         case RANDOM_SCHEDULE_PACKET:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerRandomPacket;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerRandomPacket;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: RANDOM_SCHEDULE_PACKET" << endl;
             break;
 
         case FAIR_BANDWITH:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerFairBandwidth;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerFairBandwidth;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: FAIR_BANDWITH" << endl;
             break;
 
         case FAIR_BANDWITH_PACKET:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerFairBandwidthPacket;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerFairBandwidthPacket;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: FAIR_BANDWITH_PACKET" << endl;
             break;
 
         case PRIORITY:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerPriority;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerPriority;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: PRIORITY" << endl;
             break;
 
         case FCFS:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::streamSchedulerFCFS;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::streamSchedulerFCFS;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: FCFS" << endl;
             break;
 
         case PATH_MANUAL:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::pathStreamSchedulerManual;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::pathStreamSchedulerManual;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: PATH_MANUAL" << endl;
             break;
 
         case PATH_MAP_TO_PATH:
-            ssFunctions.ssInitStreams = &SCTPAssociation::initStreams;
-            ssFunctions.ssAddInStreams = &SCTPAssociation::addInStreams;
-            ssFunctions.ssAddOutStreams = &SCTPAssociation::addOutStreams;
-            ssFunctions.ssGetNextSid = &SCTPAssociation::pathStreamSchedulerMapToPath;
-            ssFunctions.ssUsableStreams = &SCTPAssociation::numUsableStreams;
+            ssFunctions.ssInitStreams = &SctpAssociation::initStreams;
+            ssFunctions.ssAddInStreams = &SctpAssociation::addInStreams;
+            ssFunctions.ssAddOutStreams = &SctpAssociation::addOutStreams;
+            ssFunctions.ssGetNextSid = &SctpAssociation::pathStreamSchedulerMapToPath;
+            ssFunctions.ssUsableStreams = &SctpAssociation::numUsableStreams;
             EV_DETAIL << "Setting Stream Scheduler: PATH_MAP_TO_PATH" << endl;
             break;
     }
 }
 
-SCTPAssociation::~SCTPAssociation()
+SctpAssociation::~SctpAssociation()
 {
-    EV_TRACE << "Destructor SCTPAssociation " << assocId << endl;
+    EV_TRACE << "Destructor SctpAssociation " << assocId << endl;
 
     delete T1_InitTimer;
     delete T2_ShutdownTimer;
@@ -886,27 +887,27 @@ SCTPAssociation::~SCTPAssociation()
     delete sctpAlgorithm;
 }
 
-bool SCTPAssociation::processTimer(cMessage *msg)
+bool SctpAssociation::processTimer(cMessage *msg)
 {
-    SCTPPathVariables *path = nullptr;
+    SctpPathVariables *path = nullptr;
 
     EV_INFO << msg->getName() << " timer expired at " << simTime() << "\n";
 
-    SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(msg->getControlInfo());
+    SctpPathInfo *pinfo = check_and_cast<SctpPathInfo *>(msg->getControlInfo());
     L3Address addr = pinfo->getRemoteAddress();
 
     if (!addr.isUnspecified())
         path = getPath(addr);
 
     // first do actions
-    SCTPEventCode event;
+    SctpEventCode event;
     event = SCTP_E_IGNORE;
 
     if (msg == T1_InitTimer) {
         process_TIMEOUT_INIT_REXMIT(event);
     }
     else if (msg == SackTimer) {
-        EV_DETAIL << simTime() << " delayed Sack: cTsnAck=" << state->gapList.getCumAckTSN() << " highestTsnReceived=" << state->gapList.getHighestTSNReceived() << " lastTsnReceived=" << state->lastTsnReceived << " ackState=" << state->ackState << " numGaps=" << state->gapList.getNumGaps(SCTPGapList::GT_Any) << "\n";
+        EV_DETAIL << simTime() << " delayed Sack: cTsnAck=" << state->gapList.getCumAckTsn() << " highestTsnReceived=" << state->gapList.getHighestTsnReceived() << " lastTsnReceived=" << state->lastTsnReceived << " ackState=" << state->ackState << " numGaps=" << state->gapList.getNumGaps(SctpGapList::GT_Any) << "\n";
         sendSack();
     }
     else if (msg == T2_ShutdownTimer) {
@@ -979,7 +980,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg,
+bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
         const L3Address& msgSrcAddr,
         const L3Address& msgDestAddr)
 {
@@ -1007,7 +1008,7 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg,
     return process_RCV_Message(sctpmsg, msgSrcAddr, msgDestAddr);
 }
 
-SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
+SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32 commandCode)
 {
     switch (commandCode) {
         case SCTP_C_ASSOCIATE:
@@ -1067,6 +1068,9 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
         case SCTP_C_ACCEPT:
             return SCTP_E_ACCEPT;
 
+        case SCTP_C_ACCEPT_SOCKET_ID:
+            return SCTP_E_ACCEPT_SOCKET_ID;
+
         case SCTP_C_SET_RTO_INFO:
             return SCTP_E_SET_RTO_INFO;
 
@@ -1076,13 +1080,13 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
     }
 }
 
-bool SCTPAssociation::processAppCommand(cMessage *msg)
+bool SctpAssociation::processAppCommand(cMessage *msg)
 {
     printAssocBrief();
 
     // first do actions
-    SCTPCommand *sctpCommand = (SCTPCommand *)(msg->removeControlInfo());
-    SCTPEventCode event = preanalyseAppCommandEvent(msg->getKind());
+    SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
+    SctpEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
     EV_INFO << "App command: " << eventName(event) << "\n";
 
@@ -1125,8 +1129,8 @@ bool SCTPAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SCTPSendInfo *)sctpCommand)->getSid()] =
-                ((SCTPSendInfo *)sctpCommand)->getPpid();
+            state->ssPriorityMap[((SctpSendInfo *)sctpCommand)->getSid()] =
+                ((SctpSendInfo *)sctpCommand)->getPpid();
             break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT:
@@ -1165,10 +1169,14 @@ bool SCTPAssociation::processAppCommand(cMessage *msg)
             EV_DETAIL << "Accepted fd " << fd << " for assoc " << assocId << endl;
             break;
 
+        case SCTP_E_ACCEPT_SOCKET_ID:
+            sendEstabIndicationToApp();
+            break;
+
         case SCTP_E_SET_RTO_INFO:
-            sctpMain->setRtoInitial(((SCTPRtoInfo *)sctpCommand)->getRtoInitial());
-            sctpMain->setRtoMin(((SCTPRtoInfo *)sctpCommand)->getRtoMin());
-            sctpMain->setRtoMax(((SCTPRtoInfo *)sctpCommand)->getRtoMax());
+            sctpMain->setRtoInitial(((SctpRtoInfo *)sctpCommand)->getRtoInitial());
+            sctpMain->setRtoMin(((SctpRtoInfo *)sctpCommand)->getRtoMin());
+            sctpMain->setRtoMax(((SctpRtoInfo *)sctpCommand)->getRtoMax());
             break;
         default:
             throw cRuntimeError("Wrong event code");
@@ -1179,7 +1187,7 @@ bool SCTPAssociation::processAppCommand(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
+bool SctpAssociation::performStateTransition(const SctpEventCode& event)
 {
     EV_TRACE << "performStateTransition\n";
 
@@ -1262,6 +1270,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
                 case SCTP_E_RCV_COOKIE_ACK:
                     FSM_Goto((*fsm), SCTP_S_ESTABLISHED);
+                   // sendEstabIndicationToApp();
                     break;
 
                 default:
@@ -1291,7 +1300,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_STOP_SENDING:
                     FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);
                     state->stopSending = true;
-                    state->lastTSN = state->nextTSN - 1;
+                    state->lastTsn = state->nextTsn - 1;
                     break;
 
                 case SCTP_E_RCV_SHUTDOWN:
@@ -1420,7 +1429,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
         return true;
 }
 
-void SCTPAssociation::stateEntered(int32 status)
+void SctpAssociation::stateEntered(int32 status)
 {
     switch (status) {
         case SCTP_S_COOKIE_WAIT:
@@ -1450,25 +1459,25 @@ void SCTPAssociation::stateEntered(int32 status)
             state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
             state->initialWindow = (uint32)sctpMain->par("initialWindow");
             if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseIt;
+                state->maxBurstVariant = SctpStateVariables::MBV_UseItOrLoseIt;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "congestionWindowLimiting") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_CongestionWindowLimiting;
+                state->maxBurstVariant = SctpStateVariables::MBV_CongestionWindowLimiting;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "maxBurst") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_MaxBurst;
+                state->maxBurstVariant = SctpStateVariables::MBV_MaxBurst;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "aggressiveMaxBurst") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_AggressiveMaxBurst;
+                state->maxBurstVariant = SctpStateVariables::MBV_AggressiveMaxBurst;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "totalMaxBurst") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_TotalMaxBurst;
+                state->maxBurstVariant = SctpStateVariables::MBV_TotalMaxBurst;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseItTempCwnd") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseItTempCwnd;
+                state->maxBurstVariant = SctpStateVariables::MBV_UseItOrLoseItTempCwnd;
             }
             else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "congestionWindowLimitingTempCwnd") == 0) {
-                state->maxBurstVariant = SCTPStateVariables::MBV_CongestionWindowLimitingTempCwnd;
+                state->maxBurstVariant = SctpStateVariables::MBV_CongestionWindowLimitingTempCwnd;
             }
             else {
                 throw cRuntimeError("Invalid setting of maxBurstVariant: %s.",
@@ -1500,13 +1509,13 @@ void SCTPAssociation::stateEntered(int32 status)
 
             state->cmtRetransmissionVariant = sctpMain->par("cmtRetransmissionVariant");
             if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "normal") == 0) {
-                state->cmtCUCVariant = SCTPStateVariables::CUCV_Normal;
+                state->cmtCUCVariant = SctpStateVariables::CUCV_Normal;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "pseudoCumAck") == 0) {
-                state->cmtCUCVariant = SCTPStateVariables::CUCV_PseudoCumAck;
+                state->cmtCUCVariant = SctpStateVariables::CUCV_PseudoCumAck;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "pseudoCumAckV2") == 0) {
-                state->cmtCUCVariant = SCTPStateVariables::CUCV_PseudoCumAckV2;
+                state->cmtCUCVariant = SctpStateVariables::CUCV_PseudoCumAckV2;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtCUCVariant: %s\n",
@@ -1515,19 +1524,19 @@ void SCTPAssociation::stateEntered(int32 status)
             state->smartOverfullSACKHandling = (bool)sctpMain->par("smartOverfullSACKHandling");
 
             if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "none") == 0) {
-                state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_None;
+                state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_None;
             }
             else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "senderOnly") == 0) {
-                state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_SenderOnly;
+                state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_SenderOnly;
             }
             else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "receiverOnly") == 0) {
-                state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_ReceiverOnly;
+                state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_ReceiverOnly;
             }
             else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "bothSides") == 0) {
-                state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_BothSides;
+                state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_BothSides;
             }
             else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "test") == 0) {
-                state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_Test;
+                state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_Test;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtChunkReschedulingVariant: %s\n",
@@ -1535,16 +1544,16 @@ void SCTPAssociation::stateEntered(int32 status)
             }
 
             if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "none") == 0) {
-                state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_None;
+                state->cmtBufferSplitVariant = SctpStateVariables::CBSV_None;
             }
             else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "senderOnly") == 0) {
-                state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_SenderOnly;
+                state->cmtBufferSplitVariant = SctpStateVariables::CBSV_SenderOnly;
             }
             else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "receiverOnly") == 0) {
-                state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_ReceiverOnly;
+                state->cmtBufferSplitVariant = SctpStateVariables::CBSV_ReceiverOnly;
             }
             else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "bothSides") == 0) {
-                state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_BothSides;
+                state->cmtBufferSplitVariant = SctpStateVariables::CBSV_BothSides;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtBufferSplitVariant: %s\n",
@@ -1553,16 +1562,16 @@ void SCTPAssociation::stateEntered(int32 status)
             state->cmtBufferSplittingUsesOSB = (bool)sctpMain->par("cmtBufferSplittingUsesOSB");
 
             if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "none") == 0) {
-                state->gapListOptimizationVariant = SCTPStateVariables::GLOV_None;
+                state->gapListOptimizationVariant = SctpStateVariables::GLOV_None;
             }
             else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "optimized1") == 0) {
-                state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Optimized1;
+                state->gapListOptimizationVariant = SctpStateVariables::GLOV_Optimized1;
             }
             else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "optimized2") == 0) {
-                state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Optimized2;
+                state->gapListOptimizationVariant = SctpStateVariables::GLOV_Optimized2;
             }
             else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "shrunken") == 0) {
-                state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Shrunken;
+                state->gapListOptimizationVariant = SctpStateVariables::GLOV_Shrunken;
             }
             else {
                 throw cRuntimeError("Bad setting for gapListOptimizationVariant: %s\n",
@@ -1583,16 +1592,16 @@ void SCTPAssociation::stateEntered(int32 status)
             state->strictCwndBooking = (bool)sctpMain->par("strictCwndBooking");
 
             if (strcmp((const char *)sctpMain->par("cmtSackPath"), "standard") == 0) {
-                state->cmtSackPath = SCTPStateVariables::CSP_Standard;
+                state->cmtSackPath = SctpStateVariables::CSP_Standard;
             }
             else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "primary") == 0) {
-                state->cmtSackPath = SCTPStateVariables::CSP_Primary;
+                state->cmtSackPath = SctpStateVariables::CSP_Primary;
             }
             else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "roundRobin") == 0) {
-                state->cmtSackPath = SCTPStateVariables::CSP_RoundRobin;
+                state->cmtSackPath = SctpStateVariables::CSP_RoundRobin;
             }
             else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "smallestSRTT") == 0) {
-                state->cmtSackPath = SCTPStateVariables::CSP_SmallestSRTT;
+                state->cmtSackPath = SctpStateVariables::CSP_SmallestSRTT;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtSackPath: %s\n",
@@ -1600,37 +1609,37 @@ void SCTPAssociation::stateEntered(int32 status)
             }
 
             if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "off") == 0) {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_Off;
+                state->cmtCCVariant = SctpStateVariables::CCCV_Off;
                 state->allowCMT = false;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmt") == 0) {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_CMT;
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMT;
                 state->allowCMT = true;
             }
             else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "lia") == 0){
-               state->cmtCCVariant = SCTPStateVariables::CCCV_CMT_LIA;
+               state->cmtCCVariant = SctpStateVariables::CCCV_CMT_LIA;
                state->allowCMT     = true;
             }
             else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "olia") == 0){
-               state->cmtCCVariant = SCTPStateVariables::CCCV_CMT_OLIA;
+               state->cmtCCVariant = SctpStateVariables::CCCV_CMT_OLIA;
                state->allowCMT     = true;
             }
             else if ((strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp") == 0) ||
                      (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrpv1") == 0))
             {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRPv1;
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMTRPv1;
                 state->allowCMT = true;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrpv2") == 0) {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRPv2;
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMTRPv2;
                 state->allowCMT = true;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp-t1") == 0) {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRP_Test1;
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMTRP_Test1;
                 state->allowCMT = true;
             }
             else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp-t2") == 0) {
-                state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRP_Test2;
+                state->cmtCCVariant = SctpStateVariables::CCCV_CMTRP_Test2;
                 state->allowCMT = true;
             }
             else {
@@ -1650,7 +1659,7 @@ void SCTPAssociation::stateEntered(int32 status)
                     if (token == nullptr) {
                         throw cRuntimeError("Too few cmtCCGroup values to cover all paths!");
                     }
-                    SCTPPathVariables *path = pathIterator->second;
+                    SctpPathVariables *path = pathIterator->second;
                     path->cmtCCGroup = atol(token);
                     pathIterator++;
                 }
@@ -1674,7 +1683,7 @@ void SCTPAssociation::stateEntered(int32 status)
             state->throughputInterval = (double)sctpMain->par("throughputInterval");
             sackPeriod = (double)sctpMain->getSackPeriod();
             sackFrequency = sctpMain->getSackFrequency();
-            SCTP::AssocStat stat;
+            Sctp::AssocStat stat;
             stat.assocId = assocId;
             stat.start = simTime();
             stat.stop = 0;
@@ -1692,7 +1701,7 @@ void SCTPAssociation::stateEntered(int32 status)
             stat.numOverfullSACKs = 0;
             stat.lifeTime = 0;
             stat.throughput = 0;
-            stat.numDropsBecauseNewTSNGreaterThanHighestTSN = 0;
+            stat.numDropsBecauseNewTsnGreaterThanHighestTsn = 0;
             stat.numDropsBecauseNoRoomInBuffer = 0;
             stat.numChunksReneged = 0;
             stat.numAuthChunksSent = 0;
@@ -1715,20 +1724,26 @@ void SCTPAssociation::stateEntered(int32 status)
 
             switch (ccModule) {
                 case RFC4960: {
-                    ccFunctions.ccInitParams = &SCTPAssociation::initCCParameters;
-                    ccFunctions.ccUpdateBeforeSack = &SCTPAssociation::cwndUpdateBeforeSack;
-                    ccFunctions.ccUpdateAfterSack = &SCTPAssociation::cwndUpdateAfterSack;
-                    ccFunctions.ccUpdateAfterCwndTimeout = &SCTPAssociation::cwndUpdateAfterCwndTimeout;
-                    ccFunctions.ccUpdateAfterRtxTimeout = &SCTPAssociation::cwndUpdateAfterRtxTimeout;
-                    ccFunctions.ccUpdateMaxBurst = &SCTPAssociation::cwndUpdateMaxBurst;
-                    ccFunctions.ccUpdateBytesAcked = &SCTPAssociation::cwndUpdateBytesAcked;
+                    ccFunctions.ccInitParams = &SctpAssociation::initCcParameters;
+                    ccFunctions.ccUpdateBeforeSack = &SctpAssociation::cwndUpdateBeforeSack;
+                    ccFunctions.ccUpdateAfterSack = &SctpAssociation::cwndUpdateAfterSack;
+                    ccFunctions.ccUpdateAfterCwndTimeout = &SctpAssociation::cwndUpdateAfterCwndTimeout;
+                    ccFunctions.ccUpdateAfterRtxTimeout = &SctpAssociation::cwndUpdateAfterRtxTimeout;
+                    ccFunctions.ccUpdateMaxBurst = &SctpAssociation::cwndUpdateMaxBurst;
+                    ccFunctions.ccUpdateBytesAcked = &SctpAssociation::cwndUpdateBytesAcked;
                     break;
                 }
             }
 
             pmStartPathManagement();
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
-            sendEstabIndicationToApp();
+            EV_INFO << "stateEntered: Established socketId= " << assocId << endl;
+            if (isToBeAccepted()) {
+            EV_INFO << "Listening socket can accept now\n";
+                sendAvailableIndicationToApp();
+            } else {
+                sendEstabIndicationToApp();
+            }
             if (sctpMain->hasPar("addIP")) {
                 const bool addIP = (bool)sctpMain->par("addIP");
                 EV_DETAIL << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
@@ -1751,7 +1766,7 @@ void SCTPAssociation::stateEntered(int32 status)
             snprintf(str, sizeof(str), "SendQueue of Association %d", assocId);
             sendQueue = new cOutVector(str);
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
-            SCTP::VTagPair vtagPair;
+            Sctp::VTagPair vtagPair;
             vtagPair.peerVTag = peerVTag;
             vtagPair.localVTag = localVTag;
             vtagPair.localPort = localPort;
@@ -1787,11 +1802,11 @@ void SCTPAssociation::stateEntered(int32 status)
     }
 }
 
-void SCTPAssociation::removePath()
+void SctpAssociation::removePath()
 {
     while (!sctpPathMap.empty()) {
         auto pathIterator = sctpPathMap.begin();
-        SCTPPathVariables *path = pathIterator->second;
+        SctpPathVariables *path = pathIterator->second;
         for (auto j = remoteAddressList.begin(); j != remoteAddressList.end(); j++) {
             if ((*j) == path->remoteAddress) {
                 remoteAddressList.erase(j);

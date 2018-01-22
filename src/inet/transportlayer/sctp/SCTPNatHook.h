@@ -2,7 +2,7 @@
 #define __INET_SCTPNATHOOK_H
 
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/transportlayer/sctp/SCTPNatTable.h"
+#include "inet/transportlayer/sctp/SctpNatTable.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
@@ -10,12 +10,12 @@ namespace inet {
 class IPv4;
 
 namespace sctp {
-
-class INET_API SCTPNatHook : public cSimpleModule, NetfilterBase::HookBase
+#if 0
+class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
 {
   protected:
     IPv4 *ipLayer;    // IPv4 module
-    SCTPNatTable *natTable;
+    SctpNatTable *natTable;
     IRoutingTable *rt;
     IInterfaceTable *ift;
     uint64 nattedPackets;
@@ -26,15 +26,15 @@ class INET_API SCTPNatHook : public cSimpleModule, NetfilterBase::HookBase
     void sendBackError(Ipv4Header *dgram);
 
   public:
-    SCTPNatHook();
-    virtual ~SCTPNatHook();
+    SctpNatHook();
+    virtual ~SctpNatHook();
     IHook::Result datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
     IHook::Result datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
     IHook::Result datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
     IHook::Result datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inIE) override;
     IHook::Result datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 };
-
+#endif
 } // namespace sctp
 
 } // namespace inet

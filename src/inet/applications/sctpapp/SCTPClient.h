@@ -20,7 +20,7 @@
 #define __INET_SCTPCLIENT_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
@@ -28,14 +28,14 @@ namespace inet {
 
 namespace sctp {
 
-class SCTPAssociation;
+class SctpAssociation;
 
 } // namespace sctp
 
 /**
- * Implements the SCTPClient simple module. See the NED file for more info.
+ * Implements the SctpClient simple module. See the NED file for more info.
  */
-class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
+class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
 {
   protected:
     struct PathStatus
@@ -44,7 +44,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         bool active;
         bool primaryPath;
     };
-    typedef std::map<L3Address, PathStatus> SCTPPathStatus;
+    typedef std::map<L3Address, PathStatus> SctpPathStatus;
 
     // parameters: see the corresponding NED variables
     std::map<unsigned int, unsigned int> streamRequestLengthMap;
@@ -58,8 +58,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     bool finishEndsSimulation;
 
     // state
-    SCTPSocket socket;
-    SCTPPathStatus sctpPathStatus;
+    SctpSocket socket;
+    SctpPathStatus sctpPathStatus;
     cMessage *timeMsg;
     cMessage *stopTimer;
     cMessage *primaryChangeTimer;
@@ -92,14 +92,14 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     void close();
     void handleTimer(cMessage *msg);
 
-    /* SCTPSocket::CallbackInterface callback methods */
+    /* SctpSocket::CallbackInterface callback methods */
     void socketEstablished(int connId, void *yourPtr, unsigned long int buffer) override;    // TODO: needs a better name
     void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;    // TODO: needs a better name
     void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg) override;
     void socketPeerClosed(int connId, void *yourPtr) override;
     void socketClosed(int connId, void *yourPtr) override;
     void socketFailure(int connId, void *yourPtr, int code) override;
-    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status) override;
+    void socketStatusArrived(int connId, void *yourPtr, SctpStatusInfo *status) override;
 
     void setPrimaryPath(const char *addr);
     void sendRequestArrived() override;
@@ -114,8 +114,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-    SCTPClient();
-    virtual ~SCTPClient();
+    SctpClient();
+    virtual ~SctpClient();
 };
 
 } // namespace inet

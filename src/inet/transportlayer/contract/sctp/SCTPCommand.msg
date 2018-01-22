@@ -19,12 +19,13 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.common.packet.Packet;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
 #include <vector>
-#include "inet/transportlayer/contract/sctp/SCTPCommand.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand.h"
 }}
 
 
@@ -39,7 +40,7 @@ class AddressVector { @existingClass; }
 //
 // Currently not in use.
 //
-enum SCTPErrorCode
+enum SctpErrorCode
 {
 
 }
@@ -55,9 +56,9 @@ enum SCTPErrorCode
 // ~SCTP uses the (app gate index, connId) pair to identify the socket).
 // connId is to be chosen by the application in the open command.
 //
-// @see ~SctpCommandCode, ~SctpStatusInd, ~SCTPOpenCommand, ~SCTPStatusInfo, SCTPMain
+// @see ~SctpCommandCode, ~SctpStatusInd, ~SctpOpenCommand, ~SctpStatusInfo, SctpMain
 //
-message SCTPCommand
+class SctpCommand extends cPacket
 {
     int socketId = -1;   // identifies the socket within the application
     int sid = -1;
@@ -76,44 +77,44 @@ message SCTPCommand
 //
 // Currently not in use.
 //
-message SCTPErrorInfo extends SCTPCommand
+class SctpErrorInfo extends SctpCommand
 {
-    SCTPErrorCode errorCode;
+    SctpErrorCode errorCode;
     string messageText;
 }
 
 
 //
-// Control info to be used for active or passive ~SCTP open.
+// Control info to be used for active or passive ~Sctp open.
 //
 // localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
-// localAddr is optional because ~SCTP can learn it from IP when a packet
+// localAddr is optional because ~Sctp can learn it from IP when a packet
 // is received from the peer; localPort is optional because ~SCTP supports
 // ephemeral ports.
 //
 // The sendQueueClass, receiveQueueClass and sctpAlgorithmClass fields
-// allow per-connection ~SCTP configuration. These fields may contain
-// names of messagees submessageed from SCTPSendQueue, SCTPReceiveQueue
-// and SCTPAlgorithm, respectively. If not set, module parameters with
+// allow per-connection ~Sctp configuration. These fields may contain
+// names of messagees submessageed from SctpSendQueue, SctpReceiveQueue
+// and SctpAlgorithm, respectively. If not set, module parameters with
 // similar names are used.
 //
 // The fork parameter is used with passive open, and controls what happens
 // when an incoming connection is received. With fork=true, it emulates
 // the Unix accept(2) syscall semantics: a new connection structure
-// is created for the connection (with a new connId, see in ~SCTPCommand),
+// is created for the connection (with a new connId, see in ~SctpCommand),
 // and the connection structure with the old connId remains listening.
 // With fork=false, all the above does not happen: the first connection
 // is accepted (with the original connId), and further incoming connections
-// will be refused by ~SCTP by sending an RST segment.
+// will be refused by ~Sctp by sending an RST segment.
 //
-// @see ~SctpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~Sctp
 //
-message SCTPOpenCommand extends SCTPCommand
+class SctpOpenCommand extends SctpCommand
 {
     AddressVector localAddresses;
     AddressVector remoteAddresses;
     bool fork = false;               // used only for passive open
-    string queueClass = "SCTPQueue"; // may be left empty
+    string queueClass = "SctpQueue"; // may be left empty
     string sctpAlgorithmClass;       // may be left empty
     uint32 inboundStreams;
     uint32 outboundStreams;
@@ -128,9 +129,9 @@ message SCTPOpenCommand extends SCTPCommand
 //
 // Control info to be used with the SEND command.
 //
-// @see ~SctpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~Sctp
 //
-message SCTPSendInfo extends SCTPCommand
+class SctpSendInfo extends SctpCommand
 {
     unsigned int prMethod;
     bool last;
@@ -142,9 +143,9 @@ message SCTPSendInfo extends SCTPCommand
 //
 // Control info to be used when setsockopt changes RtoInfo.
 //
-// @see ~SctpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~Sctp
 //
-message SCTPRtoInfo extends SCTPCommand
+class SctpRtoInfo extends SctpCommand
 {
     double rtoInitial;
     double rtoMin;
@@ -154,9 +155,9 @@ message SCTPRtoInfo extends SCTPCommand
 //
 // Control info to be used with the DATA command.
 //
-// @see ~SctpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~Sctp
 //
-message SCTPRcvInfo extends SCTPCommand
+class SctpRcvInfo extends SctpCommand
 {
     uint32 ppid;
     uint32 tsn;
@@ -168,9 +169,9 @@ message SCTPRcvInfo extends SCTPCommand
 // Sent with message kind SCTP_I_ESTABLISHED, to let the app know
 // about the local and remote IP address and port.
 //
-// @see ~SctpCommandCode, ~SCTP
+// @see ~SctpCommandCode, ~Sctp
 //
-message SCTPConnectInfo extends SCTPCommand
+class SctpConnectInfo extends SctpCommand
 {
     AddressVector remoteAddresses;
     int status;
@@ -178,15 +179,24 @@ message SCTPConnectInfo extends SCTPCommand
     int outboundStreams;
 }
 
+class SctpAvailableInfo extends SctpCommand
+{
+    int newSocketId;
+}
+
+class SctpAcceptSocketInfo extends SctpCommand
+{
+}
+
 
 //
 // Sent with message kind SCTP_I_STATUS, in response to command SCTP_C_STATUS.
-// For explanation of variables, see RFC 4960 or SCTPStateVariables in
-// SCTPAssociation.h.
+// For explanation of variables, see RFC 4960 or SctpStateVariables in
+// SctpAssociation.h.
 //
-// @see ~SctpStatusInd, ~SctpCommandCode, ~SCTP
+// @see ~SctpStatusInd, ~SctpCommandCode, ~Sctp
 //
-message SCTPStatusInfo extends SCTPCommand
+class SctpStatusInfo extends SctpCommand
 {
     int state;
     string stateName;
@@ -194,12 +204,12 @@ message SCTPStatusInfo extends SCTPCommand
     bool active;
 }
 
-message SCTPPathInfo extends SCTPCommand
+class SctpPathInfo extends SctpCommand
 {
     L3Address remoteAddress;
 }
 
-message SCTPResetInfo extends SCTPCommand
+class SctpResetInfo extends SctpCommand
 {
     unsigned short requestType = 0;
     uint16 instreams = 0;
@@ -207,12 +217,12 @@ message SCTPResetInfo extends SCTPCommand
     uint16 streams[];
 }
 
-message SCTPInfo extends SCTPCommand
+class SctpInfo extends SctpCommand
 {
     int text = 0;
 }
 
-message SCTPSendQueueAbated extends SCTPCommand
+class SctpSendQueueAbated extends SctpCommand
 {
     uint64 bytesAvailable;
     uint64 bytesQueued;
@@ -220,7 +230,7 @@ message SCTPSendQueueAbated extends SCTPCommand
     uint64 queuedForStream[];
 }
 
-class SCTPSimpleMessage extends FieldsChunk
+class SctpSimpleMessage extends cPacket
 {
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     char data[];

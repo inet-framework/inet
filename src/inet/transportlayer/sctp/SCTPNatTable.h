@@ -22,13 +22,13 @@
 #include <vector>
 #include <omnetpp.h>
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
 namespace sctp {
-
-class INET_API SCTPNatEntry : public cObject
+#if 0
+class INET_API SctpNatEntry : public cObject
 {
   protected:
     uint32 entryNumber;
@@ -42,8 +42,8 @@ class INET_API SCTPNatEntry : public cObject
     uint32 localVtag;
 
   public:
-    SCTPNatEntry();
-    ~SCTPNatEntry();
+    SctpNatEntry();
+    ~SctpNatEntry();
 
     void setLocalAddress(L3Address addr) { localAddress = addr; };
     void setGlobalAddress(L3Address addr) { globalAddress = addr; };
@@ -65,39 +65,39 @@ class INET_API SCTPNatEntry : public cObject
     uint32 getLocalVTag() { return localVtag; };
 };
 
-class INET_API SCTPNatTable : public cSimpleModule
+class INET_API SctpNatTable : public cSimpleModule
 {
   public:
 
-    typedef std::vector<SCTPNatEntry *> SCTPNatEntryTable;
+    typedef std::vector<SctpNatEntry *> SctpNatEntryTable;
 
-    SCTPNatEntryTable natEntries;
+    SctpNatEntryTable natEntries;
 
-    SCTPNatTable();
+    SctpNatTable();
 
-    ~SCTPNatTable();
+    ~SctpNatTable();
 
     static uint32 nextEntryNumber;
 
-    //void addNatEntry(SCTPNatEntry* entry);
+    //void addNatEntry(SctpNatEntry* entry);
 
-    SCTPNatEntry *findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag);
+    SctpNatEntry *findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag);
 
-    SCTPNatEntry *getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag);
+    SctpNatEntry *getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag);
 
-    SCTPNatEntry *getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt);
+    SctpNatEntry *getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt);
 
-    SCTPNatEntry *getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt);
+    SctpNatEntry *getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt);
 
-    SCTPNatEntry *getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag);
+    SctpNatEntry *getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag);
 
-    void removeEntry(SCTPNatEntry *entry);
+    void removeEntry(SctpNatEntry *entry);
 
     void printNatTable();
 
     static uint32 getNextEntryNumber() { return nextEntryNumber++; };
 };
-
+#endif
 } // namespace sctp
 
 } // namespace inet

@@ -23,22 +23,22 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/sctp/SCTPQueue.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
 
-class SCTPCommand;
+class SctpCommand;
 
 namespace sctp {
 
-class SCTPMessage;
-class SCTPDataVariables;
+class SctpHeader;
+class SctpDataVariables;
 
-class INET_API SCTPSendStream : public cObject
+class INET_API SctpSendStream : public cObject
 {
   protected:
-    SCTPAssociation *assoc;
+    SctpAssociation *assoc;
     uint16 streamId;
     uint16 nextStreamSeqNum;
     uint32 bytesInFlight;
@@ -49,8 +49,8 @@ class INET_API SCTPSendStream : public cObject
 
   public:
 
-    SCTPSendStream(SCTPAssociation *assoc, const uint16 id);
-    ~SCTPSendStream();
+    SctpSendStream(SctpAssociation *assoc, const uint16 id);
+    ~SctpSendStream();
 
     inline cPacketQueue *getStreamQ() const { return streamQ; };
     inline cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };

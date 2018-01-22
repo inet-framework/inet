@@ -23,7 +23,7 @@ import inet.transportlayer.contract.ISctp;
 //
 // Implements the SCTP protocol.
 //
-simple SCTP like ISctp
+simple Sctp like ISctp
 {
     parameters:
         string interfaceTableModule;
@@ -64,7 +64,7 @@ simple SCTP like ISctp
 
         //#====== Congestion Control ==========================================
         bool fastRecoverySupported = default(true);
-        string sctpAlgorithmClass = default("SCTPAlg");
+        string sctpAlgorithmClass = default("SctpAlg");
         int ccModule = default(0);           // RFC4960=0
         bool osbWithHeader = default(false);
         int RTXMethod = default(0);        // 0=Once after 3 Sacks; 1=once per RTT; 2=Switch off Fast Retransmit; 3=Always after 3 Sacks
@@ -158,7 +158,7 @@ simple SCTP like ISctp
     gates:
         input appIn;
         input ipIn;
-        output appOut;
+        output appOut @labels(SctpCommand/up);
         output ipOut;
 }
 

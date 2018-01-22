@@ -16,32 +16,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/sctp/SCTPReceiveStream.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/transportlayer/sctp/SctpReceiveStream.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {
 
 namespace sctp {
 
-SCTPReceiveStream::SCTPReceiveStream(SCTPAssociation *assoc_)
+SctpReceiveStream::SctpReceiveStream(SctpAssociation *assoc_)
 {
     streamId = 0;
     expectedStreamSeqNum = 0;
-    deliveryQ = new SCTPQueue();
-    orderedQ = new SCTPQueue();
-    unorderedQ = new SCTPQueue();
+    deliveryQ = new SctpQueue();
+    orderedQ = new SctpQueue();
+    unorderedQ = new SctpQueue();
     assoc = assoc_;
 }
 
-SCTPReceiveStream::~SCTPReceiveStream()
+SctpReceiveStream::~SctpReceiveStream()
 {
     delete deliveryQ;
     delete orderedQ;
     delete unorderedQ;
 }
 
-uint32 SCTPReceiveStream::reassemble(SCTPQueue *queue, uint32 tsn)
+uint32 SctpReceiveStream::reassemble(SctpQueue *queue, uint32 tsn)
 {
     uint32 begintsn = tsn, endtsn = 0;
 
@@ -61,14 +61,14 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue *queue, uint32 tsn)
         if (queue->getChunk(endtsn)) {
             EV_INFO << "All fragments found, now reassembling..." << endl;
 
-            SCTPDataVariables *firstVar = queue->getChunk(begintsn), *processVar;
-            SCTPSimpleMessage *firstSimple = check_and_cast<SCTPSimpleMessage *>(firstVar->userData);
+            SctpDataVariables *firstVar = queue->getChunk(begintsn), *processVar;
+            SctpSimpleMessage *firstSimple = check_and_cast<SctpSimpleMessage *>(firstVar->userData);
 
             EV_INFO << "First fragment has " << firstVar->len / 8 << " bytes." << endl;
 
             while (++begintsn <= endtsn) {
                 processVar = queue->getAndExtractChunk(begintsn);
-                SCTPSimpleMessage *processSimple = check_and_cast<SCTPSimpleMessage *>(processVar->userData);
+                SctpSimpleMessage *processSimple = check_and_cast<SctpSimpleMessage *>(processVar->userData);
 
                 EV_INFO << "Adding fragment with " << processVar->len / 8 << " bytes." << endl;
 
@@ -96,11 +96,11 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue *queue, uint32 tsn)
     return tsn;
 }
 
-uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
+uint32 SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
 {
     uint32 delivery = 0;    //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
 
-    SCTPDataVariables *chunk;
+    SctpDataVariables *chunk;
     /* Enqueueing NEW data chunk. Append it to the respective queue */
 
     // ====== Unordered delivery =============================================
@@ -155,11 +155,11 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
     return delivery;
 }
 
-int32 SCTPReceiveStream::getExpectedStreamSeqNum() {
+int32 SctpReceiveStream::getExpectedStreamSeqNum() {
     return expectedStreamSeqNum;
 }
 
-void SCTPReceiveStream::setExpectedStreamSeqNum(int32 seqNum) {
+void SctpReceiveStream::setExpectedStreamSeqNum(int32 seqNum) {
     expectedStreamSeqNum = seqNum;
 }
 

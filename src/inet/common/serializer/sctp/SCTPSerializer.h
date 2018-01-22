@@ -18,6 +18,7 @@
 #ifndef __INET_SCTPSERIALIZER_H
 #define __INET_SCTPSERIALIZER_H
 
+#if 0
 #include "inet/common/serializer/SerializerBase.h"
 #include "inet/transportlayer/sctp/SCTPMessage.h"
 
@@ -66,6 +67,6 @@ class INET_API SCTPSerializer : public SerializerBase
 } // namespace serializer
 
 } // namespace inet
-
+#endif
 #endif // ifndef __INET_SCTPSERIALIZER_H
 

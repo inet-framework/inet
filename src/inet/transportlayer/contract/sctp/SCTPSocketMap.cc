@@ -18,15 +18,15 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/sctp/SCTPSocketMap.h"
+#include "inet/transportlayer/contract/sctp/SctpSocketMap.h"
 
 namespace inet {
 
-SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
+SctpSocket *SctpSocketMap::findSocketFor(cMessage *msg)
 {
-    SCTPCommand *ind = dynamic_cast<SCTPCommand *>(msg->getControlInfo());
+    SctpCommand *ind = dynamic_cast<SctpCommand *>(msg->getControlInfo());
     if (!ind)
-        throw cRuntimeError("SCTPSocketMap: findSocketFor(): no SCTPCommand control info in message (not from SCTP?)");
+        throw cRuntimeError("SctpSocketMap: findSocketFor(): no SctpCommand control info in message (not from SCTP?)");
 
     for (auto & elem : socketMap) {
         if (elem.second->belongsToSocket(msg)) {
@@ -36,13 +36,13 @@ SCTPSocket *SCTPSocketMap::findSocketFor(cMessage *msg)
     return nullptr;
 }
 
-void SCTPSocketMap::addSocket(SCTPSocket *socket)
+void SctpSocketMap::addSocket(SctpSocket *socket)
 {
     ASSERT(socketMap.find(socket->getConnectionId()) == socketMap.end());
     socketMap[socket->getConnectionId()] = socket;
 }
 
-SCTPSocket *SCTPSocketMap::removeSocket(SCTPSocket *socket)
+SctpSocket *SctpSocketMap::removeSocket(SctpSocket *socket)
 {
     auto i = socketMap.find(socket->getConnectionId());
     if (i != socketMap.end())
@@ -50,7 +50,7 @@ SCTPSocket *SCTPSocketMap::removeSocket(SCTPSocket *socket)
     return socket;
 }
 
-void SCTPSocketMap::deleteSockets()
+void SctpSocketMap::deleteSockets()
 {
     for (auto & elem : socketMap)
         delete elem.second;
