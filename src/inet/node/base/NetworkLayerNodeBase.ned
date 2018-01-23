@@ -55,42 +55,42 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         }
 
     connections allowunconnected:
-        ipv4.ifIn <-- nl.upperLayerOut++ if hasIpv4;
-        ipv4.ifOut --> nl.upperLayerIn++ if hasIpv4;
+        ipv4.ifIn <-- nl.out++if hasIpv4;
+        ipv4.ifOut --> nl.in++ if hasIpv4;
 
-        ipv6.ifIn <-- nl.upperLayerOut++ if hasIpv6;
-        ipv6.ifOut --> nl.upperLayerIn++ if hasIpv6;
+        ipv6.ifIn <-- nl.out++if hasIpv6;
+        ipv6.ifOut --> nl.in++ if hasIpv6;
 
-        generic.ifIn <-- nl.upperLayerOut++ if networkLayerType != "";
-        generic.ifOut --> nl.upperLayerIn++ if networkLayerType != "";
+        generic.ifIn <-- nl.out++if networkLayerType != "";
+        generic.ifOut --> nl.in++ if networkLayerType != "";
 
         for i=0..numLoInterfaces-1 {
-            nl.lowerLayerOut++ --> lo[i].upperLayerIn;
-            lo[i].upperLayerOut --> nl.lowerLayerIn++;
+            nl.out++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> nl.in++;
         }
 
         for i=0..sizeof(radioIn)-1 {
-            wlan[i].upperLayerOut --> nl.lowerLayerIn++;
-            wlan[i].upperLayerIn <-- nl.lowerLayerOut++;
+            wlan[i].upperLayerOut --> nl.in++;
+            wlan[i].upperLayerIn <-- nl.out++;
         }
 
         for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerOut --> nl.lowerLayerIn++;
-            eth[i].upperLayerIn <-- nl.lowerLayerOut++;
+            eth[i].upperLayerOut --> nl.in++;
+            eth[i].upperLayerIn <-- nl.out++;
         }
 
         for i=0..sizeof(pppg)-1 {
-            ppp[i].upperLayerOut --> nl.lowerLayerIn++;
-            ppp[i].upperLayerIn <-- nl.lowerLayerOut++;
+            ppp[i].upperLayerOut --> nl.in++;
+            ppp[i].upperLayerIn <-- nl.out++;
         }
 
         for i=0..numExtInterfaces-1 {
-            ext[i].upperLayerOut --> nl.lowerLayerIn++;
-            ext[i].upperLayerIn <-- nl.lowerLayerOut++;
+            ext[i].upperLayerOut --> nl.in++;
+            ext[i].upperLayerIn <-- nl.out++;
         }
 
         for i=0..numTunInterfaces-1 {
-            tun[i].upperLayerOut --> nl.lowerLayerIn++;
-            tun[i].upperLayerIn <-- nl.lowerLayerOut++;
+            tun[i].upperLayerOut --> nl.in++;
+            tun[i].upperLayerIn <-- nl.out++;
         }
 }

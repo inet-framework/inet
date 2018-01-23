@@ -94,33 +94,33 @@ module Ipv4NetworkLayer like INetworkLayer
         }
 
     connections allowunconnected:
-        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
-        transportOut <-- { @display("m=n"); } <-- up.upperLayerOut++;
+        transportIn --> { @display("m=n"); } --> up.in++;
+        transportOut <-- { @display("m=n"); } <-- up.out++;
 
-        up.lowerLayerOut++ --> igmp.routerIn;
-        up.lowerLayerIn++ <-- igmp.routerOut;
+        up.out++ --> igmp.routerIn;
+        up.in++ <-- igmp.routerOut;
 
-        up.lowerLayerOut++ --> mp.upperLayerIn++;
-        up.lowerLayerIn++ <-- mp.upperLayerOut++;
+        up.out++ --> mp.in++;
+        up.in++ <-- mp.out++;
 
-        up.lowerLayerOut++ --> icmp.transportIn;
-        up.lowerLayerIn++ <-- icmp.transportOut;
+        up.out++ --> icmp.transportIn;
+        up.in++ <-- icmp.transportOut;
 
-        igmp.ipOut --> mp.upperLayerIn++;
-        igmp.ipIn <-- mp.upperLayerOut++;
+        igmp.ipOut --> mp.in++;
+        igmp.ipIn <-- mp.out++;
 
-        icmp.ipOut --> mp.upperLayerIn++;
-        icmp.ipIn <-- mp.upperLayerOut++;
+        icmp.ipOut --> mp.in++;
+        icmp.ipIn <-- mp.out++;
 
-        mp.lowerLayerOut++ --> ip.transportIn;
-        mp.lowerLayerIn++ <-- ip.transportOut;
+        mp.out++ --> ip.transportIn;
+        mp.in++ <-- ip.transportOut;
 
-        arp.ifOut --> lp.upperLayerIn++;
-        arp.ifIn <-- lp.upperLayerOut++;
+        arp.ifOut --> lp.in++;
+        arp.ifIn <-- lp.out++;
 
-        ip.queueOut --> lp.upperLayerIn++;
-        ip.queueIn <-- lp.upperLayerOut++;
+        ip.queueOut --> lp.in++;
+        ip.queueIn <-- lp.out++;
 
-        lp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
-        lp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
+        lp.out++ --> { @display("m=s"); } --> ifOut;
+        lp.in++ <-- { @display("m=s"); } <-- ifIn;
 }

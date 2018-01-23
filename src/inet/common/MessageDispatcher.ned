@@ -23,8 +23,6 @@ simple MessageDispatcher
     parameters:
         @display("b=100,5,,,,1;");
     gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
+        input in[];
+        output out[];
 }

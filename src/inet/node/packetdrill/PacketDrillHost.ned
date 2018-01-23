@@ -48,7 +48,7 @@ module PacketDrillHost extends StandardHost
 
     connections allowunconnected:
         for i=0..numTunInterfaces-1 {
-            tunApp[i].socketOut --> at.upperLayerIn++;
-            tunApp[i].socketIn <-- at.upperLayerOut++;
+            tunApp[i].socketOut --> at.in++;
+            tunApp[i].socketIn <-- at.out++;
         }
 }

@@ -37,7 +37,7 @@ module DsdvRouter extends WirelessHost
         }
 
     connections:
-        dsdv.ipOut --> tn.upperLayerIn++;
-        dsdv.ipIn <-- tn.upperLayerOut++;
+        dsdv.ipOut --> tn.in++;
+        dsdv.ipIn <-- tn.out++;
 }
 

@@ -20,6 +20,6 @@ module DymoRouter extends WirelessHost
         }
 
     connections:
-        dymo.ipOut --> tn.upperLayerIn++;
-        dymo.ipIn <-- tn.upperLayerOut++;
+        dymo.ipOut --> tn.in++;
+        dymo.ipIn <-- tn.out++;
 }

@@ -91,20 +91,20 @@ module Ipv6NetworkLayer like INetworkLayer
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
-        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
-        transportOut <-- { @display("m=n"); } <-- up.upperLayerOut++;
+        transportIn --> { @display("m=n"); } --> up.in++;
+        transportOut <-- { @display("m=n"); } <-- up.out++;
 
-        up.lowerLayerOut++ --> lp.upperLayerIn++;
-        up.lowerLayerIn++ <-- lp.upperLayerOut++;
+        up.out++ --> lp.in++;
+        up.in++ <-- lp.out++;
 
-        up.lowerLayerOut++ --> icmpv6.transportIn;
-        up.lowerLayerIn++ <-- icmpv6.transportOut;
+        up.out++ --> icmpv6.transportIn;
+        up.in++ <-- icmpv6.transportOut;
 
-        icmpv6.ipv6Out --> lp.upperLayerIn++;
-        icmpv6.ipv6In <-- lp.upperLayerOut++;
+        icmpv6.ipv6Out --> lp.in++;
+        icmpv6.ipv6In <-- lp.out++;
 
-        lp.lowerLayerOut++ --> ipv6.transportIn;
-        lp.lowerLayerIn++ <-- ipv6.transportOut;
+        lp.out++ --> ipv6.transportIn;
+        lp.in++ <-- ipv6.transportOut;
 
         iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
         iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;

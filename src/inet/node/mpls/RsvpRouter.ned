@@ -111,31 +111,31 @@ module RsvpRouter
                 @display("p=409,350;b=580,5,,,,1");
         }
     connections allowunconnected:
-        linkStateRouting.ipOut --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> linkStateRouting.ipIn;
-        ipv4.transportOut --> tn.lowerLayerIn++;
-        tn.lowerLayerOut++ --> ipv4.transportIn;
+        linkStateRouting.ipOut --> tn.in++;
+        tn.out++ --> linkStateRouting.ipIn;
+        ipv4.transportOut --> tn.in++;
+        tn.out++ --> ipv4.transportIn;
 
-        rsvp.ipOut --> tn.upperLayerIn++;
-        rsvp.ipIn <-- tn.upperLayerOut++;
+        rsvp.ipOut --> tn.in++;
+        rsvp.ipIn <-- tn.out++;
 
-        ipv4.ifOut --> nm.upperLayerIn++;
-        nm.upperLayerOut++ --> ipv4.ifIn;
+        ipv4.ifOut --> nm.in++;
+        nm.out++ --> ipv4.ifIn;
 
         for i=0..numLoInterfaces-1 {
-            lo[i].upperLayerOut --> nm.lowerLayerIn++;
-            nm.lowerLayerOut++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> nm.in++;
+            nm.out++ --> lo[i].upperLayerIn;
         }
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> ml.lowerLayerIn++;
-            ml.lowerLayerOut++ --> ppp[i].upperLayerIn;
+            ppp[i].upperLayerOut --> ml.in++;
+            ml.out++ --> ppp[i].upperLayerIn;
         }
-        mpls.ifOut --> ml.upperLayerIn++;
-        ml.upperLayerOut++ --> mpls.ifIn;
-        nm.lowerLayerOut++ --> mpls.netwIn;
-        mpls.netwOut --> nm.lowerLayerIn++;
+        mpls.ifOut --> ml.in++;
+        ml.out++ --> mpls.ifIn;
+        nm.out++ --> mpls.netwIn;
+        mpls.netwOut --> nm.in++;
 }
 

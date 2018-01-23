@@ -85,18 +85,18 @@ module Router extends ApplicationLayerNodeBase
         }
 
     connections allowunconnected:
-        ospf.ipOut --> tn.upperLayerIn++ if hasOSPF;
-        ospf.ipIn <-- tn.upperLayerOut++ if hasOSPF;
+        ospf.ipOut --> tn.in++ if hasOSPF;
+        ospf.ipIn <-- tn.out++ if hasOSPF;
 
-        bgp.socketOut --> at.upperLayerIn++ if hasBGP;
-        bgp.socketIn <-- at.upperLayerOut++ if hasBGP;
+        bgp.socketOut --> at.in++ if hasBGP;
+        bgp.socketIn <-- at.out++ if hasBGP;
 
-        rip.socketOut --> at.upperLayerIn++ if hasRIP;
-        rip.socketIn <-- at.upperLayerOut++ if hasRIP;
+        rip.socketOut --> at.in++ if hasRIP;
+        rip.socketIn <-- at.out++ if hasRIP;
 
-        pim.networkLayerOut --> tn.upperLayerIn++ if hasPIM;
-        pim.networkLayerIn <-- tn.upperLayerOut++ if hasPIM;
+        pim.networkLayerOut --> tn.in++ if hasPIM;
+        pim.networkLayerIn <-- tn.out++ if hasPIM;
 
-        dhcp.socketOut --> at.upperLayerIn++ if hasDHCP;
-        dhcp.socketIn <-- at.upperLayerOut++ if hasDHCP;
+        dhcp.socketOut --> at.in++ if hasDHCP;
+        dhcp.socketIn <-- at.out++ if hasDHCP;
 }

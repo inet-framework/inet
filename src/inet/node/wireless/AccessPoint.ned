@@ -94,20 +94,20 @@ module AccessPoint
                 @display("p=400,400,row;q=txQueue");
         }
     connections allowunconnected:
-        nl.upperLayerOut++ --> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
-        nl.upperLayerIn++ <-- relayUnit.ifOut if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+        nl.out++--> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+        nl.in++ <-- relayUnit.ifOut if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
         // connections to network outside
         // wireless interfaces MUST be connected first (i.e. ports 0..numWlanInterfaces-1)
         // because broadcasts must be handled differently for wireless IFs by the relayUnit
         for i=0..numWlanInterfaces-1 {
             radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
-            wlan[i].upperLayerOut --> nl.lowerLayerIn++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
-            wlan[i].upperLayerIn <-- nl.lowerLayerOut++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
-            eth[i].upperLayerIn <-- nl.lowerLayerOut++ if sizeof(ethg)+numWlanInterfaces>1;
-            eth[i].upperLayerOut --> nl.lowerLayerIn++ if sizeof(ethg)+numWlanInterfaces>1;
+            eth[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces>1;
+            eth[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces>1;
         }
 }

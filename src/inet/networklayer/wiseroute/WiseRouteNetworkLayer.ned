@@ -59,14 +59,14 @@ module WiseRouteNetworkLayer like INetworkLayer
         }
 
     connections allowunconnected:
-        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
-        dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
+        dp.out++ --> { @display("m=n"); } --> transportOut;
+        dp.in++ <-- { @display("m=n"); } <-- transportIn;
 
-        np.transportOut --> dp.lowerLayerIn++;
-        np.transportIn <-- dp.lowerLayerOut++;
+        np.transportOut --> dp.in++;
+        np.transportIn <-- dp.out++;
 
-        dp.upperLayerOut++ --> echo.ipIn;
-        dp.upperLayerIn++ <-- echo.ipOut;
+        dp.out++ --> echo.ipIn;
+        dp.in++ <-- echo.ipOut;
 
         ifIn --> { @display("m=s"); } --> np.queueIn;
         np.queueOut --> { @display("m=s"); } --> ifOut;

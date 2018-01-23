@@ -49,6 +49,6 @@ module AodvRouter extends WirelessHost
             @display("p=700,300");
         }
     connections:
-        aodv.ipOut --> tn.upperLayerIn++;
-        aodv.ipIn <-- tn.upperLayerOut++;
+        aodv.ipOut --> tn.in++;
+        aodv.ipIn <-- tn.out++;
 }

@@ -85,11 +85,11 @@ module EtherSwitch
                 @display("p=264,247,row;q=txQueue");
         }
     connections:
-        relayUnit.ifOut --> nl.upperLayerIn++;
-        relayUnit.ifIn <-- nl.upperLayerOut++;
+        relayUnit.ifOut --> nl.in++;
+        relayUnit.ifIn <-- nl.out++;
         for i=0..sizeof(ethg)-1 {
-            nl.lowerLayerOut++ --> eth[i].upperLayerIn;
-            nl.lowerLayerIn++ <-- eth[i].upperLayerOut;
+            nl.out++ --> eth[i].upperLayerIn;
+            nl.in++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 

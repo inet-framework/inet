@@ -53,24 +53,24 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         }
 
     connections allowunconnected:
-        udp.ipOut --> tn.upperLayerIn++ if hasUdp;
-        udp.ipIn <-- tn.upperLayerOut++ if hasUdp;
+        udp.ipOut --> tn.in++ if hasUdp;
+        udp.ipIn <-- tn.out++ if hasUdp;
 
-        tcp.ipOut --> tn.upperLayerIn++ if hasTcp;
-        tcp.ipIn <-- tn.upperLayerOut++ if hasTcp;
+        tcp.ipOut --> tn.in++ if hasTcp;
+        tcp.ipIn <-- tn.out++ if hasTcp;
 
-        sctp.ipOut --> tn.upperLayerIn++ if hasSctp;
-        tn.upperLayerOut++ --> sctp.ipIn if hasSctp;
+        sctp.ipOut --> tn.in++ if hasSctp;
+        tn.out++ --> sctp.ipIn if hasSctp;
 
-        tn.lowerLayerOut++ --> ipv4.transportIn if hasIpv4;
-        tn.lowerLayerIn++ <-- ipv4.transportOut if hasIpv4;
+        tn.out++ --> ipv4.transportIn if hasIpv4;
+        tn.in++ <-- ipv4.transportOut if hasIpv4;
 
-        tn.lowerLayerOut++ --> ipv6.transportIn if hasIpv6;
-        tn.lowerLayerIn++ <-- ipv6.transportOut if hasIpv6;
+        tn.out++ --> ipv6.transportIn if hasIpv6;
+        tn.in++ <-- ipv6.transportOut if hasIpv6;
 
-        tn.lowerLayerOut++ --> generic.transportIn if hasGn;
-        tn.lowerLayerIn++ <-- generic.transportOut if hasGn;
+        tn.out++ --> generic.transportIn if hasGn;
+        tn.in++ <-- generic.transportOut if hasGn;
 
-        tn.lowerLayerOut++ --> nl.upperLayerIn++;
-        tn.lowerLayerIn++ <-- nl.upperLayerOut++;
+        tn.out++ --> nl.in++;
+        tn.in++ <-- nl.out++;
 }

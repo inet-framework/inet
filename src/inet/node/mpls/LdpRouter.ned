@@ -118,8 +118,8 @@ module LdpRouter
                 @display("p=409,350;b=580,5,,,,1");
         }
     connections allowunconnected:
-        linkStateRouting.ipOut --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> linkStateRouting.ipIn;
+        linkStateRouting.ipOut --> tn.in++;
+        tn.out++ --> linkStateRouting.ipIn;
 
         ldp.tcpIn <-- tcp.appOut;
         ldp.tcpOut --> tcp.appIn;
@@ -127,30 +127,30 @@ module LdpRouter
         ldp.udpOut --> udp.appIn;
         ldp.udpIn <-- udp.appOut;
 
-        udp.ipOut --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> udp.ipIn;
+        udp.ipOut --> tn.in++;
+        tn.out++ --> udp.ipIn;
 
-        tcp.ipOut --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> tcp.ipIn;
+        tcp.ipOut --> tn.in++;
+        tn.out++ --> tcp.ipIn;
 
         for i=0..numLoInterfaces-1 {
-            lo[i].upperLayerOut --> nm.lowerLayerIn++;
-            nm.lowerLayerOut++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> nm.in++;
+            nm.out++ --> lo[i].upperLayerIn;
         }
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> ml.lowerLayerIn++;
-            ml.lowerLayerOut++ --> ppp[i].upperLayerIn;
+            ppp[i].upperLayerOut --> ml.in++;
+            ml.out++ --> ppp[i].upperLayerIn;
 
         }
-        ipv4.transportOut --> tn.lowerLayerIn++;
-        tn.lowerLayerOut++ --> ipv4.transportIn;
-        ipv4.ifOut --> nm.upperLayerIn++;
-        nm.upperLayerOut++ --> ipv4.ifIn;
-        nm.lowerLayerOut++ --> mpls.netwIn;
-        mpls.netwOut --> nm.lowerLayerIn++;
-        mpls.ifOut --> ml.upperLayerIn++;
-        ml.upperLayerOut++ --> mpls.ifIn;
+        ipv4.transportOut --> tn.in++;
+        tn.out++ --> ipv4.transportIn;
+        ipv4.ifOut --> nm.in++;
+        nm.out++ --> ipv4.ifIn;
+        nm.out++ --> mpls.netwIn;
+        mpls.netwOut --> nm.in++;
+        mpls.ifOut --> ml.in++;
+        ml.out++ --> mpls.ifIn;
 }

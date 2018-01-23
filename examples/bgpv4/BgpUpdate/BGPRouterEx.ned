@@ -103,28 +103,28 @@ module BGPRouterEx
         snifferOut.out --> { @display("m=s"); } --> tcp.appIn;
         snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut;
 
-        tcp.ipOut --> { @display("m=s"); } --> tn.upperLayerIn++;
-        tcp.ipIn <-- { @display("m=s"); } <-- tn.upperLayerOut++;
-        ospf.ipOut --> { @display("m=s"); } --> tn.upperLayerIn++;
-        ospf.ipIn <-- { @display("m=s"); } <-- tn.upperLayerOut++;
+        tcp.ipOut --> { @display("m=s"); } --> tn.in++;
+        tcp.ipIn <-- { @display("m=s"); } <-- tn.out++;
+        ospf.ipOut --> { @display("m=s"); } --> tn.in++;
+        ospf.ipIn <-- { @display("m=s"); } <-- tn.out++;
 
-        tn.lowerLayerOut++ --> { @display("m=s"); } --> ipv4.transportIn;
-        tn.lowerLayerIn++ <-- { @display("m=s"); } <-- ipv4.transportOut;
+        tn.out++ --> { @display("m=s"); } --> ipv4.transportIn;
+        tn.in++ <-- { @display("m=s"); } <-- ipv4.transportOut;
 
-        ipv4.ifOut --> { @display("m=s"); } --> nl.upperLayerIn++;
-        ipv4.ifIn <-- { @display("m=s"); } <-- nl.upperLayerOut++;
+        ipv4.ifOut --> { @display("m=s"); } --> nl.in++;
+        ipv4.ifIn <-- { @display("m=s"); } <-- nl.out++;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> nl.lowerLayerIn++;
-            ppp[i].upperLayerIn <-- nl.lowerLayerOut++;
+            ppp[i].upperLayerOut --> nl.in++;
+            ppp[i].upperLayerIn <-- nl.out++;
         }
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].upperLayerOut --> nl.lowerLayerIn++;
-            eth[i].upperLayerIn <-- nl.lowerLayerOut++;
+            eth[i].upperLayerOut --> nl.in++;
+            eth[i].upperLayerIn <-- nl.out++;
         }
 }
 

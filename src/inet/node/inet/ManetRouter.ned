@@ -14,6 +14,6 @@ module ManetRouter extends WirelessHost
             @display("p=700,300");
         }
     connections:
-        routing.ipOut --> tn.upperLayerIn++;
-        routing.ipIn <-- tn.upperLayerOut++;
+        routing.ipOut --> tn.in++;
+        routing.ipIn <-- tn.out++;
 }

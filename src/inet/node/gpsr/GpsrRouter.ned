@@ -21,6 +21,6 @@ module GpsrRouter extends WirelessHost
         }
 
     connections:
-        gpsr.ipOut --> tn.upperLayerIn++;
-        gpsr.ipIn <-- tn.upperLayerOut++;
+        gpsr.ipOut --> tn.in++;
+        gpsr.ipIn <-- tn.out++;
 }
