@@ -86,7 +86,7 @@ void Ieee80211Mac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
-        emit(NF_MODESET_CHANGED, modeSet);
+        emit(modesetChangedSignal, modeSet);
         if (isOperational)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         if (isInterfaceRegistered().isUnspecified())// TODO: do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras

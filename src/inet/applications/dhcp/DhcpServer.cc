@@ -63,7 +63,7 @@ void DhcpServer::initialize(int stage)
         serverPort = 67;    // server
 
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(interfaceDeletedSignal, this);
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -87,7 +87,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
 {
     Enter_Method_Silent();
 
-    if (signalID == NF_INTERFACE_DELETED) {
+    if (signalID == interfaceDeletedSignal) {
         if (isOperational) {
             InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
             if (ie == nie)

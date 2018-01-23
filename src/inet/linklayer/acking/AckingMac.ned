@@ -25,7 +25,7 @@ import inet.linklayer.contract.IMacProtocol;
 
 
 //
-// This module implements a trivial MAC protocol for use in ~AckingWirelessNic.
+// This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
 //
 // The implementation provides packet encapsulation and decapsulation, but it
 // doesn't have a real medium access protocol. It doesn't provide carrier sense
@@ -33,7 +33,7 @@ import inet.linklayer.contract.IMacProtocol;
 // out of bound acknowledgement. Higher layer packets should have MacAddressReq
 // tag.
 //
-// See ~AckingWirelessNic for rationale and details.
+// See ~AckingWirelessInterface for rationale and details.
 //
 simple AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
 {
@@ -54,8 +54,8 @@ simple AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromLl](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

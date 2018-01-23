@@ -337,9 +337,9 @@ void Igmpv2::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
-        host->subscribe(NF_IPv4_MCAST_JOIN, this);
-        host->subscribe(NF_IPv4_MCAST_LEAVE, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(ipv4McastJoinSignal, this);
+        host->subscribe(ipv4McastLeaveSignal, this);
 
         externalRouter = false;
         enabled = par("enabled");
@@ -387,7 +387,7 @@ void Igmpv2::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(interfaceCreatedSignal, this);
         registerProtocol(Protocol::igmp, gate("ipOut"));
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {
@@ -415,12 +415,12 @@ void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
     int interfaceId;
     const Ipv4MulticastGroupInfo *info;
 
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast())
             configureInterface(ie);
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast()) {
             interfaceId = ie->getInterfaceId();
@@ -428,11 +428,11 @@ void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (signalID == NF_IPv4_MCAST_JOIN) {
+    else if (signalID == ipv4McastJoinSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         multicastGroupJoined(info->ie, info->groupAddress);
     }
-    else if (signalID == NF_IPv4_MCAST_LEAVE) {
+    else if (signalID == ipv4McastLeaveSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         multicastGroupLeft(info->ie, info->groupAddress);
     }

@@ -28,7 +28,7 @@ void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<const
     if (ackPolicy->isAckNeeded(dataOrMgmtHeader)) {
         auto ackFrame = buildAck(dataOrMgmtHeader);
         ackFrame->setDuration(ackPolicy->computeAckDurationField(packet, dataOrMgmtHeader));
-        auto ackPacket = new Packet("ACK", ackFrame);
+        auto ackPacket = new Packet("WlanAck", ackFrame);
         callback->transmitControlResponseFrame(ackPacket, ackFrame, packet, dataOrMgmtHeader);
     }
 }

@@ -50,8 +50,8 @@ channel ethernetline extends ned.DatarateChannel
 network mIPv6Network
 {
     parameters:
-        double total_mn;
-        double total_cn;
+        int total_mn;
+        int total_cn;
         **.mgmt.numChannels = 5;
 
         @display("bgb=799,698");

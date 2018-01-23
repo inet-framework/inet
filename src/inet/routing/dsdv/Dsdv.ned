@@ -18,6 +18,8 @@
 
 package inet.routing.dsdv;
 
+import inet.routing.contract.IManetRouting;
+
 //
 // Implements Destination-Sequenced Distance Vector.
 //
@@ -30,17 +32,17 @@ package inet.routing.dsdv;
 //    there is no logic that sends out full updates if the size of the incremental update reaches
 //    the network unit size.
 //
-// WRANING: This is a partial / unfinished implementation. DO NOT USE it !
+// WARNING: This is a partial / unfinished implementation.
 //
-simple Dsdv
+simple Dsdv like IManetRouting
 {
     parameters:
         @display("i=block/routing");
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        double hellomsgperiod_DSDV @unit("s") = default(5s);  // how often hello messages should be sent out
+        double helloInterval @unit("s") = default(5s);  // how often hello messages should be sent out
         string netmask = default("255.255.0.0");  // netmask for the ad-hoc network
-        double MaxVariance_DSDV = default(1); // This is the maximum of a random value to determine when the first hello message will be sent out
+        double maxVariance = default(1); // This is the maximum of a random value to determine when the first hello message will be sent out
         double routeLifetime @unit("s") = default(5s);  // the expiry time of the routing entries
         bool manetPurgeRoutingTables = default(true);
         volatile double broadcastDelay @unit("s") = default(uniform(0s,0.01s));

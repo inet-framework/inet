@@ -26,12 +26,12 @@ namespace inet {
 
 Define_Module(SimpleVoipReceiver);
 
-simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
-simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-simsignal_t SimpleVoipReceiver::mosSignal = registerSignal("VoIPMosSignal");
-simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("voipPacketLossRate");
+simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("voipPacketDelay");
+simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("voipPlayoutDelay");
+simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("voipPlayoutLossRate");
+simsignal_t SimpleVoipReceiver::mosRateSignal = registerSignal("voipMosRate");
+simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("voipTaildropLossRate");
 
 void SimpleVoipReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoipPacket *pk)
 {
@@ -261,7 +261,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
     emit(playoutDelaySignal, playoutDelay);
     double lossRate = ((double)playoutLoss / (double)talkspurtNumPackets);
     emit(playoutLossRateSignal, lossRate);
-    emit(mosSignal, mos);
+    emit(mosRateSignal, mos);
 
     // add calculated MOS value to fingerprint
     FINGERPRINT_ADD_EXTRA_DATA(mos);

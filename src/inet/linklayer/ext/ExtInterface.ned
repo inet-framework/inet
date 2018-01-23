@@ -17,7 +17,7 @@
 
 package inet.linklayer.ext;
 
-import inet.linklayer.contract.IExternalNic;
+import inet.linklayer.contract.IExternalInterface;
 
 //
 // Implements an interface that corresponds to a real interface
@@ -26,7 +26,7 @@ import inet.linklayer.contract.IExternalNic;
 // 
 // Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
 //
-simple ExtInterface like IExternalNic
+simple ExtInterface like IExternalInterface
 {
     parameters:
         @class(InterfaceEntry);

@@ -1,0 +1,59 @@
+//
+// Copyright (C) 2006 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
+package inet.linklayer.common;
+
+import inet.linklayer.contract.IMacProtocol;
+import inet.linklayer.contract.IWirelessInterface;
+import inet.physicallayer.contract.packetlevel.IRadio;
+
+module WirelessInterface like IWirelessInterface
+{
+    parameters:
+        @class(InterfaceEntry);
+        string classifierType = default("");
+        string macType;
+        string radioType;
+        string interfaceTableModule;
+        string energySourceModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.energySourceModule = default(absPath(energySourceModule));
+        @display("i=block/ifcard;bgb=250,300");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input radioIn @labels(ISignal);
+    submodules:
+        classifier: <classifierType> like IIeee8021dQosClassifier if classifierType != "" {
+                @display("p=80,70");
+        }
+        mac: <macType> like IMacProtocol {
+                @display("p=150,100");
+        }
+        radio: <radioType> like IRadio if radioType != "" {
+                @display("p=150,200");
+        }
+    connections allowunconnected:
+        radioIn --> { @display("m=s"); } --> radio.radioIn if radioType != "";
+        radio.upperLayerIn <-- mac.lowerLayerOut if radioType != "";
+        radio.upperLayerOut --> mac.lowerLayerIn if radioType != "";
+
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
+}

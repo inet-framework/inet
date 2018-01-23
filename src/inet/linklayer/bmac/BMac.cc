@@ -668,33 +668,36 @@ void BMac::refreshDisplay() const
 {
     if (!animation)
         return;
-    cDisplayString& dispStr = findContainingNode(this)->getDisplayString();
+    cDisplayString& dispStr = getContainingNode(this)->getDisplayString();
 
     switch (macState) {
         case INIT:
+            dispStr.setTagArg("t", 0, "INIT");
+            break;
+
         case SLEEP:
-            dispStr.setTagArg("b", 3, "black");
+            dispStr.setTagArg("t", 0, "SLEEP");
             break;
 
         case CCA:
-            dispStr.setTagArg("b", 3, "green");
+            dispStr.setTagArg("t", 0, "CCA");
             break;
 
         case SEND_ACK:
         case SEND_PREAMBLE:
         case SEND_DATA:
-            dispStr.setTagArg("b", 3, "blue");
+            dispStr.setTagArg("t", 0, "SEND");
             break;
 
         case WAIT_ACK:
         case WAIT_DATA:
         case WAIT_TX_DATA_OVER:
         case WAIT_ACK_TX:
-            dispStr.setTagArg("b", 3, "yellow");
+            dispStr.setTagArg("t", 0, "WAIT");
             break;
 
         default:
-            dispStr.setTagArg("b", 3, "");
+            dispStr.setTagArg("t", 0, "");
             break;
     }
 }

@@ -20,6 +20,6 @@ class PacketDrop extends inet::PacketDropDetails
     cModule *module;
     cModule *networkNode;
     cObject *networkInterface;
-    Coord position @editable(false); // TODO: editable is a GUI concept, this is a descriptor and shouldn't be here anyway due to being readOnly
+    Coord position;
 }
 

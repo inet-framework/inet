@@ -44,7 +44,7 @@ simple XMac extends MacProtocolBase like IMacProtocol
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 
-		// size of the MAC queue (maximum number of packets in Tx buffer)
+        // size of the MAC queue (maximum number of packets in Tx buffer)
         int queueLength = default(20);
 
         // should we animate the nodes with colors depending on their state or 
@@ -71,6 +71,6 @@ simple XMac extends MacProtocolBase like IMacProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value 
 
         @class(XMac);
-        @signal[packetFromUpperDroppedSignal];
+        @signal[packetDrop](type=Packet);
 }
 

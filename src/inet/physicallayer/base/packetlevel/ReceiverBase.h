@@ -31,6 +31,8 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    virtual W computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const;
+
   public:
     ReceiverBase() { }
 

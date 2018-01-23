@@ -16,14 +16,14 @@
 //
 
 #include "inet/routing/bgpv4/BgpSession.h"
-#include "inet/routing/bgpv4/BgpRouting.h"
+#include "inet/routing/bgpv4/Bgp.h"
 #include "inet/routing/bgpv4/BgpFsm.h"
 
 namespace inet {
 
 namespace bgp {
 
-BgpSession::BgpSession(BgpRouting& _bgpRouting)
+BgpSession::BgpSession(Bgp& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(nullptr), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(nullptr)
     , _holdTime(BGP_HOLD_TIME), _ptrHoldTimer(nullptr)

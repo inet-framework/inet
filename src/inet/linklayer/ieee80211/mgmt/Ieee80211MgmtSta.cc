@@ -111,7 +111,7 @@ void Ieee80211MgmtSta::initialize(int stage)
         numChannels = par("numChannels");
 
         host = getContainingNode(this);
-        host->subscribe(NF_LINK_FULL_PROMISCUOUS, this);
+        host->subscribe(linkFullPromiscuousSignal, this);
 
         WATCH(isScanning);
 
@@ -230,7 +230,7 @@ void Ieee80211MgmtSta::changeChannel(int channelNum)
 void Ieee80211MgmtSta::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    emit(NF_L2_BEACON_LOST, myIface);
+    emit(l2BeaconLostSignal, myIface);
 }
 
 void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address)
@@ -314,7 +314,7 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, c
     printSignalBanner(signalID, obj);
 
     // Note that we are only subscribed during scanning!
-    if (signalID == NF_LINK_FULL_PROMISCUOUS) {
+    if (signalID == linkFullPromiscuousSignal) {
         auto packet = check_and_cast<Packet *>(obj);
         if (!packet->hasHeader<Ieee80211DataOrMgmtHeader>())
             return;
@@ -686,7 +686,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
 
-        emit(NF_L2_ASSOCIATED, myIface, ap);
+        emit(l2AssociatedSignal, myIface, ap);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAt(simTime() + MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
@@ -733,7 +733,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
-    storeAPInfo(header->getTransmitterAddress(), beaconBody);
+    storeAPInfo(packet, header, beaconBody);
 
     // if it is out associate AP, restart beacon timeout
     if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
@@ -758,12 +758,13 @@ void Ieee80211MgmtSta::handleProbeResponseFrame(Packet *packet, const Ptr<const 
 {
     EV << "Received Probe Response frame\n";
     const auto& probeResponseBody = packet->peekData<Ieee80211ProbeResponseFrame>();
-    storeAPInfo(header->getTransmitterAddress(), probeResponseBody);
+    storeAPInfo(packet, header, probeResponseBody);
     delete packet;
 }
 
-void Ieee80211MgmtSta::storeAPInfo(const MacAddress& address, const Ptr<const Ieee80211BeaconFrame>& body)
+void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
 {
+    auto address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
     if (ap) {
         EV << "AP address=" << address << ", SSID=" << body->getSSID() << " already in our AP list, refreshing the info\n";
@@ -779,9 +780,12 @@ void Ieee80211MgmtSta::storeAPInfo(const MacAddress& address, const Ptr<const Ie
     ap->ssid = body->getSSID();
     ap->supportedRates = body->getSupportedRates();
     ap->beaconInterval = body->getBeaconInterval();
-
-    //XXX where to get this from?
-    //ap->rxPower = ...
+    auto signalPowerInd = packet->getTag<SignalPowerInd>();
+    if (signalPowerInd != nullptr) {
+        ap->rxPower = signalPowerInd->getPower().get();
+        if (ap->address == assocAP.address)
+            assocAP.rxPower = ap->rxPower;
+    }
 }
 
 } // namespace ieee80211

@@ -268,7 +268,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
         cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
         if (m) {
             Ipv4MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
-            m->emit(NF_IPv4_MCAST_CHANGE, &info);
+            m->emit(ipv4McastChangeSignal, &info);
         }
 
         // Legacy notifications
@@ -276,7 +276,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
             cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
             if (m) {
                 Ipv4MulticastGroupInfo info2(ownerp, multicastAddress);
-                m->emit(newFilterMode == MCAST_EXCLUDE_SOURCES ? NF_IPv4_MCAST_JOIN : NF_IPv4_MCAST_LEAVE, &info2);
+                m->emit(newFilterMode == MCAST_EXCLUDE_SOURCES ? ipv4McastJoinSignal : ipv4McastLeaveSignal, &info2);
             }
         }
 
@@ -368,7 +368,7 @@ void Ipv4InterfaceData::addMulticastListener(const Ipv4Address& multicastAddress
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
         Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
+        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4McastRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.containsAll()) {
@@ -388,7 +388,7 @@ void Ipv4InterfaceData::addMulticastListener(Ipv4Address multicastAddress, Ipv4A
         getRouterData()->reportedMulticastGroups.push_back(groupData);
 
         Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
+        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4McastRegisteredSignal, &info);
     }
 
     if (!groupData->sourceList.contains(sourceAddress)) {
@@ -413,7 +413,7 @@ void Ipv4InterfaceData::removeMulticastListener(const Ipv4Address& multicastAddr
         changed1(F_MULTICAST_LISTENERS);
 
         Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
+        check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4McastUnregisteredSignal, &info);
     }
 }
 
@@ -434,7 +434,7 @@ void Ipv4InterfaceData::removeMulticastListener(Ipv4Address multicastAddress, Ip
             multicastGroups.erase(multicastGroups.begin() + i);
 
             Ipv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
-            check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
+            check_and_cast<cModule *>(getInterfaceEntry()->getInterfaceTable())->emit(ipv4McastUnregisteredSignal, &info);
         }
         changed1(F_MULTICAST_LISTENERS);
     }

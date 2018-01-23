@@ -19,7 +19,7 @@
 package inet.examples.wireless.throughput;
 
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 
@@ -45,7 +45,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=169,124");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
                 @display("p=169,231;q=queue");
                 llcType = default("Ieee80211Portal");

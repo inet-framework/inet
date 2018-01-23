@@ -32,7 +32,7 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 // per-packet bitrate setting gets implemented.)
 //
 // Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in ~Ieee80211Nic).
+// typically in the 802.11 management module, see in ~Ieee80211Interface).
 // The base class for 802.11 frame messages is ~Ieee80211MacHeader, but this
 // module expects ~Ieee80211DataOrMgmtHeader (a subclass) from upper layers
 // (the management module). This module will assign the transmitter address
@@ -81,8 +81,8 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @signal[packetReceivedFromPeer](type=Packet);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromLl](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
         @signal[linkBreak];
         @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
@@ -90,7 +90,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @signal[NF_MODESET_CHANGED](type=inet::physicallayer::Ieee80211ModeSet);
+        @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
     gates:
         input mgmtIn;
         output mgmtOut;

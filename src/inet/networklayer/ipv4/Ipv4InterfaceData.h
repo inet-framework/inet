@@ -56,7 +56,7 @@ struct INET_API Ipv4MulticastSourceList
 };
 
 /*
- * Info for NF_IPv4_MCAST_JOIN and NF_IPv4_MCAST_LEAVE notifications
+ * Info for ipv4McastJoinSignal and ipv4McastLeaveSignal notifications
  */
 struct INET_API Ipv4MulticastGroupInfo : public cObject
 {
@@ -67,7 +67,7 @@ struct INET_API Ipv4MulticastGroupInfo : public cObject
 };
 
 /*
- * Info for NF_IPv4_MCAST_CHANGE notifications
+ * Info for ipv4McastChangeSignal notifications
  */
 struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
 {
@@ -151,7 +151,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
     RouterMulticastData *routerData;
 
   protected:
-    void changed1(int fieldId) { changed(NF_INTERFACE_IPv4CONFIG_CHANGED, fieldId); }
+    void changed1(int fieldId) { changed(interfaceIpv4ConfigChangedSignal, fieldId); }
     HostMulticastData *getHostData() { if (!hostData) hostData = new HostMulticastData(); return hostData; }
     const HostMulticastData *getHostData() const { return const_cast<Ipv4InterfaceData *>(this)->getHostData(); }
     HostMulticastGroupData *findHostGroupData(Ipv4Address multicastAddress);

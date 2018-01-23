@@ -156,8 +156,8 @@ void Ldp::initialize(int stage)
 
         // listen for routing table modifications
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_ROUTE_ADDED, this);
-        host->subscribe(NF_ROUTE_DELETED, this);
+        host->subscribe(routeAddedSignal, this);
+        host->subscribe(routeDeletedSignal, this);
     }
 }
 
@@ -1245,7 +1245,7 @@ void Ldp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
 
-    ASSERT(signalID == NF_ROUTE_ADDED || signalID == NF_ROUTE_DELETED);
+    ASSERT(signalID == routeAddedSignal || signalID == routeDeletedSignal);
 
     EV_INFO << "routing table changed, rebuild list of known FEC" << endl;
 
@@ -1257,7 +1257,7 @@ void Ldp::announceLinkChange(int tedlinkindex)
     TedChangeInfo d;
     d.setTedLinkIndicesArraySize(1);
     d.setTedLinkIndices(0, tedlinkindex);
-    emit(NF_TED_CHANGED, &d);
+    emit(tedChangedSignal, &d);
 }
 
 } // namespace inet

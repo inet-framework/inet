@@ -13,11 +13,10 @@ package inet.node.mpls;
 
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IWiredNic;
-import inet.linklayer.loopback.LoopbackInterface;
+import inet.linklayer.contract.ILoopbackInterface;
+import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
-import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.networklayer.ldp.Ldp;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
@@ -96,10 +95,10 @@ module LdpRouter
             parameters:
                 @display("p=409,271;b=580,5,,,,1");
         }
-        lo[numLoInterfaces]: LoopbackInterface {
+        lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             @display("p=147,396");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=267,396,row,90;q=l2queue");
         }

@@ -181,7 +181,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
 
     if (!isPauseFrame) {
         numFramesFromHL++;
-        emit(rxPkFromHLSignal, packet);
+        emit(rxPkFromHlSignal, packet);
     }
 
     if (txQueue.extQueue) {

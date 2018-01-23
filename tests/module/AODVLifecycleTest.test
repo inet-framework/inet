@@ -102,7 +102,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sender.app[0].destAddr = "receiver(ipv4)"
 
 # nic settings
-**.wlan[*].typename = "AckingWirelessNic"
+**.wlan[*].typename = "AckingWirelessInterface"
 **.wlan[*].radio.transmitter.communicationRange = 240m
 **.wlan[*].radio.transmitter.headerBitLength = 4b
 **.wlan[*].bitrate = 2Mbps

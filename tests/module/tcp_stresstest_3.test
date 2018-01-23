@@ -33,7 +33,7 @@ cmdenv-express-mode=false
 *.tcptester.pdelete=0.05
 *.tcptester.pdelay=0.2
 *.tcptester.pcopy=0.2
-*.tcptester.numCopies=exponential(3)
+*.tcptester.numCopies=int(exponential(3))
 *.tcptester.delayValue=exponential(1)
 
 include ../../lib/defaults.ini

@@ -86,11 +86,11 @@ void Ipv6RoutingTable::initialize(int stage)
 
         cModule *host = getContainingNode(this);
 
-        host->subscribe(NF_INTERFACE_CREATED, this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
-        host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-        host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-        host->subscribe(NF_INTERFACE_IPv6CONFIG_CHANGED, this);
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(interfaceStateChangedSignal, this);
+        host->subscribe(interfaceConfigChangedSignal, this);
+        host->subscribe(interfaceIpv6ConfigChangedSignal, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // add Ipv6InterfaceData to interfaces
@@ -179,17 +179,17 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
 
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         //TODO something like this:
         //InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
         //configureInterfaceForIPv6(ie);
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         // remove all routes that point to that interface
         const InterfaceEntry *entry = check_and_cast<const InterfaceEntry *>(obj);
         deleteInterfaceRoutes(entry);
     }
-    else if (signalID == NF_INTERFACE_STATE_CHANGED) {
+    else if (signalID == interfaceStateChangedSignal) {
         const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntryChangeDetails*>(obj)->getInterfaceEntry();
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
@@ -198,10 +198,10 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
             purgeDestCacheForInterfaceID(interfaceEntryId);
         }
     }
-    else if (signalID == NF_INTERFACE_CONFIG_CHANGED) {
+    else if (signalID == interfaceConfigChangedSignal) {
         //TODO invalidate routing cache (?)
     }
-    else if (signalID == NF_INTERFACE_IPv6CONFIG_CHANGED) {
+    else if (signalID == interfaceIpv6ConfigChangedSignal) {
         //TODO
     }
 }
@@ -215,7 +215,7 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
 
         // invalidateCache();
     }
-    emit(NF_ROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
+    emit(routeChangedSignal, entry);    // TODO include fieldCode in the notification
 }
 
 void Ipv6RoutingTable::configureInterfaceForIPv6(InterfaceEntry *ie)
@@ -571,10 +571,10 @@ void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, in
     }
     else {
         // update existing one; notification-wise, we pretend the route got removed then re-added
-        emit(NF_ROUTE_DELETED, route);
+        emit(routeDeletedSignal, route);
         route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
-        emit(NF_ROUTE_ADDED, route);
+        emit(routeAddedSignal, route);
     }
 }
 
@@ -605,10 +605,10 @@ void Ipv6RoutingTable::addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, in
     }
     else {
         // update existing one; notification-wise, we pretend the route got removed then re-added
-        emit(NF_ROUTE_DELETED, route);
+        emit(routeDeletedSignal, route);
         route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
-        emit(NF_ROUTE_ADDED, route);
+        emit(routeAddedSignal, route);
     }
 }
 
@@ -688,7 +688,7 @@ void Ipv6RoutingTable::addRoute(Ipv6Route *route)
        the Destination Cache in such a way that the latest route information are used.*/
     purgeDestCache();
 
-    emit(NF_ROUTE_ADDED, route);
+    emit(routeAddedSignal, route);
 }
 
 Ipv6Route *Ipv6RoutingTable::removeRoute(Ipv6Route *route)
@@ -697,7 +697,7 @@ Ipv6Route *Ipv6RoutingTable::removeRoute(Ipv6Route *route)
     if (route) {
         // TODO purge cache?
 
-        emit(NF_ROUTE_DELETED, route);    // rather: going to be deleted
+        emit(routeDeletedSignal, route);    // rather: going to be deleted
     }
     return route;
 }
@@ -731,7 +731,7 @@ Ipv6RoutingTable::RouteList::iterator Ipv6RoutingTable::internalDeleteRoute(Rout
     ASSERT(it != routeList.end());
     Ipv6Route *route = *it;
     it = routeList.erase(it);
-    emit(NF_ROUTE_DELETED, route);
+    emit(routeDeletedSignal, route);
     // TODO purge cache?
     delete route;
     return it;
@@ -809,7 +809,7 @@ void Ipv6RoutingTable::deleteAllRoutes()
     EV_INFO << "/// Removing all routes from rt6 " << endl;
 
     for (auto & elem : routeList) {
-        emit(NF_ROUTE_DELETED, elem);
+        emit(routeDeletedSignal, elem);
         delete elem;
     }
 

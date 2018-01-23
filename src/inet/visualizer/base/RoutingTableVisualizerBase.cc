@@ -107,10 +107,10 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 void RoutingTableVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(NF_ROUTE_ADDED, this);
-    subscriptionModule->subscribe(NF_ROUTE_DELETED, this);
-    subscriptionModule->subscribe(NF_ROUTE_CHANGED, this);
-    subscriptionModule->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+    subscriptionModule->subscribe(routeAddedSignal, this);
+    subscriptionModule->subscribe(routeDeletedSignal, this);
+    subscriptionModule->subscribe(routeChangedSignal, this);
+    subscriptionModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
 void RoutingTableVisualizerBase::unsubscribe()
@@ -118,23 +118,23 @@ void RoutingTableVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(NF_ROUTE_ADDED, this);
-        subscriptionModule->unsubscribe(NF_ROUTE_DELETED, this);
-        subscriptionModule->unsubscribe(NF_ROUTE_CHANGED, this);
-        subscriptionModule->unsubscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+        subscriptionModule->unsubscribe(routeAddedSignal, this);
+        subscriptionModule->unsubscribe(routeDeletedSignal, this);
+        subscriptionModule->unsubscribe(routeChangedSignal, this);
+        subscriptionModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
 
 void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == NF_ROUTE_ADDED || signal == NF_ROUTE_DELETED || signal == NF_ROUTE_CHANGED) {
+    if (signal == routeAddedSignal || signal == routeDeletedSignal || signal == routeChangedSignal) {
         auto routingTable = check_and_cast<IIpv4RoutingTable *>(source);
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode))
             updateRouteVisualizations(routingTable);
     }
-    else if (signal == NF_INTERFACE_IPv4CONFIG_CHANGED)
+    else if (signal == interfaceIpv4ConfigChangedSignal)
         updateAllRouteVisualizations();
     else
         throw cRuntimeError("Unknown signal");

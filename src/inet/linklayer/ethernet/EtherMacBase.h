@@ -174,7 +174,7 @@ class INET_API EtherMacBase : public MacBase
     static simsignal_t rxPkOkSignal;
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
-    static simsignal_t rxPkFromHLSignal;
+    static simsignal_t rxPkFromHlSignal;
 
     static simsignal_t transmitStateSignal;
     static simsignal_t receiveStateSignal;

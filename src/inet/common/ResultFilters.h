@@ -26,6 +26,17 @@ namespace utils {
 
 namespace filters {
 
+class VoidPtrWrapper : public cObject
+{
+  private:
+    void *object;
+
+  public:
+    VoidPtrWrapper(void *object) : object(object) { }
+
+    void *getObject() const { return object; }
+};
+
 /**
  * Filter that expects a cMessage and outputs its age in seconds
  * (t - msg->getCreationTime()).
@@ -91,7 +102,7 @@ class INET_API cPointerResultFilter : public cResultFilter
 class INET_API XCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -100,7 +111,7 @@ class INET_API XCoordFilter : public cPointerResultFilter
 class INET_API YCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -109,7 +120,7 @@ class INET_API YCoordFilter : public cPointerResultFilter
 class INET_API ZCoordFilter : public cPointerResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, uintptr_t object, cObject *details) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**

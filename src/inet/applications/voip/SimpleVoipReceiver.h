@@ -93,7 +93,7 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle
     static simsignal_t packetDelaySignal;
     static simsignal_t playoutDelaySignal;
     static simsignal_t playoutLossRateSignal;
-    static simsignal_t mosSignal;
+    static simsignal_t mosRateSignal;
     static simsignal_t taildropLossRateSignal;
 
     double eModel(double delay, double loss);

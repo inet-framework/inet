@@ -33,7 +33,7 @@
 
 namespace inet {
 
-simsignal_t Arp::sentReqSignal = registerSignal("sentReq");
+simsignal_t Arp::sentRequestSignal = registerSignal("sentRequest");
 simsignal_t Arp::sentReplySignal = registerSignal("sentReply");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
@@ -200,7 +200,7 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
 
     numResolutions++;
     Notification signal(nextHopAddr, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
-    emit(initiatedARPResolutionSignal, &signal);
+    emit(arpResolutionInitiatedSignal, &signal);
 }
 
 void Arp::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
@@ -237,7 +237,7 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 
     sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
     numRequestsSent++;
-    emit(sentReqSignal, 1L);
+    emit(sentRequestSignal, 1L);
 }
 
 void Arp::requestTimedOut(cMessage *selfmsg)
@@ -259,7 +259,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
     // throw out entry from cache
     EV << "ARP timeout, max retry count " << retryCount << " for " << entry->myIter->first << " reached.\n";
     Notification signal(entry->myIter->first, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
-    emit(failedARPResolutionSignal, &signal);
+    emit(arpResolutionFailedSignal, &signal);
     arpCache.erase(entry->myIter);
     delete entry;
     numFailedResolutions++;
@@ -432,7 +432,7 @@ void Arp::updateARPCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     entry->macAddress = macAddress;
     entry->lastUpdate = simTime();
     Notification signal(entry->myIter->first, macAddress, entry->ie);
-    emit(completedARPResolutionSignal, &signal);
+    emit(arpResolutionCompletedSignal, &signal);
 }
 
 MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)

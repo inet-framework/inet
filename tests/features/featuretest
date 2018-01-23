@@ -5,12 +5,23 @@
 
 skipped_features="SCTP packetdrill"
 
+# These two variables control which feature subset is being checked.
+# This makes it easy to split a single test across multiple machines.
+# If for example TOTAL is 3, and INDEX is 1, only every 3*i+1-th
+# feature is checked. Their value is taken over from the environment.
+# The default is to include all features. The "default", "all_enabled"
+# and "all_disabled" combinations are always done in INDEX 0.
+SPLIT_INDEX=${SPLIT_INDEX:-"0"}
+SPLIT_TOTAL=${SPLIT_TOTAL:-"1"}
+
+exitcode=0
+
 # test procedure that is run for each test case (assumes to be in INET_ROOT)
 runtest() {
-  (make makefiles >/dev/null && make cleanall >/dev/null && make makefiles >/dev/null) || { echo "*** $1 prepare build: FAIL" ; return; }
-  make -j8 >/$LOG_DIR/$1-build.out 2>/$LOG_DIR/$1-build.err || { echo "*** $1 building: FAIL" ; return; }
-  (cd $DIR; opp_run -l ../../src/INET -u Cmdenv -n ../../src:. >/$LOG_DIR/$1-run.out 2>/$LOG_DIR/$1-run.err) || { echo "*** $1 running: FAIL" ; return; }
-  echo "*** $1: PASS"
+  (make makefiles >/dev/null && make cleanall >/dev/null && make makefiles >/dev/null) || { echo "*** $1 prepare build: FAIL" ; return 1; }
+  make -j8 >/$LOG_DIR/$1-build.out 2>/$LOG_DIR/$1-build.err || { echo "*** $1 building: FAIL" ; return 1; }
+  (cd $DIR; opp_run -l ../../src/INET -u Cmdenv -n ../../src:. >/$LOG_DIR/$1-run.out 2>/$LOG_DIR/$1-run.err) || { echo "*** $1 running: FAIL" ; return 1; }
+  echo "*** $1: PASS"; return 0;
 }
 
 cd `dirname $0`
@@ -20,28 +31,39 @@ rm -rf $LOG_DIR; mkdir -p $LOG_DIR
 cd ../..
 
 echo "Running feature build and run tests..."
-base_features=$(./inet_featuretool list | grep -v _examples | awk '{print $2;}')
+base_features=$(./inet_featuretool list | grep -v _examples | awk '{print $2;}' | awk "NR % ${SPLIT_TOTAL} == ${SPLIT_INDEX}")
 if [ -n "$skipped_features" ]; then
   echo "Skipping the following features: $skipped_features"
 fi
 
-# test with all features disabled
-./inet_featuretool -q disable -f all
-runtest all_disabled
-
-# test with default features enabled (except skipped ones)
-./inet_featuretool -q reset
-if [ -n "$skipped_features" ]; then
-  ./inet_featuretool -q disable -f $skipped_features
+if [ "$SPLIT_TOTAL" != "1" ]; then
+  echo "Testing feature subset ${SPLIT_INDEX} out of ${SPLIT_TOTAL}:" $base_features
 fi
-runtest default
 
-# test with all features enabled (except skipped ones)
-./inet_featuretool -q enable -f all
-if [ -n "$skipped_features" ]; then
-  ./inet_featuretool -q disable -f $skipped_features
+if [ "$SPLIT_INDEX" = "0" ]; then
+
+  # test with all features disabled
+  ./inet_featuretool -q disable -f all
+  runtest all_disabled
+  if [ $? != 0 ]; then exitcode=1; fi
+
+  # test with default features enabled (except skipped ones)
+  ./inet_featuretool -q reset
+  if [ -n "$skipped_features" ]; then
+    ./inet_featuretool -q disable -f $skipped_features
+  fi
+  runtest default
+  if [ $? != 0 ]; then exitcode=1; fi
+
+  # test with all features enabled (except skipped ones)
+  ./inet_featuretool -q enable -f all
+  if [ -n "$skipped_features" ]; then
+    ./inet_featuretool -q disable -f $skipped_features
+  fi
+  runtest all_enabled
+  if [ $? != 0 ]; then exitcode=1; fi
+
 fi
-runtest all_enabled
 
 # test with each feature enabled - one by one
 for feature in $base_features; do
@@ -51,6 +73,7 @@ for feature in $base_features; do
     ./inet_featuretool -q disable -f all
     ./inet_featuretool -q enable -f $feature
     runtest ${feature}_enabled
+    if [ $? != 0 ]; then exitcode=1; fi
   fi
 done
 
@@ -65,5 +88,8 @@ for feature in $base_features; do
   else
     ./inet_featuretool -q disable -f $feature
     runtest ${feature}_disabled
+    if [ $? != 0 ]; then exitcode=1; fi
   fi
 done
+
+exit $exitcode

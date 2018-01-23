@@ -359,6 +359,7 @@ class FingerprintTestCase(SimulationTestCase):
     def __str__(self):
         return self.title
 
+
 class ThreadSafeIter:
     """Takes an iterator/generator and makes it thread-safe by
     serializing call to the `next` method of given iterator/generator.

@@ -48,7 +48,9 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     bool displayAssociations = false;
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
-    const char *icon = nullptr;
+    double minPowerDbm = NaN;
+    double maxPowerDbm = NaN;
+    std::vector<std::string> icons;
     ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
@@ -65,11 +67,13 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid) = 0;
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power) = 0;
     virtual const Ieee80211Visualization *getIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry);
     virtual void addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization);
     virtual void removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization);
     virtual void removeAllIeee80211Visualizations();
+
+    virtual std::string getIcon(W power) const;
 
   public:
     virtual ~Ieee80211VisualizerBase();

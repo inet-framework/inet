@@ -88,7 +88,7 @@ class Ipv6RoutingTable;
 #endif /* WITH_xMIPv6 */
 
 /*
- * Info for NF_IPv6_MCAST_JOIN and NF_IPv6_MCAST_LEAVE notifications
+ * Info for ipv6McastJoinSignal and ipv6McastLeaveSignal notifications
  */
 struct INET_API Ipv6MulticastGroupInfo : public cObject
 {
@@ -432,7 +432,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
   protected:
     int findAddress(const Ipv6Address& addr) const;
     void choosePreferredAddress();
-    void changed1(int fieldId) { changed(NF_INTERFACE_IPv6CONFIG_CHANGED, fieldId); }
+    void changed1(int fieldId) { changed(interfaceIpv6ConfigChangedSignal, fieldId); }
     HostMulticastData *getHostData() { if (!hostMcastData) hostMcastData = new HostMulticastData(); return hostMcastData; }
     const HostMulticastData *getHostData() const { return const_cast<Ipv6InterfaceData *>(this)->getHostData(); }
     RouterMulticastData *getRouterData() { if (!routerMcastData) routerMcastData = new RouterMulticastData(); return routerMcastData; }

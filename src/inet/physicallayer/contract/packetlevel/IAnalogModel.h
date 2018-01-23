@@ -52,6 +52,12 @@ class INET_API IAnalogModel : public IPrintableObject
     virtual const INoise *computeNoise(const IListening *listening, const IInterference *interference) const = 0;
 
     /**
+     * Returns the total noise summing up all the reception and the noise.
+     * This function never returns nullptr.
+     */
+    virtual const INoise *computeNoise(const IReception *reception, const INoise *noise) const = 0;
+
+    /**
      * Returns the signal to noise and interference ratio. This function never
      * returns nullptr.
      */

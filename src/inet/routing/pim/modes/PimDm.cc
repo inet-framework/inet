@@ -81,13 +81,13 @@ bool PimDm::handleNodeStart(IDoneCallback *doneCallback)
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PimDm: containing node not found.");
-        host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-        host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-        host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-        host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-        host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-        host->subscribe(NF_ROUTE_ADDED, this);
-        host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+        host->subscribe(ipv4NewMulticastSignal, this);
+        host->subscribe(ipv4McastRegisteredSignal, this);
+        host->subscribe(ipv4McastUnregisteredSignal, this);
+        host->subscribe(ipv4DataOnNonrpfSignal, this);
+        host->subscribe(ipv4DataOnRpfSignal, this);
+        host->subscribe(routeAddedSignal, this);
+        host->subscribe(interfaceStateChangedSignal, this);
     }
 
     return done;
@@ -112,13 +112,13 @@ void PimDm::stopPIMRouting()
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PimDm: containing node not found.");
-        host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
-        host->unsubscribe(NF_IPv4_MCAST_REGISTERED, this);
-        host->unsubscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-        host->unsubscribe(NF_IPv4_DATA_ON_NONRPF, this);
-        host->unsubscribe(NF_IPv4_DATA_ON_RPF, this);
-        host->unsubscribe(NF_ROUTE_ADDED, this);
-        host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
+        host->unsubscribe(ipv4NewMulticastSignal, this);
+        host->unsubscribe(ipv4McastRegisteredSignal, this);
+        host->unsubscribe(ipv4McastUnregisteredSignal, this);
+        host->unsubscribe(ipv4DataOnNonrpfSignal, this);
+        host->unsubscribe(ipv4DataOnRpfSignal, this);
+        host->unsubscribe(routeAddedSignal, this);
+        host->unsubscribe(interfaceStateChangedSignal, this);
     }
 
     clearRoutes();
@@ -1055,35 +1055,35 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     PimInterface *pimInterface;
 
     // new multicast data appears in router
-    if (signalID == NF_IPv4_NEW_MULTICAST) {
+    if (signalID == ipv4NewMulticastSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             unroutableMulticastPacketArrived(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), ipv4Header->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
-    else if (signalID == NF_IPv4_MCAST_REGISTERED) {
+    else if (signalID == ipv4McastRegisteredSignal) {
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastReceiverAdded(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
-    else if (signalID == NF_IPv4_MCAST_UNREGISTERED) {
+    else if (signalID == ipv4McastUnregisteredSignal) {
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastReceiverRemoved(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // data come to non-RPF interface
-    else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
+    else if (signalID == ipv4DataOnNonrpfSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
-    else if (signalID == NF_IPv4_DATA_ON_RPF) {
+    else if (signalID == ipv4DataOnRpfSignal) {
         ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
@@ -1091,7 +1091,7 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                     ipv4Header->getDestAddress(), ipv4Header->getSrcAddress(), ipv4Header->getTimeToLive());
     }
     // RPF interface has changed
-    else if (signalID == NF_ROUTE_ADDED) {
+    else if (signalID == routeAddedSignal) {
         const Ipv4Route *entry = check_and_cast<const Ipv4Route *>(obj);
         Ipv4Address routeSource = entry->getDestination();
         Ipv4Address routeNetmask = entry->getNetmask();
@@ -1183,7 +1183,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
         EV_DETAIL << "There is no outgoing interface for multicast, will send Prune message to upstream.\n";
         route->upstreamInterface->graftPruneState = UpstreamInterface::PRUNED;
 
-        // Prune message is sent from the forwarding hook (NF_IPv4_DATA_ON_RPF), see multicastPacketArrivedOnRpfInterface()
+        // Prune message is sent from the forwarding hook (ipv4DataOnRpfSignal), see multicastPacketArrivedOnRpfInterface()
     }
 
     // create new multicast route

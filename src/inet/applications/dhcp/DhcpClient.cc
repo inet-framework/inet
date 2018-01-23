@@ -71,8 +71,8 @@ void DhcpClient::initialize(int stage)
         host = getContainingNode(this);
 
         // for a wireless interface subscribe the association event to start the DHCP protocol
-        host->subscribe(NF_L2_ASSOCIATED, this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(l2AssociatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
 
         // get the routing table to update and subscribe it to the blackboard
         irt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
@@ -506,7 +506,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     printSignalBanner(signalID, obj);
 
     // host associated. link is up. change the state to init.
-    if (signalID == NF_L2_ASSOCIATED) {
+    if (signalID == l2AssociatedSignal) {
         InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
         if (associatedIE && ie == associatedIE && clientState != IDLE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
@@ -514,7 +514,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
             initClient();
         }
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         if (isOperational)
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }

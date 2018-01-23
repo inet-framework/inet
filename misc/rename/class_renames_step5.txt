@@ -1,8 +1,0 @@
-UdpVideoStreamCli -> UdpVideoStreamClient
-EtherAppCli -> EtherAppClient
-EtherAppSrv -> EtherAppServer
-TcpGenericSrvApp -> TcpGenericServerApp
-TcpGenericSrvThread -> TcpGenericServerThread
-TcpSrvHostApp -> TcpServerHostApp
-UdpVideoStreamSvr -> UdpVideoStreamServer
-IdealMac -> MultipleAccessMac

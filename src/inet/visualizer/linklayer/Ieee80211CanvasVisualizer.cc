@@ -16,13 +16,23 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/linklayer/Ieee80211CanvasVisualizer.h"
+
+#ifdef WITH_IEEE80211
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#endif
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(Ieee80211CanvasVisualizer);
+
+Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::~Ieee80211CanvasVisualization()
+{
+    delete figure;
+}
 
 Ieee80211CanvasVisualizer::Ieee80211CanvasVisualization::Ieee80211CanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, LabeledIconFigure *figure, int networkNodeId, int interfaceId) :
     Ieee80211Visualization(networkNodeId, interfaceId),
@@ -41,10 +51,34 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
     }
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid)
+void Ieee80211CanvasVisualizer::refreshDisplay() const
 {
-    std::hash<std::string> hasher;
-    std::string icon(this->icon);
+#ifdef WITH_IEEE80211
+    auto simulation = getSimulation();
+    for (auto& entry : ieee80211Visualizations) {
+        auto networkNode = simulation->getModule(entry.second->networkNodeId);
+        if (networkNode != nullptr) {
+            L3AddressResolver addressResolver;
+            auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+            if (interfaceTable != nullptr) {
+                auto networkInterface = interfaceTable->getInterfaceById(entry.second->interfaceId);
+                auto mgmt = dynamic_cast<inet::ieee80211::Ieee80211MgmtSta *>(networkInterface->getSubmodule("mgmt"));
+                if (mgmt != nullptr) {
+                    auto apInfo = mgmt->getAssociatedAp();
+                    std::string icon = getIcon(W(apInfo->rxPower));
+                    auto canvasVisualization = check_and_cast<const Ieee80211CanvasVisualization *>(entry.second);
+                    auto iconFigure = check_and_cast<LabeledIconFigure *>(canvasVisualization->figure)->getIconFigure();
+                    iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
+                }
+            }
+        }
+    }
+#endif
+}
+
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
+{
+    std::string icon = getIcon(power);
     auto labeledIconFigure = new LabeledIconFigure("ieee80211Association");
     labeledIconFigure->setTags((std::string("ieee80211_association ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(interfaceEntry);
@@ -52,6 +86,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
+    std::hash<std::string> hasher;
     iconFigure->setTintColor(iconColorSet.getColor(hasher(ssid)));
     iconFigure->setTintAmount(1);
     auto labelFigure = labeledIconFigure->getLabelFigure();

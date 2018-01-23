@@ -60,15 +60,15 @@ simple Ppp
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[NF_PP_TX_BEGIN](type=TxNotifDetails);
-        @signal[NF_PP_TX_END](type=TxNotifDetails);
-        @signal[NF_PP_RX_END](type=TxNotifDetails);
+        @signal[ppTxBegin](type=TxNotifDetails);
+        @signal[ppTxEnd](type=TxNotifDetails);
+        @signal[ppRxEnd](type=TxNotifDetails);
         @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:

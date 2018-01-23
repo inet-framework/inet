@@ -144,8 +144,8 @@ class INET_API InterfaceEntry : public cModule
 
   protected:
     // change notifications
-    virtual void configChanged(int fieldId) { changed(NF_INTERFACE_CONFIG_CHANGED, fieldId); }
-    virtual void stateChanged(int fieldId) { changed(NF_INTERFACE_STATE_CHANGED, fieldId); }
+    virtual void configChanged(int fieldId) { changed(interfaceConfigChangedSignal, fieldId); }
+    virtual void stateChanged(int fieldId) { changed(interfaceStateChangedSignal, fieldId); }
     virtual void changed(simsignal_t signalID, int fieldId);
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

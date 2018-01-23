@@ -42,7 +42,7 @@ void MacBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         hostModule = findContainingNode(this);
         if (hostModule)
-            hostModule->subscribe(NF_INTERFACE_DELETED, this);
+            hostModule->subscribe(interfaceDeletedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         updateOperationalFlag(isNodeUp());    // needs to be done when interface is already registered (=last stage)
@@ -79,7 +79,7 @@ bool MacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 
 void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    if (signalID == NF_INTERFACE_DELETED) {
+    if (signalID == interfaceDeletedSignal) {
         if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
             interfaceEntry = nullptr;
     }

@@ -246,7 +246,7 @@ const IIeee80211Mode* QosRateSelection::computeMode(Packet *packet, const Ptr<co
 void QosRateSelection::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
     }

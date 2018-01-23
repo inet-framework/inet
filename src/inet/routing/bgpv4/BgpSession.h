@@ -24,7 +24,7 @@
 
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/routing/bgpv4/BgpRouting.h"
+#include "inet/routing/bgpv4/Bgp.h"
 #include "inet/routing/bgpv4/BgpFsm.h"
 
 namespace inet {
@@ -34,7 +34,7 @@ namespace bgp {
 class INET_API BgpSession : public cObject
 {
   public:
-    BgpSession(BgpRouting& _bgpRouting);
+    BgpSession(Bgp& _bgpRouting);
 
     virtual ~BgpSession();
 
@@ -49,7 +49,7 @@ class INET_API BgpSession : public cObject
     void openTCPConnectionToPeer() { _bgpRouting.openTCPConnectionToPeer(_info.sessionID); }
     SessionId findAndStartNextSession(BgpSessionType type) { return _bgpRouting.findNextSession(type, true); }
 
-    //setters for creating and editing the information in the BgpRouting session:
+    //setters for creating and editing the information in the Bgp session:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
@@ -73,7 +73,7 @@ class INET_API BgpSession : public cObject
 
   private:
     SessionInfo _info;
-    BgpRouting& _bgpRouting;
+    Bgp& _bgpRouting;
 
     static const int BGP_RETRY_TIME = 120;
     static const int BGP_HOLD_TIME = 180;

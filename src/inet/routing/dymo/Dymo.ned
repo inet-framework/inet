@@ -19,6 +19,8 @@
 
 package inet.routing.dymo;
 
+import inet.routing.contract.IManetRouting;
+
 //
 // This module provides Dynamic MANET On-demand (Dymo also known as AODVv2) Routing
 // based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
@@ -26,7 +28,7 @@ package inet.routing.dymo;
 // Module parameters are copied from the IETF draft and renamed for consistency with
 // INET naming conventions. Some parameters are not yet implemented.
 //
-simple Dymo
+simple Dymo like IManetRouting
 {
     parameters:
         // properties

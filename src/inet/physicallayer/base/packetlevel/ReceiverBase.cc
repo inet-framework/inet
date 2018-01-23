@@ -15,7 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
@@ -79,6 +81,11 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto packet = reception->getTransmission()->getPacket()->dup();
+    auto signalPower = computeSignalPower(listening, snir, interference);
+    if (!std::isnan(signalPower.get())) {
+        auto signalPowerInd = packet->ensureTag<SignalPowerInd>();
+        signalPowerInd->setPower(signalPower);
+    }
     auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
@@ -87,6 +94,19 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
         isReceptionSuccessful &= decision->isReceptionSuccessful();
     packet->setBitError(!isReceptionSuccessful);
     return new ReceptionResult(reception, decisions, packet);
+}
+
+W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const
+{
+    if (!dynamic_cast<const NarrowbandNoiseBase *>(snir->getNoise()))
+        return W(0);
+    else {
+        auto analogModel = snir->getReception()->getTransmission()->getMedium()->getAnalogModel();
+        auto signalPlusNoise = check_and_cast<const NarrowbandNoiseBase *>(analogModel->computeNoise(snir->getReception(), snir->getNoise()));
+        auto signalPower = signalPlusNoise == nullptr ? W(NaN) : signalPlusNoise->computeMinPower(listening->getStartTime(), listening->getEndTime());
+        delete signalPlusNoise;
+        return signalPower;
+    }
 }
 
 } // namespace physicallayer

@@ -388,8 +388,8 @@ void Igmpv3::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
-        host->subscribe(NF_IPv4_MCAST_CHANGE, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(ipv4McastChangeSignal, this);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");
@@ -436,7 +436,7 @@ void Igmpv3::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(interfaceCreatedSignal, this);
         registerProtocol(Protocol::igmp, gate("ipOut"));
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
@@ -471,12 +471,12 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
     InterfaceEntry *ie;
     int interfaceId;
     const Ipv4MulticastGroupSourceInfo *info;
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
         if (ie->isMulticast())
             configureInterface(ie);
     }
-    else if (signalID == NF_INTERFACE_DELETED) {
+    else if (signalID == interfaceDeletedSignal) {
         ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry *>(obj));
         if (ie->isMulticast()) {
             interfaceId = ie->getInterfaceId();
@@ -484,7 +484,7 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (signalID == NF_IPv4_MCAST_CHANGE) {
+    else if (signalID == ipv4McastChangeSignal) {
         info = check_and_cast<const Ipv4MulticastGroupSourceInfo *>(obj);
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }

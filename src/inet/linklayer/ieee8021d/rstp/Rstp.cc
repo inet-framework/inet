@@ -875,7 +875,7 @@ void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 {
     Enter_Method_Silent();
 
-    if (signalID == NF_INTERFACE_STATE_CHANGED) {
+    if (signalID == interfaceStateChangedSignal) {
         InterfaceEntry *changedIE = check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry();
         for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();

@@ -19,11 +19,11 @@ package inet.examples.bgpv4.BgpOpen;
 
 import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
-import inet.linklayer.contract.IWiredNic;
+import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
-import inet.routing.bgpv4.BgpRouting;
+import inet.routing.bgpv4.Bgp;
 import inet.transportlayer.contract.ITcp;
 
 
@@ -52,7 +52,7 @@ module BGPRouterSimple
                 routerId = "auto";
                 @display("p=52,172;i=block/table2_s");
         }
-        bgp: BgpRouting {
+        bgp: Bgp {
             parameters:
                 ospfRoutingModule = "";
                 @display("p=160,50;i=block/network");
@@ -82,7 +82,7 @@ module BGPRouterSimple
             parameters:
                 @display("b=580,5,,,,1;p=461,368");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=401,429,row,110;q=l2queue;i=block/ifcard");
         }

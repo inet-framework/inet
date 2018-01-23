@@ -30,6 +30,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -186,17 +187,13 @@ void xMIPv6::handleMessage(cMessage *msg)
         // CB on 29.08.07
         // normal datagram with an extension header
         else if (auto packet = dynamic_cast<Packet *>(msg)) {
-            packet->removePoppedHeaders();
-            auto ipv6Header = packet->removeHeader<Ipv6Header>();
             Ipv6ExtensionHeader *eh = (Ipv6ExtensionHeader *)packet->getContextPointer();
-
             if (auto rh = dynamic_cast<Ipv6RoutingHeader *>(eh))
-                processType2RH(packet, (Ipv6Header *)ipv6Header.get(), rh);
+                processType2RH(packet, rh);
             else if (auto hao = dynamic_cast<HomeAddressOption *>(eh))
-                processHoAOpt(packet, (Ipv6Header *)ipv6Header.get(), hao);
+                processHoAOpt(packet, hao);
             else
                 throw cRuntimeError("Unknown Extension Header.");
-            packet->insertHeader(ipv6Header);
         }
         else
             throw cRuntimeError("Unknown message type received.");
@@ -242,6 +239,9 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
     }
     else {
         EV_WARN << "Unrecognised mobility message... Dropping" << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, inPacket, &details);
         delete inPacket;
     }
 }
@@ -1237,7 +1237,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                     /*statVectorBAfromCN.record(1);*/
 
                     // fire event to MIH subscribers
-                    emit(NF_MIPv6_RO_COMPLETED, (cObject *)nullptr);
+                    emit(mipv6RoCompletedSignal, (cObject *)nullptr);
                 }
 
                 // set BAck flag in BUL
@@ -1766,8 +1766,12 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit
 
 void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& homeTest)
 {
-    if (!validateHoTMessage(inPacket, *homeTest))
+    if (!validateHoTMessage(inPacket, *homeTest)) {
         EV_WARN << "HoT validation not passed: dropping message" << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, inPacket, &details);
+    }
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
         Ipv6Address srcAddr = inPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
@@ -1849,8 +1853,12 @@ bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 
 void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& CoT)
 {
-    if (!validateCoTMessage(inPacket, *CoT))
+    if (!validateCoTMessage(inPacket, *CoT)) {
         EV_WARN << "CoT validation not passed: dropping message" << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, inPacket, &details);
+    }
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
 
@@ -2025,13 +2033,16 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
     //createBUTimer(bulEntry.destAddress, ie, false);
 }
 
-void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingHeader *rh)
+void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 {
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
     //EV << "Processing RH2..." << endl;
 
-    if (!validateType2RH(*ipv6Header, *rh)) {
-        delete rh;
-        delete ipv6Header;
+    if (!validateType2RH(*ipv6Header.get(), *rh)) {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         return;
     }
 
@@ -2052,7 +2063,10 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
     /*The segments left field in the routing header is 1 on the wire.*/
     if (rh->getSegmentsLeft() != 1) {
         EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
-        delete ipv6Header;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, packet, &details);
+        delete packet;
         return;
     }
 
@@ -2067,7 +2081,11 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
            destination field with the Home Address field in the routing header,
            decrements segments left by one from the value it had on the wire,
            and resubmits the packet to IP for processing the next header.*/
-        ipv6Header->setDestAddress(HoA);
+        ipv6Header = nullptr;
+        packet->removePoppedHeaders();
+        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        newIpv6Header->setDestAddress(HoA);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validRH2 = true;
     }
     else {
@@ -2077,17 +2095,21 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6Header *ipv6Header, Ipv6RoutingH
         EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
     }
 
-    delete rh;
+    packet->setContextPointer(nullptr);
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
         send(packet, "toIPv6");
     }
-    else
+    else {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, packet, &details);
         delete packet;
+    }
 }
 
-bool xMIPv6::validateType2RH(Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
+bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh)
 {
     // cf. RFC 3775 - 6.4
 
@@ -2116,8 +2138,10 @@ bool xMIPv6::validateType2RH(Ipv6Header& ipv6Header, const Ipv6RoutingHeader& rh
     return true;
 }
 
-void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOption *hoaOpt)
+void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 {
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
+
     // datagram from MN to CN
     bool validHoAOpt = false;
     const Ipv6Address& HoA = hoaOpt->getHomeAddress();
@@ -2133,7 +2157,11 @@ void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOp
     ASSERT(bc != nullptr);
 
     if (bc->isInBindingCache(HoA, CoA)) {
-        ipv6Header->setSrcAddress(HoA);
+        ipv6Header = nullptr;
+        packet->removePoppedHeaders();
+        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        newIpv6Header->setSrcAddress(HoA);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validHoAOpt = true;
     }
     else {
@@ -2149,14 +2177,19 @@ void xMIPv6::processHoAOpt(Packet *packet, Ipv6Header *ipv6Header, HomeAddressOp
         createAndSendBEMessage(CoA, status);
     }
 
+    packet->setContextPointer(nullptr);
     delete hoaOpt;
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
         send(packet, "toIPv6");
     }
-    else
+    else {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, packet, &details);
         delete packet;
+    }
 }
 
 void xMIPv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beStatus)
@@ -2471,6 +2504,9 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
 
     if (!bul->isInBindingUpdateList(cnAddress, HoA)) {
         EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDropSignal, inPacket, &details);
     }
     else {
         auto ifTag = inPacket->getMandatoryTag<InterfaceInd>();

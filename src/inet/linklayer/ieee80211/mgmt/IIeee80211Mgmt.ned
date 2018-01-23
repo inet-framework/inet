@@ -21,7 +21,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // This is not a concrete module type, but a prototype for all IEEE 802.11
 // management module types. It exists to specify what gates a management
-// module should have in order to be usable within ~Ieee80211Nic.
+// module should have in order to be usable within ~Ieee80211Interface.
 //
 moduleinterface IIeee80211Mgmt
 {

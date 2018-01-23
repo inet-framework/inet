@@ -30,7 +30,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
-#include "inet/networklayer/contract/ipv6/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
@@ -281,20 +281,32 @@ void Ipv6::handleMessageFromHL(cPacket *msg)
         return;
     }
 
-    // encapsulate upper-layer packet into IPv6Datagram
-    // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
     auto ifTag = msg->getTag<InterfaceReq>();
     const InterfaceEntry *destIE = ifTag ? ift->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
     auto packet = check_and_cast<Packet *>(msg);
-    encapsulate(packet);
 
+    // when source address was given, use it; otherwise it'll get the address
+    // of the outgoing interface after routing
+    Ipv6Address src = packet->getMandatoryTag<L3AddressReq>()->getSrcAddress().toIPv6();
+    if (!src.isUnspecified()) {
+        // if interface parameter does not match existing interface, do not send datagram
+        if (rt->getInterfaceByAddress(src) == nullptr) {
 #ifdef WITH_xMIPv6
-    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::ipv6) {
-        EV_WARN << "Encapsulation failed - dropping packet." << endl;
-        delete packet;
-        return;
-    }
+            EV_WARN << "Encapsulation failed - dropping packet." << endl;
+            PacketDropDetails details;
+            details.setReason(NO_INTERFACE_FOUND);
+            emit(packetDropSignal, packet, &details);
+            delete packet;
+            return;
+#else /* WITH_xMIPv6 */
+            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
+                    src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 #endif /* WITH_xMIPv6 */
+        }
+    }
+
+    // encapsulate upper-layer packet into IPv6Datagram
+    encapsulate(packet);
 
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     Ipv6Address destAddress = ipv6Header->getDestAddress();
@@ -753,21 +765,7 @@ void Ipv6::encapsulate(Packet *transportPacket)
 
     // set source and destination address
     ipv6Header->setDestAddress(dest);
-
-    // when source address was given, use it; otherwise it'll get the address
-    // of the outgoing interface after routing
-    if (!src.isUnspecified()) {
-        // if interface parameter does not match existing interface, do not send datagram
-        if (rt->getInterfaceByAddress(src) == nullptr) {
-#ifndef WITH_xMIPv6
-            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
-                    src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
-#else /* WITH_xMIPv6 */
-            return;
-#endif /* WITH_xMIPv6 */
-        }
-        ipv6Header->setSrcAddress(src);
-    }
+    ipv6Header->setSrcAddress(src);
 
     // set other fields
     if (DscpReq *dscpReq = transportPacket->removeTag<DscpReq>()) {
@@ -789,8 +787,8 @@ void Ipv6::encapsulate(Packet *transportPacket)
         Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         ipv6Header->addExtensionHeader(extHeader);
         // EV << "Move extension header to datagram." << endl;
-        delete extHeadersTag;
     }
+    delete extHeadersTag;
 
     ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
     transportPacket->removePoppedHeaders();
@@ -967,7 +965,6 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
                 return false;
             }
             else {
-                delete rh;
                 EV_INFO << "Ignoring unknown routing header" << endl;
             }
         }

@@ -25,10 +25,10 @@
 // in their role (ad-hoc station, infrastructure mode station, or
 // access point) and their level of detail:
 //
-//  - ~Ieee80211Nic: a generic (configurable) NIC
-//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAdhoc: for ad-hoc mode
-//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified: for use in an access point
-//  - ~Ieee80211Nic with mgmtType = ~Ieee80211MgmtSta, ~Ieee80211MgmtStaSimplified: for use in an
+//  - ~Ieee80211Interface: a generic (configurable) NIC
+//  - ~Ieee80211Interface with mgmtType = ~Ieee80211MgmtAdhoc: for ad-hoc mode
+//  - ~Ieee80211Interface with mgmtType = ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified: for use in an access point
+//  - ~Ieee80211Interface with mgmtType = ~Ieee80211MgmtSta, ~Ieee80211MgmtStaSimplified: for use in an
 //    infrastructure-mode station
 //
 // NICs consist of four layers, which are the following (in top-down order):
@@ -71,7 +71,7 @@
 // just carries out these commands by performing the scanning, authentication
 // and association procedures, and reports back the results to the agent.
 //
-// The agent layer is currenly only present in the ~Ieee80211Nic with
+// The agent layer is currenly only present in the ~Ieee80211Interface with
 // mgmtType = ~Ieee80211MgmtSta NIC module,
 // as an ~Ieee80211AgentSta module. The managament entities in other NIC
 // variants do not have as much freedom as to need an agent to control them.

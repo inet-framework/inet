@@ -69,14 +69,14 @@ void TestIGMP::initialize(int stage)
 void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     const Ipv4MulticastGroupInfo *info;
-    if (signalID == NF_IPv4_MCAST_JOIN)
+    if (signalID == ipv4McastJoinSignal)
     {
         info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
         Igmpv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
-    else if (signalID == NF_IPv4_MCAST_LEAVE)
+    else if (signalID == ipv4McastLeaveSignal)
     {
         info = check_and_cast<const Ipv4MulticastGroupInfo*>(obj);
         startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);

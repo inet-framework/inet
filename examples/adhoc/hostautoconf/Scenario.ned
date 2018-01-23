@@ -24,7 +24,7 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 network Scenario
 {
     parameters:
-        double hosts;
+        int hosts;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:

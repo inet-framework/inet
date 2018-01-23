@@ -21,13 +21,13 @@
 package inet.linklayer.loopback;
 
 import inet.common.IHook;
-import inet.linklayer.contract.INic;
+import inet.linklayer.contract.ILoopbackInterface;
 
 
 //
 // Loopback interface. Complements the ~Loopback module.
 //
-module LoopbackInterface like INic
+module LoopbackInterface like ILoopbackInterface
 {
     parameters:
         @class(InterfaceEntry);

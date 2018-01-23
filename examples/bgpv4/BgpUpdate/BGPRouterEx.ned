@@ -19,12 +19,12 @@ package inet.examples.bgpv4.BgpUpdate;
 
 import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
-import inet.linklayer.contract.IWiredNic;
+import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
-import inet.networklayer.ipv4.Ipv4RoutingTable;
-import inet.routing.bgpv4.BgpRouting;
-import inet.routing.ospfv2.OspfRouting;
+import inet.routing.bgpv4.Bgp;
+import inet.routing.ospfv2.Ospf;
 import inet.transportlayer.contract.ITcp;
 
 
@@ -52,11 +52,11 @@ module BGPRouterEx
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        ospf: OspfRouting {
+        ospf: Ospf {
             parameters:
                 @display("p=235,284,row;i=block/network2");
         }
-        bgp: BgpRouting {
+        bgp: Bgp {
             parameters:
                 ospfRoutingModule = "^.ospf";
                 @display("p=160,50;i=block/network");
@@ -88,11 +88,11 @@ module BGPRouterEx
             parameters:
                 @display("b=580,5,,,,1;p=305,326");
         }
-        ppp[sizeof(pppg)]: <default("PppInterface")> like IWiredNic {
+        ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
                 @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=196,369,row,110;q=l2queue;i=block/ifcard");
         }

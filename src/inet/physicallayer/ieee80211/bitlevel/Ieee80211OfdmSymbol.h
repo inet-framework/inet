@@ -36,7 +36,7 @@ class INET_API Ieee80211OfdmSymbol : public ISymbol
     Ieee80211OfdmSymbol() { subcarrierSymbols.resize(53, nullptr); } // (48 + 4 + 1), but one of them is skipped.
     const std::vector<const ApskSymbol *>& getSubCarrierSymbols() const { return subcarrierSymbols; }
     int symbolSize() const { return subcarrierSymbols.size(); }
-    void pushAPSKSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex);
+    void pushApskSymbol(const ApskSymbol *apskSymbol, int subcarrierIndex);
     void clearSymbols() { subcarrierSymbols.resize(53, nullptr); }
 };
 } /* namespace physicallayer */

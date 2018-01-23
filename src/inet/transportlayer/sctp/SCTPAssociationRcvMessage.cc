@@ -848,7 +848,8 @@ bool SctpAssociation::processInitAckArrived(SctpInitAckChunk *initAckChunk)
 bool SctpAssociation::processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, L3Address addr)
 {
     bool trans = false;
-  //  SctpCookie *cookie = check_and_cast<SctpCookie *>(cookieEcho->getStateCookie());
+
+   // SctpCookie *cookie = check_and_cast<SctpCookie *>(cookieEcho->getStateCookie());
     SctpCookie *cookie = (SctpCookie *)(cookieEcho->getStateCookie());
     if (cookie->getCreationTime() + (int32)sctpMain->par("validCookieLifetime") < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";

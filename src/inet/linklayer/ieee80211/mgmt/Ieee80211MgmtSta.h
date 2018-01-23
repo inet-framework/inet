@@ -113,6 +113,8 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
   public:
     Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
 
+    virtual const ApInfo *getAssociatedAp() { return &assocAP; }
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -139,7 +141,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(const MacAddress& address, const Ptr<const Ieee80211BeaconFrame>& body);
+    virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();

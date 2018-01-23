@@ -81,11 +81,11 @@ void GenericRoutingTable::initialize(int stage)
         WATCH(routerId);
 
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_CREATED, this);
-        host->subscribe(NF_INTERFACE_DELETED, this);
-        host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-        host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-        host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(interfaceStateChangedSignal, this);
+        host->subscribe(interfaceConfigChangedSignal, this);
+        host->subscribe(interfaceIpv4ConfigChangedSignal, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // At this point, all L2 modules have registered themselves (added their
@@ -137,7 +137,7 @@ void GenericRoutingTable::routeChanged(GenericRoute *entry, int fieldCode)
 
         //invalidateCache();
     }
-    emit(NF_ROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
+    emit(routeChangedSignal, entry);    // TODO include fieldCode in the notification
 }
 
 void GenericRoutingTable::configureRouterId()
@@ -337,7 +337,7 @@ void GenericRoutingTable::addRoute(IRoute *route)
 
     internalAddRoute(entry);
 
-    emit(NF_ROUTE_ADDED, entry);
+    emit(routeAddedSignal, entry);
 }
 
 IRoute *GenericRoutingTable::removeRoute(IRoute *route)
@@ -346,7 +346,7 @@ IRoute *GenericRoutingTable::removeRoute(IRoute *route)
 
     GenericRoute *entry = internalRemoveRoute(check_and_cast<GenericRoute *>(route));
     if (entry) {
-        emit(NF_ROUTE_DELETED, entry);
+        emit(routeDeletedSignal, entry);
     }
 
     return entry;

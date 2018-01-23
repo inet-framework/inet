@@ -39,7 +39,7 @@
 // A few useful starting points for browsing the documentation:
 //  - hosts, routers, switches and other network level modules:
 //    ~StandardHost, ~Router, ~EtherSwitch, ~EtherHub, ~InternetCloud etc.
-//  - network interfaces: ~EthernetInterface, ~PppInterface, ~Ieee80211Nic
+//  - network interfaces: ~EthernetInterface, ~PppInterface, ~Ieee80211Interface
 //  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
 //    mode are supported
 //  - Ipv4 layer: ~Ipv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
@@ -61,7 +61,7 @@
 //    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericServerApp, ~TcpSinkApp,
 //    ~TcpServerHostApp, ~EtherAppClient, ~EtherAppServer, ~PingApp, ~SimpleVoipSender,
 //    ~SimpleVoipReceiver etc.
-//  - wireless support: ~IRadioMedium, ~Ieee80211Nic
+//  - wireless support: ~IRadioMedium, ~Ieee80211Interface
 //  - Mobility models: ~TurtleMobility,
 //    ~BonnMotionMobility, ~AnsimMobility, ~RandomWaypointMobility, ~MassMobility
 //  - Mpls models: the core modules are ~Mpls, ~LibTable, ~Ldp, ~Rsvp, ~Ted,
@@ -70,7 +70,7 @@
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
 //    daemon ported into the INET Framework, currently in a different project)
 //    used inside QuaggaRouter; alternatively one can run ~OspfRouter which relies
-//    on the ~OspfRouting module;
+//    on the ~Ospf module;
 //
 // Related documentation:
 //   - <a href="../doxy/index.html" target="_top">C++ source documentation (Doxygen)</a>

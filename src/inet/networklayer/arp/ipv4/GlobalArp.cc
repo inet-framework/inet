@@ -94,7 +94,7 @@ void GlobalArp::initialize(int stage)
         }
         cModule *host = findContainingNode(this);
         if (host != nullptr)
-            host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+            host->subscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
 
@@ -219,7 +219,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
-    if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED) {
+    if (signalID == interfaceIpv4ConfigChangedSignal) {
         const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         InterfaceEntry *ie = iecd->getInterfaceEntry();
         // rebuild the arp cache

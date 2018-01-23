@@ -47,7 +47,7 @@ namespace inet {
 
 Define_Module(Ipv6NeighbourDiscovery);
 
-simsignal_t Ipv6NeighbourDiscovery::startDADSignal = registerSignal("startDAD");
+simsignal_t Ipv6NeighbourDiscovery::startDadSignal = registerSignal("startDad");
 
 Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
     : neighbourCache(*this)
@@ -845,7 +845,7 @@ void Ipv6NeighbourDiscovery::initiateDAD(const Ipv6Address& tentativeAddr, Inter
     scheduleAt(simTime() + ie->ipv6Data()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
 #endif /* WITH_xMIPv6 */
 
-    emit(startDADSignal, 1);
+    emit(startDadSignal, 1);
 }
 
 void Ipv6NeighbourDiscovery::processDADTimeout(cMessage *msg)

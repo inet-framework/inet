@@ -22,15 +22,15 @@ package inet.linklayer.ethernet;
 
 import inet.common.IHook;
 import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.linklayer.contract.IWiredNic;
 
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
 // with an output queue for QoS and RED support.
 //
-module EthernetInterface like IWiredNic
+module EthernetInterface like IEthernetInterface
 {
     parameters:
         @class(InterfaceEntry);
@@ -41,7 +41,7 @@ module EthernetInterface like IWiredNic
         string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
         string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
         string encapType = default("EtherEncap");   // module for encapsulation/decapsulation; use ~EtherEncapDummy for no encapsulation/decapsulation
-        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
+        string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");

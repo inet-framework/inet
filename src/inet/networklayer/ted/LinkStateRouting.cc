@@ -51,7 +51,7 @@ void LinkStateRouting::initialize(int stage)
 
         // listen for TED modifications
         cModule *host = getContainingNode(this);
-        host->subscribe(NF_TED_CHANGED, this);
+        host->subscribe(tedChangedSignal, this);
 
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
@@ -91,7 +91,7 @@ void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, c
     Enter_Method_Silent();
     printSignalBanner(signalID, obj);
 
-    ASSERT(signalID == NF_TED_CHANGED);
+    ASSERT(signalID == tedChangedSignal);
 
     EV_INFO << "TED changed\n";
 

@@ -31,8 +31,8 @@ import inet.networklayer.contract.IArp;
 // IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
 // of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
 // uses the Arp::startAddressResolution() method.
-// ARP emit a completedARPResolution signal, when added/modified an entry in ARP table.
-// ARP emit a failedARPResolution signal when an ARP request failed (ARP request sent
+// ARP emit a arpResolutionCompleted signal, when added/modified an entry in ARP table.
+// ARP emit a arpResolutionFailed signal when an ARP request failed (ARP request sent
 // retryCount times and retryTimeout elapsed).
 //
 // ARP resolution is used over <i>broadcast</i> interfaces only,
@@ -53,16 +53,16 @@ simple Arp like IArp
         double cacheTimeout @unit("s") = default(120s); // number seconds unused entries in the cache will time out
         bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
         @display("i=block/layer");
-        @signal[sentReq](type=long);
+        @signal[sentRequest](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedARPResolution](type=IArp::Notification);
-        @signal[completedARPResolution](type=IArp::Notification);
-        @signal[failedARPResolution](type=IArp::Notification);
-        @statistic[sentReq](title="ARP request sent"; record=count,vector);
+        @signal[arpResolutionInitiated](type=IArp::Notification);
+        @signal[arpResolutionCompleted](type=IArp::Notification);
+        @signal[arpResolutionFailed](type=IArp::Notification);
+        @statistic[sentRequest](title="ARP request sent"; record=count,vector);
         @statistic[sentReply](title="ARP replies sent"; record=count,vector);
-        @statistic[initiatedARPResolution](title="ARP initiated resolutions"; record=count);
-        @statistic[completedARPResolution](title="ARP completed resolutions"; record=count);
-        @statistic[failedARPResolution](title="ARP failed resolutions"; record=count);
+        @statistic[arpResolutionInitiated](title="ARP initiated resolutions"; record=count);
+        @statistic[arpResolutionCompleted](title="ARP completed resolutions"; record=count);
+        @statistic[arpResolutionFailed](title="ARP failed resolutions"; record=count);
     gates:
         input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ArpPacket+Ieee802Ctrl,Ipv4Header+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop

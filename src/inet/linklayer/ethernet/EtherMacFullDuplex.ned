@@ -138,7 +138,7 @@ simple EtherMacFullDuplex like IEtherMac
         @signal[rxPkOk](type=Packet);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
-        @signal[rxPkFromHL](type=Packet);
+        @signal[rxPkFromHl](type=Packet);
         @signal[packetDrop](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
@@ -152,7 +152,7 @@ simple EtherMacFullDuplex like IEtherMac
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[txPausePkUnits](title="pause units sent"; record=count,sum,vector; interpolationmode=none);
         @statistic[rxPausePkUnits](title="pause units received"; record=count,sum,vector; interpolationmode=none);
-        @statistic[rxPkFromHL](title="packet bytes from higher layer"; source=rxPkFromHL; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rxPkFromHl](title="packet bytes from higher layer"; source=rxPkFromHl; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

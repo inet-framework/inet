@@ -32,7 +32,7 @@ namespace physicallayer {
 
 Define_Module(Radio);
 
-simsignal_t Radio::minSNIRSignal = cComponent::registerSignal("minSNIR");
+simsignal_t Radio::minSnirSignal = cComponent::registerSignal("minSnir");
 simsignal_t Radio::packetErrorRateSignal = cComponent::registerSignal("packetErrorRate");
 simsignal_t Radio::bitErrorRateSignal = cComponent::registerSignal("bitErrorRate");
 simsignal_t Radio::symbolErrorRateSignal = cComponent::registerSignal("symbolErrorRate");
@@ -500,7 +500,7 @@ void Radio::captureReception(cMessage *timer)
 
 void Radio::sendUp(Packet *macFrame)
 {
-    emit(minSNIRSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
+    emit(minSnirSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
     auto errorRateInd = macFrame->getMandatoryTag<ErrorRateInd>();
     if (!std::isnan(errorRateInd->getPacketErrorRate()))
         emit(packetErrorRateSignal, errorRateInd->getPacketErrorRate());

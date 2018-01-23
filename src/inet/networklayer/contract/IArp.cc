@@ -21,9 +21,9 @@ namespace inet {
 
 Register_Abstract_Class(IArp::Notification);
 
-const simsignal_t IArp::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
-const simsignal_t IArp::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
-const simsignal_t IArp::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");
+const simsignal_t IArp::arpResolutionInitiatedSignal = cComponent::registerSignal("arpResolutionInitiated");
+const simsignal_t IArp::arpResolutionCompletedSignal = cComponent::registerSignal("arpResolutionCompleted");
+const simsignal_t IArp::arpResolutionFailedSignal = cComponent::registerSignal("arpResolutionFailed");
 
 } // namespace inet
 

@@ -546,6 +546,21 @@
         linkerFlags = ""
         />
     <feature
+        id="DSDV"
+        name="DSDV"
+        description = "Destination-Sequenced Distance Vector routing"
+        initiallyEnabled = "true"
+        requires = "IPv4 Ieee80211"
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.dsdv
+                       inet.node.dsdv
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_DSDV"
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
@@ -766,6 +781,21 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ACKINGWIRELESS"
+        linkerFlags = ""
+        />
+    <feature
+        id="shortcut"
+        name="Shortcut"
+        description = "Implements simple shortcut to peer protocols that completely bypass the lower layers."
+        initiallyEnabled = "true"
+        requires = "radio"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.shortcut
+                       inet.physicallayer.shortcut
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_SHORTCUT"
         linkerFlags = ""
         />
     <feature
@@ -1030,7 +1060,7 @@
         />
     <feature
         id="BMAC"
-        name="BMAC"
+        name="B-MAC"
         description = "B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
         initiallyEnabled = "true"
         requires = ""
@@ -1044,7 +1074,7 @@
         />
     <feature
         id="LMAC"
-        name="LMAC"
+        name="L-MAC"
         description = "L-MAC, a lightweight MAC protocol for wireless sensor networks"
         initiallyEnabled = "true"
         requires = ""
@@ -1054,6 +1084,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_LMAC"
+        linkerFlags = ""
+        />
+    <feature
+        id="XMAC"
+        name="X-MAC"
+        description = "X-MAC, a MAC protocol for wireless sensor networks"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.xmac
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_XMAC"
         linkerFlags = ""
         />
     <feature
@@ -1103,6 +1147,18 @@
         requires = "Ieee80211 IPv4 AODV Ethernet visualization"
         labels = "tutorial configuration"
         nedPackages = "inet.tutorials.configurator"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="generalshowcases"
+        name="General showcases"
+        description = "Simple showcases demonstrating general features."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = "showcase general"
+        nedPackages = "inet.showcases.general"
         extraSourceFolders = ""
         compileFlags = ""
         linkerFlags = ""

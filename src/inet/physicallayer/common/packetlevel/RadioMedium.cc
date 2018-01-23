@@ -445,7 +445,7 @@ void RadioMedium::addRadio(const IRadio *radio)
     if (listeningFilter)
         radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
-        getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+        getContainingNode(radioModule)->subscribe(interfaceConfigChangedSignal, this);
     emit(radioAddedSignal, radioModule);
 }
 
@@ -468,7 +468,7 @@ void RadioMedium::removeRadio(const IRadio *radio)
     if (listeningFilter)
         radioModule->unsubscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
-        getContainingNode(radioModule)->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+        getContainingNode(radioModule)->unsubscribe(interfaceConfigChangedSignal, this);
     emit(radioRemovedSignal, radioModule);
 }
 
@@ -606,6 +606,14 @@ Packet *RadioMedium::receivePacket(const IRadio *radio, ISignal *signal)
     return packet;
 }
 
+const ITransmission *RadioMedium::getTransmission(int id) const
+{
+    for (auto transmission : transmissions)
+        if (transmission->getId() == id)
+            return transmission;
+    return nullptr;
+}
+
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
     const IListeningDecision *decision = computeListeningDecision(radio, listening, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
@@ -677,7 +685,7 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const ISignal *signal)
 
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
-    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
+    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == interfaceConfigChangedSignal) {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
         for (const auto transmission : transmissions) {
             if (signal == IRadio::listeningChangedSignal) {

@@ -1,0 +1,106 @@
+//
+// Copyright (C) 2005 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderTagBase.h"
+
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+
+namespace inet {
+
+void Ipv6ExtHeaderTagBase::copy(const Ipv6ExtHeaderTagBase& other)
+{
+    for (const auto & elem : other.extensionHeaders)
+        extensionHeaders.push_back((elem)->dup());
+}
+
+Ipv6ExtHeaderTagBase& Ipv6ExtHeaderTagBase::operator=(const Ipv6ExtHeaderTagBase& other)
+{
+    if (this == &other)
+        return *this;
+    clean();
+    Ipv6ExtHeaderTagBase_Base::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ipv6ExtHeaderTagBase::clean()
+{
+    while (!extensionHeaders.empty()) {
+        Ipv6ExtensionHeader *eh = extensionHeaders.back();
+        extensionHeaders.pop_back();
+        delete eh;
+    }
+}
+
+Ipv6ExtHeaderTagBase::~Ipv6ExtHeaderTagBase()
+{
+    clean();
+}
+
+size_t Ipv6ExtHeaderTagBase::getExtensionHeaderArraySize() const
+{
+    return extensionHeaders.size();
+}
+
+void Ipv6ExtHeaderTagBase::setExtensionHeaderArraySize(size_t size)
+{
+    throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
+}
+
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeaderForUpdate(size_t k)
+{
+    //handleChange(); // ??? Where to declare this, if it's not in cObject?
+    ASSERT(k < extensionHeaders.size());
+    return extensionHeaders[k];
+}
+
+const Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::getExtensionHeader(size_t k) const
+{
+    ASSERT(k < extensionHeaders.size());
+    return extensionHeaders[k];
+}
+
+void Ipv6ExtHeaderTagBase::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var)
+{
+    throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
+}
+
+void Ipv6ExtHeaderTagBase::addExtensionHeader(Ipv6ExtensionHeader *eh, int atPos)
+{
+    ASSERT(eh);
+    if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size()) {
+        extensionHeaders.push_back(eh);
+        return;
+    }
+
+    // insert at position atPos, shift up the rest of the array
+    extensionHeaders.insert(extensionHeaders.begin() + atPos, eh);
+}
+
+Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
+{
+    if (extensionHeaders.empty())
+        return nullptr;
+
+    auto first = extensionHeaders.begin();
+    Ipv6ExtensionHeader *ret = *first;
+    extensionHeaders.erase(first);
+    return ret;
+}
+
+} // namespace inet
+

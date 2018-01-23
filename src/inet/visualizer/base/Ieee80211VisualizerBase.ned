@@ -22,8 +22,8 @@ package inet.visualizer.base;
 // It keeps track of wireless interface associations by subscribing to a number
 // of signals at the provided subscription module.
 //
-// This module subscribes for NF_L2_ASSOCIATED, NF_L2_DISASSOCIATED,
-// NF_L2_AP_ASSOCIATED,NF_L2_AP_DISASSOCIATED on the module determined by the
+// This module subscribes for l2Associated, l2Disassociated,
+// l2ApAssociated,l2ApDisassociated on the module determined by the
 // subscriptionModule parameter.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~IIeee80211Visualizer, ~VisualizerBase
@@ -39,7 +39,10 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
 
-        string icon = default("misc/signal_s"); // wireless network visualization icon
+        double minPower @unit(dBm) = default(-85dBm); // minimum expected signal power
+        double maxPower @unit(dBm) = default(-50dBm); // maximum expeceted signal power
+
+        string icons = default("misc/signal_power_0 misc/signal_power_1 misc/signal_power_2 misc/signal_power_3"); // wireless network visualization icon for different signal powers
         string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default

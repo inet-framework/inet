@@ -48,7 +48,7 @@ void StpBase::initialize(int stage)
 
     if (stage == INITSTAGE_LINK_LAYER_2) {    // "auto" MAC addresses assignment takes place in stage 0
         numPorts = ifTable->getNumInterfaces();
-        switchModule->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+        switchModule->subscribe(interfaceStateChangedSignal, this);
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(switchModule->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

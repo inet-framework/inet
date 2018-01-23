@@ -151,10 +151,10 @@ void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
 void InterfaceTableVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(NF_INTERFACE_CREATED, this);
-    subscriptionModule->subscribe(NF_INTERFACE_DELETED, this);
-    subscriptionModule->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-    subscriptionModule->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+    subscriptionModule->subscribe(interfaceCreatedSignal, this);
+    subscriptionModule->subscribe(interfaceDeletedSignal, this);
+    subscriptionModule->subscribe(interfaceConfigChangedSignal, this);
+    subscriptionModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
 void InterfaceTableVisualizerBase::unsubscribe()
@@ -162,10 +162,10 @@ void InterfaceTableVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(NF_INTERFACE_CREATED, this);
-        subscriptionModule->unsubscribe(NF_INTERFACE_DELETED, this);
-        subscriptionModule->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-        subscriptionModule->unsubscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+        subscriptionModule->unsubscribe(interfaceCreatedSignal, this);
+        subscriptionModule->unsubscribe(interfaceDeletedSignal, this);
+        subscriptionModule->unsubscribe(interfaceConfigChangedSignal, this);
+        subscriptionModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
 
@@ -234,7 +234,7 @@ std::string InterfaceTableVisualizerBase::getVisualizationText(const InterfaceEn
 void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == NF_INTERFACE_CREATED) {
+    if (signal == interfaceCreatedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto interfaceEntry = static_cast<InterfaceEntry *>(object);
@@ -244,7 +244,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             }
         }
     }
-    else if (signal == NF_INTERFACE_DELETED) {
+    else if (signal == interfaceDeletedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto interfaceEntry = static_cast<InterfaceEntry *>(object);
@@ -254,7 +254,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             }
         }
     }
-    else if (signal == NF_INTERFACE_CONFIG_CHANGED || signal == NF_INTERFACE_IPv4CONFIG_CHANGED) {
+    else if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (object != nullptr && nodeFilter.matches(networkNode)) {
             auto interfaceEntryDetails = static_cast<InterfaceEntryChangeDetails *>(object);

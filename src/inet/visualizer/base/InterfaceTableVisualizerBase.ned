@@ -23,8 +23,8 @@ package inet.visualizer.base;
 // interfaces are not displayed by default, see module parameters for how to
 // enable the visualization.
 //
-// This module subscribes for NF_INTERFACE_CREATED, NF_INTERFACE_DELETED, 
-// NF_INTERFACE_CONFIG_CHANGED, and NF_INTERFACE_IPv4CONFIG_CHANGED on the
+// This module subscribes for interfaceCreated, interfaceDeleted, 
+// interfaceConfigChanged, and interfaceIpv4ConfigChanged on the
 // module determined by the subscriptionModule parameter.
 //
 // The format string can contain the following directives:

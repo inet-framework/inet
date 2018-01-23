@@ -33,7 +33,7 @@ inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 void Edcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(NF_MODESET_CHANGED, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
@@ -181,7 +181,7 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();
     }

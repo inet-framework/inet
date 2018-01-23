@@ -341,7 +341,7 @@ void Ieee80211MgmtAp::sendAssocNotification(const MacAddress& addr)
     NotificationInfoSta notif;
     notif.setApAddress(mib->address);
     notif.setStaAddress(addr);
-    emit(NF_L2_AP_ASSOCIATED, &notif);
+    emit(l2ApAssociatedSignal, &notif);
 }
 
 void Ieee80211MgmtAp::sendDisAssocNotification(const MacAddress& addr)
@@ -349,7 +349,7 @@ void Ieee80211MgmtAp::sendDisAssocNotification(const MacAddress& addr)
     NotificationInfoSta notif;
     notif.setApAddress(mib->address);
     notif.setStaAddress(addr);
-    emit(NF_L2_AP_DISASSOCIATED, &notif);
+    emit(l2ApDisassociatedSignal, &notif);
 }
 
 void Ieee80211MgmtAp::start()

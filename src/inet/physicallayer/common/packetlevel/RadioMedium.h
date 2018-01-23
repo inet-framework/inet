@@ -337,6 +337,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual ISignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
     virtual Packet *receivePacket(const IRadio *receiver, ISignal *signal) override;
+    virtual const ITransmission *getTransmission(int id) const override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 

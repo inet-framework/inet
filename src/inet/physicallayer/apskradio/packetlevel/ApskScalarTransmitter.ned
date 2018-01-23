@@ -24,7 +24,7 @@ import inet.physicallayer.base.packetlevel.NarrowbandTransmitterBase;
 // power in their analog representation and the configured modulation.
 //
 // See also ~ApskScalarReceiver, ~ApskScalarRadio, ~ApskScalarRadioMedium, and
-// ~APSKScalarAnalogModel.
+// ~ApskScalarAnalogModel.
 //
 module ApskScalarTransmitter extends NarrowbandTransmitterBase
 {

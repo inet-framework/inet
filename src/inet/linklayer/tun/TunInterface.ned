@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2015 Irene Ruengeler
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,27 +18,9 @@
 
 package inet.linklayer.tun;
 
-import inet.linklayer.contract.ITunNic;
+import inet.linklayer.contract.ITunnelInterface;
 
-simple Tun
-{
-    parameters:
-        @class(TunInterface);
-        string interfaceTableModule;    // The path to the InterfaceTable module
-        int mtu @unit("B") = default(1500B);
-        @display("i=block/tunnel");
-
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-
-    gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
-}
-
-module TunInterface like ITunNic
+module TunInterface like ITunnelInterface
 {
     parameters:
         @class(InterfaceEntry);

@@ -104,7 +104,7 @@ void Gpsr::initialize(int stage)
         networkProtocol->registerHook(0, this);
         if (isNodeUp()) {
             configureInterfaces();
-            scheduleBeaconTimer();
+            processBeaconTimer();
             schedulePurgeNeighborsTimer();
         }
         WATCH(neighborPositionTable);
@@ -229,7 +229,7 @@ const Ptr<GpsrBeacon> Gpsr::createBeacon()
 void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    Packet *udpPacket = new Packet("GPRSBeacon");
+    Packet *udpPacket = new Packet("GPSRBeacon");
     udpPacket->insertAtEnd(beacon);
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
@@ -303,7 +303,12 @@ void Gpsr::configureInterfaces()
 // position
 //
 
-Coord Gpsr::intersectSections(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2)
+bool Gpsr::isConnectingLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
+{
+    return begin1 == begin2 || begin1 == end2 || end1 == begin2 || end1 == end2;
+}
+
+Coord Gpsr::computeRealIntersectionForLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
 {
     double x1 = begin1.x;
     double y1 = begin1.y;
@@ -422,7 +427,6 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
                 const L3Address& witnessAddress = neighborAddresse;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
-                ;
                 double neighborWitnessDistance = (witnessPosition - neighborPosition).length();
                 if (*it == neighborAddresse)
                     continue;
@@ -437,7 +441,6 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
                 const L3Address& witnessAddress = neighborAddresse;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
-                ;
                 if (*it == neighborAddresse)
                     continue;
                 else if (witnessDistance < neighborDistance)
@@ -539,8 +542,7 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
         const L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
         const L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
         L3Address nextNeighborAddress = getSenderNeighborAddress(networkHeader);
-        bool hasIntersection;
-        do {
+        while (true) {
             if (nextNeighborAddress.isUnspecified())
                 nextNeighborAddress = getNextPlanarNeighborCounterClockwise(nextNeighborAddress, getDestinationAngle(destination));
             else
@@ -549,15 +551,19 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
                 break;
             EV_DEBUG << "Intersecting towards next hop: nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
             Coord nextNeighborPosition = getNeighborPosition(nextNeighborAddress);
-            Coord intersection = intersectSections(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
-            hasIntersection = !std::isnan(intersection.x);
-            if (hasIntersection) {
+            // NOTE: we must explicitly avoid computing the real intersection points due to double instability
+            if (isConnectingLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition))
+                break;
+            Coord intersection = computeRealIntersectionForLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
+            if (std::isnan(intersection.x))
+                break;
+            else {
                 EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
                 // KLUDGE: TODO: const_cast<GpsrOption *>(gpsrOption)
                 const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstSenderAddress(selfAddress);
                 const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstReceiverAddress(L3Address());
             }
-        } while (hasIntersection);
+        }
         if (firstSenderAddress == selfAddress && firstReceiverAddress == nextNeighborAddress) {
             EV_DEBUG << "End of perimeter reached: firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
             return L3Address();
