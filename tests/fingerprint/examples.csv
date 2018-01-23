@@ -439,7 +439,7 @@
 
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx, ERROR,
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx, ERROR,
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d348-1867/tplx, ERROR,
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            ead4-4685/tplx, PASS,
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            891d-24f4/tplx, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            5cc0-9205/tplx, PASS,
