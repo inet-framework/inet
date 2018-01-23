@@ -1,0 +1,8 @@
+Making sure the cpu's frequency doesn't scale during the speedtest:
+
+sudo pstate-frequency -S --turbo off	# turn off frequency scaling
+sudo pstate-frequency -S --min 100	# set frequency of cpu cores to 100% (base frequency)
+sudo pstate-frequency -S --max 100
+
+pstate-frequency -G			# to check if turbo is off and the percentages are properly set to around 100% (the cpu frequencies reported here can be misleading)
+cpufreq-info				# check the actual cpu core frequencies, should be around the base frequency
