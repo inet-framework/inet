@@ -288,7 +288,7 @@ void Ppp::handleMessage(cMessage *msg)
             cPacket *payload = decapsulate(packet);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
-            EV_INFO << "Sending payload " << payload << " to upper layer.\n";
+            EV_INFO << "Sending " << payload << " to upper layer.\n";
             send(payload, "upperLayerOut");
         }
     }

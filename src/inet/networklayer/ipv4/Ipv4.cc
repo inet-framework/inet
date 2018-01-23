@@ -147,7 +147,6 @@ void Ipv4::refreshDisplay() const
 
 void Ipv4::handleMessage(cMessage *msg)
 {
-EV_INFO << "Ipv4::handleMessage\n";
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
@@ -188,7 +187,7 @@ void Ipv4::endService(cPacket *packet)
         handlePacketFromHL(check_and_cast<Packet*>(packet));
     }
     else {    // from network
-        EV_INFO << "Received packet " << packet << " from network.\n";
+        EV_INFO << "Received " << packet << " from network.\n";
         handleIncomingDatagram(check_and_cast<Packet*>(packet));
     }
 }
@@ -245,7 +244,6 @@ Ipv4Address Ipv4::getNextHop(cPacket *packet)
 void Ipv4::handleIncomingDatagram(Packet *packet)
 {
     ASSERT(packet);
-    EV_INFO << "handleIncomingDatagram: " << packet << endl;
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     emit(packetReceivedFromLowerSignal, packet);
 
@@ -286,27 +284,22 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
         }
     }
 
-    EV_DETAIL << "Received datagram `" << ipv4Header->getName() << " Packet: " << packet << "' with dest=" << ipv4Header->getDestAddress() << "\n";
+    EV_DETAIL << "Received datagram `" << ipv4Header->getName() << "' with dest=" << ipv4Header->getDestAddress() << "\n";
 
-    if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT) {
+    if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
         preroutingFinish(packet);
-    }
 }
 
 Packet *Ipv4::prepareForForwarding(Packet *packet) const
 {
-EV_INFO << "prepareForForwarding: Packet " << packet << "\n";
     const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-EV_INFO << "Packet after removeNetworkProtocolHeaderk " << packet << endl;
     ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
     insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
-EV_INFO << "Packet after insertNetworkProtocolHeader ipv4Header " << packet << endl;
     return packet;
 }
 
 void Ipv4::preroutingFinish(Packet *packet)
 {
-EV_INFO << "Ipv4::preroutingFinish " << packet << endl;
     const InterfaceEntry *fromIE = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     Ipv4Address nextHopAddr = getNextHop(packet);
 
@@ -374,9 +367,7 @@ EV_INFO << "Ipv4::preroutingFinish " << packet << endl;
         }
         else {
             packet->ensureTag<NextHopAddressReq>()->setNextHopAddress(nextHopAddr);
-            EV_INFO << " call routeUnicastPacket " << packet << endl;
             routeUnicastPacket(prepareForForwarding(packet));
-            EV_INFO << "danach " << packet << endl;
         }
     }
 }
@@ -402,11 +393,8 @@ void Ipv4::handlePacketFromHL(Packet *packet)
 
     // TODO:
     L3Address nextHopAddr(Ipv4Address::UNSPECIFIED_ADDRESS);
-    if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT) {
-    EV_INFO << "Call datagramLocalOut for " << packet << endl;
+    if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet);
-    EV_INFO << "datagramLocalOut returned with " << packet << endl;
-    }
 }
 
 void Ipv4::datagramLocalOut(Packet *packet)
@@ -424,7 +412,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
     // send
     Ipv4Address destAddr = ipv4Header->getDestAddress();
 
-    EV_DETAIL << "Sending datagram '" << packet->getName() << " packet: " << packet << "' with destination = " << destAddr << "\n";
+    EV_DETAIL << "Sending datagram '" << packet->getName() << "' with destination = " << destAddr << "\n";
 
     if (ipv4Header->getDestAddress().isMulticast()) {
         destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header, destIE);
@@ -517,7 +505,6 @@ const InterfaceEntry *Ipv4::determineOutgoingInterfaceForMulticastDatagram(const
 
 void Ipv4::routeUnicastPacket(Packet *packet)
 {
-EV_INFO << "routeUnicastPacket " << packet << endl;
     const InterfaceEntry *fromIE = getSourceInterface(packet);
     const InterfaceEntry *destIE = getDestInterface(packet);
     Ipv4Address nextHopAddress = getNextHop(packet);
@@ -703,7 +690,7 @@ void Ipv4::reassembleAndDeliver(Packet *packet)
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     if (ipv4Header->getSrcAddress().isUnspecified())
-        EV_WARN << "Received datagram '" << packet->getName() << " Packet: " << packet << "' without source address filled in\n";
+        EV_WARN << "Received datagram '" << packet->getName() << "' without source address filled in\n";
 
     // reassemble the packet (if fragmented)
     if (ipv4Header->getFragmentOffset() != 0 || ipv4Header->getMoreFragments()) {
@@ -1117,7 +1104,6 @@ void Ipv4::dropQueuedDatagram(const Packet *packet)
 
 void Ipv4::reinjectQueuedDatagram(const Packet *packet)
 {
-EV_INFO << "Ipv4::reinjectQueuedDatagram " << packet << "\n";
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->packet == packet) {
@@ -1125,7 +1111,6 @@ EV_INFO << "Ipv4::reinjectQueuedDatagram " << packet << "\n";
             take(qPacket);
             switch (iter->hookType) {
                 case INetfilter::IHook::LOCALOUT:
-                EV_INFO << "Ipv4:: call datagramLocalOut with " << qPacket << endl;
                     datagramLocalOut(qPacket);
                     break;
 
@@ -1157,10 +1142,8 @@ EV_INFO << "Ipv4::reinjectQueuedDatagram " << packet << "\n";
 
 INetfilter::IHook::Result Ipv4::datagramPreRoutingHook(Packet *packet)
 {
-EV_INFO << "Ipv4::datagramPreRoutingHook\n";
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
-        EV_INFO << "Returned from other hook: " << packet << endl;
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1211,10 +1194,8 @@ INetfilter::IHook::Result Ipv4::datagramForwardHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
 {
-EV_INFO << "Ipv4::datagramPostRoutingHook\n";
     for (auto & elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
-        EV_INFO << "returned from other postrouting " << packet << endl;
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1325,9 +1306,7 @@ INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)
 INetfilter::IHook::Result Ipv4::datagramLocalOutHook(Packet *packet)
 {
     for (auto & elem : hooks) {
-std::cout << "Call datagramLocalOutHook for " << packet << endl;
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
-std::cout << "datagramLocalOutHook returned for " << packet << endl;
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1368,4 +1347,3 @@ void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type
 }
 
 } // namespace inet
-

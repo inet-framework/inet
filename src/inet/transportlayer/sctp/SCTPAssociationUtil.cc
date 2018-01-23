@@ -384,27 +384,21 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         sctpmsg->setTag(localVTag);
     }
 
-#if 0
+
+    EV_INFO << "insertTransportProtocolHeader sctpmsg\n";
+        insertTransportProtocolHeader(pkt, Protocol::sctp, sctpmsg);
+
     if ((bool)sctpMain->par("udpEncapsEnabled")) {
-    EV_INFO << "udpEncapsEnabled\n";
-    	pkt->insertAtEnd(sctpmsg);
-       // insertTransportProtocolHeader(pkt, Protocol::sctp, sctpmsg);
-        EV_INFO << "SCTP packet " << pkt << endl;
         auto udpHeader = makeShared<UdpHeader>();
         udpHeader->setSourcePort(SCTP_UDP_PORT);
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
         udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + pkt->getTotalLength()).get());
-        udpHeader->setChunkLength(B(udpHeader->getTotalLengthField()));
-        EV_INFO << "add UDP header\n";
+        EV_INFO << "Packet: " << pkt << endl;
+        udpHeader->setCrc(0x0000);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);
-        pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    } else {
-#endif
-        pkt->insertAtEnd(sctpmsg);
-        pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
-        pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-     //   insertTransportProtocolHeader(pkt, Protocol::sctp, sctpmsg);
-//    }
+        EV_INFO << "After udp header added " << pkt << endl;
+    }
+
         IL3AddressType *addressType = dest.getAddressType();
         pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
             auto addresses = pkt->ensureTag<L3AddressReq>();
@@ -565,7 +559,6 @@ void SctpAssociation::sendInit()
 
     state->setPrimaryPath(getPath(remoteAddr));
     // create message consisting of INIT chunk
-   // SctpHeader *sctpmsg = new SctpHeader();
     const auto& sctpmsg = makeShared<SctpHeader>();
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     SctpInitChunk *initChunk = new SctpInitChunk();
@@ -750,7 +743,6 @@ void SctpAssociation::sendInit()
     }
     // send it
     state->initChunk = check_and_cast<SctpInitChunk *>(initChunk->dup());
-   // state->initChunk->setName("StateInitChunk");
     printSctpPathMap();
     EV_DEBUG << getFullPath() << " sendInit: localVTag=" << localVTag << " peerVTag=" << peerVTag << "\n";
     Packet *fp = new Packet("INIT");
