@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/common/ModuleAccess.h"

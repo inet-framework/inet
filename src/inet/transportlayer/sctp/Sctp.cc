@@ -31,7 +31,7 @@
 #include "inet/common/packet/Message.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"

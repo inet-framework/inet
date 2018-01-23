@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 #include "inet/common/INETUtils.h"
 
@@ -23,13 +23,9 @@ namespace inet {
 
 Register_Class(Ipv4Header);
 
-int Ipv4Header::getTotalLengthField() const
-{
-    return totalLengthField;
-}
-
 TlvOptionBase *Ipv4Header::findMutableOptionByType(short int optionType, int index)
 {
+    handleChange();
     int i = options.findByType(optionType, index);
     return i >= 0 ? &getOptionForUpdate(i) : nullptr;
 }
@@ -42,11 +38,13 @@ const TlvOptionBase *Ipv4Header::findOptionByType(short int optionType, int inde
 
 void Ipv4Header::addOption(TlvOptionBase *opt)
 {
+    handleChange();
     options.insertTlvOption(opt);
 }
 
 void Ipv4Header::addOption(TlvOptionBase *opt, int atPos)
 {
+    handleChange();
     options.insertTlvOption(atPos, opt);
 }
 
@@ -57,6 +55,18 @@ int Ipv4Header::calculateHeaderByteLength() const
 
     return length;
 }
+
+short Ipv4Header::getTypeOfService() const
+{
+    return ((getExplicitCongestionNotification() << 6) & 0xc0) | (getDiffServCodePoint() & 0x3f);
+}
+
+void Ipv4Header::setTypeOfService(short trafficClass)
+{
+    setDiffServCodePoint(trafficClass & 0x3f);
+    setExplicitCongestionNotification((trafficClass >> 6) & 0x03);
+}
+
 
 } // namespace inet
 

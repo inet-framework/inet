@@ -18,7 +18,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"

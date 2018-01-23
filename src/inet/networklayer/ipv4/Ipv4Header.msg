@@ -25,6 +25,10 @@ import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
+cplusplus {{
+#include "inet/common/ProtocolGroup.h"
+}}
+
 namespace inet;
 
 cplusplus {{
@@ -168,8 +172,6 @@ class Ipv4OptionUnknown extends Ipv4Option
 // TODO: cleanup order of fields
 class Ipv4Header extends NetworkHeaderBase
 {
-    @customize;
-
     chunkLength = B(IP_HEADER_BYTES);
 
     short version = 4;
@@ -188,10 +190,54 @@ class Ipv4Header extends NetworkHeaderBase
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
     int totalLengthField;
-    unsigned char typeOfService;  // ToS byte
-    abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
-    abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS
+    short diffServCodePoint;  // maps to bits 0-5 of ToS
+    short explicitCongestionNotification;  // maps to bits 6-7 of ToS
 
     TlvOptions options; // array of option pointers, option pointers owned by datagram
 }
+
+cplusplus(Ipv4Header) {{
+  public:
+    virtual short getTypeOfService() const;
+    virtual void setTypeOfService(short typeOfService);
+
+    /**
+     * Returns the number of extension headers in this datagram
+     */
+    virtual unsigned int getOptionArraySize() const { return options.getTlvOptionArraySize(); }
+
+    /**
+     * Returns the kth extension header in this datagram
+     */
+    virtual TlvOptionBase& getOptionForUpdate(unsigned int k) { handleChange(); return *check_and_cast<TlvOptionBase *>((options.getTlvOptionForUpdate(k))); }
+    virtual const TlvOptionBase& getOption(unsigned int k) const { return *check_and_cast<const TlvOptionBase *>((options.getTlvOption(k))); }
+
+    /**
+     * Returns the TlvOptionBase of the specified type,
+     * or nullptr. If index is 0, then the first, if 1 then the
+     * second option is returned.
+     */
+    virtual TlvOptionBase *findMutableOptionByType(short int optionType, int index = 0);
+    virtual const TlvOptionBase *findOptionByType(short int optionType, int index = 0) const;
+
+    /**
+     * Adds an TlvOptionBase to the datagram.
+     */
+    virtual void addOption(TlvOptionBase *opt);
+    virtual void addOption(TlvOptionBase *opt, int atPos);
+
+    /**
+     * Calculates the length of the Ipv6 header plus the extension
+     * headers.
+     */
+    virtual int calculateHeaderByteLength() const;
+
+    // implements NetworkHeaderBase:
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv4()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv4()); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+}}
 

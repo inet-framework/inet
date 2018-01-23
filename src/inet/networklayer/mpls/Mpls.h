@@ -24,7 +24,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
