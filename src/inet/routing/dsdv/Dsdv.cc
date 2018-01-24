@@ -63,7 +63,8 @@ void Dsdv::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        registerProtocol(Protocol::manet, gate("ipOut"));
+        registerService(Protocol::manet, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         L3Socket socket(Protocol::manet.getId(), gate("ipOut"));
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");

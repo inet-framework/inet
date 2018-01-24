@@ -78,8 +78,8 @@ void GenericNetworkProtocol::initialize(int stage)
         WATCH(numForwarded);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerProtocol(Protocol::gnp, gate("transportOut"));
-        registerProtocol(Protocol::gnp, gate("queueOut"));
+        registerService(Protocol::gnp, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::gnp, gate("queueOut"), gate("transportOut"));
     }
 }
 

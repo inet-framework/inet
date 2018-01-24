@@ -47,8 +47,10 @@ void PimSplitter::initialize(int stage)
         pimSMIn = gate("pimSMIn");
         pimSMOut = gate("pimSMOut");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-        registerProtocol(Protocol::pim, gate("ipOut"));
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        registerService(Protocol::pim, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::pim, gate("ipOut"), nullptr);
+    }
 }
 
 void PimSplitter::handleMessage(cMessage *msg)

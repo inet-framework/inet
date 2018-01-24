@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/applications/generic/IpvxTrafSink.h"
@@ -43,7 +44,7 @@ class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
     simtime_t stopTime;
     cPar *sendIntervalPar = nullptr;
     cPar *packetLengthPar = nullptr;
-    int protocol = -1;
+    const Protocol *protocol = nullptr;
     std::vector<L3Address> destAddresses;
     int numPackets = 0;
 

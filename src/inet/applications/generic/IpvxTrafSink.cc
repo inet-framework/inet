@@ -41,8 +41,9 @@ void IpvxTrafSink::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        int protocol = par("protocol");
-        registerProtocol(*ProtocolGroup::ipprotocol.getProtocol(protocol), gate("ipOut"));
+        auto protocol = ProtocolGroup::ipprotocol.getProtocol(par("protocol"));
+        registerService(*protocol, nullptr, gate("ipIn"));
+        registerProtocol(*protocol, gate("ipOut"), nullptr);
     }
 }
 

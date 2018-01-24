@@ -44,7 +44,8 @@ void Ieee8021dRelay::initialize(int stage)
         fcsMode = parseEthernetFcsMode(par("fcsMode"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerProtocol(Protocol::ethernet, gate("ifOut"));
+        registerService(Protocol::ethernet, gate("stpIn"), gate("ifIn"));
+        registerProtocol(Protocol::ethernet, gate("ifOut"), gate("stpOut"));
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

@@ -55,7 +55,8 @@ void Ospf::initialize(int stage)
         isUp = isNodeUp();
         if (isUp)
             createOspfRouter();
-        registerProtocol(Protocol::ospf, gate("ipOut"));
+        registerService(Protocol::ospf, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
     }
 }
 

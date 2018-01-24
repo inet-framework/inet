@@ -50,8 +50,8 @@ void Icmp::initialize(int stage)
             throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerProtocol(Protocol::icmpv4, gate("ipOut"));
-        registerProtocol(Protocol::icmpv4, gate("transportOut"));
+        registerService(Protocol::icmpv4, gate("transportIn"), gate("ipIn"));
+        registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("transportOut"));
     }
 }
 

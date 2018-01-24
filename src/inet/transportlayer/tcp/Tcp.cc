@@ -103,8 +103,8 @@ void Tcp::initialize(int stage)
         cModule *host = findContainingNode(this);
         NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerProtocol(Protocol::tcp, gate("ipOut"));
-        registerProtocol(Protocol::tcp, gate("appOut"));
+        registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
+        registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));

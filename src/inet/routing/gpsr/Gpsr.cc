@@ -97,7 +97,8 @@ void Gpsr::initialize(int stage)
         positionByteLength = par("positionByteLength");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"));
+        registerService(Protocol::manet, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         globalPositionTable.clear();
         host->subscribe(linkBreakSignal, this);
         addressType = getSelfAddress().getAddressType();

@@ -29,8 +29,10 @@ Define_Module(EchoProtocol);
 void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_LAYER)
-        registerProtocol(Protocol::echo, gate("ipOut"));
+    if (stage == INITSTAGE_NETWORK_LAYER) {
+        registerService(Protocol::echo, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::echo, gate("ipOut"), nullptr);
+    }
 }
 
 void EchoProtocol::handleMessage(cMessage *msg)

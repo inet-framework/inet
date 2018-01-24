@@ -44,7 +44,8 @@ void MacRelayUnit::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerProtocol(Protocol::ethernet, gate("ifOut"));
+        registerService(Protocol::ethernet, nullptr, gate("ifIn"));
+        registerProtocol(Protocol::ethernet, gate("ifOut"), nullptr);
     }
 }
 

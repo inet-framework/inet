@@ -78,13 +78,14 @@ void Arp::initialize(int stage)
         WATCH_PTRMAP(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        // TODO: registerProtocol(Protocol::arp, gate("netwOut"));
+        // TODO: registerProtocol
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {    // IP addresses should be available
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         isUp = isNodeUp();
-        registerProtocol(Protocol::arp, gate("ifOut"));
+        registerService(Protocol::arp, gate("netwIn"), gate("ifIn"));
+        registerProtocol(Protocol::arp, gate("ifOut"), gate("netwOut"));
     }
 }
 

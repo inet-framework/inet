@@ -50,7 +50,7 @@ void IpvxTrafGen::initialize(int stage)
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage == INITSTAGE_LOCAL) {
-        protocol = par("protocol");
+        protocol = ProtocolGroup::ipprotocol.getProtocol(par("protocol"));
         numPackets = par("numPackets");
         startTime = par("startTime");
         stopTime = par("stopTime");
@@ -69,7 +69,8 @@ void IpvxTrafGen::initialize(int stage)
         timer = new cMessage("sendTimer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerProtocol(*ProtocolGroup::ipprotocol.getProtocol(protocol), gate("ipOut"));
+        registerService(*protocol, nullptr, gate("ipIn"));
+        registerProtocol(*protocol, gate("ipOut"), nullptr);
 
         if (isNodeUp())
             startApp();
@@ -186,7 +187,7 @@ void IpvxTrafGen::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
 

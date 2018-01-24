@@ -170,8 +170,9 @@ void Udp::initialize(int stage)
         }
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerProtocol(Protocol::udp, gate("ipOut"));
-        registerProtocol(Protocol::udp, gate("appOut"));
+
+        registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
+        registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
     }
 }
 

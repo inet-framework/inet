@@ -57,8 +57,8 @@ void Icmpv6::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerProtocol(Protocol::icmpv6, gate("ipv6Out"));
-        registerProtocol(Protocol::icmpv6, gate("transportOut"));
+        registerService(Protocol::icmpv6, gate("transportIn"), gate("ipv6In"));
+        registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("transportOut"));
     }
 }
 

@@ -78,7 +78,8 @@ void Aodv::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         addressType = getSelfIPAddress().getAddressType();
-        registerProtocol(Protocol::manet, gate("ipOut"));
+        registerService(Protocol::manet, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBreakSignal, this);
 

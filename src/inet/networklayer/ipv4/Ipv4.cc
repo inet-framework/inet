@@ -119,8 +119,8 @@ void Ipv4::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         isUp = isNodeUp();
-        registerProtocol(Protocol::ipv4, gate("transportOut"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"));
+        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
     }
 }
 

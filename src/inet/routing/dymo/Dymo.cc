@@ -136,7 +136,8 @@ void Dymo::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"));
+        registerService(Protocol::manet, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         host->subscribe(linkBreakSignal, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);

@@ -93,8 +93,10 @@ void PimBase::initialize(int stage)
         holdTime = par("holdTime");
         designatedRouterPriority = mode == PimInterface::SparseMode ? par("designatedRouterPriority") : -1;
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-        registerProtocol(Protocol::pim, gate("ipOut"));
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        registerService(Protocol::pim, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::pim, gate("ipOut"), nullptr);
+    }
 }
 
 bool PimBase::handleNodeStart(IDoneCallback *doneCallback)

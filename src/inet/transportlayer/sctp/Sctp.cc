@@ -112,10 +112,8 @@ void Sctp::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        registerProtocol(Protocol::sctp, gate("appOut"));
-        EV_INFO << "SCTP::SCTP registered for gate appOut\n";
-        registerProtocol(Protocol::sctp, gate("ipOut"));
-        EV_INFO << "SCTP::SCTP registered for gate ipOut\n";
+        registerService(Protocol::sctp, gate("appIn"), gate("ipIn"));
+        registerProtocol(Protocol::sctp, gate("ipOut"), gate("appOut"));
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
         if (par("udpEncapsEnabled")) {

@@ -437,7 +437,8 @@ void Igmpv3::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);
-        registerProtocol(Protocol::igmp, gate("ipOut"));
+        registerService(Protocol::igmp, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
         for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
