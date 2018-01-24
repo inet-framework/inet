@@ -1,0 +1,14 @@
+Suggestions for msgc:
+
+field property: @afterChange, @afterSizeChange
+- example: Ipv6RoutingHeader: Ipv6Address address[] @afterSizeChange(setByteLength(8 + 16 * size);) //Ipv6ExtensionHeaders.msg customized for set correct byteLength when array resized
+- alternative: cplusplus[Ipv6RoutingHeader::setAddressArraySize()] {{ setByteLength(8 + 16 * getAddressArraySize()); }}
+
+for array fields: @arrayType({c-array|stlVector|???})
+
+for all fields:
+    @setter(-), ...     for disable function
+    @optional           extra functions: hasFoo(), removeFoo()
+
+    abstract field:     @customize ne kelljen hozzá, mert "cplusplus(ClassName) {{ }}" módon is betehető
+
