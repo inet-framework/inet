@@ -2,6 +2,11 @@ sudo: required
 
 language: generic
 
+notifications:
+  email:
+    recipients:
+      - inet@omnetpp.org
+
 services:
   - docker
 
