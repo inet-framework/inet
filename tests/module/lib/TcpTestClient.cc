@@ -172,7 +172,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         }
         case TEST_SEND:
-            socket.send(msg);
+            socket.send(check_and_cast<Packet *>(msg));
             scheduleNextSend();
             break;
         case TEST_CLOSE:
@@ -191,7 +191,7 @@ void TcpTestClient::scheduleNextSend()
         return;
     Command cmd = commands.front();
     commands.pop_front();
-    Packet *msg = new Packet(makeMsgName().c_str(),TEST_SEND);
+    Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
     msg->insertAtEnd(bytes);
     scheduleAt(cmd.tSend, msg);

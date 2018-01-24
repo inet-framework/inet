@@ -21,6 +21,7 @@
 #define __INET_MPDUGEN_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -42,7 +43,7 @@ protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void sendPackets();
-    void processPacket(cPacket *pk);
+    void processPacket(Packet *pk);
     virtual void handleMessageWhenUp(cMessage* msg) override;
 
   public:

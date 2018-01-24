@@ -40,7 +40,7 @@ void MpduGen::initialize(int stage)
     }
 }
 
-void MpduGen::processPacket(cPacket *pk)
+void MpduGen::processPacket(Packet *pk)
 {
     emit(rcvdPkSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
@@ -86,7 +86,7 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
         sendPackets();
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet*>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
