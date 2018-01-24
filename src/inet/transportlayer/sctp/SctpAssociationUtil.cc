@@ -46,6 +46,7 @@
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -431,7 +432,7 @@ void SctpAssociation::sendIndicationToApp(const int32 code, const int32 value)
     EV_INFO << "sendIndicationToApp: " << indicationName(code) << endl;
     assert(code != SCTP_I_SENDQUEUE_ABATED);
 
-    cPacket *msg = new cPacket(indicationName(code));
+    Indication *msg = new Indication(indicationName(code));
     msg->setKind(code);
 
     SctpCommand *indication = new SctpCommand(indicationName(code));
@@ -441,7 +442,7 @@ void SctpAssociation::sendIndicationToApp(const int32 code, const int32 value)
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
     msg->setControlInfo(indication);
-    msg->ensureTag<SocketInd>()->setSocketId(assocId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
     sctpMain->send(msg, "appOut");
 }
 
@@ -450,7 +451,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     EV_INFO << "sendAvailableIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cPacket *msg = new cPacket(indicationName(SCTP_I_AVAILABLE));
+    Indication *msg = new Indication(indicationName(SCTP_I_AVAILABLE));
     msg->setKind(SCTP_I_AVAILABLE);
 
     SctpAvailableInfo *availableIndication = new SctpAvailableInfo("SctpAvailableInfo");
@@ -460,7 +461,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
     availableIndication->setLocalPort(localPort);
     availableIndication->setRemotePort(remotePort);
     availableIndication->setNewSocketId(assocId);
-    msg->ensureTag<SocketInd>()->setSocketId(listeningAssocId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(listeningAssocId);
     msg->setControlInfo(availableIndication);
     sctpMain->send(msg, "appOut");
 }
@@ -470,7 +471,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     EV_INFO << "sendEstabIndicationToApp: localPort="
             << localPort << " remotePort=" << remotePort << endl;
 
-    cPacket *msg = new cPacket(indicationName(SCTP_I_ESTABLISHED));
+    Indication *msg = new Indication(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
 
     SctpConnectInfo *establishIndication = new SctpConnectInfo("ConnectInfo");
@@ -483,7 +484,7 @@ void SctpAssociation::sendEstabIndicationToApp()
     establishIndication->setInboundStreams(inboundStreams);
     establishIndication->setOutboundStreams(outboundStreams);
     establishIndication->setNumMsgs(state->sendQueueLimit);
-    msg->ensureTag<SocketInd>()->setSocketId(assocId);
+    msg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
     msg->setControlInfo(establishIndication);
     sctpMain->send(msg, "appOut");
 
@@ -496,7 +497,8 @@ void SctpAssociation::sendEstabIndicationToApp()
 
 void SctpAssociation::sendToApp(cMessage *msg)
 {
-    msg->ensureTag<SocketInd>()->setSocketId(assocId);
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<SocketInd>()->setSocketId(assocId);
     sctpMain->send(msg, "appOut");
 }
 

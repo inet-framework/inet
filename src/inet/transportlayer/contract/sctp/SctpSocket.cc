@@ -122,8 +122,9 @@ void SctpSocket::sendToSctp(cMessage *msg)
     if (!gateToSctp)
         throw cRuntimeError("SctpSocket::sendToSctp(): setOutputGate() must be invoked before socket can be used");
     EV_INFO << "sendToSctp SocketId is set to " << assocId << endl;
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
-    msg->ensureTag<SocketReq>()->setSocketId(assocId == -1 ? this->assocId : assocId);
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(assocId == -1 ? this->assocId : assocId);
     check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
 }
 
@@ -526,7 +527,8 @@ void SctpSocket::processMessage(cMessage *msg)
             fsmStatus = connectInfo->getStatus();
             appOptions->inboundStreams = connectInfo->getInboundStreams();
             appOptions->outboundStreams = connectInfo->getOutboundStreams();
-            assocId = msg->getTag<SocketInd>()->getSocketId();
+            auto& tags = getTags(msg);
+            assocId = tags.getTag<SocketInd>()->getSocketId();
            // assocId = msg->getMandatoryTag<SocketInd>()->getSocketId();
 
             if (cb) {

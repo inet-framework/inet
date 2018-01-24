@@ -48,8 +48,8 @@ INetfilter::IHook::Result SctpUdpHook::datagramPreRoutingHook(Packet *packet)
             ipv4Header->setProtocolId(IP_PROT_SCTP);
         }
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
         EV_INFO << "Packet mit Network: " << packet << endl;
     } else {
         EV_INFO << "Protocol is " << networkHeader->getProtocol()->getId() << endl;

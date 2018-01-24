@@ -20,6 +20,7 @@
 #define __INET_SCTPSERVER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Message.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -90,10 +91,11 @@ class INET_API SctpServer : public cSimpleModule, public ILifecycle
     virtual void finish() override;
     void handleTimer(cMessage *msg);
     void sendOrSchedule(cMessage *msg);
+    void sendOrSchedule(Message *msg);
 
-    cMessage *makeAbortNotification(SctpCommand *msg);
-    cMessage *makeReceiveRequest(cMessage *msg);
-    cMessage *makeDefaultReceive();
+    Message *makeAbortNotification(SctpCommand *msg);
+    Message *makeReceiveRequest(cMessage *msg);
+    Message *makeDefaultReceive();
     void generateAndSend();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override

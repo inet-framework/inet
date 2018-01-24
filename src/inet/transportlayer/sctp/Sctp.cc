@@ -28,6 +28,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/common/packet/chunk/Chunk.h"
+#include "inet/common/packet/Message.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header.h"
@@ -173,7 +174,7 @@ void Sctp::handleMessage(cMessage *msg)
         EV_INFO << "Message from IP\n";
         printInfoAssocMap();
         Packet *packet = check_and_cast<Packet *>(msg);
-        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be a SctpHeader
             auto sctpmsg = packet->peekHeader<SctpHeader>();
@@ -258,18 +259,19 @@ void Sctp::handleMessage(cMessage *msg)
     }
     else {    // must be from app
         EV_DEBUG << "must be from app\n";
-        int32 assocId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        auto& tags = getTags(msg);
+        int32 assocId = tags.getTag<SocketReq>()->getSocketId();
         EV_INFO << "assocId = " << assocId << endl;
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
         EV_INFO << "Msg is SCTP_C_GETSOCKETOPTIONS\n";
             SctpCommand *controlInfo = (SctpCommand *)(msg->getControlInfo());
-            cPacket* cmsg = new cPacket("SendSocketOptions", SCTP_I_SENDSOCKETOPTIONS);
+            Indication* cmsg = new Indication("SendSocketOptions", SCTP_I_SENDSOCKETOPTIONS);
             SctpCommand* indication = new SctpCommand("SCTP_I_SENDSOCKETOPTIONS");
             indication->setSocketId(controlInfo->getSocketId());
             cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            cmsg->ensureTag<SocketInd>()->setSocketId(assocId);
+            cmsg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
             send(cmsg, "appOut");
             delete msg;
         } else {
