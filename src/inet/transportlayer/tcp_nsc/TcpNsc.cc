@@ -289,25 +289,22 @@ TcpNsc::~TcpNsc()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TcpNsc::sendEstablishedMsg(TcpNscConnection& connP)
 {
-    cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
-    msg->setKind(TCP_I_ESTABLISHED);
+    auto indication = new Indication("TCP_I_ESTABLISHED", TCP_I_ESTABLISHED);
     TcpConnectInfo *tcpConnectInfo = new TcpConnectInfo();
     tcpConnectInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
     tcpConnectInfo->setRemoteAddr(connP.inetSockPairM.remoteM.ipAddrM);
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
-    msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketInd>()->setSocketId(connP.connIdM);
-    send(msg, "appOut");
+    indication->setControlInfo(tcpConnectInfo);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(connP.connIdM);
+    send(indication, "appOut");
     connP.sentEstablishedM = true;
 }
 
 void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
 {
-    cMessage *msg = new cMessage("TCP_I_AVAILABLE");
-    msg->setKind(TCP_I_AVAILABLE);
-
+    auto *indication = new Indication("TCP_I_AVAILABLE", TCP_I_AVAILABLE);
     TcpAvailableInfo *tcpConnectInfo = new TcpAvailableInfo();
 
     ASSERT(c.forkedConnId != -1);
@@ -317,10 +314,10 @@ void TcpNsc::sendAvailableIndicationMsg(TcpNscConnection& c)
     tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
-    msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketInd>()->setSocketId(c.forkedConnId);
-    send(msg, "appOut");
+    indication->setControlInfo(tcpConnectInfo);
+    indication->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(c.forkedConnId);
+    send(indication, "appOut");
     c.sentEstablishedM = true;
 }
 
@@ -351,11 +348,11 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
     // get src/dest addresses
     TcpNscConnection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    inetSockPair.remoteM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    inetSockPair.localM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+    inetSockPair.remoteM.ipAddrM = packet->getTag<L3AddressInd>()->getSrcAddress();
+    inetSockPair.localM.ipAddrM = packet->getTag<L3AddressInd>()->getDestAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
+    if (packet->getTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
         const auto& tcpHdr = packet->peekHeader<TcpHeader>();
         // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
         //       with IP header size difference
@@ -569,11 +566,11 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
 
 void TcpNsc::sendDataToApp(TcpNscConnection& c)
 {
-    cPacket *dataMsg;
+    Packet *dataMsg;
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
         dataMsg->setKind(TCP_I_DATA);
-        dataMsg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
+        dataMsg->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
     }
@@ -614,13 +611,12 @@ void TcpNsc::sendErrorNotificationToApp(TcpNscConnection& c, int err)
             break;
     }
     if (code != -1) {
-        cMessage *msg = new cMessage(name);
-        msg->setKind(code);
+        auto indication = new Indication(name, code);
         TcpCommand *ind = new TcpCommand();
-        msg->setControlInfo(ind);
-        msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-        msg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
-        send(msg, "appOut");
+        indication->setControlInfo(ind);
+        indication->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(c.connIdM);
+        send(indication, "appOut");
     }
 }
 
@@ -636,7 +632,8 @@ TcpNscReceiveQueue *TcpNsc::createReceiveQueue()
 
 void TcpNsc::handleAppMessage(cMessage *msgP)
 {
-    int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
+    auto& tags = getTags(msgP);
+    int connId = tags.getTag<SocketReq>()->getSocketId();
 
     TcpNscConnection *conn = findAppConn(connId);
 
@@ -686,7 +683,7 @@ void TcpNsc::handleMessage(cMessage *msgP)
     }
     else if (msgP->arrivedOn("ipIn")) {
         Packet *pk = check_and_cast<Packet *>(msgP);
-        auto protocol = msgP->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
             handleIpInputMessage(pk);
@@ -910,8 +907,8 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    fp->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = fp->ensureTag<L3AddressReq>();
+    fp->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = fp->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 

@@ -58,8 +58,8 @@ simple UdpBasicApp like IApp
         bool receiveBroadcast = default(false); // if true, makes the socket receive broadcast packets
         bool joinLocalMulticastGroups = default(false); // if true, makes the socket receive packets from all multicast groups set on local interfaces
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
+        @signal[sentPk](type=Packet);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=vector);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

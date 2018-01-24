@@ -400,12 +400,12 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     }
 
         IL3AddressType *addressType = dest.getAddressType();
-        pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-            auto addresses = pkt->ensureTag<L3AddressReq>();
-            addresses->setSrcAddress(localAddr);
-            addresses->setDestAddress(dest);
-            pkt->ensureTag<SocketReq>()->setSocketId(assocId);
-            check_and_cast<Sctp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
+        pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+        auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+        addresses->setSrcAddress(localAddr);
+        addresses->setDestAddress(dest);
+        pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+        check_and_cast<Sctp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 
         if (chunkType == HEARTBEAT) {
             SctpPathVariables *path = getPath(dest);

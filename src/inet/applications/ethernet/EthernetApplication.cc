@@ -98,7 +98,7 @@ void EthernetApplication::sendPacket()
     long respLen = *respLength;
     data->setResponseBytes(respLen);
     datapacket->insertAtEnd(data);
-    datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
     send(datapacket, "out");
     packetsSent++;
 }
@@ -115,7 +115,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
 
     if (req != nullptr) {
-        MacAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+        MacAddress srcAddr = reqPk->getTag<MacAddressInd>()->getSrcAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
 
@@ -142,9 +142,9 @@ void EthernetApplication::receivePacket(cMessage *msg)
     delete msg;
 }
 
-void EthernetApplication::sendPacket(cMessage *datapacket, const MacAddress& destAddr)
+void EthernetApplication::sendPacket(Packet *datapacket, const MacAddress& destAddr)
 {
-    datapacket->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");
 }

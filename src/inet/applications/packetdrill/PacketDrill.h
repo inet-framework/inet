@@ -44,15 +44,15 @@ class INET_API PacketDrill
         PacketDrill(PacketDrillApp* mod);
         ~PacketDrill();
 
-        static cPacket *buildUDPPacket(int address_family, enum direction_t direction,
+        static Packet *buildUDPPacket(int address_family, enum direction_t direction,
                                        uint16 udp_payload_bytes, char **error);
 
-        static cPacket* buildTCPPacket(int address_family, enum direction_t direction,
+        static Packet* buildTCPPacket(int address_family, enum direction_t direction,
                                        const char *flags, uint32 startSequence,
                                        uint16 tcpPayloadBytes, uint32 ackSequence,
                                        int32 window, cQueue *tcpOptions, char **error);
 
-        static cPacket* buildSCTPPacket(int address_family, enum direction_t direction,
+        static Packet* buildSCTPPacket(int address_family, enum direction_t direction,
                                         cQueue *chunks);
 
         static PacketDrillSctpChunk* buildDataChunk(int64 flgs, int64 len, int64 tsn, int64 sid, int64 ssn, int64 ppid);

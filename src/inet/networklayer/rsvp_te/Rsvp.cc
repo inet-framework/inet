@@ -1306,7 +1306,7 @@ void Rsvp::processHelloMsg(Packet *pk)
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
     const auto& msg = pk->peekHeader<RsvpHelloMsg>();
-    Ipv4Address sender = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
     Ipv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();
@@ -1881,13 +1881,13 @@ void Rsvp::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, Se
     sendToIP(pk, nextHop);
 }
 
-void Rsvp::sendToIP(cMessage *msg, Ipv4Address destAddr)
+void Rsvp::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = RSVP_TRAFFIC;
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     send(msg, "ipOut");
 }
 

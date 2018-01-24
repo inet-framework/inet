@@ -31,7 +31,7 @@ simple UdpEchoApp like IApp
         string interfaceTableModule;   // The path to the InterfaceTable module
         int localPort;  // local port to listen on
         @display("i=block/app");
-        @signal[pk](type=cPacket);
+        @signal[pk](type=Packet);
         @statistic[echoedPk](title="packets echoed"; source=pk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input socketIn @labels(UdpControlInfo/up);

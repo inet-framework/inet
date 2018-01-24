@@ -88,7 +88,7 @@ void TcpAppBase::close()
     emit(connectSignal, -1L);
 }
 
-void TcpAppBase::sendPacket(cPacket *msg)
+void TcpAppBase::sendPacket(Packet *msg)
 {
     int numBytes = msg->getByteLength();
     emit(sentPkSignal, msg);

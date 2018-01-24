@@ -222,7 +222,7 @@ bool Ldp::isNodeUp()
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void Ldp::sendToPeer(Ipv4Address dest, cMessage *msg)
+void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
 {
     getPeerSocket(dest)->send(msg);
 }
@@ -518,7 +518,7 @@ void Ldp::processLDPHello(Packet *msg)
     const auto& ldpHello = msg->peekHeader<LdpHello>();
     //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
-    int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
     EV_INFO << "Received LDP Hello from " << peerAddr << ", ";

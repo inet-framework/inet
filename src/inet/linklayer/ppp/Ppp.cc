@@ -202,7 +202,7 @@ void Ppp::refreshOutGateConnection(bool connected)
         queueModule->requestPacket();
 }
 
-void Ppp::startTransmitting(cPacket *msg)
+void Ppp::startTransmitting(Packet *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     Packet *pppFrame = encapsulate(msg);
@@ -249,8 +249,8 @@ void Ppp::handleMessage(cMessage *msg)
         emit(ppTxEndSignal, &notifDetails);
 
         if (!txQueue.isEmpty()) {
-            cPacket *pk = (cPacket *)txQueue.pop();
-            startTransmitting(pk);
+            auto packet = check_and_cast<Packet *>(txQueue.pop());
+            startTransmitting(packet);
         }
         else if (queueModule && 0 == queueModule->getNumPendingRequests()) {
             queueModule->requestPacket();
@@ -265,11 +265,12 @@ void Ppp::handleMessage(cMessage *msg)
         notifDetails.setPacket(PK(msg));
         emit(ppRxEndSignal, &notifDetails);
 
-        msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+        auto packet = check_and_cast<Packet *>(msg);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
 
         // check for bit errors
-        if (PK(msg)->hasBitError()) {
+        if (packet->hasBitError()) {
             EV_WARN << "Bit error in " << msg << endl;
             PacketDropDetails details;
             details.setReason(INCORRECTLY_RECEIVED);
@@ -279,7 +280,6 @@ void Ppp::handleMessage(cMessage *msg)
         }
         else {
             // pass up payload
-            auto packet = check_and_cast<Packet *>(msg);
             const auto& pppHeader = packet->peekHeader<PppHeader>();
             const auto& pppTrailer = packet->peekTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
             if (pppHeader == nullptr || pppTrailer == nullptr)
@@ -322,7 +322,7 @@ void Ppp::handleMessage(cMessage *msg)
             }
             else {
                 // We are idle, so we can start transmitting right away.
-                startTransmitting(PK(msg));
+                startTransmitting(check_and_cast<Packet *>(msg));
             }
         }
     }
@@ -363,15 +363,15 @@ void Ppp::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-Packet *Ppp::encapsulate(cPacket *msg)
+Packet *Ppp::encapsulate(Packet *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();
-    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertHeader(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
     packet->insertTrailer(pppTrailer);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
     return packet;
 }
 
@@ -382,11 +382,11 @@ cPacket *Ppp::decapsulate(Packet *packet)
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     auto protocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     return packet;
 }
 

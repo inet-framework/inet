@@ -19,7 +19,7 @@
 #define __INET_ETHERAPPSRV_H
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
@@ -53,7 +53,7 @@ class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
 
     virtual bool isNodeUp();
     void registerDSAP(int dsap);
-    void sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap);
+    void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
 };
 
 } // namespace inet

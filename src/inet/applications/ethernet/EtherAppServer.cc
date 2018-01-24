@@ -85,8 +85,8 @@ void EtherAppServer::handleMessage(cMessage *msg)
     packetsReceived++;
     emit(rcvdPkSignal, reqPk);
 
-    MacAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
-    int srcSap = reqPk->getMandatoryTag<Ieee802SapInd>()->getSsap();
+    MacAddress srcAddr = reqPk->getTag<MacAddressInd>()->getSrcAddress();
+    int srcSap = reqPk->getTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
 
@@ -112,10 +112,10 @@ void EtherAppServer::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void EtherAppServer::sendPacket(cPacket *datapacket, const MacAddress& destAddr, int destSap)
+void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap)
 {
-    datapacket->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
-    auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
+    auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
     ieee802SapReq->setSsap(localSAP);
     ieee802SapReq->setDsap(destSap);
 

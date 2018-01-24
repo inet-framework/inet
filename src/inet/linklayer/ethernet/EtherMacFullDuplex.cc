@@ -347,9 +347,9 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     if (interfaceEntry)
-        packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, packet);

@@ -83,10 +83,10 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto packet = reception->getTransmission()->getPacket()->dup();
     auto signalPower = computeSignalPower(listening, snir, interference);
     if (!std::isnan(signalPower.get())) {
-        auto signalPowerInd = packet->ensureTag<SignalPowerInd>();
+        auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
         signalPowerInd->setPower(signalPower);
     }
-    auto snirInd = packet->ensureTag<SnirInd>();
+    auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     bool isReceptionSuccessful = true;

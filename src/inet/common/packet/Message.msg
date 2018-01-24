@@ -16,14 +16,26 @@
 import inet.common.INETDefs;
 
 cplusplus {{
-#include "inet/common/packet/Command.h"
+#include "inet/common/packet/Message.h"
 }}
 
 namespace inet;
 
-class Command extends cMessage
+class Message extends cMessage
 {
     @existingClass;
     @descriptor(readonly);
     cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
+}
+
+class Request extends Message
+{
+    @existingClass;
+    @descriptor(readonly);
+}
+
+class Indication extends Request
+{
+    @existingClass;
+    @descriptor(readonly);
 }

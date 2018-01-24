@@ -19,7 +19,7 @@
 #define __INET_ETHERAPPCLI_H
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -68,7 +68,7 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
     virtual MacAddress resolveDestMACAddress();
 
     virtual void sendPacket();
-    virtual void receivePacket(cPacket *msg);
+    virtual void receivePacket(Packet *msg);
     virtual void registerDSAP(int dsap);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 

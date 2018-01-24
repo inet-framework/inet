@@ -28,6 +28,7 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -399,7 +400,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
-            cPacket* cmsg = new cPacket("ReceiveRequest");
+            Packet* cmsg = new Packet("ReceiveRequest");
             cmsg->setKind(SCTP_C_RECEIVE);
             cmsg->setControlInfo(command);
             send(cmsg, "sctpOut");
@@ -581,7 +582,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          IncomingSocketTCP->setOutputGate(gate("tcpOut"));
       }
 
-      ConnectionID = msg->getMandatoryTag<SocketInd>()->getSocketId();
+      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
       sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
    else if(TransportProtocol == SCTP) {
@@ -1171,8 +1172,8 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
 // ###### Receive data ######################################################
 void NetPerfMeter::receiveMessage(cMessage* msg)
 {
-   const cPacket* dataMessage =
-      dynamic_cast<const cPacket*>(msg);
+   const Packet* dataMessage =
+      dynamic_cast<const Packet*>(msg);
    if(dataMessage != nullptr) {
       unsigned int    streamID = 0;
       const simtime_t delay    = simTime() - dataMessage->getCreationTime();
@@ -1204,7 +1205,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
    queueInfo->setText(queueSize);
    queueInfo->setSocketId(ConnectionID);
 
-   cPacket* cmsg = new cPacket("QueueRequest");
+   Packet* cmsg = new Packet("QueueRequest");
    cmsg->setKind(SCTP_C_QUEUE_BYTES_LIMIT);
    cmsg->setControlInfo(queueInfo);
    if(IncomingSocketSCTP) {
@@ -1228,15 +1229,14 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    TcpCommand* queueInfo = new TcpCommand();
    queueInfo->setUserId(queueSize);
 
-   cPacket* cmsg = new cPacket("QueueRequest");
-   cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
-   cmsg->setControlInfo(queueInfo);
-   cmsg->ensureTag<SocketReq>()->setSocketId(ConnectionID);
+   auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
+   request->setControlInfo(queueInfo);
+   request->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
-      IncomingSocketTCP->sendCommand(cmsg);
+      IncomingSocketTCP->sendCommand(request);
    }
    else {
-      SocketTCP->sendCommand(cmsg);
+      SocketTCP->sendCommand(request);
    }
 }
 

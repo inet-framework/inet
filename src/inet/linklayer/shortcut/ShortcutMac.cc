@@ -75,7 +75,7 @@ void ShortcutMac::handleMessageWhenUp(cMessage *message)
 
 void ShortcutMac::handleUpperPacket(Packet *packet)
 {
-    auto destination = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    auto destination = packet->getTag<MacAddressReq>()->getDestAddress();
     if (destination.isBroadcast()) {
         for (auto it : shortcutMacs)
             if (it.second != this)
@@ -123,10 +123,10 @@ void ShortcutMac::sendToPeer(Packet *packet, ShortcutMac *peer)
 
 void ShortcutMac::receiveFromPeer(Packet *packet)
 {
-    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     packet->clearTags();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->popHeader<BitCountChunk>();
     sendUp(packet);
 }

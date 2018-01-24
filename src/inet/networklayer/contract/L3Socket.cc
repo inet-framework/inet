@@ -17,6 +17,8 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/L3Socket.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -39,8 +41,9 @@ void L3Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)
         throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
-    message->ensureTag<DispatchProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
-    message->ensureTag<SocketReq>()->setSocketId(socketId);
+    auto& tags = getTags(message);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
@@ -50,9 +53,9 @@ void L3Socket::bind(int protocolId)
     ASSERT(controlInfoProtocolId != -1);
     L3SocketBindCommand *command = new L3SocketBindCommand();
     command->setProtocolId(protocolId);
-    cMessage *bind = new cMessage("bind");
-    bind->setControlInfo(command);
-    sendToOutput(bind);
+    auto request = new Request("bind", L3_C_BIND);
+    request->setControlInfo(command);
+    sendToOutput(request);
     bound = true;
 }
 
@@ -66,9 +69,9 @@ void L3Socket::close()
     ASSERT(bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    cMessage *close = new cMessage("close");
-    close->setControlInfo(command);
-    sendToOutput(close);
+    auto request = new Request("close", L3_C_CLOSE);
+    request->setControlInfo(command);
+    sendToOutput(request);
 }
 
 } // namespace inet

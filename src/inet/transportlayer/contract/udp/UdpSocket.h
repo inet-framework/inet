@@ -258,7 +258,7 @@ class INET_API UdpSocket
     /**
      * Utility function: returns a line of information about a packet received via UDP.
      */
-    static std::string getReceivedPacketInfo(cPacket *pk);
+    static std::string getReceivedPacketInfo(Packet *pk);
     //@}
 };
 

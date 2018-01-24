@@ -55,7 +55,7 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInte
     /* Utility functions */
     virtual void connect();
     virtual void close();
-    virtual void sendPacket(cPacket *pkt);
+    virtual void sendPacket(Packet *pkt);
 
     /* TcpSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;

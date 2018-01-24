@@ -234,7 +234,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      *  Create control info and assigns it to a msg. Returns a copy of the
      *  msg with the control info.
      */
-    virtual void sendPacketToIPv6Module(cMessage *msg, const Ipv6Address& destAddr,
+    virtual void sendPacketToIPv6Module(Packet *msg, const Ipv6Address& destAddr,
             const Ipv6Address& srcAddr, int interfaceId);
 
     /**

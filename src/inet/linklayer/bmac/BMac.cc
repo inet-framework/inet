@@ -426,8 +426,8 @@ void BMac::handleSelfMessage(cMessage *msg)
             }
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
-                auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress src = mac->peekHeader<BMacHeader>()->getSrcAddr();
+                auto packet = check_and_cast<Packet *>(msg);
+                const MacAddress src = packet->peekHeader<BMacHeader>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -470,23 +470,23 @@ void BMac::handleSelfMessage(cMessage *msg)
             }
             if (msg->getKind() == BMAC_DATA) {
                 nbRxDataPackets++;
-                auto mac = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = mac->peekHeader<BMacHeader>();
+                auto packet = check_and_cast<Packet *>(msg);
+                const auto bmacHeader = packet->peekHeader<BMacHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
-                    EV_DETAIL << "Local delivery " << mac << endl;
-                    decapsulate(mac);
-                    sendUp(mac);
+                    EV_DETAIL << "Local delivery " << packet << endl;
+                    decapsulate(packet);
+                    sendUp(packet);
                 }
                 else {
-                    EV_DETAIL << "Received " << mac << " is not for us, dropping frame." << endl;
+                    EV_DETAIL << "Received " << packet << " is not for us, dropping frame." << endl;
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
                     emit(packetDropSignal, msg, &details);
                     delete msg;
                     msg = nullptr;
-                    mac = nullptr;
+                    packet = nullptr;
                 }
 
                 cancelEvent(data_timeout);
@@ -742,11 +742,11 @@ void BMac::refreshDisplay() const
 void BMac::decapsulate(Packet *packet)
 {
     const auto& bmacHeader = packet->popHeader<BMacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -757,9 +757,9 @@ void BMac::encapsulate(Packet *packet)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    auto dest = packet->getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info

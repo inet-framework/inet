@@ -108,7 +108,7 @@ void IpvxTrafGen::handleMessage(cMessage *msg)
         }
     }
     else
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet *>(msg));
 }
 
 void IpvxTrafGen::refreshDisplay() const
@@ -186,9 +186,9 @@ void IpvxTrafGen::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    packet->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
 
     EV_INFO << "Sending packet: ";
     printPacket(packet);
@@ -197,17 +197,17 @@ void IpvxTrafGen::sendPacket()
     numSent++;
 }
 
-void IpvxTrafGen::printPacket(cPacket *msg)
+void IpvxTrafGen::printPacket(Packet *msg)
 {
     L3Address src, dest;
     int protocol = -1;
     auto *ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
-    L3AddressTagBase *addresses = msg->getTag<L3AddressReq>();
+    L3AddressTagBase *addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)
-        addresses = msg->getTag<L3AddressInd>();
+        addresses = msg->findTag<L3AddressInd>();
     if (addresses != nullptr) {
         src = addresses->getSrcAddress();
         dest = addresses->getDestAddress();
@@ -220,7 +220,7 @@ void IpvxTrafGen::printPacket(cPacket *msg)
         EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
-void IpvxTrafGen::processPacket(cPacket *msg)
+void IpvxTrafGen::processPacket(Packet *msg)
 {
     emit(rcvdPkSignal, msg);
     EV_INFO << "Received packet: ";

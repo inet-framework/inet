@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -222,9 +223,9 @@ void Ieee80211MgmtSta::changeChannel(int channelNum)
 
     Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
     configureCommand->setChannelNumber(channelNum);
-    cMessage *msg = new cMessage("changeChannel", RADIO_C_CONFIGURE);
-    msg->setControlInfo(configureCommand);
-    send(msg, "macOut");
+    auto request = new Request("changeChannel", RADIO_C_CONFIGURE);
+    request->setControlInfo(configureCommand);
+    send(request, "macOut");
 }
 
 void Ieee80211MgmtSta::beaconLost()
@@ -236,8 +237,8 @@ void Ieee80211MgmtSta::beaconLost()
 void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address)
 {
     auto packet = new Packet(name);
-    packet->ensureTag<MacAddressReq>()->setDestAddress(address);
-    packet->ensureTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
+    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
+    packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtEnd(body);
     sendDown(packet);
 }
@@ -324,7 +325,7 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, c
         const Ptr<const Ieee80211MgmtHeader>& beacon = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
         ApInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
-            ap->rxPower = packet->getMandatoryTag<SignalPowerInd>()->getPower().get();
+            ap->rxPower = packet->getTag<SignalPowerInd>()->getPower().get();
     }
 }
 

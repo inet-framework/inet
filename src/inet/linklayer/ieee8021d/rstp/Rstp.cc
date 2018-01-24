@@ -274,8 +274,8 @@ void Rstp::handleIncomingFrame(Packet *packet)
     const Ptr<const Bpdu>& frame = packet->peekHeader<Bpdu>();
     // incoming BPDU handling
     // checking message age
-    int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MacAddress src = packet->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+    int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    MacAddress src = packet->getTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
     if (frame->getMessageAge() < maxAge) {
         // checking TC
@@ -598,10 +598,10 @@ void Rstp::sendTCNtoRoot()
 
                 packet->insertAtEnd(frame);
 
-                auto macAddressReq = packet->ensureTag<MacAddressReq>();
+                auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-                packet->ensureTag<InterfaceReq>()->setInterfaceId(r);
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(r);
 
                 send(packet, "relayOut");
             }
@@ -664,10 +664,10 @@ void Rstp::sendBPDU(int interfaceId)
 
         packet->insertAtEnd(frame);
 
-        auto macAddressReq = packet->ensureTag<MacAddressReq>();
+        auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
 
         send(packet, "relayOut");
     }

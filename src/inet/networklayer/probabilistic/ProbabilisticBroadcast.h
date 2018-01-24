@@ -154,7 +154,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      * @param pMsg      The message where the "control info" shall be attached.
      * @param pDestAddr The MAC address of the message receiver.
      */
-    virtual void setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr);
+    virtual void setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr);
 
     /**
      * @brief Period (in sim time) between two broadcast attempts.

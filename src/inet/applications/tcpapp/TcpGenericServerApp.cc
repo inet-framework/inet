@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -71,7 +72,7 @@ void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TcpGenericServerApp::sendBack(cMessage *msg)
 {
-    cPacket *packet = dynamic_cast<cPacket *>(msg);
+    Packet *packet = dynamic_cast<Packet *>(msg);
 
     if (packet) {
         msgsSent++;
@@ -84,7 +85,8 @@ void TcpGenericServerApp::sendBack(cMessage *msg)
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     send(msg, "socketOut");
 }
 
@@ -96,17 +98,15 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
-        int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+        int connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
         delete msg;
-        cMessage *outMsg = new cMessage("close");
-        outMsg->setName("close");
-        outMsg->setKind(TCP_C_CLOSE);
-        outMsg->ensureTag<SocketReq>()->setSocketId(connId);
-        sendOrSchedule(outMsg, delay + maxMsgDelay);
+        auto request = new Request("close", TCP_C_CLOSE);
+        request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+        sendOrSchedule(request, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
+        int connId = packet->getTag<SocketInd>()->getSocketId();
         ChunkQueue &queue = socketQueue[connId];
         auto chunk = packet->peekDataAt(B(0));
         queue.push(chunk);
@@ -123,7 +123,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 
             if (requestedBytes > 0) {
                 Packet *outPacket = new Packet(msg->getName());
-                outPacket->ensureTag<SocketReq>()->setSocketId(connId);
+                outPacket->addTagIfAbsent<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
                 payload->setChunkLength(B(requestedBytes));
@@ -140,12 +140,11 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         delete msg;
 
         if (doClose) {
-            cMessage *outMsg = new cMessage("close");
-            outMsg->setKind(TCP_C_CLOSE);
+            auto request = new Request("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            outMsg->ensureTag<SocketReq>()->setSocketId(connId);
-            outMsg->setControlInfo(cmd);
-            sendOrSchedule(outMsg, delay + maxMsgDelay);
+            request->addTagIfAbsent<SocketReq>()->setSocketId(connId);
+            request->setControlInfo(cmd);
+            sendOrSchedule(request, delay + maxMsgDelay);
         }
     }
     else if (msg->getKind() == TCP_I_AVAILABLE)

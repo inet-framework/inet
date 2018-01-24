@@ -645,7 +645,7 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
      */
-    template<typename T> int findTag(b offset = b(0), b length = b(-1)) const {
+    template<typename T> T *findTag(b offset = b(0), b length = b(-1)) const {
         return tags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 

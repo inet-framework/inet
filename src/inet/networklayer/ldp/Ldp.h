@@ -161,7 +161,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     /** Utility: return socket for given peer, and nullptr if session doesn't exist */
     virtual TcpSocket *findPeerSocket(Ipv4Address peerAddr);
 
-    virtual void sendToPeer(Ipv4Address dest, cMessage *msg);
+    virtual void sendToPeer(Ipv4Address dest, Packet *msg);
 
     //bool matches(const FecTlv& a, const FecTlv& b);
 

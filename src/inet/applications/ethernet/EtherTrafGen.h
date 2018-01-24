@@ -19,7 +19,7 @@
 #define __INET_ETHERTRAFGEN_H
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -68,7 +68,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     virtual MacAddress resolveDestMACAddress();
 
     virtual void sendBurstPackets();
-    virtual void receivePacket(cPacket *msg);
+    virtual void receivePacket(Packet *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:

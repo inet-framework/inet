@@ -35,6 +35,7 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
@@ -260,8 +261,8 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = packet->ensureTag<L3AddressReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
     tcpseg->setCrc(0);
@@ -278,8 +279,8 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(B(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
-    pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = pkt->ensureTag<L3AddressReq>();
+    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     insertTransportProtocolHeader(pkt, Protocol::tcp, tcpseg);
@@ -294,21 +295,18 @@ void TcpConnection::signalConnectionTimeout()
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
-    cMessage *msg = new cMessage(indicationName(code));
-    msg->setKind(code);
+    auto indication = new Indication(indicationName(code), code);
     TcpCommand *ind = new TcpCommand();
     ind->setUserId(id);
-    msg->ensureTag<SocketInd>()->setSocketId(socketId);
-    msg->setControlInfo(ind);
-    sendToApp(msg);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    indication->setControlInfo(ind);
+    sendToApp(indication);
 }
 
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
-    cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
-    msg->setKind(TCP_I_AVAILABLE);
-
+    auto indication = new Indication(indicationName(TCP_I_AVAILABLE), TCP_I_AVAILABLE);
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -316,25 +314,23 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
 
-    msg->ensureTag<SocketInd>()->setSocketId(listeningSocketId);
-    msg->setControlInfo(ind);
-    sendToApp(msg);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(listeningSocketId);
+    indication->setControlInfo(ind);
+    sendToApp(indication);
 }
 
 void TcpConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
-    cMessage *msg = new cMessage(indicationName(TCP_I_ESTABLISHED));
-    msg->setKind(TCP_I_ESTABLISHED);
-
+    auto indication = new Indication(indicationName(TCP_I_ESTABLISHED), TCP_I_ESTABLISHED);
     TcpConnectInfo *ind = new TcpConnectInfo();
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
-    msg->ensureTag<SocketInd>()->setSocketId(socketId);
-    msg->setControlInfo(ind);
-    sendToApp(msg);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    indication->setControlInfo(ind);
+    sendToApp(indication);
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
@@ -345,19 +341,16 @@ void TcpConnection::sendToApp(cMessage *msg)
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
-        cMessage *msg = nullptr;
-
         if (tcpMain->useDataNotification) {
-            msg = new cMessage("Data Notification");
-            msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
+            auto indication = new Indication("Data Notification", TCP_I_DATA_NOTIFICATION); // TBD currently we never send TCP_I_URGENT_DATA
             TcpCommand *cmd = new TcpCommand();
-            msg->ensureTag<SocketInd>()->setSocketId(socketId);
-            msg->setControlInfo(cmd);
-            sendToApp(msg);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            indication->setControlInfo(cmd);
+            sendToApp(indication);
         } else {
-            while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
+            while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                msg->ensureTag<SocketInd>()->setSocketId(socketId);
+                msg->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);
             }
         }

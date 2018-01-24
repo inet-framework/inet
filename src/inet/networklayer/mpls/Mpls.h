@@ -60,8 +60,8 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
     virtual bool tryLabelAndForwardIPv4Datagram(Packet *ipdatagram);
     virtual void labelAndForwardIPv4Datagram(Packet *ipdatagram);
 
-    virtual void sendToL2(cMessage *msg);
-    virtual void sendToL3(cMessage *msg);
+    virtual void sendToL2(Packet *msg);
+    virtual void sendToL3(Packet *msg);
 
     virtual void doStackOps(MplsHeader *mplsPacket, const LabelOpVector& outLabel);
 

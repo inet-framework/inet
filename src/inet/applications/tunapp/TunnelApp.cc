@@ -79,29 +79,30 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
     if (message->arrivedOn("socketIn")) {
         ASSERT(message->getControlInfo() == nullptr);
 
-        auto sockInd = message->getTag<SocketInd>();
+        auto packet = check_and_cast<Packet *>(message);
+        auto sockInd = packet->findTag<SocketInd>();
         int sockId = (sockInd != nullptr) ? sockInd->getSocketId() : -1;
         if (sockInd != nullptr && sockId == tunSocket.getSocketId()) {
             // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
             if (protocol == &Protocol::ipv4) {
-                message->clearTags();
-                message->ensureTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
-                message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-                l3Socket.send(check_and_cast<Packet *>(message));
+                packet->clearTags();
+                packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
+                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+                l3Socket.send(packet);
             }
             else if (protocol == &Protocol::udp) {
-                message->clearTags();
-                clientSocket.send(check_and_cast<Packet *>(message));
+                packet->clearTags();
+                clientSocket.send(packet);
             }
             else
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
         }
         else {
-            auto packetProtocol = message->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+            auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
             if (packetProtocol == protocol) {
                 delete message->removeControlInfo();
-                message->clearTags();
-                tunSocket.send(check_and_cast<Packet *>(message));
+                packet->clearTags();
+                tunSocket.send(packet);
             }
             else
                 throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;

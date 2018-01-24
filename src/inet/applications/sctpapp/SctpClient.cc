@@ -320,7 +320,7 @@ void SctpClient::sendRequestArrived()
     }
 }
 
-void SctpClient::socketDataArrived(int, void *, cPacket *msg, bool)
+void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
 {
     packetsRcvd++;
 
@@ -398,7 +398,7 @@ void SctpClient::sendRequest(bool last)
     cmsg->insertAtEnd(payload);
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);*/
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SctpSimpleMessage *msg = new SctpSimpleMessage("data");
 
     msg->setDataArraySize(sendBytes);
@@ -506,7 +506,7 @@ void SctpClient::handleTimer(cMessage *msg)
     }
 }
 
-void SctpClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
+void SctpClient::socketDataNotificationArrived(int connId, void *ptr, Packet *msg)
 {
     SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");

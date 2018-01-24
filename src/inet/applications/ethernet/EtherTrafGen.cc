@@ -184,10 +184,10 @@ void EtherTrafGen::sendBurstPackets()
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         datapacket->insertAtEnd(payload);
-        datapacket->removeTag<PacketProtocolTag>();
-//        datapacket->ensureTag<PacketProtocolTag>()->setProtocol(nullptr);
-        datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
-        auto sapTag = datapacket->ensureTag<Ieee802SapReq>();
+        datapacket->removeTagIfPresent<PacketProtocolTag>();
+//        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(nullptr);
+        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
 
@@ -198,7 +198,7 @@ void EtherTrafGen::sendBurstPackets()
     }
 }
 
-void EtherTrafGen::receivePacket(cPacket *msg)
+void EtherTrafGen::receivePacket(Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "' length= " << msg->getByteLength() << "B\n";
 

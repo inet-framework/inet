@@ -15,6 +15,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/httptools/browser/HttpBrowser.h"
 
@@ -66,7 +67,8 @@ void HttpBrowser::handleMessage(cMessage *msg)
             EV_DEBUG << "No control info for the message" << endl;
         }
         else {
-            int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+            auto indication = check_and_cast<Indication *>(msg);
+            int connId = indication->getTag<SocketInd>()->getSocketId();
             EV_DEBUG << "Connection ID: " << connId << endl;
         }
 
@@ -173,10 +175,10 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     EV_DEBUG << "Proceeding to send messages on socket " << connId << endl;
     while (!sockdata->messageQueue.empty()) {
         cMessage *msg = sockdata->messageQueue.back();
-        cPacket *pckt = check_and_cast<cPacket *>(msg);
+        Packet *pckt = check_and_cast<Packet *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
-        socket->send(msg);
+        socket->send(pckt);
         sockdata->pending++;
     }
 }

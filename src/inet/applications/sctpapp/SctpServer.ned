@@ -57,7 +57,7 @@ simple SctpClient like IApp
         string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
         @signal[sentPk](type=SctpSimpleMessage);
-        @signal[rcvdPk](type=cPacket);
+        @signal[rcvdPk](type=Packet);
         @signal[echoedPk](type=SctpSimpleMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

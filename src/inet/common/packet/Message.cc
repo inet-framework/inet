@@ -13,20 +13,40 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Command.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
-Register_Class(Command);
+Register_Class(Message);
 
-Command::Command(const char *name, short kind) :
+Message::Message(const char *name, short kind) :
     cMessage(name, kind)
 {
 }
 
-Command::Command(const Command& other) :
+Message::Message(const Message& other) :
     cMessage(other),
     tags(other.tags)
+{
+}
+
+Request::Request(const char *name, short kind) :
+    Message(name, kind)
+{
+}
+
+Request::Request(const Request& other) :
+    Message(other)
+{
+}
+
+Indication::Indication(const char *name, short kind) :
+    Message(name, kind)
+{
+}
+
+Indication::Indication(const Indication& other) :
+    Message(other)
 {
 }
 

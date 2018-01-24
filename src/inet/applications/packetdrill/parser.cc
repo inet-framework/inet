@@ -2737,7 +2737,7 @@ yyreduce:
         yylineno = (yylsp[0]).first_line;
         printf("<...> for TCP options can only be used with outbound packets");
     }
-    cPacket* pkt = PacketDrill::buildTCPPacket(in_config->getWireProtocol(), direction,
+    Packet* pkt = PacketDrill::buildTCPPacket(in_config->getWireProtocol(), direction,
                                                (yyvsp[-4].string),
                                                (yyvsp[-3].tcp_sequence_info).start_sequence, (yyvsp[-3].tcp_sequence_info).payload_bytes,
                                                (yyvsp[-2].sequence_number), (yyvsp[-1].window), (yyvsp[0].tcp_options), &error);
@@ -2761,7 +2761,7 @@ yyreduce:
     PacketDrillPacket *outer = (yyvsp[-4].packet), *inner = NULL;
 
     enum direction_t direction = outer->getDirection();
-    cPacket* pkt = PacketDrill::buildUDPPacket(in_config->getWireProtocol(), direction, (yyvsp[-1].integer), &error);
+    Packet* pkt = PacketDrill::buildUDPPacket(in_config->getWireProtocol(), direction, (yyvsp[-1].integer), &error);
     if (direction == DIRECTION_INBOUND)
         pkt->setName("parserInbound");
     else
@@ -2780,7 +2780,7 @@ yyreduce:
     {
     PacketDrillPacket *inner = NULL;
     enum direction_t direction = (yyvsp[-3].packet)->getDirection();
-    cPacket* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, (yyvsp[0].sctp_chunk_list));
+    Packet* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, (yyvsp[0].sctp_chunk_list));
     if (pkt) {
         if (direction == DIRECTION_INBOUND)
             pkt->setName("parserInbound");

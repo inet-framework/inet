@@ -496,7 +496,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA:
             EV_INFO << "SCTP_I_DATA\n";
             if (cb) {
-                cb->socketDataArrived(assocId, yourPtr, PK(msg), false);
+                cb->socketDataArrived(assocId, yourPtr, check_and_cast<Packet *>(msg), false);
                 msg = nullptr;
             }
             break;
@@ -504,7 +504,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION:
             EV_INFO << "SCTP_I_NOTIFICATION\n";
             if (cb) {
-                cb->socketDataNotificationArrived(assocId, yourPtr, PK(msg));
+                cb->socketDataNotificationArrived(assocId, yourPtr, check_and_cast<Packet *>(msg));
             }
             break;
 

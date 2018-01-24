@@ -17,6 +17,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 
@@ -24,7 +25,8 @@ namespace inet {
 
 TcpSocket *TcpSocketMap::findSocketFor(cMessage *msg)
 {
-    int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+    auto& tags = getTags(msg);
+    int connId = tags.getTag<SocketInd>()->getSocketId();
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
     return (i == socketMap.end()) ? nullptr : i->second;

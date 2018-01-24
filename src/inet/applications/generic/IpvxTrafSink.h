@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
@@ -37,8 +38,8 @@ class INET_API IpvxTrafSink : public cSimpleModule, public ILifecycle
     bool isOperational;
 
   protected:
-    virtual void printPacket(cPacket *msg);
-    virtual void processPacket(cPacket *msg);
+    virtual void printPacket(Packet *msg);
+    virtual void processPacket(Packet *msg);
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

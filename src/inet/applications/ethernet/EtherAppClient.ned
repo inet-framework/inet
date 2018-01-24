@@ -36,8 +36,8 @@ simple EtherAppClient
         volatile int respLength @unit(B) = default(1KiB);  // length of response packets
         bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
+        @signal[sentPk](type=Packet);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);

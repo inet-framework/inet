@@ -123,7 +123,7 @@ void SctpNatPeer::generateAndSend()
     uint32 numBytes;
     EV << "SctpNatPeer:generateAndSend \n";
 
-    cPacket *cmsg = new cPacket("SCTP_C_SEND");
+    Packet *cmsg = new Packet("SCTP_C_SEND");
     SctpSimpleMessage *msg = new SctpSimpleMessage("Server");
     numBytes = (int64)(long)par("requestLength");
     msg->setDataArraySize(numBytes);
@@ -541,7 +541,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
     delete connectInfo;
 }
 
-void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *msg)
+void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Packet *msg)
 {
     SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
@@ -803,7 +803,7 @@ void SctpNatPeer::sendRequestArrived()
     }
 }
 
-void SctpNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
+void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -814,7 +814,7 @@ void SctpNatPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
 
     if (echo) {
         SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         cmsg->encapsulate(smsg);
         if (ind->getSendUnordered())

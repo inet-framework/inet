@@ -51,16 +51,16 @@ void TcpEchoApp::initialize(int stage)
     }
 }
 
-void TcpEchoApp::sendDown(cMessage *msg)
+void TcpEchoApp::sendDown(Packet *msg)
 {
     if (msg->isPacket()) {
-        cPacket *pk = static_cast<cPacket *>(msg);
+        Packet *pk = static_cast<Packet *>(msg);
         bytesSent += pk->getByteLength();
         emit(sentPkSignal, pk);
     }
 
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    msg->getMandatoryTag<SocketReq>();
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->getTag<SocketReq>();
     send(msg, "socketOut");
 }
 
@@ -92,8 +92,8 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         Packet *outPkt = new Packet(rcvdPkt->getName());
         // reverse direction, modify length, and send it back
         outPkt->setKind(TCP_C_SEND);
-        int socketId = rcvdPkt->getMandatoryTag<SocketInd>()->getSocketId();
-        outPkt->ensureTag<SocketReq>()->setSocketId(socketId);
+        int socketId = rcvdPkt->getTag<SocketInd>()->getSocketId();
+        outPkt->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
 
         long outByteLen = rcvdPkt->getByteLength() * echoAppModule->echoFactor;
 
@@ -122,7 +122,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
    */
 void TcpEchoAppThread::timerExpired(cMessage *timer)
 {
-    cPacket *pkt = PK(timer);
+    Packet *pkt = check_and_cast<Packet *>(timer);
     pkt->setContextPointer(nullptr);
     echoAppModule->sendDown(pkt);
 }

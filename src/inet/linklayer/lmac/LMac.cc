@@ -283,8 +283,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "Old state: CCA, New state: SEND_CONTROL" << endl;
             }
             else if (msg->getKind() == LMAC_CONTROL) {
-                auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
+                auto packet = check_and_cast<Packet *>(msg);
+                const auto& lmacHeader = packet->peekHeader<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
@@ -337,12 +337,12 @@ void LMac::handleSelfMessage(cMessage *msg)
                     if (timeout->isScheduled())
                         cancelEvent(timeout);
                 }
-                delete mac;
+                delete packet;
             }
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
-                auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
+                auto packet = check_and_cast<Packet *>(msg);
+                const MacAddress& dest = packet->peekHeader<LMacHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -352,15 +352,15 @@ void LMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    decapsulate(mac);
-                    sendUp(mac);
+                    decapsulate(packet);
+                    sendUp(packet);
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, mac, &details);
-                    delete mac;
+                    emit(packetDropSignal, packet, &details);
+                    delete packet;
                 }
                 // in any case, go back to sleep
                 macState = SLEEP;
@@ -389,8 +389,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
             }
             else if (msg->getKind() == LMAC_CONTROL) {
-                auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
+                auto packet = check_and_cast<Packet *>(msg);
+                const auto& lmacHeader = packet->peekHeader<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
@@ -443,7 +443,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     if (timeout->isScheduled())
                         cancelEvent(timeout);
                 }
-                delete mac;
+                delete packet;
             }
             else if ((msg->getKind() == LMAC_WAKEUP)) {
                 if (SETUP_PHASE == true)
@@ -546,21 +546,21 @@ void LMac::handleSelfMessage(cMessage *msg)
 
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
-                auto mac = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
+                auto packet = check_and_cast<Packet *>(msg);
+                const MacAddress& dest = packet->peekHeader<LMacHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    decapsulate(mac);
-                    sendUp(mac);
+                    decapsulate(packet);
+                    sendUp(packet);
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, mac, &details);
-                    delete mac;
+                    emit(packetDropSignal, packet, &details);
+                    delete packet;
                 }
                 // in any case, go back to sleep
                 macState = SLEEP;
@@ -664,11 +664,11 @@ void LMac::findNewSlot()
 void LMac::decapsulate(Packet *packet)
 {
     const auto& lmacHeader = packet->popHeader<LMacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto protocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -684,10 +684,10 @@ void LMac::encapsulate(Packet *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = netwPkt->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    auto dest = netwPkt->getTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
     pkt->setDestAddr(dest);
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getTag<PacketProtocolTag>()->getProtocol()));
 
     //delete the control info
     delete netwPkt->removeControlInfo();

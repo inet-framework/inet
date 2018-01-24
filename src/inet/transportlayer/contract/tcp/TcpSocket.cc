@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
@@ -37,7 +38,7 @@ TcpSocket::TcpSocket()
 
 TcpSocket::TcpSocket(cMessage *msg)
 {
-    connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+    connId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
@@ -97,8 +98,9 @@ void TcpSocket::sendToTCP(cMessage *msg, int connId)
     if (!gateToTcp)
         throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
 
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
+    auto& tags = getTags(msg);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
@@ -134,7 +136,7 @@ void TcpSocket::listen(bool fork)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
                 : "TcpSocket::listen(): connect() or listen() already called");
 
-    cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
+    auto request = new Request("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
     TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
@@ -142,17 +144,17 @@ void TcpSocket::listen(bool fork)
     openCmd->setFork(fork);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
-    msg->setControlInfo(openCmd);
-    sendToTCP(msg);
+    request->setControlInfo(openCmd);
+    sendToTCP(request);
     sockstate = LISTENING;
 }
 
 void TcpSocket::accept(int socketId)
 {
-    cMessage *msg = new cMessage("ACCEPT", TCP_C_ACCEPT);
+    auto request = new Request("ACCEPT", TCP_C_ACCEPT);
     TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
-    msg->setControlInfo(acceptCmd);
-    sendToTCP(msg, socketId);
+    request->setControlInfo(acceptCmd);
+    sendToTCP(request, socketId);
 }
 
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
@@ -163,7 +165,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     if (remotePort < 0 || remotePort > 65535)
         throw cRuntimeError("TcpSocket::connect(): invalid remote port number %d", remotePort);
 
-    cMessage *msg = new cMessage("ActiveOPEN", TCP_C_OPEN_ACTIVE);
+    auto request = new Request("ActiveOPEN", TCP_C_OPEN_ACTIVE);
 
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
@@ -175,12 +177,12 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     openCmd->setRemotePort(remotePrt);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
-    msg->setControlInfo(openCmd);
-    sendToTCP(msg);
+    request->setControlInfo(openCmd);
+    sendToTCP(request);
     sockstate = CONNECTING;
 }
 
-void TcpSocket::send(cMessage *msg)
+void TcpSocket::send(Packet *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
         throw cRuntimeError("TcpSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
@@ -189,7 +191,7 @@ void TcpSocket::send(cMessage *msg)
     sendToTCP(msg);
 }
 
-void TcpSocket::sendCommand(cMessage *msg)
+void TcpSocket::sendCommand(Request *msg)
 {
     sendToTCP(msg);
 }
@@ -199,30 +201,30 @@ void TcpSocket::close()
     if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
         throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
 
-    cMessage *msg = new cMessage("CLOSE", TCP_C_CLOSE);
+    auto request = new Request("CLOSE", TCP_C_CLOSE);
     TcpCommand *cmd = new TcpCommand();
-    msg->setControlInfo(cmd);
-    sendToTCP(msg);
+    request->setControlInfo(cmd);
+    sendToTCP(request);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
 void TcpSocket::abort()
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
-        cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
+        auto request = new Request("ABORT", TCP_C_ABORT);
         TcpCommand *cmd = new TcpCommand();
-        msg->setControlInfo(cmd);
-        sendToTCP(msg);
+        request->setControlInfo(cmd);
+        sendToTCP(request);
     }
     sockstate = CLOSED;
 }
 
 void TcpSocket::requestStatus()
 {
-    cMessage *msg = new cMessage("STATUS", TCP_C_STATUS);
+    auto request = new Request("STATUS", TCP_C_STATUS);
     TcpCommand *cmd = new TcpCommand();
-    msg->setControlInfo(cmd);
-    sendToTCP(msg);
+    request->setControlInfo(cmd);
+    sendToTCP(request);
 }
 
 void TcpSocket::renewSocket()
@@ -235,7 +237,8 @@ void TcpSocket::renewSocket()
 
 bool TcpSocket::belongsToSocket(cMessage *msg)
 {
-    return msg->getMandatoryTag<SocketInd>()->getSocketId() == connId;
+    auto& tags = getTags(msg);
+    return tags.getTag<SocketInd>()->getSocketId() == connId;
 }
 
 bool TcpSocket::belongsToAnyTCPSocket(cMessage *msg)

@@ -501,7 +501,7 @@ void SctpPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
+void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, Packet *msg)
 {
     SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("CMSG");
@@ -681,7 +681,7 @@ void SctpPeer::sendRequestArrived()
     }
 }
 
-void SctpPeer::socketDataArrived(int, void *, cPacket *msg, bool)
+void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -695,7 +695,7 @@ void SctpPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 
     if (echo) {
         SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
+        Packet *cmsg = new Packet("SCTP_C_SEND");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);

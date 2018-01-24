@@ -515,6 +515,7 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     Enter_Method_Silent();
     take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
+    packet->clearTags();
     auto signal = new Signal(transmission);
     signal->setName(packet->getName());
     signal->setDuration(transmission->getDuration());
@@ -574,7 +575,6 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
         auto receivedSignal = static_cast<Signal *>(createReceiverSignal(transmission));
         cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-        receivedSignal->clearTags();
         const_cast<Radio *>(transmitterRadio)->sendDirect(receivedSignal, propagationTime, transmission->getDuration(), gate);
         communicationCache->setCachedSignal(receiverRadio, transmission, receivedSignal);
         signalSendCount++;
@@ -628,7 +628,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getMandatoryTag<MacAddressReq>()->getDestAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getTag<MacAddressReq>()->getDestAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);
@@ -716,7 +716,6 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                     simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-                    signal->clearTags();
                     const_cast<Radio *>(transmitterRadio)->sendDirect(signal, delay > 0 ? delay : 0, duration, gate);
                     communicationCache->setCachedSignal(receiverRadio, transmission, signal);
                     signalSendCount++;

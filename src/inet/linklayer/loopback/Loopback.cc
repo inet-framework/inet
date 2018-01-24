@@ -29,6 +29,7 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -76,19 +77,20 @@ void Loopback::handleMessage(cMessage *msg)
         return;
     }
 
-    emit(packetReceivedFromUpperSignal, msg);
-    EV << "Received " << msg << " for transmission\n";
-    ASSERT(PK(msg)->hasBitError() == false);
+    auto packet = check_and_cast<Packet *>(msg);
+    emit(packetReceivedFromUpperSignal, packet);
+    EV << "Received " << packet << " for transmission\n";
+    ASSERT(packet->hasBitError() == false);
 
     // pass up payload
     numRcvdOK++;
-    emit(packetSentToUpperSignal, msg);
+    emit(packetSentToUpperSignal, packet);
     numSent++;
-    auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-    msg->clearTags();
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
-    msg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    send(msg, "upperLayerOut");
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    packet->clearTags();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    send(packet, "upperLayerOut");
 }
 
 void Loopback::flushQueue()

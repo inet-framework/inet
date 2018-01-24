@@ -193,14 +193,14 @@ void Sctp::handleMessage(cMessage *msg)
 #endif
      /*   if (par("udpEncapsEnabled")) {
             EV_DETAIL << "Size of SCTPMSG=" << B(sctpmsg->getChunkLength()).get() << "\n";
-            srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
             EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
         } else {*/
             auto controlInfo = msg->removeControlInfo();
-            srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
             delete controlInfo;
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
        // }
@@ -385,7 +385,7 @@ void Sctp::sendAbortFromMain(SctpHeader *sctpmsg, L3Address fromAddr, L3Address 
     //}
    // else {
         pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-        auto addresses = pkt->ensureTag<L3AddressReq>();
+        auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
         addresses->setSrcAddress(fromAddr);
         addresses->setDestAddress(toAddr);
 	pkt->insertAtEnd(msg);
@@ -415,8 +415,8 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
     msg->insertSctpChunks(scChunk);
 
     Packet *pkt = new Packet("SHUTDOWN_COMPLETE");
-    pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-    auto addresses = pkt->ensureTag<L3AddressReq>();
+    pkt->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
+    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
     pkt->insertAtEnd(msg);

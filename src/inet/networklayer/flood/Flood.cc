@@ -257,13 +257,13 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
 void Flood::decapsulate(Packet *packet)
 {
     auto floodHeader = packet->popHeader<FloodHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(floodHeader->getProtocol());
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(floodHeader->getProtocol());
-    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    auto addressInd = packet->ensureTag<L3AddressInd>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(floodHeader->getProtocol());
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(floodHeader->getProtocol());
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    auto addressInd = packet->addTagIfAbsent<L3AddressInd>();
     addressInd->setSrcAddress(floodHeader->getSourceAddress());
     addressInd->setDestAddress(floodHeader->getDestinationAddress());
-    packet->ensureTag<HopLimitInd>()->setHopLimit(floodHeader->getTtl());
+    packet->addTagIfAbsent<HopLimitInd>()->setHopLimit(floodHeader->getTtl());
 }
 
 /**
@@ -280,7 +280,7 @@ void Flood::encapsulate(Packet *appPkt)
     auto pkt = makeShared<FloodHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
-    auto hopLimitReq = appPkt->removeTag<HopLimitReq>();
+    auto hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
     int ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
     if (ttl == -1)
@@ -290,14 +290,14 @@ void Flood::encapsulate(Packet *appPkt)
     seqNum++;
     pkt->setTtl(ttl);
 
-    auto addressReq = appPkt->getTag<L3AddressReq>();
+    auto addressReq = appPkt->findTag<L3AddressReq>();
     if (addressReq == nullptr) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        pkt->setProtocol(appPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol());
+        pkt->setProtocol(appPkt->getTag<PacketProtocolTag>()->getProtocol());
         netwAddr = addressReq->getDestAddress();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
@@ -320,11 +320,11 @@ void Flood::encapsulate(Packet *appPkt)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void Flood::setDownControlInfo(cMessage *const pMsg, const MacAddress& pDestAddr)
+void Flood::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
-    pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
+    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
 }
 
 } // namespace inet

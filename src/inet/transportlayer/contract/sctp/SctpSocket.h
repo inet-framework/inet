@@ -68,8 +68,8 @@ class INET_API SctpSocket
     {
       public:
         virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int assocId, void *yourPtr, cPacket *msg, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) = 0;
+        virtual void socketDataArrived(int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
+        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Packet *msg) = 0;
         virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}

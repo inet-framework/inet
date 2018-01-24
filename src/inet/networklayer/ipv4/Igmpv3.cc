@@ -661,12 +661,12 @@ void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
-    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
+    msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
     send(msg, "ipOut");
 }
@@ -675,12 +675,12 @@ void Igmpv3::sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 {
     ASSERT(ie->isMulticast());
 
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
-    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
+    msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
     send(msg, "ipOut");
 }
 
@@ -857,7 +857,7 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
 // RFC 3376 5.2
 void Igmpv3::processQuery(Packet *packet)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const auto& msg = packet->peekHeader<Igmpv3Query>();        //TODO should processing Igmpv1Query and Igmpv2Query, too
     assert(msg != nullptr);
 
@@ -947,7 +947,7 @@ void Igmpv3::processQuery(Packet *packet)
     if (rt->isMulticastForwardingEnabled()) {
         //Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4() < ie->ipv4Data()->getIPAddress()) {
+        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4() < ie->ipv4Data()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
         }
@@ -1002,7 +1002,7 @@ void Igmpv3::processReport(Packet *packet)
 {
     const auto& msg = packet->peekHeader<Igmpv3Report>();       //FIXME also accept Igmpv1Report and Igmpv2Report
     assert(msg != nullptr);
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 
     ASSERT(ie->isMulticast());
 

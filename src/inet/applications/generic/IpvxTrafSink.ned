@@ -28,7 +28,7 @@ simple IpvxTrafSink like IIpvxTrafficGenerator
     parameters:
         int protocol; // value for ~Ipv4ControlInfo / ~Ipv6ControlInfo protocol field
         @display("i=block/sink");
-        @signal[rcvdPk](type=cPacket);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:

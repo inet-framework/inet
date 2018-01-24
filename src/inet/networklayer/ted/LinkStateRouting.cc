@@ -79,7 +79,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from Ipv4: " << msg << endl;
-        Ipv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+        Ipv4Address sender = check_and_cast<Packet *>(msg)->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
         processLINK_STATE_MESSAGE(check_and_cast<Packet *>(msg), sender);
     }
     else
@@ -220,11 +220,11 @@ void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = TED_TRAFFIC;
 
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ospf);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
-    msg->ensureTag<L3AddressReq>()->setSrcAddress(routerId);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ospf);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(routerId);
     send(msg, "ipOut");
 }
 

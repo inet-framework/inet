@@ -42,7 +42,7 @@ simple UdpVideoStreamClient like IApp
         int serverPort;  // server port
         double startTime @unit(s) = default(1s);
         @display("i=block/app");
-        @signal[rcvdPk](type=cPacket);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=vector);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);

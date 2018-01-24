@@ -15,6 +15,7 @@
 
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 
 namespace inet {
@@ -285,6 +286,15 @@ void Packet::removeAll()
     trailerIterator = Chunk::BackwardIterator(b(0), 0);
     totalLength = b(0);
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+}
+
+// TODO: move?
+TagSet& getTags(cMessage *msg)
+{
+    if (msg->isPacket())
+        return check_and_cast<Packet *>(msg)->getTags();
+    else
+        return check_and_cast<Message *>(msg)->getTags();
 }
 
 } // namespace

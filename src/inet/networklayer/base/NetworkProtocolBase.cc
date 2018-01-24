@@ -21,6 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -49,14 +50,14 @@ void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate
 
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
-    if (cPacket *packet = dynamic_cast<cPacket *>(message)) {
-        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol());
+    if (Packet *packet = dynamic_cast<Packet *>(message)) {
+        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
-            cPacket *packetCopy = packet->dup();
-            packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
+            Packet *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");
         }
@@ -82,8 +83,9 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        delete message->removeTag<DispatchProtocolReq>();
-        message->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        auto& tags = getTags(message);
+        delete tags.removeTagIfPresent<DispatchProtocolReq>();
+        tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
     else {
@@ -91,8 +93,9 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                delete duplicate->removeTag<DispatchProtocolReq>();
-                duplicate->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                auto& tags = getTags(duplicate);
+                delete tags.removeTagIfPresent<DispatchProtocolReq>();
+                tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }
         }
@@ -112,15 +115,16 @@ bool NetworkProtocolBase::isLowerMessage(cMessage *message)
 
 void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
 {
+    auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;

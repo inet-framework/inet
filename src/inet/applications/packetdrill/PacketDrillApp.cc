@@ -209,16 +209,16 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     if (listenSet) {
                         if (acceptSet) {
                             tcpSocket.setState(TcpSocket::CONNECTED);
-                            tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             establishedPending = true;
                         }
                     } else {
                         tcpSocket.setState(TcpSocket::CONNECTED);
-                        tcpConnId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+                        tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                     }
                     delete msg;
                     break;
@@ -231,7 +231,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                         cMessage *msg = new cMessage("data request");
                         msg->setKind(TCP_C_READ);
                         TcpCommand *cmd = new TcpCommand();
-                        msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+                        msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                         msg->setControlInfo(cmd);
                         send(msg, "tcpOut");
                         recvFromSet = false;
@@ -277,7 +277,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
                 case SCTP_I_DATA_NOTIFICATION: {
                     if (recvFromSet) {
-                        cPacket* cmsg = new cPacket("ReceiveRequest", SCTP_C_RECEIVE);
+                        Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
                         SCTPSendInfo *cmd = new SCTPSendInfo("Send2");
                         cmd->setSocketId(sctpAssocId);
                         cmd->setSid(0);
@@ -837,13 +837,13 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
     switch (protocol)
     {
         case IP_PROT_TCP: {
-            cPacket *payload = new cPacket("Write");
+            Packet *payload = new Packet("Write");
             payload->setByteLength(syscall->result->getNum());
             tcpSocket.send(payload);
             break;
         }
         case IP_PROT_SCTP: {
-            cPacket* cmsg = new cPacket("AppData");
+            Packet* cmsg = new Packet("AppData");
             SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
             uint32 sendBytes = syscall->result->getNum();
             msg->setDataArraySize(sendBytes);
@@ -1175,7 +1175,7 @@ int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, ch
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
-    cPacket *payload = new cPacket("SendTo");
+    Packet *payload = new Packet("SendTo");
     payload->setByteLength(count);
 
     switch (protocol) {
@@ -1232,7 +1232,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     if (!exp || exp->getU32(&context, error))
         return STATUS_ERR;
 
-    cPacket* cmsg = new cPacket("AppData");
+    Packet* cmsg = new Packet("AppData");
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
     uint32 sendBytes = syscall->result->getNum();
     msg->setDataArraySize(sendBytes);
@@ -1286,7 +1286,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
         sid = info->sinfo_stream->getNum();
         ppid = info->sinfo_ppid->getNum();
     }
-    cPacket* cmsg = new cPacket("AppData");
+    Packet* cmsg = new Packet("AppData");
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
     uint32 sendBytes = syscall->result->getNum();
     msg->setDataArraySize(sendBytes);
@@ -1338,13 +1338,13 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                     cMessage *msg = new cMessage("dataRequest");
                     msg->setKind(TCP_C_READ);
                     TcpCommand *tcpcmd = new TcpCommand();
-                    msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+                    msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                     msg->setControlInfo(tcpcmd);
                     send(msg, "tcpOut");
                     break;
                 }
                 case IP_PROT_SCTP: {
-                    cPacket* pkt = new cPacket("dataRequest", SCTP_C_RECEIVE);
+                    Packet* pkt = new Packet("dataRequest", SCTP_C_RECEIVE);
                     SCTPSendInfo *sctpcmd = new SCTPSendInfo();
                     sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
@@ -1446,7 +1446,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
             cMessage *msg = new cMessage("close");
             msg->setKind(TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
-            msg->ensureTag<SocketReq>()->setSocketId(tcpConnId);
+            msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
             msg->setControlInfo(cmd);
             send(msg, "tcpOut");
             break;

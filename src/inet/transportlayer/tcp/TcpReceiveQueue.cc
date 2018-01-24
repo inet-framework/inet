@@ -88,7 +88,7 @@ uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
     return rcv_nxt;
 }
 
-cPacket *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
+Packet *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 

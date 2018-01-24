@@ -96,7 +96,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
+    virtual const InterfaceEntry *getSourceInterfaceFrom(Packet *packet);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;

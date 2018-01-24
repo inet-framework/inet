@@ -49,7 +49,8 @@ void ExampleQosClassifier::initialize()
 
 void ExampleQosClassifier::handleMessage(cMessage *msg)
 {
-    msg->ensureTag<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
+    auto packet = check_and_cast<Packet *>(msg);
+    packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
     send(msg, "out");
 }
 
@@ -60,7 +61,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     b ipHeaderLength = b(-1);
 
 #ifdef WITH_IPv4
-    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
         const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
         if (ipv4Header->getProtocolId() == IP_PROT_ICMP)
             return UP_BE; // ICMP class
@@ -70,7 +71,7 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef WITH_IPv6
-    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP)
             return UP_BE; // ICMPv6 class

@@ -136,7 +136,7 @@ void TcpNscReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
     dataBuffer.push(makeShared<BytesChunk>((uint8_t *)dataP, dataLengthP));
 }
 
-cPacket *TcpNscReceiveQueue::extractBytesUpTo()
+Packet *TcpNscReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 

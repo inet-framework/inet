@@ -19,6 +19,12 @@ import inet.common.INETDefs;
 
 namespace inet;
 
+enum L3CommandCode
+{
+    L3_C_BIND  = 1;
+    L3_C_CLOSE = 2;
+}
+
 class L3SocketCommand extends cObject
 {
 }
