@@ -144,7 +144,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     snprintf(str, sizeof(str), "RTX_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     T3_RtxTimer = new cMessage(str);
     snprintf(str, sizeof(str), "Reset_TIMER %d:%s", assoc->assocId, addr.str().c_str());
-    ResetTimer = new cPacket(str);
+    ResetTimer = new cMessage(str);
     ResetTimer->setContextPointer(association);
     snprintf(str, sizeof(str), "ASCONF_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     AsconfTimer = new cMessage(str);
