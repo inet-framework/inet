@@ -26,46 +26,36 @@
 namespace inet {
 
 /**
- * This module connects multiple protocols to multiple other protocols.
- *
- * Configuring the dispatch mechanism:
- *  - protocols must register by calling registerProtocol
- *  - interfaces must register by calling registerInterface
- *  - sockets must register by sending socket messages
- *  - packets must have a proper control info attached that specifies the
- *    destination protocol, interface or socket
+ * This class implements the corresponding module. See module documentation for more details.
  */
 class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
     protected:
-        std::map<int, int> socketIdToUpperLayerGateIndex;
-        std::map<int, int> interfaceIdToLowerLayerGateIndex;
-        std::map<int, int> protocolIdToUpperLayerGateIndex;
-        std::map<int, int> protocolIdToLowerLayerGateIndex;
+        std::map<int, int> socketIdToGateIndex;
+        std::map<int, int> interfaceIdToGateIndex;
+        std::map<std::pair<int, ServicePrimitive>, int> serviceToGateIndex;
+        std::map<std::pair<int, ServicePrimitive>, int> protocolToGateIndex;
 
     protected:
         virtual void initialize() override;
         virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
-        virtual cGate *handleUpperLayerPacket(Packet *packet, cGate *inGate);
-        virtual cGate *handleLowerLayerPacket(Packet *packet, cGate *inGate);
-        virtual cGate *handleUpperLayerMessage(Request *request, cGate *inGate);
-        virtual cGate *handleLowerLayerMessage(Indication *indication, cGate *inGate);
+        virtual cGate *handlePacket(Packet *packet, cGate *inGate);
+        virtual cGate *handleMessage(Message *request, cGate *inGate);
 
         virtual int computeSocketReqSocketId(Packet *packet);
         virtual int computeSocketIndSocketId(Packet *packet);
         virtual int computeInterfaceId(Packet *packet);
-        virtual const Protocol *computeProtocol(Packet *packet);
+        virtual std::pair<int, ServicePrimitive> computeDispatch(Packet *packet);
 
         virtual int computeSocketReqSocketId(Message *message);
         virtual int computeSocketIndSocketId(Message *message);
         virtual int computeInterfaceId(Message *message);
-        virtual const Protocol *computeProtocol(Message *message);
+        virtual std::pair<int, ServicePrimitive> computeDispatch(Message *message);
 
     public:
-        MessageDispatcher();
-
-        virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
-        virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *gate) override;
+        virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) override;
+        virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+        virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet
