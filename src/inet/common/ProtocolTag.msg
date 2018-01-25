@@ -31,11 +31,23 @@ class ProtocolTagBase extends TagBase
 }
 
 //
+// OSI layered service primitives
+//
+enum ServicePrimitive
+{
+    SP_REQUEST    = 1;
+    SP_INDICATION = 2;
+    SP_RESPONSE   = 3;
+    SP_CONFIRM    = 4;
+}
+
+//
 // This request determines the destination protocol of the message or packet
 // when it's sent from one protocol module to another using the ~MessageDispatcher.
 //
 class DispatchProtocolReq extends ProtocolTagBase
 {
+    ServicePrimitive servicePrimitive;
 }
 
 //
