@@ -17,17 +17,25 @@ cache:
   directories:
     - $HOME/docker_ccache
 
-# The "build" stage inherits this, so we won't have to repeat it 6 times.
-# The "fingerprints" stage overwrites it for both of its jobs (only the .sh file is different).
-script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
-          -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
-          omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-build.sh
+# This is not used directly by Travis (the name doesn't matter), we just reuse it in script: nodes.
+docker_command: &DOCKER_COMMAND docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
+                  -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG
+                  -v $HOME/docker_ccache:/root/.ccache omnetpp/travis-inet:5.3p2-180111
+                  /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-$STAGE.sh $INNER_ARGS
+                   # the last two (STAGE and INNER_ARGS) come from export statements, not env: lines
+
+# The "build" stage inherits this, so we won't have to repeat it 6 more times.
+# The "fingerprints" stage overwrites it for all of its jobs.
+script:
+  - export STAGE=build # not env, so it doesn't affect the cache key
+  - *DOCKER_COMMAND
 
 # Note that the "env:" values must match EXACTLY (the whole string, even the spaces between the assignments)
 # between the jobs in the "build" stage (which prepare the cache) and the corresponding jobs in the
 # "fingerprints" stage (which use the cache). See: https://github.com/travis-ci/travis-ci/issues/9043
 jobs:
   include:
+
     - stage: build
       env: TARGET_PLATFORM=linux MODE=release
     - env: TARGET_PLATFORM=linux MODE=debug
@@ -36,12 +44,31 @@ jobs:
     - env: TARGET_PLATFORM=macosx MODE=release
     - env: TARGET_PLATFORM=macosx MODE=debug
 
+    # release mode fingerprints, split into three arbitrary parts using filters, to avoid freaking timeouts
     - stage: fingerprints
-      script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
-                -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
-                omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-fingerprints.sh
+      script: # lines that contain "wireless"
+        - export STAGE=fingerprints INNER_ARGS="-m wireless" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=release
-    - script: docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
-                -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG -v $HOME/docker_ccache:/root/.ccache
-                omnetpp/travis-inet:5.3p2-180111 /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-fingerprints.sh
+    - script: # lines that contain "inet" or "ethernet" (overlaps shouldn't matter)
+        - export STAGE=fingerprints INNER_ARGS="-m inet -m ethernet" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=release
+    - script: # and the rest
+        - export STAGE=fingerprints INNER_ARGS="-x wireless -x inet -x ethernet" # not env, so it doesn't affect the cache key
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=release
+
+    # debug mode fingerprints, similar to above
+    - script:
+        - export STAGE=fingerprints INNER_ARGS="-m wireless"
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    - script:
+        - export STAGE=fingerprints INNER_ARGS="-m inet -m ethernet"
+        - *DOCKER_COMMAND
+      env: TARGET_PLATFORM=linux MODE=debug
+    - script:
+        - export STAGE=fingerprints INNER_ARGS="-x wireless -x inet -x ethernet"
+        - *DOCKER_COMMAND
       env: TARGET_PLATFORM=linux MODE=debug
