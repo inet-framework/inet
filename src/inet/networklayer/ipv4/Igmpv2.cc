@@ -495,9 +495,15 @@ void Igmpv2::handleMessage(cMessage *msg)
     }
 }
 
-void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Igmpv2::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
 {
-    if (protocol.getId() == Protocol::igmp.getId())
+    Enter_Method("handleRegisterService");
+}
+
+void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (protocol.getId() == Protocol::igmp.getId() && servicePrimitive == SP_INDICATION)
         externalRouter = true;
 }
 

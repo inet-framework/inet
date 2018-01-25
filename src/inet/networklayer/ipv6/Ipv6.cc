@@ -117,10 +117,19 @@ void Ipv6::initialize(int stage)
     }
 }
 
-void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Ipv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
+    if (!strcmp("transportIn", in->getBaseName())) {
+        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
+        if (protocolNumber != -1)
+            mapping.addProtocolMapping(protocolNumber, in->getIndex());
+    }
 }
 
 void Ipv6::handleMessage(cMessage *msg)

@@ -98,7 +98,8 @@ class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtoco
 
     virtual void errorOut(const Ptr<const Icmpv6Header>& header);
 
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
     static void insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);

@@ -222,7 +222,8 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     Ipv4();
     virtual ~Ipv4();
 
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

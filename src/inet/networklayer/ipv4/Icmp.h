@@ -47,7 +47,8 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
     virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId);
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
     /**

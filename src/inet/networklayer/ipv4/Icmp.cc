@@ -283,11 +283,18 @@ void Icmp::sendToIP(Packet *msg)
     send(msg, "ipOut");
 }
 
-void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Icmp::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Icmp::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", gate->getBaseName())) {
-        transportProtocols.insert(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol));
+    if (!strcmp("transportIn", in->getBaseName())) {
+        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
+        if (protocolNumber != -1)
+            transportProtocols.insert(protocolNumber);
     }
 }
 

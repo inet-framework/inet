@@ -43,9 +43,15 @@ void NetworkProtocolBase::initialize(int stage)
     }
 }
 
-void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate) {
+void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
     Enter_Method("handleRegisterProtocol");
-    protocolMapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
+    protocolMapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), in->getIndex());
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)

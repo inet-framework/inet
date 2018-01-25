@@ -161,7 +161,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     GenericNetworkProtocol();
     ~GenericNetworkProtocol();
 
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;

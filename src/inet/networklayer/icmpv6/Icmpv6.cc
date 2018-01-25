@@ -342,11 +342,18 @@ bool Icmpv6::handleOperationStage(LifecycleOperation *operation, int stage, IDon
     throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
-void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", gate->getBaseName())) {
-        transportProtocols.insert(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol));
+    if (!strcmp("transportIn", in->getBaseName())) {
+        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
+        if (protocolNumber != -1)
+            transportProtocols.insert(protocolNumber);
     }
 }
 

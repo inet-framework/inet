@@ -303,16 +303,26 @@ void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingat
     registerInterface(interface, gate("netwOut"));
 }
 
-void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
+void Mpls::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
 {
-    if (!strcmp("ifIn", protocolGate->getName())) {
-        registerProtocol(protocol, gate("netwOut"));
-    }
-    else if (!strcmp("netwIn", protocolGate->getName())) {
-        registerProtocol(protocol, gate("ifOut"));
-    }
+    Enter_Method("handleRegisterService");
+    if (!strcmp("ifOut", out->getName()))
+        registerService(protocol, gate("netwIn"), servicePrimitive);
+    else if (!strcmp("netwOut", out->getName()))
+        registerService(protocol, gate("ifIn"), servicePrimitive);
     else
-        throw cRuntimeError("Unknown gate: %s", protocolGate->getName());
+        throw cRuntimeError("Unknown gate: %s", out->getName());
+}
+
+void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("ifIn", in->getName()))
+        registerProtocol(protocol, gate("netwOut"), servicePrimitive);
+    else if (!strcmp("netwIn", in->getName()))
+        registerProtocol(protocol, gate("ifOut"), servicePrimitive);
+    else
+        throw cRuntimeError("Unknown gate: %s", in->getName());
 }
 
 } // namespace inet

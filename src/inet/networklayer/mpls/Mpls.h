@@ -69,7 +69,8 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
     virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *gate) override;
 
     //IProtocolRegistrationListener:
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet
