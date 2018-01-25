@@ -89,6 +89,7 @@ void Loopback::handleMessage(cMessage *msg)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     packet->clearTags();
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(packet, "upperLayerOut");
 }

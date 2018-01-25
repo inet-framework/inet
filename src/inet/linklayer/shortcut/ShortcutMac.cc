@@ -125,6 +125,7 @@ void ShortcutMac::receiveFromPeer(Packet *packet)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     packet->clearTags();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->popHeader<BitCountChunk>();
