@@ -48,7 +48,7 @@ void MacProtocolBase::registerInterface()
         interfaceEntry = createInterfaceEntry();
         interfaceTable->addInterface(interfaceEntry);
         auto module = getContainingNicModule(this);
-        inet::registerInterface(*interfaceEntry, module->gate("upperLayerOut"));
+        inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
     }
 }
 

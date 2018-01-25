@@ -298,9 +298,10 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "netwOut");
 }
 
-void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingate)
+void Mpls::handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in)
 {
-    registerInterface(interface, gate("netwOut"));
+    if (!strcmp("ifIn", in->getBaseName()))
+        registerInterface(interface, gate("netwIn"), gate("netwOut"));
 }
 
 void Mpls::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)

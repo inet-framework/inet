@@ -19,12 +19,13 @@
 
 namespace inet {
 
-void registerInterface(const InterfaceEntry& interface, cGate *gate)
+void registerInterface(const InterfaceEntry& interface, cGate *in, cGate *out)
 {
-    cGate* pathEndGate = gate->getPathEndGate();
-    IInterfaceRegistrationListener *interfaceRegistration = dynamic_cast<IInterfaceRegistrationListener *>(pathEndGate->getOwner());
+    auto outPathEnd = out->getPathEndGate();
+    auto inPathStart = in->getPathStartGate();
+    IInterfaceRegistrationListener *interfaceRegistration = dynamic_cast<IInterfaceRegistrationListener *>(outPathEnd->getOwner());
     if (interfaceRegistration != nullptr)
-        interfaceRegistration->handleRegisterInterface(interface, pathEndGate);
+        interfaceRegistration->handleRegisterInterface(interface, inPathStart, outPathEnd);
 }
 
 } // namespace inet
