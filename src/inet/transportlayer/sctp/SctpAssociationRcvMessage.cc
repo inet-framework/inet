@@ -19,6 +19,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "inet/common/packet/Message.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
@@ -2033,7 +2034,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
                   << bytes << ") to refill buffer "
                   << state->sendBuffer << "/" << state->sendQueueLimit << endl;
 
-        cPacket *msg = new cPacket(indicationName(SCTP_I_SENDQUEUE_ABATED));
+        Indication *msg = new Indication(indicationName(SCTP_I_SENDQUEUE_ABATED));
         msg->setKind(SCTP_I_SENDQUEUE_ABATED);
 
         SctpSendQueueAbated *sendQueueAbatedIndication =

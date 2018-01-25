@@ -1855,7 +1855,7 @@ void SctpAssociation::sendDataArrivedNotification(uint16 sid)
 {
     EV_INFO << "SendDataArrivedNotification\n";
 
-    cPacket *cmsg = new cPacket("SCTP_I_DATA_NOTIFICATION");
+    Indication *cmsg = new Indication("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SctpCommand *cmd = new SctpCommand("notification");
     cmd->setSocketId(assocId);
@@ -2811,7 +2811,7 @@ void SctpAssociation::pmClearPathCounter(SctpPathVariables *path)
 void SctpAssociation::pathStatusIndication(const SctpPathVariables *path,
         const bool status)
 {
-    cPacket *msg = new cPacket("StatusInfo");
+    Indication *msg = new Indication("StatusInfo");
     msg->setKind(SCTP_I_STATUS);
     SctpStatusInfo *cmd = new SctpStatusInfo();
     cmd->setPathId(path->remoteAddress);
