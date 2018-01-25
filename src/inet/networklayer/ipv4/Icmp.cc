@@ -208,7 +208,9 @@ void Icmp::processICMPMessage(Packet *packet)
                     delete packet;
                 }
                 else {
-                    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+                    auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
+                    dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
+                    dispatchProtocolReq->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
                     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
                     send(packet, "transportOut");
                 }

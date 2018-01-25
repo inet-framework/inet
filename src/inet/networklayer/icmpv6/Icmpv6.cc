@@ -98,7 +98,9 @@ void Icmpv6::processICMPv6Message(Packet *packet)
             delete packet;
         }
         else {
-            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+            auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
+            dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
+            dispatchProtocolReq->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
             send(packet, "transportOut");
         }
     }
