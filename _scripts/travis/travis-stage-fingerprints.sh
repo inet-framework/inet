@@ -1,6 +1,7 @@
 #!/bin/env bash
 
-# This script runs the jobs on Travis.
+# This script runs the fingerprints stage on Travis.
+# All arguments are passed to the fingerprinttest script.
 #
 # The following environment variables must be set when invoked:
 #    TARGET_PLATFORM        - must be one of "linux", "windows", "macosx"
@@ -14,7 +15,7 @@ set -e # make the script exit with error if any executed command exits with erro
 
 echo -e "\nccache summary:\n"
 ccache -s
-echo -e "\n----\n"
+echo -e ""
 
 export PATH="/root/omnetpp-5.3p2-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
 
@@ -28,16 +29,18 @@ if [ "$TARGET_PLATFORM" = "linux" ]; then
     opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
 fi
 
-make makefiles
-make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc)
-
+echo -e "\nBuilding...\n"
+make makefiles > /dev/null
+make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc) > /dev/null
 echo -e "\nccache summary:\n"
 ccache -s
-echo -e "\n---- build finished, starting fingerprint tests ----\n"
+
+echo -e "\nBuild finished, starting fingerprint tests..."
+echo -e "Additional arguments passed to fingerprint test script: " $@ "\n"
 
 cd tests/fingerprint
 if [ "$MODE" = "debug" ]; then
-    ./fingerprints -e opp_run_dbg
+    ./fingerprints -e opp_run_dbg $@
 else
-    ./fingerprints -e opp_run_release
+    ./fingerprints -e opp_run_release $@
 fi
