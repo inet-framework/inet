@@ -19,12 +19,54 @@
 
 namespace inet {
 
-void registerProtocol(const Protocol& protocol, cGate *gate)
+void registerService(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
-    cGate* pathEndGate = gate->getPathEndGate();
-    IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(pathEndGate->getOwner());
+    auto out = in->getPathStartGate();
+    IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(out->getOwner());
     if (protocolRegistration != nullptr)
-        protocolRegistration->handleRegisterProtocol(protocol, pathEndGate);
+        protocolRegistration->handleRegisterService(protocol, out, servicePrimitive);
+}
+
+void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn, cGate *responseIn, cGate *confirmIn)
+{
+    if (requestIn != nullptr)
+        registerService(protocol, requestIn, SP_REQUEST);
+    if (indicationIn != nullptr)
+        registerService(protocol, indicationIn, SP_INDICATION);
+    if (responseIn != nullptr)
+        registerService(protocol, responseIn, SP_RESPONSE);
+    if (confirmIn != nullptr)
+        registerService(protocol, confirmIn, SP_CONFIRM);
+}
+
+void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn)
+{
+    registerService(protocol, requestIn, indicationIn, requestIn, indicationIn);
+}
+
+void registerProtocol(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    auto in = out->getPathEndGate();
+    IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(in->getOwner());
+    if (protocolRegistration != nullptr)
+        protocolRegistration->handleRegisterProtocol(protocol, in, servicePrimitive);
+}
+
+void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut)
+{
+    registerProtocol(protocol, requestOut, indicationOut, requestOut, indicationOut);
+}
+
+void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut, cGate *responseOut, cGate *confirmOut)
+{
+    if (requestOut != nullptr)
+        registerProtocol(protocol, requestOut, SP_REQUEST);
+    if (indicationOut != nullptr)
+        registerProtocol(protocol, indicationOut, SP_INDICATION);
+    if (responseOut != nullptr)
+        registerProtocol(protocol, responseOut, SP_RESPONSE);
+    if (confirmOut != nullptr)
+        registerProtocol(protocol, confirmOut, SP_CONFIRM);
 }
 
 } // namespace inet

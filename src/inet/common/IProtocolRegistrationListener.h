@@ -19,15 +19,23 @@
 #define __INET_IPROTOCOLREGISTRATIONLISTENER_H
 
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
-INET_API void registerProtocol(const Protocol& protocol, cGate *gate);
+INET_API void registerService(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive);
+INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn, cGate *responseIn, cGate *confirmIn);
+INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationIn);
+
+INET_API void registerProtocol(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive);
+INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut, cGate *responseOut, cGate *confirmOut);
+INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationOut);
 
 class INET_API IProtocolRegistrationListener
 {
   public:
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) = 0;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) = 0;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) = 0;
 };
 
 } // namespace inet
