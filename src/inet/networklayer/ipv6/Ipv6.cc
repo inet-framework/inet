@@ -313,7 +313,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             return;
 #else /* WITH_xMIPv6 */
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
-                    src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
+                    src.str().c_str(), packet->getClassName(), packet->getFullName());
 #endif /* WITH_xMIPv6 */
         }
     }
