@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2018 OpenSim Ltd.
 // Copyright (C) 2005 Wei Yang, Ng
 // Copyright (C) 2005 Andras Varga
 // Copyright (C) 2001-2004 CTIE, Monash University
@@ -24,6 +25,7 @@ import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
 #include <iostream>
+#include "inet/common/ProtocolGroup.h"
 }}
 
 
@@ -45,6 +47,10 @@ class Ipv6ExtensionHeader extends cObject
     short byteLength = 0;   // byteLength = n * 8;
 }
 
+cplusplus(Ipv6ExtensionHeader) {{
+  public:
+    int getOrder() const;
+}}
 //
 // Ipv6 datagram. RFC 2460 Section 3.
 //
@@ -55,19 +61,74 @@ class Ipv6ExtensionHeader extends cObject
 //
 class Ipv6Header extends NetworkHeaderBase
 {
-    @customize;
     chunkLength = B(IPv6_HEADER_BYTES);
     Ipv6Address srcAddress;
     Ipv6Address destAddress;
     int payloadLength = -1;    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
-    unsigned char trafficClass;
-    abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
-    abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
+    short diffServCodePoint;  // bits 0-5 of trafficClass
+    short explicitCongestionNotification;  // bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
     IpProtocolId protocolId = IP_PROT_NONE;
 
-    abstract Ipv6ExtensionHeader *extensionHeader[]; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
+    Ipv6ExtensionHeader *extensionHeader[] @owned @clone(->dup()); // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }
 
+cplusplus(Ipv6Header) {{
+  public:
+    virtual short getTrafficClass() const;
+    virtual void setTrafficClass(short trafficClass);
+
+    /**
+     * Returns the extension header of the specified type,
+     * or nullptr. If index is 0, then the first, if 1 then the
+     * second extension is returned. (The datagram might
+     * contain two Destination Options extension.)
+     */
+    virtual Ipv6ExtensionHeader *findExtensionHeaderByTypeForUpdate(IpProtocolId extensionType, int index = 0);
+    virtual const Ipv6ExtensionHeader *findExtensionHeaderByType(IpProtocolId extensionType, int index = 0) const;
+
+    /**
+     * Adds an extension header to the datagram.
+     * The extension headers are stored in the order specified in RFC 2460 4.1.
+     */
+    virtual void addExtensionHeader(Ipv6ExtensionHeader *eh);
+
+    /**
+     * Calculates the length of the Ipv6 header plus the extension
+     * headers.
+     */
+    virtual int calculateHeaderByteLength() const;
+
+    /**
+     * Calculates the length of the unfragmentable part of Ipv6 header
+     * plus the extension headers.
+     */
+    virtual int calculateUnfragmentableHeaderByteLength() const;
+
+    /**
+     * Calculates the length of the payload and extension headers
+     * after the Fragment Header.
+     */
+    virtual int calculateFragmentLength() const;
+
+    /**
+     * Removes and returns the first extension header of this datagram
+     */
+    virtual Ipv6ExtensionHeader *removeFirstExtensionHeader();
+
+
+    /**
+     * Removes and returns the first extension header with the given type.
+     */
+    virtual Ipv6ExtensionHeader *removeExtensionHeader(IpProtocolId extensionType);
+
+    // implements NetworkHeaderBase functions:
+    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+}}
 

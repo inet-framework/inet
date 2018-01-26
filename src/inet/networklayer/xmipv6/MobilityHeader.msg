@@ -27,10 +27,6 @@ import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.networklayer.ipv6.Ipv6Header;
 import inet.networklayer.ipv6.Ipv6ExtensionHeaders;
 
-cplusplus {{
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h" // 17.10.07 - CB
-}}
-
 namespace inet;
 
 enum MobilityHeaderType

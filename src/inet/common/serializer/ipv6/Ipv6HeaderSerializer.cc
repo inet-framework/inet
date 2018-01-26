@@ -18,7 +18,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ipv6/headers/ip6.h"
 #include "inet/common/serializer/ipv6/Ipv6HeaderSerializer.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 #if defined(_MSC_VER)
