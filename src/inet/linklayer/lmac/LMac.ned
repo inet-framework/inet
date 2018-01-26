@@ -30,7 +30,7 @@ simple LMac extends MacProtocolBase like IMacProtocol
                                           // a generated MAC address in init stage 0.
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
-        int headerLength @unit(B) = default(10B);
+        int headerLength @unit(b) = default(10b);
         int mtu @unit("B") = default(0B);
         // length of MAC header
         int queueLength = default(10);

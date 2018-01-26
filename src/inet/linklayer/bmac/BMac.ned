@@ -51,7 +51,7 @@ simple BMac extends MacProtocolBase like IMacProtocol
         // how long is one slot?
         double slotDuration @unit(s) = default(0.1s);
 
-        int headerLength @unit(B) = default(10B);
+        int headerLength @unit(b) = default(10b);
         int mtu @unit("B") = default(0B);
 
         // how long is the check interval (CCA)?
