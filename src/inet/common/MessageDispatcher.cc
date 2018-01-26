@@ -113,9 +113,7 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t) {
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {
-    int interfaceId = computeInterfaceId(packet);
     int socketId = computeSocketIndSocketId(packet);
-    auto dispatch = computeDispatch(packet);
     if (socketId != -1) {
         auto it = socketIdToGateIndex.find(socketId);
         if (it != socketIdToGateIndex.end())
@@ -123,7 +121,8 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d", socketId);
     }
-    else if (dispatch.first != -1 && dispatch.second != -1) {
+    auto dispatch = computeDispatch(packet);
+    if (dispatch.first != -1 && dispatch.second != -1) {
         auto it = serviceToGateIndex.find(dispatch);
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
@@ -132,15 +131,15 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
             throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
         }
     }
-    else if (interfaceId != -1) {
+    int interfaceId = computeInterfaceId(packet);
+    if (interfaceId != -1) {
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
         else
             throw cRuntimeError("handlePacket(): Unknown interface: id = %d", interfaceId);
     }
-    else
-        throw cRuntimeError("handlePacket(): Unknown packet: %s(%s)", packet->getName(), packet->getClassName());
+    throw cRuntimeError("handlePacket(): Unknown packet: %s(%s)", packet->getName(), packet->getClassName());
 }
 
 cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
@@ -154,8 +153,6 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
             throw cRuntimeError("handleMessage(): Socket is already registered: id = %d, gate = %d, new gate = %d", socketReqId, it->second, inGate->getIndex());
     }
     int socketIndId = computeSocketIndSocketId(message);
-    int interfaceId = computeInterfaceId(message);
-    auto dispatch = computeDispatch(message);
     if (socketIndId != -1) {
         auto it = socketIdToGateIndex.find(socketIndId);
         if (it != socketIdToGateIndex.end())
@@ -163,7 +160,8 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else
             throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketIndId);
     }
-    else if (dispatch.first != -1 && dispatch.second != -1) {
+    auto dispatch = computeDispatch(message);
+    if (dispatch.first != -1 && dispatch.second != -1) {
         auto it = serviceToGateIndex.find(dispatch);
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
@@ -172,15 +170,15 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
             throw cRuntimeError("handleMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
         }
     }
-    else if (interfaceId != -1) {
+    int interfaceId = computeInterfaceId(message);
+    if (interfaceId != -1) {
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
         else
             throw cRuntimeError("handleMessage(): Unknown interface: id = %d", interfaceId);
     }
-    else
-        throw cRuntimeError("handleMessage(): Unknown message: %s(%s)", message->getName(), message->getClassName());
+    throw cRuntimeError("handleMessage(): Unknown message: %s(%s)", message->getName(), message->getClassName());
 }
 
 void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
