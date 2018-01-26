@@ -584,7 +584,7 @@ def ensure_dir(f):
         try:
             os.makedirs(f) # in Python3 we will have exist_ok, which makes this whole function unnecessary
         except OSError as e:
-            if e.error != errno.EEXIST: # ignore "OSError: [Errno 17] File exists"
+            if e.errno != os.errno.EEXIST: # ignore "OSError: [Errno 17] File exists"
                 raise  # re-raise the exception if the error is something else
 
 if __name__ == "__main__":
