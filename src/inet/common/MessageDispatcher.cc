@@ -32,76 +32,8 @@ void MessageDispatcher::initialize()
     // TODO: WATCH_MAP(protocolToGateIndex);
 }
 
-int MessageDispatcher::computeSocketReqSocketId(Packet *packet)
+void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
 {
-    auto *socketReq = packet->findTag<SocketReq>();
-    return socketReq != nullptr ? socketReq->getSocketId() : -1;
-}
-
-int MessageDispatcher::computeSocketIndSocketId(Packet *packet)
-{
-    auto *socketInd = packet->findTag<SocketInd>();
-    return socketInd != nullptr ? socketInd->getSocketId() : -1;
-}
-
-int MessageDispatcher::computeInterfaceId(Packet *packet)
-{
-    auto interfaceReq = packet->findTag<InterfaceReq>();
-    return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
-}
-
-std::pair<int, ServicePrimitive> MessageDispatcher::computeDispatch(Packet *packet)
-{
-    auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
-    auto packetProtocolTag = packet->findTag<PacketProtocolTag>();;
-    if (dispatchProtocolReq != nullptr) {
-        ServicePrimitive servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
-        if (servicePrimitive == -1) {
-            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
-                servicePrimitive = SP_INDICATION;
-            else
-                servicePrimitive = SP_REQUEST;
-        }
-        return std::pair<int, ServicePrimitive>(dispatchProtocolReq->getProtocol()->getId(), servicePrimitive);
-    }
-    else
-        return std::pair<int, ServicePrimitive>(-1, (ServicePrimitive)-1);
-}
-
-int MessageDispatcher::computeSocketReqSocketId(Message *message)
-{
-    auto *socketReq = message->findTag<SocketReq>();
-    return socketReq != nullptr ? socketReq->getSocketId() : -1;
-}
-
-int MessageDispatcher::computeSocketIndSocketId(Message *message)
-{
-    auto *socketInd = message->findTag<SocketInd>();
-    return socketInd != nullptr ? socketInd->getSocketId() : -1;
-}
-
-int MessageDispatcher::computeInterfaceId(Message *message)
-{
-    auto interfaceReq = message->findTag<InterfaceReq>();
-    return interfaceReq != nullptr ? interfaceReq->getInterfaceId() : -1;
-}
-
-std::pair<int, ServicePrimitive> MessageDispatcher::computeDispatch(Message *message)
-{
-    auto dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
-    if (dispatchProtocolReq != nullptr) {
-        ServicePrimitive servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
-        if (servicePrimitive == -1)
-            servicePrimitive = SP_REQUEST;
-        return std::pair<int, ServicePrimitive>(dispatchProtocolReq->getProtocol()->getId(), servicePrimitive);
-    }
-    else
-        return std::pair<int, ServicePrimitive>(-1, (ServicePrimitive)-1);
-}
-
-void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t) {
     Enter_Method_Silent();
     cGate *outGate = nullptr;
     if (message->isPacket())
@@ -113,26 +45,36 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t) {
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {
-    int socketId = computeSocketIndSocketId(packet);
-    if (socketId != -1) {
+    auto socketInd = packet->findTag<SocketInd>();
+    if (socketInd != nullptr) {
+        int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
         if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
         else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d", socketId);
     }
-    auto dispatch = computeDispatch(packet);
-    if (dispatch.first != -1 && dispatch.second != -1) {
-        auto it = serviceToGateIndex.find(dispatch);
+    auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
+    if (dispatchProtocolReq != nullptr) {
+        auto packetProtocolTag = packet->findTag<PacketProtocolTag>();;
+        auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
+        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        if (servicePrimitive == -1) {
+            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
+                servicePrimitive = SP_INDICATION;
+            else
+                servicePrimitive = SP_REQUEST;
+        }
+        auto protocol = dispatchProtocolReq->getProtocol();
+        auto it = serviceToGateIndex.find(std::pair<int, ServicePrimitive>(protocol->getId(), servicePrimitive));
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
-        else {
-            auto protocol = Protocol::getProtocol(dispatch.first);
+        else
             throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
-        }
     }
-    int interfaceId = computeInterfaceId(packet);
-    if (interfaceId != -1) {
+    auto interfaceReq = packet->findTag<InterfaceReq>();
+    if (interfaceReq != nullptr) {
+        int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
@@ -144,34 +86,40 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 
 cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
 {
-    int socketReqId = computeSocketReqSocketId(message);
-    if (socketReqId != -1) {
+    auto socketReq = message->findTag<SocketReq>();
+    if (socketReq != nullptr) {
+        int socketReqId = socketReq->getSocketId();
         auto it = socketIdToGateIndex.find(socketReqId);
         if (it == socketIdToGateIndex.end())
             socketIdToGateIndex[socketReqId] = inGate->getIndex();
         else if (it->first != socketReqId)
             throw cRuntimeError("handleMessage(): Socket is already registered: id = %d, gate = %d, new gate = %d", socketReqId, it->second, inGate->getIndex());
     }
-    int socketIndId = computeSocketIndSocketId(message);
-    if (socketIndId != -1) {
-        auto it = socketIdToGateIndex.find(socketIndId);
+    auto socketInd = message->findTag<SocketInd>();
+    if (socketInd != nullptr) {
+        int socketId = socketInd->getSocketId();
+        auto it = socketIdToGateIndex.find(socketId);
         if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketIndId);
+            throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
     }
-    auto dispatch = computeDispatch(message);
-    if (dispatch.first != -1 && dispatch.second != -1) {
-        auto it = serviceToGateIndex.find(dispatch);
+    auto dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
+    if (dispatchProtocolReq != nullptr) {
+        auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
+        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        if (servicePrimitive == -1)
+            servicePrimitive = SP_REQUEST;
+        auto protocol = dispatchProtocolReq->getProtocol();
+        auto it = serviceToGateIndex.find(std::pair<int, ServicePrimitive>(protocol->getId(), servicePrimitive));
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
-        else {
-            auto protocol = Protocol::getProtocol(dispatch.first);
+        else
             throw cRuntimeError("handleMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
-        }
     }
-    int interfaceId = computeInterfaceId(message);
-    if (interfaceId != -1) {
+    auto interfaceReq = message->findTag<InterfaceReq>();
+    if (interfaceReq != nullptr) {
+        int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);

@@ -42,16 +42,6 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
         virtual cGate *handlePacket(Packet *packet, cGate *inGate);
         virtual cGate *handleMessage(Message *request, cGate *inGate);
 
-        virtual int computeSocketReqSocketId(Packet *packet);
-        virtual int computeSocketIndSocketId(Packet *packet);
-        virtual int computeInterfaceId(Packet *packet);
-        virtual std::pair<int, ServicePrimitive> computeDispatch(Packet *packet);
-
-        virtual int computeSocketReqSocketId(Message *message);
-        virtual int computeSocketIndSocketId(Message *message);
-        virtual int computeInterfaceId(Message *message);
-        virtual std::pair<int, ServicePrimitive> computeDispatch(Message *message);
-
     public:
         virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) override;
         virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
