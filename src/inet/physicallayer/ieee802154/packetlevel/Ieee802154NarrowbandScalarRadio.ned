@@ -39,7 +39,7 @@ module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
         // 1 octet SFD
         // 7 bit Frame length
         // 1 bit Reserved
-        *.headerBitLength = (1*8 + 7 + 1) * 1 b;
+        *.headerLength = (1*8 + 7 + 1) * 1 b;
 
         // Preamble
         // 4 octets Preamble

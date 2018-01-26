@@ -107,7 +107,7 @@ sim-time-limit = 100s
 **.wlan[*].mac.cwMinMulticast = 31
 
 **.wlan[*].radio.transmitter.power = 2mW
-**.wlan[*].radio.transmitter.headerBitLength = 4b
+**.wlan[*].radio.transmitter.headerLength = 4b
 **.wlan[*].radio.receiver.sensitivity = -85dBm
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 

@@ -44,7 +44,7 @@ module Ieee80211Radio extends FlatRadioBase
         antennaType = default("IsotropicAntenna");
         transmitter.preambleDuration = default(0s/0);
         transmitter.bitrate = default(11Mbps);
-        transmitter.headerBitLength = default(192b);
+        transmitter.headerLength = default(192b);
         transmitter.power = default(20mW);
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);

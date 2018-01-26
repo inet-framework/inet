@@ -36,7 +36,7 @@ void FlatTransmitterBase::initialize(int stage)
     NarrowbandTransmitterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
-        headerLength = b(par("headerBitLength"));
+        headerLength = b(par("headerLength"));
         bitrate = bps(par("bitrate"));
         power = W(par("power"));
     }
