@@ -35,6 +35,7 @@ SHOULD:
  - compare performance with INET 3.x branch and optimize if a lot of worse
 
 NEED NOT:
+ - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
  - eliminate all KLUDGES introduced by the 3 main infrastructure changes
  - revise physical layer error models wrt. how errors are represented
