@@ -667,22 +667,36 @@ void XMac::changeDisplayColor(XMAC_COLORS color)
     if (!animation)
         return;
     cDisplayString& dispStr = getContainingNode(this)->getDisplayString();
-    //b=40,40,rect,black,black,2"
-    if (color == GREEN)
-        dispStr.setTagArg("b", 3, "green");
-        //dispStr.parse("b=40,40,rect,green,green,2");
-    if (color == BLUE)
-        dispStr.setTagArg("b", 3, "blue");
-                //dispStr.parse("b=40,40,rect,blue,blue,2");
-    if (color == RED)
-        dispStr.setTagArg("b", 3, "red");
-                //dispStr.parse("b=40,40,rect,red,red,2");
-    if (color == BLACK)
-        dispStr.setTagArg("b", 3, "black");
-                //dispStr.parse("b=40,40,rect,black,black,2");
-    if (color == YELLOW)
-        dispStr.setTagArg("b", 3, "yellow");
-                //dispStr.parse("b=40,40,rect,yellow,yellow,2");
+    switch (macState) {
+        case INIT:
+            dispStr.setTagArg("t", 0, "INIT");
+            break;
+
+        case SLEEP:
+            dispStr.setTagArg("t", 0, "SLEEP");
+            break;
+
+        case CCA:
+            dispStr.setTagArg("t", 0, "CCA");
+            break;
+
+        case SEND_ACK:
+        case SEND_PREAMBLE:
+        case SEND_DATA:
+            dispStr.setTagArg("t", 0, "SEND");
+            break;
+
+        case WAIT_ACK:
+        case WAIT_DATA:
+        case WAIT_TX_DATA_OVER:
+        case WAIT_ACK_TX:
+            dispStr.setTagArg("t", 0, "WAIT");
+            break;
+
+        default:
+            dispStr.setTagArg("t", 0, "");
+            break;
+    }
 }
 
 
