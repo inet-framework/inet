@@ -28,8 +28,8 @@ void MessageDispatcher::initialize()
 {
     WATCH_MAP(socketIdToGateIndex);
     WATCH_MAP(interfaceIdToGateIndex);
-    // TODO: WATCH_MAP(serviceToGateIndex);
-    // TODO: WATCH_MAP(protocolToGateIndex);
+    WATCH_MAP(serviceToGateIndex);
+    WATCH_MAP(protocolToGateIndex);
 }
 
 void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
@@ -66,7 +66,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
                 servicePrimitive = SP_REQUEST;
         }
         auto protocol = dispatchProtocolReq->getProtocol();
-        auto it = serviceToGateIndex.find(std::pair<int, ServicePrimitive>(protocol->getId(), servicePrimitive));
+        auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
         else
@@ -111,7 +111,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         if (servicePrimitive == -1)
             servicePrimitive = SP_REQUEST;
         auto protocol = dispatchProtocolReq->getProtocol();
-        auto it = serviceToGateIndex.find(std::pair<int, ServicePrimitive>(protocol->getId(), servicePrimitive));
+        auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
         if (it != serviceToGateIndex.end())
             return gate("out", it->second);
         else
@@ -132,7 +132,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
 void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    auto key = std::pair<int, ServicePrimitive>(protocol.getId(), servicePrimitive);
+    auto key = Key(protocol.getId(), servicePrimitive);
     if (serviceToGateIndex.find(key) != serviceToGateIndex.end())
         throw cRuntimeError("handleRegisterService(): service is already registered: %s", protocol.str().c_str());
     serviceToGateIndex[key] = out->getIndex();
@@ -145,7 +145,7 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *o
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    auto key = std::pair<int, ServicePrimitive>(protocol.getId(), servicePrimitive);
+    auto key = Key(protocol.getId(), servicePrimitive);
     if (protocolToGateIndex.find(key) != protocolToGateIndex.end())
         throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: %s", protocol.str().c_str());
     protocolToGateIndex[key] = in->getIndex();
