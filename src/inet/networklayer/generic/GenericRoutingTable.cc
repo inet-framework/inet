@@ -145,13 +145,15 @@ void GenericRoutingTable::configureRouterId()
     if (routerId.isUnspecified()) {    // not yet configured
         const char *routerIdStr = par("routerId");
         if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled in earlier stage
-            // choose highest interface address as routerId
+            // choose lowest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
                     L3Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
-                    if (routerId.isUnspecified() || routerId < interfaceAddr)
+                    if (routerId.isUnspecified() || routerId < interfaceAddr) {
                         routerId = interfaceAddr;
+                        break;
+                    }
                 }
             }
         }
