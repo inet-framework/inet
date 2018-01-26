@@ -43,22 +43,22 @@ simple Rstp like ISpanningTree
     parameters:
         // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.
         // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.
-        double helloTime @unit("s") = default(2s);
+        double helloTime @unit(s) = default(2s);
 
         // The forward delay is the time that is spent in the listening and learning state. This time is equal to 6 sec by default,
         // but you can tune the time to be between 4 and 30 sec.
-        double forwardDelay @unit("s") = default(6s);
+        double forwardDelay @unit(s) = default(6s);
 
         // The max age timer controls the maximum length of time that passes before a bridge port saves its configuration BPDU information.
         // This time is 20 sec by default, but you can tune the time to be between 6 and 40 sec.
-        double maxAge @unit("s") = default(20s);
+        double maxAge @unit(s) = default(20s);
 
         // The migrate time is the time after which a non-assigned port becomes designated. This time is equal to 6 sec by default,
         // but you can tune the time to be between 4 and 30 sec.
         double migrateTime @unit ("s")= default(3s);
 
         // The topology change while time is the time while a port will send TC=true (Topology Change Notification)
-        double tcWhileTime @unit("s") = default(6s);
+        double tcWhileTime @unit(s) = default(6s);
 
         // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all
         // the other switches, the other switches automatically select the switch as the root switch.

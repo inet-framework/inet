@@ -121,7 +121,7 @@ simple EtherMac like IEtherMac
         int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue (only used if queueModule==""); additional frames cause a runtime error
         string queueModule = default("");   // name of optional external queue module
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
-        int mtu @unit("B") = default(1500B);
+        int mtu @unit(B) = default(1500B);
         @display("i=block/rxtx");
 
         @signal[txPk](type=Packet);

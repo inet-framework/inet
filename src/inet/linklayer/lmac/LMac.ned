@@ -31,7 +31,7 @@ simple LMac extends MacProtocolBase like IMacProtocol
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(b) = default(10b);
-        int mtu @unit("B") = default(0B);
+        int mtu @unit(B) = default(0B);
         // length of MAC header
         int queueLength = default(10);
         // default channel

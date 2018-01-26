@@ -29,7 +29,7 @@ simple Loopback
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        int mtu @unit("B") = default(4470B);
+        int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");
 
         @signal[packetSentToUpper](type=cPacket);

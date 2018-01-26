@@ -66,7 +66,7 @@ simple XMac extends MacProtocolBase like IMacProtocol
 
         // length of MAC header
         int headerLength @unit(b) = default(80b);
-        int mtu @unit("B") = default(0B);
+        int mtu @unit(B) = default(0B);
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value 
 

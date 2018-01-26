@@ -50,7 +50,7 @@ simple Ppp
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // path of external (QoS,RED,etc) queue module
-        int mtu @unit("B") = default(4470B);
+        int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");
 
         @signal[txState](type=long);    // 1:transmit, 0:idle

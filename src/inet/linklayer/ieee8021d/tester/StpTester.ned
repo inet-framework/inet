@@ -22,7 +22,7 @@ package inet.linklayer.ieee8021d.tester;
 simple StpTester
 {
     parameters:
-        double checkTime @unit("s") = default(500ms);
+        double checkTime @unit(s) = default(500ms);
         
         @display("i=block/cogwheel");
 }

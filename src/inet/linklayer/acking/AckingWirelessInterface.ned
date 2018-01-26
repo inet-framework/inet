@@ -44,7 +44,7 @@ module AckingWirelessInterface like IWirelessInterface
         @display("i=block/ifcard;bgb=214,335;bgl=53");
         string interfaceTableModule;
         string energySourceModule = default("");
-        double bitrate @unit("bps");
+        double bitrate @unit(bps);
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
         string radioType = default("UnitDiskRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));

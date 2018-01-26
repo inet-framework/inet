@@ -41,8 +41,8 @@ simple Ldp      //FIXME like IApp
         string routingTableModule;
         string libTableModule;
         string tedModule;
-        double holdTime @unit("s") = default(15s);
-        double helloInterval @unit("s") = default(5s);
+        double holdTime @unit(s) = default(15s);
+        double helloInterval @unit(s) = default(5s);
         string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
         @display("i=block/control");
     gates:

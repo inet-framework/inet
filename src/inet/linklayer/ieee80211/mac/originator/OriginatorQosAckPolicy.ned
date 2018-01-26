@@ -23,9 +23,9 @@ simple OriginatorQosAckPolicy
         string rateSelectionModule;
 
         int blockAckReqTreshold = default(5);
-        int maxBlockAckPolicyFrameLength @unit("B") = default(1000B);
-        double blockAckTimeout @unit("s") = default(-1s);
-        double ackTimeout @unit("s") = default(-1s);
+        int maxBlockAckPolicyFrameLength @unit(B) = default(1000B);
+        double blockAckTimeout @unit(s) = default(-1s);
+        double ackTimeout @unit(s) = default(-1s);
         
         @display("i=block/control");
 }

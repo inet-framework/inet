@@ -30,8 +30,8 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 simple AarfRateControl like IRateControl
 {
     parameters:
-        double initialRate @unit("bps") = default(-1bps); // -1 means fastest mandatory rate
-        double interval @unit("s") = default(50ms); // The rate (unconditionally) increases after each time interval (the default interval is unspecified [2]).
+        double initialRate @unit(bps) = default(-1bps); // -1 means fastest mandatory rate
+        double interval @unit(s) = default(50ms); // The rate (unconditionally) increases after each time interval (the default interval is unspecified [2]).
         int increaseThreshold = default(10); // Number of successful transmissions needed to increase the rate
         int decreaseThreshold = default(2); // Number of consecutive unsuccessful transmissions (in the sense that ACK does not arrive within timeout) 
                                             // needed to increase the rate

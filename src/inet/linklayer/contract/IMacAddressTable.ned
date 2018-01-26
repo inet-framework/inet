@@ -24,6 +24,6 @@ moduleinterface IMacAddressTable
 {
     parameters:
         @display("i=block/table2");
-        double agingTime @unit("s");
+        double agingTime @unit(s);
         string addressTableFile;
 }

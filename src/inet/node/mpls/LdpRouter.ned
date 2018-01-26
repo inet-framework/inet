@@ -38,8 +38,8 @@ module LdpRouter
         @labels(node);
         @display("i=abstract/router");
         bool hasStatus = default(false);
-        double holdTime @unit("s") = default(15s);
-        double helloInterval @unit("s") = default(5s);
+        double holdTime @unit(s) = default(15s);
+        double helloInterval @unit(s) = default(5s);
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");

@@ -89,10 +89,10 @@ simple Ipv4
         string arpModule;
         string icmpModule;
         string crcMode @enum("declared", "computed") = default("declared");
-        double procDelay @unit("s") = default(0s);
+        double procDelay @unit(s) = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
-        double fragmentTimeout @unit("s") = default(60s);
+        double fragmentTimeout @unit(s) = default(60s);
         bool forceBroadcast = default(false);
         bool useProxyARP = default(true);
         @display("i=block/routing");

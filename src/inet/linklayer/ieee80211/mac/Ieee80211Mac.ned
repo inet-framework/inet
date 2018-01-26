@@ -68,7 +68,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         string modeSet @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
         string fcsMode @enum("declared","computed") = default("declared");
 
-        int mtu @unit("B") = default(2304B);
+        int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);
 
         *.mibModule = default(absPath(mibModule));
@@ -130,14 +130,14 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
     parameters:
         string rateControlType = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n","p") = default("g(mixed)");
-        double bitrate @unit("bps") = default(-1bps); // for backward compatibility
-        double basicBitrate @unit("bps") = default(-1bps); // for backward compatibility
-        double dataBitrate @unit("bps") = default(bitrate);
-        double mgmtBitrate @unit("bps") = default(basicBitrate);
-        double multicastBitrate @unit("bps") = default(basicBitrate);
-        double controlBitrate @unit("bps") = default(-1bps);
-        double initialRateControlRate @unit("bps") = default(-1bps);
-        int rtsThresholdBytes @unit("B") = default(2346B);
+        double bitrate @unit(bps) = default(-1bps); // for backward compatibility
+        double basicBitrate @unit(bps) = default(-1bps); // for backward compatibility
+        double dataBitrate @unit(bps) = default(bitrate);
+        double mgmtBitrate @unit(bps) = default(basicBitrate);
+        double multicastBitrate @unit(bps) = default(basicBitrate);
+        double controlBitrate @unit(bps) = default(-1bps);
+        double initialRateControlRate @unit(bps) = default(-1bps);
+        int rtsThresholdBytes @unit(B) = default(2346B);
         int retryLimit = default(-1);
         bool EDCA = default(false);
         int maxQueueSize = default(14);
@@ -152,7 +152,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         double TXOP3 @unit(s) = default(1.504ms);
         int AIFSN = default(2); // if there is only one AC (EDCA = false)
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
-        double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)
+        double slotTime @unit(s) = default(-1s); // slot time, -1 means default (mode dependent)
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
 

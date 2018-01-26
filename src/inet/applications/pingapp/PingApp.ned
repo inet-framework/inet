@@ -63,12 +63,12 @@ simple PingApp like IApp
     parameters:
         string destAddr = default(""); // destination address(es), separated by spaces, "*" means all Ipv4/Ipv6 interfaces in entire simulation
         string srcAddr = default(""); // source address (useful with multi-homing)
-        int packetSize @unit("B") = default(56B); // of ping payload, in bytes
-        volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
+        int packetSize @unit(B) = default(56B); // of ping payload, in bytes
+        volatile double sendInterval @unit(s) = default(1s); // time to wait between pings (can be random)
         int hopLimit = default(-1); // TTL or hopLimit for IP packets
         int count = default(-1); // number of pings requests sent to a single destination address, -1 means continuously (only first address will be used from destAddr)
-        double startTime @unit("s") = default(uniform(0s, this.sleepDuration + this.sendInterval)); // send first ping at startTime
-        double stopTime @unit("s") = default(-1s); // time to finish sending, negative values mean forever
+        double startTime @unit(s) = default(uniform(0s, this.sleepDuration + this.sendInterval)); // send first ping at startTime
+        double stopTime @unit(s) = default(-1s); // time to finish sending, negative values mean forever
         volatile double sleepDuration @unit(s) = default(0s); // time spent in sleep between switching destinations
         bool continuous = default(false);  // whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // log to stdout
