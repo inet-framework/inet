@@ -829,7 +829,7 @@ UNIT_DISPLAY_NAME(units::K, "K");
 UNIT_DISPLAY_NAME(units::A, "A");
 UNIT_DISPLAY_NAME(units::mol, "mol");
 UNIT_DISPLAY_NAME(units::cd, "cd");
-UNIT_DISPLAY_NAME(units::b, "bit");
+UNIT_DISPLAY_NAME(units::b, "b");
 
 namespace units {
 
@@ -1105,7 +1105,7 @@ UNIT_DISPLAY_NAME(units::degree_second, "\"");
 UNIT_DISPLAY_NAME(units::kPa, "kPa");
 UNIT_DISPLAY_NAME(units::psi, "PSI");
 UNIT_DISPLAY_NAME(units::millibar, "millibars");
-UNIT_DISPLAY_NAME(units::B, "byte");
+UNIT_DISPLAY_NAME(units::B, "B");
 UNIT_DISPLAY_NAME(units::bps, "bps");
 UNIT_DISPLAY_NAME(units::kbps, "kbps");
 UNIT_DISPLAY_NAME(units::Mbps, "Mbps");
