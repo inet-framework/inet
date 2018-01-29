@@ -21,7 +21,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -114,23 +113,22 @@ void GenericNetworkProtocol::refreshDisplay() const
 
 void GenericNetworkProtocol::handleMessage(cMessage *msg)
 {
-    if (!msg->isPacket())
-        handleCommand(msg);
+    if (auto request = dynamic_cast<Request *>(msg))
+        handleCommand(request);
     else
         QueueBase::handleMessage(msg);
 }
 
-void GenericNetworkProtocol::handleCommand(cMessage *msg)
+void GenericNetworkProtocol::handleCommand(Request *request)
 {
-    auto request = dynamic_cast<Request *>(msg);
-    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
-        delete msg;
+        delete request;
     }
-    else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<L3SocketCloseCommand *>(request->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
@@ -146,10 +144,10 @@ void GenericNetworkProtocol::handleCommand(cMessage *msg)
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete msg;
+        delete request;
     }
     else
-        throw cRuntimeError("Invalid command: (%s)%s", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
 }
 
 void GenericNetworkProtocol::endService(cPacket *pk)
