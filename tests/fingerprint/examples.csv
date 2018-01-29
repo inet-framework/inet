@@ -432,10 +432,10 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            38cb-01ac/tplx, PASS,
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            886d-54a9/tplx, PASS,
 
-/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           9069-44f4/tplx, PASS,
-/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           d8e8-ff6e/tplx, PASS,
-/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           5f5e-6900/tplx, PASS,
-/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           4e82-e192/tplx, PASS,
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           d6f1-b720/tplx, PASS,
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           706d-80ce/tplx, PASS,
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           6853-75a6/tplx, PASS,
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           d22e-c743/tplx, PASS,
 
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx, ERROR,
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx, ERROR,
