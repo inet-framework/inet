@@ -290,12 +290,14 @@ void Rtcp::createPacket()
             }
         }
     }
+    reportPacket->paddingAndSetLength();
 
     // insert source description items (at least common name)
     const auto& sdesPacket = makeShared<RtcpSdesPacket>();
 
     SdesChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
+    sdesPacket->paddingAndSetLength();
 
     Packet *compoundPacket = new Packet("RtcpCompoundPacket");
 
@@ -306,6 +308,7 @@ void Rtcp::createPacket()
     if (_leaveSession) {
         const auto& byePacket = makeShared<RtcpByePacket>();
         byePacket->setSsrc(_senderInfo->getSsrc());
+        byePacket->paddingAndSetLength();
         compoundPacket->insertTrailer(byePacket);
     }
 

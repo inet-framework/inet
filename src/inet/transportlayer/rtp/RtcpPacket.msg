@@ -37,33 +37,17 @@ enum RtcpPacketType
 class RtcpPacket extends FieldsChunk
 {
     chunkLength = B(4);
-    @customize;  // implements rtcpLength getter/setter
     int8 version = 2;
-    bool padding = 0;
-    short count = 0;
-    RtcpPacketType packetType = RTCP_PT_UNDEF;
-    abstract int rtcpLength;
+    bool padding = 0;   // (1 bits) Used to indicate if there are extra padding bytes at the end of the RTP packet. A padding might be used to fill up a block of certain size, for example as required by an encryption algorithm. The last byte of the padding contains the number of padding bytes that were added (including itself).
+    short count = 0;    // RC (Reception report count ): (5 bits) The number of reception report blocks contained in this packet. A value of zero is valid.
+    RtcpPacketType packetType = RTCP_PT_UNDEF;      // (8 bits) Contains a constant to identify RTCP packet type.
+    int rtcpLength = 0;     // (16 bits) Indicates The length of this RTCP packet in 32-bit words minus one, including the header and any padding.
 }
 
-cplusplus {{
-
-class INET_API RtcpPacket : public RtcpPacket_Base
-{
+cplusplus(RtcpPacket) {{
   public:
-    RtcpPacket() : RtcpPacket_Base() {};
-    RtcpPacket(const RtcpPacket& other) : RtcpPacket_Base(other) {}
-    RtcpPacket& operator=(const RtcpPacket& other) { RtcpPacket_Base::operator=(other); return *this; }
-    virtual RtcpPacket *dup() const override { return new RtcpPacket(*this); }
-
-    // ADD CODE HERE to redefine and implement pure virtual functions from RtcpPacket_Base
-
-    // rtcpLength is the header field length
-    // of an rtcp packet
-    // in 32 bit words minus one
-    virtual int getRtcpLength() const override { return (int)(B(getChunkLength()).get() / 4) - 1; }
-    virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
-};
-
+    /** padding RtcpPacket to 32 bit words and set the rtcpLength field (based on chunkLength field) **/
+    void paddingAndSetLength();
 }}
 
 class RtcpReceiverReportPacket extends RtcpPacket
