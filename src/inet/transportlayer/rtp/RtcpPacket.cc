@@ -17,6 +17,7 @@ void RtcpPacket::paddingAndSetLength()
 
 void RtcpReceiverReportPacket::addReceptionReport(ReceptionReport *report)
 {
+    handleChange();
     receptionReports.add(report);
     count++;
     // an rtcp receiver report is 24 bytes long
@@ -25,6 +26,7 @@ void RtcpReceiverReportPacket::addReceptionReport(ReceptionReport *report)
 
 void RtcpSdesPacket::addSDESChunk(SdesChunk *sdesChunk)
 {
+    handleChange();
     sdesChunks.add(sdesChunk);
     count++;
     // the size of the rtcp packet increases by the
