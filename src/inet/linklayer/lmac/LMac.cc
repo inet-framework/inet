@@ -40,7 +40,7 @@ void LMac::initialize(int stage)
         queueLength = par("queueLength");
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
-        headerLength = par("headerLength");
+        headerLength = b(par("headerLength"));
         EV << "headerLength is: " << headerLength << endl;
         numSlots = par("numSlots");
         // the first N slots are reserved for mobile nodes to be able to function normally
@@ -53,7 +53,7 @@ void LMac::initialize(int stage)
         slotChange = new cOutVector("slotChange");
 
         // how long does it take to send/receive a control packet
-        controlDuration = ((double)headerLength + (double)numSlots + 16) / (double)bitrate;
+        controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
         initializeMACAddress();
@@ -483,7 +483,7 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setChunkLength(b(headerLength + numSlots));
+                control->setChunkLength(headerLength + b(numSlots));    //FIXME check it: add only 1 bit / slot?
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
@@ -505,7 +505,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet();
-                data->insertAtEnd(macQueue.front()->peekAt(b(headerLength)));
+                data->insertAtEnd(macQueue.front()->peekAt(headerLength));
                 data->setKind(LMAC_DATA);
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
@@ -680,7 +680,7 @@ void LMac::decapsulate(Packet *packet)
 void LMac::encapsulate(Packet *netwPkt)
 {
     auto pkt = makeShared<LMacHeader>();
-    pkt->setChunkLength(b(headerLength));
+    pkt->setChunkLength(headerLength);
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer

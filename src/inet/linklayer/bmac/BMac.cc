@@ -38,7 +38,7 @@ void BMac::initialize(int stage)
         animation = par("animation");
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
-        headerLength = par("headerLength");
+        headerLength = b(par("headerLength"));
         checkInterval = par("checkInterval");
         useMacAcks = par("useMACAcks");
         maxTxAttempts = par("maxTxAttempts");
@@ -206,7 +206,7 @@ void BMac::sendPreamble()
     auto preamble = makeShared<BMacHeader>();
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
-    preamble->setChunkLength(b(headerLength));
+    preamble->setChunkLength(headerLength);
 
     //attach signal and send down
     auto packet = new Packet();
@@ -225,7 +225,7 @@ void BMac::sendMacAck()
     auto ack = makeShared<BMacHeader>();
     ack->setSrcAddr(address);
     ack->setDestAddr(lastDataPktSrcAddr);
-    ack->setChunkLength(b(headerLength));
+    ack->setChunkLength(headerLength);
 
     //attach signal and send down
     auto packet = new Packet();
@@ -753,7 +753,7 @@ void BMac::decapsulate(Packet *packet)
 void BMac::encapsulate(Packet *packet)
 {
     auto pkt = makeShared<BMacHeader>();
-    pkt->setChunkLength(b(headerLength));
+    pkt->setChunkLength(headerLength);
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer

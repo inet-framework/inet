@@ -75,7 +75,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , slotChange()
         , macState()
         , slotDuration(0)
-        , headerLength(0)
+        , headerLength(b(0))
         , controlDuration(0)
         , mySlot(0)
         , numSlots(0)
@@ -169,7 +169,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     /** @brief Duration of a slot */
     double slotDuration;
     /** @brief Length of the header*/
-    int headerLength;
+    b headerLength;
     /** @brief Duration of teh control time in each slot */
     double controlDuration;
     /** @brief my slot ID */
