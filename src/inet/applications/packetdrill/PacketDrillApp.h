@@ -23,19 +23,19 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/applications/tcpapp/TcpSessionApp.h"
 #include "PacketDrill.h"
 #include "PacketDrillUtils.h"
 
+namespace inet {
+
 class PacketDrill;
 class PacketDrillScript;
-
-namespace inet {
 
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
@@ -87,7 +87,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         int sctpAssocId;
         UdpSocket udpSocket;
         TcpSocket tcpSocket;
-        SCTPSocket sctpSocket;
+        SctpSocket sctpSocket;
         PacketDrill *pd;
         bool msgArrived;
         bool recvFromSet;
@@ -107,7 +107,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         uint16 peerWindow;
         uint16 peerInStreams;
         uint16 peerOutStreams;
-        SCTPCookie *peerCookie;
+        SctpCookie *peerCookie;
         uint16 peerCookieLength;
         uint32 initPeerTsn;
         uint32 initLocalTsn;
@@ -161,23 +161,23 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
 
         int syscallSctpSend(struct syscall_spec *syscall, cQueue *args, char **error);
 
-        bool compareDatagram(Ipv4Header *storedDatagram, Ipv4Header *liveDatagram);
+        bool compareDatagram(Packet *storedDatagram, Packet *liveDatagram);
 
-        bool compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp);
+        bool compareUdpHeader(const Ptr<const UdpHeader>& storedUdp, const Ptr<const UdpHeader>& liveUdp);
 
-        bool compareTcpPacket(tcp::TcpHeader *storedTcp, tcp::TcpHeader *liveTcp);
+        bool compareTcpHeader(const Ptr<const tcp::TcpHeader>& storedTcp, const Ptr<const tcp::TcpHeader>& liveTcp);
 
-        bool compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liveSctp);
+        bool compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, const Ptr<const SctpHeader>& liveSctp);
 
-        bool compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitChunk* liveInitChunk);
+        bool compareInitPacket(const SctpInitChunk* storedInitChunk, const SctpInitChunk* liveInitChunk);
 
-        bool compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataChunk* liveDataChunk);
+        bool compareDataPacket(const SctpDataChunk* storedDataChunk, const SctpDataChunk* liveDataChunk);
 
-        bool compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackChunk* liveSackChunk);
+        bool compareSackPacket(const SctpSackChunk* storedSackChunk, const SctpSackChunk* liveSackChunk);
 
-        bool compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, SCTPInitAckChunk* liveInitAckChunk);
+        bool compareInitAckPacket(const SctpInitAckChunk* storedInitAckChunk, const SctpInitAckChunk* liveInitAckChunk);
 
-        bool compareReconfigPacket(SCTPStreamResetChunk* storedReconfigChunk, SCTPStreamResetChunk* liveReconfigChunk);
+        bool compareReconfigPacket(const SctpStreamResetChunk* storedReconfigChunk, const SctpStreamResetChunk* liveReconfigChunk);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,

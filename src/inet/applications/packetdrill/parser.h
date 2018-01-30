@@ -194,7 +194,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 219 "parser.y" /* yacc.c:1909  */
+#line 221 "parser.y" /* yacc.c:1909  */
 
     int64 integer;
     double floating;

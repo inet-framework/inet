@@ -28,12 +28,13 @@
 #include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
-Define_Module(PacketDrillApp);
 
 namespace inet {
+
+Define_Module(PacketDrillApp);
 
 using namespace tcp;
 
@@ -149,19 +150,17 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     }
                 }
             } else {
-                Ipv4Header *ipv4Header = check_and_cast<Ipv4Header *>(outboundPackets->pop());
-                Ipv4Header *live = check_and_cast<Ipv4Header*>(msg);
-                PacketDrillInfo *info = (PacketDrillInfo *)ipv4Header->getContextPointer();
+                Packet *ipv4Packet = check_and_cast<Packet *>(outboundPackets->pop());
+                const auto& ipv4Header = ipv4Packet->peekHeader<Ipv4Header>();
+                Packet *liveIpv4Packet = check_and_cast<Packet*>(msg);
+                const auto& liveIpv4Header = liveIpv4Packet->peekHeader<Ipv4Header>();
+                PacketDrillInfo *info = (PacketDrillInfo *)ipv4Packet->getContextPointer();
                 if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
                         == STATUS_ERR) {
-                    delete info;
-                    delete msg;
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
                 }
-                if (!compareDatagram(ipv4Header, live)) {
-                    delete (PacketDrillInfo *)msg->getContextPointer();
-                    delete msg;
+                if (!compareDatagram(ipv4Packet, liveIpv4Packet)) {
                     throw cTerminationException("Packetdrill error: Datagrams are not the same");
                 }
                 delete info;
@@ -171,7 +170,6 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
                 delete (PacketDrillInfo *)msg->getContextPointer();
                 delete msg;
-                delete ipv4Header;
             }
         } else if (msg->getArrivalGate()->isName("udpIn")) {
             PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
@@ -184,7 +182,6 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 recvFromSet = false;
                 msgArrived = false;
                 if (!(PK(msg)->getByteLength() == expectedMessageSize)) {
-                    delete msg;
                     throw cTerminationException("Packetdrill error: Received data has unexpected size");
                 }
                 if (!eventTimer->isScheduled() && eventCounter < numEvents - 1) {
@@ -206,19 +203,17 @@ void PacketDrillApp::handleMessage(cMessage *msg)
         } else if (msg->getArrivalGate()->isName("tcpIn")) {
             switch (msg->getKind()) {
                 case TCP_I_ESTABLISHED:
+                    tcpConnId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
                     if (listenSet) {
                         if (acceptSet) {
                             tcpSocket.setState(TcpSocket::CONNECTED);
-                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             establishedPending = true;
                         }
                     } else {
                         tcpSocket.setState(TcpSocket::CONNECTED);
-                        tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                     }
                     delete msg;
                     break;
@@ -228,8 +223,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case TCP_I_DATA_NOTIFICATION:
                     if (recvFromSet)
                     {
-                        cMessage *msg = new cMessage("data request");
-                        msg->setKind(TCP_C_READ);
+                        auto *msg = new Request("data request", TCP_C_READ);
                         TcpCommand *cmd = new TcpCommand();
                         msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                         msg->setControlInfo(cmd);
@@ -240,7 +234,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     msgArrived = true;
                     delete msg;
                     break;
-                default: EV_INFO << "Message kind not supported (yet)";
+                default:
+                    EV_INFO << "Message kind not supported (yet)";
+                    break;
             }
         } else if (msg->getArrivalGate()->isName("sctpIn")) {
             switch (msg->getKind()) {
@@ -257,17 +253,17 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case SCTP_I_ESTABLISHED: {
                     if (listenSet) {
                         if (acceptSet) {
-                            sctpSocket.setState(SCTPSocket::CONNECTED);
-                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getSocketId();
+                            sctpSocket.setState(SctpSocket::CONNECTED);
+                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getSocketId();
+                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
                             establishedPending = true;
                         }
                     } else {
-                        sctpSocket.setState(SCTPSocket::CONNECTED);
-                        SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
+                        sctpSocket.setState(SctpSocket::CONNECTED);
+                        SctpConnectInfo *connectInfo = check_and_cast<SctpConnectInfo *>(msg->removeControlInfo());
                         sctpAssocId = connectInfo->getSocketId();
                         sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
                         sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
@@ -278,14 +274,14 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case SCTP_I_DATA_NOTIFICATION: {
                     if (recvFromSet) {
                         Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
-                        SCTPSendInfo *cmd = new SCTPSendInfo("Send2");
+                        SctpSendInfo *cmd = new SctpSendInfo("Send2");
                         cmd->setSocketId(sctpAssocId);
                         cmd->setSid(0);
                         cmsg->setControlInfo(cmd);
                         send(cmsg, "sctpOut");
                         recvFromSet = false;
                     }
-                    if (sctpSocket.getState() == SCTPSocket::CLOSED) {
+                    if (sctpSocket.getState() == SctpSocket::CLOSED) {
                         sctpSocket.abort();
                         abortSent = true;
                     }
@@ -319,7 +315,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case SCTP_I_PEER_CLOSED: {
                     break;
                 }
-                default: printf("Msg kind %d not implemented\n", msg->getKind());
+                default:
+                    printf("Msg kind %d not implemented\n", msg->getKind());
+                    break;
             }
             delete msg;
             return;
@@ -364,62 +362,68 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
 {
     char str[128];
     if (event->getType() == PACKET_EVENT) {
-        Ipv4Header *ip = check_and_cast<Ipv4Header *>(event->getPacket()->getInetPacket());
+        Packet *pk = event->getPacket()->getInetPacket();
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
+            auto packetByteLength = pk->getByteLength();
+            auto ipHeader = pk->removeHeader<Ipv4Header>();
+            // remove lower layer paddings:
+            ASSERT(B(ipHeader->getTotalLengthField()) >= ipHeader->getChunkLength());
+            if (ipHeader->getTotalLengthField() < packetByteLength)
+                pk->setTrailerPopOffset(B(ipHeader->getTotalLengthField()) - ipHeader->getChunkLength());
+
             if (protocol == IP_PROT_TCP) {
-                TcpHeader* tcp = check_and_cast<TcpHeader*>(ip->decapsulate());
-                tcp->setAckNo(tcp->getAckNo() + relSequenceOut);
-                if (tcp->getHeaderOptionArraySize() > 0) {
-                    for (unsigned int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
-                        if (tcp->getHeaderOption(i)->getKind() == TCPOPT_TIMESTAMP) {
+                auto tcpHeader = pk->removeHeader<TcpHeader>();
+                tcpHeader->setAckNo(tcpHeader->getAckNo() + relSequenceOut);
+                if (tcpHeader->getHeaderOptionArraySize() > 0) {
+                    for (unsigned int i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                        if (tcpHeader->getHeaderOption(i)->getKind() == TCPOPT_TIMESTAMP) {
                             TcpOptionTimestamp *option = new TcpOptionTimestamp();
                             option->setEchoedTimestamp(peerTS);
-                            tcp->setHeaderOption(i, option);
+                            tcpHeader->setHeaderOption(i, option);
                         }
                     }
                 }
-                ip->encapsulate(tcp);
+                pk->insertHeader(tcpHeader);
                 snprintf(str, sizeof(str), "inbound %d", eventCounter);
-                ip->setName(str);
+                pk->setName(str);
             }
-            if (protocol == IP_PROT_SCTP) {
-                SCTPMessage* sctp = check_and_cast<SCTPMessage*>(ip->decapsulate());
-                sctp->setTag(peerVTag);
-                int32 noChunks = sctp->getChunksArraySize();
+            else if (protocol == IP_PROT_SCTP) {
+                auto sctpHeader = pk->removeHeader<SctpHeader>();
+                sctpHeader->setTag(peerVTag);
+                int32 noChunks = sctpHeader->getSctpChunksArraySize();
                 for (int32 cc = 0; cc < noChunks; cc++) {
-                    SCTPChunk *chunk = const_cast<SCTPChunk *>(check_and_cast<const SCTPChunk *>(((SCTPMessage *)sctp)->getChunks(cc)));
-                    unsigned char chunkType = chunk->getChunkType();
+                    SctpChunk *chunk = const_cast<SctpChunk *>(check_and_cast<const SctpChunk *>(sctpHeader->getSctpChunks(cc)));
+                    unsigned char chunkType = chunk->getSctpChunkType();
                     switch (chunkType) {
                         case INIT: {
-                            SCTPInitChunk* init = check_and_cast<SCTPInitChunk*>(chunk);
+                            SctpInitChunk* init = check_and_cast<SctpInitChunk*>(chunk);
                             peerInStreams = init->getNoInStreams();
                             peerOutStreams = init->getNoOutStreams();
-                            initPeerTsn = init->getInitTSN();
+                            initPeerTsn = init->getInitTsn();
                             localVTag = init->getInitTag();
                             peerCumTsn = initPeerTsn - 1;
                             break;
                         }
                         case INIT_ACK: {
-                            SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk*>(chunk);
+                            SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk*>(chunk);
                             localVTag = initack->getInitTag();
-                            initPeerTsn = initack->getInitTSN();
+                            initPeerTsn = initack->getInitTsn();
                             peerCumTsn = initPeerTsn - 1;
                             break;
                         }
                         case COOKIE_ECHO: {
-                            SCTPCookieEchoChunk* cookieEcho = check_and_cast<SCTPCookieEchoChunk*>(chunk);
+                            SctpCookieEchoChunk* cookieEcho = check_and_cast<SctpCookieEchoChunk*>(chunk);
                             int tempLength = cookieEcho->getByteLength();
                             printf("copy peerCookie %p\n", peerCookie);
-                            cookieEcho->setStateCookie(peerCookie->dup());
-                            cookieEcho->getStateCookie()->setName("CookieEchoStateCookie");
-                            cookieEcho->setByteLength(SCTP_COOKIE_ACK_LENGTH + peerCookieLength);
-                            sctp->setByteLength(sctp->getByteLength() - tempLength + cookieEcho->getByteLength());
-                            delete peerCookie;
+                            peerCookie->setName("CookieEchoStateCookie");
+                            cookieEcho->setStateCookie(peerCookie);
                             peerCookie = nullptr;
+                            cookieEcho->setByteLength(SCTP_COOKIE_ACK_LENGTH + peerCookieLength);
+                            sctpHeader->setChunkLength(sctpHeader->getChunkLength() - B(tempLength + cookieEcho->getByteLength()));
                             break;
                         }
                         case SACK: {
-                            SCTPSackChunk* sack = check_and_cast<SCTPSackChunk*>(chunk);
+                            SctpSackChunk* sack = check_and_cast<SctpSackChunk*>(chunk);
                             sack->setCumTsnAck(sack->getCumTsnAck() + localDiffTsn);
                             if (sack->getNumGaps() > 0) {
                                 for (int i = 0; i < sack->getNumGaps(); i++) {
@@ -432,16 +436,16 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                                     sack->setDupTsns(i, sack->getDupTsns(i) + sack->getCumTsnAck());
                                 }
                             }
-                            sctp->replaceChunk(sack, cc);
+                            sctpHeader->setSctpChunks(cc, sack);
                             break;
                         }
                         case RE_CONFIG:{
-                            SCTPStreamResetChunk* reconfig = check_and_cast<SCTPStreamResetChunk*>(chunk);
+                            SctpStreamResetChunk* reconfig = check_and_cast<SctpStreamResetChunk*>(chunk);
                             for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
-                                SCTPParameter *parameter = check_and_cast<SCTPParameter *>(reconfig->getParameters(i));
+                                auto *parameter = reconfig->getParametersForUpdate(i);
                                 switch (parameter->getParameterType()) {
                                     case STREAM_RESET_RESPONSE_PARAMETER: {
-                                        SCTPStreamResetResponseParameter *param = check_and_cast<SCTPStreamResetResponseParameter *>(parameter);
+                                        SctpStreamResetResponseParameter *param = check_and_cast<SctpStreamResetResponseParameter *>(parameter);
                                         param->setSrResSn(seqNumMap[param->getSrResSn()]);
                                         if (param->getReceiversNextTsn() != 0) {
                                             param->setReceiversNextTsn(param->getReceiversNextTsn() + localDiffTsn);
@@ -449,7 +453,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                                         break;
                                     }
                                     case OUTGOING_RESET_REQUEST_PARAMETER: {
-                                        SCTPOutgoingSSNResetRequestParameter *param = check_and_cast<SCTPOutgoingSSNResetRequestParameter *>(parameter);
+                                        auto *param = check_and_cast<SctpOutgoingSsnResetRequestParameter *>(parameter);
                                       /*  for (const auto & elem : seqNumMap) {
                                             std::cout << " myNum = " << elem.first << "  liveNum = " << elem.second << endl;
                                         }*/
@@ -460,30 +464,30 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                                     }
                                 }
                             }
-                            sctp->replaceChunk(reconfig, cc);
                             break;
                         }
                     }
                 }
-                sctp->setName("inboundSctp");
-                ip->encapsulate(sctp);
+                pk->insertHeader(sctpHeader);
+                pk->setName("inboundSctp");
             }
-            send(ip, "tunOut");
+            else {
+                // other protocol
+            }
+            ipHeader->setTotalLengthField(B(ipHeader->getChunkLength()).get() + pk->getByteLength());
+            pk->insertHeader(ipHeader);
+            send(pk, "tunOut");
         } else if (event->getPacket()->getDirection() == DIRECTION_OUTBOUND) { // >
             if (receivedPackets->getLength() > 0) {
-                Ipv4Header *live = check_and_cast<Ipv4Header *>(receivedPackets->pop());
-                if (ip && live) {
-                    PacketDrillInfo *liveInfo = (PacketDrillInfo *)live->getContextPointer();
+                Packet *livePacket = check_and_cast<Packet *>(receivedPackets->pop());
+                if (pk && livePacket) {
+                    PacketDrillInfo *liveInfo = (PacketDrillInfo *)livePacket->getContextPointer();
                     if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(),
                             event->getEventTimeEnd(), event->getEventOffset(), liveInfo->getLiveTime(),
                             "outbound packet") == STATUS_ERR) {
-                        delete liveInfo;
-                        delete live;
-                        delete ip;
                         throw cTerminationException("Packetdrill error: Timing error");
                     }
-                    if (!compareDatagram(ip, live)) {
-                        delete liveInfo;
+                    if (!compareDatagram(pk, livePacket)) {
                         throw cTerminationException("Packetdrill error: Datagrams are not the same");
                     }
                     delete liveInfo;
@@ -492,22 +496,24 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                         scheduleEvent();
                     }
                 }
-                delete live;
-                delete ip;
+                delete livePacket;
+                delete pk;
             } else {
                 if (protocol == IP_PROT_SCTP) {
-                    SCTPMessage* sctp = check_and_cast<SCTPMessage*>(ip->getEncapsulatedPacket());
-                    if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == INIT) {
-                        SCTPInitChunk* init = check_and_cast<SCTPInitChunk*>(sctp->getChunks(0));
-                        initLocalTsn = init->getInitTSN();
+                    const auto& ipHeader = pk->peekHeader<Ipv4Header>();
+                    const auto& sctpHeader = pk->peekDataAt<SctpHeader>(ipHeader->getChunkLength());
+                    const SctpChunk *sctpChunk = sctpHeader->getSctpChunks(0);
+                    if (sctpChunk->getSctpChunkType() == INIT) {
+                        auto *init = check_and_cast<const SctpInitChunk*>(sctpChunk);
+                        initLocalTsn = init->getInitTsn();
                         peerVTag = init->getInitTag();
                         localCumTsn = initLocalTsn - 1;
                         sctpSocket.setInboundStreams(init->getNoInStreams());
                         sctpSocket.setOutboundStreams(init->getNoOutStreams());
                     }
-                    if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == INIT_ACK) {
-                        SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk*>(sctp->getChunks(0));
-                        initLocalTsn = initack->getInitTSN();
+                    else if (sctpChunk->getSctpChunkType() == INIT_ACK) {
+                        auto *initack = check_and_cast<const SctpInitAckChunk*>(sctpChunk);
+                        initLocalTsn = initack->getInitTsn();
                         peerVTag = initack->getInitTag();
                         localCumTsn = initLocalTsn - 1;
                     }
@@ -517,10 +523,10 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 info->setScriptTimeEnd(event->getEventTimeEnd());
                 info->setOffset(event->getEventOffset());
                 info->setTimeType(event->getTimeType());
-                ip->setContextPointer(info);
+                pk->setContextPointer(info);
                 snprintf(str, sizeof(str), "outbound %d", eventCounter);
-                ip->setName(str);
-                outboundPackets->insert(ip);
+                pk->setName(str);
+                outboundPackets->insert(pk);
             }
         } else
             throw cRuntimeError("Invalid direction");
@@ -571,34 +577,36 @@ void PacketDrillApp::handleTimer(cMessage *msg)
 
 void PacketDrillApp::closeAllSockets()
 {
-    SCTPAbortChunk *abortChunk = new SCTPAbortChunk("Abort");
-    abortChunk->setChunkType(ABORT);
+    Packet *pk = new Packet("IPCleanup");
+    SctpAbortChunk *abortChunk = new SctpAbortChunk("Abort");
+    abortChunk->setSctpChunkType(ABORT);
     abortChunk->setT_Bit(1);
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
-    SCTPMessage *sctpmsg = new SCTPMessage();
-    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    auto sctpmsg = makeShared<SctpHeader>();
+    sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     sctpmsg->setSrcPort(remotePort);
     sctpmsg->setDestPort(localPort);
     sctpmsg->setTag(peerVTag);
-    sctpmsg->setName("SCTPCleanUp");
+    pk->setName("SCTPCleanUp");
     sctpmsg->setChecksumOk(true);
     sctpmsg->insertSctpChunks(abortChunk);
-    IPv4Datagram *ipv4Header = new IPv4Datagram("IPCleanup");
+    pk->insertHeader(sctpmsg);
+    auto ipv4Header = makeShared<Ipv4Header>();
     ipv4Header->setSrcAddress(remoteAddress.toIPv4());
     ipv4Header->setDestAddress(localAddress.toIPv4());
     ipv4Header->setIdentification(0);
     ipv4Header->setVersion(4);
     ipv4Header->setHeaderLength(20);
-    ipv4Header->setProtocolId(IPPROTO_SCTP);
+    ipv4Header->setProtocolId(IP_PROT_SCTP);
     ipv4Header->setTimeToLive(32);
     ipv4Header->setMoreFragments(0);
     ipv4Header->setDontFragment(0);
     ipv4Header->setFragmentOffset(0);
     ipv4Header->setTypeOfService(0);
-    ipv4Header->setByteLength(20);
-    ipv4Header->encapsulate(sctpmsg);
+    ipv4Header->setTotalLengthField(B(ipv4Header->getChunkLength()).get() + pk->getByteLength());
+    pk->insertHeader(ipv4Header);
     EV_DETAIL << "Send Abort to cleanup association." << endl;
-    send(ipv4Header, "tunOut");
+    send(pk, "tunOut");
 }
 
 bool PacketDrillApp::findSeqNumMap(uint32 num)
@@ -702,7 +710,6 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             break;
 
         case IP_PROT_TCP:
-            tcpSocket.readDataTransferModePar(*this);
             tcpSocket.setOutputGate(gate("tcpOut"));
             tcpSocket.bind(localPort);
             break;
@@ -750,7 +757,7 @@ int PacketDrillApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char
             }
             break;
         case IP_PROT_SCTP:
-            if (sctpSocket.getState() == SCTPSocket::NOT_BOUND)
+            if (sctpSocket.getState() == SctpSocket::NOT_BOUND)
             {
                 sctpSocket.bind(localPort);
             }
@@ -807,7 +814,7 @@ int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, ch
         if (protocol == IP_PROT_TCP)
             tcpSocket.setState(TcpSocket::CONNECTED);
         else if (protocol == IP_PROT_SCTP)
-            sctpSocket.setState(SCTPSocket::CONNECTED);
+            sctpSocket.setState(SctpSocket::CONNECTED);
         establishedPending = false;
         sctpSocket.accept(sctpAssocId, script_accepted_fd);
     } else {
@@ -844,7 +851,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
         }
         case IP_PROT_SCTP: {
             Packet* cmsg = new Packet("AppData");
-            SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
+            SctpSimpleMessage* msg = new SctpSimpleMessage("data");
             uint32 sendBytes = syscall->result->getNum();
             msg->setDataArraySize(sendBytes);
             for (uint32 i = 0; i < sendBytes; i++)
@@ -856,7 +863,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             cmsg->encapsulate(msg);
             cmsg->setKind(SCTP_C_SEND_ORDERED);
 
-            SCTPSendInfo* sendCommand = new SCTPSendInfo;
+            SctpSendInfo* sendCommand = new SctpSendInfo;
             sendCommand->setLast(true);
             sendCommand->setSocketId(-1);
             sendCommand->setSendUnordered(false);
@@ -865,7 +872,9 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             sctpSocket.sendMsg(cmsg);
             break;
         }
-        default: EV_INFO << "Protocol not supported for this socket call";
+        default:
+            EV_INFO << "Protocol not supported for this socket call";
+            break;
     }
 
     return STATUS_OK;
@@ -981,7 +990,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_RESET_STREAMS: {
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
             cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
-            SCTPResetInfo *rinfo = new SCTPResetInfo();
+            SctpResetInfo *rinfo = new SctpResetInfo();
             rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1015,7 +1024,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
         case EXPR_SCTP_ADD_STREAMS: {
             struct sctp_add_streams_expr *as = exp->getAddStreams();
             cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
-            SCTPResetInfo *rinfo = new SCTPResetInfo();
+            SctpResetInfo *rinfo = new SctpResetInfo();
             rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1062,6 +1071,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 }
                 default:
                     printf("Option name %d of type EXPR_SCTP_ASSOCVAL not known\n", optname);
+                    break;
             }
             break;
         case EXPR_LIST: {
@@ -1086,7 +1096,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                     break;
                 case SCTP_RESET_ASSOC: {
                     cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
-                    SCTPResetInfo *rinfo = new SCTPResetInfo();
+                    SctpResetInfo *rinfo = new SctpResetInfo();
                     rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
@@ -1103,6 +1113,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
             break;
         default:
             printf("Type %d not known\n", exp->getType());
+            break;
     }
     return STATUS_OK;
 }
@@ -1145,6 +1156,7 @@ int PacketDrillApp::syscallGetsockopt(struct syscall_spec *syscall, cQueue *args
             break;
         }
         default: printf("Getsockopt option is not supported\n");
+        break;
     }
     return STATUS_OK;
 }
@@ -1233,7 +1245,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
         return STATUS_ERR;
 
     Packet* cmsg = new Packet("AppData");
-    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
+    SctpSimpleMessage* msg = new SctpSimpleMessage("data");
     uint32 sendBytes = syscall->result->getNum();
     msg->setDataArraySize(sendBytes);
     for (uint32 i = 0; i < sendBytes; i++)
@@ -1244,7 +1256,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     msg->setByteLength(sendBytes);
     cmsg->encapsulate(msg);
 
-    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    SctpSendInfo* sendCommand = new SctpSendInfo;
     sendCommand->setLast(true);
     sendCommand->setSocketId(sctpAssocId);
     sendCommand->setSid(stream_no);
@@ -1287,7 +1299,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
         ppid = info->sinfo_ppid->getNum();
     }
     Packet* cmsg = new Packet("AppData");
-    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
+    SctpSimpleMessage* msg = new SctpSimpleMessage("data");
     uint32 sendBytes = syscall->result->getNum();
     msg->setDataArraySize(sendBytes);
     for (uint32 i = 0; i < sendBytes; i++)
@@ -1298,7 +1310,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     msg->setByteLength(sendBytes);
     cmsg->encapsulate(msg);
 
-    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    SctpSendInfo* sendCommand = new SctpSendInfo;
     sendCommand->setLast(true);
     sendCommand->setSocketId(-1);
     sendCommand->setSid(sid);
@@ -1335,8 +1347,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
         if (msgArrived || receivedPackets->getLength() > 0) {
             switch (protocol) {
                 case IP_PROT_TCP: {
-                    cMessage *msg = new cMessage("dataRequest");
-                    msg->setKind(TCP_C_READ);
+                    Request *msg = new Request("dataRequest", TCP_C_READ);
                     TcpCommand *tcpcmd = new TcpCommand();
                     msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
                     msg->setControlInfo(tcpcmd);
@@ -1345,14 +1356,16 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 }
                 case IP_PROT_SCTP: {
                     Packet* pkt = new Packet("dataRequest", SCTP_C_RECEIVE);
-                    SCTPSendInfo *sctpcmd = new SCTPSendInfo();
+                    SctpSendInfo *sctpcmd = new SctpSendInfo();
                     sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
                     pkt->setControlInfo(sctpcmd);
                     send(pkt, "sctpOut");
                     break;
                 }
-                default: EV_INFO << "Protocol not supported for this system call.";
+                default:
+                    EV_INFO << "Protocol not supported for this system call.";
+                    break;
             }
             msgArrived = false;
             expectedMessageSize = syscall->result->getNum();
@@ -1443,8 +1456,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
         }
 
         case IP_PROT_TCP: {
-            cMessage *msg = new cMessage("close");
-            msg->setKind(TCP_C_CLOSE);
+            Request *msg = new Request("close", TCP_C_CLOSE);
             TcpCommand *cmd = new TcpCommand();
             msg->addTagIfAbsent<SocketReq>()->setSocketId(tcpConnId);
             msg->setControlInfo(cmd);
@@ -1457,6 +1469,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
         }
         default:
             EV_INFO << "Protocol " << protocol << " is not supported for this system call\n";
+            break;
     }
     return STATUS_OK;
 }
@@ -1478,6 +1491,7 @@ printf("syscallShutdown\n");
         }
         default:
             EV_INFO << "Protocol " << protocol << " is not supported for this system call\n";
+            break;
     }
     return STATUS_OK;
 }
@@ -1539,8 +1553,11 @@ int PacketDrillApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, 
     }
 }
 
-bool PacketDrillApp::compareDatagram(Ipv4Header *storedDatagram, Ipv4Header *liveDatagram)
+bool PacketDrillApp::compareDatagram(Packet *storedPacket, Packet *livePacket)
 {
+    const auto& storedDatagram = storedPacket->peekHeader<Ipv4Header>();
+    const auto& liveDatagram = livePacket->peekHeader<Ipv4Header>();
+
     if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
         return false;
     }
@@ -1573,51 +1590,53 @@ bool PacketDrillApp::compareDatagram(Ipv4Header *storedDatagram, Ipv4Header *liv
     }
     switch (storedDatagram->getProtocolId()) {
         case IP_PROT_UDP: {
-            UdpHeader *storedUdp = check_and_cast<UdpHeader *>(storedDatagram->getEncapsulatedPacket());
-            UdpHeader *liveUdp = check_and_cast<UdpHeader *>(liveDatagram->getEncapsulatedPacket());
-            if (!(compareUdpPacket(storedUdp, liveUdp))) {
+            const auto& storedUdp = storedPacket->peekDataAt<UdpHeader>(storedDatagram->getChunkLength());
+            const auto& liveUdp = livePacket->peekDataAt<UdpHeader>(liveDatagram->getChunkLength());
+            if (!(compareUdpHeader(storedUdp, liveUdp))) {
                 return false;
             }
             break;
         }
 
         case IP_PROT_TCP: {
-            TcpHeader *storedTcp = check_and_cast<TcpHeader *>(storedDatagram->getEncapsulatedPacket());
-            TcpHeader *liveTcp = check_and_cast<TcpHeader *>(liveDatagram->getEncapsulatedPacket());
+            const auto& storedTcp = storedPacket->peekDataAt<TcpHeader>(storedDatagram->getChunkLength());
+            const auto& liveTcp = livePacket->peekDataAt<TcpHeader>(liveDatagram->getChunkLength());
             if (storedTcp->getSynBit()) { // SYN was sent. Store the sequence number for comparisons
                 relSequenceOut = liveTcp->getSequenceNo();
             }
             if (storedTcp->getSynBit() && storedTcp->getAckBit()) {
                 peerWindow = liveTcp->getWindow();
             }
-            if (!(compareTcpPacket(storedTcp, liveTcp))) {
+            if (!(compareTcpHeader(storedTcp, liveTcp))) {
                 return false;
             }
             break;
         }
         case IP_PROT_SCTP: {
-            SCTPMessage *storedSctp = check_and_cast<SCTPMessage *>(storedDatagram->decapsulate());
-            SCTPMessage *liveSctp = check_and_cast<SCTPMessage *>(liveDatagram->decapsulate());
+            const auto& storedSctp = storedPacket->peekDataAt<SctpHeader>(storedDatagram->getChunkLength());
+            const auto& liveSctp = livePacket->peekDataAt<SctpHeader>(liveDatagram->getChunkLength());
             if (!(compareSctpPacket(storedSctp, liveSctp))) {
                 EV_DETAIL << "SCTP packets are not the same" << endl;
                 return false;
             }
-            delete storedSctp;
-            delete liveSctp;
             break;
         }
-        default: EV_INFO << "Transport protocol %d is not supported yet" << storedDatagram->getProtocolId();
+        default:
+            EV_INFO << "Transport protocol %d is not supported yet" << storedDatagram->getProtocolId();
+            break;
     }
     return true;
 }
 
-bool PacketDrillApp::compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp)
+bool PacketDrillApp::compareUdpHeader(const Ptr<const UdpHeader>& storedUdp, const Ptr<const UdpHeader>& liveUdp)
 {
-    return (storedUdp->getSourcePort() == liveUdp->getSourcePort()) &&
-        (storedUdp->getDestinationPort() == liveUdp->getDestinationPort());
+    return (storedUdp->getSourcePort() == liveUdp->getSourcePort())
+            && (storedUdp->getDestinationPort() == liveUdp->getDestinationPort())
+            && (storedUdp->getTotalLengthField() == liveUdp->getTotalLengthField())
+            ;
 }
 
-bool PacketDrillApp::compareTcpPacket(TcpHeader *storedTcp, TcpHeader *liveTcp)
+bool PacketDrillApp::compareTcpHeader(const Ptr<const TcpHeader>& storedTcp, const Ptr<const TcpHeader>& liveTcp)
 {
     if (!(storedTcp->getSrcPort() == liveTcp->getSrcPort())) {
         return false;
@@ -1646,55 +1665,57 @@ bool PacketDrillApp::compareTcpPacket(TcpHeader *storedTcp, TcpHeader *liveTcp)
             return true;
         }
         if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
-            TcpOption *liveOption;
+            const TcpOption *liveOption;
             for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
                 liveOption = liveTcp->getHeaderOption(i);
             }
             return false;
         } else {
-            TcpOption *storedOption, *liveOption;
+            const TcpOption *storedOption, *liveOption;
             for (unsigned int i = 0; i < storedTcp->getHeaderOptionArraySize(); i++) {
                 storedOption = storedTcp->getHeaderOption(i);
                 liveOption = liveTcp->getHeaderOption(i);
                 if (storedOption->getKind() == liveOption->getKind()) {
                     switch (storedOption->getKind()) {
-                        case TCPOPT_EOL:
-                        case TCPOPT_NOP:
+                        case TCPOPTION_END_OF_OPTION_LIST:
+                        case TCPOPTION_NO_OPERATION:
                             if (!(storedOption->getLength() == liveOption->getLength())) {
                                 return false;
                             }
                             break;
-                        case TCPOPT_SACK_PERMITTED:
+                        case TCPOPTION_SACK_PERMITTED:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() == 2)) {
                                 return false;
                             }
                             break;
-                        case TCPOPT_WINDOW:
+                        case TCPOPTION_WINDOW_SCALE:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() == 3 &&
-                                check_and_cast<TcpOptionWindowScale *>(storedOption)->getWindowScale()
-                                 == check_and_cast<TcpOptionWindowScale *>(liveOption)->getWindowScale())) {
+                                check_and_cast<const TcpOptionWindowScale *>(storedOption)->getWindowScale()
+                                 == check_and_cast<const TcpOptionWindowScale *>(liveOption)->getWindowScale())) {
                                 return false;
                             }
                             break;
-                        case TCPOPT_SACK:
+                        case TCPOPTION_SACK:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() > 2 && (storedOption->getLength() % 8) == 2 &&
-                                check_and_cast<TcpOptionSack *>(storedOption)->getSackItemArraySize()
-                                == check_and_cast<TcpOptionSack *>(liveOption)->getSackItemArraySize())) {
+                                check_and_cast<const TcpOptionSack *>(storedOption)->getSackItemArraySize()
+                                == check_and_cast<const TcpOptionSack *>(liveOption)->getSackItemArraySize())) {
                                 return false;
                             }
                             break;
-                        case TCPOPT_TIMESTAMP:
+                        case TCPOPTION_TIMESTAMP:
                             if (!(storedOption->getLength() == liveOption->getLength() &&
                                 storedOption->getLength() == 10 &&
-                                check_and_cast<TcpOptionTimestamp *>(storedOption)->getSenderTimestamp()
-                                == check_and_cast<TcpOptionTimestamp *>(liveOption)->getSenderTimestamp())) {
+                                check_and_cast<const TcpOptionTimestamp *>(storedOption)->getSenderTimestamp()
+                                == check_and_cast<const TcpOptionTimestamp *>(liveOption)->getSenderTimestamp())) {
                                 return false;
                             }
                             break;
-                        default: EV_INFO << "Option not supported";
+                        default:
+                            EV_INFO << "TCP Option type=" << storedOption->getKind() << " not supported";
+                            break;
                     }
                 } else {
                     EV_INFO << "Wrong sequence or option kind not present";
@@ -1707,7 +1728,7 @@ bool PacketDrillApp::compareTcpPacket(TcpHeader *storedTcp, TcpHeader *liveTcp)
     return true;
 }
 
-bool PacketDrillApp::compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liveSctp)
+bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, const Ptr<const SctpHeader>& liveSctp)
 {
     if (!(storedSctp->getSrcPort() == liveSctp->getSrcPort())) {
         return false;
@@ -1715,18 +1736,18 @@ bool PacketDrillApp::compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liv
     if (!(storedSctp->getDestPort() == liveSctp->getDestPort())) {
         return false;
     }
-    if (!(storedSctp->getChunksArraySize() == liveSctp->getChunksArraySize())) {
+    if (!(storedSctp->getSctpChunksArraySize() == liveSctp->getSctpChunksArraySize())) {
         return false;
     }
 
-    const uint32 numberOfChunks = storedSctp->getChunksArraySize();
+    const uint32 numberOfChunks = storedSctp->getSctpChunksArraySize();
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        SCTPChunk* storedHeader = (SCTPChunk*) (storedSctp->removeChunk());
-        SCTPChunk* liveHeader = (SCTPChunk*) (liveSctp->removeChunk());
-        if (!(storedHeader->getChunkType() == liveHeader->getChunkType())) {
+        const SctpChunk* storedHeader = storedSctp->getSctpChunks(i);
+        const SctpChunk* liveHeader = liveSctp->getSctpChunks(i);
+        if (!(storedHeader->getSctpChunkType() == liveHeader->getSctpChunkType())) {
             return false;
         }
-        const uint8 type = storedHeader->getChunkType();
+        const uint8 type = storedHeader->getSctpChunkType();
 
         if ((type != INIT && type != INIT_ACK) && type != ABORT && (liveSctp->getTag() != localVTag)) {
             EV_DETAIL << " VTag " << liveSctp->getTag() << " incorrect. Should be " << localVTag << " peerVTag="
@@ -1736,171 +1757,126 @@ bool PacketDrillApp::compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liv
 
         switch (type) {
             case DATA: {
-                SCTPDataChunk* storedDataChunk = check_and_cast<SCTPDataChunk*>(storedHeader);
-                SCTPDataChunk* liveDataChunk = check_and_cast<SCTPDataChunk*>(liveHeader);
+                auto *storedDataChunk = check_and_cast<const SctpDataChunk*>(storedHeader);
+                auto *liveDataChunk = check_and_cast<const SctpDataChunk*>(liveHeader);
                 if (!(compareDataPacket(storedDataChunk, liveDataChunk))) {
-                    delete storedDataChunk;
-                    delete liveDataChunk;
                     EV_DETAIL << "DATA chunks are not the same" << endl;
                     return false;
                 }
-                delete storedDataChunk;
-                delete liveDataChunk;
                 break;
             }
             case INIT: {
-                SCTPInitChunk* storedInitChunk = check_and_cast<SCTPInitChunk*>(storedHeader);
-                SCTPInitChunk* liveInitChunk = check_and_cast<SCTPInitChunk*>(liveHeader);
+                auto *storedInitChunk = check_and_cast<const SctpInitChunk*>(storedHeader);
+                auto *liveInitChunk = check_and_cast<const SctpInitChunk*>(liveHeader);
                 if (!(compareInitPacket(storedInitChunk, liveInitChunk))) {
-                    delete storedInitChunk;
-                    delete liveInitChunk;
                     EV_DETAIL << "INIT chunks are not the same" << endl;
                     return false;
                 }
-                delete storedInitChunk;
-                delete liveInitChunk;
                 break;
             }
             case INIT_ACK: {
-                SCTPInitAckChunk* storedInitAckChunk = check_and_cast<SCTPInitAckChunk*>(storedHeader);
-                SCTPInitAckChunk* liveInitAckChunk = check_and_cast<SCTPInitAckChunk*>(liveHeader);
+                auto *storedInitAckChunk = check_and_cast<const SctpInitAckChunk*>(storedHeader);
+                auto *liveInitAckChunk = check_and_cast<const SctpInitAckChunk*>(liveHeader);
                 if (!(compareInitAckPacket(storedInitAckChunk, liveInitAckChunk))) {
-                    delete storedInitAckChunk;
-                    delete liveInitAckChunk;
                     EV_DETAIL << "INIT-ACK chunks are not the same" << endl;
                     return false;
                 }
-                delete storedInitAckChunk;
-                delete liveInitAckChunk;
                 break;
             }
             case SACK: {
-                SCTPSackChunk* storedSackChunk = check_and_cast<SCTPSackChunk*>(storedHeader);
-                SCTPSackChunk* liveSackChunk = check_and_cast<SCTPSackChunk*>(liveHeader);
+                auto *storedSackChunk = check_and_cast<const SctpSackChunk*>(storedHeader);
+                auto *liveSackChunk = check_and_cast<const SctpSackChunk*>(liveHeader);
                 if (!(compareSackPacket(storedSackChunk, liveSackChunk))) {
-                    delete storedSackChunk;
-                    delete liveSackChunk;
                     EV_DETAIL << "SACK chunks are not the same" << endl;
                     return false;
                 }
-                delete storedSackChunk;
-                delete liveSackChunk;
                 break;
             }
             case COOKIE_ECHO: {
-                SCTPCookieEchoChunk* storedCookieEchoChunk = check_and_cast<SCTPCookieEchoChunk*>(storedHeader);
+                auto *storedCookieEchoChunk = check_and_cast<const SctpCookieEchoChunk*>(storedHeader);
                 if (!(storedCookieEchoChunk->getFlags() & FLAG_CHUNK_VALUE_NOCHECK))
                     printf("COOKIE_ECHO chunks should be compared\n");
                 else
                     printf("Do not check cookie echo chunks\n");
-                delete storedCookieEchoChunk;
                 if (numberOfChunks == 1)
-                    delete liveHeader;
+                    delete liveHeader;  //FIXME Why?
                 break;
             }
             case SHUTDOWN: {
-                SCTPShutdownChunk* storedShutdownChunk = check_and_cast<SCTPShutdownChunk*>(storedHeader);
-                SCTPShutdownChunk* liveShutdownChunk = check_and_cast<SCTPShutdownChunk*>(liveHeader);
+                auto *storedShutdownChunk = check_and_cast<const SctpShutdownChunk*>(storedHeader);
+                auto *liveShutdownChunk = check_and_cast<const SctpShutdownChunk*>(liveHeader);
                 if (!(storedShutdownChunk->getFlags() & FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK)) {
                     if (!(storedShutdownChunk->getCumTsnAck() == liveShutdownChunk->getCumTsnAck())) {
-                        delete storedShutdownChunk;
-                        delete liveShutdownChunk;
                         EV_DETAIL << "SHUTDOWN chunks are not the same" << endl;
                         return false;
                     }
                 }
-                delete storedShutdownChunk;
-                delete liveShutdownChunk;
                 break;
             }
             case SHUTDOWN_COMPLETE: {
-                SCTPShutdownCompleteChunk* storedShutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk*>(
-                        storedHeader);
-                SCTPShutdownCompleteChunk* liveShutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk*>(
-                        liveHeader);
+                auto *storedShutdownCompleteChunk = check_and_cast<const SctpShutdownCompleteChunk*>(storedHeader);
+                auto *liveShutdownCompleteChunk = check_and_cast<const SctpShutdownCompleteChunk*>(liveHeader);
                 if (!(storedShutdownCompleteChunk->getFlags() & FLAG_CHUNK_FLAGS_NOCHECK))
                     if (!(storedShutdownCompleteChunk->getTBit() == liveShutdownCompleteChunk->getTBit())) {
-                        delete storedShutdownCompleteChunk;
-                        delete liveShutdownCompleteChunk;
                         EV_DETAIL << "SHUTDOWN-COMPLETE chunks are not the same" << endl;
                         return false;
                     }
-                delete storedShutdownCompleteChunk;
-                delete liveShutdownCompleteChunk;
                 break;
             }
             case ABORT: {
-                SCTPAbortChunk* storedAbortChunk = check_and_cast<SCTPAbortChunk*>(storedHeader);
-                SCTPAbortChunk* liveAbortChunk = check_and_cast<SCTPAbortChunk*>(liveHeader);
+                auto *storedAbortChunk = check_and_cast<const SctpAbortChunk*>(storedHeader);
+                auto *liveAbortChunk = check_and_cast<const SctpAbortChunk*>(liveHeader);
                 if (!(storedAbortChunk->getFlags() & FLAG_CHUNK_FLAGS_NOCHECK))
                     if (!(storedAbortChunk->getT_Bit() == liveAbortChunk->getT_Bit())) {
-                        delete storedAbortChunk;
-                        delete liveAbortChunk;
                         EV_DETAIL << "ABORT chunks are not the same" << endl;
                         return false;
                     }
-                delete storedAbortChunk;
-                delete liveAbortChunk;
                 break;
             }
             case ERRORTYPE: {
-                SCTPErrorChunk* storedErrorChunk = check_and_cast<SCTPErrorChunk*>(storedHeader);
-                SCTPErrorChunk* liveErrorChunk = check_and_cast<SCTPErrorChunk*>(liveHeader);
+                auto *storedErrorChunk = check_and_cast<const SctpErrorChunk*>(storedHeader);
+                auto *liveErrorChunk = check_and_cast<const SctpErrorChunk*>(liveHeader);
                 if (!(storedErrorChunk->getParametersArraySize() == liveErrorChunk->getParametersArraySize())) {
-                    delete storedErrorChunk;
-                    delete liveErrorChunk;
                     return false;
                 }
                 if (storedErrorChunk->getParametersArraySize() > 0) {
                 // Only Cause implemented so far.
-                    SCTPSimpleErrorCauseParameter *storedcause = check_and_cast<SCTPSimpleErrorCauseParameter *>(storedErrorChunk->getParameters(0));
-                    SCTPSimpleErrorCauseParameter *livecause = check_and_cast<SCTPSimpleErrorCauseParameter *>(liveErrorChunk->getParameters(0));
+                    auto *storedcause = check_and_cast<const SctpSimpleErrorCauseParameter *>(storedErrorChunk->getParameters(0));
+                    auto *livecause = check_and_cast<const SctpSimpleErrorCauseParameter *>(liveErrorChunk->getParameters(0));
                     if (!(storedcause->getValue() == livecause->getValue())) {
-                        delete storedcause;
-                        delete livecause;
-                        delete storedErrorChunk;
-                        delete liveErrorChunk;
                         return false;
                     }
                 }
-                delete storedErrorChunk;
-                delete liveErrorChunk;
                 break;
             }
             case HEARTBEAT: {
-                SCTPHeartbeatChunk* heartbeatChunk = check_and_cast<SCTPHeartbeatChunk*>(liveHeader);
+                auto *heartbeatChunk = check_and_cast<const SctpHeartbeatChunk*>(liveHeader);
                 peerHeartbeatTime = heartbeatChunk->getTimeField();
-                delete heartbeatChunk;
                 break;
             }
             case COOKIE_ACK:
             case SHUTDOWN_ACK:
             case HEARTBEAT_ACK:
-                delete storedHeader;
-                delete liveHeader;
                 break;
             case RE_CONFIG: {
-                SCTPStreamResetChunk* liveReconfigChunk = check_and_cast<SCTPStreamResetChunk*>(liveHeader);
-                liveReconfigChunk->setName("livereconfig");
-                SCTPStreamResetChunk* storedReconfigChunk = check_and_cast<SCTPStreamResetChunk*>(storedHeader);
+                auto *liveReconfigChunk = check_and_cast<const SctpStreamResetChunk*>(liveHeader);
+                // liveReconfigChunk->setName("livereconfig");          //FIXME Why???
+                auto *storedReconfigChunk = check_and_cast<const SctpStreamResetChunk*>(storedHeader);
                 if (!(compareReconfigPacket(storedReconfigChunk, liveReconfigChunk))) {
-                    delete storedReconfigChunk;
-                    delete liveReconfigChunk;
                     EV_DETAIL << "RECONFIG chunks are not the same" << endl;
                     return false;
                 }
-                delete storedReconfigChunk;
-                delete liveReconfigChunk;
                 break;
             }
             default:
                 printf("type %d not implemented\n", type);
+                break;
         }
     }
     return true;
 }
 
-bool PacketDrillApp::compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataChunk* liveDataChunk)
+bool PacketDrillApp::compareDataPacket(const SctpDataChunk* storedDataChunk, const SctpDataChunk* liveDataChunk)
 {
     uint32 flags = storedDataChunk->getFlags();
     if (!(flags & FLAG_CHUNK_LENGTH_NOCHECK))
@@ -1929,17 +1905,17 @@ bool PacketDrillApp::compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataC
     return true;
 }
 
-bool PacketDrillApp::compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitChunk* liveInitChunk)
+bool PacketDrillApp::compareInitPacket(const SctpInitChunk* storedInitChunk, const SctpInitChunk* liveInitChunk)
 {
     uint32 flags = storedInitChunk->getFlags();
     peerVTag = liveInitChunk->getInitTag();
-    localDiffTsn = liveInitChunk->getInitTSN() - initLocalTsn;
-    initPeerTsn = liveInitChunk->getInitTSN();
+    localDiffTsn = liveInitChunk->getInitTsn() - initLocalTsn;
+    initPeerTsn = liveInitChunk->getInitTsn();
     localCumTsn = initPeerTsn - 1;
     peerCumTsn = initLocalTsn - 1;
 
     if (!(flags & FLAG_INIT_CHUNK_TSN_NOCHECK))
-        if (!(storedInitChunk->getInitTSN() + localDiffTsn == liveInitChunk->getInitTSN()))
+        if (!(storedInitChunk->getInitTsn() + localDiffTsn == liveInitChunk->getInitTsn()))
             return false;
     if (!(flags & FLAG_INIT_CHUNK_A_RWND_NOCHECK))
         if (!(storedInitChunk->getA_rwnd() == liveInitChunk->getA_rwnd()))
@@ -1956,12 +1932,12 @@ bool PacketDrillApp::compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitC
     return true;
 }
 
-bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, SCTPInitAckChunk* liveInitAckChunk)
+bool PacketDrillApp::compareInitAckPacket(const SctpInitAckChunk* storedInitAckChunk, const SctpInitAckChunk* liveInitAckChunk)
 {
     uint32 flags = storedInitAckChunk->getFlags();
     peerVTag = liveInitAckChunk->getInitTag();
-    localDiffTsn = liveInitAckChunk->getInitTSN() - initLocalTsn;
-    initPeerTsn = liveInitAckChunk->getInitTSN();
+    localDiffTsn = liveInitAckChunk->getInitTsn() - initLocalTsn;
+    initPeerTsn = liveInitAckChunk->getInitTsn();
     localCumTsn = initPeerTsn - 1;
     peerCumTsn = initLocalTsn - 1;
     if (!(flags & FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK))
@@ -1974,14 +1950,14 @@ bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, 
         if (!(min(storedInitAckChunk->getNoInStreams(), peerOutStreams) == liveInitAckChunk->getNoInStreams()))
             return false;
     if (!(flags & FLAG_INIT_ACK_CHUNK_TSN_NOCHECK))
-        if (!(storedInitAckChunk->getInitTSN() + localDiffTsn == liveInitAckChunk->getInitTSN()))
+        if (!(storedInitAckChunk->getInitTsn() + localDiffTsn == liveInitAckChunk->getInitTsn()))
             return false;
-    peerCookie = check_and_cast<SCTPCookie*>(liveInitAckChunk->getStateCookie());
+    peerCookie = CHK(liveInitAckChunk->getStateCookie())->dup();        //FIXME hack: dup() called for generate a mutable copy
     peerCookieLength = peerCookie->getByteLength();
     return true;
 }
 
-bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigChunk, SCTPStreamResetChunk* liveReconfigChunk)
+bool PacketDrillApp::compareReconfigPacket(const SctpStreamResetChunk* storedReconfigChunk, const SctpStreamResetChunk* liveReconfigChunk)
 {
     bool found = false;
 
@@ -1990,14 +1966,14 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
         return false;
     }
     for (unsigned int i = 0; i < storedReconfigChunk->getParametersArraySize(); i++) {
-        SCTPParameter *storedParameter = check_and_cast<SCTPParameter *>(storedReconfigChunk->getParameters(i));
-        SCTPParameter *liveParameter = nullptr;
+        auto *storedParameter = check_and_cast<const SctpParameter *>(storedReconfigChunk->getParameters(i));
+        const SctpParameter *liveParameter = nullptr;
         found = false;
         switch (storedParameter->getParameterType()) {
             case OUTGOING_RESET_REQUEST_PARAMETER: {
-                SCTPOutgoingSSNResetRequestParameter *storedoutparam = check_and_cast<SCTPOutgoingSSNResetRequestParameter *>(storedParameter);
+                auto *storedoutparam = check_and_cast<const SctpOutgoingSsnResetRequestParameter *>(storedParameter);
                 for (unsigned int j = 0; j < liveReconfigChunk->getParametersArraySize(); j++) {
-                    liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(j));
+                    liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(j));
                     if (liveParameter->getParameterType() != OUTGOING_RESET_REQUEST_PARAMETER)
                         continue;
                     else {
@@ -2007,7 +1983,7 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 }
                 if (!found)
                     return false;
-                SCTPOutgoingSSNResetRequestParameter *liveoutparam = check_and_cast<SCTPOutgoingSSNResetRequestParameter *>(liveParameter);
+                auto *liveoutparam = check_and_cast<const SctpOutgoingSsnResetRequestParameter *>(liveParameter);
                 if (seqNumMap[storedoutparam->getSrReqSn()] == 0) {
                     seqNumMap[storedoutparam->getSrReqSn()] = liveoutparam->getSrReqSn();
                 } else if (!(flags & FLAG_RECONFIG_REQ_SN_NOCHECK))
@@ -2032,9 +2008,9 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
             }
             case INCOMING_RESET_REQUEST_PARAMETER: {
                 found = false;
-                SCTPIncomingSSNResetRequestParameter *storedinparam = check_and_cast<SCTPIncomingSSNResetRequestParameter *>(storedParameter);
+                auto *storedinparam = check_and_cast<const SctpIncomingSsnResetRequestParameter *>(storedParameter);
                 for (unsigned int j = 0; j < liveReconfigChunk->getParametersArraySize(); j++) {
-                    liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(j));
+                    liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(j));
                     if (liveParameter->getParameterType() != INCOMING_RESET_REQUEST_PARAMETER)
                         continue;
                     else {
@@ -2044,7 +2020,7 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 }
                 if (!found)
                     return false;
-                SCTPIncomingSSNResetRequestParameter *liveinparam = check_and_cast<SCTPIncomingSSNResetRequestParameter *>(liveParameter);
+                auto *liveinparam = check_and_cast<const SctpIncomingSsnResetRequestParameter *>(liveParameter);
                 if (seqNumMap[storedinparam->getSrReqSn()] == 0) {
                     seqNumMap[storedinparam->getSrReqSn()] = liveinparam->getSrReqSn();
                 } else if (!(seqNumMap[storedinparam->getSrReqSn()] == liveinparam->getSrReqSn())) {
@@ -2061,12 +2037,12 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 break;
             }
             case STREAM_RESET_RESPONSE_PARAMETER: {
-                SCTPStreamResetResponseParameter *storedresparam = check_and_cast<SCTPStreamResetResponseParameter *>(storedParameter);
-                liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(i));
+                auto *storedresparam = check_and_cast<const SctpStreamResetResponseParameter *>(storedParameter);
+                liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(i));
                 if (liveParameter->getParameterType() != STREAM_RESET_RESPONSE_PARAMETER) {
                     break;
                 }
-                SCTPStreamResetResponseParameter *liveresparam = check_and_cast<SCTPStreamResetResponseParameter *>(liveParameter);
+                auto *liveresparam = check_and_cast<const SctpStreamResetResponseParameter *>(liveParameter);
                 if (!(storedresparam->getSrResSn() == liveresparam->getSrResSn())) {
                     return false;
                 }
@@ -2085,9 +2061,9 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
             }
             case SSN_TSN_RESET_REQUEST_PARAMETER: {
                 found = false;
-                SCTPSSNTSNResetRequestParameter *storedinparam = check_and_cast<SCTPSSNTSNResetRequestParameter *>(storedParameter);
+                auto *storedinparam = check_and_cast<const SctpSsnTsnResetRequestParameter *>(storedParameter);
                 for (unsigned int j = 0; j < liveReconfigChunk->getParametersArraySize(); j++) {
-                    liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(j));
+                    liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(j));
                     if (liveParameter->getParameterType() != SSN_TSN_RESET_REQUEST_PARAMETER)
                         continue;
                     else {
@@ -2097,7 +2073,7 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 }
                 if (!found)
                     return false;
-                SCTPSSNTSNResetRequestParameter *liveinparam = check_and_cast<SCTPSSNTSNResetRequestParameter *>(liveParameter);
+                auto *liveinparam = check_and_cast<const SctpSsnTsnResetRequestParameter *>(liveParameter);
                 if (seqNumMap[storedinparam->getSrReqSn()] == 0) {
                     seqNumMap[storedinparam->getSrReqSn()] = liveinparam->getSrReqSn();
                 } else if (!(seqNumMap[storedinparam->getSrReqSn()] == liveinparam->getSrReqSn())) {
@@ -2107,9 +2083,9 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
             }
             case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
                 found = false;
-                SCTPAddStreamsRequestParameter *storedaddparam = check_and_cast<SCTPAddStreamsRequestParameter *>(storedParameter);
+                auto *storedaddparam = check_and_cast<const SctpAddStreamsRequestParameter *>(storedParameter);
                 for (unsigned int j = 0; j < liveReconfigChunk->getParametersArraySize(); j++) {
-                    liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(j));
+                    liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(j));
                     if (liveParameter->getParameterType() != ADD_INCOMING_STREAMS_REQUEST_PARAMETER)
                         continue;
                     else {
@@ -2119,7 +2095,7 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 }
                 if (!found)
                     return false;
-                SCTPAddStreamsRequestParameter *liveaddparam = check_and_cast<SCTPAddStreamsRequestParameter *>(liveParameter);
+                auto *liveaddparam = check_and_cast<const SctpAddStreamsRequestParameter *>(liveParameter);
                 if (seqNumMap[storedaddparam->getSrReqSn()] == 0) {
                     seqNumMap[storedaddparam->getSrReqSn()] = liveaddparam->getSrReqSn();
                 } else if (!(seqNumMap[storedaddparam->getSrReqSn()] == liveaddparam->getSrReqSn())) {
@@ -2131,9 +2107,9 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
             }
             case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
                 found = false;
-                SCTPAddStreamsRequestParameter *storedaddparam = check_and_cast<SCTPAddStreamsRequestParameter *>(storedParameter);
+                auto *storedaddparam = check_and_cast<const SctpAddStreamsRequestParameter *>(storedParameter);
                 for (unsigned int j = 0; j < liveReconfigChunk->getParametersArraySize(); j++) {
-                    liveParameter = check_and_cast<SCTPParameter *>(liveReconfigChunk->getParameters(j));
+                    liveParameter = check_and_cast<const SctpParameter *>(liveReconfigChunk->getParameters(j));
                     if (liveParameter->getParameterType() != ADD_OUTGOING_STREAMS_REQUEST_PARAMETER)
                         continue;
                     else {
@@ -2143,7 +2119,7 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                 }
                 if (!found)
                     return false;
-                SCTPAddStreamsRequestParameter *liveaddparam = check_and_cast<SCTPAddStreamsRequestParameter *>(liveParameter);
+                auto *liveaddparam = check_and_cast<const SctpAddStreamsRequestParameter *>(liveParameter);
                 if (seqNumMap[storedaddparam->getSrReqSn()] == 0) {
                     seqNumMap[storedaddparam->getSrReqSn()] = liveaddparam->getSrReqSn();
                 } else if (!(seqNumMap[storedaddparam->getSrReqSn()] == liveaddparam->getSrReqSn())) {
@@ -2153,13 +2129,15 @@ bool PacketDrillApp::compareReconfigPacket(SCTPStreamResetChunk* storedReconfigC
                     return false;
                 break;
             }
-            default: printf("Reconfig Parameter %d not implemented\n", storedParameter->getParameterType());
+            default:
+                printf("Reconfig Parameter %d not implemented\n", storedParameter->getParameterType());
+                break;
         }
     }
     return true;
 }
 
-bool PacketDrillApp::compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackChunk* liveSackChunk)
+bool PacketDrillApp::compareSackPacket(const SctpSackChunk *storedSackChunk, const SctpSackChunk *liveSackChunk)
 {
     uint32 flags = storedSackChunk->getFlags();
     if (!(flags & FLAG_SACK_CHUNK_CUM_TSN_NOCHECK))
@@ -2201,3 +2179,4 @@ bool PacketDrillApp::compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackC
 }
 
 } // namespace INET
+

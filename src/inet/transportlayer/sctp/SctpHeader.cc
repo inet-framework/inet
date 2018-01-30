@@ -76,7 +76,7 @@ void SctpHeader::setSctpChunksArraySize(size_t size)
 
 void SctpHeader::setSctpChunks(size_t k, SctpChunk * sctpChunks)
 {
-    throw new cException(this, "setChunks() not supported, use insertSctpChunks()");
+    sctpChunkList.at(k) = sctpChunks;
 }
 
 size_t SctpHeader::getSctpChunksArraySize() const

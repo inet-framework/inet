@@ -20,20 +20,20 @@
 #define __INET_PACKETDRILL_H
 
 #include "inet/common/INETDefs.h"
-#include "omnetpp/platdep/sockets.h"
+//#include "omnetpp/platdep/sockets.h"
 
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/transportlayer/sctp/SCTPMessage.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "PacketDrillApp.h"
 
 namespace inet {
 using namespace sctp;
 class PacketDrillApp;
-}
 
 class INET_API PacketDrill
 {
@@ -83,7 +83,7 @@ class INET_API PacketDrill
 
         static PacketDrillSctpChunk* buildErrorChunk(int64 flgs, cQueue *causes);
 
-        static Ipv4Header *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
+        static Ptr<Ipv4Header> makeIpv4Header(IpProtocolId protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);
 
@@ -100,4 +100,7 @@ class INET_API PacketDrill
         int evaluateListExpression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 };
 
+} // namespace inet
+
 #endif
+
