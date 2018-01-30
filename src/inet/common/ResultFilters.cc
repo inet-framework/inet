@@ -42,6 +42,14 @@ void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject
             fire(this, t, t - region.getTag()->getCreationTime(), details);
 }
 
+Register_ResultFilter("messageAge", MessageAgeFilter);
+
+void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto msg = dynamic_cast<cMessage *>(object))
+        fire(this, t, t - msg->getCreationTime(), details);
+}
+
 Register_ResultFilter("messageTSAge", MessageTsAgeFilter);
 
 void MessageTsAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)

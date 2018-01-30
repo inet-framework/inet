@@ -47,6 +47,16 @@ class INET_API DataAgeFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects a cMessage and outputs its age in seconds
+ * (t - msg->getCreationTime()).
+ */
+class INET_API MessageAgeFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects a cMessage and outputs its age from the timestamp field
  * in seconds (t - msg->getTimestamp()).
  */
