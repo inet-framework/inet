@@ -126,7 +126,7 @@ simple UdpBasicBurst like IApp
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=packetDrop; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[outOfOrderPk](title="packets received out of order"; source=outOfOrderPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @display("i=block/app");
     gates:
         input socketIn @labels(UdpControlInfo/up);

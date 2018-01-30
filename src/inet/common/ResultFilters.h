@@ -38,10 +38,9 @@ class VoidPtrWrapper : public cObject
 };
 
 /**
- * Filter that expects a cMessage and outputs its age in seconds
- * (t - msg->getCreationTime()).
+ * Filter that expects a Packet and outputs the age of packet data in seconds.
  */
-class INET_API MessageAgeFilter : public cObjectResultFilter
+class INET_API DataAgeFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;

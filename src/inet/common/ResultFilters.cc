@@ -33,10 +33,9 @@ namespace utils {
 
 namespace filters {
 
-// TODO: rename packetAge
-Register_ResultFilter("messageAge", MessageAgeFilter);
+Register_ResultFilter("dataAge", DataAgeFilter);
 
-void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<Packet *>(object))
         for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>())
