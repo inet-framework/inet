@@ -183,7 +183,6 @@ void Aodv::handleMessage(cMessage *msg)
 
 INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
 {
-    Enter_Method("datagramPreRoutingHook");
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
@@ -208,7 +207,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
 
             return ACCEPT;
         }
-        else if (sourceAddr.isUnspecified() || routingTable->isLocalAddress(sourceAddr)) {
+        else {
             bool isInactive = routeData && !routeData->isActive();
             // A node disseminates a RREQ when it determines that it needs a route
             // to a destination and does not have one available.  This can happen if
@@ -233,8 +232,6 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram)
 
             return QUEUE;
         }
-        else
-            return ACCEPT;
     }
 }
 
