@@ -29,9 +29,9 @@ if [ "$TARGET_PLATFORM" = "linux" ]; then
     opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
 fi
 
-echo -e "\nBuilding...\n"
-make makefiles > /dev/null
-make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc) > /dev/null
+echo -e "\nBuilding (silently)...\n"
+make makefiles > /dev/null 2>&1
+make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc) > /dev/null 2>&1
 echo -e "\nccache summary:\n"
 ccache -s
 
