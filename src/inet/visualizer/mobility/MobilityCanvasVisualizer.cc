@@ -64,8 +64,8 @@ void MobilityCanvasVisualizer::refreshDisplay() const
         if (mobilityVisualization->visualRepresentation != nullptr)
             setPosition(mobilityVisualization->visualRepresentation, position);
         if (displayOrientations) {
-            // TODO: this doesn't correctly take canvas projection into account
-            double angle = orientation.alpha;
+            // NOTE: this negation cancels out the (incorrect) CCW angle handling of cArcFigure (see bug https://dev.omnetpp.org/bugs/view.php?id=1030)
+            double angle = -orientation.alpha;
             mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationArcSize);
             mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationArcSize);
         }
