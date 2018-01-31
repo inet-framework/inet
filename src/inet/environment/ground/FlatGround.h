@@ -33,7 +33,7 @@ class INET_API FlatGround : public IGround, public cModule
     virtual void initialize(int stage) override;
 
   public:
-    virtual double getElevation(const Coord &position) const override;
+    virtual Coord projectToGround(const Coord &position) const override;
 };
 
 } // namespace physicalenvironment

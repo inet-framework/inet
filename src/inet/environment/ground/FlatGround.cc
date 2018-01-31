@@ -29,9 +29,9 @@ void FlatGround::initialize(int stage)
         elevation = par("elevation");
 }
 
-double FlatGround::getElevation(const Coord &position) const
+Coord FlatGround::projectToGround(const Coord &position) const
 {
-    return elevation;
+    return Coord(position.x, position.y, elevation);
 }
 
 } // namespace physicalenvironment
