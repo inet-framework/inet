@@ -29,6 +29,8 @@ simple PacketDrillApp like IApp
         int remotePort;
         string localAddress;
         string remoteAddress;
+        string interfaceTableModule;
+        string interface;   // tun interface name
         int inboundStreams = default(20);
         int outboundStreams = default(20);
         int streamReset = default(0);

@@ -19,18 +19,19 @@
 #define __INET_PACKETDRILLAPP_H_
 
 #include "inet/common/INETDefs.h"
+#include "inet/applications/tcpapp/TcpSessionApp.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/linklayer/tun/TunSocket.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/tcp/TcpConnection.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/applications/tcpapp/TcpSessionApp.h"
-#include "PacketDrill.h"
-#include "PacketDrillUtils.h"
+#include "inet/applications/packetdrill/PacketDrill.h"
+#include "inet/applications/packetdrill/PacketDrillUtils.h"
 
 namespace inet {
 
@@ -88,6 +89,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         UdpSocket udpSocket;
         TcpSocket tcpSocket;
         SctpSocket sctpSocket;
+        TunSocket tunSocket;
         PacketDrill *pd;
         bool msgArrived;
         bool recvFromSet;
