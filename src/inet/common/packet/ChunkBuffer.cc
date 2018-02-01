@@ -122,6 +122,7 @@ void ChunkBuffer::replace(b offset, const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(offset >= b(0), "offset is invalid");
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     constPtrCast<Chunk>(chunk)->markImmutable();
     Region newRegion(offset, chunk);
     sliceRegions(newRegion);

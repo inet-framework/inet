@@ -92,6 +92,7 @@ void ChunkQueue::clear()
 void ChunkQueue::push(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     constPtrCast<Chunk>(chunk)->markImmutable();
     pushedLength += chunk->getChunkLength();
     if (contents == EmptyChunk::singleton)
