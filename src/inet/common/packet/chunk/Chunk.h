@@ -503,7 +503,7 @@ class INET_API Chunk : public cObject,
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const Ptr<const Chunk>& chunk) {
+    void insertAtEnd(const Ptr<const Chunk>& chunk) {
         CHUNK_CHECK_IMPLEMENTATION(canInsertAtEnd(chunk));
         handleChange();
         tags.copyTags(chunk->tags, b(0), getChunkLength(), chunk->getChunkLength());
@@ -550,7 +550,7 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the sequentially assigned id.
      */
-    virtual int getChunkId() const { return id; }
+    int getChunkId() const { return id; }
 
     /**
      * Returns the type of this chunk as an enum member. This can be used to
@@ -567,7 +567,7 @@ class INET_API Chunk : public cObject,
      * Returns the simplified representation of this chunk eliminating all potential
      * redundancies. This function may return a nullptr for emptry chunks.
      */
-    virtual const Ptr<Chunk> simplify() const {
+    const Ptr<Chunk> simplify() const {
         return peek(b(0), getChunkLength(), PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED);
     }
 
@@ -578,7 +578,7 @@ class INET_API Chunk : public cObject,
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual const Ptr<Chunk> peek(const Iterator& iterator, b length = b(-1), int flags = 0) const;
+    const Ptr<Chunk> peek(const Iterator& iterator, b length = b(-1), int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
