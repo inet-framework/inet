@@ -92,14 +92,14 @@ void Gpsr::initialize(int stage)
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
-
         // packet size
         positionByteLength = par("positionByteLength");
+        // reset state
+        globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        globalPositionTable.clear();
         host->subscribe(linkBreakSignal, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
