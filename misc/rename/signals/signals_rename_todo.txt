@@ -1,7 +1,6 @@
 ### "acceptConfirm" -> "acceptConfirm"
 ### "backoff" -> "backoff"
 ### "badResponse" -> "badResponse"
-"bitErrorRate" -> use indication on packet and filter
 ### "collision" -> "collision"
 ### "connState" -> "connState"
 ### "connect" -> "connect"
@@ -38,13 +37,11 @@
 ### "lostSamples" -> "lostSamples"
 ### "macBecameIdle" -> "macBecameIdle"
 ### "markPk" -> "markPk"
-"minSnir" -> use indication on packet and filter
 ### "numLost" -> "numLost"
 ### "numOutOfOrderArrivals" -> "numOutOfOrderArrivals"
 ### "numRoutes" -> "numRoutes"
 ### "outOfOrderPk" -> "outOfOrderPk"
 "packetDrop" -> "packetDropped"
-"packetErrorRate" -> use indication on packet and filter
 ### "packetHasVoice" -> "packetHasVoice"
 ### "pingRxSeq" -> "pingRxSeq"
 ### "pingTxSeq" -> "pingTxSeq"
@@ -85,7 +82,6 @@
 ### "sentStateRefreshPk" -> "sentStateRefreshPk"
 ### "sentUpdate" -> "sentUpdate"
 ### "startDad" -> "startDad"
-"symbolErrorRate" -> use indication on packet and filter
 ### "tedChanged" -> "tedChanged"
 ### "transmitState" -> "transmitState"
 ### "txAcked" -> "txAcked"

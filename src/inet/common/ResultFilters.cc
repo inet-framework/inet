@@ -23,9 +23,14 @@
 #include "inet/common/ResultFilters.h"
 #include "inet/common/Simsignals_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceptionBase.h"
+
+#ifdef WITH_RADIO
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#endif
 
 namespace inet {
 
@@ -206,6 +211,63 @@ Register_PacketDropReason_ResultFilter("packetDropReasonIsLifetimeExpired", Life
 Register_PacketDropReason_ResultFilter("packetDropReasonIsCongestion", CongestionPacketDropReasonFilter, CONGESTION);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsNoProtocolFound", NoProtocolFoundPacketDropReasonFilter, NO_PROTOCOL_FOUND);
 Register_PacketDropReason_ResultFilter("packetDropReasonIsNoPortFound", NoPortFoundPacketDropReasonFilter, NO_PORT_FOUND);
+
+
+Register_ResultFilter("minimumSnir", MinimumSnirFromSnirIndFilter);
+
+void MinimumSnirFromSnirIndFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+#ifdef WITH_RADIO
+    if (auto pk = dynamic_cast<Packet *>(object)) {
+        auto tag = pk->findTag<SnirInd>();
+        if (tag)
+            fire(this, t, tag->getMinimumSnir(), details);
+    }
+#endif  // WITH_RADIO
+}
+
+
+Register_ResultFilter("packetErrorRate", PacketErrorRateFromErrorRateIndFilter);
+
+void PacketErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+#ifdef WITH_RADIO
+    if (auto pk = dynamic_cast<Packet *>(object)) {
+        auto tag = pk->findTag<ErrorRateInd>();
+        if (tag)
+            fire(this, t, tag->getPacketErrorRate(), details);  //TODO isNaN?
+    }
+#endif  // WITH_RADIO
+}
+
+
+Register_ResultFilter("bitErrorRate", BitErrorRateFromErrorRateIndFilter);
+
+void BitErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+#ifdef WITH_RADIO
+    if (auto pk = dynamic_cast<Packet *>(object)) {
+        auto tag = pk->findTag<ErrorRateInd>();
+        if (tag)
+            fire(this, t, tag->getBitErrorRate(), details);  //TODO isNaN?
+    }
+#endif  // WITH_RADIO
+}
+
+
+Register_ResultFilter("symbolErrorRate", SymbolErrorRateFromErrorRateIndFilter);
+
+void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+#ifdef WITH_RADIO
+    if (auto pk = dynamic_cast<Packet *>(object)) {
+        auto tag = pk->findTag<ErrorRateInd>();
+        if (tag)
+            fire(this, t, tag->getSymbolErrorRate(), details);  //TODO isNaN?
+    }
+#endif  // WITH_RADIO
+}
+
 
 } // namespace filters
 

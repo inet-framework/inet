@@ -188,6 +188,44 @@ class INET_API PacketDropReasonFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+/**
+ * Filter that expects a Packet and outputs its minsnir from snirIndication tag if exists .
+ */
+class INET_API MinimumSnirFromSnirIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its packetErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API PacketErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its bitErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API BitErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its symbolErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API SymbolErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+
+
 } // namespace filters
 
 } // namespace utils
