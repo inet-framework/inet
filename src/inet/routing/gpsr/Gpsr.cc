@@ -312,30 +312,31 @@ void Gpsr::configureInterfaces()
 // position
 //
 
-bool Gpsr::isConnectingLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
+Coord Gpsr::computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
 {
-    return begin1 == begin2 || begin1 == end2 || end1 == begin2 || end1 == end2;
-}
-
-Coord Gpsr::computeRealIntersectionForLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
-{
-    double x1 = begin1.x;
-    double y1 = begin1.y;
-    double x2 = end1.x;
-    double y2 = end1.y;
-    double x3 = begin2.x;
-    double y3 = begin2.y;
-    double x4 = end2.x;
-    double y4 = end2.y;
-    double a = determinant(x1, y1, x2, y2);
-    double b = determinant(x3, y3, x4, y4);
-    double c = determinant(x1 - x2, y1 - y2, x3 - x4, y3 - y4);
-    double x = determinant(a, x1 - x2, b, x3 - x4) / c;
-    double y = determinant(a, y1 - y2, b, y3 - y4) / c;
-    if (x1 < x && x < x2 && x3 < x && x < x4 && y1 < y && y < y2 && y3 < y && y < y4)
-        return Coord(x, y, 0);
-    else
-        return Coord(NaN, NaN, NaN);
+    // NOTE: we must explicitly avoid computing the intersection points inside due to double instability
+    if (begin1 == begin2 || begin1 == end2 || end1 == begin2 || end1 == end2)
+        return Coord::NIL;
+    else {
+        double x1 = begin1.x;
+        double y1 = begin1.y;
+        double x2 = end1.x;
+        double y2 = end1.y;
+        double x3 = begin2.x;
+        double y3 = begin2.y;
+        double x4 = end2.x;
+        double y4 = end2.y;
+        double a = determinant(x1, y1, x2, y2);
+        double b = determinant(x3, y3, x4, y4);
+        double c = determinant(x1 - x2, y1 - y2, x3 - x4, y3 - y4);
+        double x = determinant(a, x1 - x2, b, x3 - x4) / c;
+        double y = determinant(a, y1 - y2, b, y3 - y4) / c;
+        if ((x <= x1 && x <= x2) || (x >= x1 && x >= x2) || (x <= x3 && x <= x4) || (x >= x3 && x >= x4) ||
+            (y <= y1 && y <= y2) || (y >= y1 && y >= y2) || (y <= y3 && y <= y4) || (y >= y3 && y >= y4))
+            return Coord::NIL;
+        else
+            return Coord(x, y, 0);
+    }
 }
 
 Coord Gpsr::getDestinationPosition(const L3Address& address) const
@@ -562,10 +563,7 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
                 break;
             EV_DEBUG << "Intersecting towards next hop: nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
             Coord nextNeighborPosition = getNeighborPosition(nextNeighborAddress);
-            // NOTE: we must explicitly avoid computing the real intersection points due to double instability
-            if (isConnectingLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition))
-                break;
-            Coord intersection = computeRealIntersectionForLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
+            Coord intersection = computeIntersectionInsideLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
             if (std::isnan(intersection.x))
                 break;
             else {

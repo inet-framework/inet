@@ -125,8 +125,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void configureInterfaces();
 
     // position
-    bool isConnectingLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
-    Coord computeRealIntersectionForLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
+    Coord computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
     Coord getDestinationPosition(const L3Address& address) const;
     Coord getNeighborPosition(const L3Address& address) const;
 
