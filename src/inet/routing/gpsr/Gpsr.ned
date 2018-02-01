@@ -41,7 +41,7 @@ simple Gpsr like IManetRouting
         string outputInterface = default("wlan0");
 
         // GPSR parameters
-        int planarizationMode @enum(0,1) = default(0); // 0 for GG, 1 for RNG
+        string planarizationMode @enum("", "GG", "RNG") = default("GG");
         string interfaces = default("*");
         double beaconInterval @unit(s) = default(10s);
         double maxJitter @unit(s) = default(1s);

@@ -76,7 +76,15 @@ void Gpsr::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         // Gpsr parameters
-        planarizationMode = (GpsrPlanarizationMode)(int)par("planarizationMode");
+        const char *planarizationModeString = par("planarizationMode");
+        if (!strcmp(planarizationModeString, ""))
+            planarizationMode = GPSR_NO_PLANARIZATION;
+        else if (!strcmp(planarizationModeString, "GG"))
+            planarizationMode = GPSR_GG_PLANARIZATION;
+        else if (!strcmp(planarizationModeString, "RNG"))
+            planarizationMode = GPSR_RNG_PLANARIZATION;
+        else
+            throw cRuntimeError("Unknown planarization mode");
         interfaces = par("interfaces");
         beaconInterval = par("beaconInterval");
         maxJitter = par("maxJitter");
@@ -422,7 +430,9 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
     for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
         const L3Address& neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
-        if (planarizationMode == GPSR_RNG_PLANARIZATION) {
+        if (planarizationMode == GPSR_NO_PLANARIZATION)
+            return neighborAddresses;
+        else if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
             for (auto & neighborAddresse : neighborAddresses) {
                 const L3Address& witnessAddress = neighborAddresse;
