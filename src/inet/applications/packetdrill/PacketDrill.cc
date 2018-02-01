@@ -28,7 +28,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 
 namespace inet {

@@ -27,7 +27,7 @@
 #include "PacketDrillUtils.h"
 #include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 
