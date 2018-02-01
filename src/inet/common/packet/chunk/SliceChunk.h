@@ -75,7 +75,7 @@ class INET_API SliceChunk : public Chunk
     /** @name Field accessor functions */
     //@{
     const Ptr<Chunk>& getChunk() const { return chunk; }
-    void setChunk(const Ptr<Chunk>& chunk) { this->chunk = chunk; }
+    void setChunk(const Ptr<Chunk>& chunk) { CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable"); this->chunk = chunk; }
 
     b getOffset() const { return offset; }
     void setOffset(b offset);

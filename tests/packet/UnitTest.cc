@@ -1150,6 +1150,7 @@ static void testNesting()
     Packet packet1;
     auto ipHeader1 = makeShared<IpHeader>();
     ipHeader1->setProtocol(Protocol::Tcp);
+    ipHeader1->markImmutable();
     auto compoundHeader1 = makeShared<CompoundHeader>();
     compoundHeader1->insertAtEnd(ipHeader1);
     compoundHeader1->markImmutable();
@@ -1210,8 +1211,12 @@ static void testSequence()
 
     // 2. sequence merges mutable slices
     auto sequenceChunk2 = makeShared<SequenceChunk>();
-    sequenceChunk2->insertAtEnd(makeShared<SliceChunk>(applicationHeader1, B(0), B(5)));
-    sequenceChunk2->insertAtEnd(makeShared<SliceChunk>(applicationHeader1, B(5), B(5)));
+    const auto& sliceChunk1 = makeShared<SliceChunk>(applicationHeader1, B(0), B(5));
+    sliceChunk1->markImmutable();
+    sequenceChunk2->insertAtEnd(sliceChunk1);
+    const auto& sliceChunk2 = makeShared<SliceChunk>(applicationHeader1, B(5), B(5));
+    sliceChunk2->markImmutable();
+    sequenceChunk2->insertAtEnd(sliceChunk2);
     const auto& chunk2 = sequenceChunk2->peek(b(0));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
 }

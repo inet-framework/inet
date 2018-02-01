@@ -39,6 +39,7 @@ SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, b offset, b length) :
     offset(offset),
     length(length == b(-1) ? chunk->getChunkLength() - offset : length)
 {
+    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     b chunkLength = chunk->getChunkLength();
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= this->offset && this->offset <= chunkLength);
