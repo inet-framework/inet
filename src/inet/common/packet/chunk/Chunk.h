@@ -564,6 +564,11 @@ class INET_API Chunk : public cObject,
     virtual b getChunkLength() const = 0;
 
     /**
+     * Returns true if this chunk contains no data.
+     */
+    virtual bool isEmpty() const { return getChunkLength() == b(0); }
+
+    /**
      * Returns the simplified representation of this chunk eliminating all potential
      * redundancies. This function may return a nullptr for emptry chunks.
      */
