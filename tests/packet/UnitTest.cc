@@ -386,13 +386,12 @@ static void testEmpty()
     ASSERT_ERROR(packet1.peekHeader<IpHeader>(), "empty chunk is not allowed");
     ASSERT_ERROR(packet1.peekTrailer<IpHeader>(), "empty chunk is not allowed");
 
-    // 2. insert an empty chunk is an error
+    // 2. inserting an empty chunk is an error
     Packet packet2;
-    ASSERT_ERROR(packet2.insertHeader(makeShared<ByteCountChunk>(B(0))), "empty chunk is not allowed");
-    ASSERT_ERROR(packet2.insertAtBeginning(makeShared<ByteCountChunk>(B(0))), "empty chunk is not allowed");
-    ASSERT_ERROR(packet2.insertTrailer(makeShared<ByteCountChunk>(B(0))), "empty chunk is not allowed");
-    ASSERT_ERROR(packet2.insertAtEnd(makeShared<ByteCountChunk>(B(0))), "empty chunk is not allowed");
-    packet2.insertHeader(makeShared<ByteCountChunk>(B(10)));
+    ASSERT_ERROR(packet2.insertHeader(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
+    ASSERT_ERROR(packet2.insertAtBeginning(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
+    ASSERT_ERROR(packet2.insertTrailer(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
+    ASSERT_ERROR(packet2.insertAtEnd(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
 }
 
 static void testHeader()
