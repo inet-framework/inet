@@ -39,6 +39,7 @@ import inet.routing.contract.IManetRouting;
 simple Aodv like IManetRouting
 {
     parameters:
+        @class("aodv::Aodv");
         @display("i=block/network2");
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");

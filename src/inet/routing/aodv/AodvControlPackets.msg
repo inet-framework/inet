@@ -20,7 +20,7 @@ import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
-namespace inet;
+namespace inet::aodv;
 
 //
 // Helper struct to represent (L3Address, sequence number) pairs in a RERR message
@@ -50,7 +50,7 @@ class AodvControlPacket extends FieldsChunk
 //
 // Represents an AODV Route Request
 //
-class AodvRreq extends AodvControlPacket
+class Rreq extends AodvControlPacket
 {
     packetType = RREQ;
     bool joinFlag;
@@ -69,7 +69,7 @@ class AodvRreq extends AodvControlPacket
 //
 // Represents an AODV Route Reply
 //
-class AodvRrep extends AodvControlPacket
+class Rrep extends AodvControlPacket
 {
     packetType = RREP;
     bool repairFlag;
@@ -86,7 +86,7 @@ class AodvRrep extends AodvControlPacket
 //
 // Represents an AODV Route Error
 //
-class AodvRerr extends AodvControlPacket
+class Rerr extends AodvControlPacket
 {
     packetType = RERR;
     UnreachableNode unreachableNodes[];
@@ -97,7 +97,7 @@ class AodvRerr extends AodvControlPacket
 //
 // Represents an AODV Route Reply ACK
 //
-class AodvRrepAck extends AodvControlPacket
+class RrepAck extends AodvControlPacket
 {
     packetType = RREPACK;
 }

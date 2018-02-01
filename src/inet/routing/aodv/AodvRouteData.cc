@@ -19,6 +19,7 @@
 #include "inet/routing/aodv/AodvRouteData.h"
 
 namespace inet {
+namespace aodv {
 
 std::ostream& operator<<(std::ostream& out, const AodvRouteData *data)
 {
@@ -39,5 +40,6 @@ std::ostream& operator<<(std::ostream& out, const AodvRouteData *data)
     return out;
 };
 
+} // namespace aodv
 } // namespace inet
 

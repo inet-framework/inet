@@ -71,8 +71,7 @@ std::string Ipv4Route::str() const
     out << " " << IRoute::sourceTypeName(sourceType);
 
 #ifdef WITH_AODV
-    if (dynamic_cast<AodvRouteData *>(protocolData)) {
-        AodvRouteData *data = (AodvRouteData *)protocolData;
+    if (auto *data = dynamic_cast<aodv::AodvRouteData *>(protocolData)) {
         out << data;
     }
 #endif // ifdef WITH_AODV
