@@ -61,6 +61,7 @@ void TcpSinkApp::handleMessage(cMessage *msg)
         request->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
         request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
         send(request, "socketOut");
+        delete msg;
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);
