@@ -290,6 +290,14 @@ void Packet::removeAll()
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
+//(inet::Packet)UdpBasicAppData-0 (5000 bytes)
+std::string Packet::str() const
+{
+    std::ostringstream out;
+    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << contents->str() << "]";
+    return out.str();
+}
+
 // TODO: move?
 TagSet& getTags(cMessage *msg)
 {

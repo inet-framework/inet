@@ -613,7 +613,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return contents->str(); }
+    virtual std::string str() const override;
 };
 
 INET_API TagSet& getTags(cMessage *msg);
