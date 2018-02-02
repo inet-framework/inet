@@ -63,10 +63,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.client.app[0].cmdenv-log-level=TRACE
 
 %contains: stdout
-C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)SetMulticastLoop  control info: (inet::UdpSetMulticastLoopCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UdpConnectCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)BIND  control info: (inet::UdpBindCommand)
-C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UdpConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)SetMulticastLoop  control info: (inet::UdpSetMulticastLoopCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)CONNECT  control info: (inet::UdpConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)BIND  control info: (inet::UdpBindCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)CONNECT  control info: (inet::UdpConnectCommand)
 
 %contains-regex: stdout
 C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 localPort=1025
