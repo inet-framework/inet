@@ -826,7 +826,7 @@ void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     Enter_Method("receiveChangeNotification");
     if (signalID == linkBreakSignal) {
         EV_WARN << "Received link break" << endl;
-        // TODO: shall we remove the neighbor?
+        // TODO: remove the neighbor
     }
 }
 
