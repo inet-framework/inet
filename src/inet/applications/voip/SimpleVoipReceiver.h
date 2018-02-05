@@ -89,12 +89,12 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle
     cMessage *selfTalkspurtFinished = nullptr;
     TalkspurtInfo currentTalkspurt;
 
-    static simsignal_t packetLossRateSignal;
-    static simsignal_t packetDelaySignal;
-    static simsignal_t playoutDelaySignal;
-    static simsignal_t playoutLossRateSignal;
-    static simsignal_t mosRateSignal;
-    static simsignal_t taildropLossRateSignal;
+    static simsignal_t voipPacketLossRateSignal;
+    static simsignal_t voipPacketDelaySignal;
+    static simsignal_t voipPlayoutDelaySignal;
+    static simsignal_t voipPlayoutLossRateSignal;
+    static simsignal_t voipMosRateSignal;
+    static simsignal_t voipTaildropLossRateSignal;
 
     double eModel(double delay, double loss);
     void evaluateTalkspurt(bool finish);

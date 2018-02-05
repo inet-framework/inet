@@ -26,12 +26,12 @@ namespace inet {
 
 Define_Module(SimpleVoipReceiver);
 
-simsignal_t SimpleVoipReceiver::packetLossRateSignal = registerSignal("voipPacketLossRate");
-simsignal_t SimpleVoipReceiver::packetDelaySignal = registerSignal("voipPacketDelay");
-simsignal_t SimpleVoipReceiver::playoutDelaySignal = registerSignal("voipPlayoutDelay");
-simsignal_t SimpleVoipReceiver::playoutLossRateSignal = registerSignal("voipPlayoutLossRate");
-simsignal_t SimpleVoipReceiver::mosRateSignal = registerSignal("voipMosRate");
-simsignal_t SimpleVoipReceiver::taildropLossRateSignal = registerSignal("voipTaildropLossRate");
+simsignal_t SimpleVoipReceiver::voipPacketLossRateSignal = registerSignal("voipPacketLossRate");
+simsignal_t SimpleVoipReceiver::voipPacketDelaySignal = registerSignal("voipPacketDelay");
+simsignal_t SimpleVoipReceiver::voipPlayoutDelaySignal = registerSignal("voipPlayoutDelay");
+simsignal_t SimpleVoipReceiver::voipPlayoutLossRateSignal = registerSignal("voipPlayoutLossRate");
+simsignal_t SimpleVoipReceiver::voipMosRateSignal = registerSignal("voipMosRate");
+simsignal_t SimpleVoipReceiver::voipTaildropLossRateSignal = registerSignal("voipTaildropLossRate");
 
 void SimpleVoipReceiver::TalkspurtInfo::startTalkspurt(const SimpleVoipPacket *pk)
 {
@@ -156,7 +156,7 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
     EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << "\n\n";
 
     simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
-    emit(packetDelaySignal, delay);
+    emit(voipPacketDelaySignal, delay);
 
     delete msg;
 }
@@ -189,7 +189,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
     // we'll correct that in the code below when we detect duplicates.
 
     double packetLossRate = ((double)channelLoss / (double)talkspurtNumPackets);
-    emit(packetLossRateSignal, packetLossRate);
+    emit(voipPacketLossRateSignal, packetLossRate);
 
     // vector to manage duplicated packets
     bool *isArrived = new bool[talkspurtNumPackets];
@@ -258,16 +258,16 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     double mos = eModel(SIMTIME_DBL(mouthToEarDelay), proportionalLossRate);
 
-    emit(playoutDelaySignal, playoutDelay);
+    emit(voipPlayoutDelaySignal, playoutDelay);
     double lossRate = ((double)playoutLoss / (double)talkspurtNumPackets);
-    emit(playoutLossRateSignal, lossRate);
-    emit(mosRateSignal, mos);
+    emit(voipPlayoutLossRateSignal, lossRate);
+    emit(voipMosRateSignal, mos);
 
     // add calculated MOS value to fingerprint
     FINGERPRINT_ADD_EXTRA_DATA(mos);
 
     double tailDropRate = ((double)tailDropLoss / (double)talkspurtNumPackets);
-    emit(taildropLossRateSignal, tailDropRate);
+    emit(voipTaildropLossRateSignal, tailDropRate);
 
     EV_DEBUG << "CALCULATED MOS: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";
 
