@@ -53,9 +53,6 @@ static inline double determinant(double a1, double a2, double b1, double b2)
     return a1 * b2 - a2 * b1;
 }
 
-// KLUDGE: implement position registry protocol
-PositionTable Gpsr::globalPositionTable;
-
 Gpsr::Gpsr()
 {
 }
@@ -102,7 +99,7 @@ void Gpsr::initialize(int stage)
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
         // packet size
         positionByteLength = par("positionByteLength");
-        // reset state
+        // KLUDGE: implement position registry protocol
         globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -163,11 +160,10 @@ void Gpsr::scheduleBeaconTimer()
 void Gpsr::processBeaconTimer()
 {
     EV_DEBUG << "Processing beacon timer" << endl;
-    L3Address selfAddress = getSelfAddress();
+    const L3Address selfAddress = getSelfAddress();
     if (!selfAddress.isUnspecified()) {
         sendBeacon(createBeacon());
-        // KLUDGE: implement position registry protocol
-        globalPositionTable.setPosition(selfAddress, mobility->getCurrentPosition());
+        storeSelfPositionInGlobalRegistry();
     }
     scheduleBeaconTimer();
     schedulePurgeNeighborsTimer();
@@ -266,8 +262,7 @@ GpsrOption *Gpsr::createGpsrOption(L3Address destination)
 {
     GpsrOption *gpsrOption = new GpsrOption();
     gpsrOption->setRoutingMode(GPSR_GREEDY_ROUTING);
-    // KLUDGE: implement position registry protocol
-    gpsrOption->setDestinationPosition(getDestinationPosition(destination));
+    gpsrOption->setDestinationPosition(lookupPositionInGlobalRegistry(destination));
     gpsrOption->setLength(computeOptionLength(gpsrOption));
     return gpsrOption;
 }
@@ -310,6 +305,28 @@ void Gpsr::configureInterfaces()
 // position
 //
 
+// KLUDGE: implement position registry protocol
+PositionTable Gpsr::globalPositionTable;
+
+Coord Gpsr::lookupPositionInGlobalRegistry(const L3Address& address) const
+{
+    // KLUDGE: implement position registry protocol
+    return globalPositionTable.getPosition(address);
+}
+
+void Gpsr::storePositionInGlobalRegistry(const L3Address& address, const Coord& position) const
+{
+    // KLUDGE: implement position registry protocol
+    globalPositionTable.setPosition(address, position);
+}
+
+void Gpsr::storeSelfPositionInGlobalRegistry() const
+{
+    auto selfAddress = getSelfAddress();
+    if (!selfAddress.isUnspecified())
+        storePositionInGlobalRegistry(selfAddress, mobility->getCurrentPosition());
+}
+
 Coord Gpsr::computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const
 {
     // NOTE: we must explicitly avoid computing the intersection points inside due to double instability
@@ -337,12 +354,6 @@ Coord Gpsr::computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Co
     }
 }
 
-Coord Gpsr::getDestinationPosition(const L3Address& address) const
-{
-    // KLUDGE: implement position registry protocol
-    return globalPositionTable.getPosition(address);
-}
-
 Coord Gpsr::getNeighborPosition(const L3Address& address) const
 {
     return neighborPositionTable.getPosition(address);
@@ -359,11 +370,6 @@ double Gpsr::getVectorAngle(Coord vector)
     if (angle < 0)
         angle += 2 * M_PI;
     return angle;
-}
-
-double Gpsr::getDestinationAngle(const L3Address& address)
-{
-    return getVectorAngle(getDestinationPosition(address) - mobility->getCurrentPosition());
 }
 
 double Gpsr::getNeighborAngle(const L3Address& address)
@@ -554,7 +560,7 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
         const L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
         const L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
         auto senderNeighborAddress = getSenderNeighborAddress(networkHeader);
-        auto nextNeighborAngle = senderNeighborAddress.isUnspecified() ? getDestinationAngle(destination) : getNeighborAngle(senderNeighborAddress);
+        auto nextNeighborAngle = senderNeighborAddress.isUnspecified() ? getVectorAngle(destinationPosition - mobility->getCurrentPosition()) : getNeighborAngle(senderNeighborAddress);
         auto nextNeighborAddress = senderNeighborAddress;
         while (true) {
             nextNeighborAddress = getNextPlanarNeighborCounterClockwise(nextNeighborAngle);

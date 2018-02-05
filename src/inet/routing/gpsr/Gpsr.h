@@ -125,13 +125,14 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void configureInterfaces();
 
     // position
+    Coord lookupPositionInGlobalRegistry(const L3Address& address) const;
+    void storePositionInGlobalRegistry(const L3Address& address, const Coord& position) const;
+    void storeSelfPositionInGlobalRegistry() const;
     Coord computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
-    Coord getDestinationPosition(const L3Address& address) const;
     Coord getNeighborPosition(const L3Address& address) const;
 
     // angle
     static double getVectorAngle(Coord vector);
-    double getDestinationAngle(const L3Address& address);
     double getNeighborAngle(const L3Address& address);
 
     // address
