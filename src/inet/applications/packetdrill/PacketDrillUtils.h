@@ -27,10 +27,11 @@
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
  #include <sys/socket.h>
 #endif
-#include "inet/transportlayer/sctp/SCTPMessage.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
-using namespace inet;
+namespace inet {
+
 using namespace sctp;
 
 /* For tables mapping symbolic strace strings to the corresponding
@@ -289,9 +290,6 @@ enum status_t {
     STATUS_WARN = -2,    /* a non-fatal error or warning */
 };
 
-
-//namespace inet {
-
 class PacketDrillConfig;
 class PacketDrillScript;
 class PacketDrillExpression;
@@ -326,15 +324,19 @@ struct command_spec {
  * implementation for this function is in the bison parser file
  * parser.y.
  */
-int parse_script(PacketDrillConfig *config,
-    PacketDrillScript *script,
-    struct invocation *callback_invocation);
+struct Invocation;
 
-void parse_and_finalize_config(struct invocation *invocation);
+} // namespace inet
 
+int parse_script(inet::PacketDrillConfig *config,
+        inet::PacketDrillScript *script,
+        inet::Invocation *callback_invocation);
+void parse_and_finalize_config(inet::Invocation *invocation);
+
+namespace inet {
 
 /* Top-level info about the invocation of a test script */
-struct invocation {
+struct Invocation {
     PacketDrillConfig *config;    /* run-time configuration */
     PacketDrillScript *script;    /* parse tree of the script to run */
 };
@@ -717,15 +719,15 @@ class INET_API PacketDrillTcpOption : public cObject
 class INET_API PacketDrillSctpChunk : public cObject
 {
     public:
-        PacketDrillSctpChunk(uint8 type_, SCTPChunk *sctpChunk);
+        PacketDrillSctpChunk(uint8 type_, SctpChunk *sctpChunk);
 
     private:
         uint8 type;
-        SCTPChunk *chunk;
+        SctpChunk *chunk;
 
     public:
         uint8 getType() { return type; };
-        SCTPChunk *getChunk() { return chunk; };
+        SctpChunk *getChunk() { return chunk; };
 };
 
 class INET_API PacketDrillSctpParameter : public cObject
@@ -754,5 +756,7 @@ class INET_API PacketDrillSctpParameter : public cObject
         void setByteArrayPointer(ByteArray *ptr) { bytearray = ptr; };
         void *getContent() { return content; };
 };
+
+}
 
 #endif

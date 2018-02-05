@@ -25,7 +25,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
-
+#if 0
 class SctpConnectInfo;
 
 /**
@@ -124,7 +124,7 @@ class INET_API SctpPeer : public cSimpleModule, public SctpSocket::CallbackInter
     SctpPeer();
     ~SctpPeer();
 };
-
+#endif
 } // namespace inet
 
 #endif // ifndef __INET_SCTPPEER_H

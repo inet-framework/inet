@@ -26,7 +26,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
-
+#if 0
 using namespace sctp;
 
 #define MSGKIND_CONNECT    0
@@ -917,6 +917,6 @@ void SctpNatPeer::finish()
     sentPacketsPerAssoc.clear();
     rcvdBytesPerAssoc.clear();
 }
-
+#endif
 } // namespace inet
 

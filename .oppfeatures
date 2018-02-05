@@ -1047,7 +1047,7 @@
         id="packetdrill"
         name="PacketDrill testing"
         description = "PacketDrill testing application"
-        initiallyEnabled = "false"
+        initiallyEnabled = "true"
         requires = "TUN TCP_INET UDP SCTP IPv4"
         labels = ""
         nedPackages = "

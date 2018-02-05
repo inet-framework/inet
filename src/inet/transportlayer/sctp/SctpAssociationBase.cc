@@ -63,13 +63,14 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     queuedBytes = 0;
     outstandingBytes = 0;
 
-    rtie = rt->getOutputInterfaceForDestination(remoteAddress);
+  /*  rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
     if (rtie == nullptr) {
         throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
-    pmtu = rtie->getMTU();
+    pmtu = rtie->getMTU();*/
+    pmtu = 1500;
     rttvar = 0.0;
 
     cwndTimeout = pathRto;
@@ -1080,15 +1081,22 @@ SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32 commandCode)
     }
 }
 
-bool SctpAssociation::processAppCommand(cMessage *msg)
+bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpCommand)
 {
     printAssocBrief();
 
     // first do actions
-    SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
+  /*  auto& tags = getTags(msg);
+    SctpCommandReq *sctpCommand = tags.findTag<SctpCommandReq>();
+    if (!sctpCommand) {
+        sctpCommand = tags.findTag<SctpOpenReq>();
+    } else {
+        std::cout << "got sctpCommand\n";
+    }*/
+   // SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
     SctpEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
-    EV_INFO << "App command: " << eventName(event) << "\n";
+    std::cout << "App command: " << eventName(event) << "\n";
 
     switch (event) {
         case SCTP_E_ASSOCIATE:
@@ -1096,6 +1104,7 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_OPEN_PASSIVE:
+        std::cout << "call process_OPEN_PASSIVE\n";
             process_OPEN_PASSIVE(event, sctpCommand, msg);
             break;
 
@@ -1129,8 +1138,8 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SctpSendInfo *)sctpCommand)->getSid()] =
-                ((SctpSendInfo *)sctpCommand)->getPpid();
+            state->ssPriorityMap[((SctpSendReq *)sctpCommand)->getSid()] =
+                ((SctpSendReq *)sctpCommand)->getPpid();
             break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT:
@@ -1174,15 +1183,15 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_RTO_INFO:
-            sctpMain->setRtoInitial(((SctpRtoInfo *)sctpCommand)->getRtoInitial());
-            sctpMain->setRtoMin(((SctpRtoInfo *)sctpCommand)->getRtoMin());
-            sctpMain->setRtoMax(((SctpRtoInfo *)sctpCommand)->getRtoMax());
+            sctpMain->setRtoInitial(((SctpRtoReq *)sctpCommand)->getRtoInitial());
+            sctpMain->setRtoMin(((SctpRtoReq *)sctpCommand)->getRtoMin());
+            sctpMain->setRtoMax(((SctpRtoReq *)sctpCommand)->getRtoMax());
             break;
         default:
             throw cRuntimeError("Wrong event code");
     }
 
-    delete sctpCommand;
+   // delete sctpCommand;
     // then state transitions
     return performStateTransition(event);
 }

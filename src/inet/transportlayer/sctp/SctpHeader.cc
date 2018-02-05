@@ -38,7 +38,8 @@ SctpHeader& SctpHeader::operator=(const SctpHeader& other)
 
 void SctpHeader::copy(const SctpHeader& other)
 {
-    setTag(other.getTag());
+    handleChange();
+    setVTag(other.getVTag());
     setSrcPort(other.getSrcPort());
     setDestPort(other.getDestPort());
     setChecksumOk(other.getChecksumOk());
@@ -76,7 +77,7 @@ void SctpHeader::setSctpChunksArraySize(size_t size)
 
 void SctpHeader::setSctpChunks(size_t k, SctpChunk * sctpChunks)
 {
-    throw new cException(this, "setChunks() not supported, use insertSctpChunks()");
+    sctpChunkList.at(k) = sctpChunks;
 }
 
 size_t SctpHeader::getSctpChunksArraySize() const
@@ -123,6 +124,7 @@ void SctpHeader::insertSctpChunks(size_t k, SctpChunk * chunk)
 //void SctpHeader::eraseSctpChunks(size_t k)
 SctpChunk *SctpHeader::removeChunk()
 {
+    handleChange();
     if (sctpChunkList.empty())
         return nullptr;
 
@@ -137,6 +139,7 @@ SctpChunk *SctpHeader::removeChunk()
 
 SctpChunk *SctpHeader::removeLastChunk()
 {
+    handleChange();
     if (sctpChunkList.empty())
         return nullptr;
 

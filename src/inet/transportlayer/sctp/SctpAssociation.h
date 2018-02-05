@@ -806,7 +806,7 @@ class INET_API SctpStateVariables : public cObject
     std::list<uint16> peerStreamsToReset;
     std::map<uint32, RequestData> requests;
     std::map<uint32, RequestData> peerRequests;
-    SctpResetInfo *resetInfo;
+    SctpResetReq *resetInfo;
     uint16 peerRequestType;
     uint16 localRequestType;
 
@@ -1048,7 +1048,7 @@ class INET_API SctpAssociation : public cObject
      * Normally returns true. A return value of false means that the
      * connection structure must be deleted by the caller (SCTP).
      */
-    bool processAppCommand(cMessage *msg);
+    bool processAppCommand(cMessage *msg, SctpCommandReq *sctpCommand);
     void removePath();
     void removePath(const L3Address& addr);
     void deleteStreams();
@@ -1098,15 +1098,15 @@ class INET_API SctpAssociation : public cObject
     //@}
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
-    void process_ASSOCIATE(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg);
-    void process_OPEN_PASSIVE(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg);
-    void process_SEND(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg);
+    void process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg);
+    void process_OPEN_PASSIVE(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg);
+    void process_SEND(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg);
     void process_CLOSE(SctpEventCode& event);
     void process_ABORT(SctpEventCode& event);
-    void process_STATUS(SctpEventCode& event, SctpCommand *sctpCommand, cMessage *msg);
-    void process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommand *sctpCommand);
-    void process_PRIMARY(SctpEventCode& event, SctpCommand *sctpCommand);
-    void process_STREAM_RESET(SctpCommand *sctpCommand);
+    void process_STATUS(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg);
+    void process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommandReq *sctpCommand);
+    void process_PRIMARY(SctpEventCode& event, SctpCommandReq *sctpCommand);
+    void process_STREAM_RESET(SctpCommandReq *sctpCommand);
     //@}
 
     /** @name Processing Sctp message arrivals. Invoked from processSctpHeader(). */
@@ -1147,7 +1147,7 @@ class INET_API SctpAssociation : public cObject
     SctpAssociation *cloneAssociation();
 
     /** Utility: creates send/receive queues and sctpAlgorithm */
-    void initAssociation(SctpOpenCommand *openCmd);
+    void initAssociation(SctpOpenReq *openCmd);
 
     /** Methods dealing with the handling of TSNs  **/
     bool tsnIsDuplicate(const uint32 tsn) const;
@@ -1239,14 +1239,14 @@ class INET_API SctpAssociation : public cObject
 
     bool allPathsInactive() const;
 
-    void sendStreamResetRequest(SctpResetInfo *info);
+    void sendStreamResetRequest(SctpResetReq *info);
     void sendStreamResetResponse(uint32 srrsn, int result);
     void sendStreamResetResponse(SctpSsnTsnResetRequestParameter *requestParam, int result,
             bool options);
     void sendOutgoingResetRequest(SctpIncomingSsnResetRequestParameter *requestParam);
     void sendAddOutgoingStreamsRequest(uint16 numStreams);
     void sendBundledOutgoingResetAndResponse(SctpIncomingSsnResetRequestParameter *requestParam);
-    void sendAddInAndOutStreamsRequest(SctpResetInfo *info);
+    void sendAddInAndOutStreamsRequest(SctpResetReq *info);
     void sendDoubleStreamResetResponse(uint32 insrrsn, uint16 inresult, uint32 outsrrsn, uint16 outresult);
     void checkStreamsToReset();
     void sendPacketDrop(const bool flag);
@@ -1302,8 +1302,8 @@ class INET_API SctpAssociation : public cObject
     /**
      *    Queue Management
      */
-    void process_QUEUE_MSGS_LIMIT(const SctpCommand *sctpCommand);
-    void process_QUEUE_BYTES_LIMIT(const SctpCommand *sctpCommand);
+    void process_QUEUE_MSGS_LIMIT(const SctpCommandReq *sctpCommand);
+    void process_QUEUE_BYTES_LIMIT(const SctpCommandReq *sctpCommand);
     int32 getOutstandingBytes() const;
     void dequeueAckedChunks(const uint32 tsna,
             SctpPathVariables *path,
@@ -1342,10 +1342,10 @@ class INET_API SctpAssociation : public cObject
     void resetExpectedSsn(uint16 id);
     uint32 getExpectedSsnOfStream(uint16 id);
     uint32 getSsnOfStream(uint16 id);
-    SctpParameter *makeOutgoingStreamResetParameter(uint32 srsn, SctpResetInfo *info);
-    SctpParameter *makeIncomingStreamResetParameter(uint32 srsn, SctpResetInfo *info);
+    SctpParameter *makeOutgoingStreamResetParameter(uint32 srsn, SctpResetReq *info);
+    SctpParameter *makeIncomingStreamResetParameter(uint32 srsn, SctpResetReq *info);
     SctpParameter *makeSsnTsnResetParameter(uint32 srsn);
-    SctpParameter *makeAddStreamsRequestParameter(uint32 srsn, SctpResetInfo *info);
+    SctpParameter *makeAddStreamsRequestParameter(uint32 srsn, SctpResetReq *info);
     void sendOutgoingRequestAndResponse(uint32 inRequestSn, uint32 outRequestSn);
     void sendOutgoingRequestAndResponse(SctpIncomingSsnResetRequestParameter *inRequestParam, SctpOutgoingSsnResetRequestParameter *outRequestParam);
     SctpEventCode processInAndOutResetRequestArrived(SctpIncomingSsnResetRequestParameter *inRequestParam, SctpOutgoingSsnResetRequestParameter *outRequestParam);

@@ -22,6 +22,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.common.packet.Packet;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
+import inet.common.TagBase;
 
 cplusplus {{
 #include <vector>
@@ -46,19 +47,16 @@ enum SctpErrorCode
 }
 
 
-//
-// Control info for SCTP connections. This message is to be set as control info
-// (see cMessage::setControlInfo()) on all messages exchanged between ~SCTP and
-// application, in both directions. Some commands and indications
-// (SCTP_C_OPEN_xxx, SCTP_I_STATUS) use submessagees.
-//
-// connId identifies the connection locally within the application (internally,
-// ~SCTP uses the (app gate index, connId) pair to identify the socket).
-// connId is to be chosen by the application in the open command.
-//
-// @see ~SctpCommandCode, ~SctpStatusInd, ~SctpOpenCommand, ~SctpStatusInfo, SctpMain
-//
-class SctpCommand extends cPacket
+
+class SctpSimpleMessage extends cPacket
+{
+    uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
+    uint8_t data[];
+    simtime_t creationTime = 0;
+    bool encaps = false;
+}
+
+class SctpCommandReq extends TagBase
 {
     int socketId = -1;   // identifies the socket within the application
     int sid = -1;
@@ -74,42 +72,16 @@ class SctpCommand extends cPacket
     int fd = -1;
 }
 
-//
-// Currently not in use.
-//
-class SctpErrorInfo extends SctpCommand
+class SctpSendReq extends SctpCommandReq
 {
-    SctpErrorCode errorCode;
-    string messageText;
+    unsigned int prMethod;
+    bool last;
+    unsigned int ppid = 0;
+    bool primary = true;
+    bool sackNow = false;
 }
 
-
-//
-// Control info to be used for active or passive ~Sctp open.
-//
-// localAddr, remoteAddr, localPort, remotePort should be self-explanatory.
-// localAddr is optional because ~Sctp can learn it from IP when a packet
-// is received from the peer; localPort is optional because ~SCTP supports
-// ephemeral ports.
-//
-// The sendQueueClass, receiveQueueClass and sctpAlgorithmClass fields
-// allow per-connection ~Sctp configuration. These fields may contain
-// names of messagees submessageed from SctpSendQueue, SctpReceiveQueue
-// and SctpAlgorithm, respectively. If not set, module parameters with
-// similar names are used.
-//
-// The fork parameter is used with passive open, and controls what happens
-// when an incoming connection is received. With fork=true, it emulates
-// the Unix accept(2) syscall semantics: a new connection structure
-// is created for the connection (with a new connId, see in ~SctpCommand),
-// and the connection structure with the old connId remains listening.
-// With fork=false, all the above does not happen: the first connection
-// is accepted (with the original connId), and further incoming connections
-// will be refused by ~Sctp by sending an RST segment.
-//
-// @see ~SctpCommandCode, ~Sctp
-//
-class SctpOpenCommand extends SctpCommand
+class SctpOpenReq extends SctpCommandReq
 {
     AddressVector localAddresses;
     AddressVector remoteAddresses;
@@ -125,53 +97,12 @@ class SctpOpenCommand extends SctpCommand
     uint32 messagesToPush;
 }
 
-
-//
-// Control info to be used with the SEND command.
-//
-// @see ~SctpCommandCode, ~Sctp
-//
-class SctpSendInfo extends SctpCommand
+class SctpAvailableReq extends SctpCommandReq
 {
-    unsigned int prMethod;
-    bool last;
-    unsigned int ppid = 0;
-    bool primary = true;
-    bool sackNow = false;
+    int newSocketId;
 }
 
-//
-// Control info to be used when setsockopt changes RtoInfo.
-//
-// @see ~SctpCommandCode, ~Sctp
-//
-class SctpRtoInfo extends SctpCommand
-{
-    double rtoInitial;
-    double rtoMin;
-    double rtoMax;
-}
-
-//
-// Control info to be used with the DATA command.
-//
-// @see ~SctpCommandCode, ~Sctp
-//
-class SctpRcvInfo extends SctpCommand
-{
-    uint32 ppid;
-    uint32 tsn;
-    uint32 cumTsn;
-}
-
-
-//
-// Sent with message kind SCTP_I_ESTABLISHED, to let the app know
-// about the local and remote IP address and port.
-//
-// @see ~SctpCommandCode, ~Sctp
-//
-class SctpConnectInfo extends SctpCommand
+class SctpConnectReq extends SctpCommandReq
 {
     AddressVector remoteAddresses;
     int status;
@@ -179,24 +110,14 @@ class SctpConnectInfo extends SctpCommand
     int outboundStreams;
 }
 
-class SctpAvailableInfo extends SctpCommand
+class SctpRcvReq extends SctpCommandReq
 {
-    int newSocketId;
+    uint32 ppid;
+    uint32 tsn;
+    uint32 cumTsn;
 }
 
-class SctpAcceptSocketInfo extends SctpCommand
-{
-}
-
-
-//
-// Sent with message kind SCTP_I_STATUS, in response to command SCTP_C_STATUS.
-// For explanation of variables, see RFC 4960 or SctpStateVariables in
-// SctpAssociation.h.
-//
-// @see ~SctpStatusInd, ~SctpCommandCode, ~Sctp
-//
-class SctpStatusInfo extends SctpCommand
+class SctpStatusReq extends SctpCommandReq
 {
     int state;
     string stateName;
@@ -204,12 +125,7 @@ class SctpStatusInfo extends SctpCommand
     bool active;
 }
 
-class SctpPathInfo extends SctpCommand
-{
-    L3Address remoteAddress;
-}
-
-class SctpResetInfo extends SctpCommand
+class SctpResetReq extends SctpCommandReq
 {
     unsigned short requestType = 0;
     uint16 instreams = 0;
@@ -217,12 +133,24 @@ class SctpResetInfo extends SctpCommand
     uint16 streams[];
 }
 
-class SctpInfo extends SctpCommand
+class SctpInfoReq extends SctpCommandReq
 {
     int text = 0;
 }
 
-class SctpSendQueueAbated extends SctpCommand
+class SctpPathInfoReq extends SctpCommandReq
+{
+    L3Address remoteAddress;
+}
+
+class SctpRtoReq extends SctpCommandReq
+{
+    double rtoInitial;
+    double rtoMin;
+    double rtoMax;
+}
+
+class SctpSendQueueAbatedReq extends SctpCommandReq
 {
     uint64 bytesAvailable;
     uint64 bytesQueued;
@@ -230,11 +158,7 @@ class SctpSendQueueAbated extends SctpCommand
     uint64 queuedForStream[];
 }
 
-class SctpSimpleMessage extends cPacket
+class SctpPathInfo extends cNamedObject
 {
-    uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
-    char data[];
-    simtime_t creationTime = 0;
-    bool encaps = false;
+    L3Address remoteAddress;
 }
-

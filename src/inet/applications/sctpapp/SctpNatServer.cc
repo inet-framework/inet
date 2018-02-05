@@ -28,7 +28,7 @@
 #include "inet/transportlayer/sctp/SctpNatTable.h"
 
 namespace inet {
-
+#if 0
 using namespace sctp;
 
 Define_Module(SctpNatServer);
@@ -490,6 +490,6 @@ void SctpNatServer::finish()
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 }
-
+#endif
 } // namespace inet
 

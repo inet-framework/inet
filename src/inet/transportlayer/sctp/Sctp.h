@@ -34,6 +34,7 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpUdpHook.h"
+#include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
 
 namespace inet {
 
@@ -182,6 +183,7 @@ class INET_API Sctp : public cSimpleModule
 
     UdpSocket udpSocket;
     int udpSockId;
+    SctpCrcInsertion crcInsertion;
 
     SocketOptions* socketOptions;
 
@@ -197,8 +199,8 @@ class INET_API Sctp : public cSimpleModule
     SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
     SctpAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
     int32 findAssocForFd(int32 fd);
-    void sendAbortFromMain(SctpHeader*sctpmsg, L3Address fromAddr, L3Address toAddr);
-    void sendShutdownCompleteFromMain(SctpHeader*sctpmsg, L3Address fromAddr, L3Address toAddr);
+    void sendAbortFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
+    void sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
 
   public:
@@ -215,6 +217,8 @@ class INET_API Sctp : public cSimpleModule
     bool pktdrop;
     bool sackNow;
     uint64 numPktDropReports;
+    int interfaceId = -1;
+    CrcMode crcMode = (CrcMode)-1;
 
   public:
     virtual ~Sctp();
@@ -284,6 +288,8 @@ class INET_API Sctp : public cSimpleModule
     void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; };
     void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; };
     void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; };
+    void setInterfaceId(int id) { interfaceId = id; };
+    int getInterfaceId() { return interfaceId; };
 };
 
 } // namespace sctp
