@@ -356,6 +356,7 @@ Coord Gpsr::getNeighborPosition(const L3Address& address) const
 
 double Gpsr::getVectorAngle(Coord vector)
 {
+    ASSERT(vector != Coord::ZERO);
     double angle = atan2(-vector.y, vector.x);
     if (angle < 0)
         angle += 2 * M_PI;
