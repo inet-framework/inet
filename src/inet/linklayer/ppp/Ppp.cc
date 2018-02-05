@@ -89,9 +89,6 @@ void Ppp::initialize(int stage)
         // register our interface entry in IInterfaceTable
         registerInterface();
 
-        // prepare to fire notifications
-        notifDetails.setInterfaceEntry(interfaceEntry);
-
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests()) {
             EV_DETAIL << "Requesting first frame from queue module\n";
@@ -207,10 +204,6 @@ void Ppp::startTransmitting(Packet *msg)
     // if there's any control info, remove it; then encapsulate the packet
     Packet *pppFrame = encapsulate(msg);
 
-    // fire notification
-    notifDetails.setPacket(pppFrame);
-    emit(ppTxBeginSignal, &notifDetails);
-
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(txStateSignal, 1L);
@@ -244,10 +237,6 @@ void Ppp::handleMessage(cMessage *msg)
         EV_INFO << "Transmission successfully completed.\n";
         emit(txStateSignal, 0L);
 
-        // fire notification
-        notifDetails.setPacket(nullptr);
-        emit(ppTxEndSignal, &notifDetails);
-
         if (!txQueue.isEmpty()) {
             auto packet = check_and_cast<Packet *>(txQueue.pop());
             startTransmitting(packet);
@@ -260,10 +249,6 @@ void Ppp::handleMessage(cMessage *msg)
         EV_INFO << "Received " << msg << " from network.\n";
         //TODO: if incoming gate is not connected now, then the link has benn deleted
         // during packet transmission --> discard incomplete packet.
-
-        // fire notification
-        notifDetails.setPacket(PK(msg));
-        emit(ppRxEndSignal, &notifDetails);
 
         auto packet = check_and_cast<Packet *>(msg);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);

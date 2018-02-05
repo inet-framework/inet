@@ -20,9 +20,6 @@
 
 namespace inet {
 
-simsignal_t ppTxBeginSignal = cComponent::registerSignal("ppTxBegin");
-simsignal_t ppTxEndSignal = cComponent::registerSignal("ppTxEnd");
-simsignal_t ppRxEndSignal = cComponent::registerSignal("ppRxEnd");
 simsignal_t txAckedSignal = cComponent::registerSignal("txAcked");
 simsignal_t l2QDropSignal = cComponent::registerSignal("l2QDrop");
 simsignal_t macBecameIdleSignal = cComponent::registerSignal("macBecameIdle");

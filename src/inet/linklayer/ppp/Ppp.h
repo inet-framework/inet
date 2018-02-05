@@ -21,7 +21,6 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/ppp/PppFrame_m.h"
-#include "inet/linklayer/common/TxNotifDetails.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -46,8 +45,6 @@ class INET_API Ppp : public MacBase
     cQueue txQueue;
     cMessage *endTransmissionEvent = nullptr;
     IPassiveQueue *queueModule = nullptr;
-
-    TxNotifDetails notifDetails;
 
     std::string oldConnColor;
 

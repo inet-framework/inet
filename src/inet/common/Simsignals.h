@@ -31,9 +31,6 @@ extern INET_API simsignal_t    // admin
 // - layer 2 (data-link)
 //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
 // they generally carry TxNotifDetails as "details" to identify the interface and the frame
-    ppTxBeginSignal,    // point-to-point transmission begins (currently PPP)
-    ppTxEndSignal,    // point-to-point transmission ends (currently PPP)
-    ppRxEndSignal,    // point-to-point reception ends (currently PPP)
     txAckedSignal,    // transmitted frame got acked (currently Ieee80211)
     l2QDropSignal,
     macBecameIdleSignal,
