@@ -325,18 +325,18 @@
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv4 -r 0,                  ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _IPv4 extended
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _IPv6 -r 0,                  ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _IPv6 extended
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Generic -r 0,               ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _Generic extended
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             3c7e-7d05/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             3f6a-39fa/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0,                20s,             25b0-f81b/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             4259-cfc0/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             a916-19aa/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0,                20s,             1bbf-e4b5/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Multi -r 0,                 ---100s,         0000-0000/tplx, ERROR, wireless adhoc # _Multi extended
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             3a0e-6813/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             3f6a-39fa/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             f884-7a0e/tplx, PASS,  wireless adhoc
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0,                 20s,             006c-9e57/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             6483-91d0/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             a916-19aa/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             f363-602d/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0,                 20s,             872f-8618/tplx, PASS,  wireless adhoc
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Dynamic -r 0,               ---100s,         0000-0000/tplx, ERROR, wireless adhoc   # _Dynamic extended
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            20s,             ed9b-bb50/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            20s,             a7a1-cc2c/tplx, PASS,  wireless adhoc
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            20s,             0000-0000/tplx, ERROR, wireless adhoc # This module doesn't support starting in node DOWN state
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0,         20s,             d700-761a/tplx, PASS,  wireless adhoc
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0,         20s,             c872-500a/tplx, PASS,  wireless adhoc
 
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             d035-2ecd/tplx, PASS,  wireless adhoc
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            20s,             6a41-cf55/tplx, PASS,  wireless adhoc

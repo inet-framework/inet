@@ -110,8 +110,8 @@ void Gpsr::initialize(int stage)
         networkProtocol->registerHook(0, this);
         if (isNodeUp()) {
             configureInterfaces();
-            processBeaconTimer();
-            schedulePurgeNeighborsTimer();
+            storeSelfPositionInGlobalRegistry();
+            scheduleBeaconTimer();
         }
         WATCH(neighborPositionTable);
     }
@@ -797,7 +797,8 @@ bool Gpsr::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             configureInterfaces();
-            processBeaconTimer();
+            storeSelfPositionInGlobalRegistry();
+            scheduleBeaconTimer();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
