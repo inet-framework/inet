@@ -220,6 +220,7 @@ void Gpsr::processUDPPacket(Packet *packet)
 {
     packet->popHeader<UdpHeader>();
     processBeacon(packet);
+    schedulePurgeNeighborsTimer();
 }
 
 //
