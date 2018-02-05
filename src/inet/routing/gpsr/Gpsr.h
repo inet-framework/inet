@@ -132,8 +132,8 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     Coord getNeighborPosition(const L3Address& address) const;
 
     // angle
-    static double getVectorAngle(Coord vector);
-    double getNeighborAngle(const L3Address& address);
+    double getVectorAngle(Coord vector) const;
+    double getNeighborAngle(const L3Address& address) const;
 
     // address
     std::string getHostName() const;
@@ -143,8 +143,8 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     // neighbor
     simtime_t getNextNeighborExpiration();
     void purgeNeighbors();
-    std::vector<L3Address> getPlanarNeighbors();
-    L3Address getNextPlanarNeighborCounterClockwise(double startNeighborAngle);
+    std::vector<L3Address> getPlanarNeighbors() const;
+    std::vector<L3Address> getPlanarNeighborsCounterClockwise(double startAngle) const;
 
     // next hop
     L3Address findNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);

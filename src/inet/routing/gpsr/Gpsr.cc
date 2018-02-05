@@ -17,6 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <algorithm>
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -363,7 +364,7 @@ Coord Gpsr::getNeighborPosition(const L3Address& address) const
 // angle
 //
 
-double Gpsr::getVectorAngle(Coord vector)
+double Gpsr::getVectorAngle(Coord vector) const
 {
     ASSERT(vector != Coord::ZERO);
     double angle = atan2(-vector.y, vector.x);
@@ -372,7 +373,7 @@ double Gpsr::getVectorAngle(Coord vector)
     return angle;
 }
 
-double Gpsr::getNeighborAngle(const L3Address& address)
+double Gpsr::getNeighborAngle(const L3Address& address) const
 {
     return getVectorAngle(getNeighborPosition(address) - mobility->getCurrentPosition());
 }
@@ -428,7 +429,7 @@ void Gpsr::purgeNeighbors()
     neighborPositionTable.removeOldPositions(simTime() - neighborValidityInterval);
 }
 
-std::vector<L3Address> Gpsr::getPlanarNeighbors()
+std::vector<L3Address> Gpsr::getPlanarNeighbors() const
 {
     std::vector<L3Address> planarNeighbors;
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
@@ -470,24 +471,20 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
     return planarNeighbors;
 }
 
-L3Address Gpsr::getNextPlanarNeighborCounterClockwise(double startNeighborAngle)
+std::vector<L3Address> Gpsr::getPlanarNeighborsCounterClockwise(double startAngle) const
 {
-    EV_DEBUG << "Finding next planar neighbor (counter clockwise): startAngle = " << startNeighborAngle << endl;
-    L3Address bestNeighborAddress;
-    double bestNeighborAngleDifference = DBL_MAX;
     std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
-    for (auto & neighborAddress : neighborAddresses) {
-        double neighborAngle = getNeighborAngle(neighborAddress);
-        double neighborAngleDifference = neighborAngle - startNeighborAngle;
-        if (neighborAngleDifference <= 0)
-            neighborAngleDifference += 2 * M_PI;
-        EV_DEBUG << "Trying next planar neighbor (counter clockwise): address = " << neighborAddress << ", angle = " << neighborAngle << endl;
-        if (neighborAngleDifference < bestNeighborAngleDifference) {
-            bestNeighborAngleDifference = neighborAngleDifference;
-            bestNeighborAddress = neighborAddress;
-        }
-    }
-    return bestNeighborAddress;
+    std::sort(neighborAddresses.begin(), neighborAddresses.end(), [&](const L3Address& address1, const L3Address& address2) {
+        // NOTE: make sure the neighbor at startAngle goes to the end
+        auto angle1 = getNeighborAngle(address1) - startAngle;
+        auto angle2 = getNeighborAngle(address2) - startAngle;
+        if (angle1 <= 0)
+            angle1 += 2 * M_PI;
+        if (angle2 <= 0)
+            angle2 += 2 * M_PI;
+        return angle1 < angle2;
+    });
+    return neighborAddresses;
 }
 
 //
@@ -560,35 +557,37 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
         const L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
         const L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
         auto senderNeighborAddress = getSenderNeighborAddress(networkHeader);
-        auto nextNeighborAngle = senderNeighborAddress.isUnspecified() ? getVectorAngle(destinationPosition - mobility->getCurrentPosition()) : getNeighborAngle(senderNeighborAddress);
-        auto nextNeighborAddress = senderNeighborAddress;
-        while (true) {
-            nextNeighborAddress = getNextPlanarNeighborCounterClockwise(nextNeighborAngle);
-            if (nextNeighborAddress.isUnspecified() || nextNeighborAddress == senderNeighborAddress)
+        auto neighborAngle = senderNeighborAddress.isUnspecified() ? getVectorAngle(destinationPosition - mobility->getCurrentPosition()) : getNeighborAngle(senderNeighborAddress);
+        L3Address selectedNeighborAddress;
+        std::vector<L3Address> neighborAddresses = getPlanarNeighborsCounterClockwise(neighborAngle);
+        for (auto& neighborAddress : neighborAddresses) {
+            Coord neighborPosition = getNeighborPosition(neighborAddress);
+            Coord intersection = computeIntersectionInsideLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, neighborPosition);
+            if (std::isnan(intersection.x)) {
+                selectedNeighborAddress = neighborAddress;
                 break;
-            nextNeighborAngle = getNeighborAngle(nextNeighborAddress);
-            EV_DEBUG << "Intersecting towards next hop: nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
-            Coord nextNeighborPosition = getNeighborPosition(nextNeighborAddress);
-            Coord intersection = computeIntersectionInsideLineSegments(perimeterRoutingStartPosition, destinationPosition, selfPosition, nextNeighborPosition);
-            if (std::isnan(intersection.x))
-                break;
+            }
             else {
-                EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
+                EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << selectedNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
                 // KLUDGE: TODO: const_cast<GpsrOption *>(gpsrOption)
                 const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstSenderAddress(selfAddress);
                 const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstReceiverAddress(L3Address());
                 const_cast<GpsrOption *>(gpsrOption)->setPerimeterRoutingForwardPosition(intersection);
             }
         }
-        if (firstSenderAddress == selfAddress && firstReceiverAddress == nextNeighborAddress) {
+        if (selectedNeighborAddress.isUnspecified()) {
+            EV_DEBUG << "No suitable planar graph neighbor found in perimeter routing: firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
+            return L3Address();
+        }
+        else if (firstSenderAddress == selfAddress && firstReceiverAddress == selectedNeighborAddress) {
             EV_DEBUG << "End of perimeter reached: firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
             return L3Address();
         }
         else {
             if (gpsrOption->getCurrentFaceFirstReceiverAddress().isUnspecified())
                 // KLUDGE: TODO: const_cast<GpsrOption *>(gpsrOption)
-                const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstReceiverAddress(nextNeighborAddress);
-            return nextNeighborAddress;
+                const_cast<GpsrOption *>(gpsrOption)->setCurrentFaceFirstReceiverAddress(selectedNeighborAddress);
+            return selectedNeighborAddress;
         }
     }
 }
