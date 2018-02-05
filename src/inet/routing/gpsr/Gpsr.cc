@@ -157,7 +157,7 @@ void Gpsr::processMessage(cMessage *message)
 void Gpsr::scheduleBeaconTimer()
 {
     EV_DEBUG << "Scheduling beacon timer" << endl;
-    scheduleAt(simTime() + beaconInterval, beaconTimer);
+    scheduleAt(simTime() + beaconInterval + uniform(-1, 1) * maxJitter, beaconTimer);
 }
 
 void Gpsr::processBeaconTimer()
@@ -165,7 +165,7 @@ void Gpsr::processBeaconTimer()
     EV_DEBUG << "Processing beacon timer" << endl;
     L3Address selfAddress = getSelfAddress();
     if (!selfAddress.isUnspecified()) {
-        sendBeacon(createBeacon(), uniform(0, maxJitter).dbl());
+        sendBeacon(createBeacon());
         // KLUDGE: implement position registry protocol
         globalPositionTable.setPosition(selfAddress, mobility->getCurrentPosition());
     }
@@ -208,12 +208,9 @@ void Gpsr::processPurgeNeighborsTimer()
 // handling UDP packets
 //
 
-void Gpsr::sendUDPPacket(Packet *packet, double delay)
+void Gpsr::sendUDPPacket(Packet *packet)
 {
-    if (delay == 0)
-        send(packet, "ipOut");
-    else
-        sendDelayed(packet, delay, "ipOut");
+    send(packet, "ipOut");
 }
 
 void Gpsr::processUDPPacket(Packet *packet)
@@ -236,7 +233,7 @@ const Ptr<GpsrBeacon> Gpsr::createBeacon()
     return beacon;
 }
 
-void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
+void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     Packet *udpPacket = new Packet("GPSRBeacon");
@@ -251,7 +248,7 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay)
     udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
     udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    sendUDPPacket(udpPacket, delay);
+    sendUDPPacket(udpPacket);
 }
 
 void Gpsr::processBeacon(Packet *packet)

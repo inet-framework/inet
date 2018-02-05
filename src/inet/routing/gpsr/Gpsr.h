@@ -99,12 +99,12 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void processPurgeNeighborsTimer();
 
     // handling UDP packets
-    void sendUDPPacket(Packet *packet, double delay);
+    void sendUDPPacket(Packet *packet);
     void processUDPPacket(Packet *packet);
 
     // handling beacons
     const Ptr<GpsrBeacon> createBeacon();
-    void sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay);
+    void sendBeacon(const Ptr<GpsrBeacon>& beacon);
     void processBeacon(Packet *packet);
 
     // handling packets
