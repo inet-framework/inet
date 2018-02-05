@@ -562,7 +562,7 @@ L3Address Gpsr::findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& 
         auto nextNeighborAddress = senderNeighborAddress;
         while (true) {
             nextNeighborAddress = getNextPlanarNeighborCounterClockwise(nextNeighborAngle);
-            if (nextNeighborAddress.isUnspecified())
+            if (nextNeighborAddress.isUnspecified() || nextNeighborAddress == senderNeighborAddress)
                 break;
             nextNeighborAngle = getNeighborAngle(nextNeighborAddress);
             EV_DEBUG << "Intersecting towards next hop: nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
