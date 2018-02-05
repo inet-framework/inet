@@ -40,8 +40,8 @@ simple EtherHub
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/hub");
-        @signal[pk](type=cMessage);
-        @statistic[pk](title="packets"; source=pk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetReceived](type=cMessage);
+        @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
 }
