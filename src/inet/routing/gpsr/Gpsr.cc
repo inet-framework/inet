@@ -431,18 +431,17 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
     Coord selfPosition = mobility->getCurrentPosition();
     for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
-        const L3Address& neighborAddress = *it;
+        auto neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         if (planarizationMode == GPSR_NO_PLANARIZATION)
             return neighborAddresses;
         else if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
-            for (auto & neighborAddresse : neighborAddresses) {
-                const L3Address& witnessAddress = neighborAddresse;
+            for (auto & witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
                 double neighborWitnessDistance = (witnessPosition - neighborPosition).length();
-                if (*it == neighborAddresse)
+                if (neighborAddress == witnessAddress)
                     continue;
                 else if (neighborDistance > std::max(witnessDistance, neighborWitnessDistance))
                     goto eliminate;
@@ -451,11 +450,10 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors()
         else if (planarizationMode == GPSR_GG_PLANARIZATION) {
             Coord middlePosition = (selfPosition + neighborPosition) / 2;
             double neighborDistance = (neighborPosition - middlePosition).length();
-            for (auto & neighborAddresse : neighborAddresses) {
-                const L3Address& witnessAddress = neighborAddresse;
+            for (auto & witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
-                if (*it == neighborAddresse)
+                if (neighborAddress == witnessAddress)
                     continue;
                 else if (witnessDistance < neighborDistance)
                     goto eliminate;
