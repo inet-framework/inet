@@ -143,7 +143,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     simtime_t getNextNeighborExpiration();
     void purgeNeighbors();
     std::vector<L3Address> getPlanarNeighbors();
-    L3Address getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle);
+    L3Address getNextPlanarNeighborCounterClockwise(double startNeighborAngle);
 
     // next hop
     L3Address findNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
