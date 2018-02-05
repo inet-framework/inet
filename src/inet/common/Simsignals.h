@@ -31,7 +31,6 @@ extern INET_API simsignal_t    // admin
 // - layer 2 (data-link)
 //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
 // they generally carry TxNotifDetails as "details" to identify the interface and the frame
-    txAckedSignal,    // transmitted frame got acked (currently Ieee80211)
     l2QDropSignal,
     macBecameIdleSignal,
     l2BeaconLostSignal,    // missed several consecutive beacons (currently Ieee80211)

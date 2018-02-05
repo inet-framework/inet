@@ -20,7 +20,6 @@
 
 namespace inet {
 
-simsignal_t txAckedSignal = cComponent::registerSignal("txAcked");
 simsignal_t l2QDropSignal = cComponent::registerSignal("l2QDrop");
 simsignal_t macBecameIdleSignal = cComponent::registerSignal("macBecameIdle");
 simsignal_t l2BeaconLostSignal = cComponent::registerSignal("l2BeaconLost");
