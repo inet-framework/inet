@@ -388,7 +388,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
             dumpARP(l2r, "", arpPacket, "");
         }
         else
-        if (const auto& icmpHeader = dynamicPtrCast<const IcmpHeader>(chunk)) {
+        if (dynamicPtrCast<const IcmpHeader>(chunk)) {
             out << "ICMPMessage " << packet->getName() << (packet->hasBitError() ? " (BitError)" : "") << endl;
         }
         else
