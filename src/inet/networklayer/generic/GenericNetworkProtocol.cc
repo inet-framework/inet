@@ -452,8 +452,9 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
     }
 
     // attach control info
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(header->getProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(header->getProtocol());
+    auto payloadProtocol = header->getProtocol();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();

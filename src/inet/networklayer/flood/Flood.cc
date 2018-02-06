@@ -257,8 +257,9 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
 void Flood::decapsulate(Packet *packet)
 {
     auto floodHeader = packet->popHeader<FloodHeader>();
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(floodHeader->getProtocol());
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(floodHeader->getProtocol());
+    auto payloadProtocol = floodHeader->getProtocol();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     auto addressInd = packet->addTagIfAbsent<L3AddressInd>();
     addressInd->setSrcAddress(floodHeader->getSourceAddress());

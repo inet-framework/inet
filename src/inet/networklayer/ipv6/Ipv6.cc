@@ -751,8 +751,9 @@ void Ipv6::decapsulate(Packet *packet)
     packet->addTagIfAbsent<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ipv6Header->getProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ipv6Header->getProtocol());
+    auto payloadProtocol = ipv6Header->getProtocol();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();

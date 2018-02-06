@@ -336,8 +336,9 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
 void ProbabilisticBroadcast::decapsulate(Packet *packet)
 {
     auto macHeader = packet->popHeader<ProbabilisticBroadcastHeader>();
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(macHeader->getProtocol());
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(macHeader->getProtocol());
+    auto payloadProtocol = macHeader->getProtocol();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<L3AddressInd>()->setSrcAddress(macHeader->getSrcAddr());
 }
 
