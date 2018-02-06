@@ -21,10 +21,5 @@ namespace inet {
 
 Define_Module(StationaryMobility);
 
-void StationaryMobility::handleSelfMessage(cMessage *msg)
-{
-    ASSERT(false);
-}
-
 } // namespace inet
 
