@@ -76,7 +76,7 @@ class INET_API IMobility
     /**
      * Returns the current acceleration at the current simulation time.
      */
-    // virtual Coord getCurrentAcceleration() = 0;
+    virtual Coord getCurrentAcceleration() = 0;
 
     /**
      * Returns the current angular position at the current simulation time.
@@ -91,7 +91,7 @@ class INET_API IMobility
     /**
      * Returns the current angular acceleration at the current simulation time.
      */
-    // virtual Orientation getCurrentAngularAcceleration() = 0;
+    virtual EulerAngles getCurrentAngularAcceleration() = 0;
 
     /**
      * Returns the maximum positions along each axes.
