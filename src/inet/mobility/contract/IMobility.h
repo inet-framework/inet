@@ -35,16 +35,17 @@ namespace inet {
  * coordinate system.
  *
  * Coordinates are represented by 3D double precision tuples called Coord. The
- * coordinates are in X, Y, Z order. Conceptually, the X axis goes to the right,
- * the Y axis goes forward, the Z axis goes upward.
+ * coordinates are in X, Y, Z order, they are measured in metres. Conceptually,
+ * the X axis goes to the right, the Y axis goes forward, the Z axis goes upward.
  *
  * Orientations are represented by 3D double precision Tait-Bryan (Euler) tuples
  * called EulerAngles. The angles are in Z, Y', X" order that is often called
- * intrinsic rotations. The default (unrotated) orientation is along the X axis.
- * Conceptually, Z rotation is heading, Y' rotation is descending, X'' rotation
- * is bank. For example, positive rotation along the Z axis rotates X into Y,
- * positive rotation along the Y axis rotates Z into X, positive rotation along
- * the X axis rotates Y into Z.
+ * intrinsic rotations, they are measured in radians. The default (unrotated)
+ * orientation is along the X axis. Conceptually, the Z axis rotation is heading,
+ * the Y' axis rotation is descending, the X" axis rotation is bank. For example,
+ * positive rotation along the Z axis rotates X into Y (turns left), positive
+ * rotation along the Y axis rotates Z into X (leans forward), positive rotation
+ * along the X axis rotates Y into Z (leans right).
  *
  * @ingroup mobility
  * @author Levente Meszaros
