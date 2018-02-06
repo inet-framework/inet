@@ -193,7 +193,7 @@ void IpvxTrafGen::sendPacket()
 
     EV_INFO << "Sending packet: ";
     printPacket(packet);
-    emit(sentPkSignal, packet);
+    emit(packetSentSignal, packet);
     send(packet, "ipOut");
     numSent++;
 }
@@ -223,7 +223,7 @@ void IpvxTrafGen::printPacket(Packet *msg)
 
 void IpvxTrafGen::processPacket(Packet *msg)
 {
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     EV_INFO << "Received packet: ";
     printPacket(msg);
     delete msg;

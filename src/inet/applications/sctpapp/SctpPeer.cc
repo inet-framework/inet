@@ -185,7 +185,7 @@ void SctpPeer::generateAndSend(SctpConnectInfo *connectInfo)
     cmsg->setControlInfo(cmd);
     packetsSent++;
     bytesSent += msg->getByteLength();
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     sendOrSchedule(cmsg);
 }
 
@@ -399,7 +399,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                     Packet *cmsg = new Packet("SCTP_C_SEND");
                     bytesSent += smsg->getByteLength();
                     cmd->setPrValue(0);
-                    emit(sentPkSignal, smsg);
+                    emit(packetSentSignal, smsg);
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream + 1) % outboundStreams;
                     cmd->setSid(lastStream);
@@ -595,7 +595,7 @@ void SctpPeer::sendRequest(bool last)
     cmsg->setControlInfo(sendCommand);
 
     // send SctpMessage with SctpSimpleMessage enclosed
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     clientSocket.sendMsg(cmsg);
     bytesSent += numBytes;
 }
@@ -690,7 +690,7 @@ void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
 
     SctpCommand *ind = check_and_cast<SctpCommand *>(msg->getControlInfo());
 
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo) {

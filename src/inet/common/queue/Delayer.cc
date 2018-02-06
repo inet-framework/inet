@@ -34,11 +34,11 @@ void Delayer::initialize()
 void Delayer::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        emit(sentPkSignal, msg);
+        emit(packetSentSignal, msg);
         send(msg, "out");
     }
     else {
-        emit(rcvdPkSignal, msg);
+        emit(packetReceivedSignal, msg);
 
         simtime_t delay(*delayPar);
         emit(delaySignal, delay);

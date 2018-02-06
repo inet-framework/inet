@@ -37,8 +37,8 @@ simple TcpSpoof like ITcp
         bool isSYN = default(true); // whether to set SYN bit on packet
         double t @unit(s); // simulation time to send at
         @display("i=block/square");
-        @signal[sentPk](type=cPacket);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetSent](type=cPacket);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
         input appIn @labels(TcpCommand/down); // Not used!

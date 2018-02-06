@@ -161,7 +161,7 @@ void VoipStreamSender::handleMessage(cMessage *msg)
         }
         else {
             packet = check_and_cast<Packet *>(msg);
-            emit(sentPkSignal, packet);
+            emit(packetSentSignal, packet);
             socket.sendTo(packet, destAddress, destPort);
         }
     }

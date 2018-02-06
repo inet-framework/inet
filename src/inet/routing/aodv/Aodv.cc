@@ -82,7 +82,7 @@ void Aodv::initialize(int stage)
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         networkProtocol->registerHook(0, this);
-        host->subscribe(linkBreakSignal, this);
+        host->subscribe(linkBrokenSignal, this);
 
         if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
@@ -990,7 +990,7 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
 void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
-    if (signalID == linkBreakSignal) {
+    if (signalID == linkBrokenSignal) {
         EV_DETAIL << "Received link break signal" << endl;
         Packet *datagram = check_and_cast<Packet *>(obj);
         const auto& networkHeader = findNetworkProtocolHeader(datagram);

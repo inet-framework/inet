@@ -105,7 +105,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(pendingQueue->getMaxQueueSize());
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -160,7 +160,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             EV_INFO << "This frame is not for us" << std::endl;
             PacketDropDetails details;
             details.setReason(NOT_ADDRESSED_TO_US);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
         cancelEvent(startRxTimer);
@@ -171,7 +171,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         EV_INFO << "This frame is not for us" << std::endl;
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -271,8 +271,8 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(recoveryProcedure->getShortRetryLimit());
-        emit(packetDropSignal, packet, &details);
-        emit(linkBreakSignal, packet);
+        emit(packetDroppedSignal, packet, &details);
+        emit(linkBrokenSignal, packet);
     }
 }
 
@@ -340,8 +340,8 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(-1); // TODO:
-        emit(packetDropSignal, failedPacket, &details);
-        emit(linkBreakSignal, failedPacket);
+        emit(packetDroppedSignal, failedPacket, &details);
+        emit(linkBrokenSignal, failedPacket);
     }
     else {
         auto h = failedPacket->removeHeader<Ieee80211DataOrMgmtHeader>();

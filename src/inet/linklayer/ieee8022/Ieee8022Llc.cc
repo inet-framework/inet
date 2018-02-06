@@ -49,7 +49,7 @@ void Ieee8022Llc::handleMessage(cMessage *message)
             EV_WARN << "Unknown protocol or SAP, dropping packet\n";
             PacketDropDetails details;
             details.setReason(NO_PROTOCOL_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
     }

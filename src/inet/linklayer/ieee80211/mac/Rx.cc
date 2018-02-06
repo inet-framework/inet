@@ -83,7 +83,7 @@ bool Rx::lowerFrameReceived(Packet *packet)
         EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         for (auto contention : contentions)
             contention->corruptedFrameReceived();

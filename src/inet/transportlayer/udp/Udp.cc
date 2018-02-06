@@ -394,7 +394,7 @@ void Udp::processPacketFromApp(Packet *packet)
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
-    emit(sentPkSignal, packet);
+    emit(packetSentSignal, packet);
     emit(packetSentToLowerSignal, packet);
     send(packet, "ipOut");
     numSent++;
@@ -404,7 +404,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
 {
     ASSERT(udpPacket->getControlInfo() == nullptr);
     emit(packetReceivedFromLowerSignal, udpPacket);
-    emit(rcvdPkSignal, udpPacket);
+    emit(packetReceivedSignal, udpPacket);
 
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
     const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
@@ -425,7 +425,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
         EV_WARN << "Packet has bit error, discarding\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, udpPacket, &details);
+        emit(packetDroppedSignal, udpPacket, &details);
         numDroppedBadChecksum++;
         delete udpPacket;
         return;
@@ -580,7 +580,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     const auto& udpHeader = udpPacket->peekHeader<UdpHeader>();
     PacketDropDetails details;
     details.setReason(NO_PORT_FOUND);
-    emit(packetDropSignal, udpPacket, &details);
+    emit(packetDroppedSignal, udpPacket, &details);
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE

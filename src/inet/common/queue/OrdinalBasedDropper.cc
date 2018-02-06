@@ -47,13 +47,13 @@ void OrdinalBasedDropper::initialize()
 void OrdinalBasedDropper::handleMessage(cMessage *msg)
 {
     numPackets++;
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
 
     if (generateFurtherDrops) {
         if (numPackets == dropsVector[0]) {
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
             PacketDropDetails details;
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
             numDropped++;
             dropsVector.erase(dropsVector.begin());
@@ -64,7 +64,7 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
             return;    // drop message
         }
     }
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     send(msg, "out");
 }
 

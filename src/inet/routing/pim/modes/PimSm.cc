@@ -134,8 +134,8 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
         host->subscribe(ipv4MdataRegisterSignal, this);
         host->subscribe(ipv4DataOnRpfSignal, this);
         host->subscribe(ipv4DataOnNonrpfSignal, this);
-        host->subscribe(ipv4McastRegisteredSignal, this);
-        host->subscribe(ipv4McastUnregisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
         host->subscribe(pimNeighborChangedSignal, this);
@@ -167,8 +167,8 @@ void PimSm::stopPIMRouting()
         host->unsubscribe(ipv4MdataRegisterSignal, this);
         host->unsubscribe(ipv4DataOnRpfSignal, this);
         host->unsubscribe(ipv4DataOnNonrpfSignal, this);
-        host->unsubscribe(ipv4McastRegisteredSignal, this);
-        host->unsubscribe(ipv4McastUnregisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->unsubscribe(pimNeighborAddedSignal, this);
         host->unsubscribe(pimNeighborDeletedSignal, this);
         host->unsubscribe(pimNeighborChangedSignal, this);
@@ -282,14 +282,14 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     const Ipv4Header *ipv4Header;
     PimInterface *pimInterface;
 
-    if (signalID == ipv4McastRegisteredSignal) {
+    if (signalID == ipv4MulticastGroupRegisteredSignal) {
         EV << "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverAdded(info->ie, info->groupAddress);
     }
-    else if (signalID == ipv4McastUnregisteredSignal) {
+    else if (signalID == ipv4MulticastGroupUnregisteredSignal) {
         EV << "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());

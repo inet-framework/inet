@@ -38,7 +38,7 @@ simple xMIPv6
         bool isMobileNode;
         @display("i=block/classifier2");
         @signal[mipv6RoCompleted](type=cMessage?);
-        @signal[packetDrop](type=cPacket);
+        @signal[packetDropped](type=cPacket);
     gates:
         input fromIPv6;
         output toIPv6;

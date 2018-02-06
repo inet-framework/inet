@@ -88,7 +88,7 @@ class Ipv6RoutingTable;
 #endif /* WITH_xMIPv6 */
 
 /*
- * Info for ipv6McastJoinSignal and ipv6McastLeaveSignal notifications
+ * Info for ipv6MulticastGroupJoinedSignal and ipv6MulticastGroupLeftSignal notifications
  */
 struct INET_API Ipv6MulticastGroupInfo : public cObject
 {

@@ -259,7 +259,7 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
                 PacketDropDetails details;
                 details.setReason(QUEUE_OVERFLOW);
                 details.setLimit(queueLength);
-                emit(packetDropSignal, msg, &details);
+                emit(packetDroppedSignal, msg, &details);
                 delete msg;
                 updateMacState(IDLE_1);
             }
@@ -422,7 +422,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     PacketDropDetails details;
                     details.setReason(RETRY_LIMIT_REACHED);
                     details.setLimit(macMaxCSMABackoffs);
-                    emit(packetDropSignal, mac, &details);
+                    emit(packetDroppedSignal, mac, &details);
                     delete mac;
                     manageQueue();
                 }
@@ -587,8 +587,8 @@ void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*m
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(macMaxFrameRetries);
-        emit(packetDropSignal, mac, &details);
-        emit(linkBreakSignal, mac);
+        emit(packetDroppedSignal, mac, &details);
+        emit(linkBrokenSignal, mac);
         delete mac;
     }
     manageQueue();
@@ -663,7 +663,7 @@ void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(queueLength);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
         delete msg;
     }
 }
@@ -854,7 +854,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -944,7 +944,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         EV_DETAIL << "packet not for me, deleting...\n";
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }

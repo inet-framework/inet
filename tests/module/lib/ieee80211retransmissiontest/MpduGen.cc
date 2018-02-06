@@ -42,7 +42,7 @@ void MpduGen::initialize(int stage)
 
 void MpduGen::processPacket(Packet *pk)
 {
-    emit(rcvdPkSignal, pk);
+    emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
@@ -72,7 +72,7 @@ void MpduGen::sendPackets()
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
         packet->insertAtEnd(payload);
-        emit(sentPkSignal, packet);
+        emit(packetSentSignal, packet);
         socket.sendTo(packet, destAddr, destPort);
         numSent++;
     }

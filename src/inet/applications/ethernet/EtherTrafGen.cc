@@ -192,7 +192,7 @@ void EtherTrafGen::sendBurstPackets()
         sapTag->setDsap(dsap);
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
-        emit(sentPkSignal, datapacket);
+        emit(packetSentSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;
     }
@@ -203,7 +203,7 @@ void EtherTrafGen::receivePacket(Packet *msg)
     EV_INFO << "Received packet `" << msg->getName() << "' length= " << msg->getByteLength() << "B\n";
 
     packetsReceived++;
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     delete msg;
 }
 

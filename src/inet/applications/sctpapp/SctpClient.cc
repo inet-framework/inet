@@ -326,7 +326,7 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
     SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
@@ -427,7 +427,7 @@ void SctpClient::sendRequest(bool last)
     sendCommand->setSid(nextStream);
     cmsg->setControlInfo(sendCommand);
 EV_INFO << "vor emit\n";
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     EV_INFO << "nach emit\n";
     socket.sendMsg(cmsg);
     bytesSent += sendBytes;

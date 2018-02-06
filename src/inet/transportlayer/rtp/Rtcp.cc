@@ -205,7 +205,7 @@ void Rtcp::connectRet()
 
 void Rtcp::readRet(Packet *sifpIn)
 {
-    emit(rcvdPkSignal, sifpIn);
+    emit(packetReceivedSignal, sifpIn);
     processIncomingRTCPPacket(sifpIn, Ipv4Address(_destinationAddress), _port);
 }
 

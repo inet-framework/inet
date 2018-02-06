@@ -56,7 +56,7 @@ struct INET_API Ipv4MulticastSourceList
 };
 
 /*
- * Info for ipv4McastJoinSignal and ipv4McastLeaveSignal notifications
+ * Info for ipv4MulticastGroupJoinedSignal and ipv4MulticastGroupLeftSignal notifications
  */
 struct INET_API Ipv4MulticastGroupInfo : public cObject
 {

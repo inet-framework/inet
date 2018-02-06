@@ -51,14 +51,14 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
 {
     numPackets++;
 
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
 
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
             cMessage *dupmsg = utils::dupPacketAndControlInfo(msg);
             emit(duplPkSignal, dupmsg);
-            emit(sentPkSignal, dupmsg);
+            emit(packetSentSignal, dupmsg);
             send(dupmsg, "out");
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
@@ -68,7 +68,7 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
             }
         }
     }
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     send(msg, "out");
 }
 

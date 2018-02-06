@@ -66,7 +66,7 @@ void TcpSinkApp::handleMessage(cMessage *msg)
         Packet *pk = check_and_cast<Packet *>(msg);
         long packetLength = pk->getByteLength();
         bytesRcvd += packetLength;
-        emit(rcvdPkSignal, pk);
+        emit(packetReceivedSignal, pk);
         delete msg;
     }
     else if (msg->getKind() == TCP_I_AVAILABLE)

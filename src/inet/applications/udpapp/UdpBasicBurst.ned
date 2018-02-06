@@ -88,7 +88,7 @@ import inet.applications.contract.IApp;
 // <b>Statistics</b>
 //
 // Statistics are collected on outgoing packets:
-//  - sentPk: packet object
+//  - packetSent: packet object
 //
 // Statistics are collected on incoming packets:
 //  - outOfOrderPk: statistics of out of order packets.
@@ -97,7 +97,7 @@ import inet.applications.contract.IApp;
 //  - dropPk: statistics of dropped packets.
 //        The packet is dropped when not out-of-order packet and delay time is larger than
 //        delayLimit parameter. The delayLimit=0 is infinity.
-//  - rcvdPk: statistics of not dropped, not out-of-order packets.
+//  - packetReceived: statistics of not dropped, not out-of-order packets.
 //  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
 //
 simple UdpBasicBurst like IApp
@@ -118,15 +118,15 @@ simple UdpBasicBurst like IApp
         volatile double sleepDuration @unit(s); // time between bursts (zero allowed)
         volatile double sendInterval @unit(s); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
         double delayLimit @unit(s) = default(0); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
-        @signal[sentPk](type=Packet);
-        @signal[rcvdPk](type=Packet);
-        @signal[packetDrop](type=Packet);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
+        @signal[packetDropped](type=Packet);
         @signal[outOfOrderPk](type=Packet);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; source=packetDrop; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[outOfOrderPk](title="packets received out of order"; source=outOfOrderPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[endToEndDelay](title="delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
         @display("i=block/app");
     gates:
         input socketIn @labels(UdpControlInfo/up);

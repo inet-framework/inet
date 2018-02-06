@@ -56,11 +56,11 @@ simple SctpClient like IApp
         string streamRequestRatio = default("");
         string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
-        @signal[sentPk](type=SctpSimpleMessage);
-        @signal[rcvdPk](type=Packet);
+        @signal[packetSent](type=SctpSimpleMessage);
+        @signal[packetReceived](type=Packet);
         @signal[echoedPk](type=SctpSimpleMessage);
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:

@@ -106,7 +106,7 @@ void Gpsr::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        host->subscribe(linkBreakSignal, this);
+        host->subscribe(linkBrokenSignal, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
         if (isNodeUp()) {
@@ -827,7 +827,7 @@ bool Gpsr::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
-    if (signalID == linkBreakSignal) {
+    if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
         // TODO: remove the neighbor
     }

@@ -173,7 +173,7 @@ cat("\n  MANETROUTING UDP TEST RESULT:\n")
 
 cat("\n    CHECKS SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "sentPk:count",]
+x <- dataset$scalars[dataset$scalars$name == "packetSent:count",]
 xx <- x[grep("\\.senderhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)
@@ -194,7 +194,7 @@ if(length(xx$value) != linecount)
 
 cat("\n    CHECKS RECEIVED PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "rcvdPk:count",]
+x <- dataset$scalars[dataset$scalars$name == "packetReceived:count",]
 xx <- x[grep("\\.rcvrhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)

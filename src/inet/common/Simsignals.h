@@ -45,7 +45,7 @@ extern INET_API simsignal_t    // admin
     l2ApAssociatedSignal,    // emitted by the AP, successfully associated with this AP (currently Ieee80211)
     l2ApDisassociatedSignal,    // emitted by the AP, successfully disassociated from this AP (currently Ieee80211)
 
-    linkBreakSignal,    // used for manet link layer feedback
+    linkBrokenSignal,    // used for manet link layer feedback
     linkPromiscuousSignal,    // used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
     linkFullPromiscuousSignal,    // Used for manet promiscuous mode, all packets are promiscuous
 
@@ -70,11 +70,11 @@ extern INET_API simsignal_t    // admin
     mrouteChangedSignal,
 
 // layer 3 - Ipv4
-    ipv4McastJoinSignal,
-    ipv4McastLeaveSignal,
+    ipv4MulticastGroupJoinedSignal,
+    ipv4MulticastGroupLeftSignal,
     ipv4McastChangeSignal,
-    ipv4McastRegisteredSignal,
-    ipv4McastUnregisteredSignal,
+    ipv4MulticastGroupRegisteredSignal,
+    ipv4MulticastGroupUnregisteredSignal,
 
 // for PIM
     ipv4NewMulticastSignal,
@@ -88,10 +88,10 @@ extern INET_API simsignal_t    // admin
 // layer 3 - Ipv6
     ipv6HandoverOccurredSignal,
     mipv6RoCompletedSignal,
-    ipv6McastJoinSignal,
-    ipv6McastLeaveSignal,
-    ipv6McastRegisteredSignal,
-    ipv6McastUnregisteredSignal,
+    ipv6MulticastGroupJoinedSignal,
+    ipv6MulticastGroupLeftSignal,
+    ipv6MulticastGroupRegisteredSignal,
+    ipv6MulticastGroupUnregisteredSignal,
 
 // - layer 4 (transport)
 //...
@@ -100,7 +100,7 @@ extern INET_API simsignal_t    // admin
 //...
 
 // general
-    packetDropSignal,
+    packetDroppedSignal,
 
     packetSentToUpperSignal,
     packetReceivedFromUpperSignal,
@@ -111,8 +111,8 @@ extern INET_API simsignal_t    // admin
     packetSentToPeerSignal,
     packetReceivedFromPeerSignal,
 
-    sentPkSignal,
-    rcvdPkSignal;
+    packetSentSignal,
+    packetReceivedSignal;
 
 /**
  * Utility function

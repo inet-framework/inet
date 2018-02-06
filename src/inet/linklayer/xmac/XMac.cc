@@ -637,7 +637,7 @@ bool XMac::addToQueue(Packet *packet)
                   " deleted\n";
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         nbDroppedDataPackets++;
         return false;

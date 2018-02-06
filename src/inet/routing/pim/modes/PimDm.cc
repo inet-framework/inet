@@ -82,8 +82,8 @@ bool PimDm::handleNodeStart(IDoneCallback *doneCallback)
         if (!host)
             throw cRuntimeError("PimDm: containing node not found.");
         host->subscribe(ipv4NewMulticastSignal, this);
-        host->subscribe(ipv4McastRegisteredSignal, this);
-        host->subscribe(ipv4McastUnregisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->subscribe(ipv4DataOnNonrpfSignal, this);
         host->subscribe(ipv4DataOnRpfSignal, this);
         host->subscribe(routeAddedSignal, this);
@@ -113,8 +113,8 @@ void PimDm::stopPIMRouting()
         if (!host)
             throw cRuntimeError("PimDm: containing node not found.");
         host->unsubscribe(ipv4NewMulticastSignal, this);
-        host->unsubscribe(ipv4McastRegisteredSignal, this);
-        host->unsubscribe(ipv4McastUnregisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->unsubscribe(ipv4DataOnNonrpfSignal, this);
         host->unsubscribe(ipv4DataOnRpfSignal, this);
         host->unsubscribe(routeAddedSignal, this);
@@ -1062,14 +1062,14 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             unroutableMulticastPacketArrived(ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), ipv4Header->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
-    else if (signalID == ipv4McastRegisteredSignal) {
+    else if (signalID == ipv4MulticastGroupRegisteredSignal) {
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)
             multicastReceiverAdded(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
-    else if (signalID == ipv4McastUnregisteredSignal) {
+    else if (signalID == ipv4MulticastGroupUnregisteredSignal) {
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::DenseMode)

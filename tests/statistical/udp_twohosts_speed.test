@@ -96,7 +96,7 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 scafile <- 'results/General-#0.sca'
 linecount <- 4
-sentPk   <- 10000
+packetSent   <- 10000
 echoedPk <- 10000
 
 # begin TEST:
@@ -106,20 +106,20 @@ dataset <- loadDataset(scafile)
 cat("\nOMNETPP TEST RESULT:\n")
 
 app <- dataset$scalars[grep("\\.host\\d\\w*\\.app\\[\\d\\]$",dataset$scalars$module),]
-udpSent <- app[app$name == "sentPk:count",]
+udpSent <- app[app$name == "packetSent:count",]
 udpRcvd <- app[app$name == "echoedPk:count",]
 
 cat("  UDP SPEED TEST RESULT:\n")
 
 #print(udpSent)
 cat("    UDP SENT ")
-if(length(udpSent$value) == linecount & min(udpSent$value) >= sentPk)
+if(length(udpSent$value) == linecount & min(udpSent$value) >= packetSent)
 {
     cat("OK\n")
 } else {
     cat("BAD:\n")
-    udpSent$rate = udpSent$value*100/sentPk
-    print(udpSent[udpSent$value < sentPk,])
+    udpSent$rate = udpSent$value*100/packetSent
+    print(udpSent[udpSent$value < packetSent,])
 }
 
 #print(udpRcvd)
@@ -129,7 +129,7 @@ if(length(udpRcvd$value) == linecount & min(udpRcvd$value) >= echoedPk)
     cat("OK\n")
 } else {
     cat("BAD:\n")
-    udpRcvd$rate = udpRcvd$value*100/sentPk
+    udpRcvd$rate = udpRcvd$value*100/packetSent
     print(udpRcvd[udpRcvd$value < echoedPk,])
 }
 

@@ -371,7 +371,7 @@ void EtherMacBase::processConnectDisconnect()
                 numDroppedPkFromHLIfaceDown++;
                 PacketDropDetails details;
                 details.setReason(INTERFACE_DOWN);
-                emit(packetDropSignal, msg, &details);
+                emit(packetDroppedSignal, msg, &details);
                 delete msg;
             }
         }
@@ -447,7 +447,7 @@ void EtherMacBase::flushQueue()
             cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
         }
     }
@@ -456,7 +456,7 @@ void EtherMacBase::flushQueue()
             cMessage *msg = txQueue.extQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
         }
         txQueue.extQueue->clear();    // clear request count
@@ -516,7 +516,7 @@ bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     numDroppedNotForUs++;
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(packetDropSignal, packet, &details);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
     return true;
 }

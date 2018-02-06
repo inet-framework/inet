@@ -373,7 +373,7 @@ void Ipv4::preroutingFinish(Packet *packet)
             numDropped++;
             PacketDropDetails details;
             details.setReason(FORWARDING_DISABLED);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
         else {
@@ -394,7 +394,7 @@ void Ipv4::handlePacketFromHL(Packet *packet)
         numDropped++;
         PacketDropDetails details;
         details.setReason(NO_INTERFACE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -451,7 +451,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
             numUnroutable++;
             PacketDropDetails details;
             details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
     }
@@ -555,7 +555,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
         numUnroutable++;
         PacketDropDetails details;
         details.setReason(NO_ROUTE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
@@ -602,7 +602,7 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
         numDropped++;
         PacketDropDetails details;
         details.setReason(NO_INTERFACE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -639,7 +639,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
             numUnroutable++;
             PacketDropDetails details;
             details.setReason(NO_ROUTE_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
             return;
         }
@@ -651,7 +651,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         emit(ipv4DataOnNonrpfSignal, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
         numDropped++;
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
@@ -659,7 +659,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         EV_ERROR << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
     else {
@@ -834,7 +834,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         // drop datagram, destruction responsibility in ICMP
         PacketDropDetails details;
         details.setReason(HOP_LIMIT_REACHED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
@@ -852,7 +852,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (ipv4Header->getDontFragment()) {
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
@@ -1054,7 +1054,7 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
             auto packet = packetQueue.get(i);
             PacketDropDetails details;
             details.setReason(ADDRESS_RESOLUTION_FAILED);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
         }
         packetQueue.clear();
         pendingPackets.erase(it);

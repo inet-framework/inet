@@ -78,7 +78,7 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 
-    emit(sentPkSignal, pk);
+    emit(packetSentSignal, pk);
     send(pk, "ipOut");
 }
 

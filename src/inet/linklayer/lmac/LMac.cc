@@ -176,7 +176,7 @@ void LMac::handleUpperPacket(Packet *packet)
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(queueLength);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
     }
@@ -359,7 +359,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, packet, &details);
+                    emit(packetDroppedSignal, packet, &details);
                     delete packet;
                 }
                 // in any case, go back to sleep
@@ -559,7 +559,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, packet, &details);
+                    emit(packetDroppedSignal, packet, &details);
                     delete packet;
                 }
                 // in any case, go back to sleep
@@ -594,7 +594,7 @@ void LMac::handleLowerPacket(Packet *packet)
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }

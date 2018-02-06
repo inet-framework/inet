@@ -241,7 +241,7 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
         EV_WARN << "Unrecognised mobility message... Dropping" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
         delete inPacket;
     }
 }
@@ -1770,7 +1770,7 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
         EV_WARN << "HoT validation not passed: dropping message" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
@@ -1857,7 +1857,7 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
         EV_WARN << "CoT validation not passed: dropping message" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
@@ -2041,7 +2041,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
     if (!validateType2RH(*ipv6Header.get(), *rh)) {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -2065,7 +2065,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -2104,7 +2104,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
     else {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -2187,7 +2187,7 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
     else {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -2506,7 +2506,7 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
         EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         auto ifTag = inPacket->getTag<InterfaceInd>();

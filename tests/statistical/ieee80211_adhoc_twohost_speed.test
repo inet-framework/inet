@@ -205,8 +205,8 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 sink <- dataset$scalars[grep("\\.srvHost\\[\\d\\]\\.sink", dataset$scalars$module),]
 #print(sink)
-secs <- (sink$value[sink$name == "rcvdPk:count"] / sink$value[sink$name == "packetPerSec"])
-sinkRcvd <- sink[sink$name == "rcvdPk:sum(packetBytes)",]
+secs <- (sink$value[sink$name == "packetReceived:count"] / sink$value[sink$name == "packetPerSec"])
+sinkRcvd <- sink[sink$name == "packetReceived:sum(packetBytes)",]
 
 #print(sinkRcvd)
 cnt <- length(sinkRcvd$value)

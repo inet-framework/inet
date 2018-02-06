@@ -73,12 +73,12 @@ simple TelnetApp like IApp
         volatile double idleInterval @unit(s) = default(exponential(300s)); // time gap between sessions
         volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, user waits this much before trying to reconnect
         @display("i=block/telnet");
-        @signal[sentPk](type=Packet);
-        @signal[rcvdPk](type=Packet);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
         @signal[connect](type=long);  // 1 for open, -1 for close
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[numActiveSessions](title="number of active sessions"; source="sum(connect)"; record=max,timeavg,vector; interpolationmode=sample-hold;);
         @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
 

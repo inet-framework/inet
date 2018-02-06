@@ -244,7 +244,7 @@ void UdpBasicBurst::processPacket(Packet *pk)
             EV_DEBUG << "Old packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
             PacketDropDetails details;
             details.setReason(CONGESTION);
-            emit(packetDropSignal, pk, &details);
+            emit(packetDroppedSignal, pk, &details);
             delete pk;
             numDeleted++;
             return;
@@ -252,7 +252,7 @@ void UdpBasicBurst::processPacket(Packet *pk)
     }
 
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
-    emit(rcvdPkSignal, pk);
+    emit(packetReceivedSignal, pk);
     numReceived++;
     delete pk;
 }
@@ -293,7 +293,7 @@ void UdpBasicBurst::generateBurst()
 
     Packet *payload = createPacket();
     payload->setTimestamp();
-    emit(sentPkSignal, payload);
+    emit(packetSentSignal, payload);
     socket.sendTo(payload, destAddr, destPort);
     numSent++;
 

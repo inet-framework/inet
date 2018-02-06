@@ -21,7 +21,7 @@ simple Ieee8022Llc like IIeee8022Llc
 {
     parameters:
         @display("i=block/layer");
-        @signal[packetDrop](type=Packet);
+        @signal[packetDropped](type=Packet);
     gates:
         input upperLayerIn;
         output upperLayerOut;

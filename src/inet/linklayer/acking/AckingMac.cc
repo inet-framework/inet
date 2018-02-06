@@ -54,7 +54,7 @@ void AckingMac::flushQueue()
         cMessage *msg = queueModule->pop();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
         delete msg;
     }
     queueModule->clear();    // clear request count
@@ -204,7 +204,7 @@ void AckingMac::handleLowerPacket(Packet *packet)
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -229,7 +229,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
         auto macHeader = lastSentPk->popHeader<AckingMacHeader>();
         lastSentPk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
         // packet lost
-        emit(linkBreakSignal, lastSentPk);
+        emit(linkBrokenSignal, lastSentPk);
         delete lastSentPk;
         lastSentPk = nullptr;
         if (queueModule != nullptr)
@@ -297,7 +297,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     EV << "Frame '" << packet->getName() << "' not destined to us, discarding\n";
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(packetDropSignal, packet, &details);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
     return true;
 }

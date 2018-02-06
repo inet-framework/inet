@@ -229,9 +229,9 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 runCount <- 7
 hostCount <- 2
-sentPk <- 1000
+packetSent <- 1000
 echoedPk <- 960
-rcvdPk <- 960
+packetReceived <- 960
 
 # begin TEST:
 
@@ -245,39 +245,39 @@ y <- subset(x$runattrs, attrname=='runnumber')
 names(y) <- c("runid","runnumber")
 ds <- merge(ds,y)
 
-sent <- ds[ds$name == "sentPk:count",]
-rcvd <- ds[ds$name == "rcvdPk:count",]
+sent <- ds[ds$name == "packetSent:count",]
+rcvd <- ds[ds$name == "packetReceived:count",]
 echoed <- ds[ds$name == "echoedPk:count",]
 
 cat("\nOSPF TEST RESULT:\n")
 
-sent$success = (sent$value == sentPk)
+sent$success = (sent$value == packetSent)
 if(length(sent$value) == runCount*hostCount & min(sent$success) == TRUE)
 {
     cat("SENT OK\n")
 } else {
     cat("SENT BAD:\n")
-    sent$rate = sent$value*100/sentPk
+    sent$rate = sent$value*100/packetSent
     print(sent)
 }
 
-echoed$success = (echoed$value >= echoedPk & echoed$value <= sentPk)
+echoed$success = (echoed$value >= echoedPk & echoed$value <= packetSent)
 if(length(echoed$value) == runCount*hostCount & min(echoed$success) == TRUE)
 {
     cat("ECHOED OK\n")
 } else {
     cat("ECHOED BAD:\n")
-    echoed$rate = echoed$value*100/sentPk
+    echoed$rate = echoed$value*100/packetSent
     print(echoed)
 }
 
-rcvd$success = ((rcvd$value >= rcvdPk) & (rcvd$value <= sentPk))
+rcvd$success = ((rcvd$value >= packetReceived) & (rcvd$value <= packetSent))
 if(length(rcvd$value) == runCount*hostCount & min(rcvd$success) == TRUE)
 {
     cat("RCVD OK\n")
 } else {
     cat("RCVD BAD:\n")
-    rcvd$rate = rcvd$value*100/sentPk
+    rcvd$rate = rcvd$value*100/packetSent
     print(rcvd)
 }
 

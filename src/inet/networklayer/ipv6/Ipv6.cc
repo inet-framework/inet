@@ -308,7 +308,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             EV_WARN << "Encapsulation failed - dropping packet." << endl;
             PacketDropDetails details;
             details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
             return;
 #else /* WITH_xMIPv6 */

@@ -343,7 +343,7 @@ void Rtp::readRet(cMessage *sifp)
         Packet *pk = check_and_cast<Packet *>(sifp);
         const auto& rtpHeader = pk->peekHeader<RtpHeader>();
 
-        emit(rcvdPkSignal, pk);
+        emit(packetReceivedSignal, pk);
 
         rtpHeader->dump();
         RtpInnerPacket *rinp1 = new RtpInnerPacket("dataIn1()");

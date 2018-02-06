@@ -111,7 +111,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     // simtime_t lastEED = simTime() - msg->getCreationTime();
 
     Packet *reqPk = check_and_cast<Packet *>(msg);
-    emit(rcvdPkSignal, reqPk);
+    emit(packetReceivedSignal, reqPk);
     const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
 
     if (req != nullptr) {
@@ -145,7 +145,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
 void EthernetApplication::sendPacket(Packet *datapacket, const MacAddress& destAddr)
 {
     datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
-    emit(sentPkSignal, datapacket);
+    emit(packetSentSignal, datapacket);
     send(datapacket, "out");
 }
 

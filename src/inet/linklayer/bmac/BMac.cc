@@ -403,7 +403,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     //drop the packet
                     cMessage *mac = macQueue.front();
                     macQueue.pop_front();
-                    emit(linkBreakSignal, mac);
+                    emit(linkBrokenSignal, mac);
                     delete mac;
 
                     // if something in the queue, wakeup soon.
@@ -483,7 +483,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "Received " << packet << " is not for us, dropping frame." << endl;
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, msg, &details);
+                    emit(packetDroppedSignal, msg, &details);
                     delete msg;
                     msg = nullptr;
                     packet = nullptr;
@@ -565,7 +565,7 @@ void BMac::handleLowerPacket(Packet *packet)
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -628,7 +628,7 @@ bool BMac::addToQueue(cMessage *msg)
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(queueLength);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
         nbDroppedDataPackets++;
         return false;
     }
