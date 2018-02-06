@@ -84,14 +84,13 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual void move() = 0;
 
   public:
-    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() override;
-
-    /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() override;
+    virtual Coord getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
 
-    /** @brief Returns the current angular position at the current simulation time. */
     virtual EulerAngles getCurrentAngularPosition() override;
+    virtual EulerAngles getCurrentAngularSpeed() override { throw cRuntimeError("Invalid operation"); }
+    virtual EulerAngles getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace inet
