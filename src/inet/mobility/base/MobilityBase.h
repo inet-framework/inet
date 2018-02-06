@@ -159,11 +159,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
   public:
     virtual double getMaxSpeed() const override { return NaN; }
 
-    virtual EulerAngles getCurrentAngularPosition() override { return EulerAngles::ZERO; }
-
-    /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed() override { return EulerAngles::ZERO; }
-
     virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
     virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }
 };
