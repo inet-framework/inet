@@ -33,6 +33,9 @@ simple StationaryMobility extends MobilityBase
         double initialLatitude @unit(deg) = default(0deg/0);
         double initialLongitude @unit(deg) = default(0deg/0);
         double initialAltitude @unit(m) = default(0m);
+        double initialHeading @unit(rad) = default(0rad);
+        double initialElevation @unit(rad) = default(0rad);
+        double initialBank @unit(rad) = default(0rad);
         bool initFromDisplayString = default(true);
         @class(StationaryMobility);
 }
