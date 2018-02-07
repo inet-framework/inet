@@ -1,5 +1,5 @@
 ### "acceptConfirm" -> "acceptConfirm"      ### Ieee80211AgentSta
-### "backoff" -> "backoff"      ### EtherMac backoff - emit(1)
+### "backoff" -> "backoff"      ### EtherMac backoff - emit(slotNumber)
 ### "badResponse" -> "badResponse"      ### Rip: dropPacket
 ### "collision" -> "collision"      ### EtherMac: also doing emit(receiveStateSignal, RX_COLLISION_STATE);
 ### "connState" -> "connState"      ### VoipStreamReceiver emit(1)/emit(-1)

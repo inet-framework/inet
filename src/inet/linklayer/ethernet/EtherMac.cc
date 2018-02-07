@@ -760,9 +760,9 @@ void EtherMac::handleRetransmission()
     scheduleAt(simTime() + slotNumber * curEtherDescr->slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
     emit(transmitStateSignal, BACKOFF_STATE);
+    emit(backoffSignal, slotNumber);
 
     numBackoffs++;
-    emit(backoffSignal, 1L);
 }
 
 void EtherMac::printState()
