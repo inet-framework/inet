@@ -29,8 +29,6 @@ simsignal_t l2ApAssociatedSignal = cComponent::registerSignal("l2ApAssociated");
 simsignal_t l2ApDisassociatedSignal = cComponent::registerSignal("l2ApDisassociated");
 
 simsignal_t linkBrokenSignal = cComponent::registerSignal("linkBroken");
-simsignal_t linkPromiscuousSignal = cComponent::registerSignal("linkPromiscuous");
-simsignal_t linkFullPromiscuousSignal = cComponent::registerSignal("linkFullPromiscuous");
 
 simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
 

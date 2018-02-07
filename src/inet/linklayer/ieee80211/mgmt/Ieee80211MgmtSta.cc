@@ -112,7 +112,6 @@ void Ieee80211MgmtSta::initialize(int stage)
         numChannels = par("numChannels");
 
         host = getContainingNode(this);
-        host->subscribe(linkFullPromiscuousSignal, this);
 
         WATCH(isScanning);
 
@@ -306,26 +305,6 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, l
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
         }
-    }
-}
-
-void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method_Silent();
-    printSignalBanner(signalID, obj);
-
-    // Note that we are only subscribed during scanning!
-    if (signalID == linkFullPromiscuousSignal) {
-        auto packet = check_and_cast<Packet *>(obj);
-        if (!packet->hasHeader<Ieee80211DataOrMgmtHeader>())
-            return;
-        const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
-        if (header->getType() != ST_BEACON)
-            return;
-        const Ptr<const Ieee80211MgmtHeader>& beacon = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
-        ApInfo *ap = lookupAP(beacon->getTransmitterAddress());
-        if (ap)
-            ap->rxPower = packet->getTag<SignalPowerInd>()->getPower().get();
     }
 }
 

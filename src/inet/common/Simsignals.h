@@ -40,8 +40,6 @@ extern INET_API simsignal_t    // admin
     l2ApDisassociatedSignal,    // emitted by the AP, successfully disassociated from this AP (currently Ieee80211)
 
     linkBrokenSignal,    // used for manet link layer feedback
-    linkPromiscuousSignal,    // used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
-    linkFullPromiscuousSignal,    // Used for manet promiscuous mode, all packets are promiscuous
 
     modesetChangedSignal,
 

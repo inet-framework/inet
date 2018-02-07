@@ -172,7 +172,6 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase, protected cListener
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual Ieee80211PrimResultCode statusCodeToPrimResultCode(int statusCode);
