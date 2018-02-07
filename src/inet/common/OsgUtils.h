@@ -70,6 +70,32 @@ Texture2D *createTexture(const char *name, bool repeat);
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace = true);
 StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width);
 
+// TODO: move to separate file, recreate node similar to omnetpp figures as a set of basic building blocks
+class INET_API LineNode : public Group
+{
+  protected:
+    cFigure::Arrowhead startArrowhead;
+    cFigure::Arrowhead endArrowhead;
+
+  protected:
+    Geode *getLineGeode() { return static_cast<Geode *>(getChild(0)); }
+    Geode *getStartArrowheadGeode() { return static_cast<Geode *>(getStartArrowheadAutoTransform()->getChild(0)); }
+    Geode *getEndArrowheadGeode() { return static_cast<Geode *>(getEndArrowheadAutoTransform()->getChild(0)); }
+
+    Geometry *getLineGeometry() { return static_cast<Geometry *>(getLineGeode()->getDrawable(0)); }
+    Geometry *getStartArrowheadGeometry() { return static_cast<Geometry *>(getStartArrowheadGeode()->getDrawable(0)); }
+    Geometry *getEndArrowheadGeometry() { return static_cast<Geometry *>(getEndArrowheadGeode()->getDrawable(0)); }
+
+    AutoTransform *getStartArrowheadAutoTransform() { return static_cast<AutoTransform *>(getChild(1)); }
+    AutoTransform *getEndArrowheadAutoTransform() { return static_cast<AutoTransform *>(getChild(startArrowhead ? 2 : 1)); }
+
+  public:
+    LineNode(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead, double lineWidth);
+
+    void setStart(const Coord& start);
+    void setEnd(const Coord& end);
+};
+
 #endif // ifdef WITH_OSG
 
 } // namespace osg

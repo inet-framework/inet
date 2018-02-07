@@ -318,6 +318,50 @@ StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineSty
     return stateSet;
 }
 
+LineNode::LineNode(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead, double lineWidth) :
+    startArrowhead(startArrowhead),
+    endArrowhead(endArrowhead)
+{
+    auto line = inet::osg::createLineGeometry(start, end);
+    auto geode = new osg::Geode();
+    geode->addDrawable(line);
+    addChild(geode);
+    if (startArrowhead)
+        addChild(createArrowhead(end, start, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
+    if (endArrowhead)
+        addChild(createArrowhead(start, end, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
+}
+
+void LineNode::setStart(const Coord& start)
+{
+    auto line = getLineGeometry();
+    auto vertices = static_cast<osg::Vec3Array *>(line->getVertexArray());
+    vertices->at(0) = inet::osg::toVec3d(start);
+    auto end = vertices->at(1);
+    line->dirtyBound();
+    line->dirtyDisplayList();
+    if (startArrowhead) {
+        auto autoTransform = getEndArrowheadAutoTransform();
+        autoTransform->setPosition(vertices->at(0));
+        autoTransform->setAxis(end - vertices->at(0));
+    }
+}
+
+void LineNode::setEnd(const Coord& end)
+{
+    auto line = getLineGeometry();
+    auto vertices = static_cast<osg::Vec3Array *>(line->getVertexArray());
+    auto start = vertices->at(0);
+    vertices->at(1) = inet::osg::toVec3d(end);
+    line->dirtyBound();
+    line->dirtyDisplayList();
+    if (endArrowhead) {
+        auto autoTransform = getEndArrowheadAutoTransform();
+        autoTransform->setPosition(vertices->at(1));
+        autoTransform->setAxis(start - vertices->at(1));
+    }
+}
+
 #endif // ifdef WITH_OSG
 
 } // namespace osg
