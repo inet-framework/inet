@@ -48,17 +48,17 @@ inline Coord toCoord(const Vec3d& vec3d) { return Coord(vec3d.x(), vec3d.y(), ve
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize);
 Vec3Array *createAnnulusVertices(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
 
-Geometry *createLineGeometry(const Coord& begin, const Coord& end);
-Geometry *createArrowheadGeometry(const Coord& begin, const Coord& end, double width = 10.0, double height = 20.0);
+Geometry *createLineGeometry(const Coord& start, const Coord& end);
+Geometry *createArrowheadGeometry(const Coord& start, const Coord& end, double width = 10.0, double height = 20.0);
 Geometry *createPolylineGeometry(const std::vector<Coord>& coords);
 Geometry *createCircleGeometry(const Coord& center, double radius, int polygonSize);
 Geometry *createAnnulusGeometry(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
-Geometry *createQuadGeometry(const Coord& begin, const Coord& end);
+Geometry *createQuadGeometry(const Coord& start, const Coord& end);
 Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& translation = Coord::ZERO);
 
-Node *createArrowhead(const Coord& begin, const Coord &end);
-Node *createLine(const Coord& begin, const Coord& end, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
-Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createArrowhead(const Coord& start, const Coord &end);
+Node *createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);
 
 AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotateMode mode, bool autoScaleToScreen, const Coord& position = Coord::ZERO);
