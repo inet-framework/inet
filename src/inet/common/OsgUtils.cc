@@ -170,10 +170,10 @@ Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& t
     return geometry;
 }
 
-osg::Node *createArrowhead(const Coord& start, const Coord &end)
+osg::Node *createArrowhead(const Coord& start, const Coord &end, double width, double height)
 {
     auto direction = start - end;
-    auto arrowhead = inet::osg::createArrowheadGeometry(direction, Coord::ZERO);
+    auto arrowhead = inet::osg::createArrowheadGeometry(direction, Coord::ZERO, width, height);
     auto autoTransform = inet::osg::createAutoTransform(arrowhead, osg::AutoTransform::ROTATE_TO_AXIS, true, end);
     auto vertexArray = static_cast<osg::Vec3Array *>(arrowhead->getVertexArray());
     auto normal = (vertexArray->at(0) - vertexArray->at(1)) ^ (vertexArray->at(0) - vertexArray->at(2));

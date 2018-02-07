@@ -49,14 +49,14 @@ Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonS
 Vec3Array *createAnnulusVertices(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
 
 Geometry *createLineGeometry(const Coord& start, const Coord& end);
-Geometry *createArrowheadGeometry(const Coord& start, const Coord& end, double width = 10.0, double height = 20.0);
+Geometry *createArrowheadGeometry(const Coord& start, const Coord& end, double width, double height);
 Geometry *createPolylineGeometry(const std::vector<Coord>& coords);
 Geometry *createCircleGeometry(const Coord& center, double radius, int polygonSize);
 Geometry *createAnnulusGeometry(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
 Geometry *createQuadGeometry(const Coord& start, const Coord& end);
 Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& translation = Coord::ZERO);
 
-Node *createArrowhead(const Coord& start, const Coord &end);
+Node *createArrowhead(const Coord& start, const Coord &end, double width = 10.0, double height = 20.0);
 Node *createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);
