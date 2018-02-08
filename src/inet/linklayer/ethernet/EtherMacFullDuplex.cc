@@ -288,9 +288,14 @@ void EtherMacFullDuplex::handleEndTxPeriod()
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    if (dynamic_cast<EthernetPauseFrame *>(curTxFrame) != nullptr) {    //FIXME KLUDGE
+    bool isPauseFrame = false;
+    const auto& header = curTxFrame->peekHeader<EthernetMacHeader>();
+    if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
+        const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
+        isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
+        const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
         numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, ((EthernetPauseFrame *)curTxFrame)->getPauseTime()); //FIXME KLUDGE
+        emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
     }
     else {
         unsigned long curBytes = curTxFrame->getByteLength();
