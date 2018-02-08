@@ -40,6 +40,7 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
     };
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
     virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const override;

@@ -39,6 +39,8 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     };
 
   protected:
+    virtual void initialize(int stage) override;
+
     virtual const RouteVisualization *createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const override;
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;

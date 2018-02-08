@@ -82,7 +82,6 @@ void RoutingTableVisualizerBase::initialize(int stage)
         lineShiftMode = par("lineShiftMode");
         lineContactSpacing = par("lineContactSpacing");
         lineContactMode = par("lineContactMode");
-        lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
         labelFormat.parseFormat(par("labelFormat"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));

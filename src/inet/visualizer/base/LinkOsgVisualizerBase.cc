@@ -43,6 +43,15 @@ LinkOsgVisualizerBase::LinkOsgVisualization::~LinkOsgVisualization()
     // TODO: delete node;
 }
 
+void LinkOsgVisualizerBase::initialize(int stage)
+{
+    LinkVisualizerBase::initialize(stage);
+    if (!hasGUI()) return;
+    if (stage == INITSTAGE_LOCAL) {
+        auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getOsgLineManager(canvas);
+    }
+}
 
 void LinkOsgVisualizerBase::refreshDisplay() const
 {
@@ -78,6 +87,7 @@ void LinkOsgVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDe
     LinkVisualizerBase::addLinkVisualization(sourceAndDestination, linkVisualization);
     auto linkOsgVisualization = static_cast<const LinkOsgVisualization *>(linkVisualization);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    lineManager->addModuleLine(linkVisualization);
     scene->addChild(linkOsgVisualization->node);
 }
 
@@ -86,6 +96,7 @@ void LinkOsgVisualizerBase::removeLinkVisualization(const LinkVisualization *lin
     LinkVisualizerBase::removeLinkVisualization(linkVisualization);
     auto linkOsgVisualization = static_cast<const LinkOsgVisualization *>(linkVisualization);
     auto node = linkOsgVisualization->node;
+    lineManager->removeModuleLine(linkVisualization);
     node->getParent(0)->removeChild(node);
 }
 

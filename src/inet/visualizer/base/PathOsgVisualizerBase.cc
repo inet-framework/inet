@@ -43,6 +43,16 @@ PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
     // TODO: delete node;
 }
 
+void PathOsgVisualizerBase::initialize(int stage)
+{
+    PathVisualizerBase::initialize(stage);
+    if (!hasGUI()) return;
+    if (stage == INITSTAGE_LOCAL) {
+        auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getOsgLineManager(canvas);
+    }
+}
+
 void PathOsgVisualizerBase::refreshDisplay() const
 {
     PathVisualizerBase::refreshDisplay();
