@@ -77,6 +77,7 @@ void PathOsgVisualizerBase::addPathVisualization(const PathVisualization *pathVi
     PathVisualizerBase::addPathVisualization(pathVisualization);
     auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    lineManager->addModulePath(pathVisualization);
     scene->addChild(pathOsgVisualization->node);
 }
 
@@ -85,6 +86,7 @@ void PathOsgVisualizerBase::removePathVisualization(const PathVisualization *pat
     PathVisualizerBase::removePathVisualization(pathVisualization);
     auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
     auto node = pathOsgVisualization->node;
+    lineManager->removeModulePath(pathVisualization);
     node->getParent(0)->removeChild(node);
 }
 

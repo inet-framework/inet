@@ -57,6 +57,7 @@ void LinkOsgVisualizerBase::refreshDisplay() const
 {
     LinkVisualizerBase::refreshDisplay();
     auto simulation = getSimulation();
+    // TODO: share common part with LinkCanvasVisualizerBase
     for (auto it : linkVisualizations) {
         auto linkVisualization = it.second;
         auto sourceModule = simulation->getModule(linkVisualization->sourceModuleId);
