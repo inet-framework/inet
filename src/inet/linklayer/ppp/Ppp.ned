@@ -53,14 +53,14 @@ simple Ppp
         int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");
 
-        @signal[txState](type=long);    // 1:transmit, 0:idle
+        @signal[transmissionStateChanged](type=long);    // 1:transmit, 0:idle
         @signal[rxPkOk](type=Packet);
         @signal[packetDropped](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="tx state"; source=transmissionStateChanged; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

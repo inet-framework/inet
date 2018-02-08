@@ -34,7 +34,7 @@ namespace inet {
 
 Define_Module(Ppp);
 
-simsignal_t Ppp::txStateSignal = registerSignal("txState");
+simsignal_t Ppp::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
 simsignal_t Ppp::rxPkOkSignal = registerSignal("rxPkOk");
 
 Ppp::~Ppp()
@@ -62,7 +62,7 @@ void Ppp::initialize(int stage)
 
         subscribe(POST_MODEL_CHANGE, this);
 
-        emit(txStateSignal, 0L);
+        emit(transmissionStateChangedSignal, 0L);
 
         // find queueModule
         queueModule = nullptr;
@@ -206,7 +206,7 @@ void Ppp::startTransmitting(Packet *msg)
 
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
-    emit(txStateSignal, 1L);
+    emit(transmissionStateChangedSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     pppFrame->clearTags();
     if (sendRawBytes) {
@@ -235,7 +235,7 @@ void Ppp::handleMessage(cMessage *msg)
     if (msg == endTransmissionEvent) {
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
-        emit(txStateSignal, 0L);
+        emit(transmissionStateChangedSignal, 0L);
 
         if (!txQueue.isEmpty()) {
             auto packet = check_and_cast<Packet *>(txQueue.pop());

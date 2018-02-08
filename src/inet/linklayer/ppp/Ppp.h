@@ -54,7 +54,7 @@ class INET_API Ppp : public MacBase
     long numBitErr = 0;
     long numDroppedIfaceDown = 0;
 
-    static simsignal_t txStateSignal;
+    static simsignal_t transmissionStateChangedSignal;
     static simsignal_t rxPkOkSignal;
 
   protected:
