@@ -351,6 +351,11 @@ void EtherMacBase::processConnectDisconnect()
         cancelEvent(endPauseMsg);
 
         if (curTxFrame) {
+            EV_DETAIL << "Interface is not connected, dropping packet " << curTxFrame << endl;
+            numDroppedPkFromHLIfaceDown++;
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(packetDroppedSignal, curTxFrame, &details);
             delete curTxFrame;
             curTxFrame = nullptr;
             lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
