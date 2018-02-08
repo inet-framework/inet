@@ -319,6 +319,7 @@ StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineSty
 }
 
 LineNode::LineNode(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead, double lineWidth) :
+    lineWidth(lineWidth),
     startArrowhead(startArrowhead),
     endArrowhead(endArrowhead)
 {
@@ -337,13 +338,13 @@ void LineNode::setStart(const Coord& start)
     auto line = getLineGeometry();
     auto vertices = static_cast<osg::Vec3Array *>(line->getVertexArray());
     vertices->at(0) = inet::osg::toVec3d(start);
-    auto end = vertices->at(1);
     line->dirtyBound();
     line->dirtyDisplayList();
     if (startArrowhead) {
-        auto autoTransform = getEndArrowheadAutoTransform();
-        autoTransform->setPosition(vertices->at(0));
-        autoTransform->setAxis(end - vertices->at(0));
+        // TODO: suboptimal
+        removeChild(1);
+        auto end = inet::osg::toCoord(vertices->at(1));
+        addChild(createArrowhead(end, start, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
     }
 }
 
@@ -351,14 +352,14 @@ void LineNode::setEnd(const Coord& end)
 {
     auto line = getLineGeometry();
     auto vertices = static_cast<osg::Vec3Array *>(line->getVertexArray());
-    auto start = vertices->at(0);
     vertices->at(1) = inet::osg::toVec3d(end);
     line->dirtyBound();
     line->dirtyDisplayList();
     if (endArrowhead) {
-        auto autoTransform = getEndArrowheadAutoTransform();
-        autoTransform->setPosition(vertices->at(1));
-        autoTransform->setAxis(start - vertices->at(1));
+        // TODO: suboptimal
+        removeChild(startArrowhead ? 2 : 1);
+        auto start = inet::osg::toCoord(vertices->at(0));
+        addChild(createArrowhead(start, end, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
     }
 }
 

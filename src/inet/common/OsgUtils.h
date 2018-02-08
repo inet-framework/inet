@@ -74,6 +74,7 @@ StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineSty
 class INET_API LineNode : public Group
 {
   protected:
+    double lineWidth;
     cFigure::Arrowhead startArrowhead;
     cFigure::Arrowhead endArrowhead;
 
