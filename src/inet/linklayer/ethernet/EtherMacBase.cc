@@ -379,11 +379,10 @@ void EtherMacBase::processConnectDisconnect()
             }
         }
 
-        transmitState = TX_IDLE_STATE;
-        emit(transmitStateSignal, TX_IDLE_STATE);
-        receiveState = RX_IDLE_STATE;
-        emit(receiveStateSignal, RX_IDLE_STATE);
+        changeTransmissionState(TX_IDLE_STATE);         //FIXME replace status to OFF
+        changeReceptionState(RX_IDLE_STATE);
     }
+    //FIXME when connect, set statuses to RECONNECT or IDLE
 }
 
 void EtherMacBase::encapsulate(Packet *frame)
@@ -678,6 +677,18 @@ int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
     int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     return ac - bc;
+}
+
+void EtherMacBase::changeTransmissionState(MacTransmitState newState)
+{
+    transmitState = newState;
+    emit(transmitStateSignal, newState);
+}
+
+void EtherMacBase::changeReceptionState(MacReceiveState newState)
+{
+    receiveState = newState;
+    emit(receiveStateSignal, newState);
 }
 
 } // namespace inet

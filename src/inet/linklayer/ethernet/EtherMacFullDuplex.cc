@@ -133,8 +133,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     send(signal, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);
-    transmitState = TRANSMITTING_STATE;
-    emit(transmitStateSignal, TRANSMITTING_STATE);
+    changeTransmissionState(TRANSMITTING_STATE);
 }
 
 void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
@@ -381,8 +380,7 @@ void EtherMacFullDuplex::processPauseCommand(int pauseUnits)
 void EtherMacFullDuplex::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == curTxFrame);
-    transmitState = WAIT_IFG_STATE;
-    emit(transmitStateSignal, WAIT_IFG_STATE);
+    changeTransmissionState(WAIT_IFG_STATE);
     simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIFGMsg);
 }
@@ -393,8 +391,7 @@ void EtherMacFullDuplex::scheduleEndPausePeriod(int pauseUnits)
     // length is interpreted as 512-bit-time units
     simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
-    transmitState = PAUSE_STATE;
-    emit(transmitStateSignal, PAUSE_STATE);
+    changeTransmissionState(PAUSE_STATE);
 }
 
 void EtherMacFullDuplex::beginSendFrames()
@@ -406,8 +403,7 @@ void EtherMacFullDuplex::beginSendFrames()
     }
     else {
         // No more frames set transmitter to idle
-        transmitState = TX_IDLE_STATE;
-        emit(transmitStateSignal, TX_IDLE_STATE);
+        changeTransmissionState(TX_IDLE_STATE);
         if (!txQueue.extQueue) {
             // Output only for internal queue (we cannot be shure that there
             //are no other frames in external queue)

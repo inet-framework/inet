@@ -51,6 +51,7 @@ class INET_API EtherMacBase : public MacBase
             JAMMING_STATE,
             BACKOFF_STATE,
             PAUSE_STATE
+            //FIXME add TX_OFF_STATE
         };
 
         enum MacReceiveState {
@@ -58,6 +59,7 @@ class INET_API EtherMacBase : public MacBase
             RECEIVING_STATE,
             RX_COLLISION_STATE,
             RX_RECONNECT_STATE
+            //FIXME add RX_OFF_STATE
         };
 
   protected:
@@ -238,6 +240,9 @@ class INET_API EtherMacBase : public MacBase
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
     virtual void refreshConnection();
+
+    void changeTransmissionState(MacTransmitState newState);
+    void changeReceptionState(MacReceiveState newState);
 };
 
 } // namespace inet
