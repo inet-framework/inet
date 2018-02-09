@@ -134,8 +134,8 @@ simple EtherMac like IEtherMac
         @signal[packetReceivedFromUpper](type=Packet);
         @signal[collision](type=long);
         @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
-        @signal[transmitState](type=long); // enum=MacTransmitState
-        @signal[receiveState](type=long); // enum=MacReceiveState
+        @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
+        @signal[receptionStateChanged](type=long); // enum=MacReceiveState
 
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

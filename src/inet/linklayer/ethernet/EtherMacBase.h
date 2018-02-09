@@ -176,8 +176,8 @@ class INET_API EtherMacBase : public MacBase
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
 
-    static simsignal_t transmitStateSignal;
-    static simsignal_t receiveStateSignal;
+    static simsignal_t transmissionStateChangedSignal;
+    static simsignal_t receptionStateChangedSignal;
 
   public:
     static const double SPEED_OF_LIGHT_IN_CABLE;

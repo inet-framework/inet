@@ -121,8 +121,8 @@ simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
 
-simsignal_t EtherMacBase::transmitStateSignal = registerSignal("transmitState");
-simsignal_t EtherMacBase::receiveStateSignal = registerSignal("receiveState");
+simsignal_t EtherMacBase::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
+simsignal_t EtherMacBase::receptionStateChangedSignal = registerSignal("receptionStateChanged");
 
 EtherMacBase::EtherMacBase()
 {
@@ -682,13 +682,13 @@ int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
 void EtherMacBase::changeTransmissionState(MacTransmitState newState)
 {
     transmitState = newState;
-    emit(transmitStateSignal, newState);
+    emit(transmissionStateChangedSignal, newState);
 }
 
 void EtherMacBase::changeReceptionState(MacReceiveState newState)
 {
     receiveState = newState;
-    emit(receiveStateSignal, newState);
+    emit(receptionStateChangedSignal, newState);
 }
 
 } // namespace inet

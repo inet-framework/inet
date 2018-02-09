@@ -144,8 +144,8 @@ simple EtherMacFullDuplex like IEtherMac
         @signal[packetReceivedFromLower](type=Packet);
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
-        @signal[transmitState](type=long); // enum=MacTransmitState
-        @signal[receiveState](type=long); // enum=MacReceiveState
+        @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
+        @signal[receptionStateChanged](type=long); // enum=MacReceiveState
 
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
