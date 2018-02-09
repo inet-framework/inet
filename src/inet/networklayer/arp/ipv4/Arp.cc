@@ -204,19 +204,6 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
     emit(arpResolutionInitiatedSignal, &signal);
 }
 
-void Arp::sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
-{
-    // add control info with MAC address
-    msg->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddress);
-    delete msg->removeTagIfPresent<DispatchProtocolReq>();
-    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::arp);
-
-    // send out
-    EV_INFO << "Sending " << msg << " to network protocol.\n";
-    send(msg, "ifOut");
-}
-
 void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 {
     // find our own IPv4 address and MAC address on the given interface
@@ -236,8 +223,13 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     arp->setDestIPAddress(ipAddress);
     packet->insertHeader(arp);
 
-    emit(arpRequestSentSignal, 1L);
-    sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    // send out
+    EV_INFO << "Sending " << packet << " to network protocol.\n";
+    emit(arpRequestSentSignal, packet);
+    send(packet, "ifOut");
     numRequestsSent++;
 }
 
@@ -386,8 +378,14 @@ void Arp::processARPPacket(Packet *packet)
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
                 outPk->insertHeader(arpReply);
+                outPk->addTag<MacAddressReq>()->setDestAddress(srcMACAddress);
+                outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+                outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+
+                // send out
+                EV_INFO << "Sending " << outPk << " to network protocol.\n";
                 emit(arpReplySentSignal, outPk);
-                sendPacketToNIC(outPk, ie, srcMACAddress);
+                send(outPk, "ifOut");
                 numRepliesSent++;
                 break;
             }

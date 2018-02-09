@@ -110,8 +110,6 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     virtual void start();
     virtual void flush();
 
-    virtual void sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress);
-
     virtual void initiateARPResolution(ArpCacheEntry *entry);
     virtual void sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
