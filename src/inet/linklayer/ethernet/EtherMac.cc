@@ -47,7 +47,7 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 Define_Module(EtherMac);
 
 simsignal_t EtherMac::collisionSignal = registerSignal("collision");
-simsignal_t EtherMac::backoffSignal = registerSignal("backoff");
+simsignal_t EtherMac::backoffSlotsGeneratedSignal = registerSignal("backoffSlotsGenerated");
 
 EtherMac::~EtherMac()
 {
@@ -741,7 +741,7 @@ void EtherMac::handleRetransmission()
 
     scheduleAt(simTime() + slotNumber * curEtherDescr->slotTime, endBackoffMsg);
     changeTransmissionState(BACKOFF_STATE);
-    emit(backoffSignal, slotNumber);
+    emit(backoffSlotsGeneratedSignal, slotNumber);
 
     numBackoffs++;
 }

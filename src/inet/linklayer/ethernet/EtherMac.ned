@@ -133,7 +133,7 @@ simple EtherMac like IEtherMac
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
         @signal[collision](type=long);
-        @signal[backoff](type=long);
+        @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
         @signal[transmitState](type=long); // enum=MacTransmitState
         @signal[receiveState](type=long); // enum=MacReceiveState
 
@@ -147,7 +147,7 @@ simple EtherMac like IEtherMac
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[collision](title="collision"; record=count,vector; interpolationmode=none);
-        @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
+        @statistic[backoffSlotsGenerated](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
