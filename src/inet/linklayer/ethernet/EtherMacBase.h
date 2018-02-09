@@ -170,11 +170,9 @@ class INET_API EtherMacBase : public MacBase
     unsigned long numPauseFramesRcvd = 0;    // PAUSE frames received from network
     unsigned long numPauseFramesSent = 0;    // PAUSE frames sent
 
-    static simsignal_t txPkSignal;
     static simsignal_t rxPkOkSignal;
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
-    static simsignal_t rxPkFromHlSignal;
 
     static simsignal_t transmitStateSignal;
     static simsignal_t receiveStateSignal;

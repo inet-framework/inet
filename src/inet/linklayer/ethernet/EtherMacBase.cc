@@ -117,11 +117,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
-simsignal_t EtherMacBase::txPkSignal = registerSignal("txPk");
 simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-simsignal_t EtherMacBase::rxPkFromHlSignal = registerSignal("rxPkFromHl");
 
 simsignal_t EtherMacBase::transmitStateSignal = registerSignal("transmitState");
 simsignal_t EtherMacBase::receiveStateSignal = registerSignal("receiveState");

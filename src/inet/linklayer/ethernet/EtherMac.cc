@@ -213,6 +213,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
+    numFramesFromHL++;
     emit(packetReceivedFromUpperSignal, packet);
 
     auto frame = packet->peekHeader<EthernetMacHeader>();
@@ -248,13 +249,6 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
         frame = newFrame;
         auto oldFcs = packet->removeTrailer<EthernetFcs>();
         EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
-    }
-
-    bool isControlFrame = frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL;
-
-    if (!isControlFrame) {
-        numFramesFromHL++;
-        emit(rxPkFromHlSignal, packet);
     }
 
     if (txQueue.extQueue) {
@@ -600,6 +594,8 @@ void EtherMac::handleEndTxPeriod()
     if (curTxFrame == nullptr)
         throw cRuntimeError("Frame under transmission cannot be found");
 
+    numFramesSent++;
+    numBytesSent += curTxFrame->getByteLength();
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
     bool isPauseFrame = false;
@@ -610,12 +606,6 @@ void EtherMac::handleEndTxPeriod()
         const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
-    }
-    if (!isPauseFrame) {
-        unsigned long curBytes = curTxFrame->getByteLength();
-        numFramesSent++;
-        numBytesSent += curBytes;
-        emit(txPkSignal, curTxFrame);
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";

@@ -141,6 +141,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
+    numFramesFromHL++;
     emit(packetReceivedFromUpperSignal, packet);
 
     auto frame = packet->peekHeader<EthernetMacHeader>();
@@ -175,13 +176,6 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
         frame = newFrame;
         auto oldFcs = packet->removeTrailer<EthernetFcs>();
         EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
-    }
-
-    bool isPauseFrame = (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL);           //FIXME let more specific test
-
-    if (!isPauseFrame) {
-        numFramesFromHL++;
-        emit(rxPkFromHlSignal, packet);
     }
 
     if (txQueue.extQueue) {
@@ -281,11 +275,13 @@ void EtherMacFullDuplex::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully
     if (transmitState != TRANSMITTING_STATE)
-        throw cRuntimeError("End of transmission, and incorrect state detected");
+        throw cRuntimeError("Model error: End of transmission, and incorrect state detected");
 
     if (nullptr == curTxFrame)
-        throw cRuntimeError("Frame under transmission cannot be found");
+        throw cRuntimeError("Model error: Frame under transmission cannot be found");
 
+    numFramesSent++;
+    numBytesSent += curTxFrame->getByteLength();
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
     bool isPauseFrame = false;
@@ -296,12 +292,6 @@ void EtherMacFullDuplex::handleEndTxPeriod()
         const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
         numPauseFramesSent++;
         emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
-    }
-    else {
-        unsigned long curBytes = curTxFrame->getByteLength();
-        numFramesSent++;
-        numBytesSent += curBytes;
-        emit(txPkSignal, curTxFrame);
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
