@@ -732,6 +732,7 @@ void EtherMac::handleRetransmission()
         EV_DETAIL << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
+        details.setLimit(MAX_ATTEMPTS);
         emit(packetDroppedSignal, curTxFrame, &details);
         delete curTxFrame;
         curTxFrame = nullptr;
