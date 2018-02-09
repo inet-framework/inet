@@ -76,8 +76,8 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     long numRequestsSent = 0;
     long numRepliesSent = 0;
 
-    static simsignal_t sentRequestSignal;
-    static simsignal_t sentReplySignal;
+    static simsignal_t arpRequestSentSignal;
+    static simsignal_t arpReplySentSignal;
 
     ArpCache arpCache;
 

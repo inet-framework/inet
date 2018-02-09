@@ -33,8 +33,8 @@
 
 namespace inet {
 
-simsignal_t Arp::sentRequestSignal = registerSignal("sentRequest");
-simsignal_t Arp::sentReplySignal = registerSignal("sentReply");
+simsignal_t Arp::arpRequestSentSignal = registerSignal("arpRequestSent");
+simsignal_t Arp::arpReplySentSignal = registerSignal("arpReplySent");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
@@ -236,9 +236,9 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     arp->setDestIPAddress(ipAddress);
     packet->insertHeader(arp);
 
+    emit(arpRequestSentSignal, 1L);
     sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
     numRequestsSent++;
-    emit(sentRequestSignal, 1L);
 }
 
 void Arp::requestTimedOut(cMessage *selfmsg)
@@ -293,11 +293,6 @@ void Arp::processARPPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from network protocol.\n";
     const auto& arp = packet->peekHeader<ArpPacket>();
-    if (arp == nullptr) {
-        EV_ERROR << "ARP received a non-arp packet: " << packet->getName() << endl;
-        delete packet;
-        return;
-    }
     dumpARPPacket(arp.get());
 
     // extract input port
@@ -391,9 +386,9 @@ void Arp::processARPPacket(Packet *packet)
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
                 outPk->insertHeader(arpReply);
+                emit(arpReplySentSignal, outPk);
                 sendPacketToNIC(outPk, ie, srcMACAddress);
                 numRepliesSent++;
-                emit(sentReplySignal, 1L);
                 break;
             }
 
