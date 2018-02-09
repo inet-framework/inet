@@ -5,13 +5,13 @@
 ### "connState" -> "connState"      ### VoipStreamReceiver emit(1)/emit(-1)
 ### "connect" -> "connect"      ### TcpAppBase: connect: emit(1), close emit(-1)
 ### "datarate" -> "datarate"    ### RateControlBase: emit datarate
-### "decapPk" -> meaningless, use another or merge
+### "decapPk" -> meaningless, use another or merge      ### EtherEncap
 ### "delay" -> "delay"          ### VoipStreamReceiver: delay of received packet; common/queue/Delayer: generated delay (from parameter)
 ### "dropConfirm" -> "dropConfirm"      ### Ieee80211AgentSta: emit @enum(Ieee80211PrimConfirmCode)
-### "dsap" -> "dsap"
+### "dsap" -> "dsap"      ### EtherLlc
 ### "duplPk" -> "duplPk"            ### common/queue/OrdinalBasedDuplicator: emit generated duplicated cMessage
 ### "echoedPk" -> "echoedPk"        ### SctpClient, SctpPeer
-### "encapPk" -> meaningless, use another or merge
+### "encapPk" -> meaningless, use another or merge      ### EtherEncap
 ### "ipv4DataOnNonrpf" -> "ipv4DataOnNonrpf"          ### from Ipv4 to Pim
 ### "ipv4DataOnRpf" -> "ipv4DataOnRpf"          ### from Ipv4 to Pim
 ### "ipv4McastChange" -> "ipv4McastChange"          ### from Ipv4 to Igmpv3
@@ -19,13 +19,10 @@
 ### "ipv4NewMulticast" -> "ipv4NewMulticast"          ### from Ipv4 to Pim
 ### "l2AssociatedNewAp" -> "l2AssociatedNewAp"          ### Ieee80211AgentSta
 ### "l2AssociatedOldAp" -> "l2AssociatedOldAp"          ### Ieee80211AgentSta
-### "l2QDrop" -> "l2QDrop"          ### !!! UNUSED !!!
 ### "linkFullPromiscuous" -> "linkFullPromiscuous"      ### only subscribe to it, never found any emit
 ### "linkPromiscuous" -> "linkPromiscuous"          ### only registerSignal, no emi, no subscribe
 ### "lostPackets" -> "lostPackets"          ### VoipStreamReceiver: number of lost packets
 ### "lostSamples" -> "lostSamples"          ### VoipStreamReceiver: number of lost samples
-### "macBecameIdle" -> "macBecameIdle"      ### !!! UNUSED !!!
-### "markPk" -> "markPk"            ### DscpMarker: packetMarked
 ### "numLost" -> "numLost"          ### PingApp: count of lost packets
 ### "numOutOfOrderArrivals" -> "numOutOfOrderArrivals"          ### PingApp: count of out of order arrival packets
 ### "numRoutes" -> "numRoutes"          ### Rip: number of RIP route entries. numRipRoutes???
@@ -46,11 +43,9 @@
 ### "rcvdRegisterStopPk" -> "rcvdRegisterStopPk"            ### Pim:
 ### "rcvdResponse" -> "rcvdResponse"            ### Rip:
 ### "rcvdStateRefreshPk" -> "rcvdStateRefreshPk"            ### Pim:
-### "receiveState" -> "receiveState"            ### EtherMac
 ### "reqStreamBytes" -> "reqStreamBytes"            ### UdpVideoStreamServer: length of the requested entire video
 ### "rtt" -> "rtt"          ### PingApp: round trip time
 ### "rxPausePkUnits" -> "rxPausePkUnits"            ### EtherMac
-### "rxPkFromHl" -> "rxPkFromHl"            ### EtherMac*: rx packet from HL and packet not a control frame (not a pause, ...)
 ### "rxPkOk" -> "rxPkOk"            ### EtherMac*, Ppp: when received from LL, packet is OK, before decapsulate and send to HL
 ### "sentAssertPk" -> "sentAssertPk"            ### Pim
 ### "sentGraftAckPk" -> "sentGraftAckPk"            ### Pim
@@ -59,16 +54,12 @@
 ### "sentJoinPrunePk" -> "sentJoinPrunePk"            ### Pim
 ### "sentRegisterPk" -> "sentRegisterPk"            ### Pim
 ### "sentRegisterStopPk" -> "sentRegisterStopPk"            ### Pim
-### "sentReply" -> "sentReply"          ### sent ARP reply, emit(1) !!!
-### "sentRequest" -> "sentRequest"          ### Ieee80211AgentSta: @enum(Ieee80211PrimRequestCode); Arp: emit(1)
+### "sentRequest" -> "sentRequest"          ### Ieee80211AgentSta: @enum(Ieee80211PrimRequestCode); Rip: emit(pk)
 ### "sentStateRefreshPk" -> "sentStateRefreshPk"            ### Pim
 ### "sentUpdate" -> "sentUpdate"            ### Rip
 ### "startDad" -> "startDad"            ### ipv6 ND: emit(1)
 ### "tedChanged" -> "tedChanged"            ### Ldp,Rsvp, ted: 
-### "transmitState" -> "transmitState"          ### EtherMac*: enum MacTransmitState
 ### "txPausePkUnits" -> "txPausePkUnits"          ### EtherMac*: long
-### "txPk" -> "txPk"            ### EtherMac: tx succesfully completed
-### "txState" -> "txState":         ### Ppp: 1/0
 ### "voipMosRate" -> "voipMosRate"          ### SimpleVoip
 ### "voipPacketDelay" -> "voipPacketDelay"          ### SimpleVoip
 ### "voipPacketLossRate" -> "voipPacketLossRate"          ### SimpleVoip
