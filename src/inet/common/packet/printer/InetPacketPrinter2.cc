@@ -220,33 +220,33 @@ std::string InetPacketPrinter2::formatARPPacket(const ArpPacket *packet) const
     std::ostringstream os;
     switch (packet->getOpcode()) {
         case ARP_REQUEST:
-            os << "ARP req: " << packet->getDestIPAddress()
-               << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
+            os << "ARP req: " << packet->getDestIpAddress()
+               << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
             break;
 
         case ARP_REPLY:
             os << "ARP reply: "
-               << packet->getSrcIPAddress() << "=" << packet->getSrcMACAddress()
-               << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))"
+               << packet->getSrcIpAddress() << "=" << packet->getSrcMacAddress()
+               << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))"
             ;
             break;
 
         case ARP_RARP_REQUEST:
-            os << "RARP req: " << packet->getDestMACAddress()
-               << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
+            os << "RARP req: " << packet->getDestMacAddress()
+               << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
             break;
 
         case ARP_RARP_REPLY:
             os << "RARP reply: "
-               << packet->getSrcMACAddress() << "=" << packet->getSrcIPAddress()
-               << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))";
+               << packet->getSrcMacAddress() << "=" << packet->getSrcIpAddress()
+               << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))";
             break;
 
         default:
-            os << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIPAddress()
-               << "(" << packet->getDestMACAddress()
-               << ") s=" << packet->getSrcIPAddress()
-               << "(" << packet->getSrcMACAddress() << ")";
+            os << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIpAddress()
+               << "(" << packet->getDestMacAddress()
+               << ") s=" << packet->getSrcIpAddress()
+               << "(" << packet->getSrcMacAddress() << ")";
             break;
     }
     return os.str();

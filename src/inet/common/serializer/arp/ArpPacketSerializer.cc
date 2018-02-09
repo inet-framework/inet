@@ -49,10 +49,10 @@ void ArpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeByte(ETHER_ADDR_LEN);
     stream.writeByte(4);  // size of IPv4 address
     stream.writeUint16Be(arpPacket->getOpcode());
-    stream.writeMACAddress(arpPacket->getSrcMACAddress());
-    stream.writeIPv4Address(arpPacket->getSrcIPAddress());
-    stream.writeMACAddress(arpPacket->getDestMACAddress());
-    stream.writeIPv4Address(arpPacket->getDestIPAddress());
+    stream.writeMACAddress(arpPacket->getSrcMacAddress());
+    stream.writeIPv4Address(arpPacket->getSrcIpAddress());
+    stream.writeMACAddress(arpPacket->getDestMacAddress());
+    stream.writeIPv4Address(arpPacket->getDestIpAddress());
 }
 
 const Ptr<Chunk> ArpPacketSerializer::deserialize(MemoryInputStream& stream) const
@@ -65,10 +65,10 @@ const Ptr<Chunk> ArpPacketSerializer::deserialize(MemoryInputStream& stream) con
     uint8_t macAddressLength = stream.readByte();     //ar_hln
     uint8_t ipAddressLength = stream.readByte();     //ar_pln
     arpPacket->setOpcode((ArpOpcode)stream.readUint16Be());   // arphdr->ar_op
-    arpPacket->setSrcMACAddress(readMACAddress(stream, macAddressLength));
-    arpPacket->setSrcIPAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
-    arpPacket->setDestMACAddress(readMACAddress(stream, macAddressLength));
-    arpPacket->setDestIPAddress(readIPv4Address(stream, ipAddressLength));   // ar_tpa
+    arpPacket->setSrcMacAddress(readMACAddress(stream, macAddressLength));
+    arpPacket->setSrcIpAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
+    arpPacket->setDestMacAddress(readMACAddress(stream, macAddressLength));
+    arpPacket->setDestIpAddress(readIPv4Address(stream, ipAddressLength));   // ar_tpa
     return arpPacket;
 }
 

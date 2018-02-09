@@ -218,9 +218,9 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     Packet *packet = new Packet("arpREQ");
     const auto& arp = makeShared<ArpPacket>();
     arp->setOpcode(ARP_REQUEST);
-    arp->setSrcMACAddress(myMACAddress);
-    arp->setSrcIPAddress(myIPAddress);
-    arp->setDestIPAddress(ipAddress);
+    arp->setSrcMacAddress(myMACAddress);
+    arp->setSrcIpAddress(myIPAddress);
+    arp->setDestIpAddress(ipAddress);
     packet->insertHeader(arp);
 
     packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
@@ -277,8 +277,8 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
 void Arp::dumpARPPacket(const ArpPacket *arp)
 {
     EV_DETAIL << (arp->getOpcode() == ARP_REQUEST ? "ARP_REQ" : arp->getOpcode() == ARP_REPLY ? "ARP_REPLY" : "unknown type")
-              << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()
-              << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
+              << "  src=" << arp->getSrcIpAddress() << " / " << arp->getSrcMacAddress()
+              << "  dest=" << arp->getDestIpAddress() << " / " << arp->getDestMacAddress() << "\n";
 }
 
 void Arp::processARPPacket(Packet *packet)
@@ -318,8 +318,8 @@ void Arp::processARPPacket(Packet *packet)
     //             the same hardware on which the request was received.
     //
 
-    MacAddress srcMACAddress = arp->getSrcMACAddress();
-    Ipv4Address srcIPAddress = arp->getSrcIPAddress();
+    MacAddress srcMACAddress = arp->getSrcMacAddress();
+    Ipv4Address srcIPAddress = arp->getSrcIpAddress();
 
     if (srcMACAddress.isUnspecified())
         throw cRuntimeError("wrong ARP packet: source MAC address is empty");
@@ -338,7 +338,7 @@ void Arp::processARPPacket(Packet *packet)
 
     // "?Am I the target protocol address?"
     // if Proxy ARP is enabled, we also have to reply if we're a router to the dest IPv4 address
-    if (addressRecognized(arp->getDestIPAddress(), ie)) {
+    if (addressRecognized(arp->getDestIpAddress(), ie)) {
         // "If Merge_flag is false, add the triplet protocol type, sender
         // protocol address, sender hardware address to the translation table"
         if (!mergeFlag) {
@@ -370,11 +370,11 @@ void Arp::processARPPacket(Packet *packet)
 
                 // "Swap hardware and protocol fields", etc.
                 const auto& arpReply = makeShared<ArpPacket>();
-                Ipv4Address origDestAddress = arp->getDestIPAddress();
-                arpReply->setDestIPAddress(srcIPAddress);
-                arpReply->setDestMACAddress(srcMACAddress);
-                arpReply->setSrcIPAddress(origDestAddress);
-                arpReply->setSrcMACAddress(myMACAddress);
+                Ipv4Address origDestAddress = arp->getDestIpAddress();
+                arpReply->setDestIpAddress(srcIPAddress);
+                arpReply->setDestMacAddress(srcMACAddress);
+                arpReply->setSrcIpAddress(origDestAddress);
+                arpReply->setSrcMacAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
                 outPk->insertHeader(arpReply);
@@ -407,7 +407,7 @@ void Arp::processARPPacket(Packet *packet)
     }
     else {
         // address not recognized
-        EV_INFO << "IPv4 address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
+        EV_INFO << "IPv4 address " << arp->getDestIpAddress() << " not recognized, dropping ARP packet\n";
     }
     delete packet;
 }

@@ -468,8 +468,8 @@ void PacketDump::dumpARP(bool l2r, const char *label, const Ptr<const ArpPacket>
     std::ostream& out = *outp;
     char buf[30];
     sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
-    out << buf << " src: " << arp->getSrcIPAddress() << ", " << arp->getSrcMACAddress()
-        << "; dest: " << arp->getDestIPAddress() << ", " << arp->getDestMACAddress() << endl;
+    out << buf << " src: " << arp->getSrcIpAddress() << ", " << arp->getSrcMacAddress()
+        << "; dest: " << arp->getDestIpAddress() << ", " << arp->getDestMacAddress() << endl;
 }
 
 void PacketDump::dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const  char *comment)
