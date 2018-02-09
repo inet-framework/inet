@@ -34,7 +34,7 @@ class INET_API DscpMarker : public cSimpleModule
     int numRcvd = 0;
     int numMarked = 0;
 
-    static simsignal_t markPkSignal;
+    static simsignal_t packetMarkedSignal;
 
   public:
     DscpMarker() {}

@@ -38,7 +38,7 @@ using namespace DiffservUtil;
 
 Define_Module(DscpMarker);
 
-simsignal_t DscpMarker::markPkSignal = registerSignal("markPk");
+simsignal_t DscpMarker::packetMarkedSignal = registerSignal("packetMarked");
 
 void DscpMarker::initialize()
 {
@@ -60,7 +60,7 @@ void DscpMarker::handleMessage(cMessage *msg)
     numRcvd++;
     int dscp = dscps.at(msg->getArrivalGate()->getIndex());
     if (markPacket(packet, dscp)) {
-        emit(markPkSignal, packet);
+        emit(packetMarkedSignal, packet);
         numMarked++;
     }
 

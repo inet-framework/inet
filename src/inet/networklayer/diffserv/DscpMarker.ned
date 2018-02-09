@@ -33,8 +33,8 @@ simple DscpMarker
 
         @display("i=block/star");
 
-        @signal[markPk](type=cPacket);
-        @statistic[markPk](title="packets marked"; source=markPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetMarked](type=cPacket);
+        @statistic[packetMarked](title="packets marked"; source=packetMarked; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in[];
         output out;
