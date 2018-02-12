@@ -69,7 +69,7 @@ void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVecto
         nodeInfo[i].isIPNode = L3AddressResolver().findIpv4RoutingTableOf(mod) != nullptr && L3AddressResolver().findInterfaceTableOf(mod) != nullptr;
         if (nodeInfo[i].isIPNode) {
             nodeInfo[i].ift = L3AddressResolver().interfaceTableOf(mod);
-            nodeInfo[i].rt = L3AddressResolver().routingTableOf(mod);
+            nodeInfo[i].rt = L3AddressResolver().getIpv4RoutingTableOf(mod);
             nodeInfo[i].ipForwardEnabled = mod->hasPar("forwarding") ? mod->par("forwarding") : false;
             topo.getNode(i)->setWeight(nodeInfo[i].ipForwardEnabled ? 0.0 : INFINITY);
         }

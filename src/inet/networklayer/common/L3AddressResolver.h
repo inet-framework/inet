@@ -165,14 +165,14 @@ class INET_API L3AddressResolver
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IIpv4RoutingTable *routingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *getIpv4RoutingTableOf(cModule *host);
 
     /**
      * The function tries to look up the Ipv6RoutingTable module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual Ipv6RoutingTable *routingTable6Of(cModule *host);
+    virtual Ipv6RoutingTable *getIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.

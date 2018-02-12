@@ -181,7 +181,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
 L3Address L3AddressResolver::routerIdOf(cModule *host)
 {
 #ifdef WITH_IPv4
-    IIpv4RoutingTable *rt = routingTableOf(host);
+    IIpv4RoutingTable *rt = getIpv4RoutingTableOf(host);
     return L3Address(rt->getRouterId());
 #else // ifdef WITH_IPv4
     throw cRuntimeError("INET was compiled without Ipv4 support");
@@ -431,7 +431,7 @@ IInterfaceTable *L3AddressResolver::interfaceTableOf(cModule *host)
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
-IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
+IIpv4RoutingTable *L3AddressResolver::getIpv4RoutingTableOf(cModule *host)
 {
     IIpv4RoutingTable *mod = findIpv4RoutingTableOf(host);
     if (!mod)
@@ -440,7 +440,7 @@ IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
     return mod;
 }
 
-Ipv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
+Ipv6RoutingTable *L3AddressResolver::getIpv6RoutingTableOf(cModule *host)
 {
     // find Ipv6RoutingTable
     Ipv6RoutingTable *mod = findIpv6RoutingTableOf(host);
