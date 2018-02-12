@@ -25,7 +25,12 @@ cplusplus {{
 
 namespace inet;
 
-class BitVector { @existingClass; }
+class BitVector
+{
+    @existingClass;
+    @opaque;
+    @toString(.toString());
+}
 
 namespace inet::ieee80211;
 
