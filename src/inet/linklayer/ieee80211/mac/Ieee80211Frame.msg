@@ -41,8 +41,8 @@ const b LENGTH_ACK = b(112);    //bits
 const b LENGTH_MGMT = B(28);    //bits
 const b LENGTH_ADDBAREQ = LENGTH_MGMT + B(9); // mgmt length + action body length
 const b LENGTH_BASIC_BLOCKACK = B(16 + 2 + (2 + 128) + 4); // header + ba control + ba information + fcs
-const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2 + 4(crc)    //FIXME why int, why not b or B? ; why the crc in header_minlength?
-const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
+const b DATAFRAME_HEADER_MINLENGTH = B(2 + 2 + 3 * 6 + 2);    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2
+const b QOSCONTROL_PART_LENGTH = b(2 * 8);    // QoS Control field length (bits)
 const short int MAX_NUM_FRAGMENTS = 16;
 const b LENGTH_A_MSDU_SUBFRAME_HEADER = B(14); //48 + 48 + 16 bits
 const b LENGTH_A_MPDU_SUBFRAME_HEADER = b(4 + 12 + 8 + 8);
@@ -193,15 +193,15 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
 //  field is set to 1 (8.3.2.1 Data frame format)
-//  FIXME: chunkLength is not a constant value (DATAFRAME_HEADER_MINLENGTH / 8 = 28).
-//  For example, with Address 4 and without QoS the correct length is 34 bytes.
-//  Without Address 4 and QoS the correct value is indeed 28.
-//  With Address 4 and QoS the correct value is indeed 36.
-    chunkLength = b(DATAFRAME_HEADER_MINLENGTH) - B(4);
+//  FIXME: chunkLength is not a constant value DATAFRAME_HEADER_MINLENGTH (24 bytes).
+//  For example, with Address 4 and without QoS the correct length is 30 bytes.
+//  Without Address 4 and QoS the correct value is indeed 24 bytes.
+//  With Address 4 and QoS the correct value is indeed 32 bytes.
+    chunkLength = DATAFRAME_HEADER_MINLENGTH;
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MacAddress address4;    // optional field, exists when toDS and fromDS are true
     AckPolicy ackPolicy = NORMAL_ACK;
-    uint8 tid;
+    uint8 tid;              // optional field, exists when type == ST_DATA_WITH_QOS
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
@@ -209,7 +209,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;
-//    chunkLength = b(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - B(4);
+//    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
 //    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
