@@ -200,7 +200,7 @@ osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transm
     auto color = signalColorSet.getColor(transmission->getId());
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
-    auto stateSet = inet::osg::createStateSet(color, 1.0, false);
+    auto stateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
     stateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
     auto transmissionStart = transmission->getStartPosition();
     // FIXME: there's some random overlapping artifact due to clipping degenerate triangles
@@ -278,10 +278,10 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
     cFigure::Color color = signalColorSet.getColor(transmission->getId());;
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
-    auto startStateSet = inet::osg::createStateSet(color, 1.0, false);
+    auto startStateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
     startStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
     startSphere->setStateSet(startStateSet);
-    auto endStateSet = inet::osg::createStateSet(color, 1.0, false);
+    auto endStateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
     endStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
     endSphere->setStateSet(endStateSet);
     auto startGeode = new osg::Geode();
