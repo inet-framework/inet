@@ -21,10 +21,6 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.transportlayer.common.CRC;
 
-cplusplus {{
-#include <vector>
-}}
-
 namespace inet;
 
 enum IgmpType
