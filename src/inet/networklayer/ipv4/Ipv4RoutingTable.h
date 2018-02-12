@@ -111,7 +111,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
 
   protected:
     // set Ipv4 address etc on local loopback
-    virtual void configureLoopbackForIPv4();
+    virtual void configureLoopbackForIpv4();
 
     // set router Id
     virtual void configureRouterId();
@@ -187,7 +187,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
 
     /** @name Interfaces */
     //@{
-    virtual void configureInterfaceForIPv4(InterfaceEntry *ie) override;
+    virtual void configureInterfaceForIpv4(InterfaceEntry *ie) override;
 
     /**
      * Returns an interface given by its address. Returns nullptr if not found.

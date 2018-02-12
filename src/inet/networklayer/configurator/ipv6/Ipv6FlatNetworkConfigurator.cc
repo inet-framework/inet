@@ -64,7 +64,7 @@ void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPN
 
 bool Ipv6FlatNetworkConfigurator::isIPNode(cTopology::Node *node)
 {
-    return L3AddressResolver().findIPv6RoutingTableOf(node->getModule()) != nullptr
+    return L3AddressResolver().findIpv6RoutingTableOf(node->getModule()) != nullptr
            && L3AddressResolver().findInterfaceTableOf(node->getModule()) != nullptr;
 }
 
@@ -81,7 +81,7 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
         // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.getNode(i)->getModule();
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(mod);
-        Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(mod);
+        Ipv6RoutingTable *rt = L3AddressResolver().findIpv6RoutingTableOf(mod);
 
         // skip non-Ipv6 nodes
         if (!rt)
@@ -139,7 +139,7 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
         if (!isIPNode(node))
             continue;
 
-        Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(node->getModule());
+        Ipv6RoutingTable *rt = L3AddressResolver().findIpv6RoutingTableOf(node->getModule());
         IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(node->getModule());
 
         // skip non-Ipv6 nodes
@@ -187,7 +187,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
  */
 
         numIPNodes++;    // FIXME split into num hosts, num routers
-        Ipv6RoutingTable *destRt = L3AddressResolver().findIPv6RoutingTableOf(destNode->getModule());
+        Ipv6RoutingTable *destRt = L3AddressResolver().findIpv6RoutingTableOf(destNode->getModule());
         IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode->getModule());
 
         // skip non-Ipv6 nodes
@@ -228,7 +228,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             if (atNode->getNumPaths() == 0)
                 continue; // not connected
 
-            Ipv6RoutingTable *rt = L3AddressResolver().findIPv6RoutingTableOf(atNode->getModule());
+            Ipv6RoutingTable *rt = L3AddressResolver().findIpv6RoutingTableOf(atNode->getModule());
             IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(atNode->getModule());
 
             // skip non-Ipv6 nodes

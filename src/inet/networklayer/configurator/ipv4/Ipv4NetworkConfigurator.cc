@@ -1201,7 +1201,7 @@ Ipv4NetworkConfigurator::LinkInfo *Ipv4NetworkConfigurator::findLinkOfInterface(
 
 IRoutingTable *Ipv4NetworkConfigurator::findRoutingTable(NetworkConfiguratorBase::Node *node)
 {
-    return L3AddressResolver().findIPv4RoutingTableOf(node->module);
+    return L3AddressResolver().findIpv4RoutingTableOf(node->module);
 }
 
 bool Ipv4NetworkConfigurator::containsRoute(const std::vector<Ipv4Route *>& routes, Ipv4Route *route)

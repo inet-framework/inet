@@ -182,12 +182,12 @@ class INET_API L3AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIpv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *findIpv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual Ipv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
+    virtual Ipv6RoutingTable *findIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.

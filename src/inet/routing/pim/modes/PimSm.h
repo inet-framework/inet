@@ -318,8 +318,8 @@ class INET_API PimSm : public PimBase, protected cListener
     Route *findRouteSG(Ipv4Address source, Ipv4Address group);
     Route *addNewRouteG(Ipv4Address group, int flags);
     Route *addNewRouteSG(Ipv4Address source, Ipv4Address group, int flags);
-    Ipv4MulticastRoute *createIPv4Route(Route *route);
-    Ipv4MulticastRoute *findIPv4Route(Ipv4Address source, Ipv4Address group);
+    Ipv4MulticastRoute *createIpv4Route(Route *route);
+    Ipv4MulticastRoute *findIpv4Route(Ipv4Address source, Ipv4Address group);
 };
 
 }    // namespace inet

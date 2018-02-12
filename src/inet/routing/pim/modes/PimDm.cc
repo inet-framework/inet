@@ -964,7 +964,7 @@ void PimDm::processSourceActiveTimer(cMessage *timer)
     Ipv4Address routeSource = route->source;
     Ipv4Address routeGroup = route->group;
     deleteRoute(routeSource, routeGroup);
-    Ipv4MulticastRoute *ipv4Route = findIPv4MulticastRoute(routeGroup, routeSource);
+    Ipv4MulticastRoute *ipv4Route = findIpv4MulticastRoute(routeGroup, routeSource);
     if (ipv4Route)
         rt->deleteMulticastRoute(ipv4Route);
 }
@@ -1699,7 +1699,7 @@ PimInterface *PimDm::getIncomingInterface(InterfaceEntry *fromIE)
     return nullptr;
 }
 
-Ipv4MulticastRoute *PimDm::findIPv4MulticastRoute(Ipv4Address group, Ipv4Address source)
+Ipv4MulticastRoute *PimDm::findIpv4MulticastRoute(Ipv4Address group, Ipv4Address source)
 {
     int numRoutes = rt->getNumMulticastRoutes();
     for (int i = 0; i < numRoutes; i++) {

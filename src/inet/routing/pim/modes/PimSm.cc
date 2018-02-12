@@ -1729,7 +1729,7 @@ bool PimSm::deleteMulticastRoute(Route *route)
 {
     if (removeRoute(route)) {
         // remove route from Ipv4 routing table
-        Ipv4MulticastRoute *ipv4Route = findIPv4Route(route->source, route->group);
+        Ipv4MulticastRoute *ipv4Route = findIpv4Route(route->source, route->group);
         if (ipv4Route)
             rt->deleteMulticastRoute(ipv4Route);
 
@@ -1810,7 +1810,7 @@ PimSm::Route *PimSm::addNewRouteG(Ipv4Address group, int flags)
 
     SourceAndGroup sg(Ipv4Address::UNSPECIFIED_ADDRESS, group);
     gRoutes[sg] = newRouteG;
-    rt->addMulticastRoute(createIPv4Route(newRouteG));
+    rt->addMulticastRoute(createIpv4Route(newRouteG));
 
     // set (*,G) route in (S,G) and (S,G,rpt) routes
     for (auto & elem : sgRoutes) {
@@ -1864,7 +1864,7 @@ PimSm::Route *PimSm::addNewRouteSG(Ipv4Address source, Ipv4Address group, int fl
 
     SourceAndGroup sg(source, group);
     sgRoutes[sg] = newRouteSG;
-    rt->addMulticastRoute(createIPv4Route(newRouteSG));
+    rt->addMulticastRoute(createIpv4Route(newRouteSG));
 
     // set (*,G) route if exists
     newRouteSG->gRoute = findRouteG(group);
@@ -1881,7 +1881,7 @@ PimSm::Route *PimSm::addNewRouteSG(Ipv4Address source, Ipv4Address group, int fl
     return newRouteSG;
 }
 
-Ipv4MulticastRoute *PimSm::createIPv4Route(Route *route)
+Ipv4MulticastRoute *PimSm::createIpv4Route(Route *route)
 {
     Ipv4MulticastRoute *newRoute = new Ipv4MulticastRoute();
     newRoute->setOrigin(route->source);
@@ -1923,7 +1923,7 @@ PimSm::Route *PimSm::findRouteSG(Ipv4Address source, Ipv4Address group)
     return it != sgRoutes.end() ? it->second : nullptr;
 }
 
-Ipv4MulticastRoute *PimSm::findIPv4Route(Ipv4Address source, Ipv4Address group)
+Ipv4MulticastRoute *PimSm::findIpv4Route(Ipv4Address source, Ipv4Address group)
 {
     unsigned int numMulticastRoutes = rt->getNumMulticastRoutes();
     for (unsigned int i = 0; i < numMulticastRoutes; ++i) {
@@ -2055,7 +2055,7 @@ void PimSm::Route::removeDownstreamInterface(unsigned int i)
 {
     // remove corresponding out interface from the Ipv4 route,
     // because it refers to the downstream interface to be deleted
-    Ipv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
+    Ipv4MulticastRoute *ipv4Route = pimsm()->findIpv4Route(source, group);
     ipv4Route->removeOutInterface(i);
 
     DownstreamInterface *outInterface = downstreamInterfaces[i];

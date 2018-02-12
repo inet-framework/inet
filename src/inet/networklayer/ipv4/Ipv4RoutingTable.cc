@@ -297,7 +297,7 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 
 //---
 
-void Ipv4RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
+void Ipv4RoutingTable::configureInterfaceForIpv4(InterfaceEntry *ie)
 {
     Ipv4InterfaceData *d = new Ipv4InterfaceData();
     ie->setIPv4Data(d);
@@ -327,7 +327,7 @@ InterfaceEntry *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr)
     return nullptr;
 }
 
-void Ipv4RoutingTable::configureLoopbackForIPv4()
+void Ipv4RoutingTable::configureLoopbackForIpv4()
 {
     InterfaceEntry *ie = ift->getFirstLoopbackInterface();
     if (ie) {

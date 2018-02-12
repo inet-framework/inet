@@ -433,7 +433,7 @@ IInterfaceTable *L3AddressResolver::interfaceTableOf(cModule *host)
 
 IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
 {
-    IIpv4RoutingTable *mod = findIPv4RoutingTableOf(host);
+    IIpv4RoutingTable *mod = findIpv4RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("L3AddressResolver: IIpv4RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
@@ -443,7 +443,7 @@ IIpv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
 Ipv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
 {
     // find Ipv6RoutingTable
-    Ipv6RoutingTable *mod = findIPv6RoutingTableOf(host);
+    Ipv6RoutingTable *mod = findIpv6RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("L3AddressResolver: Ipv6RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
@@ -455,7 +455,7 @@ IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
     return dynamic_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
 }
 
-IIpv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
+IIpv4RoutingTable *L3AddressResolver::findIpv4RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
     return dynamic_cast<IIpv4RoutingTable *>(host->getModuleByPath(".ipv4.routingTable"));
@@ -464,7 +464,7 @@ IIpv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
 #endif // ifdef WITH_IPv4
 }
 
-Ipv6RoutingTable *L3AddressResolver::findIPv6RoutingTableOf(cModule *host)
+Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv6
     return dynamic_cast<Ipv6RoutingTable *>(host->getModuleByPath(".ipv6.routingTable"));

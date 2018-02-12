@@ -102,7 +102,7 @@ void Ted::initializeTED()
         }
         if (!g) // not connected
             continue;
-        IIpv4RoutingTable *destRt = L3AddressResolver().findIPv4RoutingTableOf(destNode);
+        IIpv4RoutingTable *destRt = L3AddressResolver().findIpv4RoutingTableOf(destNode);
         if (!destRt) // switch, hub, bus, accesspoint, etc
             continue;
         Ipv4Address destRouterId = destRt->getRouterId();
