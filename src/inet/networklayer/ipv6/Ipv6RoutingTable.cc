@@ -221,7 +221,7 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
 void Ipv6RoutingTable::configureInterfaceForIPv6(InterfaceEntry *ie)
 {
     Ipv6InterfaceData *ipv6IfData = new Ipv6InterfaceData();
-    ie->setIPv6Data(ipv6IfData);
+    ie->setIpv6Data(ipv6IfData);
 
     // for routers, turn on advertisements by default
     //FIXME: we will use this isRouter flag for now. what if future implementations

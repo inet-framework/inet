@@ -103,7 +103,7 @@ void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
     ASSERT(!interfaceEntry->ipv4Data());
     Ipv4InterfaceData *interfaceData = new Ipv4InterfaceData();
-    interfaceEntry->setIPv4Data(interfaceData);
+    interfaceEntry->setIpv4Data(interfaceData);
     if (interfaceEntry->isLoopback()) {
         // we may reconfigure later it to be the routerId
         interfaceData->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);

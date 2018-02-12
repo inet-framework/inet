@@ -223,7 +223,7 @@ class INET_API InterfaceEntry : public cModule
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
-    Ipv4Address getIPv4Address() const;
+    Ipv4Address getIpv4Address() const;
     Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
     GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
     TrillInterfaceData *trillData() const { return trilldata; }
@@ -238,11 +238,11 @@ class INET_API InterfaceEntry : public cModule
 
     /** @name Installing protocol-specific interface data */
     //@{
-    virtual void setIPv4Data(Ipv4InterfaceData *p);
-    virtual void setIPv6Data(Ipv6InterfaceData *p);
+    virtual void setIpv4Data(Ipv4InterfaceData *p);
+    virtual void setIpv6Data(Ipv6InterfaceData *p);
     virtual void setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p);
-    virtual void setTRILLInterfaceData(TrillInterfaceData *p);
-    virtual void setISISInterfaceData(IsisInterfaceData *p);
+    virtual void setTrillInterfaceData(TrillInterfaceData *p);
+    virtual void setIsisInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
     //@}
 

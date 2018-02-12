@@ -300,7 +300,7 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 void Ipv4RoutingTable::configureInterfaceForIpv4(InterfaceEntry *ie)
 {
     Ipv4InterfaceData *d = new Ipv4InterfaceData();
-    ie->setIPv4Data(d);
+    ie->setIpv4Data(d);
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     d->setMetric((int)ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
@@ -337,7 +337,7 @@ void Ipv4RoutingTable::configureLoopbackForIpv4()
         d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
         d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
         d->setMetric(1);
-        ie->setIPv4Data(d);
+        ie->setIpv4Data(d);
     }
 }
 
