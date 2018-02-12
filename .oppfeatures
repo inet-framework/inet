@@ -252,7 +252,7 @@
         name="SCTP"
         description = "SCTP Protocol support"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "IPv4 UDP"
         labels = ""
         nedPackages = "
                        inet.applications.sctpapp
