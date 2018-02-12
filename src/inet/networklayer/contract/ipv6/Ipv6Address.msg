@@ -28,6 +28,7 @@ namespace inet;
 class Ipv6Address
 {
     @existingClass;
-    //FIXME @toString, ...
+    @opaque;
+    @toString(.str());
 }
 

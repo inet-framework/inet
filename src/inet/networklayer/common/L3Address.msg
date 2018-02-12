@@ -29,6 +29,6 @@ class L3Address
 {
     @existingClass;
     @opaque;
-    //FIXME @toString()...
+    @toString(.str());
 }
 
