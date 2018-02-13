@@ -74,7 +74,7 @@ if [ "$MODE" = "debug" ]; then
   elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ]; then
     $TOOL opp_run_dbg -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
   else
-    echo "INET release executable or shared library not found"
+    echo "INET debug executable or shared library not found"
   fi
 fi
 
