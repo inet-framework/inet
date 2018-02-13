@@ -101,7 +101,6 @@ void Ieee8022Llc::encapsulate(Packet *frame)
 
 void Ieee8022Llc::decapsulate(Packet *frame)
 {
-    const Protocol *payloadProtocol = nullptr;
     const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
 
     auto sapInd = frame->addTagIfAbsent<Ieee802SapInd>();
@@ -109,6 +108,19 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     sapInd->setDsap(llcHeader->getDsap());
     //TODO control?
 
+    if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
+        const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
+        if (snapHeader == nullptr)
+            throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
+    }
+    auto payloadProtocol = getProtocol(llcHeader);
+    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+}
+
+const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
+{
+    const Protocol *payloadProtocol = nullptr;
     if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
         const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
         if (snapHeader == nullptr)
@@ -121,12 +133,8 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     else {
         int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
         payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
-        auto sapInd = frame->addTagIfAbsent<Ieee802SapInd>();
-        sapInd->setSsap(llcHeader->getSsap());
-        sapInd->setDsap(llcHeader->getDsap());
     }
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    return payloadProtocol;
 }
 
 } // namespace inet
