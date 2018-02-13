@@ -28,8 +28,6 @@ using namespace physicallayer;
 
 Define_Module(LMac)
 
-#define myId    (getParentModule()->getParentModule()->getIndex())
-
 const MacAddress LMac::LMAC_NO_RECEIVER = MacAddress(-2);
 const MacAddress LMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
@@ -46,6 +44,8 @@ void LMac::initialize(int stage)
         // the first N slots are reserved for mobile nodes to be able to function normally
         reservedMobileSlots = par("reservedMobileSlots");
 
+        auto node = getContainingNode(this);
+        myId = node->isVector() ? node->getIndex() : getId() % numSlots;
         EV_DETAIL << "My Mac address is" << address << " and my Id is " << myId << endl;
 
         macState = INIT;
