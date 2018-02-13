@@ -40,7 +40,7 @@ class INET_API StationaryMobility : public MobilityBase
     virtual EulerAngles getCurrentAngularSpeed() override { return EulerAngles::ZERO; }
     virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::ZERO; }
 
-    virtual Coord getCurrentPosition() override { return lastPosition; }
+    virtual Coord getCurrentPosition() override { return lastPosition; /* TODO: ground support */ }
     virtual Coord getCurrentSpeed() override { return Coord::ZERO; }
     virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
 

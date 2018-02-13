@@ -21,8 +21,11 @@
  **************************************************************************/
 
 #include "inet/mobility/base/MovingMobilityBase.h"
+#include "inet/environment/contract/IGround.h"
 
 namespace inet {
+
+using namespace physicalenvironment;
 
 MovingMobilityBase::MovingMobilityBase() :
     moveTimer(nullptr),
@@ -100,6 +103,12 @@ void MovingMobilityBase::scheduleUpdate()
 Coord MovingMobilityBase::getCurrentPosition()
 {
     moveAndUpdate();
+
+    auto ground = getModuleFromPar<IGround>(par("groundModule"), this, true);
+
+    if (ground)
+        return ground->projectToGround(lastPosition);
+
     return lastPosition;
 }
 

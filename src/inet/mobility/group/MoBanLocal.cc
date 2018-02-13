@@ -129,6 +129,7 @@ void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double 
 
 Coord MoBanLocal::getCurrentPosition()
 {
+    // TODO: ground support
     return LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
 }
 
