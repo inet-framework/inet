@@ -56,7 +56,6 @@ void VehicleMobility::readWaypointsFromFile(const char *fileName)
         inputFile.getline(line, 256);
         if (!inputFile.fail()) {
             cStringTokenizer tokenizer(line, ",");
-            Coord playgroundCoordinate;
             double value1 = atof(tokenizer.nextToken());
             double value2 = atof(tokenizer.nextToken());
             double value3 = atof(tokenizer.nextToken());
