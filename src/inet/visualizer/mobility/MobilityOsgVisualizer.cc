@@ -127,9 +127,9 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
         auto mobilityVisualization = ensureMobilityVisualization(mobility);
         auto networkNode = mobilityVisualization->networkNode;
         networkNode->setPosition(osg::Vec3d(position.x, position.y, position.z));
-        networkNode->setAttitude(osg::Quat(orientation.alpha, osg::Vec3d(0.0, 0.0, 1.0)) *
+        networkNode->setAttitude(osg::Quat(orientation.gamma, osg::Vec3d(1.0, 0.0, 0.0)) *
                                  osg::Quat(orientation.beta, osg::Vec3d(0.0, 1.0, 0.0)) *
-                                 osg::Quat(orientation.gamma, osg::Vec3d(1.0, 0.0, 0.0)));
+                                 osg::Quat(orientation.alpha, osg::Vec3d(0.0, 0.0, 1.0)));
         if (displayMovementTrails)
             extendMovementTrail(mobilityVisualization->trail, position);
     }
