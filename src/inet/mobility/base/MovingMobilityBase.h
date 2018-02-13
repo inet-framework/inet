@@ -83,6 +83,8 @@ class INET_API MovingMobilityBase : public MobilityBase
      */
     virtual void move() = 0;
 
+    virtual void orient();
+
   public:
     virtual Coord getCurrentPosition() override;
     virtual Coord getCurrentSpeed() override;

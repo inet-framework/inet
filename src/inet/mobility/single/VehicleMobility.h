@@ -20,6 +20,8 @@
 
 #include "inet/mobility/base/MovingMobilityBase.h"
 
+#include "inet/environment/contract/IGround.h"
+
 namespace inet {
 
 class INET_API VehicleMobility : public MovingMobilityBase
@@ -38,6 +40,9 @@ class INET_API VehicleMobility : public MovingMobilityBase
     // configuration
     std::vector<Waypoint> waypoints;
 
+    //The ground module given by the "groundModule" parameter, pointer stored for easier access.
+    physicalenvironment::IGround *ground = nullptr;
+
     double speed;
     double heading;
     double waypointProximity;
@@ -48,6 +53,7 @@ class INET_API VehicleMobility : public MovingMobilityBase
     virtual void initialize(int stage) override;
     virtual void setInitialPosition() override;
     virtual void move() override;
+    virtual void orient() override;
 
     virtual void readWaypointsFromFile(const char *fileName);
 
