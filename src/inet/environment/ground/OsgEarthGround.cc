@@ -57,6 +57,27 @@ Coord OsgEarthGround::projectToGround(const Coord &position) const
     return coordinateSystem->computePlaygroundCoordinate(geoCoord);
 }
 
+Coord OsgEarthGround::groundNormalAt(const Coord &position) const
+{
+    // we take 3 samples, one at position, and 2 at a distance from it in different directions
+    // then compute a cross product to get the normal
+
+    // ??? Make this configurable somehow?
+    double distance = 1; // how far the other samples are from the center one, in meters.
+
+    Coord A = projectToGround(position);
+    Coord B = projectToGround(position + Coord(distance, 0, 0));
+    Coord C = projectToGround(position + Coord(0, distance, 0));
+
+    Coord V1 = B - A;
+    Coord V2 = C - A;
+
+    Coord normal = V1 % V2;
+    normal.normalize();
+
+    return normal;
+}
+
 } // namespace physicalenvironment
 
 } // namespace inet

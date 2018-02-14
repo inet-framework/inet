@@ -34,6 +34,7 @@ class INET_API FlatGround : public IGround, public cModule
 
   public:
     virtual Coord projectToGround(const Coord &position) const override;
+    virtual Coord groundNormalAt(const Coord &position) const override;
 };
 
 } // namespace physicalenvironment
