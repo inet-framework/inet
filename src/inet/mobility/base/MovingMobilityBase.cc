@@ -64,16 +64,21 @@ void MovingMobilityBase::moveAndUpdate()
     simtime_t now = simTime();
     if (nextChange == now || lastUpdate != now) {
         move();
-        // determine orientation based on direction
-        Coord direction = lastSpeed;
-        direction.normalize();
-        lastOrientation.alpha = atan2(direction.y, direction.x);
-        lastOrientation.beta = -asin(direction.z);
-        lastOrientation.gamma = 0.0;
+        orient();
         lastUpdate = simTime();
         emitMobilityStateChangedSignal();
         updateVisualRepresentation();
     }
+}
+
+void MovingMobilityBase::orient()
+{
+    // determine orientation based on direction
+    Coord direction = lastSpeed;
+    direction.normalize();
+    lastOrientation.alpha = atan2(direction.y, direction.x);
+    lastOrientation.beta = -asin(direction.z);
+    lastOrientation.gamma = 0.0;
 }
 
 void MovingMobilityBase::handleSelfMessage(cMessage *message)
