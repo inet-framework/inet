@@ -153,18 +153,18 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
                             (intf->getState() == Interface::BACKUP_STATE) ||
                             (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
                         {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
                         }
                         else {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
+                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
                         }
                     }
                     else {
                         if (intf->getType() == Interface::POINTTOPOINT) {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
                         }
                         else {
-                            intf->sendLSAcknowledgement(&(currentLSA->getHeader()), neighbor->getAddress());
+                            intf->sendLsAcknowledgement(&(currentLSA->getHeader()), neighbor->getAddress());
                         }
                     }
                     continue;
@@ -366,7 +366,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
                 router->getMessageHandler()->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
             }
             else {
-                Neighbor *neighbor = intf->getNeighborByID(lsaSource);
+                Neighbor *neighbor = intf->getNeighborById(lsaSource);
                 ASSERT(neighbor);
                 router->getMessageHandler()->sendPacket(pk, neighbor->getAddress(), intf->getIfIndex(), ttl);
             }

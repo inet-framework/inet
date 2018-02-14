@@ -245,7 +245,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     joinMulticastGroups(ifIndex);
 
     AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
-    intf->setAreaID(areaID);
+    intf->setAreaId(areaID);
 
     intf->setOutputCost(getIntAttrOrPar(ifConfig, "interfaceOutputCost"));
 
@@ -397,7 +397,7 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     neighbor->setNeighborID(ipv4AddressFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
-    intf->setTransitAreaID(ipv4AddressFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
+    intf->setTransitAreaId(ipv4AddressFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
 
     intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
 
@@ -410,14 +410,14 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     loadAuthenticationConfig(intf, virtualLinkConfig);
 
     // add the virtual link to the OSPF data structure.
-    Area *transitArea = ospfRouter->getAreaByID(intf->getAreaID());
+    Area *transitArea = ospfRouter->getAreaByID(intf->getAreaId());
     Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
 
     if ((backbone != nullptr) && (transitArea != nullptr) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);
     }
     else {
-        throw cRuntimeError("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaID().str(false).c_str(), virtualLinkConfig.getSourceLocation());
+        throw cRuntimeError("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaId().str(false).c_str(), virtualLinkConfig.getSourceLocation());
         //delete intf;
     }
 }

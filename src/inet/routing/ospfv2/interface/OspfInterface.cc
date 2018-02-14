@@ -175,7 +175,7 @@ void Interface::sendHelloPacket(Ipv4Address destination, short ttl)
     parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
 }
 
-void Interface::sendLSAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination)
+void Interface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination)
 {
     OspfOptions options;
     const auto& lsAckPacket = makeShared<OspfLinkStateAcknowledgementPacket>();
@@ -199,7 +199,7 @@ void Interface::sendLSAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Addres
     parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
 }
 
-Neighbor *Interface::getNeighborByID(RouterId neighborID)
+Neighbor *Interface::getNeighborById(RouterId neighborID)
 {
     auto neighborIt = neighboringRoutersByID.find(neighborID);
     if (neighborIt != neighboringRoutersByID.end()) {
@@ -301,7 +301,7 @@ bool Interface::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 /**
  * @see RFC2328 Section 13.3.
  */
-bool Interface::floodLSA(const OspfLsa *lsa, Interface *intf, Neighbor *neighbor)
+bool Interface::floodLsa(const OspfLsa *lsa, Interface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
 
@@ -383,8 +383,8 @@ bool Interface::floodLSA(const OspfLsa *lsa, Interface *intf, Neighbor *neighbor
                             }
                             else {
                                 messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
-                                Neighbor *dRouter = getNeighborByID(designatedRouter.routerID);
-                                Neighbor *backupDRouter = getNeighborByID(backupDesignatedRouter.routerID);
+                                Neighbor *dRouter = getNeighborById(designatedRouter.routerID);
+                                Neighbor *backupDRouter = getNeighborById(backupDesignatedRouter.routerID);
                                 if (dRouter != nullptr) {
                                     dRouter->addToTransmittedLSAList(lsaKey);
                                     if (!dRouter->isUpdateRetransmissionTimerActive()) {
@@ -615,7 +615,7 @@ void Interface::sendDelayedAcknowledgements()
     messageHandler->startTimer(acknowledgementTimer, acknowledgementDelay);
 }
 
-void Interface::ageTransmittedLSALists()
+void Interface::ageTransmittedLsaLists()
 {
     long neighborCount = neighboringRouters.size();
     for (long i = 0; i < neighborCount; i++) {

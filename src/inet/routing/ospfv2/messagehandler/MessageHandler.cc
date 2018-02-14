@@ -212,7 +212,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                         intf = area->findVirtualLink(packet->getRouterID());
 
                         if (intf != nullptr) {
-                            Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaID());
+                            Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaId());
 
                             if (virtualLinkTransitArea != nullptr) {
                                 // the receiving interface must attach to the virtual link's configured transit area
@@ -262,7 +262,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
                                 case Interface::POINTTOPOINT:
                                 case Interface::VIRTUAL:
-                                    neighbor = intf->getNeighborByID(packet->getRouterID());
+                                    neighbor = intf->getNeighborById(packet->getRouterID());
                                     break;
 
                                 default:
