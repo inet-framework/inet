@@ -689,7 +689,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     else if (protocol == IP_PROT_IPv6EXT_MOB) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
-        if (rt->hasMIPv6Support()) {
+        if (rt->hasMipv6Support()) {
             EV_INFO << "MIPv6 packet: passing it to xMIPv6 module\n";
             send(packet, "xMIPv6Out");
         }
@@ -971,7 +971,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 
             // type 2 routing header should be processed by MIPv6 module
             // if no MIP support, ignore the header
-            if (rt->hasMIPv6Support() && rh->getRoutingType() == 2) {
+            if (rt->hasMipv6Support() && rh->getRoutingType() == 2) {
                 // for simplicity, we set a context pointer on the datagram
                 packet->setContextPointer((void *)rh);
                 EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
@@ -986,7 +986,7 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
             //Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
             //EV << "object of type=" << typeid(eh).name() << endl;
 
-            if (rt->hasMIPv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
+            if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
                 packet->setContextPointer((void *)eh);
                 EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
                 send(packet, "xMIPv6Out");

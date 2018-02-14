@@ -120,7 +120,7 @@ void xMIPv6::initialize(int stage)
         // with other modules.
         cModule *host = getContainingNode(this);
         rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
-        rt6->setMIPv6Support(true);    // 4.9.07 - CB
+        rt6->setMipv6Support(true);    // 4.9.07 - CB
 
         // moved init stuff from rt6 to here as this is actually
         // the right place for these parameters
@@ -246,7 +246,7 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
     }
 }
 
-void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA)
+void xMIPv6::initiateMipv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA)
 {
     Enter_Method_Silent();    // can be called by NeighborDiscovery module
 
@@ -337,12 +337,12 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie)
     // update lifetime, 14.9.07
     //if (homeRegistration)
     if (buDest == ie->ipv6Data()->getHomeAgentAddress())
-        createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHABindingLifeTime(), true);
+        createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHaBindingLifeTime(), true);
     else {
         if (bulEntry->state == BindingUpdateList::DEREGISTER)
             createDeregisterBUTimer(buDest, ie);
         else
-            createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRRBindingLifeTime(), false);
+            createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRrBindingLifeTime(), false);
     }
 }
 
@@ -1181,7 +1181,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                          the all-nodes multicast address) a Neighbor Advertisement [12], to
                          advertise the mobile node's own link-layer address for its own home
                          address.*/
-                    ipv6nd->sendUnsolicitedNA(ie);
+                    ipv6nd->sendUnsolicitedNa(ie);
 
                     // statistic collection
                     /*statVectorBAfromHA.record(2);*/

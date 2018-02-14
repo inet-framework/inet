@@ -96,10 +96,10 @@ void Ipv6RoutingTable::initialize(int stage)
         // add Ipv6InterfaceData to interfaces
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             InterfaceEntry *ie = ift->getInterface(i);
-            configureInterfaceForIPv6(ie);
+            configureInterfaceForIpv6(ie);
         }
 
-        parseXMLConfigFile();
+        parseXmlConfigFile();
 
         // skip hosts
         if (isrouter) {
@@ -121,7 +121,7 @@ void Ipv6RoutingTable::initialize(int stage)
     }
 }
 
-void Ipv6RoutingTable::parseXMLConfigFile()
+void Ipv6RoutingTable::parseXmlConfigFile()
 {
     cModule *host = getContainingNode(this);
 
@@ -150,10 +150,10 @@ void Ipv6RoutingTable::parseXMLConfigFile()
                 if (!ie)
                     throw cRuntimeError("no interface named %s was registered, %s", ifname, child->getSourceLocation());
 
-                configureInterfaceFromXML(ie, ifTag);
+                configureInterfaceFromXml(ie, ifTag);
             }
             else if (opp_strcmp(ifTag->getTagName(), "tunnel") == 0)
-                configureTunnelFromXML(ifTag);
+                configureTunnelFromXml(ifTag);
         }
     }
 }
@@ -195,7 +195,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
 
         // an interface went down
         if (!interfaceEntry->isUp()) {
-            purgeDestCacheForInterfaceID(interfaceEntryId);
+            purgeDestCacheForInterfaceId(interfaceEntryId);
         }
     }
     else if (signalID == interfaceConfigChangedSignal) {
@@ -218,7 +218,7 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
     emit(routeChangedSignal, entry);    // TODO include fieldCode in the notification
 }
 
-void Ipv6RoutingTable::configureInterfaceForIPv6(InterfaceEntry *ie)
+void Ipv6RoutingTable::configureInterfaceForIpv6(InterfaceEntry *ie)
 {
     Ipv6InterfaceData *ipv6IfData = new Ipv6InterfaceData();
     ie->setIpv6Data(ipv6IfData);
@@ -310,7 +310,7 @@ static bool toBool(const char *s, bool defaultValue = false)
     return !strcmp(s, "on") || !strcmp(s, "true") || !strcmp(s, "yes");
 }
 
-void Ipv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
+void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement *cfg)
 {
     /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific
        node's interface. We can set advertising prefixes and other variables to be used
@@ -373,7 +373,7 @@ void Ipv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
     }
 }
 
-void Ipv6RoutingTable::configureTunnelFromXML(cXMLElement *cfg)
+void Ipv6RoutingTable::configureTunnelFromXml(cXMLElement *cfg)
 {
     Ipv6Tunneling *tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
 
@@ -533,7 +533,7 @@ void Ipv6RoutingTable::purgeDestCacheEntriesToNeighbour(const Ipv6Address& nextH
     }
 }
 
-void Ipv6RoutingTable::purgeDestCacheForInterfaceID(int interfaceId)
+void Ipv6RoutingTable::purgeDestCacheForInterfaceId(int interfaceId)
 {
     for (auto it = destCache.begin(); it != destCache.end(); ) {
         if (it->second.interfaceId == interfaceId) {

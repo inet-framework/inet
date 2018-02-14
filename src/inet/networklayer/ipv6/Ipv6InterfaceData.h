@@ -233,8 +233,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     bool dadInProgress = false;
 
   public:
-    bool isDADInProgress() { return dadInProgress; };
-    void setDADInProgress(bool val) { dadInProgress = val; };
+    bool isDadInProgress() { return dadInProgress; };
+    void setDadInProgress(bool val) { dadInProgress = val; };
 #endif /* WITH_xMIPv6 */
 
   protected:
@@ -589,13 +589,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     uint _getMaxInitialRtrAdvertisements() const { return routerConstants.maxInitialRtrAdvertisements; }
     uint _getMaxFinalRtrAdvertisements() const { return routerConstants.maxFinalRtrAdvertisements; }
     simtime_t _getMinDelayBetweenRAs() const { return routerConstants.minDelayBetweenRAs; }
-    simtime_t _getMaxRADelayTime() const { return routerConstants.maxRADelayTime; }
+    simtime_t _getMaxRaDelayTime() const { return routerConstants.maxRADelayTime; }
     /************Setters for Router Protocol Constants*************************/
     virtual void _setMaxInitialRtrAdvertInterval(simtime_t d) { routerConstants.maxInitialRtrAdvertInterval = d; }
     virtual void _setMaxInitialRtrAdvertisements(uint d) { routerConstants.maxInitialRtrAdvertisements = d; }
     virtual void _setMaxFinalRtrAdvertisements(uint d) { routerConstants.maxFinalRtrAdvertisements = d; }
     virtual void _setMinDelayBetweenRAs(simtime_t d) { routerConstants.minDelayBetweenRAs = d; }
-    virtual void _setMaxRADelayTime(simtime_t d) { routerConstants.maxRADelayTime = d; }
+    virtual void _setMaxRaDelayTime(simtime_t d) { routerConstants.maxRADelayTime = d; }
     /************End of Router Protocol Constant getters and setters***********/
 
     /************Getters for Host Protocol Constants***************************/
@@ -607,8 +607,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     simtime_t _getInitialBindAckTimeout() const { return hostConstants.initialBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
     simtime_t _getMaxBindAckTimeout() const { return hostConstants.maxBindAckTimeout; }    //MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
     simtime_t _getInitialBindAckTimeoutFirst() const { return hostConstants.initialBindAckTimeoutFirst; }    //MIPv6, 12.9.07 - CB
-    uint _getMaxRRBindingLifeTime() const { return hostConstants.maxRRBindingLifeTime; }    //MIPv6, 14.9.07 - CB
-    uint _getMaxHABindingLifeTime() const { return hostConstants.maxHABindingLifeTime; }    //MIPv6, 14.9.07 - CB
+    uint _getMaxRrBindingLifeTime() const { return hostConstants.maxRRBindingLifeTime; }    //MIPv6, 14.9.07 - CB
+    uint _getMaxHaBindingLifeTime() const { return hostConstants.maxHABindingLifeTime; }    //MIPv6, 14.9.07 - CB
     uint _getMaxTokenLifeTime() const { return hostConstants.maxTokenLifeTime; }    //MIPv6, 10.07.08 - CB
 #endif /* WITH_xMIPv6 */
 
@@ -621,8 +621,8 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     virtual void _setInitialBindAckTimeout(simtime_t d) { hostConstants.initialBindAckTimeout = SIMTIME_DBL(d); }
     virtual void _setMaxBindAckTimeout(simtime_t d) { hostConstants.maxBindAckTimeout = SIMTIME_DBL(d); }
     virtual void _setInitialBindAckTimeoutFirst(simtime_t d) { hostConstants.initialBindAckTimeoutFirst = d; }
-    virtual void _setMaxRRBindingLifeTime(uint d) { hostConstants.maxRRBindingLifeTime = d; }
-    virtual void _setMaxHABindingLifeTime(uint d) { hostConstants.maxHABindingLifeTime = d; }
+    virtual void _setMaxRrBindingLifeTime(uint d) { hostConstants.maxRRBindingLifeTime = d; }
+    virtual void _setMaxHaBindingLifeTime(uint d) { hostConstants.maxHABindingLifeTime = d; }
     virtual void _setMaxTokenLifeTime(uint d) { hostConstants.maxTokenLifeTime = d; }
 #endif /* WITH_xMIPv6 */
     /************End of Host Protocol Constant getters and setters*************/
@@ -656,13 +656,13 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     /************End of Node Variables getters and setters*********************/
 
     /************Getters for Host Variables************************************/
-    uint getLinkMTU() const { return hostVars.linkMTU; }
+    uint getLinkMtu() const { return hostVars.linkMTU; }
     short getCurHopLimit() const { return hostVars.curHopLimit; }
     uint getBaseReachableTime() const { return hostVars.baseReachableTime; }
     simtime_t getReachableTime() const { return hostVars.reachableTime; }
     uint getRetransTimer() const { return hostVars.retransTimer; }
     /************Setters for Host Variables************************************/
-    virtual void setLinkMTU(uint d) { hostVars.linkMTU = d; }
+    virtual void setLinkMtu(uint d) { hostVars.linkMTU = d; }
     virtual void setCurHopLimit(short d) { hostVars.curHopLimit = d; }
     virtual void setBaseReachableTime(uint d) { hostVars.baseReachableTime = d; }
     virtual void setReachableTime(simtime_t d) { hostVars.reachableTime = d; }
@@ -680,7 +680,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     bool getAdvHomeAgentFlag() const { return rtrVars.advHomeAgentFlag; }
 #endif /* WITH_xMIPv6 */
 
-    int getAdvLinkMTU() const { return rtrVars.advLinkMTU; }
+    int getAdvLinkMtu() const { return rtrVars.advLinkMTU; }
     int getAdvReachableTime() const { return rtrVars.advReachableTime; }
     int getAdvRetransTimer() const { return rtrVars.advRetransTimer; }
     short getAdvCurHopLimit() const { return rtrVars.advCurHopLimit; }
@@ -696,7 +696,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     virtual void setAdvHomeAgentFlag(bool d) { rtrVars.advHomeAgentFlag = d; }
 #endif /* WITH_xMIPv6 */
 
-    virtual void setAdvLinkMTU(int d) { rtrVars.advLinkMTU = d; }
+    virtual void setAdvLinkMtu(int d) { rtrVars.advLinkMTU = d; }
     virtual void setAdvReachableTime(int d) { rtrVars.advReachableTime = d; }
     virtual void setAdvRetransTimer(int d) { rtrVars.advRetransTimer = d; }
     virtual void setAdvCurHopLimit(short d) { rtrVars.advCurHopLimit = d; }
@@ -773,7 +773,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
 
     const Ipv6Address& getHomeAgentAddress() const { return homeInfo.homeAgentAddr; }    // Zarrar 03.09.07
     const Ipv6Address& getMNHomeAddress() const { return homeInfo.HoA; }    // Zarrar 03.09.07
-    const Ipv6Address& getMNPrefix() const { return homeInfo.prefix    /*.prefix()*/; }    // Zarrar 03.09.07
+    const Ipv6Address& getMnPrefix() const { return homeInfo.prefix    /*.prefix()*/; }    // Zarrar 03.09.07
 
     /**
      * Removes a CoA address from the interface if one exists.

@@ -99,7 +99,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     bool routeLessThan(const Ipv6Route *a, const Ipv6Route *b) const;
 
     // internal
-    virtual void configureInterfaceForIPv6(InterfaceEntry *ie);
+    virtual void configureInterfaceForIpv6(InterfaceEntry *ie);
     /**
      *  RFC 3513: Section 2.8 A Node's Required Address
      *  Assign the various addresses to the node's respective interface. This
@@ -107,10 +107,10 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      */
     virtual void assignRequiredNodeAddresses(InterfaceEntry *ie);
     // internal
-    virtual void configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg);
+    virtual void configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement *cfg);
 
     // internal
-    virtual void configureTunnelFromXML(cXMLElement *cfg);
+    virtual void configureTunnelFromXml(cXMLElement *cfg);
 
     void internalAddRoute(Ipv6Route *route);
     Ipv6Route *internalRemoveRoute(Ipv6Route *route);
@@ -127,7 +127,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void parseXMLConfigFile();
+    virtual void parseXmlConfigFile();
 
     /**
      * Raises an error.
@@ -245,7 +245,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Removes all destination cache entries for the specified interface
      */
-    void purgeDestCacheForInterfaceID(int interfaceId);
+    void purgeDestCacheForInterfaceId(int interfaceId);
 
     //@}
 
@@ -362,13 +362,13 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * Can be used to check whether this node supports MIPv6 or not
      * (MN, MR, HA or CN).
      */
-    bool hasMIPv6Support() { return mipv6Support; }
+    bool hasMipv6Support() { return mipv6Support; }
 
     /**
      * This method is used to define whether the node support MIPv6 or
      * not (MN, MR, HA or CN).
      */
-    void setMIPv6Support(bool value) { mipv6Support = value; }
+    void setMipv6Support(bool value) { mipv6Support = value; }
 
     /**
      * Checks whether the provided address is in an on-link address
