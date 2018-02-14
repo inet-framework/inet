@@ -34,6 +34,11 @@ Coord FlatGround::projectToGround(const Coord &position) const
     return Coord(position.x, position.y, elevation);
 }
 
+Coord FlatGround::groundNormalAt(const Coord &position) const
+{
+    return Coord(0, 0, 1);
+}
+
 } // namespace physicalenvironment
 
 } // namespace inet
