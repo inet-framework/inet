@@ -26,6 +26,7 @@ simple VehicleMobility extends MovingMobilityBase
         string waypointFile;
         double waypointProximity @unit(m);
         double speed @unit(mps);
+        string groundModule = default("ground"); // module path of the ground module
         double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
         double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
