@@ -44,13 +44,17 @@ void DefaultDissector::dissect(Packet *packet, const PacketDissector& packetDiss
     // TODO: use signal tag as opposed to protocol tag?! e.g. IEEE 802. 11 signal -> means 802.11 PHY header
     if (const auto& ethernetPhyHeader = dynamicPtrCast<const inet::EthernetPhyHeader>(header)) {
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ethernetPhyHeader->getChunkLength());
+        packetDissector.startProtocol(nullptr);
         packetDissector.visitChunk(header, nullptr);
         packetDissector.dissectPacket(packet, &Protocol::ethernet);
+        packetDissector.endProtocol(nullptr);
     }
     else if (const auto& ieeeIeee80211PhyHeader = dynamicPtrCast<const inet::physicallayer::Ieee80211PhyHeader>(header)) {
+        packetDissector.startProtocol(nullptr);
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ieeeIeee80211PhyHeader->getChunkLength());
         packetDissector.visitChunk(header, nullptr);
         packetDissector.dissectPacket(packet, &Protocol::ieee80211);
+        packetDissector.endProtocol(nullptr);
     }
     else
         packetDissector.visitChunk(packet->peekData(), nullptr);
@@ -59,44 +63,53 @@ void DefaultDissector::dissect(Packet *packet, const PacketDissector& packetDiss
 void EthernetDissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<EthernetMacHeader>();
+    packetDissector.startProtocol(&Protocol::ethernet);
     packetDissector.visitChunk(header, &Protocol::ethernet);
     auto protocol = nullptr; // TODO: EtherMac::getProtocol(header);
     packetDissector.dissectPacket(packet, protocol);
     const auto& fcs = packet->popTrailer<EthernetFcs>();
-    packetDissector.visitChunk(fcs, &Protocol::ethernet);
     auto paddingLength = packet->getDataLength();
     const auto& padding = packet->popTrailer<EthernetPadding>(paddingLength);
     packetDissector.visitChunk(padding, &Protocol::ethernet);
+    packetDissector.visitChunk(fcs, &Protocol::ethernet);
+    packetDissector.endProtocol(&Protocol::ethernet);
 }
 
 void Ieee80211Dissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
     const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>();
+    packetDissector.startProtocol(&Protocol::ieee80211);
     packetDissector.visitChunk(header, &Protocol::ieee80211);
     // TODO: fragmentation & aggregation
     if (dynamicPtrCast<const inet::ieee80211::Ieee80211DataOrMgmtHeader>(header))
         packetDissector.dissectPacket(packet, &Protocol::ieee8022); // TODO:
     packetDissector.visitChunk(trailer, &Protocol::ieee80211);
+    packetDissector.endProtocol(&Protocol::ieee80211);
 }
 
 void Ieee802LlcDissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<inet::Ieee8022LlcHeader>();
+    packetDissector.startProtocol(&Protocol::ieee8022);
     packetDissector.visitChunk(header, &Protocol::ieee8022);
     auto protocol = Ieee8022Llc::getProtocol(header);
     packetDissector.dissectPacket(packet, protocol);
+    packetDissector.endProtocol(&Protocol::ieee8022);
 }
 
 void ArpDissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& arpPacket = packet->peekData<ArpPacket>();
+    packetDissector.startProtocol(&Protocol::arp);
     packetDissector.visitChunk(arpPacket, &Protocol::arp);
+    packetDissector.endProtocol(&Protocol::arp);
 }
 
 void Ipv4Dissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<Ipv4Header>();
+    packetDissector.startProtocol(&Protocol::ipv4);
     packetDissector.visitChunk(header, &Protocol::ipv4);
     // TODO: fragmentation
 //    auto trailerPopOffset = packet->getTrailerPopOffset();
@@ -106,20 +119,25 @@ void Ipv4Dissector::dissect(Packet *packet, const PacketDissector& packetDissect
 //    assert(packet->getDataLength() == B(0));
 //    packet->setHeaderPopOffset(xxx);
 //    packet->setTrailerPopOffset(trailerPopOffset);
+    packetDissector.endProtocol(&Protocol::ipv4);
 }
 
 void IcmpDissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<IcmpHeader>();
+    packetDissector.startProtocol(&Protocol::icmpv4);
     packetDissector.visitChunk(header, &Protocol::icmpv4);
     packetDissector.dissectPacket(packet, nullptr);
+    packetDissector.endProtocol(&Protocol::icmpv4);
 }
 
 void UdpDissector::dissect(Packet *packet, const PacketDissector& packetDissector) const
 {
     const auto& header = packet->popHeader<UdpHeader>();
+    packetDissector.startProtocol(&Protocol::udp);
     packetDissector.visitChunk(header, &Protocol::udp);
     packetDissector.dissectPacket(packet, nullptr);
+    packetDissector.endProtocol(&Protocol::udp);
 }
 
 } // namespace

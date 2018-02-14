@@ -29,6 +29,16 @@ void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) co
     protocolDissector->dissect(packet, *this);
 }
 
+void PacketDissector::startProtocol(const Protocol *protocol) const
+{
+    chunkVisitor.startProtocol(protocol);
+}
+
+void PacketDissector::endProtocol(const Protocol *protocol) const
+{
+    chunkVisitor.endProtocol(protocol);
+}
+
 void PacketDissector::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const
 {
     chunkVisitor.visitChunk(chunk, protocol);

@@ -40,6 +40,9 @@ class INET_API PacketFilter
         ChunkVisitor(const PacketFilter& packetFilter);
 
         bool matches(const Packet *packet) const;
+
+        virtual void startProtocol(const Protocol *protocol) const override;
+        virtual void endProtocol(const Protocol *protocol) const override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const override;
     };
 

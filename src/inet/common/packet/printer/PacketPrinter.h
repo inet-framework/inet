@@ -31,6 +31,9 @@ class INET_API PacketPrinter : public cMessagePrinter
 
       public:
         ChunkVisitor(std::ostream& stream, const PacketPrinter& packetPrinter);
+
+        virtual void startProtocol(const Protocol *protocol) const override;
+        virtual void endProtocol(const Protocol *protocol) const override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const override;
     };
 

@@ -41,6 +41,8 @@ class INET_API PacketDissector
     class INET_API ChunkVisitor
     {
       public:
+        virtual void startProtocol(const Protocol *protocol) const = 0;
+        virtual void endProtocol(const Protocol *protocol) const = 0;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const = 0;
     };
 
@@ -55,6 +57,16 @@ class INET_API PacketDissector
      * Dissects the given packet assuming its a packet of the provided protocol.
      */
     void dissectPacket(Packet *packet, const Protocol *protocol) const;
+
+    /**
+     * TODO
+     */
+    void startProtocol(const Protocol *protocol) const;
+
+    /**
+     * TODO
+     */
+    void endProtocol(const Protocol *protocol) const;
 
     /**
      * This is a callback method for individual ProtocolDissectors to notify the

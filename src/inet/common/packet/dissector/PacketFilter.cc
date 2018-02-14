@@ -57,6 +57,14 @@ bool PacketFilter::ChunkVisitor::matches(const Packet *packet) const
     return matches_;
 }
 
+void PacketFilter::ChunkVisitor::startProtocol(const Protocol *protocol) const
+{
+}
+
+void PacketFilter::ChunkVisitor::endProtocol(const Protocol *protocol) const
+{
+}
+
 void PacketFilter::ChunkVisitor::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, chunk.get());

@@ -135,6 +135,14 @@ PacketPrinter::ChunkVisitor::ChunkVisitor(std::ostream& stream, const PacketPrin
 {
 }
 
+void PacketPrinter::ChunkVisitor::startProtocol(const Protocol *protocol) const
+{
+}
+
+void PacketPrinter::ChunkVisitor::endProtocol(const Protocol *protocol) const
+{
+}
+
 void PacketPrinter::ChunkVisitor::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const
 {
     if (protocol == &Protocol::ieee80211)
