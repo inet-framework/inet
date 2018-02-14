@@ -269,6 +269,8 @@ void Ieee80211Mac::encapsulate(Packet *packet)
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
     const auto& header = packet->popHeader<Ieee80211DataOrMgmtHeader>();
+    if (dynamicPtrCast<const Ieee80211DataHeader>(header))
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT) {
         macAddressInd->setSrcAddress(header->getTransmitterAddress());
