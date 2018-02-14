@@ -98,10 +98,10 @@ void Mpls::processPacketFromL3(Packet *msg)
     }
     // XXX end of temporary area
 
-    labelAndForwardIPv4Datagram(msg);
+    labelAndForwardIpv4Datagram(msg);
 }
 
-bool Mpls::tryLabelAndForwardIPv4Datagram(Packet *packet)
+bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 {
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
     (void)ipv4Header;       // unused variable
@@ -144,9 +144,9 @@ bool Mpls::tryLabelAndForwardIPv4Datagram(Packet *packet)
     return true;
 }
 
-void Mpls::labelAndForwardIPv4Datagram(Packet *ipdatagram)
+void Mpls::labelAndForwardIpv4Datagram(Packet *ipdatagram)
 {
-    if (tryLabelAndForwardIPv4Datagram(ipdatagram))
+    if (tryLabelAndForwardIpv4Datagram(ipdatagram))
         return;
 
     // handling our outgoing Ipv4 traffic that didn't match any FEC/LSP
@@ -194,13 +194,13 @@ void Mpls::processPacketFromL2(Packet *packet)
 {
     const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::mpls) {
-        processMPLSPacketFromL2(packet);
+        processMplsPacketFromL2(packet);
     }
     else if (protocol == &Protocol::ipv4) {
         // Ipv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
-        if (!tryLabelAndForwardIPv4Datagram(packet)) {
+        if (!tryLabelAndForwardIpv4Datagram(packet)) {
             sendToL3(packet);
         }
     }
@@ -211,7 +211,7 @@ void Mpls::processPacketFromL2(Packet *packet)
     }
 }
 
-void Mpls::processMPLSPacketFromL2(Packet *packet)
+void Mpls::processMplsPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);

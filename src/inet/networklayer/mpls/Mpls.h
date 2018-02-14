@@ -55,10 +55,10 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
   protected:
     virtual void processPacketFromL3(Packet *msg);
     virtual void processPacketFromL2(Packet *msg);
-    virtual void processMPLSPacketFromL2(Packet *mplsPacket);
+    virtual void processMplsPacketFromL2(Packet *mplsPacket);
 
-    virtual bool tryLabelAndForwardIPv4Datagram(Packet *ipdatagram);
-    virtual void labelAndForwardIPv4Datagram(Packet *ipdatagram);
+    virtual bool tryLabelAndForwardIpv4Datagram(Packet *ipdatagram);
+    virtual void labelAndForwardIpv4Datagram(Packet *ipdatagram);
 
     virtual void sendToL2(Packet *msg);
     virtual void sendToL3(Packet *msg);
