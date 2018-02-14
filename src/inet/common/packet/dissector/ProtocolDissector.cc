@@ -13,8 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
@@ -53,7 +54,14 @@ void DefaultDissector::dissect(Packet *packet, const PacketDissector& packetDiss
         packetDissector.startProtocol(nullptr);
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ieeeIeee80211PhyHeader->getChunkLength());
         packetDissector.visitChunk(header, nullptr);
+        const auto& trailer = packet->peekTrailer();
+        // TODO: KLUDGE: padding length
+        auto ieeeIeee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
+        if (ieeeIeee80211PhyPadding != nullptr)
+            packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieeeIeee80211PhyPadding->getChunkLength());
         packetDissector.dissectPacket(packet, &Protocol::ieee80211);
+        if (ieeeIeee80211PhyPadding != nullptr)
+            packetDissector.visitChunk(ieeeIeee80211PhyPadding, nullptr);
         packetDissector.endProtocol(nullptr);
     }
     else
@@ -82,8 +90,32 @@ void Ieee80211Dissector::dissect(Packet *packet, const PacketDissector& packetDi
     packetDissector.startProtocol(&Protocol::ieee80211);
     packetDissector.visitChunk(header, &Protocol::ieee80211);
     // TODO: fragmentation & aggregation
-    if (dynamicPtrCast<const inet::ieee80211::Ieee80211DataOrMgmtHeader>(header))
-        packetDissector.dissectPacket(packet, &Protocol::ieee8022); // TODO:
+    if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
+        if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
+            packetDissector.dissectPacket(packet, nullptr);
+        else if (dataHeader->getAMsduPresent()) {
+            auto originalTrailerPopOffset = packet->getTrailerPopOffset();
+            int paddingLength = 0;
+            while (packet->getDataLength() > B(0)) {
+                packet->setHeaderPopOffset(packet->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+                const auto& msduSubframeHeader = packet->popHeader<ieee80211::Ieee80211MsduSubframeHeader>();
+                auto msduEndOffset = packet->getHeaderPopOffset() + B(msduSubframeHeader->getLength());
+                packet->setTrailerPopOffset(msduEndOffset);
+                packetDissector.dissectPacket(packet, &Protocol::ieee8022);
+                paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get() % 4;
+                packet->setTrailerPopOffset(originalTrailerPopOffset);
+                packet->setHeaderPopOffset(msduEndOffset);
+            }
+        }
+        else
+            packetDissector.dissectPacket(packet, &Protocol::ieee8022);
+    }
+    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
+        ASSERT(packet->getDataLength() == b(0));
+    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
+        packetDissector.visitChunk(packet->peekData(), &Protocol::ieee80211);
+    else // TODO: if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
+        ASSERT(packet->getDataLength() == b(0));
     packetDissector.visitChunk(trailer, &Protocol::ieee80211);
     packetDissector.endProtocol(&Protocol::ieee80211);
 }
