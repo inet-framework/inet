@@ -16,6 +16,8 @@
 #ifndef __INET_PACKETPRINTER_H_
 #define __INET_PACKETPRINTER_H_
 
+#include <stack>
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 
 namespace inet {
@@ -23,19 +25,18 @@ namespace inet {
 class INET_API PacketPrinter : public cMessagePrinter
 {
   protected:
-    class INET_API ChunkVisitor : public PacketDissector::ChunkVisitor
-    {
-      protected:
-        std::ostream& stream;
-        const PacketPrinter& packetPrinter;
-
+    class Context {
       public:
-        ChunkVisitor(std::ostream& stream, const PacketPrinter& packetPrinter);
-
-        virtual void startProtocol(const Protocol *protocol) const override;
-        virtual void endProtocol(const Protocol *protocol) const override;
-        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const override;
+        std::stringstream sourceColumn;
+        std::stringstream destinationColumn;
+        std::string protocolColumn;
+        std::stringstream infoColumn;
+        int infoLevel = -1;
     };
+
+  protected:
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context);
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context);
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;
