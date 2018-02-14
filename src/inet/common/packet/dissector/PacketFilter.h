@@ -33,17 +33,17 @@ class INET_API PacketFilter
     class INET_API ChunkVisitor : public PacketDissector::ChunkVisitor
     {
       protected:
-        mutable bool matches_ = false;
+        bool matches_ = false;
         const PacketFilter& packetFilter;
 
       public:
         ChunkVisitor(const PacketFilter& packetFilter);
 
-        bool matches(const Packet *packet) const;
+        bool matches(const Packet *packet);
 
-        virtual void startProtocol(const Protocol *protocol) const override;
-        virtual void endProtocol(const Protocol *protocol) const override;
-        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const override;
+        virtual void startProtocol(const Protocol *protocol) override;
+        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
   protected:

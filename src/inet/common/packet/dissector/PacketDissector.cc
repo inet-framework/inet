@@ -17,7 +17,7 @@
 
 namespace inet {
 
-PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, const ChunkVisitor& chunkVisitor) :
+PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ChunkVisitor& chunkVisitor) :
     protocolDissectorRegistry(protocolDissectorRegistry),
     chunkVisitor(chunkVisitor)
 {

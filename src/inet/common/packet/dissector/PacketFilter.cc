@@ -46,7 +46,7 @@ PacketFilter::ChunkVisitor::ChunkVisitor(const PacketFilter& packetFilter) :
 {
 }
 
-bool PacketFilter::ChunkVisitor::matches(const Packet *packet) const
+bool PacketFilter::ChunkVisitor::matches(const Packet *packet)
 {
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
@@ -57,15 +57,15 @@ bool PacketFilter::ChunkVisitor::matches(const Packet *packet) const
     return matches_;
 }
 
-void PacketFilter::ChunkVisitor::startProtocol(const Protocol *protocol) const
+void PacketFilter::ChunkVisitor::startProtocol(const Protocol *protocol)
 {
 }
 
-void PacketFilter::ChunkVisitor::endProtocol(const Protocol *protocol) const
+void PacketFilter::ChunkVisitor::endProtocol(const Protocol *protocol)
 {
 }
 
-void PacketFilter::ChunkVisitor::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const
+void PacketFilter::ChunkVisitor::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, chunk.get());
     if (!matches_)
