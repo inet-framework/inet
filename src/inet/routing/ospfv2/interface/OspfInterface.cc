@@ -94,7 +94,7 @@ void Interface::setIfIndex(IInterfaceTable *ift, int index)
         InterfaceEntry *routingInterface = ift->getInterfaceById(ifIndex);
         interfaceAddressRange.address = routingInterface->ipv4Data()->getIPAddress();
         interfaceAddressRange.mask = routingInterface->ipv4Data()->getNetmask();
-        mtu = routingInterface->getMTU();
+        mtu = routingInterface->getMtu();
     }
 }
 

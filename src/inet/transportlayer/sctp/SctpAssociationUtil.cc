@@ -2748,7 +2748,7 @@ void SctpAssociation::pmStartPathManagement()
         path = elem.second;
         path->pathErrorCount = 0;
         rtie = rt->getOutputInterfaceForDestination(path->remoteAddress);
-        path->pmtu = rtie->getMTU();
+        path->pmtu = rtie->getMtu();
         EV_DETAIL << "Path MTU of Interface " << i << " = " << path->pmtu << "\n";
         if (path->pmtu < state->assocPmtu) {
             state->assocPmtu = path->pmtu;

@@ -122,7 +122,7 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     // address
-    e->setMACAddress(mib->address);
+    e->setMacAddress(mib->address);
     e->setInterfaceToken(mib->address.formInterfaceIdentifier());
     e->setMtu(par("mtu"));
     // capabilities

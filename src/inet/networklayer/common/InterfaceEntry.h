@@ -192,7 +192,7 @@ class INET_API InterfaceEntry : public cModule
     const char *getInterfaceName() const { return interfaceName.c_str(); }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }
-    int getMTU() const { return mtu; }
+    int getMtu() const { return mtu; }
     bool hasCarrier() const { return carrier; }
     bool isBroadcast() const { return broadcast; }
     bool isMulticast() const { return multicast; }
@@ -216,7 +216,7 @@ class INET_API InterfaceEntry : public cModule
     virtual void setPointToPoint(bool b) { if (pointToPoint != b) { pointToPoint = b; configChanged(F_POINTTOPOINT); } }
     virtual void setLoopback(bool b) { if (loopback != b) { loopback = b; configChanged(F_LOOPBACK); } }
     virtual void setDatarate(double d) { if (datarate != d) { datarate = d; configChanged(F_DATARATE); } }
-    virtual void setMACAddress(const MacAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
+    virtual void setMacAddress(const MacAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
     virtual void setInterfaceToken(const InterfaceToken& t) { token = t; configChanged(F_TOKEN); }
     //@}
 

@@ -274,7 +274,7 @@ InterfaceEntry *EtherMacBase::createInterfaceEntry()
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMACAddress(address);
+    interfaceEntry->setMacAddress(address);
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
     //InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
     //interfaceEntry->setInterfaceToken(token);

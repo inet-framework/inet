@@ -841,7 +841,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         return;
     }
 
-    int mtu = destIE->getMTU();
+    int mtu = destIE->getMtu();
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
     if (mtu == 0 || packet->getByteLength() <= mtu) {

@@ -343,7 +343,7 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
             if (transmissionChannel) {
                 InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
                 double bitErrorRate = transmissionChannel->getBitErrorRate();
-                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
+                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMtu());
                 return minLinkWeight - log(1 - packetErrorRate);
             }
             else
@@ -394,7 +394,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
             Packet *transmittedFrame = new Packet();
-            auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMTU()));
+            auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMtu()));
             transmittedFrame->insertAtEnd(byteCountChunk);
             // TODO: KLUDGE: review
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);

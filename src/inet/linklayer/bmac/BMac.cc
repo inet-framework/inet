@@ -170,7 +170,7 @@ InterfaceEntry *BMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities

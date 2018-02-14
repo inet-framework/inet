@@ -850,7 +850,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
     #endif /* WITH_xMIPv6 */
     }
 
-    int mtu = ie->getMTU();
+    int mtu = ie->getMtu();
 
     // check if datagram does not require fragmentation
     if (packet->getTotalLength() <= B(mtu)) {

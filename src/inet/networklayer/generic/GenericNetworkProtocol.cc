@@ -544,7 +544,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
 {
     delete datagram->removeControlInfo();
 
-    if (datagram->getByteLength() > ie->getMTU())
+    if (datagram->getByteLength() > ie->getMtu())
         throw cRuntimeError("datagram too large"); //TODO refine
 
     const auto& header = datagram->peekHeader<GenericDatagramHeader>();

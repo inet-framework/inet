@@ -124,7 +124,7 @@ InterfaceEntry *AckingMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),

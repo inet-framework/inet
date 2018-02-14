@@ -367,7 +367,7 @@ int Rtp::resolveMTU()
     if (rtie == nullptr)
         throw cRuntimeError("No interface for remote address %s found!", _destinationAddress.str().c_str());
 
-    int pmtu = rtie->getMTU();
+    int pmtu = rtie->getMtu();
     return pmtu - 20 - 8;
 }
 
