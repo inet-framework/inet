@@ -78,6 +78,10 @@ class INET_API Coord
     /** @brief Returns a string with the value of the coordinate. */
     std::string str() const;
 
+
+    /** @brief Returns the negated vector. */
+    Coord operator-() const { return Coord(-x, -y, -z); }
+
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b)
     {
