@@ -44,5 +44,34 @@ void PacketDissector::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *
     chunkVisitor.visitChunk(chunk, protocol);
 }
 
+PacketDissector::ProtocolLevel::ProtocolLevel(int level, const Protocol* protocol) :
+    level(level),
+    protocol(protocol)
+{
+}
+
+void PacketDissector::ProtocolTreeBuilder::startProtocol(const Protocol *protocol)
+{
+    if (isEndProtocolCalled)
+        isSimplePacket_ = false;
+    auto level = makeShared<ProtocolLevel>(levels.size(), protocol);
+    if (topLevel == nullptr)
+        topLevel = level;
+    else
+        levels.top()->insert(level);
+    levels.push(level.get());
+}
+
+void PacketDissector::ProtocolTreeBuilder::endProtocol(const Protocol *protocol)
+{
+    isEndProtocolCalled = true;
+    levels.pop();
+}
+
+void PacketDissector::ProtocolTreeBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    levels.top()->insert(chunk);
+}
+
 } // namespace
 

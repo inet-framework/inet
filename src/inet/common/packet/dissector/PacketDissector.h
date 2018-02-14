@@ -16,6 +16,7 @@
 #ifndef __INET_PACKETDISSECTOR_H_
 #define __INET_PACKETDISSECTOR_H_
 
+#include <stack>
 #include <functional>
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
@@ -44,6 +45,45 @@ class INET_API PacketDissector
         virtual void startProtocol(const Protocol *protocol) = 0;
         virtual void endProtocol(const Protocol *protocol) = 0;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
+    };
+
+    class INET_API ProtocolLevel : public Chunk
+    {
+      protected:
+        int level;
+        const Protocol *protocol;
+        std::deque<Ptr<const Chunk>> chunks;
+
+      public:
+        ProtocolLevel(int level, const Protocol* protocol);
+
+        int getLevel() const { return level; }
+        const Protocol *getProtocol() const { return protocol; }
+        const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
+
+        virtual ChunkType getChunkType() const { throw cRuntimeError("Invalid operation"); }
+        virtual b getChunkLength() const { throw cRuntimeError("Invalid operation"); }
+        virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const { throw cRuntimeError("Invalid operation"); }
+
+        void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
+    };
+
+    class INET_API ProtocolTreeBuilder : public PacketDissector::ChunkVisitor
+    {
+      protected:
+        bool isEndProtocolCalled = false;
+        bool isSimplePacket_ = true;
+
+        Ptr<ProtocolLevel> topLevel = nullptr;
+        std::stack<ProtocolLevel *> levels;
+
+      public:
+        bool isSimplePacket() const { return isSimplePacket_; }
+        const Ptr<ProtocolLevel>& getTopLevel() const { return topLevel; }
+
+        virtual void startProtocol(const Protocol *protocol) override;
+        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
   protected:
