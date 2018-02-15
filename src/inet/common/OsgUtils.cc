@@ -285,7 +285,7 @@ StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullB
     return stateSet;
 }
 
-StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width)
+StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width, bool overlay)
 {
     auto stateSet = new StateSet();
     auto material = new Material();
@@ -294,8 +294,12 @@ StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineSty
     material->setDiffuse(Material::FRONT_AND_BACK, colorVec);
     stateSet->setAttribute(material);
     stateSet->setMode(GL_BLEND, StateAttribute::ON);
-    stateSet->setMode(GL_DEPTH_TEST, StateAttribute::ON);
+    stateSet->setMode(GL_DEPTH_TEST, overlay ? StateAttribute::OFF : StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+    if (overlay)
+        stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
+
     if (width != 1.0) {
         auto lineWidth = new osg::LineWidth();
         lineWidth->setWidth(width);
