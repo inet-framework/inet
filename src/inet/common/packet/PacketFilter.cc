@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/dissector/PacketFilter.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {

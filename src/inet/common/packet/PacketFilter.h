@@ -25,7 +25,9 @@ namespace inet {
 
 /**
  * This class provides a generic filter for packets. The filter is expressed
- * as a pattern using the cMatchExpression format.
+ * as two patterns using the cMatchExpression format. One filter is applied
+ * to the Packet the other one is applied to each Chunk in the packet using
+ * the PacketDissector.
  */
 class INET_API PacketFilter
 {

@@ -21,8 +21,7 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/dissector/PacketFilter.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/recorder/PacketDump.h"
 #include "inet/common/packet/recorder/PcapDump.h"
 
