@@ -44,7 +44,7 @@ void PcapRecorder::initialize()
     packetDumper.setVerbose(par("verbose"));
     packetDumper.setOutStream(EVSTREAM);
     signalList.clear();
-    packetFilter.setPattern(par("packetFilter"), par("chunkFilter"));
+    packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
 
     {
         cStringTokenizer signalTokenizer(par("sendingSignalNames"));
