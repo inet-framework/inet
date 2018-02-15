@@ -79,7 +79,7 @@ const LinkVisualizerBase::LinkVisualization *LinkOsgVisualizerBase::createLinkVi
     auto sourcePosition = getPosition(source);
     auto destinationPosition = getPosition(destination);
     auto node = new inet::osg::LineNode(sourcePosition, destinationPosition, cFigure::ARROW_NONE, cFigure::ARROW_BARBED, lineWidth);
-    node->setStateSet(inet::osg::createLineStateSet(lineColor, lineStyle, lineWidth));
+    node->setStateSet(inet::osg::createLineStateSet(lineColor, lineStyle, lineWidth, true)); // < add the overlay as configurable parameter?
     return new LinkOsgVisualization(node, source->getId(), destination->getId());
 }
 
