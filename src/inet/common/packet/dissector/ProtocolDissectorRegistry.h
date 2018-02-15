@@ -36,6 +36,7 @@ class INET_API ProtocolDissectorRegistry
 
     void registerProtocolDissector(const Protocol* protocol, const ProtocolDissector *dissector);
 
+    const ProtocolDissector *findProtocolDissector(const Protocol* protocol) const;
     const ProtocolDissector *getProtocolDissector(const Protocol* protocol) const;
 };
 

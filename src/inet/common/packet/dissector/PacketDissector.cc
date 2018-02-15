@@ -17,31 +17,54 @@
 
 namespace inet {
 
-PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ChunkVisitor& chunkVisitor) :
-    protocolDissectorRegistry(protocolDissectorRegistry),
-    chunkVisitor(chunkVisitor)
+PacketDissector::ProtocolDissectorCallback::ProtocolDissectorCallback(const PacketDissector& packetDissector) :
+    packetDissector(packetDissector)
 {
+}
+
+PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback) :
+    protocolDissectorRegistry(protocolDissectorRegistry),
+    callback(callback)
+{
+}
+
+void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) const
+{
+    auto protocolDissector = protocolDissectorRegistry.findProtocolDissector(protocol);
+    if (protocolDissector == nullptr)
+        protocolDissector = protocolDissectorRegistry.getProtocolDissector(nullptr);
+    ProtocolDissectorCallback callback(*this);
+    protocolDissector->dissect(packet, callback);
 }
 
 void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) const
 {
-    auto protocolDissector = protocolDissectorRegistry.getProtocolDissector(protocol);
-    protocolDissector->dissect(packet, *this);
+    auto headerPopOffset = packet->getHeaderPopOffset();
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    doDissectPacket(packet, protocol);
+    ASSERT(packet->getDataLength() == B(0));
+    packet->setHeaderPopOffset(headerPopOffset);
+    packet->setTrailerPopOffset(trailerPopOffset);
 }
 
-void PacketDissector::startProtocol(const Protocol *protocol) const
+void PacketDissector::ProtocolDissectorCallback::startProtocol(const Protocol *protocol)
 {
-    chunkVisitor.startProtocol(protocol);
+    packetDissector.callback.startProtocol(protocol);
 }
 
-void PacketDissector::endProtocol(const Protocol *protocol) const
+void PacketDissector::ProtocolDissectorCallback::endProtocol(const Protocol *protocol)
 {
-    chunkVisitor.endProtocol(protocol);
+    packetDissector.callback.endProtocol(protocol);
 }
 
-void PacketDissector::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const
+void PacketDissector::ProtocolDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
-    chunkVisitor.visitChunk(chunk, protocol);
+    packetDissector.callback.visitChunk(chunk, protocol);
+}
+
+void PacketDissector::ProtocolDissectorCallback::dissectPacket(Packet *packet, const Protocol *protocol)
+{
+    packetDissector.doDissectPacket(packet, protocol);
 }
 
 PacketDissector::ProtocolLevel::ProtocolLevel(int level, const Protocol* protocol) :

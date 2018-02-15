@@ -30,14 +30,14 @@ namespace inet {
 class INET_API PacketFilter
 {
   protected:
-    class INET_API ChunkVisitor : public PacketDissector::ChunkVisitor
+    class INET_API PacketDissectorCallback : public PacketDissector::ICallback
     {
       protected:
         bool matches_ = false;
         const PacketFilter& packetFilter;
 
       public:
-        ChunkVisitor(const PacketFilter& packetFilter);
+        PacketDissectorCallback(const PacketFilter& packetFilter);
 
         bool matches(const Packet *packet);
 

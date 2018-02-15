@@ -21,8 +21,6 @@
 
 namespace inet {
 
-class PacketDissector;
-
 /**
  * Protocol dissector classes dissect packets into protocol specific meaningful
  * parts. The algorithm calls the visitor method exactly one time for each part
@@ -38,58 +36,95 @@ class PacketDissector;
 class INET_API ProtocolDissector : public cObject
 {
   public:
+    class INET_API ICallback
+    {
+      public:
+        /**
+         * Notifies about the start of a new protocol data unit (PDU).
+         */
+        virtual void startProtocol(const Protocol *protocol) = 0;
+
+        /**
+         * Notifies about the end of the current protocol data unit (PDU).
+         */
+        virtual void endProtocol(const Protocol *protocol) = 0;
+
+        /**
+         * Notifies about a new chunk in the current protocol data unit (PDU).
+         */
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
+
+        /**
+         * Requests the dissection of the data part of packet according to the given protocol.
+         */
+        virtual void dissectPacket(Packet *packet, const Protocol *protocol) = 0;
+    };
+
+  public:
     /**
      * Dissects the packet according to the protocol implemented by this ProtocolDissector.
      */
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const = 0;
+    virtual void dissect(Packet *packet, ICallback& callback) const = 0;
 };
 
 class INET_API DefaultDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+class INET_API PppDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API EthernetDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API Ieee80211Dissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API Ieee802LlcDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API ArpDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API Ipv4Dissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API IcmpDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 class INET_API UdpDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, const PacketDissector& packetDissector) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+class INET_API TcpDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 } // namespace

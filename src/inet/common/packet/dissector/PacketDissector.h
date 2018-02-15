@@ -32,19 +32,38 @@ namespace inet {
  *
  * The supported protocols are provided by the ProtocolDissectorRegistry. The
  * packet dissection algorithm calls the visitChunk() method of the provided
- * PacketDissector::ChunkVisitor for each protocol specific chunk found in the
+ * PacketDissector::ICallback for each protocol specific chunk found in the
  * packet. The chunks are passed to the method in the order they appear in the
  * packet from left to right using their most specific protocol dependent form.
  */
 class INET_API PacketDissector
 {
   public:
-    class INET_API ChunkVisitor
+    class INET_API ICallback
     {
       public:
         virtual void startProtocol(const Protocol *protocol) = 0;
         virtual void endProtocol(const Protocol *protocol) = 0;
+
+        /**
+         * This is a callback method for individual ProtocolDissectors to notify the
+         * PacketDissector about a chunk that is found.
+         */
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
+    };
+
+    class INET_API ProtocolDissectorCallback : public ProtocolDissector::ICallback
+    {
+      protected:
+        const PacketDissector& packetDissector;
+
+      public:
+        ProtocolDissectorCallback(const PacketDissector& packetDissector);
+
+        virtual void startProtocol(const Protocol *protocol) override;
+        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
+        virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
 
     class INET_API ProtocolLevel : public Chunk
@@ -68,7 +87,7 @@ class INET_API PacketDissector
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
-    class INET_API ProtocolTreeBuilder : public PacketDissector::ChunkVisitor
+    class INET_API ProtocolTreeBuilder : public PacketDissector::ICallback
     {
       protected:
         bool isEndProtocolCalled = false;
@@ -88,31 +107,17 @@ class INET_API PacketDissector
 
   protected:
     const ProtocolDissectorRegistry& protocolDissectorRegistry;
-    ChunkVisitor& chunkVisitor;
+    ICallback& callback;
+
+    void doDissectPacket(Packet *packet, const Protocol *protocol) const;
 
   public:
-    PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ChunkVisitor& chunkVisitor);
+    PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback);
 
     /**
      * Dissects the given packet assuming its a packet of the provided protocol.
      */
     void dissectPacket(Packet *packet, const Protocol *protocol) const;
-
-    /**
-     * TODO
-     */
-    void startProtocol(const Protocol *protocol) const;
-
-    /**
-     * TODO
-     */
-    void endProtocol(const Protocol *protocol) const;
-
-    /**
-     * This is a callback method for individual ProtocolDissectors to notify the
-     * PacketDissector about a chunk that is found.
-     */
-    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) const;
 };
 
 } // namespace

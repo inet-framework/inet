@@ -34,19 +34,19 @@ bool PacketFilter::matches(const cPacket *cpacket) const
     if (!const_cast<PacketFilter *>(this)->packetMatchExpression.matches(&matchableObject))
         return false;
     else if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-        ChunkVisitor chunkVisitor(*this);
-        return chunkVisitor.matches(packet);
+        PacketDissectorCallback callback(*this);
+        return callback.matches(packet);
     }
     else
         return true;
 }
 
-PacketFilter::ChunkVisitor::ChunkVisitor(const PacketFilter& packetFilter) :
+PacketFilter::PacketDissectorCallback::PacketDissectorCallback(const PacketFilter& packetFilter) :
     packetFilter(packetFilter)
 {
 }
 
-bool PacketFilter::ChunkVisitor::matches(const Packet *packet)
+bool PacketFilter::PacketDissectorCallback::matches(const Packet *packet)
 {
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
@@ -57,15 +57,15 @@ bool PacketFilter::ChunkVisitor::matches(const Packet *packet)
     return matches_;
 }
 
-void PacketFilter::ChunkVisitor::startProtocol(const Protocol *protocol)
+void PacketFilter::PacketDissectorCallback::startProtocol(const Protocol *protocol)
 {
 }
 
-void PacketFilter::ChunkVisitor::endProtocol(const Protocol *protocol)
+void PacketFilter::PacketDissectorCallback::endProtocol(const Protocol *protocol)
 {
 }
 
-void PacketFilter::ChunkVisitor::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, chunk.get());
     if (!matches_)

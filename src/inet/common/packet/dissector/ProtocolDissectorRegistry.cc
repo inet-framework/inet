@@ -30,11 +30,20 @@ void ProtocolDissectorRegistry::registerProtocolDissector(const Protocol* protoc
     protocolDissectors[protocol] = dissector;
 }
 
-const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const Protocol* protocol) const
+const ProtocolDissector *ProtocolDissectorRegistry::findProtocolDissector(const Protocol* protocol) const
 {
     auto it = protocolDissectors.find(protocol);
     if (it != protocolDissectors.end())
         return it->second;
+    else
+        return nullptr;
+}
+
+const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const Protocol* protocol) const
+{
+    auto protocolDissector = findProtocolDissector(protocol);
+    if (protocolDissector != nullptr)
+        return protocolDissector;
     else
         throw cRuntimeError("Cannot find protocol dissector for %s", protocol->getName());
 }
