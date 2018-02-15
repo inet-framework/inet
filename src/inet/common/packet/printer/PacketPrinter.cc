@@ -95,7 +95,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             }
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 // TODO: printEthernetChunk(context.infoColumn, chunk);
             }
@@ -108,7 +108,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             }
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printIeee80211Chunk(context.infoColumn, chunk);
             }
@@ -123,7 +123,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
         else if (protocol == &Protocol::arp) {
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printArpChunk(context.infoColumn, chunk);
             }
@@ -138,7 +138,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             }
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printIpv4Chunk(context.infoColumn, chunk);
             }
@@ -146,7 +146,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
         else if (protocol == &Protocol::icmpv4) {
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printIcmpChunk(context.infoColumn, chunk);
             }
@@ -159,7 +159,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             }
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printUdpChunk(context.infoColumn, chunk);
             }
@@ -172,7 +172,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             }
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                context.protocolColumn = protocol->getName();
+                context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 // TODO: printTcpChunk(context.infoColumn, chunk);
             }
@@ -284,7 +284,7 @@ void PacketPrinter::printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& 
 
 void PacketPrinter::printUnimplementedProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk, const Protocol* protocol) const
 {
-    stream << "(UNIMPLEMENTED " << protocol->getName() << ") " << chunk;
+    stream << "(UNIMPLEMENTED " << protocol->getDescriptiveName() << ") " << chunk;
 }
 
 void PacketPrinter::printUnknownProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
