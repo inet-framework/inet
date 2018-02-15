@@ -44,6 +44,7 @@ void PcapRecorder::initialize()
     packetDumper.setVerbose(par("verbose"));
     packetDumper.setOutStream(EVSTREAM);
     signalList.clear();
+    packetFilter.setPattern(par("packetFilter"), par("chunkFilter"));
 
     {
         cStringTokenizer signalTokenizer(par("sendingSignalNames"));
@@ -131,7 +132,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 
     auto packet = dynamic_cast<Packet *>(msg);
 
-    if (packet && (dumpBadFrames || !packet->hasBitError())) {
+    if (packet && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
