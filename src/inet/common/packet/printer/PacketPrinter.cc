@@ -66,9 +66,7 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
-    auto copy = packet->dup();
-    packetDissector.dissectPacket(copy, protocol);
-    delete copy;
+    packetDissector.dissectPacket(packet, protocol);
     Context context;
     if (pduTreeBuilder.isSimplyEncapsulatedPacket())
         const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevelPdu(), context);
