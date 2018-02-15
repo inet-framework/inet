@@ -32,15 +32,17 @@ class INET_API Protocol
   protected:
     const int id;
     const char *name;
+    const char *descriptiveName;
 
   public:
-    Protocol(const char *name);
+    Protocol(const char *name, const char *descriptiveName);
 
     bool operator==(const Protocol& other) const { return id == other.id; }
     bool operator!=(const Protocol& other) const { return id != other.id; }
 
     int getId() const { return id; }
     const char *getName() const { return name; }
+    const char *getDescriptiveName() const { return descriptiveName; }
 
     std::string str() const;
 
@@ -49,7 +51,6 @@ class INET_API Protocol
 
     static const Protocol *findProtocol(const char *name);
     static const Protocol *getProtocol(const char *name);
-
 
   public:
     // in alphanumeric order
