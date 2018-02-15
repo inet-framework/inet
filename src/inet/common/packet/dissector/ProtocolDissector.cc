@@ -50,13 +50,13 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
     // TODO: use signal tag as opposed to protocol tag?! e.g. IEEE 802. 11 signal -> means 802.11 PHY header
     if (const auto& ethernetPhyHeader = dynamicPtrCast<const inet::EthernetPhyHeader>(header)) {
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ethernetPhyHeader->getChunkLength());
-        callback.startProtocol(nullptr);
+        callback.startProtocolDataUnit(nullptr);
         callback.visitChunk(header, nullptr);
         callback.dissectPacket(packet, &Protocol::ethernet);
-        callback.endProtocol(nullptr);
+        callback.endProtocolDataUnit(nullptr);
     }
     else if (const auto& ieeeIeee80211PhyHeader = dynamicPtrCast<const inet::physicallayer::Ieee80211PhyHeader>(header)) {
-        callback.startProtocol(nullptr);
+        callback.startProtocolDataUnit(nullptr);
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ieeeIeee80211PhyHeader->getChunkLength());
         callback.visitChunk(header, nullptr);
         const auto& trailer = packet->peekTrailer();
@@ -67,7 +67,7 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
         callback.dissectPacket(packet, &Protocol::ieee80211);
         if (ieeeIeee80211PhyPadding != nullptr)
             callback.visitChunk(ieeeIeee80211PhyPadding, nullptr);
-        callback.endProtocol(nullptr);
+        callback.endProtocolDataUnit(nullptr);
     }
     else {
         callback.visitChunk(packet->peekData(), nullptr);
@@ -77,20 +77,20 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
 
 void PppDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    callback.startProtocol(&Protocol::ppp);
+    callback.startProtocolDataUnit(&Protocol::ppp);
     const auto& header = packet->popHeader<PppHeader>();
     const auto& trailer = packet->popTrailer<PppTrailer>();
     callback.visitChunk(header, &Protocol::ppp);
     auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(header->getProtocol());
     callback.dissectPacket(packet, payloadProtocol);
     callback.visitChunk(trailer, &Protocol::ppp);
-    callback.endProtocol(&Protocol::ppp);
+    callback.endProtocolDataUnit(&Protocol::ppp);
 }
 
 void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetMacHeader>();
-    callback.startProtocol(&Protocol::ethernet);
+    callback.startProtocolDataUnit(&Protocol::ethernet);
     callback.visitChunk(header, &Protocol::ethernet);
     const auto& fcs = packet->popTrailer<EthernetFcs>();
     // TODO:
@@ -102,14 +102,14 @@ void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
         callback.visitChunk(padding, &Protocol::ethernet);
     }
     callback.visitChunk(fcs, &Protocol::ethernet);
-    callback.endProtocol(&Protocol::ethernet);
+    callback.endProtocolDataUnit(&Protocol::ethernet);
 }
 
 void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
     const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>();
-    callback.startProtocol(&Protocol::ieee80211);
+    callback.startProtocolDataUnit(&Protocol::ieee80211);
     callback.visitChunk(header, &Protocol::ieee80211);
     // TODO: fragmentation & aggregation
     if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
@@ -139,31 +139,31 @@ void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
     else // TODO: if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
         ASSERT(packet->getDataLength() == b(0));
     callback.visitChunk(trailer, &Protocol::ieee80211);
-    callback.endProtocol(&Protocol::ieee80211);
+    callback.endProtocolDataUnit(&Protocol::ieee80211);
 }
 
 void Ieee802LlcDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::Ieee8022LlcHeader>();
-    callback.startProtocol(&Protocol::ieee8022);
+    callback.startProtocolDataUnit(&Protocol::ieee8022);
     callback.visitChunk(header, &Protocol::ieee8022);
     auto protocol = Ieee8022Llc::getProtocol(header);
     callback.dissectPacket(packet, protocol);
-    callback.endProtocol(&Protocol::ieee8022);
+    callback.endProtocolDataUnit(&Protocol::ieee8022);
 }
 
 void ArpDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& arpPacket = packet->popHeader<ArpPacket>();
-    callback.startProtocol(&Protocol::arp);
+    callback.startProtocolDataUnit(&Protocol::arp);
     callback.visitChunk(arpPacket, &Protocol::arp);
-    callback.endProtocol(&Protocol::arp);
+    callback.endProtocolDataUnit(&Protocol::arp);
 }
 
 void Ipv4Dissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<Ipv4Header>();
-    callback.startProtocol(&Protocol::ipv4);
+    callback.startProtocolDataUnit(&Protocol::ipv4);
     callback.visitChunk(header, &Protocol::ipv4);
     // TODO: fragmentation
 //    auto trailerPopOffset = packet->getTrailerPopOffset();
@@ -173,35 +173,35 @@ void Ipv4Dissector::dissect(Packet *packet, ICallback& callback) const
 //    assert(packet->getDataLength() == B(0));
 //    packet->setHeaderPopOffset(xxx);
 //    packet->setTrailerPopOffset(trailerPopOffset);
-    callback.endProtocol(&Protocol::ipv4);
+    callback.endProtocolDataUnit(&Protocol::ipv4);
 }
 
 void IcmpDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<IcmpHeader>();
-    callback.startProtocol(&Protocol::icmpv4);
+    callback.startProtocolDataUnit(&Protocol::icmpv4);
     callback.visitChunk(header, &Protocol::icmpv4);
     callback.dissectPacket(packet, nullptr);
-    callback.endProtocol(&Protocol::icmpv4);
+    callback.endProtocolDataUnit(&Protocol::icmpv4);
 }
 
 void UdpDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<UdpHeader>();
-    callback.startProtocol(&Protocol::udp);
+    callback.startProtocolDataUnit(&Protocol::udp);
     callback.visitChunk(header, &Protocol::udp);
     callback.dissectPacket(packet, nullptr);
-    callback.endProtocol(&Protocol::udp);
+    callback.endProtocolDataUnit(&Protocol::udp);
 }
 
 void TcpDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<tcp::TcpHeader>();
-    callback.startProtocol(&Protocol::tcp);
+    callback.startProtocolDataUnit(&Protocol::tcp);
     callback.visitChunk(header, &Protocol::tcp);
     if (packet->getDataLength() != b(0))
         callback.dissectPacket(packet, nullptr);
-    callback.endProtocol(&Protocol::tcp);
+    callback.endProtocolDataUnit(&Protocol::tcp);
 }
 
 } // namespace

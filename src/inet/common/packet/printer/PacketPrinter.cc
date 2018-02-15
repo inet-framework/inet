@@ -70,13 +70,13 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
     packetDissector.dissectPacket(copy, protocol);
     delete copy;
     Context context;
-    if (pduTreeBuilder.isSimplePacket())
-        const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevel(), context);
+    if (pduTreeBuilder.isSimplyEncapsulatedPacket())
+        const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevelPdu(), context);
     else {
         context.sourceColumn << "mixed";
         context.destinationColumn << "mixed";
         context.protocolColumn = "mixed";
-        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevel(), context);
+        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevelPdu(), context);
     }
     stream << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t" << context.protocolColumn << "\t" << context.infoColumn.str() << std::endl;
 }

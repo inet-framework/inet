@@ -42,12 +42,12 @@ class INET_API ProtocolDissector : public cObject
         /**
          * Notifies about the start of a new protocol data unit (PDU).
          */
-        virtual void startProtocol(const Protocol *protocol) = 0;
+        virtual void startProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
          * Notifies about the end of the current protocol data unit (PDU).
          */
-        virtual void endProtocol(const Protocol *protocol) = 0;
+        virtual void endProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
          * Notifies about a new chunk in the current protocol data unit (PDU).

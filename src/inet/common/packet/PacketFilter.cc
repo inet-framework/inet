@@ -57,11 +57,11 @@ bool PacketFilter::PacketDissectorCallback::matches(const Packet *packet)
     return matches_;
 }
 
-void PacketFilter::PacketDissectorCallback::startProtocol(const Protocol *protocol)
+void PacketFilter::PacketDissectorCallback::startProtocolDataUnit(const Protocol *protocol)
 {
 }
 
-void PacketFilter::PacketDissectorCallback::endProtocol(const Protocol *protocol)
+void PacketFilter::PacketDissectorCallback::endProtocolDataUnit(const Protocol *protocol)
 {
 }
 

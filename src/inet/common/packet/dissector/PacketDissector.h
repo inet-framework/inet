@@ -45,12 +45,12 @@ class INET_API PacketDissector
         /**
          * Notifies about the start of a new protocol data unit (PDU).
          */
-        virtual void startProtocol(const Protocol *protocol) = 0;
+        virtual void startProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
          * Notifies about the end of the current protocol data unit (PDU).
          */
-        virtual void endProtocol(const Protocol *protocol) = 0;
+        virtual void endProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
          * Notifies about a new chunk in the current protocol data unit (PDU).
@@ -66,8 +66,8 @@ class INET_API PacketDissector
       public:
         ProtocolDissectorCallback(const PacketDissector& packetDissector);
 
-        virtual void startProtocol(const Protocol *protocol) override;
-        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void startProtocolDataUnit(const Protocol *protocol) override;
+        virtual void endProtocolDataUnit(const Protocol *protocol) override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
         virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
@@ -96,18 +96,18 @@ class INET_API PacketDissector
     class INET_API PduTreeBuilder : public PacketDissector::ICallback
     {
       protected:
-        bool isEndProtocolCalled = false;
-        bool isSimplePacket_ = true;
+        bool isEndProtocolDataUnitCalled = false;
+        bool isSimplyEncapsulatedPacket_ = true;
 
-        Ptr<ProtocolDataUnit> topLevel = nullptr;
-        std::stack<ProtocolDataUnit *> levels;
+        Ptr<ProtocolDataUnit> topLevelPdu = nullptr;
+        std::stack<ProtocolDataUnit *> pduLevels;
 
       public:
-        bool isSimplePacket() const { return isSimplePacket_; }
-        const Ptr<ProtocolDataUnit>& getTopLevel() const { return topLevel; }
+        bool isSimplyEncapsulatedPacket() const { return isSimplyEncapsulatedPacket_; }
+        const Ptr<ProtocolDataUnit>& getTopLevelPdu() const { return topLevelPdu; }
 
-        virtual void startProtocol(const Protocol *protocol) override;
-        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void startProtocolDataUnit(const Protocol *protocol) override;
+        virtual void endProtocolDataUnit(const Protocol *protocol) override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 

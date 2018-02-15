@@ -43,8 +43,8 @@ class INET_API PacketFilter
 
         bool matches(const Packet *packet);
 
-        virtual void startProtocol(const Protocol *protocol) override;
-        virtual void endProtocol(const Protocol *protocol) override;
+        virtual void startProtocolDataUnit(const Protocol *protocol) override;
+        virtual void endProtocolDataUnit(const Protocol *protocol) override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 

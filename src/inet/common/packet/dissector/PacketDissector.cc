@@ -24,14 +24,14 @@ PacketDissector::ProtocolDissectorCallback::ProtocolDissectorCallback(const Pack
 {
 }
 
-void PacketDissector::ProtocolDissectorCallback::startProtocol(const Protocol *protocol)
+void PacketDissector::ProtocolDissectorCallback::startProtocolDataUnit(const Protocol *protocol)
 {
-    packetDissector.callback.startProtocol(protocol);
+    packetDissector.callback.startProtocolDataUnit(protocol);
 }
 
-void PacketDissector::ProtocolDissectorCallback::endProtocol(const Protocol *protocol)
+void PacketDissector::ProtocolDissectorCallback::endProtocolDataUnit(const Protocol *protocol)
 {
-    packetDissector.callback.endProtocol(protocol);
+    packetDissector.callback.endProtocolDataUnit(protocol);
 }
 
 void PacketDissector::ProtocolDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
@@ -54,27 +54,27 @@ PacketDissector::ProtocolDataUnit::ProtocolDataUnit(int level, const Protocol* p
 
 // PduTreeBuilder
 
-void PacketDissector::PduTreeBuilder::startProtocol(const Protocol *protocol)
+void PacketDissector::PduTreeBuilder::startProtocolDataUnit(const Protocol *protocol)
 {
-    if (isEndProtocolCalled)
-        isSimplePacket_ = false;
-    auto level = makeShared<ProtocolDataUnit>(levels.size(), protocol);
-    if (topLevel == nullptr)
-        topLevel = level;
+    if (isEndProtocolDataUnitCalled)
+        isSimplyEncapsulatedPacket_ = false;
+    auto level = makeShared<ProtocolDataUnit>(pduLevels.size(), protocol);
+    if (topLevelPdu == nullptr)
+        topLevelPdu = level;
     else
-        levels.top()->insert(level);
-    levels.push(level.get());
+        pduLevels.top()->insert(level);
+    pduLevels.push(level.get());
 }
 
-void PacketDissector::PduTreeBuilder::endProtocol(const Protocol *protocol)
+void PacketDissector::PduTreeBuilder::endProtocolDataUnit(const Protocol *protocol)
 {
-    isEndProtocolCalled = true;
-    levels.pop();
+    isEndProtocolDataUnitCalled = true;
+    pduLevels.pop();
 }
 
 void PacketDissector::PduTreeBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
-    levels.top()->insert(chunk);
+    pduLevels.top()->insert(chunk);
 }
 
 // PacketDissector
