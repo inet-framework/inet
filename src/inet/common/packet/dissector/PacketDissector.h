@@ -30,7 +30,7 @@ namespace inet {
  * dissection may be useful for printing packet details, filter packets,
  * finding information in a packet deep down.
  *
- * The supported protocols are provided by the ProtocolDissectorRegistry. The
+ * The supported protocols are provided by a ProtocolDissectorRegistry. The
  * packet dissection algorithm calls the visitChunk() method of the provided
  * PacketDissector::ICallback for each protocol specific chunk found in the
  * packet. The chunks are passed to the method in the order they appear in the
@@ -42,12 +42,18 @@ class INET_API PacketDissector
     class INET_API ICallback
     {
       public:
+        /**
+         * Notifies about the start of a new protocol data unit (PDU).
+         */
         virtual void startProtocol(const Protocol *protocol) = 0;
+
+        /**
+         * Notifies about the end of the current protocol data unit (PDU).
+         */
         virtual void endProtocol(const Protocol *protocol) = 0;
 
         /**
-         * This is a callback method for individual ProtocolDissectors to notify the
-         * PacketDissector about a chunk that is found.
+         * Notifies about a new chunk in the current protocol data unit (PDU).
          */
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
     };
@@ -66,7 +72,7 @@ class INET_API PacketDissector
         virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
 
-    class INET_API ProtocolLevel : public Chunk
+    class INET_API ProtocolDataUnit : public Chunk
     {
       protected:
         int level;
@@ -74,7 +80,7 @@ class INET_API PacketDissector
         std::deque<Ptr<const Chunk>> chunks;
 
       public:
-        ProtocolLevel(int level, const Protocol* protocol);
+        ProtocolDataUnit(int level, const Protocol* protocol);
 
         int getLevel() const { return level; }
         const Protocol *getProtocol() const { return protocol; }
@@ -87,18 +93,18 @@ class INET_API PacketDissector
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
-    class INET_API ProtocolTreeBuilder : public PacketDissector::ICallback
+    class INET_API PduTreeBuilder : public PacketDissector::ICallback
     {
       protected:
         bool isEndProtocolCalled = false;
         bool isSimplePacket_ = true;
 
-        Ptr<ProtocolLevel> topLevel = nullptr;
-        std::stack<ProtocolLevel *> levels;
+        Ptr<ProtocolDataUnit> topLevel = nullptr;
+        std::stack<ProtocolDataUnit *> levels;
 
       public:
         bool isSimplePacket() const { return isSimplePacket_; }
-        const Ptr<ProtocolLevel>& getTopLevel() const { return topLevel; }
+        const Ptr<ProtocolDataUnit>& getTopLevel() const { return topLevel; }
 
         virtual void startProtocol(const Protocol *protocol) override;
         virtual void endProtocol(const Protocol *protocol) override;
@@ -115,7 +121,9 @@ class INET_API PacketDissector
     PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback);
 
     /**
-     * Dissects the given packet assuming its a packet of the provided protocol.
+     * Dissects the given packet of the provided protocol. The packet dissection
+     * algorithm calls the visitChunk() method of the provided callback for each
+     * protocol specific chunk found in the packet.
      */
     void dissectPacket(Packet *packet, const Protocol *protocol) const;
 };

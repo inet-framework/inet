@@ -17,10 +17,67 @@
 
 namespace inet {
 
+// PacketDissector::ProtocolDissectorCallback
+
 PacketDissector::ProtocolDissectorCallback::ProtocolDissectorCallback(const PacketDissector& packetDissector) :
     packetDissector(packetDissector)
 {
 }
+
+void PacketDissector::ProtocolDissectorCallback::startProtocol(const Protocol *protocol)
+{
+    packetDissector.callback.startProtocol(protocol);
+}
+
+void PacketDissector::ProtocolDissectorCallback::endProtocol(const Protocol *protocol)
+{
+    packetDissector.callback.endProtocol(protocol);
+}
+
+void PacketDissector::ProtocolDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    packetDissector.callback.visitChunk(chunk, protocol);
+}
+
+void PacketDissector::ProtocolDissectorCallback::dissectPacket(Packet *packet, const Protocol *protocol)
+{
+    packetDissector.doDissectPacket(packet, protocol);
+}
+
+// ProtocolDataUnit
+
+PacketDissector::ProtocolDataUnit::ProtocolDataUnit(int level, const Protocol* protocol) :
+    level(level),
+    protocol(protocol)
+{
+}
+
+// PduTreeBuilder
+
+void PacketDissector::PduTreeBuilder::startProtocol(const Protocol *protocol)
+{
+    if (isEndProtocolCalled)
+        isSimplePacket_ = false;
+    auto level = makeShared<ProtocolDataUnit>(levels.size(), protocol);
+    if (topLevel == nullptr)
+        topLevel = level;
+    else
+        levels.top()->insert(level);
+    levels.push(level.get());
+}
+
+void PacketDissector::PduTreeBuilder::endProtocol(const Protocol *protocol)
+{
+    isEndProtocolCalled = true;
+    levels.pop();
+}
+
+void PacketDissector::PduTreeBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
+{
+    levels.top()->insert(chunk);
+}
+
+// PacketDissector
 
 PacketDissector::PacketDissector(const ProtocolDissectorRegistry& protocolDissectorRegistry, ICallback& callback) :
     protocolDissectorRegistry(protocolDissectorRegistry),
@@ -45,55 +102,6 @@ void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) co
     ASSERT(packet->getDataLength() == B(0));
     packet->setHeaderPopOffset(headerPopOffset);
     packet->setTrailerPopOffset(trailerPopOffset);
-}
-
-void PacketDissector::ProtocolDissectorCallback::startProtocol(const Protocol *protocol)
-{
-    packetDissector.callback.startProtocol(protocol);
-}
-
-void PacketDissector::ProtocolDissectorCallback::endProtocol(const Protocol *protocol)
-{
-    packetDissector.callback.endProtocol(protocol);
-}
-
-void PacketDissector::ProtocolDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
-{
-    packetDissector.callback.visitChunk(chunk, protocol);
-}
-
-void PacketDissector::ProtocolDissectorCallback::dissectPacket(Packet *packet, const Protocol *protocol)
-{
-    packetDissector.doDissectPacket(packet, protocol);
-}
-
-PacketDissector::ProtocolLevel::ProtocolLevel(int level, const Protocol* protocol) :
-    level(level),
-    protocol(protocol)
-{
-}
-
-void PacketDissector::ProtocolTreeBuilder::startProtocol(const Protocol *protocol)
-{
-    if (isEndProtocolCalled)
-        isSimplePacket_ = false;
-    auto level = makeShared<ProtocolLevel>(levels.size(), protocol);
-    if (topLevel == nullptr)
-        topLevel = level;
-    else
-        levels.top()->insert(level);
-    levels.push(level.get());
-}
-
-void PacketDissector::ProtocolTreeBuilder::endProtocol(const Protocol *protocol)
-{
-    isEndProtocolCalled = true;
-    levels.pop();
-}
-
-void PacketDissector::ProtocolTreeBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
-{
-    levels.top()->insert(chunk);
 }
 
 } // namespace

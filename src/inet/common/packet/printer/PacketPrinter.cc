@@ -62,30 +62,30 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 {
-    PacketDissector::ProtocolTreeBuilder protocolTreeBuilder;
+    PacketDissector::PduTreeBuilder pduTreeBuilder;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, protocolTreeBuilder);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
     auto copy = packet->dup();
     packetDissector.dissectPacket(copy, protocol);
     delete copy;
     Context context;
-    if (protocolTreeBuilder.isSimplePacket())
-        const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolTreeBuilder.getTopLevel(), context);
+    if (pduTreeBuilder.isSimplePacket())
+        const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevel(), context);
     else {
         context.sourceColumn << "mixed";
         context.destinationColumn << "mixed";
         context.protocolColumn = "mixed";
-        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolTreeBuilder.getTopLevel(), context);
+        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevel(), context);
     }
     stream << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t" << context.protocolColumn << "\t" << context.infoColumn.str() << std::endl;
 }
 
-void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context)
+void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
 {
-    auto protocol = protocolLevel->getProtocol();
-    for (const auto& chunk : protocolLevel->getChunks()) {
-        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolLevel>(chunk))
+    auto protocol = protocolDataUnit->getProtocol();
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketInsideOut(childLevel, context);
         else if (protocol == &Protocol::ethernet) {
             auto header = dynamicPtrCast<const EthernetMacHeader>(chunk);
@@ -93,8 +93,8 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.sourceColumn << header->getSrc();
                 context.destinationColumn << header->getDest();
             }
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 // TODO: printEthernetChunk(context.infoColumn, chunk);
@@ -106,23 +106,23 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.sourceColumn << header->getTransmitterAddress();
                 context.destinationColumn << header->getReceiverAddress();
             }
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 printIeee80211Chunk(context.infoColumn, chunk);
             }
         }
         else if (protocol == &Protocol::ieee8022) {
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.infoColumn.str("");
                 printIeee8022Chunk(context.infoColumn, chunk);
             }
         }
         else if (protocol == &Protocol::arp) {
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 printArpChunk(context.infoColumn, chunk);
@@ -136,16 +136,16 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.destinationColumn.str("");
                 context.destinationColumn << header->getDestAddress();
             }
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 printIpv4Chunk(context.infoColumn, chunk);
             }
         }
         else if (protocol == &Protocol::icmpv4) {
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 printIcmpChunk(context.infoColumn, chunk);
@@ -157,8 +157,8 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.sourceColumn << ":" << header->getSrcPort();
                 context.destinationColumn << ":" << header->getDestPort();
             }
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 printUdpChunk(context.infoColumn, chunk);
@@ -170,23 +170,23 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.sourceColumn << ":" << header->getSrcPort();
                 context.destinationColumn << ":" << header->getDestPort();
             }
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getName();
                 context.infoColumn.str("");
                 // TODO: printTcpChunk(context.infoColumn, chunk);
             }
         }
         else if (protocol != nullptr) {
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.infoColumn.str("");
                 printUnimplementedProtocolChunk(context.infoColumn, chunk, protocol);
             }
         }
         else {
-            if (protocolLevel->getLevel() > context.infoLevel) {
-                context.infoLevel = protocolLevel->getLevel();
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
                 context.infoColumn.str("");
                 printUnknownProtocolChunk(context.infoColumn, chunk);
             }
@@ -194,11 +194,11 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
     }
 }
 
-void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context)
+void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
 {
-    auto protocol = protocolLevel->getProtocol();
-    for (const auto& chunk : protocolLevel->getChunks()) {
-        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolLevel>(chunk))
+    auto protocol = protocolDataUnit->getProtocol();
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketLeftToRight(childLevel, context);
         else if (protocol == &Protocol::ieee80211)
             printIeee80211Chunk(context.infoColumn, chunk);

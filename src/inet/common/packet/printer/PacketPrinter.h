@@ -35,8 +35,8 @@ class INET_API PacketPrinter : public cMessagePrinter
     };
 
   protected:
-    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context);
-    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolLevel>& protocolLevel, Context& context);
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context);
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context);
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;
