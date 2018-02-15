@@ -56,6 +56,10 @@ Coord VisualizerBase::getPosition(const cModule *networkNode) const
 
 Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const
 {
+    double zoomLevel = getEnvir()->getZoomLevel(networkNode->getParentModule());
+    if (std::isnan(zoomLevel))
+        zoomLevel = 1.0;
+
     if (!strcmp(contactMode, "circular")) {
         auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
         auto size = bounds.getSize();
@@ -64,13 +68,14 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         auto direction = fromPosition - position;
         direction.normalize();
         direction *= radius + contactSpacing;
+        direction /= zoomLevel;
         return position + direction;
     }
     else if (!strcmp(contactMode, "rectangular")) {
         auto position = getPosition(networkNode);
         auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
         auto size = bounds.getSize();
-        Cuboid networkNodeShape(Coord(size.x + 2 * contactSpacing, size.y + 2 * contactSpacing, 1));
+        Cuboid networkNodeShape(Coord(size.x + 2 * contactSpacing / zoomLevel, size.y + 2 * contactSpacing / zoomLevel, 1));
         Coord intersection1, intersection2, normal1, normal2;
         networkNodeShape.computeIntersection(LineSegment(Coord::ZERO, fromPosition - position), intersection1, intersection2, normal1, normal2);
         return position + intersection2;
