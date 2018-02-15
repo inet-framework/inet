@@ -141,6 +141,11 @@ Coord LineManager::getLineShift(int sourceModuleId, int destinationModuleId, con
         auto count = cacheEntry.moduleLines.size() + cacheEntry.modulePaths.size();
         shift *= (double)shiftOffset - ((double)count - 1) / 2;
     }
+
+    double zoomLevel = getEnvir()->getZoomLevel(getSimulation()->getModule(sourceModuleId)->getParentModule());
+    if (!std::isnan(zoomLevel))
+        shift /= zoomLevel;
+
     return shift;
 }
 
