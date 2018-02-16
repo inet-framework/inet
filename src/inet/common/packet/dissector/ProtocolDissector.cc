@@ -29,7 +29,6 @@
 #include "inet/networklayer/ipv4/Ipv4Header.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 
@@ -41,7 +40,6 @@ Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 Register_Protocol_Dissector(&Protocol::arp, ArpDissector);
 Register_Protocol_Dissector(&Protocol::ipv4, Ipv4Dissector);
 Register_Protocol_Dissector(&Protocol::icmpv4, IcmpDissector);
-Register_Protocol_Dissector(&Protocol::udp, UdpDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
 void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
@@ -183,15 +181,6 @@ void IcmpDissector::dissect(Packet *packet, ICallback& callback) const
     callback.visitChunk(header, &Protocol::icmpv4);
     callback.dissectPacket(packet, nullptr);
     callback.endProtocolDataUnit(&Protocol::icmpv4);
-}
-
-void UdpDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<UdpHeader>();
-    callback.startProtocolDataUnit(&Protocol::udp);
-    callback.visitChunk(header, &Protocol::udp);
-    callback.dissectPacket(packet, nullptr);
-    callback.endProtocolDataUnit(&Protocol::udp);
 }
 
 void TcpDissector::dissect(Packet *packet, ICallback& callback) const

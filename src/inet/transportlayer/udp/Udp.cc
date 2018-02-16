@@ -23,6 +23,8 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -60,7 +62,26 @@
 #endif // ifdef WITH_IPv6
 
 
+
 namespace inet {
+
+class INET_API UdpDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void UdpDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    const auto& header = packet->popHeader<UdpHeader>();
+    callback.startProtocolDataUnit(&Protocol::udp);
+    callback.visitChunk(header, &Protocol::udp);
+    callback.dissectPacket(packet, nullptr);
+    callback.endProtocolDataUnit(&Protocol::udp);
+}
+
+Register_Protocol_Dissector(&Protocol::udp, UdpDissector);
+
 
 Define_Module(Udp);
 
