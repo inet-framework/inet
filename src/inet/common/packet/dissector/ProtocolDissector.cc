@@ -70,8 +70,10 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
         callback.endProtocolDataUnit(nullptr);
     }
     else {
+        callback.startProtocolDataUnit(nullptr);
         callback.visitChunk(packet->peekData(), nullptr);
         packet->setHeaderPopOffset(packet->getTrailerPopOffset());
+        callback.endProtocolDataUnit(nullptr);
     }
 }
 
