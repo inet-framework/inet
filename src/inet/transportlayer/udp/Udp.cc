@@ -434,6 +434,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
+    delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
     const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
