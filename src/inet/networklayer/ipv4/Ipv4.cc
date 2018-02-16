@@ -30,6 +30,8 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
@@ -51,6 +53,37 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
+
+class INET_API Ipv4Dissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void Ipv4Dissector::dissect(Packet *packet, ICallback& callback) const
+{
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto ipv4EndOffset = packet->getHeaderPopOffset();
+    const auto& header = packet->popHeader<Ipv4Header>();
+    ipv4EndOffset += B(header->getTotalLengthField());
+    callback.startProtocolDataUnit(&Protocol::ipv4);
+    callback.visitChunk(header, &Protocol::ipv4);
+    packet->setTrailerPopOffset(ipv4EndOffset);
+    if (header->getFragmentOffset() == 0 && !header->getMoreFragments()) {
+        callback.dissectPacket(packet, header->getProtocol());
+    }
+    else {
+        //TODO Fragmentation
+        callback.dissectPacket(packet, nullptr);
+    }
+    ASSERT(packet->getDataLength() == B(0));
+    packet->setHeaderPopOffset(ipv4EndOffset);
+    packet->setTrailerPopOffset(trailerPopOffset);
+    callback.endProtocolDataUnit(&Protocol::ipv4);
+}
+
+Register_Protocol_Dissector(&Protocol::ipv4, Ipv4Dissector);
+
 
 Define_Module(Ipv4);
 

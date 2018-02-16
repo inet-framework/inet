@@ -37,7 +37,6 @@ Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211, Ieee80211Dissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 Register_Protocol_Dissector(&Protocol::arp, ArpDissector);
-Register_Protocol_Dissector(&Protocol::ipv4, Ipv4Dissector);
 Register_Protocol_Dissector(&Protocol::icmpv4, IcmpDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
@@ -148,22 +147,6 @@ void ArpDissector::dissect(Packet *packet, ICallback& callback) const
     callback.startProtocolDataUnit(&Protocol::arp);
     callback.visitChunk(arpPacket, &Protocol::arp);
     callback.endProtocolDataUnit(&Protocol::arp);
-}
-
-void Ipv4Dissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<Ipv4Header>();
-    callback.startProtocolDataUnit(&Protocol::ipv4);
-    callback.visitChunk(header, &Protocol::ipv4);
-    // TODO: fragmentation
-//    auto trailerPopOffset = packet->getTrailerPopOffset();
-//    auto xxx = packet->getHeaderPopOffset() + B(header->getTotalLengthField());
-//    packet->setTrailerPopOffset(xxx);
-    callback.dissectPacket(packet, header->getProtocol());
-//    assert(packet->getDataLength() == B(0));
-//    packet->setHeaderPopOffset(xxx);
-//    packet->setTrailerPopOffset(trailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::ipv4);
 }
 
 void IcmpDissector::dissect(Packet *packet, ICallback& callback) const

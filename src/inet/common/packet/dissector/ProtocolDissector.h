@@ -97,12 +97,6 @@ class INET_API ArpDissector : public ProtocolDissector
     virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
-class INET_API Ipv4Dissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
 class INET_API IcmpDissector : public ProtocolDissector
 {
   public:
