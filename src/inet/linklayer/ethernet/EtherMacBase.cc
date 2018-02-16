@@ -49,9 +49,18 @@ void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
     callback.startProtocolDataUnit(&Protocol::ethernet);
     callback.visitChunk(header, &Protocol::ethernet);
     const auto& fcs = packet->popTrailer<EthernetFcs>();
-    // TODO:
-    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
-    callback.dissectPacket(packet, payloadProtocol);
+    if (isEth2Header(*header)) {
+        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
+        callback.dissectPacket(packet, payloadProtocol);
+    }
+    else {
+        // LLC header
+        auto ethEndOffset = packet->getHeaderPopOffset() + B(header->getTypeOrLength());
+        auto trailerOffset = packet->getTrailerPopOffset();
+        packet->setTrailerPopOffset(ethEndOffset);
+        callback.dissectPacket(packet, &Protocol::ieee8022);
+        packet->setTrailerPopOffset(trailerOffset);
+    }
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
         const auto& padding = packet->popTrailer<EthernetPadding>(paddingLength);
