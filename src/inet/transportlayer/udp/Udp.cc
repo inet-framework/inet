@@ -73,10 +73,17 @@ class INET_API UdpDissector : public ProtocolDissector
 
 void UdpDissector::dissect(Packet *packet, ICallback& callback) const
 {
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto udpEndOffset = packet->getHeaderPopOffset();
     const auto& header = packet->popHeader<UdpHeader>();
+    udpEndOffset += B(header->getTotalLengthField());
+    packet->setTrailerPopOffset(udpEndOffset);
     callback.startProtocolDataUnit(&Protocol::udp);
     callback.visitChunk(header, &Protocol::udp);
     callback.dissectPacket(packet, nullptr);
+    ASSERT(packet->getDataLength() == B(0));
+    packet->setHeaderPopOffset(udpEndOffset);
+    packet->setTrailerPopOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::udp);
 }
 
