@@ -22,6 +22,8 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
@@ -31,6 +33,27 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
+
+class INET_API PppDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void PppDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    callback.startProtocolDataUnit(&Protocol::ppp);
+    const auto& header = packet->popHeader<PppHeader>();
+    const auto& trailer = packet->popTrailer<PppTrailer>();
+    callback.visitChunk(header, &Protocol::ppp);
+    auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(header->getProtocol());
+    callback.dissectPacket(packet, payloadProtocol);
+    callback.visitChunk(trailer, &Protocol::ppp);
+    callback.endProtocolDataUnit(&Protocol::ppp);
+}
+
+Register_Protocol_Dissector(&Protocol::ppp, PppDissector);
+
 
 Define_Module(Ppp);
 

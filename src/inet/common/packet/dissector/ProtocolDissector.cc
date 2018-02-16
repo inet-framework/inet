@@ -33,7 +33,6 @@
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::ppp, PppDissector);
 Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211, Ieee80211Dissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
@@ -71,18 +70,6 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
         callback.visitChunk(packet->peekData(), nullptr);
         packet->setHeaderPopOffset(packet->getTrailerPopOffset());
     }
-}
-
-void PppDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    callback.startProtocolDataUnit(&Protocol::ppp);
-    const auto& header = packet->popHeader<PppHeader>();
-    const auto& trailer = packet->popTrailer<PppTrailer>();
-    callback.visitChunk(header, &Protocol::ppp);
-    auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(header->getProtocol());
-    callback.dissectPacket(packet, payloadProtocol);
-    callback.visitChunk(trailer, &Protocol::ppp);
-    callback.endProtocolDataUnit(&Protocol::ppp);
 }
 
 void EthernetDissector::dissect(Packet *packet, ICallback& callback) const

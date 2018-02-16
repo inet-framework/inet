@@ -73,12 +73,6 @@ class INET_API DefaultDissector : public ProtocolDissector
     virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
-class INET_API PppDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
 class INET_API EthernetDissector : public ProtocolDissector
 {
   public:
