@@ -42,7 +42,18 @@ void IcmpDissector::dissect(Packet *packet, ICallback& callback) const
     const auto& header = packet->popHeader<IcmpHeader>();
     callback.startProtocolDataUnit(&Protocol::icmpv4);
     callback.visitChunk(header, &Protocol::icmpv4);
-    callback.dissectPacket(packet, nullptr);
+    switch (header->getType()) {
+        case ICMP_DESTINATION_UNREACHABLE:
+        case ICMP_TIME_EXCEEDED:
+        case ICMP_PARAMETER_PROBLEM: {
+            //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
+            callback.dissectPacket(packet, nullptr);
+            break;
+        }
+        default:
+            callback.dissectPacket(packet, nullptr);
+            break;
+    }
     callback.endProtocolDataUnit(&Protocol::icmpv4);
 }
 
