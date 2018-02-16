@@ -63,7 +63,7 @@ void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
     }
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
-        const auto& padding = packet->popTrailer<EthernetPadding>(paddingLength);
+        const auto& padding = packet->popHeader(paddingLength);        // remove padding (type is not EthernetPadding!)
         callback.visitChunk(padding, &Protocol::ethernet);
     }
     callback.visitChunk(fcs, &Protocol::ethernet);
