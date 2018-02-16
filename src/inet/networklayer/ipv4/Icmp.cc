@@ -26,6 +26,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -34,6 +36,18 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
+
+void IcmpDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    const auto& header = packet->popHeader<IcmpHeader>();
+    callback.startProtocolDataUnit(&Protocol::icmpv4);
+    callback.visitChunk(header, &Protocol::icmpv4);
+    callback.dissectPacket(packet, nullptr);
+    callback.endProtocolDataUnit(&Protocol::icmpv4);
+}
+
+Register_Protocol_Dissector(&Protocol::icmpv4, IcmpDissector);
+
 
 Define_Module(Icmp);
 
