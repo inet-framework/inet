@@ -52,6 +52,9 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
         callback.dissectPacket(packet, &Protocol::ethernet);
         callback.endProtocolDataUnit(nullptr);
     }
+    else if (const auto& pppHeader = dynamicPtrCast<const inet::PppHeader>(header)) {
+        callback.dissectPacket(packet, &Protocol::ppp);
+    }
     else if (const auto& ieeeIeee80211PhyHeader = dynamicPtrCast<const inet::physicallayer::Ieee80211PhyHeader>(header)) {
         callback.startProtocolDataUnit(nullptr);
         packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ieeeIeee80211PhyHeader->getChunkLength());
