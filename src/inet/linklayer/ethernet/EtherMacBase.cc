@@ -21,7 +21,10 @@
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -33,6 +36,33 @@
 #include "inet/common/INETUtils.h"
 
 namespace inet {
+
+class INET_API EthernetDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    const auto& header = packet->popHeader<EthernetMacHeader>();
+    callback.startProtocolDataUnit(&Protocol::ethernet);
+    callback.visitChunk(header, &Protocol::ethernet);
+    const auto& fcs = packet->popTrailer<EthernetFcs>();
+    // TODO:
+    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
+    callback.dissectPacket(packet, payloadProtocol);
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popTrailer<EthernetPadding>(paddingLength);
+        callback.visitChunk(padding, &Protocol::ethernet);
+    }
+    callback.visitChunk(fcs, &Protocol::ethernet);
+    callback.endProtocolDataUnit(&Protocol::ethernet);
+}
+
+Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
+
 
 const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 

@@ -33,7 +33,6 @@
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211, Ieee80211Dissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
@@ -72,24 +71,6 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
         packet->setHeaderPopOffset(packet->getTrailerPopOffset());
         callback.endProtocolDataUnit(nullptr);
     }
-}
-
-void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<EthernetMacHeader>();
-    callback.startProtocolDataUnit(&Protocol::ethernet);
-    callback.visitChunk(header, &Protocol::ethernet);
-    const auto& fcs = packet->popTrailer<EthernetFcs>();
-    // TODO:
-    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
-    callback.dissectPacket(packet, payloadProtocol);
-    auto paddingLength = packet->getDataLength();
-    if (paddingLength > b(0)) {
-        const auto& padding = packet->popTrailer<EthernetPadding>(paddingLength);
-        callback.visitChunk(padding, &Protocol::ethernet);
-    }
-    callback.visitChunk(fcs, &Protocol::ethernet);
-    callback.endProtocolDataUnit(&Protocol::ethernet);
 }
 
 void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
