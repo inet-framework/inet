@@ -98,8 +98,9 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
         }
         else {
-            auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if (packetProtocol == protocol) {
+            auto transportProtocolTag = packet->findTag<TransportProtocolInd>();
+            auto packetProtocol = transportProtocolTag ? transportProtocolTag->getProtocol() : packet->getTag<NetworkProtocolInd>()->getProtocol();
+            if (protocol == packetProtocol) {
                 delete message->removeControlInfo();
                 packet->clearTags();
                 tunSocket.send(packet);
