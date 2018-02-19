@@ -160,6 +160,7 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
 
     if (isIeee8023Header(*ethHeader)) {
         llc = packet->popHeader<Ieee8022LlcHeader>();
+        delete packet->removeTagIfPresent<PacketProtocolTag>();
     }
     else {
         EV << "Incoming packet does not have an LLC ethernet header, dropped. Header is " << (ethHeader ? ethHeader->getClassName() : "nullptr") << "\n";
