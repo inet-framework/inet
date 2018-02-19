@@ -80,8 +80,8 @@ simple Udp like IUdp
         @signal[packetDropped](type=Packet);
         @signal[packetSent](type=cPacket);
         @signal[packetReceived](type=cPacket);
-        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"vector(count)","sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"vector(count)","sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed up"; source=packetSentToUpper; record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkWrongPort](title="packets dropped (wrong port)"; source=packetDropReasonIsNoPortFound(packetDropped); record=count,"vector(count)"; interpolationmode=none);
         @statistic[droppedPkBadChecksum](title="packets dropped (checksum error)"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,"vector(count)"; interpolationmode=none);
