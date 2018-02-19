@@ -100,11 +100,13 @@ class INET_API PacketDissector
         bool isSimplyEncapsulatedPacket_ = true;
 
         Ptr<ProtocolDataUnit> topLevelPdu = nullptr;
+        Ptr<Chunk> remainingJunk = nullptr;
         std::stack<ProtocolDataUnit *> pduLevels;
 
       public:
         bool isSimplyEncapsulatedPacket() const { return isSimplyEncapsulatedPacket_; }
         const Ptr<ProtocolDataUnit>& getTopLevelPdu() const { return topLevelPdu; }
+        const Ptr<Chunk>& getRemainingJunk() const { return remainingJunk; }
 
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;

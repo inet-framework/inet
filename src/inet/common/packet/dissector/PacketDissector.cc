@@ -59,8 +59,14 @@ void PacketDissector::PduTreeBuilder::startProtocolDataUnit(const Protocol *prot
     if (isEndProtocolDataUnitCalled)
         isSimplyEncapsulatedPacket_ = false;
     auto level = makeShared<ProtocolDataUnit>(pduLevels.size(), protocol);
-    if (topLevelPdu == nullptr)
-        topLevelPdu = level;
+    if (pduLevels.size() == 0) {
+        if (topLevelPdu == nullptr)
+            topLevelPdu = level;
+        else if (remainingJunk == nullptr)
+            remainingJunk = level;
+        else
+            throw cRuntimeError("Invalid state");
+    }
     else
         pduLevels.top()->insert(level);
     pduLevels.push(level.get());
@@ -98,8 +104,12 @@ void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) co
 {
     auto headerPopOffset = packet->getHeaderPopOffset();
     auto trailerPopOffset = packet->getTrailerPopOffset();
+    // dissect packet data part according to protocol
     doDissectPacket(packet, protocol);
-    ASSERT(packet->getDataLength() == B(0));
+    // dissect remaining junk in packet without protocol (e.g. ethernet padding at IP level)
+    if (packet->getDataLength() != b(0))
+        doDissectPacket(packet, nullptr);
+    ASSERT(packet->getDataLength() == b(0));
     packet->setHeaderPopOffset(headerPopOffset);
     packet->setTrailerPopOffset(trailerPopOffset);
 }
