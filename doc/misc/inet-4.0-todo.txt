@@ -26,6 +26,8 @@ SHOULD:
 
  - revise and rename signals to have a consistent naming scheme (e.g. NF_*)
  - revise and rename statistics to have a consistent naming scheme
+ - add meaningful display strings to at least the top level submodules of network nodes
+ - fix mobility non-determinism caused by interpolation from last position during animation
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
