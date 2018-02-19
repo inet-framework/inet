@@ -27,7 +27,7 @@
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
@@ -232,32 +232,32 @@ void PacketPrinter::printArpChunk(std::ostream& stream, const Ptr<const Chunk>& 
     if (auto packet = dynamicPtrCast<const ArpPacket>(chunk)) {
         switch (packet->getOpcode()) {
             case ARP_REQUEST:
-                stream << "ARP req: " << packet->getDestIPAddress()
-                       << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
+                stream << "ARP req: " << packet->getDestIpAddress()
+                       << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
                 break;
 
             case ARP_REPLY:
                 stream << "ARP reply: "
-                       << packet->getSrcIPAddress() << "=" << packet->getSrcMACAddress()
-                       << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))";
+                       << packet->getSrcIpAddress() << "=" << packet->getSrcMacAddress()
+                       << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))";
                 break;
 
             case ARP_RARP_REQUEST:
-                stream << "RARP req: " << packet->getDestMACAddress()
-                       << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
+                stream << "RARP req: " << packet->getDestMacAddress()
+                       << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
                 break;
 
             case ARP_RARP_REPLY:
                 stream << "RARP reply: "
-                       << packet->getSrcMACAddress() << "=" << packet->getSrcIPAddress()
-                       << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))";
+                       << packet->getSrcMacAddress() << "=" << packet->getSrcIpAddress()
+                       << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))";
                 break;
 
             default:
-                stream << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIPAddress()
-                       << "(" << packet->getDestMACAddress()
-                       << ") s=" << packet->getSrcIPAddress()
-                       << "(" << packet->getSrcMACAddress() << ")";
+                stream << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIpAddress()
+                       << "(" << packet->getDestMacAddress()
+                       << ") s=" << packet->getSrcIpAddress()
+                       << "(" << packet->getSrcMacAddress() << ")";
                 break;
         }
     }
