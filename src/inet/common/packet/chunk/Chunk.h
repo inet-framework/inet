@@ -746,7 +746,7 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
         return staticPtrCast<T>(chunk->dupShared());
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { return os << chunk->str(); }
+inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { if (chunk != nullptr) return os << chunk->str(); else return os << "<nullptr>"; }
 
 inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
 
