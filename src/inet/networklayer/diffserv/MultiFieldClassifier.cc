@@ -49,9 +49,9 @@ using namespace DiffservUtil;
 #ifdef WITH_IPv4
 bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv4Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIpv4(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIpv4(), destPrefixLength)))
         return false;
     int ipv4HeaderProtocolId = ipv4Header->getProtocolId();
     if (protocol >= 0 && ipv4HeaderProtocolId != protocol)
@@ -83,9 +83,9 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv
 #ifdef WITH_IPv6
 bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv6Header *ipv6Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv6 || !ipv6Header->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
         return false;
     int ipv6HeaderProtocolId = ipv6Header->getProtocolId();
     if (protocol >= 0 && ipv6HeaderProtocolId != protocol)

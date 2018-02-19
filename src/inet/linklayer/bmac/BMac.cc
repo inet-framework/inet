@@ -59,7 +59,7 @@ void BMac::initialize(int stage)
 
         macState = INIT;
 
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -146,7 +146,7 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-void BMac::initializeMACAddress()
+void BMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 

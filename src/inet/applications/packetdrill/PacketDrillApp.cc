@@ -611,8 +611,8 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->insertSctpChunks(abortChunk);
     pk->insertHeader(sctpmsg);
     auto ipv4Header = makeShared<Ipv4Header>();
-    ipv4Header->setSrcAddress(remoteAddress.toIPv4());
-    ipv4Header->setDestAddress(localAddress.toIPv4());
+    ipv4Header->setSrcAddress(remoteAddress.toIpv4());
+    ipv4Header->setDestAddress(localAddress.toIpv4());
     ipv4Header->setIdentification(0);
     ipv4Header->setVersion(4);
     ipv4Header->setHeaderLength(20);

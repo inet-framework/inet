@@ -521,7 +521,7 @@ void DhcpServer::startApp()
     if (ipv4data == nullptr)
         throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
     const char *gatewayStr = par("gateway");
-    gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIPv4() : ipv4data->getIPAddress();
+    gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIpv4() : ipv4data->getIPAddress();
     subnetMask = ipv4data->getNetmask();
     long numReservedAddresses = par("numReservedAddresses");
     uint32_t networkStartAddress = ipv4data->getIPAddress().getInt() & ipv4data->getNetmask().getInt();

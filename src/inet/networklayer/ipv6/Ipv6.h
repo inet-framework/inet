@@ -109,7 +109,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
         ~ScheduledDatagram();
         const InterfaceEntry *getIE() { return ie; }
         const Ipv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
-        const MacAddress& getMACAddress() { return macAddr; }
+        const MacAddress& getMacAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
@@ -145,7 +145,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Handle incoming ICMP messages.
      */
-    virtual void handleReceivedICMP(Packet *msg);
+    virtual void handleReceivedIcmp(Packet *msg);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to

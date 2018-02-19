@@ -114,9 +114,9 @@ class INET_API Ipv6Route : public cObject, public IRoute
     unsigned int getAdminDist() const { return _adminDist; }
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
 
-    virtual void setDestination(const L3Address& dest) override { if (_destPrefix != dest.toIPv6()) { _destPrefix = dest.toIPv6(); changed(F_DESTINATION); } }
+    virtual void setDestination(const L3Address& dest) override { if (_destPrefix != dest.toIpv6()) { _destPrefix = dest.toIpv6(); changed(F_DESTINATION); } }
     virtual void setPrefixLength(int prefixLength) override { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIPv6()) { _nextHop = nextHop.toIPv6(); changed(F_NEXTHOP); } }
+    virtual void setNextHop(const L3Address& nextHop) override { if (_nextHop != nextHop.toIpv6()) { _nextHop = nextHop.toIpv6(); changed(F_NEXTHOP); } }
     virtual void setSource(cObject *source) override { if (_source != source) { _source = source; changed(F_SOURCE); } }
     virtual void setSourceType(SourceType type) override { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
     virtual L3Address getDestinationAsGeneric() const override { return getDestPrefix(); }    //TODO rename Ipv6 method

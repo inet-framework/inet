@@ -174,7 +174,7 @@ uint32_t TcpNsc::mapRemote2Nsc(L3Address const& addrP)
     }
 
     // get first free remote NSC IP
-    uint32_t ret = remoteFirstInnerIpS.toIPv4().getInt();
+    uint32_t ret = remoteFirstInnerIpS.toIpv4().getInt();
     for (auto & elem : nsc2RemoteMapM) {
         if (elem.first > ret)
             break;
@@ -431,7 +431,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
     ih->protocol = 6;    // TCP
     ih->check = 0;
     ih->saddr = htonl(nscSrcAddr);
-    ih->daddr = htonl(localInnerIpS.toIPv4().getInt());
+    ih->daddr = htonl(localInnerIpS.toIpv4().getInt());
 
     EV_DEBUG << this << ": modified to: IP " << ih->version << " len " << ih->ihl
              << " protocol " << (unsigned int)(ih->protocol)

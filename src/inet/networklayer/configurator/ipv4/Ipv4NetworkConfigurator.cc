@@ -947,7 +947,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
             // parse and check the attributes
             Ipv4Address destination;
             if (!isEmpty(destinationAttr) && strcmp(destinationAttr, "*"))
-                destination = resolve(destinationAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
+                destination = resolve(destinationAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
             Ipv4Address netmask;
             if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
@@ -1009,7 +1009,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
             // parse and check the attributes
             Ipv4Address source;
             if (!isEmpty(sourceAttr) && strcmp(sourceAttr, "*"))
-                source = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
+                source = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
             Ipv4Address netmask;
             if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
@@ -1107,7 +1107,7 @@ void Ipv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     ASSERT(isNotEmpty(gatewayAttr));    // see "if" above
 
     // check syntax of gatewayAttr, and obtain an initial value
-    outGateway = resolve(gatewayAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
+    outGateway = resolve(gatewayAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
 
     Ipv4Address gatewayAddressOnCommonLink;
 
@@ -1707,7 +1707,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     originalRoutes = optimizedRoutes;
 }
 
-bool Ipv4NetworkConfigurator::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
+bool Ipv4NetworkConfigurator::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
     auto it = topology.interfaceInfos.find(interfaceEntry);
     if (it == topology.interfaceInfos.end())

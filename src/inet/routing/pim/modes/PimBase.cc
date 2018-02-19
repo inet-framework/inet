@@ -196,7 +196,7 @@ void PimBase::processHelloPacket(Packet *packet)
 {
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
-    Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     const auto& pimPacket = packet->peekHeader<PimHello>();
     int version = pimPacket->getVersion();
 

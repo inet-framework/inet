@@ -200,7 +200,7 @@ void Ipv6::endService(cPacket *msg)
         else {
             // address is not tentative anymore - send out datagram
             numForwarded++;
-            fragmentAndSend(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMACAddress(), sDgram->getFromHL());
+            fragmentAndSend(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
             delete sDgram;
         }
     }
@@ -256,11 +256,11 @@ void Ipv6::endService(cPacket *msg)
             // remove control info
             delete packet->removeControlInfo();
             if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
-                datagramLocalOut(packet, destIE, nextHop.toIPv6());
+                datagramLocalOut(packet, destIE, nextHop.toIpv6());
         }
         else {
             if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
-                preroutingFinish(packet, fromIE, destIE, nextHop.toIPv6());
+                preroutingFinish(packet, fromIE, destIE, nextHop.toIpv6());
         }
     }
 }
@@ -300,7 +300,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
-    Ipv6Address src = packet->getTag<L3AddressReq>()->getSrcAddress().toIPv6();
+    Ipv6Address src = packet->getTag<L3AddressReq>()->getSrcAddress().toIpv6();
     if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src) == nullptr) {
@@ -347,7 +347,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
     }
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
-        datagramLocalOut(packet, destIE, nextHopAddr.toIPv6());
+        datagramLocalOut(packet, destIE, nextHopAddr.toIpv6());
 }
 
 void Ipv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Address requestedNextHopAddress)
@@ -683,7 +683,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     }
 
     if (protocol == IP_PROT_IPv6_ICMP) {
-        handleReceivedICMP(packet);
+        handleReceivedIcmp(packet);
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
     else if (protocol == IP_PROT_IPv6EXT_MOB) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
@@ -721,7 +721,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     delete origPacket;
 }
 
-void Ipv6::handleReceivedICMP(Packet *msg)
+void Ipv6::handleReceivedIcmp(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<Icmpv6Header>();
     if (dynamicPtrCast<const Ipv6NdMessage>(icmpHeader) != nullptr) {
@@ -767,8 +767,8 @@ void Ipv6::encapsulate(Packet *transportPacket)
     auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
 
     L3AddressReq *addresses = transportPacket->removeTag<L3AddressReq>();
-    Ipv6Address src = addresses->getSrcAddress().toIPv6();
-    Ipv6Address dest = addresses->getDestAddress().toIPv6();
+    Ipv6Address src = addresses->getSrcAddress().toIpv6();
+    Ipv6Address dest = addresses->getDestAddress().toIpv6();
     delete addresses;
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();

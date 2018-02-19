@@ -224,11 +224,11 @@ L3Address L3AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
 {
     L3Address ret;
     bool netmask = addrType & ADDR_MASK;
-    if ((addrType & ADDR_IPv4) && getIPv4AddressFrom(ret, ift, netmask))
+    if ((addrType & ADDR_IPv4) && getIpv4AddressFrom(ret, ift, netmask))
         return ret;
-    else if ((addrType & ADDR_IPv6) && getIPv6AddressFrom(ret, ift, netmask))
+    else if ((addrType & ADDR_IPv6) && getIpv6AddressFrom(ret, ift, netmask))
         return ret;
-    else if ((addrType & ADDR_MAC) && getMACAddressFrom(ret, ift, netmask))
+    else if ((addrType & ADDR_MAC) && getMacAddressFrom(ret, ift, netmask))
         return ret;
     else if ((addrType & ADDR_MODULEPATH) && getModulePathAddressFrom(ret, ift, netmask))
         return ret;
@@ -244,11 +244,11 @@ L3Address L3AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     L3Address ret;
     bool mask = addrType & ADDR_MASK;
 
-    if ((addrType & ADDR_IPv4) && getInterfaceIPv4Address(ret, ie, mask))
+    if ((addrType & ADDR_IPv4) && getInterfaceIpv4Address(ret, ie, mask))
         return ret;
-    else if ((addrType & ADDR_IPv6) && getInterfaceIPv6Address(ret, ie, mask))
+    else if ((addrType & ADDR_IPv6) && getInterfaceIpv6Address(ret, ie, mask))
         return ret;
-    else if ((addrType & ADDR_MAC) && getInterfaceMACAddress(ret, ie, mask))
+    else if ((addrType & ADDR_MAC) && getInterfaceMacAddress(ret, ie, mask))
         return ret;
     else if ((addrType & ADDR_MODULEPATH) && getInterfaceModulePathAddress(ret, ie, mask))
         return ret;
@@ -260,7 +260,7 @@ L3Address L3AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     return ret;
 }
 
-bool L3AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getIpv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
         throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
@@ -272,14 +272,14 @@ bool L3AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
-        if (getInterfaceIPv4Address(retAddr, ie, netmask))
+        if (getInterfaceIpv4Address(retAddr, ie, netmask))
             return true;
     }
 #endif // ifdef WITH_IPv4
     return false;
 }
 
-bool L3AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     // browse interfaces and pick a globally routable address
     if (ift->getNumInterfaces() == 0)
@@ -311,7 +311,7 @@ bool L3AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *
 #endif // ifndef WITH_IPv6
 }
 
-bool L3AddressResolver::getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getMacAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
         throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
@@ -322,7 +322,7 @@ bool L3AddressResolver::getMACAddressFrom(L3Address& retAddr, IInterfaceTable *i
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->isLoopback())
             continue;
-        if (getInterfaceMACAddress(retAddr, ie, netmask))
+        if (getInterfaceMacAddress(retAddr, ie, netmask))
             return true;
     }
     return false;
@@ -362,7 +362,7 @@ bool L3AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTab
     return false;
 }
 
-bool L3AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv6
     if (netmask)
@@ -378,7 +378,7 @@ bool L3AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *
     return false;
 }
 
-bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv4
     if (ie->ipv4Data()) {
@@ -393,13 +393,13 @@ bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *
         // TODO: how do we know where is the configurator? get the path from a NED parameter?
         L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->getModuleByPath("configurator"));
         if (configurator)
-            return configurator->getInterfaceIPv4Address(ret, ie, netmask);
+            return configurator->getInterfaceIpv4Address(ret, ie, netmask);
     }
 #endif // ifdef WITH_IPv4
     return false;
 }
 
-bool L3AddressResolver::getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
     if (!ie->getMacAddress().isUnspecified()) {
         ret = ie->getMacAddress();
@@ -501,20 +501,20 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                 switch (add.getType()) {
 #ifdef WITH_IPv6
                     case L3Address::Ipv6:
-                        if (entry->ipv6Data()->hasAddress(add.toIPv6()))
+                        if (entry->ipv6Data()->hasAddress(add.toIpv6()))
                             return mod;
                         break;
 
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
                     case L3Address::Ipv4:
-                        if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIPv4())
+                        if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIpv4())
                             return mod;
                         break;
 
 #endif // ifdef WITH_IPv4
                     case L3Address::MAC:
-                        if (entry->getMacAddress() == add.toMAC())
+                        if (entry->getMacAddress() == add.toMac())
                             return mod;
                         break;
                     default:

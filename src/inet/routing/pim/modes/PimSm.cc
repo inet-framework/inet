@@ -596,8 +596,8 @@ void PimSm::processRegisterPacket(Packet *pk)
 
     emit(rcvdRegisterPkSignal, pk);
 
-    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    Ipv4Address destAddr = pk->getTag<L3AddressInd>()->getDestAddress().toIPv4();
+    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
+    Ipv4Address destAddr = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
     const auto& encapData = pk->peekHeader<Ipv4Header>();
     Ipv4Address source = encapData->getSrcAddress();
     Ipv4Address group = encapData->getDestAddress();
@@ -686,7 +686,7 @@ void PimSm::processAssertPacket(Packet *pk)
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address source = pkt->getSourceAddress();
     Ipv4Address group = pkt->getGroupAddress();
-    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4());
+    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
             << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << "'.\n";

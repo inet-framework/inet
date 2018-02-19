@@ -123,7 +123,7 @@ void BgpSession::sendOpenMessage()
     const auto& openMsg = makeShared<BgpOpenMessage>();
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
-    openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIPv4());
+    openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
     pk->insertHeader(openMsg);
     _info.socket->send(pk);
     _openMsgSent++;

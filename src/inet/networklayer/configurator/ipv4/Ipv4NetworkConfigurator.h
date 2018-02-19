@@ -253,7 +253,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
     // address resolver interface
-    bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask) override;
+    bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask) override;
 };
 
 } // namespace inet

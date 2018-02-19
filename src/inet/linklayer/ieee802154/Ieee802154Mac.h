@@ -289,7 +289,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief Generate new interface address*/
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 

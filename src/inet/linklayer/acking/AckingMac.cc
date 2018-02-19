@@ -88,7 +88,7 @@ void AckingMac::initialize(int stage)
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
 
-        initializeMACAddress();
+        initializeMacAddress();
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
@@ -100,7 +100,7 @@ void AckingMac::initialize(int stage)
     }
 }
 
-void AckingMac::initializeMACAddress()
+void AckingMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 

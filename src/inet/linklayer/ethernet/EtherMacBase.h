@@ -186,7 +186,7 @@ class INET_API EtherMacBase : public MacBase
     EtherMacBase();
     virtual ~EtherMacBase();
 
-    virtual MacAddress getMACAddress() { return address; }
+    virtual MacAddress getMacAddress() { return address; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
@@ -201,7 +201,7 @@ class INET_API EtherMacBase : public MacBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initializeFlags();
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual void initializeQueueModule();
     virtual void initializeStatistics();
 

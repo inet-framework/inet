@@ -249,7 +249,7 @@ const InterfaceEntry *Ipv4::getDestInterface(Packet *packet)
 Ipv4Address Ipv4::getNextHop(Packet *packet)
 {
     auto tag = packet->findTag<NextHopAddressReq>();
-    return tag != nullptr ? tag->getNextHopAddress().toIPv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
+    return tag != nullptr ? tag->getNextHopAddress().toIpv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
 void Ipv4::handleIncomingDatagram(Packet *packet)
@@ -921,8 +921,8 @@ void Ipv4::encapsulate(Packet *transportPacket)
     const auto& ipv4Header = makeShared<Ipv4Header>();
 
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
-    Ipv4Address src = l3AddressReq->getSrcAddress().toIPv4();
-    Ipv4Address dest = l3AddressReq->getDestAddress().toIPv4();
+    Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
+    Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
     delete l3AddressReq;
 
     ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
@@ -1003,7 +1003,7 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
 {
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     auto nextHopAddressReq = packet->removeTag<NextHopAddressReq>();
-    Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIPv4();
+    Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIpv4();
     delete nextHopAddressReq;
     if (!ie->isBroadcast() || ie->getMacAddress().isUnspecified()) // we can't do ARP
         sendPacketToNIC(packet);
@@ -1025,7 +1025,7 @@ void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
-    auto it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution completed for " << entry->l3Address << ". Sending " << packetQueue.getLength()
@@ -1046,7 +1046,7 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
-    auto it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";

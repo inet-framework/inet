@@ -60,7 +60,7 @@ MacAddress GenericArp::mapUnicastAddress(L3Address addr)
     cModule *module;
     switch (addr.getType()) {
         case L3Address::MAC:
-            return addr.toMAC();
+            return addr.toMac();
 
         case L3Address::MODULEID:
             module = getSimulation()->getModule(addr.toModuleId().getId());

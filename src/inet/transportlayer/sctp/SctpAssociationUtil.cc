@@ -650,13 +650,13 @@ void SctpAssociation::sendInit()
                 length += 8;
                 sctpMain->addLocalAddress(this, (elem));
                 state->localAddresses.push_back((elem));
-                if (localAddr.toIPv4().getInt() == 0)
+                if (localAddr.toIpv4().getInt() == 0)
                     localAddr = (elem);
             }
             else if (rlevel == 4 && addressLevel == 3 && friendly) {
                 sctpMain->addLocalAddress(this, (elem));
                 state->localAddresses.push_back((elem));
-                if (localAddr.toIPv4().getInt() == 0)
+                if (localAddr.toIpv4().getInt() == 0)
                     localAddr = (elem);
             }
         }
@@ -2883,7 +2883,7 @@ void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
 int SctpAssociation::getAddressLevel(const L3Address& addr)
 {
     if (addr.getType() == L3Address::Ipv6) {
-        switch (addr.toIPv6().getScope()) {
+        switch (addr.toIpv6().getScope()) {
             case Ipv6Address::UNSPECIFIED:
             case Ipv6Address::MULTICAST:
                 return 0;
@@ -2901,11 +2901,11 @@ int SctpAssociation::getAddressLevel(const L3Address& addr)
                 return 4;
 
             default:
-                throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIPv6().getScope()));
+                throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIpv6().getScope()));
         }
     }
     else if (addr.getType() == L3Address::Ipv4) {
-        switch (addr.toIPv4().getAddressCategory()) {
+        switch (addr.toIpv4().getAddressCategory()) {
             case Ipv4Address::UNSPECIFIED:
             case Ipv4Address::THIS_NETWORK:
             case Ipv4Address::MULTICAST:
@@ -2930,7 +2930,7 @@ int SctpAssociation::getAddressLevel(const L3Address& addr)
                 return 4;
 
             default:
-                throw cRuntimeError("Unknown Ipv4 address category: %d", (int)(addr.toIPv4().getAddressCategory()));
+                throw cRuntimeError("Unknown Ipv4 address category: %d", (int)(addr.toIpv4().getAddressCategory()));
         }
     }
     throw cRuntimeError("Unknown address type: %d", (int)(addr.getType()));

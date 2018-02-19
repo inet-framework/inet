@@ -386,13 +386,13 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual bool isForwardingEnabled() const override { return isRouter(); }    //XXX inconsistent names
     virtual bool isMulticastForwardingEnabled() const override { return true;    /*TODO isMulticastForwardingEnabled();*/ }
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address());    /*TODO getRouterId();*/ }
-    virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIPv6()); }
+    virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;
     virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<Ipv6Route *>((const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getInterface() : nullptr; }
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { const Ipv6Route *e = (const_cast<Ipv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIpv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
     virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return nullptr;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
     virtual IRoute *getDefaultRoute() const override { return nullptr;    /*TODO getDefaultRoute();*/ }

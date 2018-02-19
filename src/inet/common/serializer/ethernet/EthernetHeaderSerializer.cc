@@ -32,16 +32,16 @@ Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
-    stream.writeMACAddress(ethernetMacHeader->getDest());
-    stream.writeMACAddress(ethernetMacHeader->getSrc());
+    stream.writeMacAddress(ethernetMacHeader->getDest());
+    stream.writeMacAddress(ethernetMacHeader->getSrc());
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
 const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
-    MacAddress destAddr = stream.readMACAddress();
-    MacAddress srcAddr = stream.readMACAddress();
+    MacAddress destAddr = stream.readMacAddress();
+    MacAddress srcAddr = stream.readMacAddress();
     uint16_t typeOrLength = stream.readUint16Be();
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);

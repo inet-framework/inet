@@ -85,11 +85,11 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());
             stream.writeUint32Be(0);   // unused
-            stream.writeIPv6Address(frame->getTargetAddress());
+            stream.writeIpv6Address(frame->getTargetAddress());
             if (frame->getChunkLength() > B(8 + 16)) {   // has optional sourceLinkLayerAddress    (TLB options)
                 stream.writeByte(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION);
                 stream.writeByte(1);         // length = 1 * 8byte
-                stream.writeMACAddress(frame->getSourceLinkLayerAddress());
+                stream.writeMacAddress(frame->getSourceLinkLayerAddress());
                 ASSERT(1 + 1 + MAC_ADDRESS_SIZE == 8);
             }
             break;
@@ -176,7 +176,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             neighbourSol->setCode(subcode);
 
             stream.readUint32Be(); // reserved
-            neighbourSol->setTargetAddress(stream.readIPv6Address());
+            neighbourSol->setTargetAddress(stream.readIpv6Address());
 
             //FIXME deserialize TLV options
             while (stream.getRemainingLength() != B(0)) {   // has options
@@ -187,7 +187,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
                     break;
                 }
                 if (type == 1) {
-                    neighbourSol->setSourceLinkLayerAddress(stream.readMACAddress());     // sourceLinkLayerAddress
+                    neighbourSol->setSourceLinkLayerAddress(stream.readMacAddress());     // sourceLinkLayerAddress
                 }
             }
             break;

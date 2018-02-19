@@ -105,7 +105,7 @@ void Ieee802154Mac::initialize(int stage)
         macState = IDLE_1;
         txAttempts = 0;
 
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -168,7 +168,7 @@ Ieee802154Mac::~Ieee802154Mac()
     }
 }
 
-void Ieee802154Mac::initializeMACAddress()
+void Ieee802154Mac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 

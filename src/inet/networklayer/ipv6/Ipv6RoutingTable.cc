@@ -417,7 +417,7 @@ InterfaceEntry *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& addr)
 
 InterfaceEntry *Ipv6RoutingTable::getInterfaceByAddress(const L3Address& address) const
 {
-    return getInterfaceByAddress(address.toIPv6());
+    return getInterfaceByAddress(address.toIpv6());
 }
 
 bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const

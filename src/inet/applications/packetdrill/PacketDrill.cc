@@ -55,13 +55,13 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     ipv4Header->setHeaderLength(20);
 
     if (direction == DIRECTION_INBOUND) {
-        ipv4Header->setSrcAddress(remoteAddr.toIPv4());
-        ipv4Header->setDestAddress(localAddr.toIPv4());
+        ipv4Header->setSrcAddress(remoteAddr.toIpv4());
+        ipv4Header->setDestAddress(localAddr.toIpv4());
         ipv4Header->setIdentification(pdapp->getIdInbound());
         pdapp->increaseIdInbound();
     } else if (direction == DIRECTION_OUTBOUND) {
-        ipv4Header->setSrcAddress(localAddr.toIPv4());
-        ipv4Header->setDestAddress(remoteAddr.toIPv4());
+        ipv4Header->setSrcAddress(localAddr.toIpv4());
+        ipv4Header->setDestAddress(remoteAddr.toIpv4());
         ipv4Header->setIdentification(pdapp->getIdOutbound());
         pdapp->increaseIdOutbound();
     } else

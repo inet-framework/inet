@@ -215,7 +215,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     bool stats = false;
 
     /** @brief Generate new interface address*/
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 

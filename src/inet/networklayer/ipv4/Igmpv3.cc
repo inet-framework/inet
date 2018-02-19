@@ -948,7 +948,7 @@ void Igmpv3::processQuery(Packet *packet)
     if (rt->isMulticastForwardingEnabled()) {
         //Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4() < ie->ipv4Data()->getIPAddress()) {
+        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->ipv4Data()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
         }

@@ -25,18 +25,18 @@ namespace serializer {
 
 Register_Serializer(ArpPacket, ArpPacketSerializer);
 
-MacAddress ArpPacketSerializer::readMACAddress(MemoryInputStream& stream, unsigned int size) const
+MacAddress ArpPacketSerializer::readMacAddress(MemoryInputStream& stream, unsigned int size) const
 {
     b curpos = stream.getPosition();
-    MacAddress address = stream.readMACAddress();
+    MacAddress address = stream.readMacAddress();
     stream.seek(curpos + B(size));
     return address;
 }
 
-Ipv4Address ArpPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsigned int size) const
+Ipv4Address ArpPacketSerializer::readIpv4Address(MemoryInputStream& stream, unsigned int size) const
 {
     b curpos = stream.getPosition();
-    Ipv4Address address = stream.readIPv4Address();
+    Ipv4Address address = stream.readIpv4Address();
     stream.seek(curpos + B(size));
     return address;
 }
@@ -49,10 +49,10 @@ void ArpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeByte(ETHER_ADDR_LEN);
     stream.writeByte(4);  // size of IPv4 address
     stream.writeUint16Be(arpPacket->getOpcode());
-    stream.writeMACAddress(arpPacket->getSrcMacAddress());
-    stream.writeIPv4Address(arpPacket->getSrcIpAddress());
-    stream.writeMACAddress(arpPacket->getDestMacAddress());
-    stream.writeIPv4Address(arpPacket->getDestIpAddress());
+    stream.writeMacAddress(arpPacket->getSrcMacAddress());
+    stream.writeIpv4Address(arpPacket->getSrcIpAddress());
+    stream.writeMacAddress(arpPacket->getDestMacAddress());
+    stream.writeIpv4Address(arpPacket->getDestIpAddress());
 }
 
 const Ptr<Chunk> ArpPacketSerializer::deserialize(MemoryInputStream& stream) const
@@ -65,10 +65,10 @@ const Ptr<Chunk> ArpPacketSerializer::deserialize(MemoryInputStream& stream) con
     uint8_t macAddressLength = stream.readByte();     //ar_hln
     uint8_t ipAddressLength = stream.readByte();     //ar_pln
     arpPacket->setOpcode((ArpOpcode)stream.readUint16Be());   // arphdr->ar_op
-    arpPacket->setSrcMacAddress(readMACAddress(stream, macAddressLength));
-    arpPacket->setSrcIpAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
-    arpPacket->setDestMacAddress(readMACAddress(stream, macAddressLength));
-    arpPacket->setDestIpAddress(readIPv4Address(stream, ipAddressLength));   // ar_tpa
+    arpPacket->setSrcMacAddress(readMacAddress(stream, macAddressLength));
+    arpPacket->setSrcIpAddress(readIpv4Address(stream, ipAddressLength));    // ar_spa
+    arpPacket->setDestMacAddress(readMacAddress(stream, macAddressLength));
+    arpPacket->setDestIpAddress(readIpv4Address(stream, ipAddressLength));   // ar_tpa
     return arpPacket;
 }
 

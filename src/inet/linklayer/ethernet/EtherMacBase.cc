@@ -152,7 +152,7 @@ void EtherMacBase::initialize(int stage)
 
         initializeFlags();
 
-        initializeMACAddress();
+        initializeMacAddress();
         initializeStatistics();
 
         lastTxFinishTime = -1.0;    // not equals with current simtime.
@@ -204,7 +204,7 @@ void EtherMacBase::initializeQueueModule()
     }
 }
 
-void EtherMacBase::initializeMACAddress()
+void EtherMacBase::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -296,7 +296,7 @@ bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER) {
             initializeFlags();
-            initializeMACAddress();
+            initializeMacAddress();
             initializeQueueModule();
         }
     }

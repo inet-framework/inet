@@ -68,7 +68,7 @@ class INET_API AckingMac : public MacProtocolBase
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
 
     // get MSG from queue

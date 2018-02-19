@@ -478,7 +478,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 {
     auto ipv6Header = packet->peekHeader<Ipv6Header>();
     // decapsulation is performed in Ipv6 module
-    Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
 #ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel

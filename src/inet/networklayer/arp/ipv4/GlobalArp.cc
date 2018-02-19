@@ -191,7 +191,7 @@ MacAddress GlobalArp::resolveL3Address(const L3Address& address, const Interface
 {
     Enter_Method_Silent();
 
-    Ipv4Address addr = address.toIPv4();
+    Ipv4Address addr = address.toIpv4();
     ArpCache::const_iterator it = globalArpCache.find(addr);
     if (it != globalArpCache.end())
         return it->second->macAddress;
@@ -209,7 +209,7 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddr) const
 
     for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
         if (it->second->macAddress == macAddr && it->first.getType() == L3Address::Ipv4)
-            return it->first.toIPv4();
+            return it->first.toIpv4();
 
 
     return Ipv4Address::UNSPECIFIED_ADDRESS;

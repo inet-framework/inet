@@ -56,7 +56,7 @@ void LMac::initialize(int stage)
         controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -118,7 +118,7 @@ LMac::~LMac()
     macQueue.clear();
 }
 
-void LMac::initializeMACAddress()
+void LMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 

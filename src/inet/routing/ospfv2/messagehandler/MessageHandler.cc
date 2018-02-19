@@ -230,8 +230,8 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                 }
             }
             if (intf != nullptr) {
-                Ipv4Address sourceAddress = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
-                Ipv4Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIPv4();
+                Ipv4Address sourceAddress = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
+                Ipv4Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
                 Ipv4Address allDRouters = Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 

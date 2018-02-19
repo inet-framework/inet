@@ -28,8 +28,8 @@ namespace serializer {
 class INET_API ArpPacketSerializer : public FieldsChunkSerializer
 {
   protected:
-    MacAddress readMACAddress(MemoryInputStream& stream, unsigned int size) const;
-    Ipv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
+    MacAddress readMacAddress(MemoryInputStream& stream, unsigned int size) const;
+    Ipv4Address readIpv4Address(MemoryInputStream& stream, unsigned int size) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;

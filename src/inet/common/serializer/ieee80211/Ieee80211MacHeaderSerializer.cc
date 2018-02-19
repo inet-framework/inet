@@ -51,22 +51,22 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(0xD4);
         stream.writeByte(0);
         stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_US));
-        stream.writeMACAddress(ackFrame->getReceiverAddress());
+        stream.writeMacAddress(ackFrame->getReceiverAddress());
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
         stream.writeUint16Be(rtsFrame->getDuration().inUnit(SIMTIME_US));
-        stream.writeMACAddress(rtsFrame->getReceiverAddress());
-        stream.writeMACAddress(rtsFrame->getTransmitterAddress());
+        stream.writeMacAddress(rtsFrame->getReceiverAddress());
+        stream.writeMacAddress(rtsFrame->getTransmitterAddress());
     }
     else if (auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(chunk))
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
         stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
-        stream.writeMACAddress(ctsFrame->getReceiverAddress());
+        stream.writeMacAddress(ctsFrame->getReceiverAddress());
     }
     else if (auto dataOrMgmtFrame = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(chunk))
     {
@@ -80,15 +80,15 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 | (dataOrMgmtFrame->getToDS() ? 1 : 0);
         stream.writeByte(fc1);
         stream.writeUint16Be(dataOrMgmtFrame->getDuration().inUnit(SIMTIME_US));
-        stream.writeMACAddress(dataOrMgmtFrame->getReceiverAddress());
-        stream.writeMACAddress(dataOrMgmtFrame->getTransmitterAddress());
-        stream.writeMACAddress(dataOrMgmtFrame->getAddress3());
+        stream.writeMacAddress(dataOrMgmtFrame->getReceiverAddress());
+        stream.writeMacAddress(dataOrMgmtFrame->getTransmitterAddress());
+        stream.writeMacAddress(dataOrMgmtFrame->getAddress3());
         stream.writeUint16Le(dataOrMgmtFrame->getSequenceNumber() << 4
                 | dataOrMgmtFrame->getFragmentNumber());
 
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(chunk)) {
             if (dataFrame->getFromDS() && dataFrame->getToDS())
-                stream.writeMACAddress(dataFrame->getAddress4());
+                stream.writeMacAddress(dataFrame->getAddress4());
 
             if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS) {
                 uint16_t qos =
@@ -108,8 +108,8 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     }
     else if (auto msduSubframe = dynamicPtrCast<const Ieee80211MsduSubframeHeader>(chunk))
     {
-        stream.writeMACAddress(msduSubframe->getDa());
-        stream.writeMACAddress(msduSubframe->getSa());
+        stream.writeMacAddress(msduSubframe->getDa());
+        stream.writeMacAddress(msduSubframe->getSa());
         stream.writeUint16Be(msduSubframe->getLength());
     }
     else if (auto mpduSubframe = dynamicPtrCast<const Ieee80211MpduSubframeHeader>(chunk))
@@ -132,15 +132,15 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setMoreFragments(fc1 & 0x4);
     frame->setRetry(fc1 & 0x8);
     frame->setDuration(SimTime(stream.readUint16Be() / 1000.0)); // i_dur
-    frame->setReceiverAddress(stream.readMACAddress());
-    frame->setTransmitterAddress(stream.readMACAddress());
-    frame->setAddress3(stream.readMACAddress());
+    frame->setReceiverAddress(stream.readMacAddress());
+    frame->setTransmitterAddress(stream.readMacAddress());
+    frame->setAddress3(stream.readMacAddress());
     uint16_t seq = stream.readUint16Le();   // i_seq
     frame->setSequenceNumber(seq >> 4);
     frame->setFragmentNumber(seq & 0x0F);
 
     if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
-        dynamicPtrCast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMACAddress());
+        dynamicPtrCast<Ieee80211DataHeader>(frame)->setAddress4(stream.readMacAddress());
     if (type == ST_DATA_WITH_QOS) {
         auto dataHeader = dynamicPtrCast<Ieee80211DataHeader>(frame);
         uint16_t qos = stream.readUint16Le();
@@ -170,7 +170,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             ackFrame->setRetry(false);
             ackFrame->setMoreFragments(false);
             ackFrame->setDuration(SimTime((double)stream.readUint16Be()/1000.0));    //i_dur
-            ackFrame->setReceiverAddress(stream.readMACAddress());
+            ackFrame->setReceiverAddress(stream.readMacAddress());
             return ackFrame;
         }
         case 0xB4: // ST_RTS
@@ -182,8 +182,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             rtsFrame->setRetry(false);
             rtsFrame->setMoreFragments(false);
             rtsFrame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
-            rtsFrame->setReceiverAddress(stream.readMACAddress());
-            rtsFrame->setTransmitterAddress(stream.readMACAddress());
+            rtsFrame->setReceiverAddress(stream.readMacAddress());
+            rtsFrame->setTransmitterAddress(stream.readMacAddress());
             return rtsFrame;
         }
         case 0xC4: // ST_CTS
@@ -195,7 +195,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             ctsFrame->setRetry(false);
             ctsFrame->setMoreFragments(false);
             ctsFrame->setDuration(SimTime(stream.readUint16Be(),SIMTIME_US));    //i_dur
-            ctsFrame->setReceiverAddress(stream.readMACAddress());
+            ctsFrame->setReceiverAddress(stream.readMacAddress());
             return ctsFrame;
         }
         case 0x08: // ST_DATA

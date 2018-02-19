@@ -132,9 +132,9 @@ class INET_API Ipv4Route : public cObject, public IRoute
     void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
-    virtual void setDestination(const L3Address& dest) override { setDestination(dest.toIPv4()); }
+    virtual void setDestination(const L3Address& dest) override { setDestination(dest.toIpv4()); }
     virtual void setPrefixLength(int len) override { setNetmask(Ipv4Address::makeNetmask(len)); }
-    virtual void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIPv4()); }    //TODO rename Ipv4 method
+    virtual void setNextHop(const L3Address& nextHop) override { setGateway(nextHop.toIpv4()); }    //TODO rename Ipv4 method
 
     virtual L3Address getDestinationAsGeneric() const override { return getDestination(); }
     virtual int getPrefixLength() const override { return getNetmask().getNetmaskLength(); }
@@ -247,9 +247,9 @@ class INET_API Ipv4MulticastRoute : public cObject, public IMulticastRoute
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;
     virtual void setEnabled(bool enabled) override {    /*TODO: setEnabled(enabled);*/ }
-    virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIPv4()); }
+    virtual void setOrigin(const L3Address& origin) override { setOrigin(origin.toIpv4()); }
     virtual void setPrefixLength(int len) override { setOriginNetmask(Ipv4Address::makeNetmask(len)); }    //TODO inconsistent naming
-    virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIPv4()); }
+    virtual void setMulticastGroup(const L3Address& group) override { setMulticastGroup(group.toIpv4()); }
 
     virtual bool isEnabled() const override { return true;    /*TODO: isEnabled();*/ }
     virtual bool isExpired() const override { return !isValid(); }    //TODO rename Ipv4 method

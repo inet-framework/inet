@@ -175,11 +175,11 @@ EroVector Rsvp::readTrafficRouteFromXML(const cXMLElement *route)
         EroObj h;
         if (!strcmp(hop->getTagName(), "node")) {
             h.L = false;
-            h.node = L3AddressResolver().resolve(hop->getNodeValue()).toIPv4();
+            h.node = L3AddressResolver().resolve(hop->getNodeValue()).toIpv4();
         }
         else if (!strcmp(hop->getTagName(), "lnode")) {
             h.L = true;
-            h.node = L3AddressResolver().resolve(hop->getNodeValue()).toIPv4();
+            h.node = L3AddressResolver().resolve(hop->getNodeValue()).toIpv4();
         }
         else {
             ASSERT(false);
@@ -1307,7 +1307,7 @@ void Rsvp::processHelloMsg(Packet *pk)
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
     const auto& msg = pk->peekHeader<RsvpHelloMsg>();
-    Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();

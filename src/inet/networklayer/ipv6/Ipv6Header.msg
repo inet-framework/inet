@@ -125,9 +125,9 @@ cplusplus(Ipv6Header) {{
 
     // implements NetworkHeaderBase functions:
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
-    virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIpv6()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
-    virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIpv6()); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
 }}

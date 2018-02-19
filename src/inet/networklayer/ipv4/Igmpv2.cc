@@ -720,7 +720,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 {
     ASSERT(ie->isMulticast());
 
-    Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     const auto& igmpQry = packet->peekHeader<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
 

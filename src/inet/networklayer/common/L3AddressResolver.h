@@ -55,21 +55,21 @@ class INET_API L3AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getMacAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
     virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal

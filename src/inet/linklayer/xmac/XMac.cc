@@ -74,7 +74,7 @@ void XMac::initialize(int stage)
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         wakeup = new cMessage("wakeup");
@@ -177,7 +177,7 @@ void XMac::finish()
     }
 }
 
-void XMac::initializeMACAddress()
+void XMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 

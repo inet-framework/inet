@@ -75,9 +75,9 @@ class INET_API L3Address
     void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
     void reset() { set(NONE, 0); }
 
-    Ipv4Address toIPv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(Ipv4)); }
-    Ipv6Address toIPv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, lo); }
-    MacAddress toMAC() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
+    Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(Ipv4)); }
+    Ipv6Address toIpv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, lo); }
+    MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
     ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
 

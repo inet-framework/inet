@@ -253,8 +253,8 @@ void Icmp::processEchoRequest(Packet *request)
     icmpReply->setIdentifier(icmpReq->getIdentifier());
     icmpReply->setSeqNumber(icmpReq->getSeqNumber());
     auto addressInd = request->getTag<L3AddressInd>();
-    Ipv4Address src = addressInd->getSrcAddress().toIPv4();
-    Ipv4Address dest = addressInd->getDestAddress().toIPv4();
+    Ipv4Address src = addressInd->getSrcAddress().toIpv4();
+    Ipv4Address dest = addressInd->getDestAddress().toIpv4();
     reply->insertAtEnd(request->peekData());
     insertCrc(icmpReply, reply);
     reply->insertHeader(icmpReply);
@@ -263,8 +263,8 @@ void Icmp::processEchoRequest(Packet *request)
     // TBD check what to do if dest was multicast etc?
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the Ipv4 layer
     auto addressReq = reply->addTagIfAbsent<L3AddressReq>();
-    addressReq->setSrcAddress(addressInd->getDestAddress().toIPv4());
-    addressReq->setDestAddress(addressInd->getSrcAddress().toIPv4());
+    addressReq->setSrcAddress(addressInd->getDestAddress().toIpv4());
+    addressReq->setDestAddress(addressInd->getSrcAddress().toIpv4());
 
     sendToIP(reply);
     delete request;

@@ -327,13 +327,13 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::Ipv4:
-            ipv4Data()->joinMulticastGroup(address.toIPv4());
+            ipv4Data()->joinMulticastGroup(address.toIpv4());
             break;
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::Ipv6:
-            ipv6Data()->joinMulticastGroup(address.toIPv6());
+            ipv6Data()->joinMulticastGroup(address.toIpv6());
             break;
 
 #endif // ifdef WITH_IPv6
@@ -354,7 +354,7 @@ static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::ve
 {
     result.reserve(addresses.size());
     for (auto & addresse : addresses)
-        result.push_back(addresse.toIPv4());
+        result.push_back(addresse.toIpv4());
 }
 
 void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAddress,
@@ -367,7 +367,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
             std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
             toIPv4AddressVector(newSourceList, newIPv4SourceList);
-            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
+            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIpv4(),
                     oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
             break;
         }

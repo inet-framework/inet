@@ -130,20 +130,20 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
                 switch (addrType) {
 #ifdef WITH_IPv4
                     case L3Address::Ipv4:
-                        if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIPv4())
+                        if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIpv4())
                             return ie;
                         break;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
                     case L3Address::Ipv6:
-                        if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIPv6()))
+                        if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIpv6()))
                             return ie;
                         break;
 #endif // ifdef WITH_IPv6
 
                     case L3Address::MAC:
-                        if (ie->getMacAddress() == address.toMAC())
+                        if (ie->getMacAddress() == address.toMac())
                             return ie;
                         break;
 
@@ -180,7 +180,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
                 if (ie && ie->ipv4Data()) {
                     Ipv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
                     Ipv4Address netmask = ie->ipv4Data()->getNetmask();
-                    if (Ipv4Address::maskedAddrAreEqual(address.toIPv4(), ipv4Addr, netmask))
+                    if (Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask))
                         return address != ipv4Addr;
                 }
             }
@@ -195,7 +195,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
                     Ipv6InterfaceData *ipv6Data = ie->ipv6Data();
                     for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
                         const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
-                        if (address.toIPv6().matches(advPrefix.prefix, advPrefix.prefixLength))
+                        if (address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength))
                             return address != advPrefix.prefix;
                     }
                 }

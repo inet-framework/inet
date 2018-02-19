@@ -61,7 +61,7 @@ void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unus
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                Ipv4Address srcAddress = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                Ipv4Address srcAddress = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;

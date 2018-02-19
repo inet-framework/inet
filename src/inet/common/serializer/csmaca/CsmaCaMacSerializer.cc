@@ -31,15 +31,15 @@ void CsmaCaMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<
 {
     if (auto macHeader = dynamicPtrCast<const CsmaCaMacDataHeader>(chunk)) {
         stream.writeByte(0x00);
-        stream.writeMACAddress(macHeader->getReceiverAddress());
-        stream.writeMACAddress(macHeader->getTransmitterAddress());
+        stream.writeMacAddress(macHeader->getReceiverAddress());
+        stream.writeMacAddress(macHeader->getTransmitterAddress());
         stream.writeUint16Be(macHeader->getNetworkProtocol());
         stream.writeByte(macHeader->getPriority());
     }
     else if (auto macHeader = dynamicPtrCast<const CsmaCaMacAckHeader>(chunk)) {
         stream.writeByte(0x01);
-        stream.writeMACAddress(macHeader->getReceiverAddress());
-        stream.writeMACAddress(macHeader->getTransmitterAddress());
+        stream.writeMacAddress(macHeader->getReceiverAddress());
+        stream.writeMacAddress(macHeader->getTransmitterAddress());
     }
     else
         throw cRuntimeError("CsmaCaMacSerializer: cannot serialize chunk");
@@ -51,16 +51,16 @@ const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& strea
     switch(type) {
         case 0x00: {
             auto macHeader = makeShared<CsmaCaMacDataHeader>();
-            macHeader->setReceiverAddress(stream.readMACAddress());
-            macHeader->setTransmitterAddress(stream.readMACAddress());
+            macHeader->setReceiverAddress(stream.readMacAddress());
+            macHeader->setTransmitterAddress(stream.readMacAddress());
             macHeader->setNetworkProtocol(stream.readUint16Be());
             macHeader->setPriority(stream.readByte());
             return macHeader;
         }
         case 0x01: {
             auto macHeader = makeShared<CsmaCaMacAckHeader>();
-            macHeader->setReceiverAddress(stream.readMACAddress());
-            macHeader->setTransmitterAddress(stream.readMACAddress());
+            macHeader->setReceiverAddress(stream.readMacAddress());
+            macHeader->setTransmitterAddress(stream.readMacAddress());
             return macHeader;
         }
         default:

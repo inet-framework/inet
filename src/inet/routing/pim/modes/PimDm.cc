@@ -390,7 +390,7 @@ void PimDm::processGraftPacket(Packet *pk)
 
     emit(rcvdGraftPkSignal, pk);
 
-    Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
@@ -544,7 +544,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
 
     emit(rcvdGraftAckPkSignal, pk);
 
-    Ipv4Address destAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIPv4();
+    Ipv4Address destAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         const JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
@@ -601,7 +601,7 @@ void PimDm::processStateRefreshPacket(Packet *pk)
 
     // check if State Refresh msg has came from RPF neighbor
     auto ifTag = pk->getTag<InterfaceInd>();
-    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     UpstreamInterface *upstream = route->upstreamInterface;
     if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != srcAddr) {
         delete pk;
@@ -689,7 +689,7 @@ void PimDm::processAssertPacket(Packet *pk)
 {
     const auto& pkt = pk->peekHeader<PimAssert>();
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
-    Ipv4Address srcAddrFromTag = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address srcAddrFromTag = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address source = pkt->getSourceAddress();
     Ipv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
@@ -1599,8 +1599,8 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
 
     auto ifTag = pk->getTag<InterfaceInd>();
     auto addressInd = pk->getTag<L3AddressInd>();
-    Ipv4Address destAddr = addressInd->getSrcAddress().toIPv4();
-    Ipv4Address srcAddr = addressInd->getDestAddress().toIPv4();
+    Ipv4Address destAddr = addressInd->getSrcAddress().toIpv4();
+    Ipv4Address srcAddr = addressInd->getDestAddress().toIpv4();
     int outInterfaceId = ifTag->getInterfaceId();
 
     Packet *packet = new Packet("PIMGraftAck");

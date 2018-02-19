@@ -954,12 +954,12 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
 
     if (multicastAddr.getType() == L3Address::Ipv4) {
 #ifdef WITH_IPv4
-        ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIPv4());
+        ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::Ipv6) {
 #ifdef WITH_IPv6
-        ie->ipv6Data()->assignAddress(multicastAddr.toIPv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        ie->ipv6Data()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6
     }
     else
