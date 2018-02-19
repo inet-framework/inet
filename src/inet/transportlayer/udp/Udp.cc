@@ -436,7 +436,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
 
     delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    auto udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
@@ -472,7 +472,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
             return;
         }
         else {
-            sendUp(udpPacket, sd, srcPort, destPort);
+            sendUp(udpHeader, udpPacket, sd, srcPort, destPort);
         }
     }
     else {
@@ -487,8 +487,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
         else {
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
-                sendUp(udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
-            sendUp(udpPacket, sds[i], srcPort, destPort);    // send original to last socket
+                sendUp(udpHeader, udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
+            sendUp(udpHeader, udpPacket, sds[i], srcPort, destPort);    // send original to last socket
         }
     }
 }
@@ -849,7 +849,7 @@ std::vector<Udp::SockDesc *> Udp::findSocketsForMcastBcastPacket(const L3Address
     return result;
 }
 
-void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
+void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
@@ -858,6 +858,7 @@ void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
     delete payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    payload->addTagIfAbsent<TransportProtocolInd>()->setTransportProtocolHeader(header);
     payload->addTagIfAbsent<L4PortInd>()->setSrcPort(srcPort);
     payload->addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
 
