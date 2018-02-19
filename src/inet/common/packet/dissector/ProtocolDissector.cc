@@ -36,7 +36,6 @@ Register_Protocol_Dissector(nullptr, DefaultDissector);
 Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211, Ieee80211Dissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
-Register_Protocol_Dissector(&Protocol::arp, ArpDissector);
 Register_Protocol_Dissector(&Protocol::icmpv4, IcmpDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
@@ -139,14 +138,6 @@ void Ieee802LlcDissector::dissect(Packet *packet, ICallback& callback) const
     auto protocol = Ieee8022Llc::getProtocol(header);
     callback.dissectPacket(packet, protocol);
     callback.endProtocolDataUnit(&Protocol::ieee8022);
-}
-
-void ArpDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& arpPacket = packet->popHeader<ArpPacket>();
-    callback.startProtocolDataUnit(&Protocol::arp);
-    callback.visitChunk(arpPacket, &Protocol::arp);
-    callback.endProtocolDataUnit(&Protocol::arp);
 }
 
 void IcmpDissector::dissect(Packet *packet, ICallback& callback) const

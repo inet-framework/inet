@@ -21,6 +21,8 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -32,6 +34,23 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
+
+class INET_API ArpDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void ArpDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    const auto& arpPacket = packet->popHeader<ArpPacket>();
+    callback.startProtocolDataUnit(&Protocol::arp);
+    callback.visitChunk(arpPacket, &Protocol::arp);
+    callback.endProtocolDataUnit(&Protocol::arp);
+}
+
+Register_Protocol_Dissector(&Protocol::arp, ArpDissector);
+
 
 simsignal_t Arp::arpRequestSentSignal = registerSignal("arpRequestSent");
 simsignal_t Arp::arpReplySentSignal = registerSignal("arpReplySent");
