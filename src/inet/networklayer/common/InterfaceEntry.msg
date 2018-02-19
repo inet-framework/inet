@@ -32,8 +32,8 @@ class InterfaceEntry extends cModule
     bool multicast @getter("isMulticast");
     bool pointToPoint @getter("isPointToPoint");
     bool loopback @getter("isLoopback");
-    int mtu @getter("getMTU");
+    int mtu;
     MacAddress macAddress;
-    Ipv4Address ipv4Address @byValue @getter("getIPv4Address");
+    Ipv4Address ipv4Address @byValue;
 }
 
