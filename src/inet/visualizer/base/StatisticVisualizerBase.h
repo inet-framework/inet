@@ -76,6 +76,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     const char *signalName = nullptr;
     const char *statisticName = nullptr;
     const char *statisticUnit = nullptr;
+    const char *recordingMode = nullptr;
     StringFormat format;
     std::vector<std::string> units;
     cFigure::Font font;

@@ -45,6 +45,9 @@ const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char di
         case 'n':
             result = visualizer->statisticName;
             break;
+        case 'r':
+            result = visualizer->recordingMode;
+            break;
         case 'v':
             if (std::isnan(visualization->printValue))
                 result = "-";
@@ -74,6 +77,7 @@ void StatisticVisualizerBase::initialize(int stage)
         statisticName = par("statisticName");
         format.parseFormat(par("format"));
         statisticUnit = par("statisticUnit");
+        recordingMode = par("recordingMode");
         cStringTokenizer tokenizer(par("unit"));
         while (tokenizer.hasMoreTokens())
             units.push_back(tokenizer.nextToken());
@@ -132,7 +136,10 @@ cResultFilter *StatisticVisualizerBase::findResultFilter(cComponent *source, sim
 cResultFilter *StatisticVisualizerBase::findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener)
 {
     if (auto resultRecorder = dynamic_cast<cResultRecorder *>(resultListener)) {
-        if (resultRecorder->getStatisticName() == nullptr || !strcmp(statisticName, resultRecorder->getStatisticName()))
+        // TODO: why do we allow nullptr here?
+        bool statisticNameMatches = resultRecorder->getStatisticName() == nullptr || !strcmp(statisticName, resultRecorder->getStatisticName());
+        bool recordingModeMatches = *recordingMode == '\0' || (resultRecorder->getRecordingMode() != nullptr && !strcmp(recordingMode, resultRecorder->getRecordingMode()));
+        if (statisticNameMatches && recordingModeMatches)
             return parentResultFilter;
     }
     else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {

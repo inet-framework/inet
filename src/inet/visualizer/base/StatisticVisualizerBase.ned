@@ -46,6 +46,7 @@ simple StatisticVisualizerBase extends VisualizerBase
         string signalName = default(""); // signal name to subscribe, no signal name by default
         string statisticName = default(signalName); // statistic name to get the value, signal name by default
         string statisticUnit = default(""); // statistic unit, undefined by default
+        string recordingMode = default(""); // statistic recording mode as specified in NED, undefined by default
         string sourceFilter = default("**"); // pattern that must match the signal source, no source filter by default
 
 		string format = default("%n: %v %u"); // determines what is displayed, info by default
