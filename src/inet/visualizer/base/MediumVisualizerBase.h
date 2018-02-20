@@ -18,13 +18,13 @@
 #ifndef __INET_MEDIUMVISUALIZERBASE_H
 #define __INET_MEDIUMVISUALIZERBASE_H
 
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/PacketFilter.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 

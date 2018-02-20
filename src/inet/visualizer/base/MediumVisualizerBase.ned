@@ -37,6 +37,7 @@ simple MediumVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
 
         bool displaySignals = default(false); // display signals propagating through the medium, disabled by default
         string signalColor @enum("light", "dark") = default("dark"); // signal color is a list of colors, a set of dark colors by default

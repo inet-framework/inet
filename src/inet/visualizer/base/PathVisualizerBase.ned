@@ -53,6 +53,7 @@ simple PathVisualizerBase extends VisualizerBase
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
 
         string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)

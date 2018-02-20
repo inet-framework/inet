@@ -117,7 +117,7 @@ void PacketDropVisualizerBase::initialize(int stage)
         displayPacketDrops = par("displayPacketDrops");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setPattern(par("packetFilter"));
+        packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         detailsFilter.setPattern(par("detailsFilter"));
         icon = par("icon");
         iconTintAmount = par("iconTintAmount");
@@ -141,7 +141,7 @@ void PacketDropVisualizerBase::handleParameterChange(const char *name)
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setPattern(par("packetFilter"));
+            packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         else if (!strcmp(name, "detailsFilter"))
             detailsFilter.setPattern(par("detailsFilter"));
         else if (!strcmp(name, "labelFormat"))
