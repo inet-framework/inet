@@ -145,6 +145,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
         packet->insertTrailer(phyTrailer);
     }
+    packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_PHY);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
@@ -156,6 +157,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     if (tailLength + paddingLength != b(0))
         packet->popTrailer(tailLength + paddingLength);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
+    packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
 }
 
 } // namespace physicallayer

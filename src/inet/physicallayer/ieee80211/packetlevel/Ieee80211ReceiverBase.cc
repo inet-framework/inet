@@ -93,9 +93,11 @@ const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const ILis
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
-    auto modeInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<Ieee80211ModeInd>();
+    auto packet = const_cast<Packet *>(receptionResult->getPacket());
+    packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_PHY);
+    auto modeInd = packet->addTagIfAbsent<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
-    auto channelInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<Ieee80211ChannelInd>();
+    auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
     return receptionResult;
 }

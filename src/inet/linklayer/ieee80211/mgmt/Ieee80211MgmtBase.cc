@@ -15,17 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 void Ieee80211MgmtBase::initialize(int stage)
 {
@@ -80,6 +83,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
+    frame->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
     send(frame, "macOut");
 }
 
