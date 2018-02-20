@@ -17,9 +17,7 @@
 //
 
 #include <stdlib.h>
-
 #include "inet/linklayer/ethernet/EtherMacBase.h"
-
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -39,14 +37,24 @@ namespace inet {
 
 class INET_API EthernetDissector : public ProtocolDissector
 {
+  protected:
+    virtual void dissectPhy(Packet *packet, ICallback& callback) const;
+    virtual void dissectMac(Packet *packet, ICallback& callback) const;
+
   public:
     virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
-void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
+void EthernetDissector::dissectPhy(Packet *packet, ICallback& callback) const
+{
+    const auto& header = packet->popHeader<EthernetPhyHeader>();
+    callback.visitChunk(header, nullptr);
+    dissectMac(packet, callback);
+}
+
+void EthernetDissector::dissectMac(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetMacHeader>();
-    callback.startProtocolDataUnit(&Protocol::ethernet);
     callback.visitChunk(header, &Protocol::ethernet);
     const auto& fcs = packet->popTrailer<EthernetFcs>();
     if (isEth2Header(*header)) {
@@ -67,6 +75,18 @@ void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
         callback.visitChunk(padding, &Protocol::ethernet);
     }
     callback.visitChunk(fcs, &Protocol::ethernet);
+}
+
+void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
+{
+    callback.startProtocolDataUnit(&Protocol::ethernet);
+    auto subprotocol = packet->getTag<EthernetPacketSubprotocolTag>()->getSubprotocol();
+    if (subprotocol == ETHERNET_SUBPROTOCOL_PHY)
+        dissectPhy(packet, callback);
+    else if (subprotocol == ETHERNET_SUBPROTOCOL_MAC)
+        dissectMac(packet, callback);
+    else
+        throw cRuntimeError("Unknown subprotocol");
     callback.endProtocolDataUnit(&Protocol::ethernet);
 }
 
