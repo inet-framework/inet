@@ -90,13 +90,6 @@ void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)
     numMgmtFramesDropped++;
 }
 
-void Ieee80211MgmtBase::sendUp(cMessage *msg)
-{
-    ASSERT(isOperational);
-    check_and_cast<Packet *>(msg)->addTagIfAbsent<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    send(msg, "upperLayerOut");
-}
-
 void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     switch (header->getType()) {

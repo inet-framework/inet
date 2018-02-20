@@ -69,9 +69,6 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
 
-    /** Utility method: sends the packet to the upper layer */
-    virtual void sendUp(cMessage *msg);
-
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
