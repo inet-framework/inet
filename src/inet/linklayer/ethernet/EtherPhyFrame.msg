@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
 
@@ -50,6 +51,17 @@ packet EthernetJamSignal extends EthernetSignal
 packet EthernetFilledIfgSignal extends EthernetSignal
 {
     bitLength = INTERFRAME_GAP_BITS;
+}
+
+enum EthernetSubprotocol
+{
+    ETHERNET_SUBPROTOCOL_PHY  = 0;
+    ETHERNET_SUBPROTOCOL_MAC  = 1;
+}
+
+class EthernetPacketSubprotocolTag extends TagBase
+{
+    EthernetSubprotocol subprotocol;
 }
 
 //
