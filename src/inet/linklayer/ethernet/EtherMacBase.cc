@@ -38,21 +38,21 @@ namespace inet {
 class INET_API EthernetDissector : public ProtocolDissector
 {
   protected:
-    virtual void dissectPhy(Packet *packet, ICallback& callback) const;
-    virtual void dissectMac(Packet *packet, ICallback& callback) const;
+    virtual void dissectPhySubprotocol(Packet *packet, ICallback& callback) const;
+    virtual void dissectMacSubprotocol(Packet *packet, ICallback& callback) const;
 
   public:
     virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
-void EthernetDissector::dissectPhy(Packet *packet, ICallback& callback) const
+void EthernetDissector::dissectPhySubprotocol(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetPhyHeader>();
     callback.visitChunk(header, nullptr);
-    dissectMac(packet, callback);
+    dissectMacSubprotocol(packet, callback);
 }
 
-void EthernetDissector::dissectMac(Packet *packet, ICallback& callback) const
+void EthernetDissector::dissectMacSubprotocol(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetMacHeader>();
     callback.visitChunk(header, &Protocol::ethernet);
@@ -82,9 +82,9 @@ void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
     callback.startProtocolDataUnit(&Protocol::ethernet);
     auto subprotocol = packet->getTag<EthernetPacketSubprotocolTag>()->getSubprotocol();
     if (subprotocol == ETHERNET_SUBPROTOCOL_PHY)
-        dissectPhy(packet, callback);
+        dissectPhySubprotocol(packet, callback);
     else if (subprotocol == ETHERNET_SUBPROTOCOL_MAC)
-        dissectMac(packet, callback);
+        dissectMacSubprotocol(packet, callback);
     else
         throw cRuntimeError("Unknown subprotocol");
     callback.endProtocolDataUnit(&Protocol::ethernet);

@@ -74,7 +74,7 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
     }
 }
 
-void Ieee80211Dissector::dissectPhy(Packet *packet, ICallback& callback) const
+void Ieee80211Dissector::dissectPhySubprotocol(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::physicallayer::Ieee80211PhyHeader>();
     callback.visitChunk(header, nullptr);
@@ -83,12 +83,12 @@ void Ieee80211Dissector::dissectPhy(Packet *packet, ICallback& callback) const
     auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
     if (ieee80211PhyPadding != nullptr)
         packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieee80211PhyPadding->getChunkLength());
-    dissectMac(packet, callback);
+    dissectMacSubprotocol(packet, callback);
     if (ieee80211PhyPadding != nullptr)
         callback.visitChunk(ieee80211PhyPadding, nullptr);
 }
 
-void Ieee80211Dissector::dissectMac(Packet *packet, ICallback& callback) const
+void Ieee80211Dissector::dissectMacSubprotocol(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
     const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>();
@@ -115,14 +115,14 @@ void Ieee80211Dissector::dissectMac(Packet *packet, ICallback& callback) const
             callback.dissectPacket(packet, &Protocol::ieee8022);
     }
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
-        dissectMgmt(packet, callback);
+        dissectMgmtSubprotocol(packet, callback);
     // TODO: else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
     else
         ASSERT(packet->getDataLength() == b(0));
     callback.visitChunk(trailer, &Protocol::ieee80211);
 }
 
-void Ieee80211Dissector::dissectMgmt(Packet *packet, ICallback& callback) const
+void Ieee80211Dissector::dissectMgmtSubprotocol(Packet *packet, ICallback& callback) const
 {
     callback.visitChunk(packet->peekData(), &Protocol::ieee80211);
 }
@@ -132,11 +132,11 @@ void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
     callback.startProtocolDataUnit(&Protocol::ieee80211);
     auto subprotocol = packet->getTag<inet::physicallayer::Ieee80211PacketSubprotocolTag>()->getSubprotocol();
     if (subprotocol == inet::physicallayer::IEEE80211_SUBPROTOCOL_PHY)
-        dissectPhy(packet, callback);
+        dissectPhySubprotocol(packet, callback);
     else if (subprotocol == inet::physicallayer::IEEE80211_SUBPROTOCOL_MAC)
-        dissectMac(packet, callback);
+        dissectMacSubprotocol(packet, callback);
     else if (subprotocol == inet::physicallayer::IEEE80211_SUBPROTOCOL_MGMT)
-        dissectMgmt(packet, callback);
+        dissectMgmtSubprotocol(packet, callback);
     else
         throw cRuntimeError("Unknown subprotocol");
     callback.endProtocolDataUnit(&Protocol::ieee80211);

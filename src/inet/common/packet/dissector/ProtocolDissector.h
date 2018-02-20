@@ -76,9 +76,9 @@ class INET_API DefaultDissector : public ProtocolDissector
 class INET_API Ieee80211Dissector : public ProtocolDissector
 {
   protected:
-    virtual void dissectPhy(Packet *packet, ICallback& callback) const;
-    virtual void dissectMac(Packet *packet, ICallback& callback) const;
-    virtual void dissectMgmt(Packet *packet, ICallback& callback) const;
+    virtual void dissectPhySubprotocol(Packet *packet, ICallback& callback) const;
+    virtual void dissectMacSubprotocol(Packet *packet, ICallback& callback) const;
+    virtual void dissectMgmtSubprotocol(Packet *packet, ICallback& callback) const;
 
   public:
     virtual void dissect(Packet *packet, ICallback& callback) const override;
