@@ -54,6 +54,7 @@ class INET_API Protocol
 
   public:
     // in alphanumeric order
+    static const Protocol ackingmac;
     static const Protocol aodv;
     static const Protocol arp;
     static const Protocol bgp;

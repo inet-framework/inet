@@ -71,6 +71,7 @@ const Protocol *Protocol::getProtocol(const char *name)
         throw cRuntimeError("Unknown protocol: name = %s" , name);
 }
 
+const Protocol Protocol::ackingmac("ackingmac", "AckingMac");           // INET specific
 const Protocol Protocol::aodv("aodv", "AODV");
 const Protocol Protocol::arp("arp", "ARP");
 const Protocol Protocol::bgp("bgp", "BGP");
