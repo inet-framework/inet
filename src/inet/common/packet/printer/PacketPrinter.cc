@@ -47,20 +47,44 @@ int PacketPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 100 : 0;
 }
 
+std::vector<std::string> PacketPrinter::getSupportedTags() const
+{
+    return {"insideOut"};
+}
+
+std::vector<std::string> PacketPrinter::getDefaultEnabledTags() const
+{
+    return {"insideOut"};
+}
+
+std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
+{
+    return {"source", "destination", "protocol", "info"};
+}
+
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
+{
+    // TODO: enable when migrating to new printer API
+//    Options options;
+//    options.enabledTags = getDefaultEnabledTags();
+//    printMessage(stream, message, &options);
+    printMessage(stream, message, nullptr);
+}
+
+void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const Options *options) const
 {
     auto separator = "";
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
         stream << separator;
         if (auto packet = dynamic_cast<Packet *>(cpacket))
-            printPacket(stream, packet);
+            printPacket(stream, packet, options);
         else
             stream << separator << cpacket->getClassName() << ":" << cpacket->getByteLength() << " bytes";
         separator = "  \t";
     }
 }
 
-void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
+void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
 {
     PacketDissector::PduTreeBuilder pduTreeBuilder;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
@@ -76,7 +100,7 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
         context.protocolColumn = "mixed";
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevelPdu(), context);
     }
-    stream << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t" << context.protocolColumn << "\t" << context.infoColumn.str() << std::endl;
+    stream << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t\x1b[34m" << context.protocolColumn << "\x1b[0m\t" << context.infoColumn.str() << std::endl;
 }
 
 void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)

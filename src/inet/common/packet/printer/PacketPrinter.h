@@ -22,6 +22,9 @@
 
 namespace inet {
 
+// TODO: remove when migrating to new printer API
+class Options;
+
 class INET_API PacketPrinter : public cMessagePrinter
 {
   protected:
@@ -41,8 +44,12 @@ class INET_API PacketPrinter : public cMessagePrinter
   public:
     virtual int getScoreFor(cMessage *msg) const override;
 
-    virtual void printMessage(std::ostream& stream, cMessage *message) const override;
-    virtual void printPacket(std::ostream& stream, Packet *packet) const;
+    virtual std::vector<std::string> getSupportedTags() const;
+    virtual std::vector<std::string> getDefaultEnabledTags() const;
+    virtual std::vector<std::string> getColumnNames(const Options *options) const;
+    virtual void printMessage(std::ostream& stream, cMessage *message) const;
+    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
+    virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;
     virtual void printIeee80211Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printArpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
