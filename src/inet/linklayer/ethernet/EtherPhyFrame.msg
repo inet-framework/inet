@@ -59,11 +59,6 @@ enum EthernetSubprotocol
     ETHERNET_SUBPROTOCOL_MAC  = 1;
 }
 
-class EthernetPacketSubprotocolTag extends TagBase
-{
-    EthernetSubprotocol subprotocol;
-}
-
 //
 // Represents an Ethernet PHY frame.
 //

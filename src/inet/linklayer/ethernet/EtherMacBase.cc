@@ -80,7 +80,7 @@ void EthernetDissector::dissectMacSubprotocol(Packet *packet, ICallback& callbac
 void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ethernet);
-    auto subprotocol = packet->getTag<EthernetPacketSubprotocolTag>()->getSubprotocol();
+    auto subprotocol = packet->getTag<PacketProtocolTag>()->getSubprotocol();
     if (subprotocol == ETHERNET_SUBPROTOCOL_PHY)
         dissectPhySubprotocol(packet, callback);
     else if (subprotocol == ETHERNET_SUBPROTOCOL_MAC)
