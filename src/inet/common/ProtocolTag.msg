@@ -72,7 +72,6 @@ class DispatchProtocolInd extends ProtocolTagBase
 //
 class PacketProtocolTag extends ProtocolTagBase
 {
-    int subprotocol = -1;
 }
 
 //
