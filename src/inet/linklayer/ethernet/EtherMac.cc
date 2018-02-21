@@ -537,7 +537,9 @@ void EtherMac::startFrameTransmission()
     auto signal = new EthernetSignal(frame->getName());
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
-        signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
+        auto rawFrame = new Packet(frame->getName(), frame->peekAllBytes());
+        rawFrame->copyTags(*frame);
+        signal->encapsulate(rawFrame);
         delete frame;
     }
     else

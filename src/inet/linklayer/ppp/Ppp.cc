@@ -234,6 +234,7 @@ void Ppp::startTransmitting(Packet *msg)
     pppFrame->clearTags();
     if (sendRawBytes) {
         auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllBytes());
+        rawFrame->copyTags(*pppFrame);
         send(rawFrame, physOutGate);
         delete pppFrame;
     }
