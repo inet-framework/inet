@@ -237,8 +237,8 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
     packet->insertHeader(macPkt);
-    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
+    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
     executeMac(EV_SEND_REQUEST, packet);
 }
 
