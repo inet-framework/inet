@@ -86,6 +86,7 @@ const Protocol Protocol::gpsr("gpsr", "GPSR");
 const Protocol Protocol::icmpv4("icmpv4", "ICMP v4");
 const Protocol Protocol::icmpv6("icmpv6", "ICMP v6");
 const Protocol Protocol::ieee80211("ieee80211", "IEEE 802.11");
+const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2");
 const Protocol Protocol::igmp("igmp", "IGMP");
 const Protocol Protocol::igp("igp", "IGP");
