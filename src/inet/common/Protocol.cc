@@ -76,6 +76,7 @@ const Protocol Protocol::aodv("aodv", "AODV");
 const Protocol Protocol::arp("arp", "ARP");
 const Protocol Protocol::bgp("bgp", "BGP");
 const Protocol Protocol::bmac("bmac", "B-MAC");
+const Protocol Protocol::csmacamac("csmacamac", "CsmaCaMac");           // INET specific
 const Protocol Protocol::dsdv2("dsdv2", "DSDV 2");
 const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");
