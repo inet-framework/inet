@@ -84,6 +84,15 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
     }
 }
 
+void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
+{
+    // TODO: enable when migrating to new printer API
+//    Options options;
+//    options.enabledTags = getDefaultEnabledTags();
+//    printMessage(stream, message, &options);
+    printPacket(stream, message, nullptr);
+}
+
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
 {
     PacketDissector::PduTreeBuilder pduTreeBuilder;
