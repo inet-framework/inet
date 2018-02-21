@@ -212,6 +212,7 @@ void BMac::sendPreamble()
     auto packet = new Packet();
     packet->setKind(BMAC_PREAMBLE);
     packet->insertHeader(preamble);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxPreambles++;
@@ -231,6 +232,7 @@ void BMac::sendMacAck()
     auto packet = new Packet();
     packet->setKind(BMAC_ACK);
     packet->insertHeader(ack);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;
@@ -771,6 +773,7 @@ void BMac::encapsulate(Packet *packet)
     //encapsulate the network packet
     packet->insertHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
 }
 
 } // namespace inet
