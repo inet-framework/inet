@@ -27,6 +27,8 @@
 #include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/visualizer/util/StringFormat.h"
+
 
 namespace inet {
 
@@ -64,6 +66,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
         RAISEERROR    ///< stop the simulation with error
     };
 
+    inet::visualizer::StringFormat format;
+
+    virtual std::string getLastPosition();
+
   protected:
     /** @brief Pointer to visual representation module, to speed up repeated access. */
     cModule *visualRepresentation;
@@ -82,6 +88,17 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
   protected:
     MobilityBase();
+
+    class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
+      protected:
+        const IMobility *mobility = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const IMobility *mobility) : mobility(mobility) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
 
     /** @brief Returns the required number of initialize stages. */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -161,6 +178,11 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
     virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }
+
+    virtual const char* getDisplayStringText(IMobility *mobility) const;
+    virtual void refreshDisplayStringText();
+
+
 };
 
 } // namespace inet

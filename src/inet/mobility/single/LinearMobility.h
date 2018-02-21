@@ -47,6 +47,8 @@ class INET_API LinearMobility : public MovingMobilityBase
     /** @brief Move the host*/
     virtual void move() override;
 
+    virtual void updateDisplayString();
+
   public:
     virtual double getMaxSpeed() const override { return speed; }
     LinearMobility();

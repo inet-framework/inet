@@ -41,6 +41,7 @@ void LinearMobility::initialize(int stage)
         acceleration = par("acceleration");
         stationary = (speed == 0) && (acceleration == 0.0);
     }
+//    updateDisplayString();
 }
 
 void LinearMobility::move()
@@ -61,6 +62,19 @@ void LinearMobility::move()
         speed = 0;
         stationary = true;
     }
+}
+
+void LinearMobility::updateDisplayString()
+{
+    cDisplayString& dispStr = this->getDisplayString();
+    std::string str;
+    str.append(this->getComponentType()->getName());
+    str.append("\npos");
+    str.append(this->lastPosition.str());
+//    EV_DETAIL << "XXX" << str << endl;
+    dispStr.setTagArg("t", 0, str.c_str());
+//    DirectiveResolver directiveResolver(this);
+//    dispStr.setTagArg("t", 0, format.formatString(&directiveResolver));
 }
 
 } // namespace inet
