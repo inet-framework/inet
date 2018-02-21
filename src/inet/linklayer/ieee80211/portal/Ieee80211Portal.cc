@@ -25,6 +25,7 @@
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
 namespace inet {
@@ -110,6 +111,7 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET

@@ -349,6 +349,7 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
     if (interfaceEntry)
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 

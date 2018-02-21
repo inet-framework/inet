@@ -25,6 +25,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
@@ -146,6 +147,7 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
 
     send(packet, "lowerLayerOut");
 }
@@ -269,7 +271,8 @@ void EtherLlc::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
