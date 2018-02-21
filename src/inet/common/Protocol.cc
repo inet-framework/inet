@@ -74,12 +74,13 @@ const Protocol *Protocol::getProtocol(const char *name)
 const Protocol Protocol::aodv("aodv", "AODV");
 const Protocol Protocol::arp("arp", "ARP");
 const Protocol Protocol::bgp("bgp", "BGP");
+const Protocol Protocol::bmac("bmac", "B-MAC");
 const Protocol Protocol::dsdv2("dsdv2", "DSDV 2");
 const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");
+const Protocol Protocol::echo("echo", "Echo");
 const Protocol Protocol::egp("egp", "EGP");
 const Protocol Protocol::ethernet("ethernet", "Ethernet");
-const Protocol Protocol::echo("echo", "Echo");
 const Protocol Protocol::gnp("gnp", "GNP"); // INET specific Generic Network Protocol
 const Protocol Protocol::gpsr("gpsr", "GPSR");
 const Protocol Protocol::icmpv4("icmpv4", "ICMP v4");
@@ -90,8 +91,9 @@ const Protocol Protocol::igmp("igmp", "IGMP");
 const Protocol Protocol::igp("igp", "IGP");
 const Protocol Protocol::ipv4("ipv4", "IP v4");
 const Protocol Protocol::ipv6("ipv6", "IP v6");
-const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IP v6");
+const Protocol Protocol::lmac("lmac", "L-MAC");
 const Protocol Protocol::manet("manet", "MANET");
+const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IP v6");
 const Protocol Protocol::mpls("mpls", "MPLS");
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::pim("pim", "PIM");
@@ -101,6 +103,7 @@ const Protocol Protocol::sctp("sctp", "SCTP");
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP");
 const Protocol Protocol::udp("udp", "UDP");
+const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");
 
 } // namespace inet

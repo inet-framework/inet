@@ -57,6 +57,7 @@ class INET_API Protocol
     static const Protocol aodv;
     static const Protocol arp;
     static const Protocol bgp;
+    static const Protocol bmac;
     static const Protocol dsdv2;
     static const Protocol dsr;
     static const Protocol dymo;
@@ -73,6 +74,7 @@ class INET_API Protocol
     static const Protocol igp;
     static const Protocol ipv4;
     static const Protocol ipv6;
+    static const Protocol lmac;
     static const Protocol manet;
     static const Protocol mobileipv6;
     static const Protocol mpls;
@@ -84,6 +86,7 @@ class INET_API Protocol
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol udp;
+    static const Protocol xmac;
     static const Protocol xtp;
 };
 
