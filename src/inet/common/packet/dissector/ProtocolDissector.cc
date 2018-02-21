@@ -97,7 +97,7 @@ void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
 void Ieee80211MacDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
-    const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>();
+    const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>(B(4));
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
     callback.visitChunk(header, &Protocol::ieee80211Mac);
     // TODO: fragmentation & aggregation
