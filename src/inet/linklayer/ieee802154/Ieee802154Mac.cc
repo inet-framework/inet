@@ -878,7 +878,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         else {
             long SeqNr = csmaHeader->getSequenceId();
 
-            if (strcmp(csmaHeader->getName(), "CSMA-Ack") != 0) {
+            if (strcmp(packet->getName(), "CSMA-Ack") != 0) {
                 // This is a data message addressed to us
                 // and we should send an ack.
                 // we build the ack packet here because we need to
