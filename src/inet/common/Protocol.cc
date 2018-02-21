@@ -82,12 +82,15 @@ const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");
 const Protocol Protocol::echo("echo", "Echo");
 const Protocol Protocol::egp("egp", "EGP");
-const Protocol Protocol::ethernet("ethernet", "Ethernet");
+const Protocol Protocol::ethernetPhy("ethernetphy", "Ethernet PHY");
+const Protocol Protocol::ethernetMac("ethernetmac", "Ethernet MAC");
 const Protocol Protocol::gnp("gnp", "GNP"); // INET specific Generic Network Protocol
 const Protocol Protocol::gpsr("gpsr", "GPSR");
 const Protocol Protocol::icmpv4("icmpv4", "ICMP v4");
 const Protocol Protocol::icmpv6("icmpv6", "ICMP v6");
-const Protocol Protocol::ieee80211("ieee80211", "IEEE 802.11");
+const Protocol Protocol::ieee80211Mac("ieee80211mac", "IEEE 802.11 MAC");
+const Protocol Protocol::ieee80211Mgmt("ieee80211mgmt", "IEEE 802.11 MGMT");
+const Protocol Protocol::ieee80211Phy("ieee80211phy", "IEEE 802.11 PHY");
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2");
 const Protocol Protocol::igmp("igmp", "IGMP");

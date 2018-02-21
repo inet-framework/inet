@@ -65,12 +65,15 @@ class INET_API Protocol
     static const Protocol dymo;
     static const Protocol echo;
     static const Protocol egp;
-    static const Protocol ethernet;
+    static const Protocol ethernetMac;
+    static const Protocol ethernetPhy;
     static const Protocol gnp;
     static const Protocol gpsr;
     static const Protocol icmpv4;
     static const Protocol icmpv6;
-    static const Protocol ieee80211;
+    static const Protocol ieee80211Mac;
+    static const Protocol ieee80211Mgmt;
+    static const Protocol ieee80211Phy;
     static const Protocol ieee802154;
     static const Protocol ieee8022;
     static const Protocol igmp;
