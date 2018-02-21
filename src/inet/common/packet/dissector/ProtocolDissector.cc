@@ -125,6 +125,7 @@ void Ieee80211Dissector::dissectMacSubprotocol(Packet *packet, ICallback& callba
 void Ieee80211Dissector::dissectMgmtSubprotocol(Packet *packet, ICallback& callback) const
 {
     callback.visitChunk(packet->peekData(), &Protocol::ieee80211);
+    packet->setHeaderPopOffset(packet->getTrailerPopOffset());
 }
 
 void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
