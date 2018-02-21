@@ -242,6 +242,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
     preamble->setDestAddr(preamble_address);
     preamble->setChunkLength(b(headerLength));
     auto packet = new Packet("Preamble", preamble);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     packet->setKind(XMAC_PREAMBLE);
     attachSignal(packet, simTime());
     sendDown(packet);
@@ -259,6 +260,7 @@ void XMac::sendMacAck()
     ack->setDestAddr(lastPreamblePktSrcAddr);
     ack->setChunkLength(b(headerLength));
     auto packet = new Packet("Acknowledgment", ack);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     packet->setKind(XMAC_ACK);
     attachSignal(packet, simTime());
     sendDown(packet);
@@ -731,6 +733,7 @@ void XMac::encapsulate(Packet *packet)
 
     //encapsulate the network packet
     packet->insertHeader(pkt);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     EV_DETAIL << "pkt encapsulated\n";
 }
 
