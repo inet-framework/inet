@@ -533,7 +533,11 @@ void EtherMac::startFrameTransmission()
     encapsulate(frame);
 
     int64_t sentFrameByteLength = frame->getByteLength();
+    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
+    auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {

@@ -202,8 +202,12 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->removePoppedChunks();
     emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
