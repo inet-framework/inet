@@ -45,8 +45,8 @@ void Ieee8021dRelay::initialize(int stage)
         fcsMode = parseEthernetFcsMode(par("fcsMode"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernet, gate("stpIn"), gate("ifIn"));
-        registerProtocol(Protocol::ethernet, gate("ifOut"), gate("stpOut"));
+        registerService(Protocol::ethernetMac, gate("stpIn"), gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("stpOut"));
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -246,8 +246,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
-    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;

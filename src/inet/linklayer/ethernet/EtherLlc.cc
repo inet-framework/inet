@@ -146,8 +146,7 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
     packet->insertHeader(eth);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
-    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     send(packet, "lowerLayerOut");
 }
@@ -271,8 +270,7 @@ void EtherLlc::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
-    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
-    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

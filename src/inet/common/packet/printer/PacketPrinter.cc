@@ -109,7 +109,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketInsideOut(childLevel, context);
-        else if (protocol == &Protocol::ethernet) {
+        else if (protocol == &Protocol::ethernetMac) {
             auto header = dynamicPtrCast<const EthernetMacHeader>(chunk);
             if (header != nullptr) {
                 context.sourceColumn << header->getSrc();
@@ -122,7 +122,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 // TODO: printEthernetChunk(context.infoColumn, chunk);
             }
         }
-        else if (protocol == &Protocol::ieee80211) {
+        else if (protocol == &Protocol::ieee80211Mac) {
             auto header = dynamicPtrCast<const ieee80211::Ieee80211TwoAddressHeader>(chunk);
             if (header != nullptr) {
                 context.sourceColumn << header->getTransmitterAddress();
@@ -132,7 +132,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
-                printIeee80211Chunk(context.infoColumn, chunk);
+                printIeee80211MacChunk(context.infoColumn, chunk);
             }
         }
         else if (protocol == &Protocol::ieee8022) {
@@ -222,8 +222,12 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketLeftToRight(childLevel, context);
-        else if (protocol == &Protocol::ieee80211)
-            printIeee80211Chunk(context.infoColumn, chunk);
+        else if (protocol == &Protocol::ieee80211Phy)
+            printIeee80211PhyChunk(context.infoColumn, chunk);
+        else if (protocol == &Protocol::ieee80211Mac)
+            printIeee80211MacChunk(context.infoColumn, chunk);
+        else if (protocol == &Protocol::ieee80211Mgmt)
+            printIeee80211MgmtChunk(context.infoColumn, chunk);
         else if (protocol == &Protocol::ieee8022)
             printIeee8022Chunk(context.infoColumn, chunk);
         else if (protocol == &Protocol::arp)
@@ -241,9 +245,19 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
     }
 }
 
-void PacketPrinter::printIeee80211Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
+void PacketPrinter::printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream << "(IEEE 802.11) " << chunk;
+    stream << "(IEEE 802.11 Mac) " << chunk;
+}
+
+void PacketPrinter::printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
+{
+    stream << "(IEEE 802.11 Mgmt) " << chunk;
+}
+
+void PacketPrinter::printIeee80211PhyChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
+{
+    stream << "(IEEE 802.11 Phy) " << chunk;
 }
 
 void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const

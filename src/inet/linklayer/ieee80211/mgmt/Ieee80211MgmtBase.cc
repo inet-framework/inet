@@ -84,9 +84,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
-    auto packetProtocolTag = frame->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setProtocol(&Protocol::ieee80211);
-    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
     send(frame, "macOut");
 }
 

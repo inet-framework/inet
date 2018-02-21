@@ -44,6 +44,7 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
     // insert padding and 6 tail bits
     const auto &phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
     packet->insertTrailer(phyTrailer);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
 }
 
 void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
@@ -53,7 +54,7 @@ void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
     auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
     // pop padding and 6 tail bits
     packet->popTrailer(paddingLength + b(6));
-    packet->getTag<PacketProtocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 
 } // namespace physicallayer

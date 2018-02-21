@@ -266,20 +266,17 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     packet->insertHeader(header);
     packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setProtocol(&Protocol::ieee8022);
-    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
+    packetProtocolTag->setProtocol(&Protocol::ieee80211Mac);
 }
 
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
     const auto& header = packet->popHeader<Ieee80211DataOrMgmtHeader>();
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
-    if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+    if (dynamicPtrCast<const Ieee80211DataHeader>(header))
         packetProtocolTag->setProtocol(&Protocol::ieee8022);
-        packetProtocolTag->setSubprotocol(-1);
-    }
     else if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
-        packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
+        packetProtocolTag->setProtocol(&Protocol::ieee80211Mgmt);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT) {
         macAddressInd->setSrcAddress(header->getTransmitterAddress());
@@ -365,9 +362,7 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    auto packetProtocolTag = frame->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setProtocol(&Protocol::ieee80211);
-    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
     sendDown(frame);
 }
 

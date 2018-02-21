@@ -53,12 +53,6 @@ packet EthernetFilledIfgSignal extends EthernetSignal
     bitLength = INTERFRAME_GAP_BITS;
 }
 
-enum EthernetSubprotocol
-{
-    ETHERNET_SUBPROTOCOL_PHY  = 0;
-    ETHERNET_SUBPROTOCOL_MAC  = 1;
-}
-
 //
 // Represents an Ethernet PHY frame.
 //

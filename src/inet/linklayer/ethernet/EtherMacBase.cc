@@ -35,27 +35,32 @@
 
 namespace inet {
 
-class INET_API EthernetDissector : public ProtocolDissector
+class INET_API EthernetMacDissector : public ProtocolDissector
 {
-  protected:
-    virtual void dissectPhySubprotocol(Packet *packet, ICallback& callback) const;
-    virtual void dissectMacSubprotocol(Packet *packet, ICallback& callback) const;
-
   public:
     virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
-void EthernetDissector::dissectPhySubprotocol(Packet *packet, ICallback& callback) const
+class INET_API EthernetPhyDissector : public ProtocolDissector
+{
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetPhyHeader>();
-    callback.visitChunk(header, nullptr);
-    dissectMacSubprotocol(packet, callback);
+    callback.startProtocolDataUnit(&Protocol::ethernetPhy);
+    callback.visitChunk(header, &Protocol::ethernetPhy);
+    callback.dissectPacket(packet, &Protocol::ethernetMac);
+    callback.endProtocolDataUnit(&Protocol::ethernetPhy);
 }
 
-void EthernetDissector::dissectMacSubprotocol(Packet *packet, ICallback& callback) const
+void EthernetMacDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<EthernetMacHeader>();
-    callback.visitChunk(header, &Protocol::ethernet);
+    callback.startProtocolDataUnit(&Protocol::ethernetMac);
+    callback.visitChunk(header, &Protocol::ethernetMac);
     const auto& fcs = packet->popTrailer<EthernetFcs>();
     if (isEth2Header(*header)) {
         auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
@@ -72,26 +77,15 @@ void EthernetDissector::dissectMacSubprotocol(Packet *packet, ICallback& callbac
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
         const auto& padding = packet->popHeader(paddingLength);        // remove padding (type is not EthernetPadding!)
-        callback.visitChunk(padding, &Protocol::ethernet);
+        callback.visitChunk(padding, &Protocol::ethernetMac);
     }
-    callback.visitChunk(fcs, &Protocol::ethernet);
+    callback.visitChunk(fcs, &Protocol::ethernetMac);
+    callback.endProtocolDataUnit(&Protocol::ethernetMac);
 }
 
-void EthernetDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    callback.startProtocolDataUnit(&Protocol::ethernet);
-    auto subprotocol = packet->getTag<PacketProtocolTag>()->getSubprotocol();
-    if (subprotocol == ETHERNET_SUBPROTOCOL_PHY)
-        dissectPhySubprotocol(packet, callback);
-    else if (subprotocol == ETHERNET_SUBPROTOCOL_MAC)
-        dissectMacSubprotocol(packet, callback);
-    else
-        throw cRuntimeError("Unknown subprotocol");
-    callback.endProtocolDataUnit(&Protocol::ethernet);
-}
+Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
 
-Register_Protocol_Dissector(&Protocol::ethernet, EthernetDissector);
-
+Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacDissector);
 
 const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
@@ -449,7 +443,7 @@ void EtherMacBase::encapsulate(Packet *frame)
     auto phyHeader = makeShared<EthernetPhyHeader>();
     phyHeader->setSrcMacFullDuplex(duplexMode);
     frame->insertHeader(phyHeader);
-    frame->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_PHY);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
 void EtherMacBase::decapsulate(Packet *packet)
@@ -457,8 +451,7 @@ void EtherMacBase::decapsulate(Packet *packet)
     auto phyHeader = packet->popHeader<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
-    packet->getTag<PacketProtocolTag>()->setSubprotocol(ETHERNET_SUBPROTOCOL_MAC);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
 //FIXME should use it in EtherMac, EtherMacFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.
