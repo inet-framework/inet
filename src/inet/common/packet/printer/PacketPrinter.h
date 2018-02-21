@@ -48,7 +48,7 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual std::vector<std::string> getDefaultEnabledTags() const;
     virtual std::vector<std::string> getColumnNames(const Options *options) const;
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
-    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
+    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const; //TODO override;
     virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;
     virtual void printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
