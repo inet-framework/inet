@@ -20,6 +20,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmTransmitter.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmRadio.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
@@ -52,7 +53,7 @@ void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
     auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
     // pop padding and 6 tail bits
     packet->popTrailer(paddingLength + b(6));
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
 }
 
 } // namespace physicallayer

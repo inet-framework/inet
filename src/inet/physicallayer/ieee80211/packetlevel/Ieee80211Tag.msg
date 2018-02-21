@@ -29,11 +29,6 @@ enum Ieee80211Subprotocol
     IEEE80211_SUBPROTOCOL_MGMT = 2;
 }
 
-class Ieee80211PacketSubprotocolTag extends TagBase
-{
-    Ieee80211Subprotocol subprotocol;
-}
-
 //
 // This is an abstract base class that should not be directly added as a tag.
 //

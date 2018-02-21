@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -94,7 +95,7 @@ const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const ILis
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto packet = const_cast<Packet *>(receptionResult->getPacket());
-    packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_PHY);
+    packet->getTag<PacketProtocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_PHY);
     packet->addTagIfAbsent<Ieee80211ModeInd>()->setMode(transmission->getMode());
     packet->addTagIfAbsent<Ieee80211ChannelInd>()->setChannel(transmission->getChannel());
     return receptionResult;

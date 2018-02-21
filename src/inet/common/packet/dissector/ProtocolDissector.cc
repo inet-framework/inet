@@ -130,7 +130,7 @@ void Ieee80211Dissector::dissectMgmtSubprotocol(Packet *packet, ICallback& callb
 void Ieee80211Dissector::dissect(Packet *packet, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ieee80211);
-    auto subprotocol = packet->getTag<inet::physicallayer::Ieee80211PacketSubprotocolTag>()->getSubprotocol();
+    auto subprotocol = packet->getTag<PacketProtocolTag>()->getSubprotocol();
     if (subprotocol == inet::physicallayer::IEEE80211_SUBPROTOCOL_PHY)
         dissectPhySubprotocol(packet, callback);
     else if (subprotocol == inet::physicallayer::IEEE80211_SUBPROTOCOL_MAC)

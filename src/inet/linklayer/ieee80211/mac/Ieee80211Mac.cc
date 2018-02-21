@@ -265,17 +265,21 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     }
     packet->insertHeader(header);
     packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
-    packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setProtocol(&Protocol::ieee8022);
+    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
 }
 
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
     const auto& header = packet->popHeader<Ieee80211DataOrMgmtHeader>();
-    if (dynamicPtrCast<const Ieee80211DataHeader>(header))
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
+    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        packetProtocolTag->setProtocol(&Protocol::ieee8022);
+        packetProtocolTag->setSubprotocol(-1);
+    }
     else if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
-        packet->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
+        packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     if (mib->mode == Ieee80211Mib::INDEPENDENT) {
         macAddressInd->setSrcAddress(header->getTransmitterAddress());
@@ -361,8 +365,9 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
-    frame->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
+    auto packetProtocolTag = frame->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setProtocol(&Protocol::ieee80211);
+    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MAC);
     sendDown(frame);
 }
 

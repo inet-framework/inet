@@ -20,6 +20,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -83,7 +84,9 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
-    frame->addTagIfAbsent<Ieee80211PacketSubprotocolTag>()->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
+    auto packetProtocolTag = frame->addTagIfAbsent<PacketProtocolTag>();
+    packetProtocolTag->setProtocol(&Protocol::ieee80211);
+    packetProtocolTag->setSubprotocol(IEEE80211_SUBPROTOCOL_MGMT);
     send(frame, "macOut");
 }
 
