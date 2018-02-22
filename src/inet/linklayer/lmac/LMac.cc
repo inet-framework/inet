@@ -491,6 +491,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 Packet *packet = new Packet();
                 packet->setKind(LMAC_CONTROL);
                 packet->insertHeader(control);
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
                 if ((macQueue.size() > 0) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
@@ -514,6 +515,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
 
                 data->insertHeader(lmacHeader);
+                data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
                 delete macQueue.front();
